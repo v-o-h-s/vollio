@@ -15,7 +15,7 @@
   - Create selectors for efficient component data access and integrate with existing app structure
   - _Requirements: 6.3, 6.4_
 
-- [ ] 3. Replace static PDF Notes page with functional PDF upload component
+- [x] 3. Replace static PDF Notes page with functional PDF upload component
 
   - Replace the current static UI in app/dashboard/pdf-notes/page.tsx with functional PDF upload
   - Implement file selection dialog with drag-and-drop support and PDF validation
@@ -23,7 +23,7 @@
   - Create PDF file handling with URL.createObjectURL and proper cleanup on unmount
   - _Requirements: 1.1, 1.2, 1.4_
 
-- [ ] 4. Create PDFAnnotationViewer component with Syncfusion integration
+- [x] 4. Create PDFAnnotationViewer component with Syncfusion integration
 
   - Build PDFAnnotationViewer component using @syncfusion/ej2-react-pdfviewer
   - Implement basic PDF rendering with text layer support for selection

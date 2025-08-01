@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "./syncfusion.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ReduxProvider } from "@/lib/store/provider";
+import SyncfusionLicenseProvider from "@/components/SyncfusionLicenseProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,9 +45,11 @@ export default function RootLayout({
             colorPrimary: "#2563eb", // Tailwind blue-600
           }
         }}>
-          <ReduxProvider>
-            {children}
-          </ReduxProvider>
+          <SyncfusionLicenseProvider>
+            <ReduxProvider>
+              {children}
+            </ReduxProvider>
+          </SyncfusionLicenseProvider>
         </ClerkProvider>
 
       </body>

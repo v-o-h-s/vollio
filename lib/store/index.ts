@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import annotationReducer  from "./annotationSlice";
+import annotationReducer from "./annotationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +13,7 @@ export const store = configureStore({
           "annotations/loadAnnotations",
           "annotations/createAnnotation",
           "annotations/updateAnnotation",
+          "annotations/setPdfDocument",
         ],
         // Ignore these field paths in all actions
         ignoredActionsPaths: [
