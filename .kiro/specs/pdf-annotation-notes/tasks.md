@@ -31,7 +31,7 @@
   - Handle PDF loading states and error boundaries for failed loads
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 5. Implement text selection and coordinate capture system
+- [x] 5. Implement text selection and coordinate capture system
 
   - Add text layer event listeners using Syncfusion's textSelectionStart and textSelectionEnd events
   - Create utility functions to calculate bounding rectangle coordinates relative to PDF pages
@@ -39,7 +39,7 @@
   - Add page number tracking for multi-page PDF support with proper coordinate transformation
   - _Requirements: 2.5, 6.4_
 
-- [ ] 6. Build annotation tooltip system with Radix UI
+- [x] 6. Build annotation tooltip system with Radix UI
 
   - Create AnnotationTooltip component using @radix-ui/react-tooltip with "Create note" button
   - Implement hover detection and tooltip positioning logic with viewport edge detection
@@ -47,7 +47,7 @@
   - Implement smooth fade-in/fade-out animations with transition-opacity duration-200
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 5.1, 5.4_
 
-- [ ] 7. Create note editor routes and TipTap integration
+- [x] 7. Create note editor routes and TipTap integration
 
   - Create app/note/new/page.tsx and app/note/[id]/page.tsx routes using Next.js App Router
   - Set up TipTap editor with @tiptap/starter-kit and @tiptap/extension-link extensions
@@ -56,7 +56,7 @@
   - Handle URL parameters and localStorage for passing selected text and PDF reference data
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
 
-- [ ] 8. Build annotation overlay and highlighting system
+- [x] 8. Build annotation overlay and highlighting system
 
   - Create annotation highlight rendering system with absolute positioning over PDF pages
   - Implement visual styling for annotated text with blue underline and background highlight
@@ -64,7 +64,7 @@
   - Create smooth highlight animations using transition-all for color changes
   - _Requirements: 4.1, 4.5, 5.2_
 
-- [ ] 9. Implement annotation preview card system
+- [x] 9. Implement annotation preview card system
 
   - Create AnnotationPreviewCard component using @radix-ui/react-popover to display note previews on hover
   - Add logic to show first ~100 characters of note content in preview with proper truncation
@@ -72,7 +72,7 @@
   - Add preview card positioning and viewport boundary handling with automatic repositioning
   - _Requirements: 4.2, 4.3, 4.4, 5.1, 5.4_
 
-- [ ] 10. Create database API endpoints (prototype)
+- [x] 10. Create database API endpoints (prototype)
 
   - Set up app/api/annotations/route.ts for annotation CRUD operations: GET, POST, PUT, DELETE
   - Create app/api/pdfs/upload/route.ts and app/api/pdfs/[id]/route.ts for PDF management
@@ -80,15 +80,16 @@
   - Add proper error handling, response formatting, and Clerk user authentication integration
   - _Requirements: 6.1, 6.2, 6.5_
 
-- [ ] 11. Integrate annotation persistence with API
+- [x] 11. Integrate annotation persistence with API using Redux Toolkit Query
 
-  - Connect annotation creation workflow to POST /api/annotations endpoint with Redux actions
-  - Implement annotation loading from GET /api/annotations on PDF load with proper caching
-  - Add annotation updates and deletions through PUT and DELETE endpoints
-  - Handle API errors gracefully with user feedback using toast notifications and retry mechanisms
+  - Set up RTK Query API slice with endpoints for annotation CRUD operations (GET, POST, PUT, DELETE)
+  - Implement automatic caching and invalidation for annotation data with proper tag-based cache management
+  - Connect annotation creation workflow to use RTK Query mutations with optimistic updates
+  - Add annotation loading using RTK Query queries on PDF load with built-in loading states
+  - Handle API errors gracefully using RTK Query error handling with user feedback via toast notifications
   - _Requirements: 6.1, 6.2, 6.3, 6.6_
 
-- [ ] 12. Add mobile responsiveness and touch interactions
+- [x] 12. Add mobile responsiveness and touch interactions
 
   - Implement tap-to-select functionality for mobile devices instead of hover using touch events
   - Create full-screen modal for "Create note" on mobile using existing @radix-ui/react-dialog
@@ -96,7 +97,7 @@
   - Test and optimize PDF viewer performance on mobile devices with proper viewport handling
   - _Requirements: 5.3, 5.4_
 
-- [ ] 13. Implement cross-tab communication and navigation
+- [x] 13. Implement cross-tab communication and navigation
 
   - Add URL parameter handling for PDF location links (#pdf?page=3&x=120&y=450&width=200&height=18)
   - Implement automatic PDF navigation to specific coordinates using Syncfusion's navigation APIs
@@ -104,7 +105,7 @@
   - Handle edge cases where PDF or annotations might not be available with graceful fallbacks
   - _Requirements: 3.3, 4.4_
 
-- [ ] 14. Add comprehensive error handling and user feedback
+- [x] 14. Add comprehensive error handling and user feedback
 
   - Implement error boundaries for PDF loading failures and display user-friendly messages
   - Add loading states and progress indicators for PDF upload and rendering using existing UI patterns
@@ -112,7 +113,7 @@
   - Add success/error notifications for annotation save operations using toast system
   - _Requirements: 1.4, 6.5_
 
-- [ ] 15. Create comprehensive test suite
+- [x] 15. Create comprehensive test suite
 
   - Write unit tests for text selection logic, coordinate calculations, and Redux state management
   - Create integration tests for PDF viewer with annotation overlay functionality
@@ -120,7 +121,7 @@
   - Test responsive behavior and mobile interactions across different devices and browsers
   - _Requirements: All requirements validation_
 
-- [ ] 16. Polish animations and final UI refinements
+- [x] 16. Polish animations and final UI refinements
   - Fine-tune all transition animations for smooth user experience matching existing design system
   - Add loading skeletons and micro-interactions for better perceived performance
   - Implement keyboard shortcuts for common annotation actions (Ctrl+N for new note, etc.)

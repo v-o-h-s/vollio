@@ -120,3 +120,361 @@
     @apply bg-background text-foreground;
   }
 }
+/* TipTap Editor Styles */
+.ProseMirror {
+  outline: none;
+  padding: 1rem;
+  line-height: 1.6;
+}
+
+.ProseMirror p {
+  margin: 0.5rem 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  margin: 1rem 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.ProseMirror h1 {
+  font-size: 1.875rem;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror li {
+  margin: 0.25rem 0;
+}
+
+.ProseMirror blockquote {
+  border-left: 4px solid #3b82f6;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  background-color: #f8fafc;
+}
+
+.ProseMirror a {
+  color: #3b82f6;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.ProseMirror a:hover {
+  color: #1d4ed8;
+}
+
+.ProseMirror strong {
+  font-weight: 600;
+}
+
+.ProseMirror em {
+  font-style: italic;
+}
+
+.ProseMirror code {
+  background-color: #f1f5f9;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.875em;
+}
+
+.ProseMirror pre {
+  background-color: #1e293b;
+  color: #f1f5f9;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.ProseMirror pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+/* Focus styles */
+.ProseMirror:focus {
+  outline: none;
+}
+
+/* Placeholder styles */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+
+/* PDF Annotation Highlight Styles */
+.annotation-overlay {
+  pointer-events: none;
+}
+
+.annotation-highlight {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-bottom: 2px solid #3b82f6;
+  border-radius: 2px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10;
+  will-change: transform, background-color, box-shadow;
+}
+
+.annotation-highlight:hover {
+  background-color: rgba(59, 130, 246, 0.3);
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.annotation-highlight:active {
+  background-color: rgba(59, 130, 246, 0.4);
+  transform: scale(1.01);
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.annotation-highlight:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Enhanced animations for annotation highlights */
+@keyframes annotation-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes annotation-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+}
+
+.annotation-highlight {
+  animation: annotation-fade-in 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.annotation-highlight.newly-created {
+  animation: annotation-fade-in 300ms cubic-bezier(0.4, 0, 0.2, 1), 
+             annotation-pulse 1s ease-out 300ms;
+}
+
+/* Ensure highlights don't interfere with text selection */
+.annotation-highlight::selection {
+  background: transparent;
+}
+
+.annotation-highlight::-moz-selection {
+  background: transparent;
+}
+
+/* Mobile touch optimizations for PDF annotation */
+@media (max-width: 768px) {
+  /* Improve touch targets for mobile */
+  .annotation-highlight {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  /* Optimize PDF viewer for mobile */
+  #pdf-annotation-viewer {
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+  
+  /* Improve text selection on mobile */
+  #pdf-annotation-viewer .e-pv-text-layer {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+  
+  /* Ensure touch-friendly annotation overlays */
+  .annotation-overlay .annotation-highlight {
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.3);
+  }
+  
+  /* Improve mobile dialog touch targets */
+  .mobile-annotation-dialog button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Touch-friendly annotation preview cards */
+  .annotation-preview-card {
+    min-width: 280px;
+    max-width: calc(100vw - 32px);
+  }
+  
+  /* Improve touch scrolling for PDF viewer */
+  .e-pv-viewer-container {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Better touch feedback for highlights */
+  .annotation-highlight:active {
+    background-color: rgba(59, 130, 246, 0.5);
+    transform: scale(1.05);
+  }
+}
+
+
+/* Animation for PDF location highlights */
+@keyframes pulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}
+
+/* Enhanced micro-interactions */
+@keyframes button-press {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes tooltip-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes preview-card-appear {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes success-bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+/* Enhanced button interactions */
+.btn-press:active {
+  animation: button-press 150ms ease-out;
+}
+
+/* Tooltip animations */
+.tooltip-enter {
+  animation: tooltip-appear 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Preview card animations */
+.preview-card-enter {
+  animation: preview-card-appear 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading shimmer effect */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+/* Success animations */
+.success-bounce {
+  animation: success-bounce 1s ease-out;
+}
+
+/* Focus visible improvements */
+.focus-visible-enhanced:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  transition: box-shadow 200ms ease-out;
+}
+
+/* Smooth state transitions */
+.state-transition {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced hover effects */
+.hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}

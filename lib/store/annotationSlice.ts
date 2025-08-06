@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Annotation, PDFDocument, TextSelection } from "../types";
+import { PDFDocument, TextSelection } from "../types";
 
 interface TooltipState {
   visible: boolean;
@@ -14,7 +14,6 @@ interface PreviewCardState {
 
 interface AnnotationState {
   currentPdf: PDFDocument | null;
-  annotations: Record<string, Annotation>;
   activeSelection: TextSelection | null;
   hoveredAnnotation: string | null;
   tooltipState: TooltipState;
@@ -23,7 +22,6 @@ interface AnnotationState {
 
 const initialState: AnnotationState = {
   currentPdf: null,
-  annotations: {},
   activeSelection: null,
   hoveredAnnotation: null,
   tooltipState: {
@@ -44,8 +42,7 @@ const annotationSlice = createSlice({
     // PDF Document actions
     setPdfDocument: (state, action: PayloadAction<PDFDocument>) => {
       state.currentPdf = action.payload;
-      // Clear annotations when switching PDFs
-      state.annotations = {};
+      // Clear UI state when switching PDFs
       state.activeSelection = null;
       state.hoveredAnnotation = null;
       state.tooltipState.visible = false;
@@ -54,44 +51,10 @@ const annotationSlice = createSlice({
 
     clearPdfDocument: (state) => {
       state.currentPdf = null;
-      state.annotations = {};
       state.activeSelection = null;
       state.hoveredAnnotation = null;
       state.tooltipState.visible = false;
       state.previewCard.visible = false;
-    },
-
-    // Annotation CRUD actions
-    loadAnnotations: (state, action: PayloadAction<Annotation[]>) => {
-      state.annotations = {};
-      action.payload.forEach((annotation) => {
-        state.annotations[annotation.id] = annotation;
-      });
-    },
-
-    createAnnotation: (state, action: PayloadAction<Annotation>) => {
-      state.annotations[action.payload.id] = action.payload;
-      // Clear active selection after creating annotation
-      state.activeSelection = null;
-    },
-
-    updateAnnotation: (
-      state,
-      action: PayloadAction<{ id: string; updates: Partial<Annotation> }>
-    ) => {
-      const { id, updates } = action.payload;
-      if (state.annotations[id]) {
-        state.annotations[id] = { ...state.annotations[id], ...updates };
-      }
-    },
-
-    deleteAnnotation: (state, action: PayloadAction<string>) => {
-      delete state.annotations[action.payload];
-      // Clear preview card if it's showing the deleted annotation
-      if (state.previewCard.annotationId === action.payload) {
-        state.previewCard.visible = false;
-        state.previewCard.annotationId = null;
-      }
     },
 
     // Text selection actions
@@ -100,6 +63,11 @@ const annotationSlice = createSlice({
       action: PayloadAction<TextSelection | null>
     ) => {
       state.activeSelection = action.payload;
+    },
+
+    // Clear active selection after annotation creation
+    clearActiveSelection: (state) => {
+      state.activeSelection = null;
     },
 
     // Hover state actions
@@ -154,10 +122,6 @@ const annotationSlice = createSlice({
 export const {
   setPdfDocument,
   clearPdfDocument,
-  loadAnnotations,
-  createAnnotation,
-  updateAnnotation,
-  deleteAnnotation,
   setActiveSelection,
   setHoveredAnnotation,
   showTooltip,
@@ -166,6 +130,7 @@ export const {
   showPreviewCard,
   hidePreviewCard,
   updatePreviewCardPosition,
+  clearActiveSelection,
 } = annotationSlice.actions;
 
 export default annotationSlice.reducer;
