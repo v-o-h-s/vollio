@@ -8,6 +8,7 @@ import type {
   UserActivity,
   PDFRow,
   UserActivityRow,
+  FileValidationResult,
 } from "../types";
 import {
   getAuthenticatedSupabaseClient,
@@ -53,46 +54,6 @@ export const mapSupabaseError = (error: any): APIError => {
     details: error,
     retryable,
   };
-};
-
-/**
- * Validates file upload constraints
- */
-export const validateFileUpload = (file: File): APIError | null => {
-  const MAX_SIZE = 50 * 1024 * 1024; // 50MB
-  const ALLOWED_TYPES = ["application/pdf"];
-
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return {
-      type: "INVALID_FILE_TYPE",
-      message: "Only PDF files are allowed.",
-      retryable: false,
-    };
-  }
-
-  if (file.size > MAX_SIZE) {
-    return {
-      type: "FILE_TOO_LARGE",
-      message: `File size must be less than ${MAX_SIZE / (1024 * 1024)}MB.`,
-      retryable: false,
-    };
-  }
-
-  return null;
-};
-
-/**
- * Extracts user ID from Clerk JWT claims
- * maybe will be deleted in the future
- */
-export const extractUserIdFromToken = (token: string): string | null => {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.sub || payload.user_id || null;
-  } catch (error) {
-    console.error("Failed to extract user ID from token:", error);
-    return null;
-  }
 };
 
 /**
@@ -247,10 +208,6 @@ export const formatFileSize = (bytes: number): string => {
   return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + " " + sizes[i];
 };
 
-/**
- * Database utility functions for PDF and user activity operations
- */
-
 // Helper function to convert database row to PDFDocument
 export function mapPDFRowToDocument(row: PDFRow): PDFDocument {
   return {
@@ -276,170 +233,60 @@ export function mapActivityRowToActivity(row: UserActivityRow): UserActivity {
   };
 }
 
-// Generate storage path for user's PDF
-export function generateStoragePath(userId: string, filename: string): string {
-  const timestamp = Date.now();
-  const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
-  return `${userId}/${timestamp}_${sanitizedFilename}`;
-}
 
-// Generate signed URL for PDF access
-export async function generateSignedUrl(storagePath: string): Promise<string> {
-  const supabase = await getAuthenticatedSupabaseClient();
 
-  const { data, error } = await supabase.storage
-    .from(STORAGE_CONFIG.BUCKET_NAME)
-    .createSignedUrl(storagePath, STORAGE_CONFIG.SIGNED_URL_EXPIRY);
-
-  if (error) {
-    throw new Error(`Failed to generate signed URL: ${error.message}`);
-  }
-
-  return data.signedUrl;
-}
 
 // Validate PDF file
-export function validatePDFFile(file: File): {
-  valid: boolean;
-  error?: string;
-} {
-  // Check file type
-  if (!STORAGE_CONFIG.ALLOWED_MIME_TYPES.includes(file.type)) {
-    return { valid: false, error: "File must be a PDF" };
+export function validateFile(file: File): FileValidationResult {
+  // Check if file exists
+  if (!file) {
+    return { valid: false, error: "No file provided" };
   }
 
-  // Check file size
+  // Validate file type
+  if (!STORAGE_CONFIG.ALLOWED_MIME_TYPES.includes(file.type)) {
+    return {
+      valid: false,
+      error: "Only PDF files are allowed",
+    };
+  }
+
+  // Validate file size
   if (file.size > STORAGE_CONFIG.MAX_FILE_SIZE) {
     const maxSizeMB = STORAGE_CONFIG.MAX_FILE_SIZE / (1024 * 1024);
     return {
       valid: false,
-      error: `File size must be less than ${maxSizeMB}MB`,
+      error: `File size exceeds ${maxSizeMB}MB limit`,
     };
   }
 
-  // Check filename
-  if (!file.name || file.name.trim().length === 0) {
-    return { valid: false, error: "File must have a valid name" };
+  // Additional security checks
+  if (file.size === 0) {
+    return { valid: false, error: "File is empty" };
+  }
+
+  // Check filename for security
+  const filename = file.name;
+  if (!filename || filename.length > 255) {
+    return {
+      valid: false,
+      error: "Invalid filename",
+    };
+  }
+
+  // Check for potentially malicious filename patterns
+  const dangerousPatterns = [
+    /\.\./, // Directory traversal
+    /[<>:"|?*]/, // Invalid filename characters
+    /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i, // Windows reserved names
+  ];
+
+  if (dangerousPatterns.some((pattern) => pattern.test(filename))) {
+    return {
+      valid: false,
+      error: "Filename contains invalid characters",
+    };
   }
 
   return { valid: true };
-}
-
-// Database operations
-export class PDFDatabase {
-  private static async getClient() {
-    return await getAuthenticatedSupabaseClient();
-  }
-
-  // Insert new PDF record
-  static async insertPDF(data: {
-    userId: string;
-    filename: string;
-    fileSize: number;
-    storagePath: string;
-    mimeType: string;
-  }): Promise<PDFDocument> {
-    const supabase = await this.getClient();
-
-    const { data: result, error } = await supabase
-      .from("pdfs")
-      .insert({
-        user_id: data.userId,
-        filename: data.filename,
-        file_size: data.fileSize,
-        storage_path: data.storagePath,
-        mime_type: data.mimeType,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to insert PDF record: ${error.message}`);
-    }
-
-    return mapPDFRowToDocument(result);
-  }
-
-  // Get user's PDFs
-  static async getUserPDFs(userId: string): Promise<PDFDocument[]> {
-    const supabase = await this.getClient();
-
-    const { data, error } = await supabase
-      .from("pdfs")
-      .select("*")
-      .eq("user_id", userId)
-      .order("uploaded_at", { ascending: false });
-
-    if (error) {
-      throw new Error(`Failed to fetch user PDFs: ${error.message}`);
-    }
-
-    return data.map(mapPDFRowToDocument);
-  }
-
-  // Get PDF by ID
-  static async getPDFById(id: string): Promise<PDFDocument | null> {
-    const supabase = await this.getClient();
-
-    const { data, error } = await supabase
-      .from("pdfs")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      if (error.code === "PGRST116") {
-        return null; // Not found
-      }
-      throw new Error(`Failed to fetch PDF: ${error.message}`);
-    }
-
-    return mapPDFRowToDocument(data);
-  }
-
-  // Record user activity
-  static async recordActivity(data: {
-    userId: string;
-    pdfId: string;
-    activityType: "view" | "upload" | "delete";
-  }): Promise<UserActivity> {
-    const supabase = await this.getClient();
-
-    const { data: result, error } = await supabase
-      .from("user_activity")
-      .insert({
-        user_id: data.userId,
-        pdf_id: data.pdfId,
-        activity_type: data.activityType,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to record activity: ${error.message}`);
-    }
-
-    return mapActivityRowToActivity(result);
-  }
-
-  // Get user's recent activity
-  static async getRecentActivity(
-    userId: string,
-    limit: number = 1
-  ): Promise<UserActivity[]> {
-    const supabase = await this.getClient();
-
-    const { data, error } = await supabase
-      .from("user_activity")
-      .select("*")
-      .eq("user_id", userId)
-      .order("accessed_at", { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      throw new Error(`Failed to fetch recent activity: ${error.message}`);
-    }
-
-    return data.map(mapActivityRowToActivity);
-  }
 }

@@ -4,68 +4,9 @@ import {
   getAuthenticatedSupabaseClient,
   STORAGE_CONFIG,
 } from "@/lib/supabaseClient";
-import {
-  SupabaseUploadResponse,
-  FileValidationResult,
-  StorageUploadResult,
-} from "@/lib/types";
-
-/**
- * Validates uploaded file for security and format requirements
- */
-function validateFile(file: File): FileValidationResult {
-  // Check if file exists
-  if (!file) {
-    return { valid: false, error: "No file provided" };
-  }
-
-  // Validate file type
-  if (!STORAGE_CONFIG.ALLOWED_MIME_TYPES.includes(file.type)) {
-    return {
-      valid: false,
-      error: "Only PDF files are allowed",
-    };
-  }
-
-  // Validate file size
-  if (file.size > STORAGE_CONFIG.MAX_FILE_SIZE) {
-    const maxSizeMB = STORAGE_CONFIG.MAX_FILE_SIZE / (1024 * 1024);
-    return {
-      valid: false,
-      error: `File size exceeds ${maxSizeMB}MB limit`,
-    };
-  }
-
-  // Additional security checks
-  if (file.size === 0) {
-    return { valid: false, error: "File is empty" };
-  }
-
-  // Check filename for security
-  const filename = file.name;
-  if (!filename || filename.length > 255) {
-    return {
-      valid: false,
-      error: "Invalid filename",
-    };
-  }
-
-  // Check for potentially malicious filename patterns
-  const dangerousPatterns = [
-    /\.\./, // Directory traversal
-    /[<>:"|?*]/, // Invalid filename characters
-    /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])$/i, // Windows reserved names
-  ];
-
-  if (dangerousPatterns.some((pattern) => pattern.test(filename))) {
-    return {
-      valid: false,
-      error: "Filename contains invalid characters",
-    };
-  }
-
-  return { valid: true };
-}
+import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types";
+import { validateFile } from "@/lib/utils/supabase-helpers";
+import { randomUUID } from "crypto";
 
 /**
  * Uploads file to Supabase Storage
@@ -76,12 +17,7 @@ async function uploadToStorage(
   userId: string
 ): Promise<StorageUploadResult> {
   try {
-    // Generate unique storage path
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substring(2, 11);
-    const fileExtension = file.name.split(".").pop() || "pdf";
-    const storagePath = `${userId}/${timestamp}_${randomId}.${fileExtension}`;
-
+    const storagePath = generateStoragePath(userId, file.name);
     // Convert File to ArrayBuffer for upload
     const fileBuffer = await file.arrayBuffer();
 
@@ -106,12 +42,19 @@ async function uploadToStorage(
     return {
       path: data.path,
       fullPath: data.fullPath || data.path,
-      id: data.id || randomId,
+      id: data.id || randomUUID(),
     };
   } catch (error) {
     console.error("Error in uploadToStorage:", error);
     throw error;
   }
+}
+
+// Generate storage path for user's PDF
+export function generateStoragePath(userId: string, filename: string): string {
+  const timestamp = Date.now();
+  const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
+  return `${userId}/${timestamp}_${sanitizedFilename}`;
 }
 
 /**
@@ -241,6 +184,11 @@ export async function POST(
     // Upload file to storage
     const uploadResult = await uploadToStorage(supabaseClient, file, userId);
     uploadedStoragePath = uploadResult.path;
+    // Generate signed URL for file access
+    const signedUrl = await generateSignedUrl(
+      supabaseClient,
+      uploadResult.path
+    );
 
     // Store PDF metadata in database
     const pdfId = await storePDFMetadata(
@@ -252,12 +200,6 @@ export async function POST(
 
     // Record upload activity (non-critical, don't fail if this fails)
     await recordUploadActivity(supabaseClient, userId, pdfId);
-
-    // Generate signed URL for immediate access
-    const signedUrl = await generateSignedUrl(
-      supabaseClient,
-      uploadResult.path
-    );
 
     // Return success response
     const response: SupabaseUploadResponse = {

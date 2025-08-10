@@ -22,9 +22,9 @@ Implements exponential backoff retry logic for failed operations. Automatically 
 
 Validates PDF file uploads against size (50MB max) and type constraints. Returns null if valid, or APIError with specific validation failure details.
 
-### `validatePDFFile(file: File): { valid: boolean; error?: string }`
+### `validateFile(file: File): FileValidationResult`
 
-Alternative PDF validation that checks file type, size, and filename validity. Returns object with validation status and error message.
+Comprehensive PDF file validation with enhanced security checks. Validates file existence, type (PDF only), size limits, filename security, and checks for malicious patterns like directory traversal and Windows reserved names. Returns object with validation status and detailed error messages.
 
 ## Type Guards
 
@@ -52,10 +52,6 @@ Maps database user activity rows to application UserActivity type with proper ty
 
 Creates unique storage path for user PDFs using format: `{userId}/{timestamp}_{sanitizedFilename}`. Sanitizes filename by replacing special characters.
 
-### `generateSignedUrl(storagePath: string): Promise<string>`
-
-Creates time-limited signed URLs for secure PDF access from Supabase storage. Uses configured expiry time from STORAGE_CONFIG.
-
 ## Utility Functions
 
 ### `createAPIResponse<T>(success: boolean, data?: T, error?: string)`
@@ -78,34 +74,15 @@ Converts byte values to human-readable format (Bytes, KB, MB, GB) with proper ro
 
 Converts database timestamp strings to JavaScript Date objects.
 
-## PDFDatabase Class
-
-Static class providing database operations for PDF management:
-
-### `insertPDF(data): Promise<PDFDocument>`
-
-Creates new PDF record in database with user ownership and file metadata.
-
-### `getUserPDFs(userId: string): Promise<PDFDocument[]>`
-
-Retrieves all PDFs for a user, ordered by upload date (newest first).
-
-### `getPDFById(id: string): Promise<PDFDocument | null>`
-
-Fetches single PDF by ID, returns null if not found.
-
-### `recordActivity(data): Promise<UserActivity>`
-
-Logs user actions (view, upload, delete) for analytics and tracking.
-
-### `getRecentActivity(userId: string, limit?: number): Promise<UserActivity[]>`
-
-Retrieves user's recent activity with configurable limit (default: 1).
-
 ## Usage Guidelines
 
 - Always use `withRetry()` for critical database operations
-- Validate files with `validatePDFFile()` before upload
-- Use `PDFDatabase` class methods for all PDF-related database operations
+- Validate files with `validateFile()` before upload (enhanced security validation)
+- Use direct Supabase client calls with helper functions for database operations
 - Handle errors with `mapSupabaseError()` for consistent error responses
 - Generate signed URLs only when needed due to expiry limitations
+
+## Recent Changes
+
+- **Removed**: `extractUserIdFromToken(token: string): string | null` - JWT token parsing function was removed as it's no longer needed with current Clerk authentication flow
+- **Removed**: `generateSignedUrl(storagePath: string): Promise<string>` - Signed URL generation moved to individual API routes for better error handling and context-specific configuration
