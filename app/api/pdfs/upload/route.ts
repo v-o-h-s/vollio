@@ -5,7 +5,7 @@ import {
   STORAGE_CONFIG,
 } from "@/lib/supabaseClient";
 import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types";
-import { validateFile } from "@/lib/utils/supabase-helpers";
+import { validateFile, generateSignedUrl } from "@/lib/utils/supabase-helpers";
 import { randomUUID } from "crypto";
 
 /**
@@ -56,35 +56,6 @@ export function generateStoragePath(userId: string, filename: string): string {
   const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
   return `${userId}/${timestamp}_${sanitizedFilename}`;
 }
-
-/**
- * Generates signed URL for file access
- */
-async function generateSignedUrl(
-  supabaseClient: any,
-  storagePath: string
-): Promise<string> {
-  try {
-    const { data, error } = await supabaseClient.storage
-      .from(STORAGE_CONFIG.BUCKET_NAME)
-      .createSignedUrl(storagePath, STORAGE_CONFIG.SIGNED_URL_EXPIRY);
-
-    if (error) {
-      console.error("Signed URL generation error:", error);
-      throw new Error(`Failed to generate signed URL: ${error.message}`);
-    }
-
-    if (!data?.signedUrl) {
-      throw new Error("Signed URL generation succeeded but no URL returned");
-    }
-
-    return data.signedUrl;
-  } catch (error) {
-    console.error("Error in generateSignedUrl:", error);
-    throw error;
-  }
-}
-
 /**
  * Stores PDF metadata in database
  */

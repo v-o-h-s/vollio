@@ -11,7 +11,9 @@ inclusion: always
 - **TypeScript**: Strict mode enabled
 - **Styling**: Tailwind CSS + shadcn/ui components
 - **State Management**: Redux Toolkit with RTK Query
-- **Authentication**: Clerk
+- **Authentication**: Clerk with JWT integration
+- **Database**: Supabase with Row Level Security (RLS)
+- **File Storage**: Supabase Storage with signed URLs
 - **PDF Rendering**: Syncfusion PDF Viewer
 - **Testing**: Vitest + React Testing Library
 
@@ -69,6 +71,8 @@ inclusion: always
 - Use proper HTTP status codes
 - Implement consistent error response format
 - Validate request data with TypeScript interfaces
+- Use Supabase client with RLS for automatic security
+- Implement proper error cleanup (e.g., remove uploaded files on database failures)
 
 ## Performance Guidelines
 
@@ -95,11 +99,40 @@ inclusion: always
 
 ## Security Considerations
 
-- Validate all user inputs
-- Use Clerk's authentication properly
-- Sanitize data before rendering
+- Validate all user inputs with comprehensive file validation
+- Use Clerk's authentication with JWT integration
+- Implement Row Level Security (RLS) for automatic data isolation
+- Sanitize data before rendering and storage
+- Use signed URLs for secure file access with expiration
 - Implement proper CORS policies
-- Handle file uploads securely
+- Handle file uploads securely with size and type validation
+- Organize storage by user ID to prevent cross-user access
+
+## Supabase Integration Patterns
+
+### Database Operations
+
+- Use `getAuthenticatedSupabaseClient()` for all database operations
+- Rely on RLS policies for automatic user data filtering
+- Implement retry logic with `withRetry()` for critical operations
+- Use type guards to validate database row structures
+- Map database rows to application types with helper functions
+
+### File Storage
+
+- Organize files by user ID: `{userId}/{timestamp}_{filename}`
+- Generate signed URLs only when needed (they expire)
+- Implement cleanup on upload failures to prevent orphaned files
+- Validate files comprehensively before upload
+- Use proper MIME types and cache control headers
+
+### Error Handling
+
+- Map Supabase errors to application error types
+- Implement proper cleanup on partial failures
+- Use non-blocking operations for non-critical features (e.g., activity logging)
+- Provide meaningful error messages to users
+- Log detailed errors for debugging while hiding sensitive information
 
 ## Mobile Responsiveness
 

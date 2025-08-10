@@ -52,6 +52,10 @@ Maps database user activity rows to application UserActivity type with proper ty
 
 Creates unique storage path for user PDFs using format: `{userId}/{timestamp}_{sanitizedFilename}`. Sanitizes filename by replacing special characters.
 
+### `generateSignedUrl(supabaseClient: any, storagePath: string): Promise<string>`
+
+Generates time-limited signed URLs for secure file access from Supabase Storage. Uses STORAGE_CONFIG.SIGNED_URL_EXPIRY for expiration time. Throws detailed errors if URL generation fails or no URL is returned.
+
 ## Utility Functions
 
 ### `createAPIResponse<T>(success: boolean, data?: T, error?: string)`
@@ -82,7 +86,46 @@ Converts database timestamp strings to JavaScript Date objects.
 - Handle errors with `mapSupabaseError()` for consistent error responses
 - Generate signed URLs only when needed due to expiry limitations
 
+## PDF Upload API Implementation
+
+### Upload Route Structure (`app/api/pdfs/upload/route.ts`)
+
+The PDF upload endpoint follows a robust pattern with proper error handling and cleanup:
+
+1. **Authentication**: Uses Clerk's `auth()` to verify user identity
+2. **File Validation**: Validates PDF files using `validateFile()` helper
+3. **Storage Upload**: Uploads to Supabase Storage with user-organized paths
+4. **Signed URL Generation**: Creates time-limited access URLs for files
+5. **Database Recording**: Stores metadata in `pdfs` table with RLS protection
+6. **Activity Logging**: Records upload activity (non-critical operation)
+7. **Error Cleanup**: Removes uploaded files if database operations fail
+
+### Key Functions in Upload Route
+
+- `uploadToStorage()`: Handles file upload to Supabase Storage
+- `generateSignedUrl()`: Creates signed URLs for file access
+- `storePDFMetadata()`: Records PDF information in database
+- `recordUploadActivity()`: Logs user activity (non-blocking)
+- `generateStoragePath()`: Creates organized storage paths by user
+
+### Row Level Security (RLS) Integration
+
+The application uses RLS for automatic security:
+
+- Database tables have RLS enabled with user-based policies
+- `requesting_user_id()` function extracts Clerk user ID from JWT
+- Manual `userId` still needed for file organization and explicit ownership
+- RLS provides defense-in-depth security automatically
+
 ## Recent Changes
 
-- **Removed**: `extractUserIdFromToken(token: string): string | null` - JWT token parsing function was removed as it's no longer needed with current Clerk authentication flow
-- **Removed**: `generateSignedUrl(storagePath: string): Promise<string>` - Signed URL generation moved to individual API routes for better error handling and context-specific configuration
+- **Added**: `generateSignedUrl()` function exported from supabase-helpers.ts for consistent signed URL generation across API routes
+- **Fixed**: PDF upload route now properly generates signed URLs instead of using raw paths
+- **Fixed**: Import errors in PDF listing route resolved with proper function exports
+- **Fixed**: Type casting issues in recent activity data for proper TypeScript compliance
+- **Improved**: Better error handling and cleanup in upload process with automatic file removal on database failures
+- **Enhanced**: RLS integration with Clerk authentication for automatic security and user data isolation
+- **Added**: Comprehensive file validation with security checks for malicious patterns and directory traversal
+- **Optimized**: Error mapping and retry logic for robust API operations
+- **Completed**: Full PDF upload workflow with metadata storage and activity logging
+- **Completed**: PDF listing API endpoint with signed URL generation and recent activity tracking

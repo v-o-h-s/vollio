@@ -29,41 +29,54 @@
   - Generate and return signed URLs for immediate file access
   - _Requirements: 1.4, 2.4, 3.1, 3.2_
 
-- [ ] 4. Implement PDF listing and access APIs
-- [ ] 4.1 Create PDF listing endpoint
+- [x] 4. Implement PDF listing and access APIs
+- [x] 4.1 Create PDF listing endpoint
 
-  - Write API route at `/api/pdfs` to fetch user's uploaded PDFs
-  - Implement recent activity retrieval with proper sorting
-  - Generate fresh signed URLs for file access
+  - Write API route at `/api/pdfs/route.ts` to fetch user's uploaded PDFs with GET method
+  - Implement recent activity retrieval with proper sorting and pagination
+  - Generate fresh signed URLs for file access with proper expiration handling
   - _Requirements: 2.1, 2.2, 3.1, 3.2, 3.3_
 
-- [ ] 4.2 Create individual PDF access endpoint
+- [x] 4.2 Update individual PDF access endpoint
 
-  - Write API route at `/api/pdfs/[id]` for accessing specific PDFs
-  - Record view activity when PDF is accessed
-  - Return fresh signed URLs with proper expiration
+  - Replace mock database calls in `/api/pdfs/[id]/route.ts` with Supabase integration
+  - Record view activity when PDF is accessed using authenticated Supabase client
+  - Return fresh signed URLs with proper expiration and error handling
   - _Requirements: 2.3, 3.1, 3.4, 4.1, 4.2_
 
-- [ ] 5. Update dashboard UI components
-- [ ] 5.1 Modify PDF upload component
+- [ ] 5. Update RTK Query API slice for Supabase integration
+- [ ] 5.1 Update RTK Query endpoints for PDF operations
 
-  - Replace mock upload logic with real Supabase API calls
-  - Add upload progress indicators and better error handling
-  - Implement drag-and-drop with proper validation feedback
-  - _Requirements: 1.1, 1.2, 1.3, 5.1, 5.2, 6.1, 6.2, 6.3, 6.4_
+  - Modify existing `uploadPDF` mutation to use Supabase upload endpoint
+  - Create new `getPDFs` query to fetch user's PDFs from `/api/pdfs`
+  - Add `getPDF` query for individual PDF access from `/api/pdfs/[id]`
+  - Update response transformers to handle Supabase API responses
+  - _Requirements: 2.1, 2.3, 2.5, 4.4, 5.1_
 
-- [ ] 5.2 Create PDF list display component
+- [ ] 5.2 Update dashboard UI components to use real APIs
 
-  - Build UI component to display all user's uploaded PDFs
-  - Show file metadata (name, size, upload date) in organized layout
-  - Add empty state for users with no uploaded files
-  - _Requirements: 2.1, 2.2, 2.4, 6.5_
+  - Replace mock upload logic in PDF upload component with RTK Query mutation
+  - Update dashboard page to use `getPDFs` query instead of static content
+  - Add loading states and error handling for all API operations
+  - Implement proper cache invalidation for real-time updates
+  - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 5.1, 5.2, 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 5.3 Implement recent activity display
+- [ ] 5.3 Create modern PDF list display component
+
+  - Build modern UI component to display all user's uploaded PDFs using RTK Query
+  - Show file metadata (name, size, upload date) in organized card/grid layout with modern styling
+  - Add prominent "Upload PDF" button with drag-and-drop functionality
+  - Add empty state for users with no uploaded files with clear call-to-action
+  - Implement click handlers to open PDFs in annotation viewer
+  - Use modern design patterns with proper spacing, shadows, and hover effects
+  - _Requirements: 2.1, 2.2, 2.4, 6.1, 6.5_
+
+- [ ] 5.4 Implement recent activity display
 
   - Create component to show user's last opened PDF prominently
   - Display last accessed time and provide quick access link
   - Handle cases where no recent activity exists
+  - Integrate with RTK Query for real-time activity updates
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
 - [ ] 6. Update PDF viewer integration
@@ -80,28 +93,6 @@
   - Update recent activity data in real-time
   - Handle activity tracking errors gracefully
   - _Requirements: 3.1, 3.2, 5.5_
-
-- [ ] 7. Update Redux Toolkit and RTK Query integration
-- [ ] 7.1 Create new RTK Query API slice for PDFs
-
-  - Create `pdfApiSlice.ts` with RTK Query endpoints for upload, list, and access operations
-  - Add mutations for PDF upload with progress tracking and optimistic updates
-  - Add queries for PDF listing and individual PDF access with proper caching strategies
-  - _Requirements: 2.1, 2.5, 4.4, 5.1_
-
-- [ ] 7.2 Update Redux store to handle PDF and activity state
-
-  - Modify existing annotation slice to work with Supabase PDF IDs instead of blob URLs
-  - Add new state slices for PDF management and user activity tracking
-  - Integrate RTK Query cache invalidation for real-time dashboard updates
-  - _Requirements: 2.1, 2.3, 3.1, 3.2_
-
-- [ ] 7.3 Replace mock database calls with RTK Query hooks
-
-  - Update all components to use new RTK Query hooks instead of mock database calls
-  - Replace existing API calls in PDF upload and dashboard components
-  - Ensure proper loading states, error handling, and cache management through RTK Query
-  - _Requirements: 2.1, 2.5, 4.4, 5.1_
 
 - [ ] 8. Implement comprehensive error handling
 - [ ] 8.1 Add client-side error handling

@@ -233,9 +233,6 @@ export function mapActivityRowToActivity(row: UserActivityRow): UserActivity {
   };
 }
 
-
-
-
 // Validate PDF file
 export function validateFile(file: File): FileValidationResult {
   // Check if file exists
@@ -289,4 +286,29 @@ export function validateFile(file: File): FileValidationResult {
   }
 
   return { valid: true };
+}
+
+export async function generateSignedUrl(
+  supabaseClient: any,
+  storagePath: string
+): Promise<string> {
+  try {
+    const { data, error } = await supabaseClient.storage
+      .from(STORAGE_CONFIG.BUCKET_NAME)
+      .createSignedUrl(storagePath, STORAGE_CONFIG.SIGNED_URL_EXPIRY);
+
+    if (error) {
+      console.error("Signed URL generation error:", error);
+      throw new Error(`Failed to generate signed URL: ${error.message}`);
+    }
+
+    if (!data?.signedUrl) {
+      throw new Error("Signed URL generation succeeded but no URL returned");
+    }
+
+    return data.signedUrl;
+  } catch (error) {
+    console.error("Error in generateSignedUrl:", error);
+    throw error;
+  }
 }

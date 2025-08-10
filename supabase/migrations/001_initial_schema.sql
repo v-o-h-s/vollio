@@ -6,6 +6,8 @@ CREATE OR REPLACE FUNCTION requesting_user_id()
 RETURNS TEXT
 LANGUAGE SQL
 STABLE
+SECURITY DEFINER
+SET search_path = ''
 AS $$
   SELECT COALESCE(
     current_setting('request.jwt.claims', true)::json->>'sub',
@@ -45,13 +47,41 @@ CREATE TABLE user_activity (
 ALTER TABLE pdfs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_activity ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for PDFs table
-CREATE POLICY "Users can only access their own PDFs" ON pdfs
-  FOR ALL USING (user_id = requesting_user_id());
+-- RLS Policies for PDFs table - Granular CRUD operations
+-- Users can only SELECT their own PDFs
+CREATE POLICY "Users can only view their own PDFs" ON pdfs
+  FOR SELECT USING (user_id = requesting_user_id());
 
--- RLS Policies for User Activity table
-CREATE POLICY "Users can only access their own activity" ON user_activity
-  FOR ALL USING (user_id = requesting_user_id());
+-- Users can only INSERT PDFs with their own user_id
+CREATE POLICY "Users can only create their own PDFs" ON pdfs
+  FOR INSERT WITH CHECK (user_id = requesting_user_id());
+
+-- Users can only UPDATE their own PDFs
+CREATE POLICY "Users can only update their own PDFs" ON pdfs
+  FOR UPDATE USING (user_id = requesting_user_id())
+  WITH CHECK (user_id = requesting_user_id());
+
+-- Users can only DELETE their own PDFs
+CREATE POLICY "Users can only delete their own PDFs" ON pdfs
+  FOR DELETE USING (user_id = requesting_user_id());
+
+-- RLS Policies for User Activity table - Granular CRUD operations
+-- Users can only SELECT their own activity
+CREATE POLICY "Users can only view their own activity" ON user_activity
+  FOR SELECT USING (user_id = requesting_user_id());
+
+-- Users can only INSERT activity with their own user_id
+CREATE POLICY "Users can only create their own activity" ON user_activity
+  FOR INSERT WITH CHECK (user_id = requesting_user_id());
+
+-- Users can only UPDATE their own activity
+CREATE POLICY "Users can only update their own activity" ON user_activity
+  FOR UPDATE USING (user_id = requesting_user_id())
+  WITH CHECK (user_id = requesting_user_id());
+
+-- Users can only DELETE their own activity
+CREATE POLICY "Users can only delete their own activity" ON user_activity
+  FOR DELETE USING (user_id = requesting_user_id());
 
 -- Indexes for performance
 CREATE INDEX idx_pdfs_user_id ON pdfs(user_id);
