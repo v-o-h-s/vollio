@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Supabase Helper Summary Update",
+  "description": "Automatically updates the supabase-helper-summary steering file whenever the supabase-helper.ts file is modified",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "lib/utils/supabase-helpers.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The supabase-helpers.ts file has been updated. Please analyze the changes and update the supabase-helper-summary steering file to reflect any new functions, modifications, or important changes in the helper utilities."
+  }
+}

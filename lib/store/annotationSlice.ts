@@ -6,6 +6,7 @@ interface TooltipState {
   position: { x: number; y: number };
 }
 
+
 interface PreviewCardState {
   visible: boolean;
   annotationId: string | null;

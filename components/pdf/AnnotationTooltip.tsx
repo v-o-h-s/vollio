@@ -1,13 +1,42 @@
 'use client';
 
+/**
+ * AnnotationTooltip Component
+ * 
+ * Displays a floating tooltip with "Create note" button when text is selected.
+ * This component handles:
+ * - Viewport edge detection and automatic repositioning
+ * - Smooth fade-in/fade-out animations with delays
+ * - Click-outside-to-close functionality
+ * - Mobile device detection (hides on mobile in favor of dialog)
+ * - Accessibility features and keyboard navigation
+ * 
+ * Key Features:
+ * - Smart positioning to stay within viewport bounds
+ * - 200ms delay on hide for better UX
+ * - Blue accent styling consistent with app theme
+ * - Responsive design that adapts to mobile/desktop
+ * - ARIA labels and semantic HTML for accessibility
+ * 
+ * @author Noto Team
+ * @version 1.0.0
+ */
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+/**
+ * Props interface for AnnotationTooltip component
+ */
 interface AnnotationTooltipProps {
+    /** Screen coordinates where tooltip should appear */
     position: { x: number; y: number };
+    /** Whether tooltip should be visible */
     visible: boolean;
+    /** Callback fired when user clicks "Create note" button */
     onCreateNote: () => void;
+    /** Callback fired when tooltip should be closed */
     onClose: () => void;
 }
 

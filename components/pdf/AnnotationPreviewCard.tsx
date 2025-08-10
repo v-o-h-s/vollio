@@ -1,15 +1,45 @@
 'use client';
 
+/**
+ * AnnotationPreviewCard Component
+ * 
+ * Displays a preview card showing annotation content when hovering over highlights.
+ * This component handles:
+ * - Content truncation with smart word boundary detection
+ * - Viewport boundary detection and automatic repositioning
+ * - Radix UI Popover integration for smooth animations
+ * - Mobile-responsive sizing and touch-friendly interactions
+ * - Click-to-edit functionality for annotation management
+ * 
+ * Key Features:
+ * - Smart text truncation (~100 characters with word boundaries)
+ * - Automatic collision detection and repositioning
+ * - Smooth enter/exit animations via Radix UI
+ * - Touch-friendly button sizing on mobile devices
+ * - Accessible markup with proper ARIA attributes
+ * 
+ * @author Noto Team
+ * @version 1.0.0
+ */
+
 import React, { useEffect, useRef, useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { Annotation } from '@/lib/types';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+/**
+ * Props interface for AnnotationPreviewCard component
+ */
 interface AnnotationPreviewCardProps {
+    /** The annotation data to display in the preview */
     annotation: Annotation;
+    /** Screen coordinates where preview card should appear */
     position: { x: number; y: number };
+    /** Whether preview card should be visible */
     visible: boolean;
+    /** Callback fired when user clicks to edit the annotation */
     onEdit: (annotationId: string) => void;
+    /** Callback fired when preview card should be closed */
     onClose: () => void;
 }
 

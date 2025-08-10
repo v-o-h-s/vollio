@@ -101,6 +101,7 @@ export function NoteEditor({
             }),
         ],
         content: getInitialContent(),
+        immediatelyRender: false, // Fix for Next.js SSR hydration issues
         editorProps: {
             attributes: {
                 class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[400px] p-4',
@@ -118,6 +119,9 @@ export function NoteEditor({
                 }
                 return false;
             },
+        },
+        onCreate: ({ editor }) => {
+            console.log('TipTap editor created successfully');
         },
     });
 
@@ -160,10 +164,14 @@ export function NoteEditor({
         editor.chain().focus().unsetLink().run();
     };
 
+    // Show loading state while editor is initializing
     if (!editor) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <LoadingSpinner size="lg" />
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <LoadingSpinner size="lg" className="text-blue-600 mb-4" />
+                    <p className="text-gray-600">Initializing editor...</p>
+                </div>
             </div>
         );
     }
@@ -217,24 +225,27 @@ export function NoteEditor({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => editor.chain().focus().toggleBold().run()}
-                                className={editor.isActive('bold') ? 'bg-gray-100' : ''}
+                                onClick={() => editor?.chain().focus().toggleBold().run()}
+                                className={editor?.isActive('bold') ? 'bg-gray-100' : ''}
+                                disabled={!editor}
                             >
                                 <Bold className="h-4 w-4" />
                             </Button>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => editor.chain().focus().toggleItalic().run()}
-                                className={editor.isActive('italic') ? 'bg-gray-100' : ''}
+                                onClick={() => editor?.chain().focus().toggleItalic().run()}
+                                className={editor?.isActive('italic') ? 'bg-gray-100' : ''}
+                                disabled={!editor}
                             >
                                 <Italic className="h-4 w-4" />
                             </Button>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => editor.chain().focus().toggleStrike().run()}
-                                className={editor.isActive('strike') ? 'bg-gray-100' : ''}
+                                onClick={() => editor?.chain().focus().toggleStrike().run()}
+                                className={editor?.isActive('strike') ? 'bg-gray-100' : ''}
+                                disabled={!editor}
                             >
                                 <Underline className="h-4 w-4" />
                             </Button>
@@ -244,24 +255,27 @@ export function NoteEditor({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => editor.chain().focus().toggleBulletList().run()}
-                                className={editor.isActive('bulletList') ? 'bg-gray-100' : ''}
+                                onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                                className={editor?.isActive('bulletList') ? 'bg-gray-100' : ''}
+                                disabled={!editor}
                             >
                                 <List className="h-4 w-4" />
                             </Button>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                                className={editor.isActive('orderedList') ? 'bg-gray-100' : ''}
+                                onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+                                className={editor?.isActive('orderedList') ? 'bg-gray-100' : ''}
+                                disabled={!editor}
                             >
                                 <ListOrdered className="h-4 w-4" />
                             </Button>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                                className={editor.isActive('blockquote') ? 'bg-gray-100' : ''}
+                                onClick={() => editor?.chain().focus().toggleBlockquote().run()}
+                                className={editor?.isActive('blockquote') ? 'bg-gray-100' : ''}
+                                disabled={!editor}
                             >
                                 <Quote className="h-4 w-4" />
                             </Button>
@@ -271,8 +285,9 @@ export function NoteEditor({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={editor.isActive('link') ? removeLink : addLink}
-                                className={editor.isActive('link') ? 'bg-gray-100' : ''}
+                                onClick={editor?.isActive('link') ? removeLink : addLink}
+                                className={editor?.isActive('link') ? 'bg-gray-100' : ''}
+                                disabled={!editor}
                             >
                                 <LinkIcon className="h-4 w-4" />
                             </Button>
@@ -282,16 +297,16 @@ export function NoteEditor({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => editor.chain().focus().undo().run()}
-                                disabled={!editor.can().undo()}
+                                onClick={() => editor?.chain().focus().undo().run()}
+                                disabled={!editor?.can().undo()}
                             >
                                 <Undo className="h-4 w-4" />
                             </Button>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => editor.chain().focus().redo().run()}
-                                disabled={!editor.can().redo()}
+                                onClick={() => editor?.chain().focus().redo().run()}
+                                disabled={!editor?.can().redo()}
                             >
                                 <Redo className="h-4 w-4" />
                             </Button>

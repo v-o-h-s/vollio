@@ -1,5 +1,27 @@
 'use client'
 
+/**
+ * AnnotationOverlay Component
+ * 
+ * Renders interactive annotation highlights over PDF pages.
+ * This component handles:
+ * - Positioning annotation highlights over PDF text
+ * - Zoom-aware coordinate transformation
+ * - Mouse/touch interaction handling
+ * - Mobile-responsive touch targets
+ * - Real-time overlay positioning updates
+ * 
+ * Key Features:
+ * - RTK Query integration for annotation data
+ * - Dynamic positioning based on PDF viewer zoom/scroll
+ * - Touch-friendly interaction on mobile devices
+ * - Hover effects and visual feedback
+ * - Accessibility support with keyboard navigation
+ * 
+ * @author Noto Team
+ * @version 1.0.0
+ */
+
 import React, { useEffect, useState, useRef } from 'react'
 import { useAppSelector } from '@/lib/store/hooks'
 import { useGetAnnotationsQuery } from '@/lib/store/apiSlice'
@@ -11,16 +33,29 @@ import {
     transformCoordinatesForDisplay
 } from '@/lib/utils/pdfCoordinates'
 
+/**
+ * Props interface for AnnotationOverlay component
+ */
 interface AnnotationOverlayProps {
+    /** PDF page number to render annotations for */
     pageNumber: number
+    /** Reference to the PDF viewer component for coordinate calculations */
     pdfViewerRef: React.RefObject<any>
+    /** Callback fired when user hovers over an annotation */
     onAnnotationHover?: (annotationId: string | null, position?: { x: number; y: number }) => void
+    /** Callback fired when user clicks on an annotation */
     onAnnotationClick?: (annotationId: string) => void
 }
 
+/**
+ * Internal interface for annotation highlight rendering data
+ */
 interface AnnotationHighlight {
+    /** The annotation data from the database */
     annotation: Annotation
+    /** Calculated CSS styles for positioning and appearance */
     style: React.CSSProperties
+    /** Whether the highlight should be visible (for future filtering) */
     isVisible: boolean
 }
 

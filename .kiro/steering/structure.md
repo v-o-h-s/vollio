@@ -1,78 +1,84 @@
-# Project Structure
+---
+inclusion: always
+---
 
-## Root Directory Organization
+# Project Structure & File Organization
 
+## File Placement Rules
+
+### Components
+
+- **UI Components**: `components/ui/` - shadcn/ui components only (button, dialog, etc.)
+- **Feature Components**: `components/[feature]/` - PDF (`components/pdf/`), notes (`components/note/`)
+- **Layout Components**: `components/` root - shared layouts like `dashboard-sidebar.tsx`
+- **Export Pattern**: Use `index.ts` files in feature directories for clean imports
+
+### Pages & Routes
+
+- **App Router**: Follow `app/[route]/page.tsx` pattern with proper nesting
+- **API Routes**: `app/api/[resource]/route.ts` or `app/api/[resource]/[id]/route.ts`
+- **Dynamic Routes**: Use `[id]` for single params, `[[...rest]]` for catch-all
+- **Layouts**: Place `layout.tsx` at appropriate directory levels for shared UI
+
+### State & Logic
+
+- **Redux Store**: `lib/store/` with feature slices (`annotationSlice.ts`, `apiSlice.ts`)
+- **API Clients**: `lib/api/` for external service interactions
+- **Utilities**: Feature-specific in `lib/utils/[feature].ts`, shared in `lib/utils.ts`
+- **Types**: Shared in `lib/types.ts`, component-specific inline or co-located
+
+### Custom Hooks
+
+- **Location**: `hooks/` directory only
+- **Naming**: `use-kebab-case.ts` (e.g., `use-keyboard-shortcuts.ts`)
+
+## Naming Conventions
+
+### Files
+
+- **Components**: `PascalCase.tsx` (e.g., `PDFAnnotationViewer.tsx`)
+- **Hooks**: `use-kebab-case.ts`
+- **Utils**: `kebab-case.ts` (e.g., `pdf-coordinates.ts`)
+- **API Routes**: Always `route.ts`
+- **Pages**: Always `page.tsx`
+
+### Imports
+
+- **Path Alias**: Always use `@/` prefix for internal imports
+- **Import Order**: External packages → `@/components` → `@/lib` → `@/hooks` → types
+- **Type-only**: Use `import type` when importing only for TypeScript
+
+## Architecture Patterns
+
+### Component Structure
+
+```typescript
+// Feature component example
+export interface ComponentProps {
+  // Props interface
+}
+
+export function ComponentName({ prop }: ComponentProps) {
+  // Implementation
+}
 ```
-├── app/                    # Next.js App Router pages and API routes
-├── components/             # Reusable React components
-├── lib/                   # Utilities, types, and business logic
-├── hooks/                 # Custom React hooks
-├── public/                # Static assets
-└── .kiro/                 # Kiro IDE configuration
-```
 
-## App Directory (Next.js App Router)
+### State Management
 
-```
-app/
-├── api/                   # API route handlers
-│   ├── annotations/       # Annotation CRUD operations
-│   └── pdfs/             # PDF upload and management
-├── dashboard/            # Main application pages
-│   ├── layout.tsx        # Dashboard layout with sidebar
-│   ├── page.tsx          # Dashboard home
-│   ├── pdf-notes/        # PDF annotation interface
-│   └── note/             # Individual note management
-├── sign-in/              # Clerk authentication pages
-├── sign-up/
-├── layout.tsx            # Root layout
-└── globals.css           # Global styles
-```
+- **Slices**: One per major feature, use RTK createSlice
+- **Selectors**: Memoized in `lib/store/selectors.ts`
+- **Hooks**: Use typed hooks from `lib/store/hooks.ts`
 
-## Components Organization
+### API Routes
 
-```
-components/
-├── ui/                   # shadcn/ui base components
-├── pdf/                  # PDF-specific components
-│   ├── PDFAnnotationViewer.tsx    # Main PDF viewer
-│   ├── AnnotationOverlay.tsx      # Annotation highlights
-│   ├── AnnotationTooltip.tsx      # Hover tooltips
-│   └── AnnotationPreviewCard.tsx  # Annotation previews
-├── note/                 # Note editing components
-└── dashboard-sidebar.tsx # Navigation sidebar
-```
+- **Pattern**: Export named functions for HTTP methods (GET, POST, PUT, DELETE)
+- **Validation**: Use TypeScript interfaces for request/response validation
+- **Errors**: Return consistent error format with proper HTTP status codes
 
-## Library Structure
+## Critical Rules
 
-```
-lib/
-├── store/                # Redux store configuration
-│   ├── annotationSlice.ts # Annotation state management
-│   ├── apiSlice.ts       # API state management
-│   ├── hooks.ts          # Typed Redux hooks
-│   └── selectors.ts      # Memoized selectors
-├── api/                  # API client functions
-├── utils/                # Utility functions
-│   └── pdfCoordinates.ts # PDF coordinate calculations
-├── types.ts              # TypeScript type definitions
-├── mock-db.ts            # In-memory database for prototype
-└── utils.ts              # General utilities
-```
-
-## Key Conventions
-
-- **File Naming**: Use kebab-case for directories, PascalCase for React components
-- **Import Paths**: Use `@/` alias for imports from project root
-- **Component Structure**: Each major feature has its own component directory
-- **API Routes**: Follow RESTful conventions in `/api` directory
-- **State Management**: Centralized in `/lib/store` with feature-based slices
-- **Types**: Shared types in `lib/types.ts`, component-specific types inline
-- **Styling**: Tailwind classes, component-level CSS modules when needed
-
-## Special Directories
-
-- **`.kiro/`**: Kiro IDE configuration, specs, and steering documents
-- **`public/lib/`**: Syncfusion PDF viewer WASM files
-- **`.next/`**: Next.js build output (auto-generated)
-- **`node_modules/`**: Dependencies (auto-generated)
+1. **Never** place components outside their designated directories
+2. **Always** use `@/` imports for internal modules
+3. **Always** export through `index.ts` files in feature directories
+4. **Never** mix UI components with feature components in same directory
+5. **Always** use proper TypeScript interfaces for props and API data

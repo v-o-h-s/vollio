@@ -1,5 +1,30 @@
 'use client'
 
+/**
+ * PDFAnnotationViewer Component
+ * 
+ * Main PDF viewer component that integrates Syncfusion PDF Viewer with annotation functionality.
+ * This component handles:
+ * - PDF document loading and display
+ * - Text selection detection and processing
+ * - Annotation creation workflow
+ * - Keyboard shortcuts for PDF navigation and annotation actions
+ * - Mobile-responsive annotation creation (tooltip vs dialog)
+ * - Error handling and fallback UI states
+ * - Zoom and page navigation events
+ * 
+ * Key Features:
+ * - Syncfusion PDF Viewer integration with full feature set
+ * - Real-time text selection with coordinate calculation
+ * - Redux state management for annotations
+ * - Mobile-first responsive design
+ * - Keyboard accessibility and shortcuts
+ * - Error boundaries and graceful fallbacks
+ * 
+ * @author Noto Team
+ * @version 1.0.0
+ */
+
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import {
     PdfViewerComponent,
@@ -17,7 +42,7 @@ import {
 } from '@syncfusion/ej2-react-pdfviewer'
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks'
 import { setActiveSelection, showTooltip, hideTooltip, showPreviewCard, hidePreviewCard, setHoveredAnnotation } from '@/lib/store/annotationSlice'
-import { selectCurrentPdf, selectHasAnnotations } from '@/lib/store/selectors'
+import { selectCurrentPdf, selectAnnotationState } from '@/lib/store/selectors'
 import AnnotationOverlay from './AnnotationOverlay'
 import MobileAnnotationDialog from './MobileAnnotationDialog'
 import { TextSelection as TextSelectionType } from '@/lib/types'
@@ -36,13 +61,29 @@ import { PDFLoadingIndicator } from '@/components/ui/loading'
 import { PDFViewerFallback, TextSelectionFallback, AnnotationCreationFallback } from '@/components/pdf/FallbackUI'
 import { pdfNotifications, selectionNotifications, annotationNotifications } from '@/lib/utils/notifications'
 
+/**
+ * Props interface for PDFAnnotationViewer component
+ */
 interface PDFAnnotationViewerProps {
+    /** Callback fired when user creates a new annotation from text selection */
     onAnnotationCreate?: (selection: TextSelectionType) => void
+    /** Callback fired when user clicks on an existing annotation */
     onAnnotationClick?: (annotationId: string) => void
+    /** Array of existing annotations to display as overlays */
+    annotations?: any[] // Pass annotations from parent component
 }
 
+/**
+ * PDFAnnotationViewer component with forwardRef for parent access to PDF viewer instance
+ * 
+ * Exposes methods:
+ * - pdfViewer: Direct access to Syncfusion PDF viewer instance
+ * - goToPage(pageNumber): Navigate to specific page
+ * - navigateToCoordinates(navigation): Navigate to specific coordinates with highlighting
+ */
 const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
-    onAnnotationCreate
+    onAnnotationCreate,
+    annotations = []
 }, ref) => {
     const pdfViewerRef = useRef<PdfViewerComponent>(null)
     const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -55,7 +96,7 @@ const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
 
     const dispatch = useAppDispatch()
     const currentPdf = useAppSelector(selectCurrentPdf)
-    const hasAnnotations = useAppSelector(selectHasAnnotations)
+    const hasAnnotations = annotations.length > 0
     const isMobile = useIsMobile()
 
     // Keyboard shortcuts for annotation actions
@@ -154,11 +195,28 @@ const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
             loadingTimeoutRef.current = null
         }
 
-        // Add a small delay to ensure all components are fully initialized
+        // Add a delay to ensure all Syncfusion components are fully initialized
         setTimeout(() => {
-            setIsLoading(false)
-            setError(null)
-        }, 100)
+            try {
+                // Verify the PDF viewer is properly initialized
+                if (pdfViewerRef.current && (pdfViewerRef.current as any).viewerBase) {
+                    console.log('PDF viewer base initialized successfully')
+                    setIsLoading(false)
+                    setError(null)
+                } else {
+                    console.warn('PDF viewer base not yet initialized, retrying...')
+                    // Retry after another delay
+                    setTimeout(() => {
+                        setIsLoading(false)
+                        setError(null)
+                    }, 500)
+                }
+            } catch (initError) {
+                console.warn('Error checking PDF viewer initialization:', initError)
+                setIsLoading(false)
+                setError(null)
+            }
+        }, 200)
     }, [])
 
     // Handle document load failure
@@ -323,11 +381,14 @@ const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
                     const reader = new FileReader()
                     reader.onload = () => {
                         const base64DataUrl = reader.result as string
-                        setPdfDataUrl(base64DataUrl)
-                        console.log('PDF converted to base64 data URL', {
-                            size: base64DataUrl.length,
-                            preview: base64DataUrl.substring(0, 100) + '...'
-                        })
+                        // Add a small delay to ensure Syncfusion components are ready
+                        setTimeout(() => {
+                            setPdfDataUrl(base64DataUrl)
+                            console.log('PDF converted to base64 data URL', {
+                                size: base64DataUrl.length,
+                                preview: base64DataUrl.substring(0, 100) + '...'
+                            })
+                        }, 100)
                     }
                     reader.onerror = () => {
                         console.error('Error converting PDF to base64')
@@ -347,7 +408,7 @@ const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
                 console.warn('PDF loading timeout - forcing loading state to false')
                 setIsLoading(false)
                 loadingTimeoutRef.current = null
-            }, 10000) // 10 second timeout
+            }, 15000) // Increased to 15 second timeout
 
             return () => {
                 if (loadingTimeoutRef.current) {
@@ -356,10 +417,15 @@ const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
                 }
             }
         } else if (currentPdf?.fileUrl) {
-            // For non-blob URLs, use directly
-            setPdfDataUrl(currentPdf.fileUrl)
-            setIsLoading(true)
-            setError(null)
+            // For non-blob URLs, use directly with delay
+            const fileUrl = currentPdf.fileUrl
+            if (fileUrl) {
+                setTimeout(() => {
+                    setPdfDataUrl(fileUrl)
+                    setIsLoading(true)
+                    setError(null)
+                }, 100)
+            }
         }
     }, [currentPdf])
 
@@ -590,20 +656,20 @@ const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
                     navigationSuccess = true
                 }
                 // Method 2: Direct goToPage method
-                else if (typeof viewer.goToPage === 'function') {
+                else if (typeof (viewer as any).goToPage === 'function') {
                     console.log(`Navigating to page ${navigation.page} using direct method`)
-                    viewer.goToPage(navigation.page)
+                        ; (viewer as any).goToPage(navigation.page)
                     navigationSuccess = true
                 }
                 // Method 3: Use pdfViewer property if available
-                else if (viewer.pdfViewer && typeof viewer.pdfViewer.goToPage === 'function') {
+                else if ((viewer as any).pdfViewer && typeof (viewer as any).pdfViewer.goToPage === 'function') {
                     console.log(`Navigating to page ${navigation.page} using pdfViewer property`)
-                    viewer.pdfViewer.goToPage(navigation.page)
+                        ; (viewer as any).pdfViewer.goToPage(navigation.page)
                     navigationSuccess = true
                 }
                 // Method 4: Try accessing the underlying Syncfusion instance
-                else if (viewer.element && viewer.element.ej2_instances && viewer.element.ej2_instances[0]) {
-                    const instance = viewer.element.ej2_instances[0]
+                else if ((viewer as any).element && (viewer as any).element.ej2_instances && (viewer as any).element.ej2_instances[0]) {
+                    const instance = (viewer as any).element.ej2_instances[0]
                     if (instance.navigation && typeof instance.navigation.goToPage === 'function') {
                         console.log(`Navigating to page ${navigation.page} using ej2 instance`)
                         instance.navigation.goToPage(navigation.page)
@@ -627,10 +693,10 @@ const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
 
                         // Get current zoom factor for coordinate transformation
                         let zoomFactor = 1.0
-                        if (viewer.magnificationModule && viewer.magnificationModule.zoomFactor) {
-                            zoomFactor = viewer.magnificationModule.zoomFactor
-                        } else if (viewer.magnification && viewer.magnification.zoomFactor) {
-                            zoomFactor = viewer.magnification.zoomFactor
+                        if ((viewer as any).magnificationModule && (viewer as any).magnificationModule.zoomFactor) {
+                            zoomFactor = (viewer as any).magnificationModule.zoomFactor
+                        } else if ((viewer as any).magnification && (viewer as any).magnification.zoomFactor) {
+                            zoomFactor = (viewer as any).magnification.zoomFactor
                         }
 
                         // Find the scroll container using multiple selectors
@@ -783,58 +849,69 @@ const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
                     </div>
                 )}
 
-                {/* Syncfusion PDF Viewer */}
-                <PdfViewerComponent
-                    id="pdf-annotation-viewer"
-                    ref={pdfViewerRef}
-                    documentPath={pdfDataUrl}
-                    serviceUrl=""
-                    style={{ height: '100%', width: '100%' }}
-                    documentLoad={handleDocumentLoad}
-                    documentLoadFailed={handleDocumentLoadFailed}
-                    textSelectionStart={handleTextSelectionStart}
-                    textSelectionEnd={handleTextSelectionEnd}
-                    pageChange={handlePageChange}
-                    zoomChange={handleZoomChange}
-                    enableTextSelection={true}
-                    enableHyperlink={false}
-                    enableNavigationToolbar={true}
-                    enableCommentPanel={false}
-                    enableThumbnail={true}
-                    enableBookmark={true}
-                    enableTextSearch={true}
-                    enablePrint={true}
-                    enableDownload={false}
-                    enableAnnotationToolbar={false}
-                    enableFormDesignerToolbar={false}
-                    enableFreeText={false}
-                    enableTextMarkupAnnotation={false}
-                    enableShapeAnnotation={false}
-                    enableMeasureAnnotation={false}
-                    enableStampAnnotation={false}
-                    enableStickyNotesAnnotation={false}
-                    enableInkAnnotation={false}
-                    enableShapeLabel={false}
-                    enableMultiPageText={true}
-                    restrictZoomRequest={false}
-                >
-                    <Inject services={[
-                        Toolbar,
-                        Magnification,
-                        Navigation,
-                        LinkAnnotation,
-                        BookmarkView,
-                        ThumbnailView,
-                        Print,
-                        TextSelection,
-                        TextSearch,
-                        Annotation
-                    ]} />
-                </PdfViewerComponent>
+                {/* Syncfusion PDF Viewer with enhanced error handling */}
+                {pdfDataUrl && (
+                    <div key={`pdf-viewer-${currentPdf?.id}`} style={{ height: '100%', width: '100%' }}>
+                        <PdfViewerComponent
+                            id="pdf-annotation-viewer"
+                            ref={pdfViewerRef}
+                            documentPath={pdfDataUrl}
+                            serviceUrl=""
+                            resourceUrl={`${window.location.protocol}//${window.location.host}/lib`}
+                            style={{ height: '100%', width: '100%' }}
+                            documentLoad={handleDocumentLoad}
+                            documentLoadFailed={handleDocumentLoadFailed}
+                            textSelectionStart={handleTextSelectionStart}
+                            textSelectionEnd={handleTextSelectionEnd}
+                            pageChange={handlePageChange}
+                            zoomChange={handleZoomChange}
+                            enableTextSelection={true}
+                            enableHyperlink={false}
+                            enableNavigationToolbar={true}
+                            enableCommentPanel={false}
+                            enableThumbnail={true}
+                            enableBookmark={true}
+                            enableTextSearch={true}
+                            enablePrint={true}
+                            enableDownload={false}
+                            enableAnnotationToolbar={false}
+                            enableFormDesignerToolbar={false}
+                            enableFreeText={false}
+                            enableTextMarkupAnnotation={false}
+                            enableShapeAnnotation={false}
+                            enableMeasureAnnotation={false}
+                            restrictZoomRequest={false}
+                            // Add error handling props
+                            created={() => {
+                                console.log('PDF Viewer component created successfully')
+                            }}
+                            ajaxRequestFailed={(args: any) => {
+                                console.error('PDF Viewer AJAX request failed:', args)
+                                setError('Failed to load PDF viewer resources')
+                                setIsLoading(false)
+                            }}
+                        >
+                            <Inject services={[
+                                Toolbar,
+                                Magnification,
+                                Navigation,
+                                LinkAnnotation,
+                                BookmarkView,
+                                ThumbnailView,
+                                Print,
+                                TextSelection,
+                                TextSearch,
+                                Annotation
+                            ]} />
+                        </PdfViewerComponent>
+                    </div>
+                )}
 
                 {/* Annotation Overlay */}
                 {hasAnnotations && (
                     <AnnotationOverlay
+                        pageNumber={currentPageNumber}
+                        pdfViewerRef={pdfViewerRef}
                         onAnnotationHover={handleAnnotationHover}
                         onAnnotationClick={handleAnnotationClick}
                     />
@@ -843,6 +920,7 @@ const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
                 {/* Mobile Annotation Dialog */}
                 {showMobileDialog && (
                     <MobileAnnotationDialog
+                        visible={showMobileDialog}
                         selectedText={mobileSelectedText}
                         onCreateNote={handleMobileCreateNote}
                         onClose={handleMobileDialogClose}
@@ -850,86 +928,6 @@ const PDFAnnotationViewer = React.forwardRef<any, PDFAnnotationViewerProps>(({
                 )}
             </div>
         </PDFErrorBoundary>
-    )
-}
-
-            {/* PDF Viewer */ }
-    < div className = "w-full h-full relative" >
-    {
-        pdfDataUrl?(
-                    <>
-    <PdfViewerComponent
-        ref={pdfViewerRef}
-        id="pdf-annotation-viewer"
-        style={{
-            height: '100%',
-            width: '100%',
-            // Mobile-specific optimizations
-            touchAction: isMobile ? 'pan-x pan-y' : 'auto',
-        }}
-        serviceUrl=""
-        documentPath={pdfDataUrl}
-        documentLoad={handleDocumentLoad}
-        documentLoadFailed={handleDocumentLoadFailed}
-        textSelectionStart={handleTextSelectionStart}
-        textSelectionEnd={handleTextSelectionEnd}
-        pageChange={handlePageChange}
-        zoomChange={handleZoomChange}
-        enableTextSelection={true}
-        enableTextSearch={false}
-        enableNavigation={true}
-        enableMagnification={isMobile ? true : false} // Enable magnification on mobile for better touch zoom
-        enablePrint={!isMobile} // Disable print on mobile
-        enableBookmark={!isMobile} // Disable bookmark on mobile for cleaner UI
-        enableThumbnail={!isMobile} // Disable thumbnail on mobile for cleaner UI
-        enableToolbar={true}
-        enableAnnotation={true}
-        enableFormFields={false}
-        enableFormDesigner={false}
-        resourceUrl={`${window.location.protocol}//${window.location.host}/lib`}
-    >
-        <Inject services={[
-            Toolbar,
-            Magnification,
-            Navigation,
-            LinkAnnotation,
-            BookmarkView,
-            ThumbnailView,
-            Print,
-            TextSelection,
-            TextSearch,
-            Annotation
-        ]} />
-    </PdfViewerComponent>
-
-                        {/* Annotation Overlays - render for current page */ }
-                        { hasAnnotations && !isLoading && (
-        <AnnotationOverlay
-            pageNumber={currentPageNumber}
-            pdfViewerRef={pdfViewerRef}
-            onAnnotationHover={handleAnnotationHover}
-            onAnnotationClick={handleAnnotationClick}
-        />
-    )}
-                    </>
-                ) : (
-    <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-            <Loader2 size={32} className="text-blue-500 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Processing PDF...</p>
-        </div>
-    </div>
-)}
-            </div >
-
-    {/* Mobile Annotation Dialog */ }
-    < MobileAnnotationDialog
-selectedText = { mobileSelectedText }
-visible = { showMobileDialog }
-onCreateNote = { handleMobileCreateNote }
-onClose = { handleMobileDialogClose }
-    />
-        </div >
     )
 })
 

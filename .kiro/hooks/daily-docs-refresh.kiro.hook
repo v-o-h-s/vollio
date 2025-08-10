@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Daily Documentation Refresh",
+  "description": "Automatically refreshes and refines all README files in the project daily, creates a main project README if missing, and updates agent steering files (product.md, structure.md, tech.md)",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "README.md",
+      "*/README.md",
+      "**/README.md",
+      "product.md",
+      "structure.md",
+      "tech.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Please refresh and refine all README files in the project. If there's no main README.md at the project root, create one that explains the Noto PDF annotation application. Also update the agent steering files (product.md, structure.md, tech.md) to ensure they accurately reflect the current project state and requirements. Focus on clarity, accuracy, and completeness of documentation."
+  }
+}

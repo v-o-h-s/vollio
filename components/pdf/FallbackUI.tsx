@@ -1,11 +1,42 @@
 'use client'
 
+/**
+ * FallbackUI Components
+ * 
+ * Collection of fallback UI components for error states and empty states.
+ * These components provide user-friendly error messages and recovery options
+ * when PDF operations fail or encounter issues.
+ * 
+ * Components included:
+ * - TextSelectionFallback: When text selection fails
+ * - AnnotationCreationFallback: When annotation creation fails
+ * - PDFViewerFallback: When PDF loading/viewing fails
+ * - NetworkErrorFallback: When network requests fail
+ * - EmptyStateFallback: Generic empty state component
+ * 
+ * Key Features:
+ * - Consistent visual design with appropriate icons
+ * - Helpful error messages and troubleshooting tips
+ * - Action buttons for recovery (retry, cancel, help)
+ * - Responsive design that works on all devices
+ * - Accessibility-compliant markup and interactions
+ * 
+ * @author Noto Team
+ * @version 1.0.0
+ */
+
 import React from 'react'
 import { AlertTriangle, RefreshCw, MousePointer, FileText, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+/**
+ * Props for TextSelectionFallback component
+ * Shown when text selection in PDF fails
+ */
 interface TextSelectionFallbackProps {
+    /** Callback to retry the text selection operation */
     onRetry: () => void
+    /** Optional callback to show help/troubleshooting information */
     onHelp?: () => void
 }
 

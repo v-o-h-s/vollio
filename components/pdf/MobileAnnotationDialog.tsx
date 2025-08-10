@@ -1,5 +1,30 @@
 'use client';
 
+/**
+ * MobileAnnotationDialog Component
+ * 
+ * Full-screen modal dialog for creating annotations on mobile devices.
+ * This component replaces the desktop tooltip with a mobile-optimized
+ * interface that provides better touch interaction and readability.
+ * 
+ * Key Features:
+ * - Full-screen modal optimized for mobile viewports
+ * - Touch-friendly button sizing (44px minimum height)
+ * - Selected text preview with smart truncation
+ * - Radix UI Dialog integration for accessibility
+ * - Auto-focus on primary action button
+ * - Responsive layout that adapts to screen size
+ * 
+ * Design Considerations:
+ * - Follows mobile-first design principles
+ * - Uses consistent blue accent color (#3B82F6)
+ * - Provides clear visual hierarchy and spacing
+ * - Includes proper ARIA labels for screen readers
+ * 
+ * @author Noto Team
+ * @version 1.0.0
+ */
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,10 +36,17 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 
+/**
+ * Props interface for MobileAnnotationDialog component
+ */
 interface MobileAnnotationDialogProps {
+    /** The text that was selected by the user */
     selectedText: string;
+    /** Whether the dialog should be visible */
     visible: boolean;
+    /** Callback fired when user confirms note creation */
     onCreateNote: () => void;
+    /** Callback fired when dialog should be closed */
     onClose: () => void;
 }
 

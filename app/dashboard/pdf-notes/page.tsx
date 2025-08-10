@@ -1,5 +1,39 @@
 'use client'
 
+/**
+ * PDF Notes Page Component
+ * 
+ * Main page component for the PDF annotation and note-taking interface.
+ * This component serves as the central hub for PDF document management and annotation workflow.
+ * 
+ * Key Responsibilities:
+ * - PDF file upload and validation (drag & drop, file picker)
+ * - PDF document display using PDFAnnotationViewer component
+ * - Annotation creation workflow management
+ * - Cross-tab communication for note editing
+ * - URL-based navigation to specific PDF coordinates
+ * - Error handling and user feedback
+ * - State management integration with Redux store
+ * 
+ * Features:
+ * - Drag & drop PDF upload with validation (50MB limit, PDF format only)
+ * - Real-time annotation display and interaction
+ * - Cross-tab navigation support for note editor integration
+ * - URL parameter parsing for direct coordinate navigation
+ * - Mobile-responsiv e design with touch-friendly interactions
+ * - Comprehensive error handling with user-friendly messages
+ * - Loading states and progress indicators
+ * - Keyboard shortcuts and accessibility support
+ * 
+ * Navigation Support:
+ * - URL hash navigation: #pdf?page=3&x=120&y=450&width=200&height=18
+ * - PostMessage API for cross-tab communication
+ * - Automatic coordinate highlighting for visual feedback
+ * 
+ * @author Noto Team
+ * @version 1.0.0
+ */
+
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Upload, FileText, BookOpen, Search, Filter, Grid, List, AlertCircle, X } from 'lucide-react'
@@ -11,22 +45,45 @@ import { PDFDocument } from '@/lib/types'
 import PDFAnnotationViewer from '@/components/pdf/PDFAnnotationViewer'
 import AnnotationTooltip from '@/components/pdf/AnnotationTooltip'
 import AnnotationPreviewCard from '@/components/pdf/AnnotationPreviewCard'
-import { parseNavigationHash, parseNavigationSearchParams, validateNavigationParams, isValidNavigationMessage } from '@/lib/utils/crossTabNavigation'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { PDFLoadingIndicator, AnnotationLoadingIndicator } from '@/components/ui/loading'
-import { pdfNotifications, annotationNotifications, selectionNotifications } from '@/lib/utils/notifications'
+import { isValidNavigationMessage, validateNavigationParams } from '@/lib/utils/crossTabNavigation'
+import { pdfNotifications, selectionNotifications, annotationNotifications } from '@/lib/utils/notifications'
 
+
+/** Maximum allowed file size for PDF uploads (50MB) */
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB in bytes
 
+/**
+ * Interface for upload error handling
+ * Provides structured error information for different failure scenarios
+ */
 interface UploadError {
+    /** Type of error that occurred during upload */
     type: 'size' | 'format' | 'general'
+    /** Human-readable error message to display to user */
     message: string
 }
 
+/**
+ * Main PDF Notes Page Component
+ * 
+ * Manages the complete PDF annotation workflow from upload to note creation.
+ * Integrates with Redux store for state management and provides cross-tab communication.
+ */
 export default function PDFNotesPage() {
+    // UI State Management
+    /** Whether user is currently dragging a file over the drop zone */
     const [isDragOver, setIsDragOver] = useState(false)
+    /** Whether a PDF upload is currently in progress */
     const [isUploading, setIsUploading] = useState(false)
+    /** Current upload error state, if any */
     const [uploadError, setUploadError] = useState<UploadError | null>(null)
+
+    /** 
+     * Navigation coordinates to execute once PDF viewer is ready
+     * Used for cross-tab communication and URL parameter navigation
+     */
     const [pendingNavigation, setPendingNavigation] = useState<{
         page: number;
         x: number;
@@ -34,19 +91,42 @@ export default function PDFNotesPage() {
         width: number;
         height: number;
     } | null>(null)
+
+    // Component References
+    /** refrence to the html document(the downloaded pdf) used only in download , 
+     * such as fileInputRef.current.value="" for reseting the input 
+     */
     const fileInputRef = useRef<HTMLInputElement>(null)
+    /**refrence to the syncfusion element to access props that are not available  for html document
+     * such that pdfviewRef.current.zoomFactor(this one used to know the zoom level of the docuemnt)
+    */
     const pdfViewerRef = useRef<any>(null)
 
+    // Next.js Hooks
+    /** Router instance for programmatic navigation */
     const router = useRouter()
+    /** URL search parameters for navigation coordinate parsing */
     const searchParams = useSearchParams()
+
+    // Redux State Management
+    /** Redux dispatch function for state updates */
     const dispatch = useAppDispatch()
+    /** Currently loaded PDF document from Redux store */
     const currentPdf = useAppSelector((state) => state.annotations.currentPdf)
+    /** Current tooltip visibility and position state */
     const tooltipState = useAppSelector(selectTooltipState)
+    /** Currently active text selection for annotation creation */
     const activeSelection = useAppSelector(selectActiveSelection)
+    /** Preview card visibility and position state */
     const previewCard = useAppSelector(selectPreviewCard)
+    /** ID of annotation being previewed in preview card */
     const previewCardAnnotationId = useAppSelector(selectPreviewCardAnnotationId)
 
-    // RTK Query hooks
+    // RTK Query Hooks for API Operations
+    /** 
+     * Fetch annotations for the current PDF document
+     * Automatically refetches when PDF changes, skips when no PDF loaded
+     */
     const {
         data: annotations = [],
         isLoading: isFetchingAnnotations,
@@ -56,9 +136,16 @@ export default function PDFNotesPage() {
         { skip: !currentPdf?.id }
     )
 
+    /** 
+     * Mutation hook for creating new annotations
+     * Provides loading state and error handling
+     */
     const [createAnnotation, { isLoading: isCreatingAnnotation }] = useCreateAnnotationMutation()
 
-    // Find the preview card annotation from the fetched annotations
+    /** 
+     * Find the specific annotation being previewed in the preview card
+     * Searches through fetched annotations by ID
+     */
     const previewCardAnnotation = previewCardAnnotationId
         ? annotations.find(ann => ann.id === previewCardAnnotationId) || null
         : null
@@ -72,8 +159,18 @@ export default function PDFNotesPage() {
         }
     }, [currentPdf])
 
+    /**
+     * Validates uploaded file for PDF format and size constraints
+     * 
+     * @param file - The file to validate
+     * @returns UploadError object if validation fails, null if valid
+     * 
+     * Validation Rules:
+     * - Must be PDF format (application/pdf MIME type)
+     * - Must be under 50MB file size limit
+     */
     const validateFile = (file: File): UploadError | null => {
-        // Check file type
+        // Check file type - only PDF files are supported
         if (file.type !== 'application/pdf') {
             return {
                 type: 'format',
@@ -81,7 +178,7 @@ export default function PDFNotesPage() {
             }
         }
 
-        // Check file size
+        // Check file size - enforce 50MB limit for performance
         if (file.size > MAX_FILE_SIZE) {
             return {
                 type: 'size',
@@ -92,52 +189,82 @@ export default function PDFNotesPage() {
         return null
     }
 
+    /**
+     * Handles PDF file upload process with validation and error handling
+     * 
+     * @param file - The PDF file to upload
+     * 
+     * CURRENT IMPLEMENTATION (Prototype):
+     * 1. Validates file format and size client-side
+     * 2. Creates blob URL for immediate client-side PDF viewing
+     * 3. Generates PDF document object with temporary metadata
+     * 4. Updates Redux store with new PDF document
+     * 5. Cleans up previous blob URLs to prevent memory leaks
+     * 
+     * PRODUCTION IMPLEMENTATION (TODO):
+     * 1. Validates file format and size client-side
+     * 2. Uploads file to server/cloud storage (AWS S3, etc.)
+     * 3. Receives permanent URL and metadata from server
+     * 4. Updates Redux store with server response
+     * 5. Handles server-side errors and retry logic
+     * 
+     * Error Handling:
+     * - File validation errors (size, format)
+     * - Server upload failures (network, storage)
+     * - Authentication errors (user permissions)
+     * - Redux state update errors
+     */
     const handleFileUpload = useCallback(async (file: File) => {
         setUploadError(null)
         setIsUploading(true)
 
-        // Show upload start notification
-        const uploadToastId = pdfNotifications.uploadStart(file.name)
 
         try {
-            // Validate file
+            // Validate file before processing
             const error = validateFile(file)
             if (error) {
                 setUploadError(error)
 
-                // Show specific error notifications
+                // Log specific error types for debugging
                 if (error.type === 'size') {
-                    pdfNotifications.fileSizeError(`${(file.size / (1024 * 1024)).toFixed(1)}MB`)
+                    console.error('File size error:', `${(file.size / (1024 * 1024)).toFixed(1)}MB`)
                 } else if (error.type === 'format') {
-                    pdfNotifications.fileTypeError()
+                    console.error('File type error')
                 } else {
-                    pdfNotifications.uploadError(error.message)
+                    console.error('Upload error:', error.message)
                 }
                 return
             }
 
-            // Create blob URL for the PDF
+            // CURRENT: Create blob URL for client-side PDF viewing (prototype only)
+            // TODO: Replace with server upload in production
             const fileUrl = URL.createObjectURL(file)
 
-            // Create PDF document object
+            // PRODUCTION TODO: Upload to server instead
+            // const formData = new FormData()
+            // formData.append('pdf', file)
+            // const response = await fetch('/api/pdfs/upload', { method: 'POST', body: formData })
+            // const { pdfDocument } = await response.json()
+
+            // Create PDF document object with temporary metadata
             const pdfDocument: PDFDocument = {
-                id: crypto.randomUUID(),
-                userId: 'current-user', // This would come from Clerk in a real implementation
+                id: crypto.randomUUID(), // Generate unique ID for this session
+                userId: 'current-user', // TODO: Replace with actual Clerk user ID
                 filename: file.name,
                 uploadedAt: new Date(),
-                fileUrl
+                fileUrl // CURRENT: Blob URL for immediate viewing, TODO: Use server URL
             }
 
-            // Clean up previous PDF blob URL if it exists
+            // Clean up previous PDF blob URL to prevent memory leaks
             if (currentPdf?.fileUrl && currentPdf.fileUrl.startsWith('blob:')) {
                 URL.revokeObjectURL(currentPdf.fileUrl)
             }
 
-            // Update Redux store
+            // Update Redux store with new PDF document
             dispatch(setPdfDocument(pdfDocument))
 
-            // Show success notification
-            pdfNotifications.uploadSuccess(file.name)
+            // Log successful upload
+            console.log('PDF upload successful:', file.name)
 
         } catch (error) {
             console.error('Error uploading PDF:', error)
@@ -204,22 +331,70 @@ export default function PDFNotesPage() {
         setUploadError(null)
     }, [])
 
-    // Parse URL parameters for PDF navigation using utility functions
+    /**
+     * Parses URL parameters for PDF coordinate navigation
+     * 
+     * Supports two navigation methods:
+     * 1. Hash-based: #pdf?page=3&x=120&y=450&width=200&height=18
+     * 2. Search params: ?page=3&x=120&y=450&width=200&height=18
+     * 
+     * @returns Navigation coordinates object or null if not found
+     * 
+     * Use Cases:
+     * - Cross-tab communication from note editor
+     * - Direct linking to specific PDF locations
+     * - Bookmark-able PDF coordinates
+     * - Share-able annotation links
+     */
     const parseUrlParameters = useCallback(() => {
-        // First try hash-based navigation
-        const hashParams = parseNavigationHash(window.location.hash)
-        if (hashParams) {
-            return hashParams
+        // Primary method: Check for hash-based navigation
+        // Format: #pdf?page=3&x=120&y=450&width=200&height=18
+        const hash = window.location.hash
+        if (hash.startsWith('#pdf?')) {
+            const urlParams = new URLSearchParams(hash.substring(5)) // Remove '#pdf?' prefix
+            const page = urlParams.get('page')
+            const x = urlParams.get('x')
+            const y = urlParams.get('y')
+            const width = urlParams.get('width')
+            const height = urlParams.get('height')
+
+            // Validate that all required parameters are present
+            if (page && x && y && width && height) {
+                return {
+                    page: parseInt(page, 10),
+                    x: parseFloat(x),
+                    y: parseFloat(y),
+                    width: parseFloat(width),
+                    height: parseFloat(height)
+                }
+            }
         }
 
-        // Fallback to search params
-        const searchParamsNavigation = parseNavigationSearchParams(searchParams)
-        if (searchParamsNavigation) {
-            return searchParamsNavigation
+        // Fallback method: Check Next.js search params
+        // Format: ?page=3&x=120&y=450&width=200&height=18
+        const page = searchParams.get('page')
+        const x = searchParams.get('x')
+        const y = searchParams.get('y')
+        const width = searchParams.get('width')
+        const height = searchParams.get('height')
+
+        // Validate that all required parameters are present
+        if (page && x && y && width && height) {
+            return {
+                page: parseInt(page, 10),
+                x: parseFloat(x),
+                y: parseFloat(y),
+                width: parseFloat(width),
+                height: parseFloat(height)
+            }
         }
 
         return null
     }, [searchParams])
+
+
+    // to this point i understand everything 
+
 
     // Navigate to specific PDF coordinates using Syncfusion APIs
     const navigateToCoordinates = useCallback((navigation: {
@@ -574,6 +749,7 @@ export default function PDFNotesPage() {
 
                         <PDFAnnotationViewer
                             ref={handlePdfViewerRef}
+                            annotations={annotations}
                             onAnnotationCreate={(selection) => {
                                 console.log('Annotation creation requested:', selection)
 
