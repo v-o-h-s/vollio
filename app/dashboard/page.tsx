@@ -1,6 +1,49 @@
-import { FileText, BookOpen, Zap, TrendingUp, Clock, Plus } from 'lucide-react'
+'use client'
+
+import { FileText, BookOpen, Zap, TrendingUp, Clock, Plus, Upload } from 'lucide-react'
+import { useGetPDFsQuery } from '@/lib/store/apiSlice'
+import { useRouter } from 'next/navigation'
+import { RecentActivityDisplay } from '@/components/dashboard'
+
+// Simple time formatting function
+const formatTimeAgo = (date: string) => {
+  const now = new Date()
+  const past = new Date(date)
+  const diffInMinutes = Math.floor((now.getTime() - past.getTime()) / (1000 * 60))
+
+  if (diffInMinutes < 1) return 'Just now'
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`
+
+  const diffInHours = Math.floor(diffInMinutes / 60)
+  if (diffInHours < 24) return `${diffInHours}h ago`
+
+  const diffInDays = Math.floor(diffInHours / 24)
+  if (diffInDays < 7) return `${diffInDays}d ago`
+
+  return past.toLocaleDateString()
+}
 
 export default function DashboardPage() {
+  const router = useRouter()
+
+  // Fetch user's PDFs using RTK Query
+  const {
+    data: pdfData,
+    isLoading: isLoadingPDFs,
+    error: pdfError
+  } = useGetPDFsQuery({})
+
+  const pdfs = pdfData?.pdfs || []
+  const recentActivity = pdfData?.recentActivity
+  const totalCount = pdfData?.totalCount || 0
+
+  const handleUploadClick = () => {
+    router.push('/dashboard/pdf-notes')
+  }
+
+  const handlePDFClick = (pdfId: string) => {
+    router.push(`/dashboard/pdf-notes?pdf=${pdfId}`)
+  }
   return (
     <div className="space-y-8">
       {/* Header Section */}
@@ -8,6 +51,21 @@ export default function DashboardPage() {
         <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
         <p className="text-lg text-gray-600 font-medium">Welcome back to your Noto productivity workspace</p>
       </div>
+
+      {/* Error State */}
+      {pdfError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs">!</span>
+            </div>
+            <p className="text-red-800 font-medium">Failed to load PDFs</p>
+          </div>
+          <p className="text-red-600 text-sm mt-1">
+            Please try refreshing the page or contact support if the problem persists.
+          </p>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -17,15 +75,27 @@ export default function DashboardPage() {
               <FileText size={24} className="text-white" />
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold text-gray-900">0</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {isLoadingPDFs ? '...' : totalCount}
+              </div>
               <div className="text-xs text-gray-500 font-medium">Total</div>
             </div>
           </div>
           <h3 className="font-bold text-lg text-gray-900 mb-1">Recent PDFs</h3>
-          <p className="text-gray-600 text-sm font-medium">No PDFs uploaded yet</p>
+          <p className="text-gray-600 text-sm font-medium">
+            {isLoadingPDFs
+              ? 'Loading...'
+              : totalCount === 0
+                ? 'No PDFs uploaded yet'
+                : `${totalCount} PDF${totalCount === 1 ? '' : 's'} uploaded`
+            }
+          </p>
           <div className="mt-4 pt-4 border-t border-gray-100">
-            <button className="text-blue-600 text-sm font-semibold hover:text-blue-700 transition-colors">
-              Upload your first PDF →
+            <button
+              onClick={handleUploadClick}
+              className="text-blue-600 text-sm font-semibold hover:text-blue-700 transition-colors"
+            >
+              {totalCount === 0 ? 'Upload your first PDF' : 'Upload another PDF'} →
             </button>
           </div>
         </div>
@@ -89,8 +159,11 @@ export default function DashboardPage() {
                 <p className="text-blue-700 text-sm font-medium">Start your productivity journey</p>
               </div>
             </div>
-            <button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-blue-500/25">
-              Upload Your First PDF
+            <button
+              onClick={handleUploadClick}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-blue-500/25"
+            >
+              {totalCount === 0 ? 'Upload Your First PDF' : 'Upload Another PDF'}
             </button>
           </div>
 
@@ -104,13 +177,64 @@ export default function DashboardPage() {
                 <p className="text-gray-600 text-sm font-medium">Track your progress</p>
               </div>
             </div>
-            <div className="text-center py-8">
-              <p className="text-gray-500 font-medium">No recent activity</p>
-              <p className="text-gray-400 text-sm mt-1">Your activity will appear here</p>
-            </div>
+            <RecentActivityDisplay showTitle={false} compact={true} />
           </div>
         </div>
       </div>
+
+      {/* Recent Activity Section */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Recent Activity</h2>
+        </div>
+        <RecentActivityDisplay />
+      </div>
+
+      {/* PDF List Section */}
+      {!isLoadingPDFs && totalCount > 0 && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Your PDFs</h2>
+            <button
+              onClick={() => router.push('/dashboard/pdf-notes')}
+              className="text-blue-600 text-sm font-semibold hover:text-blue-700 transition-colors"
+            >
+              View all →
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pdfs.slice(0, 6).map((pdf) => (
+              <div
+                key={pdf.id}
+                onClick={() => handlePDFClick(pdf.id)}
+                className="group bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-200 transition-all duration-300 cursor-pointer"
+              >
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                  <FileText size={24} className="text-white" />
+                </div>
+
+                <div className="space-y-2 mb-4">
+                  <h3 className="font-bold text-lg text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                    {pdf.filename}
+                  </h3>
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <span>{(pdf.fileSize / (1024 * 1024)).toFixed(1)} MB</span>
+                    <span>{formatTimeAgo(pdf.uploadedAt)}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <button className="flex items-center gap-2 text-blue-600 text-sm font-semibold hover:text-blue-700 transition-colors">
+                    <BookOpen size={16} />
+                    Open
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

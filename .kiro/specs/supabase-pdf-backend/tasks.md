@@ -44,8 +44,8 @@
   - Return fresh signed URLs with proper expiration and error handling
   - _Requirements: 2.3, 3.1, 3.4, 4.1, 4.2_
 
-- [ ] 5. Update RTK Query API slice for Supabase integration
-- [ ] 5.1 Update RTK Query endpoints for PDF operations
+- [x] 5. Update RTK Query API slice for Supabase integration
+- [x] 5.1 Update RTK Query endpoints for PDF operations
 
   - Modify existing `uploadPDF` mutation to use Supabase upload endpoint
   - Create new `getPDFs` query to fetch user's PDFs from `/api/pdfs`
@@ -53,7 +53,7 @@
   - Update response transformers to handle Supabase API responses
   - _Requirements: 2.1, 2.3, 2.5, 4.4, 5.1_
 
-- [ ] 5.2 Update dashboard UI components to use real APIs
+- [x] 5.2 Update dashboard UI components to use real APIs
 
   - Replace mock upload logic in PDF upload component with RTK Query mutation
   - Update dashboard page to use `getPDFs` query instead of static content
@@ -61,7 +61,7 @@
   - Implement proper cache invalidation for real-time updates
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 5.1, 5.2, 6.1, 6.2, 6.3, 6.4_
 
-- [ ] 5.3 Create modern PDF list display component
+- [x] 5.3 Create modern PDF list display component
 
   - Build modern UI component to display all user's uploaded PDFs using RTK Query
   - Show file metadata (name, size, upload date) in organized card/grid layout with modern styling
@@ -71,7 +71,7 @@
   - Use modern design patterns with proper spacing, shadows, and hover effects
   - _Requirements: 2.1, 2.2, 2.4, 6.1, 6.5_
 
-- [ ] 5.4 Implement recent activity display
+- [x] 5.4 Implement recent activity display
 
   - Create component to show user's last opened PDF prominently
   - Display last accessed time and provide quick access link

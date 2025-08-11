@@ -123,10 +123,15 @@ export const showLoading = (
 
 // PDF-specific notifications
 export const pdfNotifications = {
-  uploadStart: (fileName: string) => showLoading(`Uploading ${fileName}...`),
+  uploadStart: (fileName?: string) =>
+    showLoading(fileName ? `Uploading ${fileName}...` : "Uploading PDF..."),
 
-  uploadSuccess: (fileName: string) =>
-    showSuccess(`${fileName} uploaded successfully!`),
+  uploadSuccess: (fileName?: string) =>
+    showSuccess(
+      fileName
+        ? `${fileName} uploaded successfully!`
+        : "PDF uploaded successfully!"
+    ),
 
   uploadError: (error: string) => showError(`Upload failed: ${error}`),
 

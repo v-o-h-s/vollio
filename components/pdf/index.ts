@@ -35,3 +35,6 @@ export { default as MobileAnnotationDialog } from "./MobileAnnotationDialog";
 
 // Fallback UI components for error states
 export * from "./FallbackUI";
+
+// Modern PDF list display component
+export { default as PDFListDisplay } from "./PDFListDisplay";

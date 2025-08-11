@@ -51,6 +51,12 @@ const navigationItems = [
         href: '/dashboard/pdf-notes',
         icon: FileText,
         description: 'Upload PDFs and create anchored notes'
+    },
+    {
+        name: 'My PDFs',
+        href: '/dashboard/pdfs',
+        icon: FileText,
+        description: 'View and manage all your PDFs'
     }
 ]
 

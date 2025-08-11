@@ -3,7 +3,14 @@
  */
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { Annotation, PDFDocument } from "../types";
+import {
+  Annotation,
+  PDFDocument,
+  UserActivity,
+  SupabaseUploadResponse,
+  SupabasePDFListResponse,
+  SupabasePDFAccessResponse,
+} from "../types";
 import {
   annotationNotifications,
   pdfNotifications,
@@ -38,8 +45,11 @@ export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
-    prepareHeaders: (headers) => {
-      headers.set("Content-Type", "application/json");
+    prepareHeaders: (headers, { endpoint }) => {
+      // Don't set Content-Type for FormData uploads (let browser set it with boundary)
+      if (endpoint !== "uploadPDF") {
+        headers.set("Content-Type", "application/json");
+      }
       return headers;
     },
   }),
@@ -276,26 +286,119 @@ export const apiSlice = createApi({
         url: "pdfs/upload",
         method: "POST",
         body: formData,
-        formData: true,
       }),
-      transformResponse: (response: ApiResponse<PDFDocument>) => {
+      transformResponse: (response: SupabaseUploadResponse) => {
         if (!response.success || !response.data) {
           throw new Error(response.error || "Failed to upload PDF");
         }
-        return response.data;
+        // Transform Supabase response to PDFDocument format
+        const data = response.data;
+        return {
+          id: data.id,
+          userId: "", // Will be set by server
+          filename: data.filename,
+          fileSize: data.fileSize,
+          storagePath: data.storagePath,
+          mimeType: "application/pdf",
+          uploadedAt: new Date(data.uploadedAt),
+          updatedAt: new Date(data.uploadedAt),
+          fileUrl: data.fileUrl,
+        } as PDFDocument;
       },
       invalidatesTags: [{ type: "PDF", id: "LIST" }],
+      async onQueryStarted(formData, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          pdfNotifications.uploadSuccess();
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "Failed to upload PDF";
+          pdfNotifications.uploadError(message);
+        }
+      },
     }),
 
-    getPDFs: builder.query<PDFDocument[], void>({
-      query: () => "pdfs/upload",
-      transformResponse: (response: ApiResponse<PDFDocument[]>) => {
+    getPDFs: builder.query<
+      {
+        pdfs: PDFDocument[];
+        recentActivity?: UserActivity;
+        totalCount: number;
+      },
+      { page?: number; limit?: number }
+    >({
+      query: ({ page = 1, limit = 20 } = {}) => {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+        });
+        return `pdfs?${params.toString()}`;
+      },
+      transformResponse: (response: SupabasePDFListResponse) => {
         if (!response.success || !response.data) {
           throw new Error(response.error || "Failed to fetch PDFs");
         }
-        return response.data;
+
+        const data = response.data;
+
+        // Transform PDF list to PDFDocument format
+        const pdfs: PDFDocument[] = data.pdfs.map((pdf) => ({
+          id: pdf.id,
+          userId: "", // Will be set by server
+          filename: pdf.filename,
+          fileSize: pdf.fileSize,
+          storagePath: "", // Not included in list response
+          mimeType: pdf.mimeType,
+          uploadedAt: new Date(pdf.uploadedAt),
+          updatedAt: new Date(pdf.uploadedAt),
+          fileUrl: pdf.fileUrl,
+        }));
+
+        // Transform recent activity if present
+        let recentActivity: UserActivity | undefined;
+        if (data.recentActivity) {
+          recentActivity = {
+            id: "", // Not provided in response
+            userId: "", // Will be set by server
+            pdfId: data.recentActivity.pdfId,
+            activityType: data.recentActivity.activityType,
+            accessedAt: new Date(data.recentActivity.accessedAt),
+          };
+        }
+
+        return {
+          pdfs,
+          recentActivity,
+          totalCount: data.totalCount,
+        };
       },
-      providesTags: [{ type: "PDF", id: "LIST" }],
+      providesTags: (result) => [
+        { type: "PDF", id: "LIST" },
+        ...(result?.pdfs.map((pdf) => ({ type: "PDF" as const, id: pdf.id })) ||
+          []),
+      ],
+    }),
+
+    getPDF: builder.query<PDFDocument, string>({
+      query: (pdfId) => `pdfs/${pdfId}`,
+      transformResponse: (response: SupabasePDFAccessResponse) => {
+        if (!response.success || !response.data) {
+          throw new Error(response.error || "Failed to fetch PDF");
+        }
+
+        const data = response.data;
+        return {
+          id: data.id,
+          userId: "", // Will be set by server
+          filename: data.filename,
+          fileSize: data.fileSize,
+          storagePath: "", // Not included in access response
+          mimeType: data.mimeType,
+          uploadedAt: new Date(data.uploadedAt),
+          updatedAt: new Date(data.uploadedAt),
+          fileUrl: data.fileUrl,
+        } as PDFDocument;
+      },
+      providesTags: (result, error, pdfId) => [{ type: "PDF", id: pdfId }],
     }),
   }),
 });
@@ -308,6 +411,7 @@ export const {
   useDeleteAnnotationMutation,
   useUploadPDFMutation,
   useGetPDFsQuery,
+  useGetPDFQuery,
 } = apiSlice;
 
 // Export the reducer and middleware

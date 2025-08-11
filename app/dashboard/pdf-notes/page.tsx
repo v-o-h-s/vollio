@@ -40,7 +40,7 @@ import { Upload, FileText, BookOpen, Search, Filter, Grid, List, AlertCircle, X 
 import { useAppDispatch, useAppSelector } from '@/lib/store/hooks'
 import { setPdfDocument, clearPdfDocument, hideTooltip, hidePreviewCard, clearActiveSelection } from '@/lib/store/annotationSlice'
 import { selectTooltipState, selectActiveSelection, selectPreviewCard, selectPreviewCardAnnotationId } from '@/lib/store/selectors'
-import { useGetAnnotationsQuery, useCreateAnnotationMutation } from '@/lib/store/apiSlice'
+import { useGetAnnotationsQuery, useCreateAnnotationMutation, useUploadPDFMutation } from '@/lib/store/apiSlice'
 import { PDFDocument } from '@/lib/types'
 import PDFAnnotationViewer from '@/components/pdf/PDFAnnotationViewer'
 import AnnotationTooltip from '@/components/pdf/AnnotationTooltip'
@@ -75,8 +75,8 @@ export default function PDFNotesPage() {
     // UI State Management
     /** Whether user is currently dragging a file over the drop zone */
     const [isDragOver, setIsDragOver] = useState(false)
-    /** Whether a PDF upload is currently in progress */
-    const [isUploading, setIsUploading] = useState(false)
+    /** Whether a PDF upload is currently in progress - now using RTK Query state */
+    const isUploading = isUploadingPDF
     /** Current upload error state, if any */
     const [uploadError, setUploadError] = useState<UploadError | null>(null)
 
@@ -143,6 +143,12 @@ export default function PDFNotesPage() {
     const [createAnnotation, { isLoading: isCreatingAnnotation }] = useCreateAnnotationMutation()
 
     /** 
+     * Mutation hook for uploading PDF files
+     * Provides loading state and error handling for file uploads
+     */
+    const [uploadPDF, { isLoading: isUploadingPDF }] = useUploadPDFMutation()
+
+    /** 
      * Find the specific annotation being previewed in the preview card
      * Searches through fetched annotations by ID
      */
@@ -194,17 +200,10 @@ export default function PDFNotesPage() {
      * 
      * @param file - The PDF file to upload
      * 
-     * CURRENT IMPLEMENTATION (Prototype):
+     * PRODUCTION IMPLEMENTATION:
      * 1. Validates file format and size client-side
-     * 2. Creates blob URL for immediate client-side PDF viewing
-     * 3. Generates PDF document object with temporary metadata
-     * 4. Updates Redux store with new PDF document
-     * 5. Cleans up previous blob URLs to prevent memory leaks
-     * 
-     * PRODUCTION IMPLEMENTATION (TODO):
-     * 1. Validates file format and size client-side
-     * 2. Uploads file to server/cloud storage (AWS S3, etc.)
-     * 3. Receives permanent URL and metadata from server
+     * 2. Uploads file to Supabase Storage via API endpoint
+     * 3. Receives permanent signed URL and metadata from server
      * 4. Updates Redux store with server response
      * 5. Handles server-side errors and retry logic
      * 
@@ -216,8 +215,6 @@ export default function PDFNotesPage() {
      */
     const handleFileUpload = useCallback(async (file: File) => {
         setUploadError(null)
-        setIsUploading(true)
-
 
         try {
             // Validate file before processing
@@ -236,32 +233,19 @@ export default function PDFNotesPage() {
                 return
             }
 
-            // CURRENT: Create blob URL for client-side PDF viewing (prototype only)
-            // TODO: Replace with server upload in production
-            const fileUrl = URL.createObjectURL(file)
-
-            // PRODUCTION TODO: Upload to server instead
-            // const formData = new FormData()
-            // formData.append('pdf', file)
-            // const response = await fetch('/api/pdfs/upload', { method: 'POST', body: formData })
-            // const { pdfDocument } = await response.json()
-
-            // Create PDF document object with temporary metadata
-            const pdfDocument: PDFDocument = {
-                id: crypto.randomUUID(), // Generate unique ID for this session
-                userId: 'current-user', // TODO: Replace with actual Clerk user ID
-                filename: file.name,
-                uploadedAt: new Date(),
-                fileUrl // CURRENT: Blob URL for immediate viewing, TODO: Use server URL
-            }
-
             // Clean up previous PDF blob URL to prevent memory leaks
             if (currentPdf?.fileUrl && currentPdf.fileUrl.startsWith('blob:')) {
                 URL.revokeObjectURL(currentPdf.fileUrl)
             }
 
-            // Update Redux store with new PDF document
-            dispatch(setPdfDocument(pdfDocument))
+            // Upload file to Supabase Storage via RTK Query
+            const formData = new FormData()
+            formData.append('file', file)
+
+            const uploadedPDF = await uploadPDF(formData).unwrap()
+
+            // Update Redux store with uploaded PDF document
+            dispatch(setPdfDocument(uploadedPDF))
 
             // Log successful upload
             console.log('PDF upload successful:', file.name)
@@ -274,10 +258,8 @@ export default function PDFNotesPage() {
                 message: errorMessage
             })
             pdfNotifications.uploadError(errorMessage)
-        } finally {
-            setIsUploading(false)
         }
-    }, [dispatch, currentPdf])
+    }, [dispatch, currentPdf, uploadPDF])
 
     const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
