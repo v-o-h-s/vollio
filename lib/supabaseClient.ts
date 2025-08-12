@@ -33,27 +33,34 @@ export const getAuthenticatedSupabaseClient = async (): Promise<
       throw new Error("User not authenticated");
     }
 
-    // Try to get Supabase template token first, fallback to default token
+    // Try to get Supabase template token, with fallback to default
     let token;
     try {
       token = await getToken({ template: "supabase" });
+      // console.log("Got Supabase template token");
     } catch (templateError) {
       console.warn(
-        "Supabase template not found, using default token:",
+        "Supabase template failed, trying default token:",
         templateError
       );
-      token = await getToken();
+      try {
+        token = await getToken();
+        // console.log("Got default token as fallback");
+      } catch (defaultError) {
+        console.error("Both template and default token failed:", defaultError);
+        throw new Error("Failed to get any authentication token");
+      }
     }
 
     if (!token) {
-      throw new Error(
-        "No authentication token available - user may not be signed in"
-      );
+      throw new Error("No JWT token available - make sure you're signed in");
     }
 
-    console.log("Creating Supabase client for user:", userId);
+    // console.log("Creating Supabase client for user:", userId);
+    // console.log("Token length:", token.length);
+    // console.log("Token preview:", token.substring(0, 50) + "...");
 
-    return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    return createClient(supabaseUrl, supabaseAnonKey, {
       global: {
         headers: {
           Authorization: `Bearer ${token}`,

@@ -18,17 +18,34 @@ import {
  */
 async function fetchUserPDFs(supabaseClient: any, userId: string) {
   try {
-    console.log("Fetching PDFs from database for user:", userId);
+    // Test the requesting_user_id function first
+    try {
+      const { data: userIdData, error: userIdError } = await supabaseClient.rpc(
+        "requesting_user_id"
+      );
+      console.log("requesting_user_id result:", userIdData);
+      if (userIdError) {
+        console.error("requesting_user_id error:", userIdError);
+      }
 
-    // Since RLS is failing, let's try a direct query with user_id filter
-    console.log("Attempting to query pdfs table with manual user_id filter...");
+      // Debug: Let's see what's actually in the JWT claims
+      const { data: jwtClaims, error: jwtError } = await supabaseClient.rpc(
+        "get_jwt_claims"
+      );
+      console.log("JWT claims debug:", JSON.stringify(jwtClaims, null, 2));
+      if (jwtError) {
+        console.error("JWT claims error:", jwtError);
+      }
+    } catch (rpcError) {
+      console.error("RPC call failed:", rpcError);
+    }
+
+    // Now try the query with RLS (no manual user_id filter needed)
+    console.log("Attempting to query pdfs table with RLS...");
 
     const { data, error, count } = await supabaseClient
       .from("pdfs")
-      .select("id, filename, file_size, uploaded_at, mime_type", {
-        count: "exact",
-      })
-      .eq("user_id", userId) // Manual filter instead of relying on RLS
+      .select("*", { count: "exact" })
       .order("uploaded_at", { ascending: false })
       .limit(50);
 
@@ -38,7 +55,7 @@ async function fetchUserPDFs(supabaseClient: any, userId: string) {
       throw mapSupabaseError(error);
     }
 
-    console.log("Successfully fetched PDFs:", data?.length || 0);
+    // console.log("Successfully fetched PDFs:", data?.length || 0);
 
     return {
       pdfs: data || [],
@@ -101,17 +118,8 @@ export async function GET(): Promise<NextResponse<SupabasePDFListResponse>> {
       );
     }
 
-    // Get authenticated Supabase client
-    // For now, use service role client to bypass RLS since JWT parsing is failing
-    const supabaseClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!, // Service role key bypasses RLS
-      {
-        auth: {
-          persistSession: false,
-        },
-      }
-    );
+    // Get authenticated Supabase client with proper RLS
+    const supabaseClient = await getAuthenticatedSupabaseClient();
 
     // Fetch user's PDFs with retry logic
     const { pdfs: pdfRows, totalCount } = await withRetry(() =>
