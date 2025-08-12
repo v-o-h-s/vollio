@@ -23,6 +23,12 @@ import { Clock, FileText, Eye, ArrowRight } from 'lucide-react'
 import { useGetPDFsQuery } from '@/lib/store/apiSlice'
 import { UserActivity } from '@/lib/types'
 
+// Extended interface for recent activity that includes filename from API response
+interface RecentActivityWithFilename extends UserActivity {
+    filename: string;
+    fileUrl: string;
+}
+
 interface RecentActivityDisplayProps {
     /** Optional CSS class name for styling */
     className?: string
@@ -35,7 +41,7 @@ interface RecentActivityDisplayProps {
 /**
  * Formats activity time in human-readable format
  */
-const formatActivityTime = (date: string): string => {
+const formatActivityTime = (date: string | Date): string => {
     const now = new Date()
     const activityDate = new Date(date)
     const diffInMinutes = Math.floor((now.getTime() - activityDate.getTime()) / (1000 * 60))
@@ -84,7 +90,7 @@ export default function RecentActivityDisplay({
         data: pdfData,
         isLoading,
         error
-    } = useGetPDFsQuery({})
+    } = useGetPDFsQuery()
 
     const recentActivity = pdfData?.recentActivity
 
@@ -179,7 +185,7 @@ export default function RecentActivityDisplay({
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                             <h4 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
-                                {recentActivity.filename}
+                                {recentActivity.filename || 'Unknown PDF'}
                             </h4>
                             <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                                 <Eye size={12} />

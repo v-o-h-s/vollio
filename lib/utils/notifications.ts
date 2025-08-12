@@ -153,62 +153,7 @@ export const pdfNotifications = {
     ),
 };
 
-// Annotation-specific notifications
-export const annotationNotifications = {
-  createStart: () => showLoading("Creating annotation..."),
 
-  createSuccess: () => showSuccess("Annotation created successfully!"),
-
-  createError: (error: string) =>
-    showError(`Failed to create annotation: ${error}`),
-
-  updateStart: () => showLoading("Updating annotation..."),
-
-  updateSuccess: () => showSuccess("Annotation updated successfully!"),
-
-  updateError: (error: string) =>
-    showError(`Failed to update annotation: ${error}`),
-
-  deleteStart: () => showLoading("Deleting annotation..."),
-
-  deleteSuccess: () => showSuccess("Annotation deleted successfully!"),
-
-  deleteError: (error: string) =>
-    showError(`Failed to delete annotation: ${error}`),
-
-  loadError: (error: string) =>
-    showError(`Failed to load annotations: ${error}`),
-
-  selectionError: () =>
-    showWarning(
-      "Unable to capture text selection. Please try selecting the text again."
-    ),
-
-  coordinateError: () =>
-    showWarning(
-      "Unable to determine text coordinates. The annotation may not display correctly."
-    ),
-};
-
-// Text selection notifications
-export const selectionNotifications = {
-  noTextSelected: () =>
-    showWarning("Please select some text to create an annotation."),
-
-  selectionTooShort: () =>
-    showWarning("Please select at least a few words to create an annotation."),
-
-  selectionTooLong: () =>
-    showWarning("Selected text is too long. Please select a shorter passage."),
-
-  selectionOutsidePdf: () =>
-    showWarning("Please select text within the PDF document."),
-
-  coordinateCalculationFailed: () =>
-    showError(
-      "Unable to determine text location. Please try selecting the text again."
-    ),
-};
 
 // Navigation notifications
 export const navigationNotifications = {

@@ -27,14 +27,31 @@ export const getAuthenticatedSupabaseClient = async (): Promise<
   SupabaseClient<Database>
 > => {
   try {
-    const { getToken } = await auth();
-    const token = await getToken({ template: "supabase" });
+    const { getToken, userId } = await auth();
+
+    if (!userId) {
+      throw new Error("User not authenticated");
+    }
+
+    // Try to get Supabase template token first, fallback to default token
+    let token;
+    try {
+      token = await getToken({ template: "supabase" });
+    } catch (templateError) {
+      console.warn(
+        "Supabase template not found, using default token:",
+        templateError
+      );
+      token = await getToken();
+    }
 
     if (!token) {
       throw new Error(
         "No authentication token available - user may not be signed in"
       );
     }
+
+    console.log("Creating Supabase client for user:", userId);
 
     return createClient<Database>(supabaseUrl, supabaseAnonKey, {
       global: {
@@ -166,18 +183,18 @@ export const STORAGE_CONFIG = {
   MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
   ALLOWED_MIME_TYPES: ["application/pdf"] as string[],
   SIGNED_URL_EXPIRY: 3600, // 1 hour
-} 
+};
 
 // Table names for type safety
 export const TABLES = {
   PDFS: "pdfs",
   USER_ACTIVITY: "user_activity",
   ANNOTATIONS: "annotations",
-} 
+};
 
 // API configuration constants
 export const API_CONFIG = {
   DEFAULT_PAGE_SIZE: 20,
   MAX_PAGE_SIZE: 100,
   CACHE_TTL: 300000, // 5 minutes
-} 
+};

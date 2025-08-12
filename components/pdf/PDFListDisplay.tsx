@@ -117,7 +117,7 @@ export default function PDFListDisplay({
     isLoading,
     error,
     refetch
-  } = useGetPDFsQuery({ limit })
+  } = useGetPDFsQuery()
 
   const [uploadPDF, { isLoading: isUploading }] = useUploadPDFMutation()
 

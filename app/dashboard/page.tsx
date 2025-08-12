@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { RecentActivityDisplay } from '@/components/dashboard'
 
 // Simple time formatting function
-const formatTimeAgo = (date: string) => {
+const formatTimeAgo = (date: string | Date) => {
   const now = new Date()
   const past = new Date(date)
   const diffInMinutes = Math.floor((now.getTime() - past.getTime()) / (1000 * 60))
@@ -31,7 +31,7 @@ export default function DashboardPage() {
     data: pdfData,
     isLoading: isLoadingPDFs,
     error: pdfError
-  } = useGetPDFsQuery({})
+  } = useGetPDFsQuery()
 
   const pdfs = pdfData?.pdfs || []
   const recentActivity = pdfData?.recentActivity

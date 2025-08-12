@@ -19,7 +19,6 @@
  */
 
 // Main PDF viewer component with annotation capabilities
-export { default as PDFAnnotationViewer } from "./PDFAnnotationViewer";
 
 // Desktop tooltip for text selection
 export { default as AnnotationTooltip } from "./AnnotationTooltip";
@@ -28,7 +27,6 @@ export { default as AnnotationTooltip } from "./AnnotationTooltip";
 export { default as AnnotationPreviewCard } from "./AnnotationPreviewCard";
 
 // Overlay component for rendering annotation highlights
-export { default as AnnotationOverlay } from "./AnnotationOverlay";
 
 // Mobile dialog for text selection (not exported by default, used internally)
 export { default as MobileAnnotationDialog } from "./MobileAnnotationDialog";
