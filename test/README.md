@@ -44,13 +44,15 @@ Tests for Redux state management:
 
 Integration tests for the main PDF viewer component:
 
-- PDF viewer rendering with Syncfusion integration
-- Annotation overlay functionality
+- PDF viewer rendering with Syncfusion integration and Supabase URLs
+- Activity tracking functionality and cache invalidation
+- Signed URL handling and automatic refresh
+- Annotation overlay functionality with hover states
 - Text selection and annotation creation workflow
 - Annotation interactions (hover, click, edit, delete)
-- Multiple annotation handling
-- Performance with large numbers of annotations
-- Error handling for corrupted data
+- Multiple annotation handling and performance optimization
+- Error handling for URL expiration and corrupted data
+- Mobile responsive behavior and touch interactions
 
 #### `test/components/AnnotationOverlay.test.tsx`
 
@@ -94,12 +96,14 @@ Mobile-specific functionality testing:
 
 ### Core Functionality
 
-- ✅ PDF document upload and loading
-- ✅ Text selection in PDF viewer
+- ✅ PDF document upload and loading with Supabase integration
+- ✅ Signed URL handling and automatic refresh
+- ✅ Activity tracking with real-time updates
+- ✅ Text selection in PDF viewer with coordinate calculation
 - ✅ Annotation creation, editing, and deletion
 - ✅ Annotation positioning and coordinate calculations
 - ✅ Cross-tab navigation and communication
-- ✅ State management with Redux
+- ✅ State management with Redux and RTK Query
 
 ### User Interface
 
@@ -172,6 +176,8 @@ Tests are configured using Vitest with:
 - **File APIs**: `URL.createObjectURL`, `FileReader` mocked for upload testing
 - **Browser APIs**: `ResizeObserver`, `IntersectionObserver`, `matchMedia` mocked
 - **Navigation**: Next.js router and navigation hooks mocked
+- **RTK Query**: API endpoints mocked for testing without backend
+- **Activity Tracking**: Activity tracking hooks mocked for isolated testing
 
 ### Component Mocking
 

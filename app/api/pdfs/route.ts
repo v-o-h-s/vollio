@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { createClient } from "@supabase/supabase-js";
 import {
   getAuthenticatedSupabaseClient,
   API_CONFIG,
@@ -19,26 +18,26 @@ import {
 async function fetchUserPDFs(supabaseClient: any, userId: string) {
   try {
     // Test the requesting_user_id function first
-    try {
-      const { data: userIdData, error: userIdError } = await supabaseClient.rpc(
-        "requesting_user_id"
-      );
-      console.log("requesting_user_id result:", userIdData);
-      if (userIdError) {
-        console.error("requesting_user_id error:", userIdError);
-      }
+    // try {
+    //   const { data: userIdData, error: userIdError } = await supabaseClient.rpc(
+    //     "requesting_user_id"
+    //   );
+    //   console.log("requesting_user_id result:", userIdData);
+    //   if (userIdError) {
+    //     console.error("requesting_user_id error:", userIdError);
+    //   }
 
-      // Debug: Let's see what's actually in the JWT claims
-      const { data: jwtClaims, error: jwtError } = await supabaseClient.rpc(
-        "get_jwt_claims"
-      );
-      console.log("JWT claims debug:", JSON.stringify(jwtClaims, null, 2));
-      if (jwtError) {
-        console.error("JWT claims error:", jwtError);
-      }
-    } catch (rpcError) {
-      console.error("RPC call failed:", rpcError);
-    }
+    //   // Debug: Let's see what's actually in the JWT claims
+    //   const { data: jwtClaims, error: jwtError } = await supabaseClient.rpc(
+    //     "get_jwt_claims"
+    //   );
+    //   console.log("JWT claims debug:", JSON.stringify(jwtClaims, null, 2));
+    //   if (jwtError) {
+    //     console.error("JWT claims error:", jwtError);
+    //   }
+    // } catch (rpcError) {
+    //   console.error("RPC call failed:", rpcError);
+    // }
 
     // Now try the query with RLS (no manual user_id filter needed)
     console.log("Attempting to query pdfs table with RLS...");

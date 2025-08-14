@@ -7,6 +7,59 @@ import PDFAnnotationViewer from '@/components/pdf/PDFAnnotationViewer';
 import annotationSlice from '@/lib/store/annotationSlice';
 import type { PDFDocument, Annotation } from '@/lib/types';
 
+// Mock Next.js router
+const mockPush = vi.fn();
+const mockRouter = {
+  push: mockPush,
+  replace: vi.fn(),
+  prefetch: vi.fn(),
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+  pathname: '/test',
+  query: {},
+  asPath: '/test',
+  route: '/test',
+  basePath: '',
+  locale: undefined,
+  locales: undefined,
+  defaultLocale: undefined,
+  isReady: true,
+  isPreview: false,
+  isLocaleDomain: false,
+};
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  usePathname: () => '/test',
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+// Mock activity tracking hook
+vi.mock('@/hooks/use-activity-tracking', () => ({
+  useActivityTracking: () => ({
+    trackPDFView: vi.fn().mockResolvedValue({ success: true }),
+    trackAnnotationCreation: vi.fn().mockResolvedValue({ success: true }),
+    trackUserActivity: vi.fn().mockResolvedValue({ success: true }),
+    invalidateActivityCaches: vi.fn(),
+  }),
+}));
+
+// Mock mobile hook
+vi.mock('@/hooks/use-mobile', () => ({
+  useIsMobile: () => false,
+}));
+
+// Mock RTK Query
+vi.mock('@/lib/store/apiSlice', () => ({
+  useGetPDFQuery: vi.fn(() => ({
+    data: null,
+    error: null,
+    isLoading: false,
+    refetch: vi.fn(),
+  })),
+}));
+
 // Mock Syncfusion PDF Viewer
 vi.mock('@syncfusion/ej2-react-pdfviewer', () => ({
     PdfViewerComponent: vi.fn(({ children, ...props }) => (

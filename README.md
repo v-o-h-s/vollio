@@ -1,31 +1,34 @@
 # Noto - PDF Annotation Application
 
-Noto is a modern, responsive PDF annotation application built with Next.js 15 and React 19. It allows users to upload PDFs, select text, and create annotations with a seamless experience across desktop and mobile devices.
+Noto is a modern, secure PDF annotation application built with Next.js 15 and React 19. It enables users to upload PDFs, select text, and create rich annotations with seamless cross-device functionality and enterprise-grade security.
 
 ## ✨ Features
 
 ### Core Functionality
 
-- **PDF Upload & Storage**: Secure PDF upload to Supabase Storage with signed URLs
-- **Text Selection**: Precise text selection with coordinate-based positioning
-- **Annotation Management**: Create, edit, delete, and view annotations with rich metadata
-- **Cross-Document Navigation**: Navigate between PDFs and their associated annotations
-- **Real-time Sync**: Redux Toolkit with RTK Query for state management and API caching
+- **Secure PDF Upload & Storage**: Comprehensive file validation with Supabase Storage integration, signed URLs, and automatic expiration handling
+- **Advanced PDF Viewer**: Full Syncfusion PDF Viewer integration with text selection, zoom, search, navigation, and coordinate-based positioning
+- **Intelligent Text Selection**: Precise coordinate calculation for desktop tooltips and mobile-optimized annotation dialogs
+- **Real-time Activity Tracking**: Debounced user activity monitoring with automatic cache invalidation and recent activity display
+- **Cross-Document Navigation**: Seamless navigation between PDFs and annotations with cross-tab communication via PostMessage API
+- **Comprehensive Error Handling**: Retry mechanisms, fallbath automatic cache invalidation
 
 ### User Experience
 
-- **Responsive Design**: Mobile-first design with touch-friendly interactions
-- **Keyboard Shortcuts**: Desktop keyboard navigation and shortcuts
-- **Visual Feedback**: Annotation highlights, hover previews, and tooltips
-- **Authentication**: Secure user authentication with Clerk
-- **Error Handling**: Comprehensive error boundaries and user-friendly error messages
+- **Responsive Design**: Mobile-first design with touch-friendly interactions and adaptive UI components
+- **Keyboard Shortcuts**: Desktop keyboard navigation and annotation shortcuts
+- **Visual Feedback**: Annotation highlights, hover previews, tooltips, and loading states
+- **Authentication**: Secure user authentication with Clerk and JWT-based RLS
+- **Error Handling**: Comprehensive error boundaries, retry mechanisms, and user-friendly error messages
+- **Real-time Updates**: Automatic signed URL refresh and activity synchronization
 
 ### Technical Features
 
-- **Row Level Security**: Automatic user data isolation with Supabase RLS
-- **File Validation**: Comprehensive PDF validation with security checks
-- **Performance Optimized**: Lazy loading, memoization, and efficient rendering
-- **Accessibility**: ARIA labels, keyboard navigation, and screen reader support
+- **Row Level Security**: Automatic user data isolation with Supabase RLS policies
+- **File Validation**: Comprehensive PDF validation with security checks and malicious pattern detection
+- **Performance Optimized**: Debounced activity tracking, lazy loading, memoization, and efficient rendering
+- **Accessibility**: ARIA labels, keyboard navigation, screen reader support, and semantic HTML
+- **Signed URL Management**: Automatic URL refresh, expiration handling, and secure file access
 
 ## 🚀 Quick Start
 
@@ -125,11 +128,13 @@ Noto is a modern, responsive PDF annotation application built with Next.js 15 an
 
 ### Key Components
 
-- **PDFAnnotationViewer**: Main PDF viewer with annotation capabilities
-- **AnnotationOverlay**: Renders annotation highlights over PDF pages
-- **AnnotationTooltip**: Desktop text selection interface
-- **MobileAnnotationDialog**: Mobile-optimized annotation creation
-- **Dashboard**: PDF management and recent activity display
+- **PDFAnnotationViewer**: Main PDF viewer with Syncfusion integration, Supabase URL handling, and activity tracking
+- **AnnotationOverlay**: Renders interactive annotation highlights with hover states and click handling
+- **AnnotationTooltip**: Desktop text selection interface with smart positioning
+- **MobileAnnotationDialog**: Mobile-optimized annotation creation with touch-friendly design
+- **AnnotationPreviewCard**: Hover preview cards with annotation content and edit/delete actions
+- **Activity Tracking System**: Real-time user activity monitoring with debounced tracking
+- **Dashboard**: PDF management with recent activity display and signed URL integration
 
 ## 📱 User Experience
 
@@ -162,8 +167,8 @@ npm run build           # Build for production
 npm run start           # Start production server
 
 # Testing
-npm run test:run        # Run all tests
-npm run test:watch      # Run tests in watch mode
+npm run test            # Run tests in watch mode
+npm run test:run        # Run all tests once
 npm run test:ui         # Run tests with UI
 npm run test:coverage   # Run tests with coverage
 
@@ -174,11 +179,13 @@ npm run type-check      # Run TypeScript checks
 
 ### Key Development Files
 
-- **API Routes**: `app/api/pdfs/upload/route.ts` - PDF upload endpoint
-- **Store Configuration**: `lib/store/index.ts` - Redux store setup
-- **Type Definitions**: `lib/types.ts` - Application-wide types
-- **Supabase Client**: `lib/supabaseClient.ts` - Database configuration
-- **Test Setup**: `test/setup.ts` - Testing environment configuration
+- **API Routes**: `app/api/pdfs/` - PDF upload, listing, and individual access endpoints
+- **PDF Viewer**: `components/pdf/PDFAnnotationViewer.tsx` - Main PDF viewer with Supabase integration
+- **Store Configuration**: `lib/store/index.ts` - Redux store with RTK Query setup
+- **Type Definitions**: `lib/types.ts` - Application-wide types including Supabase response types
+- **Supabase Client**: `lib/supabaseClient.ts` - Database configuration with RLS
+- **Activity Tracking**: `lib/utils/activity-tracking.ts` - User activity monitoring utilities
+- **Test Setup**: `test/setup.ts` - Testing environment with comprehensive mocks
 
 ## 🔒 Security
 

@@ -8,34 +8,37 @@ This folder contains all PDF-related components for the Noto application. These 
 
 #### `PDFAnnotationViewer.tsx` - Main PDF Viewer
 
-**Purpose**: The primary PDF viewer component that integrates Syncfusion PDF Viewer with annotation functionality.
+**Purpose**: The primary PDF viewer component that integrates Syncfusion PDF Viewer with annotation functionality and Supabase backend.
 
 **Key Responsibilities**:
 
-- PDF document loading and display using Syncfusion PDF Viewer
+- PDF document loading from Supabase signed URLs with automatic refresh
 - Text selection detection and coordinate calculation
-- Keyboard shortcuts for navigation and annotation actions
+- Activity tracking for PDF access with real-time updates
 - Mobile/desktop responsive annotation creation workflow
-- Error handling and loading states
-- Integration with Redux store for state management
+- Error handling, loading states, and URL expiration management
+- Integration with Redux store and RTK Query for state management
 
 **Key Features**:
 
-- Full Syncfusion PDF Viewer integration (zoom, search, navigation, etc.)
+- Full Syncfusion PDF Viewer integration (zoom, search, navigation, print, etc.)
+- Supabase signed URL handling with automatic 30-minute refresh
 - Real-time text selection with precise coordinate mapping
-- Keyboard accessibility (Ctrl+N for new note, arrow keys for navigation, etc.)
-- Mobile-first responsive design
-- Error boundaries and graceful fallbacks
-- Exposed ref methods for parent component control
+- Activity tracking with debounced API calls and cache invalidation
+- Mobile-first responsive design with touch-friendly interactions
+- Comprehensive error boundaries and graceful fallbacks
+- URL expiration handling with retry mechanisms
+- Cross-tab communication support for navigation
 
 **Usage**:
 
 ```tsx
 <PDFAnnotationViewer
-  ref={pdfViewerRef}
+  pdfDocument={pdfDocument} // PDFDocument with Supabase signed URL
   onAnnotationCreate={handleAnnotationCreate}
-  onAnnotationClick={handleAnnotationClick}
-  annotations={existingAnnotations}
+  onAnnotationUpdate={handleAnnotationUpdate}
+  onAnnotationDelete={handleAnnotationDelete}
+  className="w-full h-full"
 />
 ```
 
@@ -287,18 +290,21 @@ PDFAnnotationViewer (main container)
 
 ### Dependencies
 
-- **Syncfusion PDF Viewer**: `@syncfusion/ej2-react-pdfviewer`
-- **Redux Toolkit**: State management and API calls
+- **Syncfusion PDF Viewer**: `@syncfusion/ej2-react-pdfviewer` - Licensed PDF viewer component
+- **Redux Toolkit**: State management and RTK Query for API calls
 - **Radix UI**: Accessible UI primitives (Dialog, Popover)
 - **Tailwind CSS**: Utility-first styling
 - **Lucide React**: Icon library
+- **Next.js**: App Router for navigation and API routes
+- **Supabase**: Backend database and storage integration
 
 ### Key Utilities
 
-- **Coordinate Calculation**: `lib/utils/pdfCoordinates.ts`
-- **Mobile Detection**: `hooks/use-mobile.ts`
-- **Keyboard Shortcuts**: `hooks/use-keyboard-shortcuts.ts`
-- **Error Boundaries**: `components/ErrorBoundary.tsx`
+- **Activity Tracking**: `lib/utils/activity-tracking.ts` - User activity monitoring
+- **Activity Tracking Hook**: `hooks/use-activity-tracking.ts` - React hook for activity tracking
+- **Mobile Detection**: `hooks/use-mobile.ts` - Responsive design hook
+- **Supabase Helpers**: `lib/utils/supabase-helpers.ts` - Database and storage utilities
+- **Error Boundaries**: `components/ErrorBoundary.tsx` - Error handling components
 
 ### Performance Considerations
 

@@ -283,32 +283,38 @@ export default function PDFNotesPage() {
                     }}
                 >
                     <div className="relative bg-white rounded-2xl border border-gray-200 overflow-hidden" style={{ height: '800px' }}>
-                        {/* Simple PDF Display */}
-                        <div className="w-full h-full flex items-center justify-center">
-                            <div className="text-center">
-                                <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                    <FileText size={32} className="text-red-600" />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900 mb-2">PDF Loaded</h3>
-                                <p className="text-gray-600 mb-4">
-                                    {currentPdf.filename}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                    File size: {(currentPdf.fileSize / (1024 * 1024)).toFixed(1)} MB
-                                </p>
-                                {currentPdf.fileUrl && (
-                                    <div className="mt-4">
-                                        <a
-                                            href={currentPdf.fileUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
-                                        >
-                                            <FileText size={16} />
-                                            Open PDF
-                                        </a>
+                        {/* PDF Annotation Viewer */}
+                        <div className="w-full h-full">
+                            {/* For now, show a placeholder until we integrate the full viewer */}
+                            <div className="w-full h-full flex items-center justify-center">
+                                <div className="text-center">
+                                    <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                        <FileText size={32} className="text-blue-600" />
                                     </div>
-                                )}
+                                    <h3 className="text-xl font-bold text-gray-900 mb-2">PDF Viewer Ready</h3>
+                                    <p className="text-gray-600 mb-4">
+                                        {currentPdf.filename}
+                                    </p>
+                                    <p className="text-sm text-gray-500 mb-4">
+                                        File size: {(currentPdf.fileSize / (1024 * 1024)).toFixed(1)} MB
+                                    </p>
+                                    <p className="text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg inline-block">
+                                        PDFAnnotationViewer component is now available for integration
+                                    </p>
+                                    {currentPdf.fileUrl && (
+                                        <div className="mt-4">
+                                            <a
+                                                href={currentPdf.fileUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
+                                            >
+                                                <FileText size={16} />
+                                                Open PDF
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

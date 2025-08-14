@@ -35,6 +35,7 @@ import {
 import { useGetPDFsQuery, useUploadPDFMutation } from '@/lib/store/apiSlice'
 import { PDFDocument } from '@/lib/types'
 import { pdfNotifications } from '@/lib/utils/notifications'
+import { formatRelativeTime } from '@/lib/utils/dates'
 
 interface PDFListDisplayProps {
   /** Optional CSS class name for styling */
@@ -58,25 +59,7 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-/**
- * Formats upload date in human-readable format
- */
-const formatUploadDate = (date: Date): string => {
-  const now = new Date()
-  const uploadDate = new Date(date)
-  const diffInMinutes = Math.floor((now.getTime() - uploadDate.getTime()) / (1000 * 60))
 
-  if (diffInMinutes < 1) return 'Just now'
-  if (diffInMinutes < 60) return `${diffInMinutes}m ago`
-
-  const diffInHours = Math.floor(diffInMinutes / 60)
-  if (diffInHours < 24) return `${diffInHours}h ago`
-
-  const diffInDays = Math.floor(diffInHours / 24)
-  if (diffInDays < 7) return `${diffInDays}d ago`
-
-  return uploadDate.toLocaleDateString()
-}
 
 /**
  * Validates uploaded file for PDF format and size constraints
@@ -323,7 +306,7 @@ export default function PDFListDisplay({
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar size={14} />
-                    <span>{formatUploadDate(pdf.uploadedAt)}</span>
+                    <span>{formatRelativeTime(pdf.uploadedAt)}</span>
                   </div>
                 </div>
               </div>

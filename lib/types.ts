@@ -27,8 +27,8 @@ export interface Annotation {
   selectedText: string;
   noteContent: string;
   coordinates: Rectangle;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string; // ISO string for Redux serialization
+  updatedAt: string; // ISO string for Redux serialization
 }
 
 export interface PDFDocument {
@@ -38,8 +38,8 @@ export interface PDFDocument {
   fileSize: number;
   storagePath: string;
   mimeType: string;
-  uploadedAt: Date;
-  updatedAt: Date;
+  uploadedAt: string; // ISO string for Redux serialization
+  updatedAt: string; // ISO string for Redux serialization
   fileUrl?: string; // Signed URL for frontend use
 }
 
@@ -48,7 +48,7 @@ export interface UserActivity {
   userId: string;
   pdfId: string;
   activityType: "view" | "upload" | "delete";
-  accessedAt: Date;
+  accessedAt: string; // ISO string for Redux serialization
 }
 
 export interface UploadProgress {
@@ -313,7 +313,7 @@ export interface DashboardState {
   data: DashboardData | null;
   isLoading: boolean;
   error: string | null;
-  lastUpdated: Date | null;
+  lastUpdated: string | null; // ISO string for Redux serialization
 }
 
 // Upload-specific interfaces
@@ -341,7 +341,7 @@ export interface ActivitySummary {
   totalViews: number;
   totalUploads: number;
   totalDeletes: number;
-  lastActivity: Date | null;
+  lastActivity: string | null; // ISO string for Redux serialization
   mostViewedPdf: {
     id: string;
     filename: string;

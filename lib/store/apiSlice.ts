@@ -50,14 +50,14 @@ export const apiSlice = createApi({
         const data = response.data;
         return {
           id: data.id,
-          userId: "", // Will be set by server
+          userId: "", // Not provided by server due to RLS - will be populated by component
           filename: data.filename,
           fileSize: data.fileSize,
           storagePath: data.storagePath,
           mimeType: "application/pdf",
-          uploadedAt: new Date(data.uploadedAt),
-          updatedAt: new Date(data.uploadedAt),
-          fileUrl: data.fileUrl,
+          uploadedAt: data.uploadedAt, // Keep as ISO string
+          updatedAt: data.uploadedAt, // Keep as ISO string
+          fileUrl: data.fileUrl, // the url used to accessed the document in the database
         } as PDFDocument;
       },
       invalidatesTags: [{ type: "PDF", id: "LIST" }],
@@ -79,23 +79,9 @@ export const apiSlice = createApi({
         recentActivity?: UserActivity & { filename?: string; fileUrl?: string };
         totalCount: number;
       },
-      { page?: number; limit?: number } | void
+      void
     >({
-      query: (params = {}) => {
-        if (
-          params &&
-          typeof params === "object" &&
-          ("page" in params || "limit" in params)
-        ) {
-          const { page = 1, limit = 20 } = params;
-          const searchParams = new URLSearchParams({
-            page: page.toString(),
-            limit: limit.toString(),
-          });
-          return `pdfs?${searchParams.toString()}`;
-        }
-        return "pdfs";
-      },
+      query: () => "pdfs",
       transformResponse: (response: SupabasePDFListResponse) => {
         if (!response.success || !response.data) {
           throw new Error(response.error || "Failed to fetch PDFs");
@@ -106,13 +92,13 @@ export const apiSlice = createApi({
         // Transform PDF list to PDFDocument format
         const pdfs: PDFDocument[] = data.pdfs.map((pdf) => ({
           id: pdf.id,
-          userId: "", // Will be set by server
+          userId: "", // Not provided by server due to RLS - will be populated by component
           filename: pdf.filename,
           fileSize: pdf.fileSize,
           storagePath: "", // Not included in list response
           mimeType: pdf.mimeType,
-          uploadedAt: new Date(pdf.uploadedAt),
-          updatedAt: new Date(pdf.uploadedAt),
+          uploadedAt: pdf.uploadedAt, // Keep as ISO string
+          updatedAt: pdf.uploadedAt, // Keep as ISO string
           fileUrl: pdf.fileUrl,
         }));
 
@@ -123,10 +109,10 @@ export const apiSlice = createApi({
         if (data.recentActivity) {
           recentActivity = {
             id: "", // Not provided in response
-            userId: "", // Will be set by server
+            userId: "", // Not provided by server due to RLS - will be populated by component
             pdfId: data.recentActivity.pdfId,
             activityType: data.recentActivity.activityType,
-            accessedAt: new Date(data.recentActivity.accessedAt),
+            accessedAt: data.recentActivity.accessedAt, // Keep as ISO string
             filename: data.recentActivity.filename,
             fileUrl: data.recentActivity.fileUrl,
           };
@@ -155,13 +141,13 @@ export const apiSlice = createApi({
         const data = response.data;
         return {
           id: data.id,
-          userId: "", // Will be set by server
+          userId: "", // Not provided by server due to RLS - will be populated by component
           filename: data.filename,
           fileSize: data.fileSize,
           storagePath: "", // Not included in access response
           mimeType: data.mimeType,
-          uploadedAt: new Date(data.uploadedAt),
-          updatedAt: new Date(data.uploadedAt),
+          uploadedAt: data.uploadedAt, // Keep as ISO string
+          updatedAt: data.uploadedAt, // Keep as ISO string
           fileUrl: data.fileUrl,
         } as PDFDocument;
       },

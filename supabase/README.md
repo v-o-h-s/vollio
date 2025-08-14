@@ -1,12 +1,13 @@
 # Supabase Setup Guide
 
-This directory contains the database schema and storage policies for the PDF annotation application.
+This directory contains the database schema, storage policies, and Row Level Security (RLS) configuration for the PDF annotation application with Clerk authentication integration.
 
 ## Prerequisites
 
 1. Supabase project created
-2. Clerk authentication configured
+2. Clerk authentication configured with JWT template
 3. Environment variables set in `.env.local`
+4. Understanding of Row Level Security (RLS) concepts
 
 ## Setup Steps
 
@@ -82,13 +83,46 @@ After setup, you can verify the configuration by:
 
 ### Tables
 
-- `pdfs`: Stores PDF file metadata
-- `user_activity`: Tracks user interactions with PDFs
+- `pdfs`: Stores PDF file metadata with RLS policies for user isolation
+- `user_activity`: Tracks user interactions with PDFs (view, upload, delete)
+- `annotations`: Stores PDF annotations with coordinates and content (future)
 
 ### Functions
 
 - `requesting_user_id()`: Extracts Clerk user ID from JWT for RLS policies
+- `get_jwt_claims()`: Debug function to inspect JWT token claims
+
+### Row Level Security (RLS)
+
+All tables have RLS enabled with policies that automatically filter data by user:
+
+```sql
+-- Example RLS policy for pdfs table
+CREATE POLICY "Users can only access their own PDFs" ON pdfs
+FOR ALL USING (user_id = requesting_user_id());
+```
 
 ### Storage
 
 - `pdfs` bucket: Private storage for PDF files with user-based access control
+- Signed URLs with configurable expiration (default: 1 hour)
+- Automatic file organization by user ID
+
+## API Integration
+
+### Supabase Helper Functions
+
+The application includes comprehensive helper functions in `lib/utils/supabase-helpers.ts`:
+
+- **Error Handling**: `mapSupabaseError()` - Converts Supabase errors to application error types
+- **Retry Logic**: `withRetry()` - Implements exponential backoff for failed operations
+- **File Validation**: `validateFile()` - Comprehensive PDF validation with security checks
+- **Signed URLs**: `generateSignedUrl()` - Creates time-limited file access URLs
+- **Type Guards**: `isPDFRow()`, `isUserActivityRow()` - Runtime type validation
+
+### API Endpoints
+
+- `POST /api/pdfs/upload` - Upload PDF with validation and metadata storage
+- `GET /api/pdfs` - List user's PDFs with signed URLs and recent activity
+- `GET /api/pdfs/[id]` - Get individual PDF with fresh signed URL and activity tracking
+- `DELETE /api/pdfs/[id]` - Delete PDF from storage and database

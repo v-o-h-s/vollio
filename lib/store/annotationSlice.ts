@@ -1,20 +1,20 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { PDFDocument, TextSelection } from "../types";
+import { PDFDocument, TextSelection, Annotation } from "../types";
 
 interface TooltipState {
   visible: boolean;
   position: { x: number; y: number };
 }
 
-
+// will be used when implementing notes 
 interface PreviewCardState {
   visible: boolean;
   annotationId: string | null;
   position: { x: number; y: number };
 }
-
 interface AnnotationState {
   currentPdf: PDFDocument | null;
+  annotations: Record<string, Annotation>;
   activeSelection: TextSelection | null;
   hoveredAnnotation: string | null;
   tooltipState: TooltipState;
@@ -23,6 +23,7 @@ interface AnnotationState {
 
 const initialState: AnnotationState = {
   currentPdf: null,
+  annotations: {},
   activeSelection: null,
   hoveredAnnotation: null,
   tooltipState: {
@@ -52,10 +53,37 @@ const annotationSlice = createSlice({
 
     clearPdfDocument: (state) => {
       state.currentPdf = null;
+      state.annotations = {};
       state.activeSelection = null;
       state.hoveredAnnotation = null;
       state.tooltipState.visible = false;
       state.previewCard.visible = false;
+    },
+
+    // Annotation management actions
+    loadAnnotations: (state, action: PayloadAction<Annotation[]>) => {
+      state.annotations = {};
+      action.payload.forEach((annotation) => {
+        state.annotations[annotation.id] = annotation;
+      });
+    },
+
+    addAnnotation: (state, action: PayloadAction<Annotation>) => {
+      state.annotations[action.payload.id] = action.payload;
+    },
+
+    updateAnnotation: (
+      state,
+      action: PayloadAction<{ id: string; updates: Partial<Annotation> }>
+    ) => {
+      const { id, updates } = action.payload;
+      if (state.annotations[id]) {
+        state.annotations[id] = { ...state.annotations[id], ...updates };
+      }
+    },
+
+    removeAnnotation: (state, action: PayloadAction<string>) => {
+      delete state.annotations[action.payload];
     },
 
     // Text selection actions
@@ -123,6 +151,10 @@ const annotationSlice = createSlice({
 export const {
   setPdfDocument,
   clearPdfDocument,
+  loadAnnotations,
+  addAnnotation,
+  updateAnnotation,
+  removeAnnotation,
   setActiveSelection,
   setHoveredAnnotation,
   showTooltip,

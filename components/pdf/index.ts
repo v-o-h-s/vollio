@@ -19,6 +19,7 @@
  */
 
 // Main PDF viewer component with annotation capabilities
+export { default as PDFAnnotationViewer } from "./PDFAnnotationViewer";
 
 // Desktop tooltip for text selection
 export { default as AnnotationTooltip } from "./AnnotationTooltip";

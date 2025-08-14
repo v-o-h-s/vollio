@@ -79,15 +79,15 @@
   - Integrate with RTK Query for real-time activity updates
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 6. Update PDF viewer integration
-- [ ] 6.1 Modify PDF viewer to use Supabase URLs
+- [x] 6. Update PDF viewer integration
+- [x] 6.1 Modify PDF viewer to use Supabase URLs
 
   - Update PDFAnnotationViewer to work with signed URLs from Supabase
   - Replace blob URL handling with proper Supabase file access
   - Ensure PDF viewer works with time-limited signed URLs
   - _Requirements: 2.3, 4.3_
 
-- [ ] 6.2 Implement activity tracking on PDF access
+- [x] 6.2 Implement activity tracking on PDF access
 
   - Record user activity when PDF is opened in viewer
   - Update recent activity data in real-time

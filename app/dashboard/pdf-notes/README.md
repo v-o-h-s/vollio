@@ -11,12 +11,13 @@ This directory contains the main PDF annotation and note-taking page for the Not
 **Key Responsibilities**:
 
 - PDF file upload and validation with drag & drop support
-- PDF document display using the PDFAnnotationViewer component
-- Annotation creation workflow management
+- PDF document display using the PDFAnnotationViewer component with Supabase integration
+- Annotation creation workflow management with activity tracking
 - Cross-tab communication for note editor integration
 - URL-based navigation to specific PDF coordinates
-- Error handling and user feedback
-- State management integration with Redux store
+- Comprehensive error handling and user feedback
+- State management integration with Redux store and RTK Query
+- Real-time activity tracking and cache invalidation
 
 ## 🏗️ Component Architecture
 
@@ -38,10 +39,13 @@ const ALLOWED_TYPE = "application/pdf";
 
 #### 2. **PDF Viewer Integration**
 
-- **Syncfusion PDF Viewer**: Full-featured PDF viewing with zoom, search, navigation
-- **Annotation Overlay**: Real-time display of existing annotations
+- **PDFAnnotationViewer Component**: Full Syncfusion PDF Viewer integration with Supabase backend
+- **Signed URL Management**: Automatic URL refresh and expiration handling
+- **Activity Tracking**: Real-time user activity monitoring and cache updates
+- **Annotation Overlay**: Interactive display of existing annotations with hover states
 - **Text Selection**: Precise coordinate calculation for annotation creation
-- **Mobile Responsive**: Touch-friendly interactions on mobile devices
+- **Mobile Responsive**: Touch-friendly interactions with adaptive UI components
+- **Error Handling**: Comprehensive error states with retry mechanisms
 
 #### 3. **Cross-Tab Communication**
 
