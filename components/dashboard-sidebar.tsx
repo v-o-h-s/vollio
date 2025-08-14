@@ -47,12 +47,6 @@ const navigationItems = [
         description: 'Overview and analytics'
     },
     {
-        name: 'PDF & Notes',
-        href: '/dashboard/pdf-notes',
-        icon: FileText,
-        description: 'Upload PDFs and create anchored notes'
-    },
-    {
         name: 'My PDFs',
         href: '/dashboard/pdfs',
         icon: FileText,

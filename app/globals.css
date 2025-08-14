@@ -478,3 +478,68 @@
 .hover-glow:hover {
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
+
+/* Syncfusion PDF Viewer Responsive Styles */
+@media (max-width: 768px) {
+  /* Make Syncfusion PDF Viewer responsive */
+  .e-pv-viewer-container {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Responsive toolbar */
+  .e-pv-toolbar {
+    flex-wrap: wrap !important;
+    padding: 8px !important;
+  }
+  
+  .e-pv-toolbar .e-toolbar-items {
+    flex-wrap: wrap !important;
+  }
+  
+  /* Responsive PDF pages */
+  .e-pv-page-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+  
+  /* Touch-friendly zoom controls */
+  .e-pv-zoom-toolbar {
+    bottom: 20px !important;
+    right: 20px !important;
+  }
+  
+  /* Mobile-friendly navigation */
+  .e-pv-navigation-toolbar {
+    bottom: 20px !important;
+    left: 20px !important;
+  }
+  
+  /* Ensure proper scaling */
+  .e-pv-page-canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  
+  /* Hide unnecessary toolbar items on mobile */
+  .e-pv-toolbar .e-pv-download-document-container,
+  .e-pv-toolbar .e-pv-open-document-container {
+    display: none !important;
+  }
+}
+
+/* Tablet responsive styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .e-pv-viewer-container {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  .e-pv-page-container {
+    max-width: 90% !important;
+    margin: 0 auto !important;
+  }
+}

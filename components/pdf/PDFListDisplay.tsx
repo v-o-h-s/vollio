@@ -114,7 +114,7 @@ export default function PDFListDisplay({
     if (onPDFClick) {
       onPDFClick(pdf)
     } else {
-      router.push(`/dashboard/pdf-notes?pdf=${pdf.id}`)
+      router.push(`/dashboard/pdf/${pdf.id}`)
     }
   }, [onPDFClick, router])
 

@@ -136,6 +136,11 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Use fresh PDF data if available, otherwise use prop data
   const currentPdfData = freshPdfData || pdfDocument;
 
+  // Configure resource URL for Syncfusion PDF Viewer (following official solution)
+  const resourceUrl = typeof window !== 'undefined' 
+    ? `${window.location.protocol}//${window.location.host}/lib`
+    : '/lib';
+
   /**
    * Handle PDF document loading
    */
@@ -438,7 +443,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       }}
     >
       <div
-        className={`relative w-full h-full ${className}`}
+        className={`relative w-full h-full overflow-hidden ${className}`}
         onClick={handleDocumentClick}
       >
         {/* Syncfusion PDF Viewer */}
@@ -447,6 +452,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           id="pdf-viewer"
           documentPath={currentPdfData.fileUrl}
           serviceUrl="" // Using client-side rendering
+          resourceUrl={resourceUrl}
           style={{ height: "100%", width: "100%" }}
           documentLoad={handleDocumentLoad}
           documentLoadFailed={handleDocumentLoadFailed}
@@ -469,7 +475,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           enableMeasureAnnotation={false}
           enableInkAnnotation={false}
           enableStickyNotesAnnotation={false}
-          zoomMode="FitToWidth"
+          zoomMode={isMobile ? "FitToPage" : "FitToWidth"}
         >
           <Inject
             services={[

@@ -38,11 +38,12 @@ export default function DashboardPage() {
   const totalCount = pdfData?.totalCount || 0
 
   const handleUploadClick = () => {
-    router.push('/dashboard/pdf-notes')
+    // TODO: Create upload page or modal
+    console.log('Upload functionality to be implemented')
   }
 
   const handlePDFClick = (pdfId: string) => {
-    router.push(`/dashboard/pdf-notes?pdf=${pdfId}`)
+    router.push(`/dashboard/pdf/${pdfId}`)
   }
   return (
     <div className="space-y-8">
@@ -196,10 +197,10 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Your PDFs</h2>
             <button
-              onClick={() => router.push('/dashboard/pdf-notes')}
+              onClick={handleUploadClick}
               className="text-blue-600 text-sm font-semibold hover:text-blue-700 transition-colors"
             >
-              View all →
+              Upload PDF →
             </button>
           </div>
 
