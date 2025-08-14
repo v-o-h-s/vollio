@@ -30,12 +30,17 @@ import {
   MoreVertical,
   Trash2,
   Download,
-  Share2
+  Share2,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react'
 import { useGetPDFsQuery, useUploadPDFMutation } from '@/lib/store/apiSlice'
-import { PDFDocument } from '@/lib/types'
+import { PDFDocument, AppError } from '@/lib/types'
 import { pdfNotifications } from '@/lib/utils/notifications'
 import { formatRelativeTime } from '@/lib/utils/dates'
+import { useUploadErrorHandler } from '@/hooks/use-error-handling'
+import { ErrorBoundary, UploadErrorBoundary } from '@/components/ErrorBoundary'
+import { Button } from '@/components/ui/button'
 
 interface PDFListDisplayProps {
   /** Optional CSS class name for styling */
@@ -94,6 +99,16 @@ export default function PDFListDisplay({
   // Local state for drag and drop
   const [isDragOver, setIsDragOver] = useState(false)
 
+  // Enhanced error handling
+  const {
+    error: uploadError,
+    isRetrying: isRetryingUpload,
+    handleUploadError,
+    getRecoveryActions,
+    clearError: clearUploadError,
+    retry: retryUpload
+  } = useUploadErrorHandler()
+
   // RTK Query hooks
   const {
     data: pdfData,
@@ -119,12 +134,20 @@ export default function PDFListDisplay({
   }, [onPDFClick, router])
 
   /**
-   * Handles file upload with validation and error handling
+   * Handles file upload with enhanced validation and error handling
    */
   const handleFileUpload = useCallback(async (file: File) => {
+    // Clear any previous upload errors
+    clearUploadError()
+
     const validation = validateFile(file)
     if (!validation.valid) {
-      pdfNotifications.uploadError(validation.error!)
+      handleUploadError(
+        new Error(validation.error!),
+        file.name,
+        file.size,
+        file.type
+      )
       return
     }
 
@@ -133,17 +156,21 @@ export default function PDFListDisplay({
       formData.append('file', file)
 
       await uploadPDF(formData).unwrap()
-      pdfNotifications.uploadSuccess(file.name)
-
-      // Reset file input
+      
+      // Reset file input on success
       if (fileInputRef.current) {
         fileInputRef.current.value = ''
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to upload PDF'
-      pdfNotifications.uploadError(errorMessage)
+    } catch (error: any) {
+      // Handle RTK Query errors which may contain AppError
+      const appError = error.error as AppError
+      if (appError) {
+        handleUploadError(appError, file.name, file.size, file.type)
+      } else {
+        handleUploadError(error, file.name, file.size, file.type)
+      }
     }
-  }, [uploadPDF])
+  }, [uploadPDF, handleUploadError, clearUploadError])
 
   /**
    * Handles drag and drop events
@@ -210,75 +237,164 @@ export default function PDFListDisplay({
     )
   }
 
-  // Error state
+  // Enhanced error state with retry logic
   if (error) {
+    const appError = error as AppError
+    const errorTitle = appError?.userMessage ? 'Failed to Load PDFs' : 'Connection Error'
+    const errorMessage = appError?.userMessage || 'There was an error loading your PDF files. Please check your connection and try again.'
+
     return (
       <div className={`space-y-6 ${className}`}>
         <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FileText size={32} className="text-red-600" />
+            <AlertTriangle size={32} className="text-red-600" />
           </div>
-          <h3 className="text-xl font-bold text-red-900 mb-2">Failed to Load PDFs</h3>
-          <p className="text-red-700 mb-4">
-            There was an error loading your PDF files. Please try again.
-          </p>
-          <button
-            onClick={() => refetch()}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-          >
-            Try Again
-          </button>
+          <h3 className="text-xl font-bold text-red-900 mb-2">{errorTitle}</h3>
+          <p className="text-red-700 mb-4">{errorMessage}</p>
+          
+          {/* Error context if available */}
+          {appError?.context && (
+            <div className="bg-red-100 rounded-lg p-3 mb-4 text-left max-w-md mx-auto">
+              <p className="text-xs text-red-600 font-medium mb-1">Error Details:</p>
+              <div className="text-xs text-red-700">
+                {appError.context.component && <div>Component: {appError.context.component}</div>}
+                {appError.context.action && <div>Action: {appError.context.action}</div>}
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-3 justify-center">
+            <Button
+              onClick={() => refetch()}
+              className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
+            >
+              <RefreshCw size={16} />
+              Try Again
+            </Button>
+            
+            {appError?.retryable && (
+              <Button
+                onClick={() => window.location.reload()}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <RefreshCw size={16} />
+                Refresh Page
+              </Button>
+            )}
+          </div>
+
+          {/* Show technical details in development */}
+          {process.env.NODE_ENV === 'development' && appError?.technicalMessage && (
+            <details className="mt-4 text-left max-w-md mx-auto">
+              <summary className="text-xs text-red-600 cursor-pointer">
+                Technical Details (Dev)
+              </summary>
+              <pre className="text-xs text-red-600 mt-2 p-2 bg-red-100 rounded overflow-auto max-h-32">
+                {appError.technicalMessage}
+              </pre>
+            </details>
+          )}
         </div>
       </div>
     )
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Upload Section */}
-      {showUpload && (
-        <div
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={`
-            relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300
-            ${isDragOver
-              ? 'border-blue-400 bg-blue-50'
-              : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
-            }
-            ${isUploading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}
-          `}
-          onClick={openFilePicker}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,application/pdf"
-            onChange={handleFileInputChange}
-            className="hidden"
-          />
-
-          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Upload size={32} className="text-blue-600" />
+    <ErrorBoundary context="PDFListDisplay">
+      <div className={`space-y-6 ${className}`}>
+        {/* Upload Error Display */}
+        {uploadError && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+            <div className="flex items-start gap-3">
+              <AlertTriangle size={20} className="text-red-500 mt-0.5" />
+              <div className="flex-1">
+                <h4 className="font-semibold text-red-900 mb-1">Upload Failed</h4>
+                <p className="text-red-700 text-sm mb-3">{uploadError.userMessage}</p>
+                
+                <div className="flex gap-2">
+                  {uploadError.retryable && (
+                    <Button
+                      onClick={() => retryUpload(() => Promise.resolve())}
+                      disabled={isRetryingUpload}
+                      size="sm"
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      <RefreshCw size={14} className={isRetryingUpload ? 'animate-spin' : ''} />
+                      {isRetryingUpload ? 'Retrying...' : 'Try Again'}
+                    </Button>
+                  )}
+                  
+                  {getRecoveryActions('').map((action, index) => (
+                    <Button
+                      key={index}
+                      onClick={action.action}
+                      size="sm"
+                      variant="outline"
+                    >
+                      {action.label}
+                    </Button>
+                  ))}
+                  
+                  <Button
+                    onClick={clearUploadError}
+                    size="sm"
+                    variant="outline"
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
+        )}
 
-          <h3 className="text-xl font-bold text-gray-900 mb-2">
-            {isDragOver ? 'Drop your PDF here' : 'Upload PDF'}
-          </h3>
+        {/* Upload Section */}
+        {showUpload && (
+          <UploadErrorBoundary>
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`
+                relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300
+                ${isDragOver
+                  ? 'border-blue-400 bg-blue-50'
+                  : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
+                }
+                ${isUploading || isRetryingUpload ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}
+              `}
+              onClick={openFilePicker}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handleFileInputChange}
+                className="hidden"
+              />
 
-          <p className="text-gray-600 mb-4">
-            {isUploading
-              ? 'Uploading...'
-              : 'Drag and drop a PDF file here, or click to browse'
-            }
-          </p>
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Upload size={32} className="text-blue-600" />
+              </div>
 
-          <p className="text-sm text-gray-500">
-            Maximum file size: 50MB
-          </p>
-        </div>
-      )}
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                {isDragOver ? 'Drop your PDF here' : 'Upload PDF'}
+              </h3>
+
+              <p className="text-gray-600 mb-4">
+                {isUploading || isRetryingUpload
+                  ? 'Uploading...'
+                  : 'Drag and drop a PDF file here, or click to browse'
+                }
+              </p>
+
+              <p className="text-sm text-gray-500">
+                Maximum file size: 50MB • Supported format: PDF
+              </p>
+            </div>
+          </UploadErrorBoundary>
+        )}
 
       {/* PDF Grid */}
       {pdfs.length > 0 ? (
@@ -364,6 +480,7 @@ export default function PDFListDisplay({
           </p>
         </div>
       )}
-    </div>
+      </div>
+    </ErrorBoundary>
   )
 }

@@ -1,9 +1,12 @@
 'use client'
 
-import { FileText, BookOpen, Zap, TrendingUp, Clock, Plus, Upload } from 'lucide-react'
+import { FileText, BookOpen, Zap, TrendingUp, Clock, Plus, Upload, AlertTriangle, RefreshCw } from 'lucide-react'
 import { useGetPDFsQuery } from '@/lib/store/apiSlice'
 import { useRouter } from 'next/navigation'
 import { RecentActivityDisplay } from '@/components/dashboard'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { AppError } from '@/lib/types'
+import { Button } from '@/components/ui/button'
 
 // Simple time formatting function
 const formatTimeAgo = (date: string | Date) => {
@@ -30,7 +33,8 @@ export default function DashboardPage() {
   const {
     data: pdfData,
     isLoading: isLoadingPDFs,
-    error: pdfError
+    error: pdfError,
+    refetch
   } = useGetPDFsQuery()
 
   const pdfs = pdfData?.pdfs || []
@@ -45,7 +49,9 @@ export default function DashboardPage() {
   const handlePDFClick = (pdfId: string) => {
     router.push(`/dashboard/pdf/${pdfId}`)
   }
+
   return (
+    <ErrorBoundary context="DashboardPage">(
     <div className="space-y-8">
       {/* Header Section */}
       <div className="space-y-2">
@@ -53,18 +59,55 @@ export default function DashboardPage() {
         <p className="text-lg text-gray-600 font-medium">Welcome back to your Noto productivity workspace</p>
       </div>
 
-      {/* Error State */}
+      {/* Enhanced Error State */}
       {pdfError && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs">!</span>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={20} className="text-red-500 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="font-semibold text-red-900 mb-1">Failed to Load Dashboard Data</h4>
+              <p className="text-red-700 text-sm mb-3">
+                {(() => {
+                  const appError = pdfError as AppError
+                  return appError?.userMessage || 'There was an error loading your dashboard. Please try again.'
+                })()}
+              </p>
+              
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => window.location.reload()}
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
+                >
+                  <RefreshCw size={14} />
+                  Refresh Page
+                </Button>
+                
+                <Button
+                  onClick={() => {
+                    // Clear cache and refetch
+                    window.location.href = '/dashboard'
+                  }}
+                  size="sm"
+                  variant="outline"
+                >
+                  Clear Cache
+                </Button>
+              </div>
+
+              {/* Show technical details in development */}
+              {process.env.NODE_ENV === 'development' && (
+                <details className="mt-3">
+                  <summary className="text-xs text-red-600 cursor-pointer">
+                    Technical Details (Dev)
+                  </summary>
+                  <pre className="text-xs text-red-600 mt-2 p-2 bg-red-100 rounded overflow-auto max-h-32">
+                    {JSON.stringify(pdfError, null, 2)}
+                  </pre>
+                </details>
+              )}
             </div>
-            <p className="text-red-800 font-medium">Failed to load PDFs</p>
           </div>
-          <p className="text-red-600 text-sm mt-1">
-            Please try refreshing the page or contact support if the problem persists.
-          </p>
         </div>
       )}
 
@@ -237,5 +280,6 @@ export default function DashboardPage() {
         </div>
       )}
     </div>
+    </ErrorBoundary>
   )
 }

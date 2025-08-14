@@ -1,8 +1,8 @@
 /**
- * RTK Query API slice for annotation and PDF management
+ * RTK Query API slice for annotation and PDF management with comprehensive error handling
  */
 
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery, BaseQueryFn } from "@reduxjs/toolkit/query/react";
 import {
   Annotation,
   PDFDocument,
@@ -11,6 +11,16 @@ import {
   SupabasePDFListResponse,
   SupabasePDFAccessResponse,
 } from "../types";
+import { 
+  AppError, 
+  ErrorType,
+  createAppError,
+  mapErrorToAppError,
+  withRetry,
+  createUploadErrorContext,
+  createNetworkErrorContext,
+  logError 
+} from "../types/errors";
 import { pdfNotifications } from "../utils/notifications";
 
 export interface ApiResponse<T> {
@@ -19,11 +29,11 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-// Define the API slice
-export const apiSlice = createApi({
-  reducerPath: "api",
-  baseQuery: fetchBaseQuery({
+// Enhanced base query with error handling and retry logic
+const baseQueryWithRetry: BaseQueryFn = async (args, api, extraOptions) => {
+  const baseQuery = fetchBaseQuery({
     baseUrl: "/api",
+    timeout: 30000, // 30 second timeout
     prepareHeaders: (headers, { endpoint }) => {
       // Don't set Content-Type for FormData uploads (let browser set it with boundary)
       if (endpoint !== "uploadPDF") {
@@ -31,11 +41,53 @@ export const apiSlice = createApi({
       }
       return headers;
     },
-  }),
+  });
+
+  // Extract request details for error context
+  const url = typeof args === 'string' ? args : args.url;
+  const method = typeof args === 'string' ? 'GET' : (args.method || 'GET');
+
+  try {
+    const result = await withRetry(
+      () => baseQuery(args, api, extraOptions),
+      {
+        maxRetries: 3,
+        backoffMultiplier: 2,
+        initialDelay: 1000,
+        maxDelay: 10000,
+        retryableErrors: [
+          ErrorType.NETWORK_ERROR,
+          ErrorType.TIMEOUT_ERROR,
+          ErrorType.CONNECTION_ERROR,
+          ErrorType.INTERNAL_SERVER_ERROR,
+          ErrorType.SERVICE_UNAVAILABLE,
+        ],
+      },
+      createNetworkErrorContext(url, method)
+    );
+
+    // Handle successful response
+    if (result.error) {
+      const appError = mapErrorToAppError(result.error, createNetworkErrorContext(url, method));
+      logError(appError);
+      return { error: appError };
+    }
+
+    return result;
+  } catch (error) {
+    const appError = mapErrorToAppError(error, createNetworkErrorContext(url, method));
+    logError(appError);
+    return { error: appError };
+  }
+};
+
+// Define the API slice
+export const apiSlice = createApi({
+  reducerPath: "api",
+  baseQuery: baseQueryWithRetry,
   tagTypes: ["Annotation", "PDF"],
   endpoints: (builder) => ({
-    // Annotation endpoints
-    // PDF endpoints
+    // PDF endpoints with enhanced error handling
     uploadPDF: builder.mutation<PDFDocument, FormData>({
       query: (formData) => ({
         url: "pdfs/upload",
@@ -44,8 +96,13 @@ export const apiSlice = createApi({
       }),
       transformResponse: (response: SupabaseUploadResponse) => {
         if (!response.success || !response.data) {
-          throw new Error(response.error || "Failed to upload PDF");
+          throw createAppError(
+            ErrorType.STORAGE_UPLOAD_FAILED,
+            response.error || "Failed to upload PDF",
+            { component: 'FileUpload', action: 'upload' }
+          );
         }
+        
         // Transform Supabase response to PDFDocument format
         const data = response.data;
         return {
@@ -60,15 +117,42 @@ export const apiSlice = createApi({
           fileUrl: data.fileUrl, // the url used to accessed the document in the database
         } as PDFDocument;
       },
+      transformErrorResponse: (response: any, meta, arg) => {
+        // Extract file information for error context
+        const file = arg.get('file') as File;
+        const fileName = file?.name || 'unknown';
+        const fileSize = file?.size || 0;
+        const fileType = file?.type || 'unknown';
+
+        const context = createUploadErrorContext(fileName, fileSize, fileType);
+        
+        if (response.status === 413) {
+          return createAppError(ErrorType.FILE_TOO_LARGE, 'File too large', context);
+        } else if (response.status === 415) {
+          return createAppError(ErrorType.INVALID_FILE_TYPE, 'Invalid file type', context);
+        } else if (response.status === 401) {
+          return createAppError(ErrorType.AUTHENTICATION_ERROR, 'Authentication required', context);
+        } else if (response.status === 403) {
+          return createAppError(ErrorType.AUTHORIZATION_ERROR, 'Access denied', context);
+        }
+
+        return mapErrorToAppError(response, context);
+      },
       invalidatesTags: [{ type: "PDF", id: "LIST" }],
       async onQueryStarted(formData, { dispatch, queryFulfilled }) {
+        const file = formData.get('file') as File;
+        const fileName = file?.name || 'PDF';
+
         try {
-          await queryFulfilled;
-          pdfNotifications.uploadSuccess();
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : "Failed to upload PDF";
+          const result = await queryFulfilled;
+          pdfNotifications.uploadSuccess(fileName);
+        } catch (error: any) {
+          const appError = error.error as AppError;
+          const message = appError?.userMessage || appError?.message || "Failed to upload PDF";
           pdfNotifications.uploadError(message);
+          
+          // Log detailed error for debugging
+          logError(appError || mapErrorToAppError(error));
         }
       },
     }),
@@ -84,7 +168,11 @@ export const apiSlice = createApi({
       query: () => "pdfs",
       transformResponse: (response: SupabasePDFListResponse) => {
         if (!response.success || !response.data) {
-          throw new Error(response.error || "Failed to fetch PDFs");
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch PDFs",
+            { component: 'PDFList', action: 'fetch' }
+          );
         }
 
         const data = response.data;
@@ -124,6 +212,23 @@ export const apiSlice = createApi({
           totalCount: data.totalCount,
         };
       },
+      transformErrorResponse: (response: any) => {
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR, 
+            'Authentication required',
+            { component: 'PDFList', action: 'fetch' }
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR, 
+            'Access denied',
+            { component: 'PDFList', action: 'fetch' }
+          );
+        }
+
+        return mapErrorToAppError(response, { component: 'PDFList', action: 'fetch' });
+      },
       providesTags: (result) => [
         { type: "PDF", id: "LIST" },
         ...(result?.pdfs.map((pdf) => ({ type: "PDF" as const, id: pdf.id })) ||
@@ -135,7 +240,11 @@ export const apiSlice = createApi({
       query: (pdfId) => `pdfs/${pdfId}`,
       transformResponse: (response: SupabasePDFAccessResponse) => {
         if (!response.success || !response.data) {
-          throw new Error(response.error || "Failed to fetch PDF");
+          throw createAppError(
+            ErrorType.PDF_LOADING_ERROR,
+            response.error || "Failed to fetch PDF",
+            { component: 'PDFViewer', action: 'load', pdfId: response.data?.id }
+          );
         }
 
         const data = response.data;
@@ -151,14 +260,78 @@ export const apiSlice = createApi({
           fileUrl: data.fileUrl,
         } as PDFDocument;
       },
+      transformErrorResponse: (response: any, meta, pdfId) => {
+        const context = { component: 'PDFViewer', action: 'load', pdfId };
+
+        if (response.status === 404) {
+          return createAppError(ErrorType.VALIDATION_ERROR, 'PDF not found', context);
+        } else if (response.status === 401) {
+          return createAppError(ErrorType.AUTHENTICATION_ERROR, 'Authentication required', context);
+        } else if (response.status === 403) {
+          return createAppError(ErrorType.AUTHORIZATION_ERROR, 'Access denied', context);
+        }
+
+        return mapErrorToAppError(response, context);
+      },
       providesTags: (result, error, pdfId) => [{ type: "PDF", id: pdfId }],
+    }),
+
+    // Delete PDF endpoint with error handling
+    deletePDF: builder.mutation<{ success: boolean }, string>({
+      query: (pdfId) => ({
+        url: `pdfs/${pdfId}`,
+        method: 'DELETE',
+      }),
+      transformResponse: (response: any) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to delete PDF",
+            { component: 'PDFList', action: 'delete' }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, pdfId) => {
+        const context = { component: 'PDFList', action: 'delete', pdfId };
+
+        if (response.status === 404) {
+          return createAppError(ErrorType.VALIDATION_ERROR, 'PDF not found', context);
+        } else if (response.status === 401) {
+          return createAppError(ErrorType.AUTHENTICATION_ERROR, 'Authentication required', context);
+        } else if (response.status === 403) {
+          return createAppError(ErrorType.AUTHORIZATION_ERROR, 'Access denied', context);
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, pdfId) => [
+        { type: "PDF", id: "LIST" },
+        { type: "PDF", id: pdfId },
+      ],
+      async onQueryStarted(pdfId, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          pdfNotifications.deleteSuccess();
+        } catch (error: any) {
+          const appError = error.error as AppError;
+          const message = appError?.userMessage || appError?.message || "Failed to delete PDF";
+          pdfNotifications.deleteError(message);
+          
+          logError(appError || mapErrorToAppError(error));
+        }
+      },
     }),
   }),
 });
 
 // Export hooks for usage in functional components
-export const { useUploadPDFMutation, useGetPDFsQuery, useGetPDFQuery } =
-  apiSlice;
+export const { 
+  useUploadPDFMutation, 
+  useGetPDFsQuery, 
+  useGetPDFQuery,
+  useDeletePDFMutation 
+} = apiSlice;
 
 // Export the reducer and middleware
 export const { reducer: apiReducer, middleware: apiMiddleware } = apiSlice;

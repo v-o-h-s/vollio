@@ -10,217 +10,196 @@ import {
   withRetry,
   generateSignedUrl,
 } from "@/lib/utils/supabase-helpers";
+import { 
+  withErrorHandling,
+  extractRequestContext,
+  createServerError,
+  ServerErrorType,
+  checkRateLimit,
+  logServerError
+} from "@/lib/utils/server-error-handling";
 
 /**
- * Fetches all user's PDFs with sorting
+ * Fetches all user's PDFs with sorting and enhanced error handling
  * Uses RLS policies to automatically filter by authenticated user
  */
 async function fetchUserPDFs(supabaseClient: any, userId: string) {
-  try {
-    // Test the requesting_user_id function first
-    // try {
-    //   const { data: userIdData, error: userIdError } = await supabaseClient.rpc(
-    //     "requesting_user_id"
-    //   );
-    //   console.log("requesting_user_id result:", userIdData);
-    //   if (userIdError) {
-    //     console.error("requesting_user_id error:", userIdError);
-    //   }
+  const { data, error, count } = await supabaseClient
+    .from("pdfs")
+    .select("*", { count: "exact" })
+    .order("uploaded_at", { ascending: false })
+    .limit(50);
 
-    //   // Debug: Let's see what's actually in the JWT claims
-    //   const { data: jwtClaims, error: jwtError } = await supabaseClient.rpc(
-    //     "get_jwt_claims"
-    //   );
-    //   console.log("JWT claims debug:", JSON.stringify(jwtClaims, null, 2));
-    //   if (jwtError) {
-    //     console.error("JWT claims error:", jwtError);
-    //   }
-    // } catch (rpcError) {
-    //   console.error("RPC call failed:", rpcError);
-    // }
-
-    // Now try the query with RLS (no manual user_id filter needed)
-    console.log("Attempting to query pdfs table with RLS...");
-
-    const { data, error, count } = await supabaseClient
-      .from("pdfs")
-      .select("*", { count: "exact" })
-      .order("uploaded_at", { ascending: false })
-      .limit(50);
-
-    if (error) {
-      console.error("Database query error:", error);
-      console.error("Error details:", JSON.stringify(error, null, 2));
-      throw mapSupabaseError(error);
-    }
-
-    // console.log("Successfully fetched PDFs:", data?.length || 0);
-
-    return {
-      pdfs: data || [],
-      totalCount: count || 0,
-    };
-  } catch (error) {
-    console.error("Error in fetchUserPDFs:", error);
-    throw error;
+  if (error) {
+    throw createServerError(
+      ServerErrorType.DATABASE_ERROR,
+      `Failed to fetch user PDFs: ${error.message}`,
+      { 
+        operation: 'fetch_user_pdfs',
+        userId 
+      },
+      error
+    );
   }
+
+  return {
+    pdfs: data || [],
+    totalCount: count || 0,
+  };
 }
 
 /**
- * Fetches user's most recent activity
+ * Fetches user's most recent activity with enhanced error handling
  * Uses RLS policies to automatically filter by authenticated user
  */
 async function fetchRecentActivity(supabaseClient: any) {
-  try {
-    const { data, error } = await supabaseClient
-      .from("user_activity")
-      .select(
-        `
-        *,
-        pdfs (
-          id,
-          filename,
-          storage_path
-        )
+  const { data, error } = await supabaseClient
+    .from("user_activity")
+    .select(
       `
+      *,
+      pdfs (
+        id,
+        filename,
+        storage_path
       )
-      .eq("activity_type", "view")
-      .order("accessed_at", { ascending: false })
-      .limit(1)
-      .single();
+    `
+    )
+    .eq("activity_type", "view")
+    .order("accessed_at", { ascending: false })
+    .limit(1)
+    .single();
 
-    if (error) {
-      // If no recent activity found, return null instead of throwing
-      if (error.code === "PGRST116") {
-        return null;
-      }
-      console.error("Recent activity query error:", error);
-      throw mapSupabaseError(error);
+  if (error) {
+    // If no recent activity found, return null instead of throwing
+    if (error.code === "PGRST116") {
+      return null;
     }
-
-    return data;
-  } catch (error) {
-    console.error("Error in fetchRecentActivity:", error);
-    // Don't throw for recent activity - it's not critical
-    return null;
+    
+    throw createServerError(
+      ServerErrorType.DATABASE_ERROR,
+      `Failed to fetch recent activity: ${error.message}`,
+      { operation: 'fetch_recent_activity' },
+      error
+    );
   }
+
+  return data;
 }
 
-export async function GET(): Promise<NextResponse<SupabasePDFListResponse>> {
-  try {
-    // Authenticate user
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+// Enhanced GET handler with comprehensive error handling
+async function handleGET(): Promise<NextResponse<SupabasePDFListResponse>> {
+  const context = { endpoint: '/api/pdfs', method: 'GET' };
 
-    // Get authenticated Supabase client with proper RLS
-    const supabaseClient = await getAuthenticatedSupabaseClient();
-
-    // Fetch user's PDFs with retry logic
-    const { pdfs: pdfRows, totalCount } = await withRetry(() =>
-      fetchUserPDFs(supabaseClient, userId)
+  // Authenticate user
+  const { userId } = await auth();
+  if (!userId) {
+    throw createServerError(
+      ServerErrorType.AUTHENTICATION_ERROR,
+      'User not authenticated',
+      { ...context, userId }
     );
+  }
 
-    // Generate signed URLs for each PDF
-    const pdfsWithUrls = await Promise.all(
-      pdfRows.map(async (pdfRow: any) => {
-        try {
-          const signedUrl = await generateSignedUrl(
-            supabaseClient,
-            pdfRow.storage_path
-          );
-          return {
-            id: pdfRow.id,
-            filename: pdfRow.filename,
-            fileSize: pdfRow.file_size,
-            uploadedAt: pdfRow.uploaded_at,
-            fileUrl: signedUrl,
-            mimeType: pdfRow.mime_type,
-          };
-        } catch (error) {
-          console.error(
-            `Failed to generate signed URL for PDF ${pdfRow.id}:`,
-            error
-          );
-          // Return PDF without URL rather than failing the entire request
-          return {
-            id: pdfRow.id,
-            filename: pdfRow.filename,
-            fileSize: pdfRow.file_size,
-            uploadedAt: pdfRow.uploaded_at,
-            fileUrl: "", // Empty URL indicates error
-            mimeType: pdfRow.mime_type,
-          };
-        }
-      })
-    );
+  // Rate limiting - 60 requests per minute per user
+  checkRateLimit(`list:${userId}`, 60, 60000, { ...context, userId });
 
-    // Fetch recent activity (non-critical, don't fail if this fails)
-    let recentActivity = null;
-    try {
-      const activityData = await fetchRecentActivity(supabaseClient);
-      if (activityData && activityData.pdfs) {
-        const activitySignedUrl = await generateSignedUrl(
+  // Get authenticated Supabase client with proper RLS
+  const supabaseClient = await getAuthenticatedSupabaseClient();
+
+  // Fetch user's PDFs with retry logic
+  const { pdfs: pdfRows, totalCount } = await withRetry(() =>
+    fetchUserPDFs(supabaseClient, userId)
+  );
+
+  // Generate signed URLs for each PDF with enhanced error handling
+  const pdfsWithUrls = await Promise.all(
+    pdfRows.map(async (pdfRow: any) => {
+      try {
+        const signedUrl = await generateSignedUrl(
           supabaseClient,
-          activityData.pdfs.storage_path
+          pdfRow.storage_path
         );
-        recentActivity = {
-          pdfId: activityData.pdf_id,
-          filename: activityData.pdfs.filename,
-          accessedAt: activityData.accessed_at,
-          fileUrl: activitySignedUrl,
-          activityType: activityData.activity_type as
-            | "view"
-            | "upload"
-            | "delete",
+        return {
+          id: pdfRow.id,
+          filename: pdfRow.filename,
+          fileSize: pdfRow.file_size,
+          uploadedAt: pdfRow.uploaded_at,
+          fileUrl: signedUrl,
+          mimeType: pdfRow.mime_type,
+        };
+      } catch (error) {
+        // Log the error but don't fail the entire request
+        const signedUrlError = createServerError(
+          ServerErrorType.STORAGE_ERROR,
+          `Failed to generate signed URL for PDF ${pdfRow.id}`,
+          { ...context, userId, operation: 'generate_signed_url', fileName: pdfRow.filename },
+          error
+        );
+        logServerError(signedUrlError);
+
+        // Return PDF without URL rather than failing the entire request
+        return {
+          id: pdfRow.id,
+          filename: pdfRow.filename,
+          fileSize: pdfRow.file_size,
+          uploadedAt: pdfRow.uploaded_at,
+          fileUrl: "", // Empty URL indicates error
+          mimeType: pdfRow.mime_type,
         };
       }
-    } catch (error) {
-      console.error("Failed to fetch recent activity:", error);
-      // Continue without recent activity
+    })
+  );
+
+  // Fetch recent activity (non-critical, don't fail if this fails)
+  let recentActivity = null;
+  try {
+    const activityData = await fetchRecentActivity(supabaseClient);
+    if (activityData && activityData.pdfs) {
+      const activitySignedUrl = await generateSignedUrl(
+        supabaseClient,
+        activityData.pdfs.storage_path
+      );
+      recentActivity = {
+        pdfId: activityData.pdf_id,
+        filename: activityData.pdfs.filename,
+        accessedAt: activityData.accessed_at,
+        fileUrl: activitySignedUrl,
+        activityType: activityData.activity_type as
+          | "view"
+          | "upload"
+          | "delete",
+      };
     }
-
-    // Return success response
-    const response: SupabasePDFListResponse = {
-      success: true,
-      data: {
-        pdfs: pdfsWithUrls,
-        recentActivity: recentActivity || undefined,
-        totalCount,
-      },
-    };
-
-    return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    console.error("Error in PDF listing:", error);
-
-    // Determine error type and appropriate response
-    let errorMessage = "Internal server error";
-    let statusCode = 500;
-
-    if (error instanceof Error) {
-      if (error.message.includes("Authentication failed")) {
-        errorMessage = "Authentication failed";
-        statusCode = 401;
-      } else if (error.message.includes("AUTHENTICATION_ERROR")) {
-        errorMessage = "Access denied. Please check your permissions.";
-        statusCode = 403;
-      } else if (error.message.includes("DATABASE_ERROR")) {
-        errorMessage = "Database error occurred. Please try again.";
-        statusCode = 500;
-      } else if (error.message.includes("NETWORK_ERROR")) {
-        errorMessage = "Network error occurred. Please try again.";
-        statusCode = 503;
-      }
-    }
-
-    return NextResponse.json(
-      { success: false, error: errorMessage },
-      { status: statusCode }
+    // Log but don't fail the request
+    const activityError = createServerError(
+      ServerErrorType.DATABASE_ERROR,
+      'Failed to fetch recent activity',
+      { ...context, userId, operation: 'fetch_recent_activity' },
+      error
     );
+    logServerError(activityError);
   }
+
+  // Log successful request
+  console.log(`✅ PDF list fetched successfully for user ${userId}: ${pdfsWithUrls.length} PDFs`);
+
+  // Return success response
+  const response: SupabasePDFListResponse = {
+    success: true,
+    data: {
+      pdfs: pdfsWithUrls,
+      recentActivity: recentActivity || undefined,
+      totalCount,
+    },
+  };
+
+  return NextResponse.json(response, { status: 200 });
 }
+
+// Export the wrapped handler
+export const GET = withErrorHandling(
+  handleGET,
+  { endpoint: '/api/pdfs', method: 'GET' }
+);

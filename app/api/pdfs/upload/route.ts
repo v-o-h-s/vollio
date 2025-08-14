@@ -6,18 +6,29 @@ import {
 } from "@/lib/supabaseClient";
 import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types";
 import { validateFile, generateSignedUrl } from "@/lib/utils/supabase-helpers";
+import { 
+  withErrorHandling,
+  extractRequestContext,
+  createServerError,
+  ServerErrorType,
+  validateRequired,
+  validateFileUpload,
+  checkRateLimit,
+  logServerError
+} from "@/lib/utils/server-error-handling";
 import { randomUUID } from "crypto";
 
 /**
- * Uploads file to Supabase Storage
+ * Uploads file to Supabase Storage with enhanced error handling
  */
 async function uploadToStorage(
   supabaseClient: any,
   file: File,
   userId: string
 ): Promise<StorageUploadResult> {
+  const storagePath = generateStoragePath(userId, file.name);
+  
   try {
-    const storagePath = generateStoragePath(userId, file.name);
     // Convert File to ArrayBuffer for upload
     const fileBuffer = await file.arrayBuffer();
 
@@ -31,12 +42,30 @@ async function uploadToStorage(
       });
 
     if (error) {
-      console.error("Storage upload error:", error);
-      throw new Error(`Storage upload failed: ${error.message}`);
+      throw createServerError(
+        ServerErrorType.STORAGE_ERROR,
+        `Storage upload failed: ${error.message}`,
+        { 
+          operation: 'storage_upload',
+          fileName: file.name,
+          fileSize: file.size,
+          userId 
+        },
+        error
+      );
     }
 
     if (!data?.path) {
-      throw new Error("Upload succeeded but no path returned");
+      throw createServerError(
+        ServerErrorType.STORAGE_ERROR,
+        'Upload succeeded but no path returned',
+        { 
+          operation: 'storage_upload',
+          fileName: file.name,
+          fileSize: file.size,
+          userId 
+        }
+      );
     }
 
     return {
@@ -45,8 +74,23 @@ async function uploadToStorage(
       id: data.id || randomUUID(),
     };
   } catch (error) {
-    console.error("Error in uploadToStorage:", error);
-    throw error;
+    // If it's already a ServerError, re-throw it
+    if (error.type) {
+      throw error;
+    }
+    
+    // Otherwise, wrap it
+    throw createServerError(
+      ServerErrorType.STORAGE_ERROR,
+      `Storage upload failed: ${error.message || 'Unknown error'}`,
+      { 
+        operation: 'storage_upload',
+        fileName: file.name,
+        fileSize: file.size,
+        userId 
+      },
+      error
+    );
   }
 }
 
@@ -57,7 +101,7 @@ export function generateStoragePath(userId: string, filename: string): string {
   return `${userId}/${timestamp}_${sanitizedFilename}`;
 }
 /**
- * Stores PDF metadata in database
+ * Stores PDF metadata in database with enhanced error handling
  */
 async function storePDFMetadata(
   supabaseClient: any,
@@ -79,82 +123,122 @@ async function storePDFMetadata(
       .single();
 
     if (error) {
-      console.error("Database insert error:", error);
-      throw new Error(`Failed to store PDF metadata: ${error.message}`);
+      throw createServerError(
+        ServerErrorType.DATABASE_ERROR,
+        `Failed to store PDF metadata: ${error.message}`,
+        { 
+          operation: 'database_insert',
+          fileName: file.name,
+          fileSize: file.size,
+          userId 
+        },
+        error
+      );
     }
 
     if (!data?.id) {
-      throw new Error("PDF metadata stored but no ID returned");
+      throw createServerError(
+        ServerErrorType.DATABASE_ERROR,
+        'PDF metadata stored but no ID returned',
+        { 
+          operation: 'database_insert',
+          fileName: file.name,
+          fileSize: file.size,
+          userId 
+        }
+      );
     }
 
     return data.id;
   } catch (error) {
-    console.error("Error in storePDFMetadata:", error);
-    throw error;
+    // If it's already a ServerError, re-throw it
+    if (error.type) {
+      throw error;
+    }
+    
+    // Otherwise, wrap it
+    throw createServerError(
+      ServerErrorType.DATABASE_ERROR,
+      `Database operation failed: ${error.message || 'Unknown error'}`,
+      { 
+        operation: 'database_insert',
+        fileName: file.name,
+        fileSize: file.size,
+        userId 
+      },
+      error
+    );
   }
 }
 
 /**
- * Records upload activity in user_activity table
+ * Records upload activity in user_activity table with enhanced error handling
  */
 async function recordUploadActivity(
   supabaseClient: any,
   userId: string,
   pdfId: string
 ): Promise<void> {
-  try {
-    const { error } = await supabaseClient.from("user_activity").insert({
-      user_id: userId,
-      pdf_id: pdfId,
-      activity_type: "upload",
-    });
+  const { error } = await supabaseClient.from("user_activity").insert({
+    user_id: userId,
+    pdf_id: pdfId,
+    activity_type: "upload",
+  });
 
-    if (error) {
-      console.error("Activity recording error:", error);
-      // Don't throw here - activity recording failure shouldn't fail the upload
-      console.warn("Failed to record upload activity, but upload succeeded");
-    }
-  } catch (error) {
-    console.error("Error in recordUploadActivity:", error);
-    // Don't throw - this is non-critical
+  if (error) {
+    throw createServerError(
+      ServerErrorType.DATABASE_ERROR,
+      `Failed to record upload activity: ${error.message}`,
+      { 
+        operation: 'record_activity',
+        userId,
+        pdfId 
+      },
+      error
+    );
   }
 }
 
-export async function POST(
-  request: NextRequest
-): Promise<NextResponse<SupabaseUploadResponse>> {
+// Enhanced POST handler with comprehensive error handling
+async function handlePOST(request: NextRequest): Promise<NextResponse<SupabaseUploadResponse>> {
   let uploadedStoragePath: string | null = null;
   let supabaseClient: any = null;
+  const context = extractRequestContext(request, '/api/pdfs/upload');
+
+  // Authenticate user
+  const { userId } = await auth();
+  if (!userId) {
+    throw createServerError(
+      ServerErrorType.AUTHENTICATION_ERROR,
+      'User not authenticated',
+      { ...context, userId }
+    );
+  }
+
+  // Rate limiting - 10 uploads per minute per user
+  checkRateLimit(`upload:${userId}`, 10, 60000, { ...context, userId });
+
+  // Parse form data
+  const formData = await request.formData();
+  const file = formData.get("file") as File;
+
+  // Enhanced file validation
+  validateRequired(file, 'file', { ...context, userId });
+  validateFileUpload(
+    file,
+    STORAGE_CONFIG.MAX_FILE_SIZE,
+    STORAGE_CONFIG.ALLOWED_MIME_TYPES,
+    { ...context, userId, fileName: file?.name, fileSize: file?.size }
+  );
 
   try {
-    // Authenticate user
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    // Parse form data
-    const formData = await request.formData();
-    const file = formData.get("file") as File;
-
-    // Validate file
-    const validation = validateFile(file);
-    if (!validation.valid) {
-      return NextResponse.json(
-        { success: false, error: validation.error },
-        { status: 400 }
-      );
-    }
-
     // Get authenticated Supabase client
     supabaseClient = await getAuthenticatedSupabaseClient();
 
     // Upload file to storage
     const uploadResult = await uploadToStorage(supabaseClient, file, userId);
     uploadedStoragePath = uploadResult.path;
+
     // Generate signed URL for file access
     const signedUrl = await generateSignedUrl(
       supabaseClient,
@@ -170,7 +254,21 @@ export async function POST(
     );
 
     // Record upload activity (non-critical, don't fail if this fails)
-    await recordUploadActivity(supabaseClient, userId, pdfId);
+    try {
+      await recordUploadActivity(supabaseClient, userId, pdfId);
+    } catch (activityError) {
+      // Log but don't fail the upload
+      const activityServerError = createServerError(
+        ServerErrorType.DATABASE_ERROR,
+        'Failed to record upload activity',
+        { ...context, userId, operation: 'record_activity' },
+        activityError
+      );
+      logServerError(activityServerError);
+    }
+
+    // Log successful upload
+    console.log(`✅ PDF uploaded successfully: ${file.name} (${file.size} bytes) for user ${userId}`);
 
     // Return success response
     const response: SupabaseUploadResponse = {
@@ -186,47 +284,33 @@ export async function POST(
     };
 
     return NextResponse.json(response, { status: 201 });
-  } catch (error) {
-    console.error("Error in PDF upload:", error);
 
-    // Cleanup: If storage upload succeeded but database insert failed,
-    // attempt to delete the uploaded file
+  } catch (error) {
+    // Enhanced cleanup with better error handling
     if (uploadedStoragePath && supabaseClient) {
       try {
         await supabaseClient.storage
           .from(STORAGE_CONFIG.BUCKET_NAME)
           .remove([uploadedStoragePath]);
-        console.log("Cleaned up uploaded file after database error");
+        console.log(`🧹 Cleaned up uploaded file after error: ${uploadedStoragePath}`);
       } catch (cleanupError) {
-        console.error("Failed to cleanup uploaded file:", cleanupError);
+        const cleanupServerError = createServerError(
+          ServerErrorType.STORAGE_ERROR,
+          'Failed to cleanup uploaded file after error',
+          { ...context, userId, operation: 'cleanup', fileName: file?.name },
+          cleanupError
+        );
+        logServerError(cleanupServerError);
       }
     }
 
-    // Determine error type and appropriate response
-    let errorMessage = "Internal server error";
-    let statusCode = 500;
-
-    if (error instanceof Error) {
-      if (error.message.includes("Authentication failed")) {
-        errorMessage = "Authentication failed";
-        statusCode = 401;
-      } else if (error.message.includes("Storage upload failed")) {
-        errorMessage = "File upload failed. Please try again.";
-        statusCode = 500;
-      } else if (error.message.includes("Failed to store PDF metadata")) {
-        errorMessage =
-          "File uploaded but failed to save metadata. Please try again.";
-        statusCode = 500;
-      } else if (error.message.includes("Failed to generate signed URL")) {
-        errorMessage =
-          "File uploaded successfully but access URL generation failed";
-        statusCode = 500;
-      }
-    }
-
-    return NextResponse.json(
-      { success: false, error: errorMessage },
-      { status: statusCode }
-    );
+    // Re-throw to be handled by withErrorHandling wrapper
+    throw error;
   }
 }
+
+// Export the wrapped handler
+export const POST = withErrorHandling(
+  handlePOST,
+  { endpoint: '/api/pdfs/upload', method: 'POST' }
+);

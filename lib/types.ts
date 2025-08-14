@@ -73,16 +73,9 @@ export type {
 } from "./types/database";
 
 // Re-export theme types
-export * from "./types/theme";
 
-// Error handling types
-//useless thing
-export interface APIError {
-  type: string;
-  message: string;
-  details?: any;
-  retryable: boolean;
-}
+// Re-export error types
+export * from "./types/errors";
 
 // API Response types
 export interface APIResponse<T = any> {
