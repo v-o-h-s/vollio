@@ -2,7 +2,11 @@
  * RTK Query API slice for annotation and PDF management with comprehensive error handling
  */
 
-import { createApi, fetchBaseQuery, BaseQueryFn } from "@reduxjs/toolkit/query/react";
+import {
+  createApi,
+  fetchBaseQuery,
+  BaseQueryFn,
+} from "@reduxjs/toolkit/query/react";
 import {
   Annotation,
   PDFDocument,
@@ -11,16 +15,15 @@ import {
   SupabasePDFListResponse,
   SupabasePDFAccessResponse,
 } from "../types";
-import { 
-  AppError, 
-  ErrorType,
+import { AppError, ErrorType } from "../types/errors";
+import {
   createAppError,
   mapErrorToAppError,
   withRetry,
   createUploadErrorContext,
   createNetworkErrorContext,
-  logError 
-} from "../types/errors";
+  logError,
+} from "../utils/error-handling";
 import { pdfNotifications } from "../utils/notifications";
 
 export interface ApiResponse<T> {
@@ -44,12 +47,12 @@ const baseQueryWithRetry: BaseQueryFn = async (args, api, extraOptions) => {
   });
 
   // Extract request details for error context
-  const url = typeof args === 'string' ? args : args.url;
-  const method = typeof args === 'string' ? 'GET' : (args.method || 'GET');
+  const url = typeof args === "string" ? args : args.url;
+  const method = typeof args === "string" ? "GET" : args.method || "GET";
 
   try {
     const result = await withRetry(
-      () => baseQuery(args, api, extraOptions),
+      async () => await baseQuery(args, api, extraOptions),
       {
         maxRetries: 3,
         backoffMultiplier: 2,
@@ -68,14 +71,20 @@ const baseQueryWithRetry: BaseQueryFn = async (args, api, extraOptions) => {
 
     // Handle successful response
     if (result.error) {
-      const appError = mapErrorToAppError(result.error, createNetworkErrorContext(url, method));
+      const appError = mapErrorToAppError(
+        result.error,
+        createNetworkErrorContext(url, method)
+      );
       logError(appError);
       return { error: appError };
     }
 
     return result;
   } catch (error) {
-    const appError = mapErrorToAppError(error, createNetworkErrorContext(url, method));
+    const appError = mapErrorToAppError(
+      error,
+      createNetworkErrorContext(url, method)
+    );
     logError(appError);
     return { error: appError };
   }
@@ -99,10 +108,10 @@ export const apiSlice = createApi({
           throw createAppError(
             ErrorType.STORAGE_UPLOAD_FAILED,
             response.error || "Failed to upload PDF",
-            { component: 'FileUpload', action: 'upload' }
+            { component: "FileUpload", action: "upload" }
           );
         }
-        
+
         // Transform Supabase response to PDFDocument format
         const data = response.data;
         return {
@@ -119,38 +128,57 @@ export const apiSlice = createApi({
       },
       transformErrorResponse: (response: any, meta, arg) => {
         // Extract file information for error context
-        const file = arg.get('file') as File;
-        const fileName = file?.name || 'unknown';
+        const file = arg.get("file") as File;
+        const fileName = file?.name || "unknown";
         const fileSize = file?.size || 0;
-        const fileType = file?.type || 'unknown';
+        const fileType = file?.type || "unknown";
 
         const context = createUploadErrorContext(fileName, fileSize, fileType);
-        
+
         if (response.status === 413) {
-          return createAppError(ErrorType.FILE_TOO_LARGE, 'File too large', context);
+          return createAppError(
+            ErrorType.FILE_TOO_LARGE,
+            "File too large",
+            context
+          );
         } else if (response.status === 415) {
-          return createAppError(ErrorType.INVALID_FILE_TYPE, 'Invalid file type', context);
+          return createAppError(
+            ErrorType.INVALID_FILE_TYPE,
+            "Invalid file type",
+            context
+          );
         } else if (response.status === 401) {
-          return createAppError(ErrorType.AUTHENTICATION_ERROR, 'Authentication required', context);
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
         } else if (response.status === 403) {
-          return createAppError(ErrorType.AUTHORIZATION_ERROR, 'Access denied', context);
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
         }
 
         return mapErrorToAppError(response, context);
       },
       invalidatesTags: [{ type: "PDF", id: "LIST" }],
       async onQueryStarted(formData, { dispatch, queryFulfilled }) {
-        const file = formData.get('file') as File;
-        const fileName = file?.name || 'PDF';
+        const file = formData.get("file") as File;
+        const fileName = file?.name || "PDF";
 
         try {
           const result = await queryFulfilled;
           pdfNotifications.uploadSuccess(fileName);
         } catch (error: any) {
           const appError = error.error as AppError;
-          const message = appError?.userMessage || appError?.message || "Failed to upload PDF";
+          const message =
+            appError?.userMessage ||
+            appError?.message ||
+            "Failed to upload PDF";
           pdfNotifications.uploadError(message);
-          
+
           // Log detailed error for debugging
           logError(appError || mapErrorToAppError(error));
         }
@@ -171,7 +199,7 @@ export const apiSlice = createApi({
           throw createAppError(
             ErrorType.DATABASE_ERROR,
             response.error || "Failed to fetch PDFs",
-            { component: 'PDFList', action: 'fetch' }
+            { component: "PDFList", action: "fetch" }
           );
         }
 
@@ -215,19 +243,22 @@ export const apiSlice = createApi({
       transformErrorResponse: (response: any) => {
         if (response.status === 401) {
           return createAppError(
-            ErrorType.AUTHENTICATION_ERROR, 
-            'Authentication required',
-            { component: 'PDFList', action: 'fetch' }
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            { component: "PDFList", action: "fetch" }
           );
         } else if (response.status === 403) {
           return createAppError(
-            ErrorType.AUTHORIZATION_ERROR, 
-            'Access denied',
-            { component: 'PDFList', action: 'fetch' }
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            { component: "PDFList", action: "fetch" }
           );
         }
 
-        return mapErrorToAppError(response, { component: 'PDFList', action: 'fetch' });
+        return mapErrorToAppError(response, {
+          component: "PDFList",
+          action: "fetch",
+        });
       },
       providesTags: (result) => [
         { type: "PDF", id: "LIST" },
@@ -243,7 +274,7 @@ export const apiSlice = createApi({
           throw createAppError(
             ErrorType.PDF_LOADING_ERROR,
             response.error || "Failed to fetch PDF",
-            { component: 'PDFViewer', action: 'load', pdfId: response.data?.id }
+            { component: "PDFViewer", action: "load", pdfId: response.data?.id }
           );
         }
 
@@ -261,14 +292,26 @@ export const apiSlice = createApi({
         } as PDFDocument;
       },
       transformErrorResponse: (response: any, meta, pdfId) => {
-        const context = { component: 'PDFViewer', action: 'load', pdfId };
+        const context = { component: "PDFViewer", action: "load", pdfId };
 
         if (response.status === 404) {
-          return createAppError(ErrorType.VALIDATION_ERROR, 'PDF not found', context);
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "PDF not found",
+            context
+          );
         } else if (response.status === 401) {
-          return createAppError(ErrorType.AUTHENTICATION_ERROR, 'Authentication required', context);
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
         } else if (response.status === 403) {
-          return createAppError(ErrorType.AUTHORIZATION_ERROR, 'Access denied', context);
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
         }
 
         return mapErrorToAppError(response, context);
@@ -280,27 +323,39 @@ export const apiSlice = createApi({
     deletePDF: builder.mutation<{ success: boolean }, string>({
       query: (pdfId) => ({
         url: `pdfs/${pdfId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
       transformResponse: (response: any) => {
         if (!response.success) {
           throw createAppError(
             ErrorType.DATABASE_ERROR,
             response.error || "Failed to delete PDF",
-            { component: 'PDFList', action: 'delete' }
+            { component: "PDFList", action: "delete" }
           );
         }
         return response;
       },
       transformErrorResponse: (response: any, meta, pdfId) => {
-        const context = { component: 'PDFList', action: 'delete', pdfId };
+        const context = { component: "PDFList", action: "delete", pdfId };
 
         if (response.status === 404) {
-          return createAppError(ErrorType.VALIDATION_ERROR, 'PDF not found', context);
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "PDF not found",
+            context
+          );
         } else if (response.status === 401) {
-          return createAppError(ErrorType.AUTHENTICATION_ERROR, 'Authentication required', context);
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
         } else if (response.status === 403) {
-          return createAppError(ErrorType.AUTHORIZATION_ERROR, 'Access denied', context);
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
         }
 
         return mapErrorToAppError(response, context);
@@ -315,9 +370,12 @@ export const apiSlice = createApi({
           pdfNotifications.deleteSuccess();
         } catch (error: any) {
           const appError = error.error as AppError;
-          const message = appError?.userMessage || appError?.message || "Failed to delete PDF";
+          const message =
+            appError?.userMessage ||
+            appError?.message ||
+            "Failed to delete PDF";
           pdfNotifications.deleteError(message);
-          
+
           logError(appError || mapErrorToAppError(error));
         }
       },
@@ -326,11 +384,11 @@ export const apiSlice = createApi({
 });
 
 // Export hooks for usage in functional components
-export const { 
-  useUploadPDFMutation, 
-  useGetPDFsQuery, 
+export const {
+  useUploadPDFMutation,
+  useGetPDFsQuery,
   useGetPDFQuery,
-  useDeletePDFMutation 
+  useDeletePDFMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

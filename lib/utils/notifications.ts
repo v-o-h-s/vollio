@@ -122,7 +122,19 @@ export const showLoading = (
 };
 
 // PDF-specific notifications
-export const pdfNotifications = {
+export const pdfNotifications: {
+  uploadStart: (fileName?: string) => string;
+  uploadSuccess: (fileName?: string) => string;
+  uploadError: (error: string) => string;
+  loadingStart: () => string;
+  loadingSuccess: () => string;
+  loadingError: (error: string) => string;
+  fileSizeError: (size: string) => string;
+  fileTypeError: () => string;
+  processingError: () => string;
+  deleteSuccess: () => string;
+  deleteError: (error: string) => string;
+} = {
   uploadStart: (fileName?: string) =>
     showLoading(fileName ? `Uploading ${fileName}...` : "Uploading PDF..."),
 
@@ -151,6 +163,10 @@ export const pdfNotifications = {
     showError(
       "Error processing PDF. The file may be corrupted or password-protected."
     ),
+
+  deleteSuccess: () => showSuccess("PDF deleted successfully!"),
+
+  deleteError: (error: string) => showError(`Failed to delete PDF: ${error}`),
 };
 
 

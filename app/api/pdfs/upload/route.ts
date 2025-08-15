@@ -6,7 +6,7 @@ import {
 } from "@/lib/supabaseClient";
 import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types";
 import { validateFile, generateSignedUrl } from "@/lib/utils/supabase-helpers";
-import { 
+import {
   withErrorHandling,
   extractRequestContext,
   createServerError,
@@ -14,7 +14,7 @@ import {
   validateRequired,
   validateFileUpload,
   checkRateLimit,
-  logServerError
+  logServerError,
 } from "@/lib/utils/server-error-handling";
 import { randomUUID } from "crypto";
 
@@ -27,7 +27,7 @@ async function uploadToStorage(
   userId: string
 ): Promise<StorageUploadResult> {
   const storagePath = generateStoragePath(userId, file.name);
-  
+
   try {
     // Convert File to ArrayBuffer for upload
     const fileBuffer = await file.arrayBuffer();
@@ -45,11 +45,11 @@ async function uploadToStorage(
       throw createServerError(
         ServerErrorType.STORAGE_ERROR,
         `Storage upload failed: ${error.message}`,
-        { 
-          operation: 'storage_upload',
+        {
+          operation: "storage_upload",
           fileName: file.name,
           fileSize: file.size,
-          userId 
+          userId,
         },
         error
       );
@@ -58,12 +58,12 @@ async function uploadToStorage(
     if (!data?.path) {
       throw createServerError(
         ServerErrorType.STORAGE_ERROR,
-        'Upload succeeded but no path returned',
-        { 
-          operation: 'storage_upload',
+        "Upload succeeded but no path returned",
+        {
+          operation: "storage_upload",
           fileName: file.name,
           fileSize: file.size,
-          userId 
+          userId,
         }
       );
     }
@@ -75,19 +75,21 @@ async function uploadToStorage(
     };
   } catch (error) {
     // If it's already a ServerError, re-throw it
-    if (error.type) {
+    if (error && typeof error === "object" && "type" in error) {
       throw error;
     }
-    
+
     // Otherwise, wrap it
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     throw createServerError(
       ServerErrorType.STORAGE_ERROR,
-      `Storage upload failed: ${error.message || 'Unknown error'}`,
-      { 
-        operation: 'storage_upload',
+      `Storage upload failed: ${errorMessage}`,
+      {
+        operation: "storage_upload",
         fileName: file.name,
         fileSize: file.size,
-        userId 
+        userId,
       },
       error
     );
@@ -126,11 +128,11 @@ async function storePDFMetadata(
       throw createServerError(
         ServerErrorType.DATABASE_ERROR,
         `Failed to store PDF metadata: ${error.message}`,
-        { 
-          operation: 'database_insert',
+        {
+          operation: "database_insert",
           fileName: file.name,
           fileSize: file.size,
-          userId 
+          userId,
         },
         error
       );
@@ -139,12 +141,12 @@ async function storePDFMetadata(
     if (!data?.id) {
       throw createServerError(
         ServerErrorType.DATABASE_ERROR,
-        'PDF metadata stored but no ID returned',
-        { 
-          operation: 'database_insert',
+        "PDF metadata stored but no ID returned",
+        {
+          operation: "database_insert",
           fileName: file.name,
           fileSize: file.size,
-          userId 
+          userId,
         }
       );
     }
@@ -152,19 +154,21 @@ async function storePDFMetadata(
     return data.id;
   } catch (error) {
     // If it's already a ServerError, re-throw it
-    if (error.type) {
+    if (error && typeof error === "object" && "type" in error) {
       throw error;
     }
-    
+
     // Otherwise, wrap it
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
-      `Database operation failed: ${error.message || 'Unknown error'}`,
-      { 
-        operation: 'database_insert',
+      `Database operation failed: ${errorMessage}`,
+      {
+        operation: "database_insert",
         fileName: file.name,
         fileSize: file.size,
-        userId 
+        userId,
       },
       error
     );
@@ -189,29 +193,30 @@ async function recordUploadActivity(
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
       `Failed to record upload activity: ${error.message}`,
-      { 
-        operation: 'record_activity',
+      {
+        operation: "record_activity",
         userId,
-        pdfId 
       },
-      error
+      { originalError: error, pdfId }
     );
   }
 }
 
 // Enhanced POST handler with comprehensive error handling
-async function handlePOST(request: NextRequest): Promise<NextResponse<SupabaseUploadResponse>> {
+async function handlePOST(
+  request: NextRequest
+): Promise<NextResponse<SupabaseUploadResponse>> {
   let uploadedStoragePath: string | null = null;
   let supabaseClient: any = null;
-  const context = extractRequestContext(request, '/api/pdfs/upload');
+  const context = extractRequestContext(request, "/api/pdfs/upload");
 
   // Authenticate user
   const { userId } = await auth();
   if (!userId) {
     throw createServerError(
       ServerErrorType.AUTHENTICATION_ERROR,
-      'User not authenticated',
-      { ...context, userId }
+      "User not authenticated",
+      { ...context, userId: undefined }
     );
   }
 
@@ -223,7 +228,7 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<SupabaseUp
   const file = formData.get("file") as File;
 
   // Enhanced file validation
-  validateRequired(file, 'file', { ...context, userId });
+  validateRequired(file, "file", { ...context, userId });
   validateFileUpload(
     file,
     STORAGE_CONFIG.MAX_FILE_SIZE,
@@ -260,15 +265,17 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<SupabaseUp
       // Log but don't fail the upload
       const activityServerError = createServerError(
         ServerErrorType.DATABASE_ERROR,
-        'Failed to record upload activity',
-        { ...context, userId, operation: 'record_activity' },
-        activityError
+        "Failed to record upload activity",
+        { ...context, userId, operation: "record_activity" },
+        { originalError: activityError, pdfId }
       );
       logServerError(activityServerError);
     }
 
     // Log successful upload
-    console.log(`✅ PDF uploaded successfully: ${file.name} (${file.size} bytes) for user ${userId}`);
+    console.log(
+      `✅ PDF uploaded successfully: ${file.name} (${file.size} bytes) for user ${userId}`
+    );
 
     // Return success response
     const response: SupabaseUploadResponse = {
@@ -284,7 +291,6 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<SupabaseUp
     };
 
     return NextResponse.json(response, { status: 201 });
-
   } catch (error) {
     // Enhanced cleanup with better error handling
     if (uploadedStoragePath && supabaseClient) {
@@ -292,12 +298,14 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<SupabaseUp
         await supabaseClient.storage
           .from(STORAGE_CONFIG.BUCKET_NAME)
           .remove([uploadedStoragePath]);
-        console.log(`🧹 Cleaned up uploaded file after error: ${uploadedStoragePath}`);
+        console.log(
+          `🧹 Cleaned up uploaded file after error: ${uploadedStoragePath}`
+        );
       } catch (cleanupError) {
         const cleanupServerError = createServerError(
           ServerErrorType.STORAGE_ERROR,
-          'Failed to cleanup uploaded file after error',
-          { ...context, userId, operation: 'cleanup', fileName: file?.name },
+          "Failed to cleanup uploaded file after error",
+          { ...context, userId, operation: "cleanup", fileName: file?.name },
           cleanupError
         );
         logServerError(cleanupServerError);
@@ -310,7 +318,7 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<SupabaseUp
 }
 
 // Export the wrapped handler
-export const POST = withErrorHandling(
-  handlePOST,
-  { endpoint: '/api/pdfs/upload', method: 'POST' }
-);
+export const POST = withErrorHandling(handlePOST, {
+  endpoint: "/api/pdfs/upload",
+  method: "POST",
+});

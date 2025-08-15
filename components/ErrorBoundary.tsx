@@ -5,21 +5,29 @@ import {
   ErrorBoundary as ReactErrorBoundary,
   FallbackProps,
 } from "react-error-boundary";
-import { AlertTriangle, RefreshCw, Home, Bug, Copy, CheckCircle, ExternalLink } from "lucide-react";
+import {
+  AlertTriangle,
+  RefreshCw,
+  Home,
+  Bug,
+  Copy,
+  CheckCircle,
+  ExternalLink,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { 
-  AppError, 
-  ErrorRecoveryAction, 
+import {
+  AppError,
+  ErrorRecoveryAction,
   ErrorDisplayOptions,
   ErrorType,
-  ErrorSeverity 
+  ErrorSeverity,
 } from "@/lib/types/errors";
-import { 
-  mapErrorToAppError, 
-  logError, 
-  shouldReportError, 
+import {
+  mapErrorToAppError,
+  logError,
+  shouldReportError,
   formatErrorForDisplay,
-  createAppError 
+  createAppError,
 } from "@/lib/utils/error-handling";
 
 interface ErrorBoundaryProps {
@@ -39,13 +47,13 @@ interface ErrorFallbackProps extends FallbackProps {
 }
 
 // Enhanced error fallback component with retry logic and better UX
-function EnhancedErrorFallback({ 
-  error, 
-  resetErrorBoundary, 
+function EnhancedErrorFallback({
+  error,
+  resetErrorBoundary,
   appError,
   displayOptions = {},
   recoveryActions = [],
-  context 
+  context,
 }: ErrorFallbackProps) {
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -53,7 +61,8 @@ function EnhancedErrorFallback({
   const [copied, setCopied] = useState(false);
 
   // Convert native error to AppError if needed
-  const processedError = appError || mapErrorToAppError(error, { component: context });
+  const processedError =
+    appError || mapErrorToAppError(error, { component: context });
   const displayError = formatErrorForDisplay(processedError);
 
   // Log the error
@@ -63,14 +72,14 @@ function EnhancedErrorFallback({
 
   const handleRetry = useCallback(async () => {
     setIsRetrying(true);
-    setRetryCount(prev => prev + 1);
-    
+    setRetryCount((prev) => prev + 1);
+
     try {
       // Add delay for better UX
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       resetErrorBoundary();
     } catch (retryError) {
-      console.error('Retry failed:', retryError);
+      console.error("Retry failed:", retryError);
     } finally {
       setIsRetrying(false);
     }
@@ -87,11 +96,13 @@ function EnhancedErrorFallback({
     };
 
     try {
-      await navigator.clipboard.writeText(JSON.stringify(errorDetails, null, 2));
+      await navigator.clipboard.writeText(
+        JSON.stringify(errorDetails, null, 2)
+      );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (clipboardError) {
-      console.error('Failed to copy error details:', clipboardError);
+      console.error("Failed to copy error details:", clipboardError);
     }
   }, [processedError]);
 
@@ -106,30 +117,36 @@ function EnhancedErrorFallback({
   const getSeverityColor = (severity: ErrorSeverity) => {
     switch (severity) {
       case ErrorSeverity.CRITICAL:
-        return 'bg-red-600 text-white';
+        return "bg-red-600 text-white";
       case ErrorSeverity.HIGH:
-        return 'bg-red-500 text-white';
+        return "bg-red-500 text-white";
       case ErrorSeverity.MEDIUM:
-        return 'bg-orange-500 text-white';
+        return "bg-orange-500 text-white";
       case ErrorSeverity.LOW:
-        return 'bg-yellow-500 text-white';
+        return "bg-yellow-500 text-white";
       default:
-        return 'bg-gray-500 text-white';
+        return "bg-gray-500 text-white";
     }
   };
 
   const defaultActions: ErrorRecoveryAction[] = [
-    ...(displayOptions.showRetryButton !== false && processedError.retryable ? [{
-      label: isRetrying ? 'Retrying...' : `Try Again${retryCount > 0 ? ` (${retryCount})` : ''}`,
-      action: handleRetry,
-      primary: true,
-    }] : []),
+    ...(displayOptions.showRetryButton !== false && processedError.retryable
+      ? [
+          {
+            label: isRetrying
+              ? "Retrying..."
+              : `Try Again${retryCount > 0 ? ` (${retryCount})` : ""}`,
+            action: handleRetry,
+            primary: true,
+          },
+        ]
+      : []),
     {
-      label: 'Go Home',
+      label: "Go Home",
       action: handleGoHome,
     },
     {
-      label: 'Refresh Page',
+      label: "Refresh Page",
       action: handleRefreshPage,
     },
   ];
@@ -144,7 +161,11 @@ function EnhancedErrorFallback({
           <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center">
             <AlertTriangle size={28} className="text-red-500" />
           </div>
-          <div className={`absolute -top-2 -right-2 px-2 py-1 rounded-full text-xs font-semibold ${getSeverityColor(processedError.severity)}`}>
+          <div
+            className={`absolute -top-2 -right-2 px-2 py-1 rounded-full text-xs font-semibold ${getSeverityColor(
+              processedError.severity
+            )}`}
+          >
             {processedError.severity}
           </div>
         </div>
@@ -153,14 +174,14 @@ function EnhancedErrorFallback({
         <h3 className="text-lg font-semibold text-red-900 mb-2">
           {displayError.title}
         </h3>
-        <p className="text-red-700 text-sm mb-4">
-          {displayError.message}
-        </p>
+        <p className="text-red-700 text-sm mb-4">{displayError.message}</p>
 
         {/* Context Information */}
         {processedError.context && (
           <div className="bg-red-100 rounded-lg p-3 mb-4 text-left">
-            <p className="text-xs text-red-600 font-medium mb-1">Error Context:</p>
+            <p className="text-xs text-red-600 font-medium mb-1">
+              Error Context:
+            </p>
             <div className="text-xs text-red-700 space-y-1">
               {processedError.context.component && (
                 <div>Component: {processedError.context.component}</div>
@@ -185,14 +206,18 @@ function EnhancedErrorFallback({
               size="sm"
               disabled={isRetrying}
               className={`flex items-center gap-2 ${
-                action.primary ? 'bg-red-500 hover:bg-red-600 text-white' : ''
+                action.primary ? "bg-red-500 hover:bg-red-600 text-white" : ""
               }`}
             >
-              {action.label === 'Try Again' || action.label.includes('Retrying') ? (
-                <RefreshCw size={16} className={isRetrying ? 'animate-spin' : ''} />
-              ) : action.label === 'Go Home' ? (
+              {action.label === "Try Again" ||
+              action.label.includes("Retrying") ? (
+                <RefreshCw
+                  size={16}
+                  className={isRetrying ? "animate-spin" : ""}
+                />
+              ) : action.label === "Go Home" ? (
                 <Home size={16} />
-              ) : action.label === 'Refresh Page' ? (
+              ) : action.label === "Refresh Page" ? (
                 <RefreshCw size={16} />
               ) : null}
               {action.label}
@@ -208,31 +233,32 @@ function EnhancedErrorFallback({
               className="text-red-600 hover:text-red-700 flex items-center gap-1"
             >
               <Bug size={12} />
-              {showDetails ? 'Hide' : 'Show'} Details
+              {showDetails ? "Hide" : "Show"} Details
             </button>
           )}
-          
+
           <button
             onClick={handleCopyError}
             className="text-red-600 hover:text-red-700 flex items-center gap-1"
           >
             {copied ? <CheckCircle size={12} /> : <Copy size={12} />}
-            {copied ? 'Copied!' : 'Copy Error'}
+            {copied ? "Copied!" : "Copy Error"}
           </button>
 
-          {displayOptions.showContactSupport !== false && shouldReportError(processedError) && (
-            <a
-              href="mailto:support@noto.app?subject=Error Report"
-              className="text-red-600 hover:text-red-700 flex items-center gap-1"
-            >
-              <ExternalLink size={12} />
-              Contact Support
-            </a>
-          )}
+          {displayOptions.showContactSupport !== false &&
+            shouldReportError(processedError) && (
+              <a
+                href="mailto:support@noto.app?subject=Error Report"
+                className="text-red-600 hover:text-red-700 flex items-center gap-1"
+              >
+                <ExternalLink size={12} />
+                Contact Support
+              </a>
+            )}
         </div>
 
         {/* Technical Details */}
-        {showDetails && (displayOptions.showTechnicalDetails !== false) && (
+        {showDetails && displayOptions.showTechnicalDetails !== false && (
           <details className="mt-4 text-left bg-red-100 rounded-lg p-3">
             <summary className="text-xs text-red-600 cursor-pointer font-medium mb-2">
               Technical Details
@@ -242,14 +268,16 @@ function EnhancedErrorFallback({
                 <strong>Error Type:</strong> {processedError.type}
               </div>
               <div>
-                <strong>Timestamp:</strong> {processedError.timestamp.toISOString()}
+                <strong>Timestamp:</strong>{" "}
+                {processedError.timestamp.toISOString()}
               </div>
               {processedError.technicalMessage && (
                 <div>
-                  <strong>Technical Message:</strong> {processedError.technicalMessage}
+                  <strong>Technical Message:</strong>{" "}
+                  {processedError.technicalMessage}
                 </div>
               )}
-              {process.env.NODE_ENV === 'development' && error?.stack && (
+              {process.env.NODE_ENV === "development" && error?.stack && (
                 <div>
                   <strong>Stack Trace:</strong>
                   <pre className="text-xs bg-red-200 p-2 rounded mt-1 overflow-auto max-h-32">
@@ -276,18 +304,18 @@ function EnhancedErrorFallback({
 function PDFErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   const pdfError = createAppError(
     ErrorType.PDF_LOADING_ERROR,
-    error?.message || 'PDF loading failed',
-    { component: 'PDFViewer', action: 'load' }
+    error?.message || "PDF loading failed",
+    { component: "PDFViewer", action: "load" }
   );
 
   const recoveryActions: ErrorRecoveryAction[] = [
     {
-      label: 'Try Different PDF',
+      label: "Try Different PDF",
       action: () => window.history.back(),
     },
     {
-      label: 'Upload New PDF',
-      action: () => window.location.href = '/dashboard',
+      label: "Upload New PDF",
+      action: () => (window.location.href = "/dashboard"),
     },
   ];
 
@@ -311,18 +339,18 @@ function PDFErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 function UploadErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   const uploadError = createAppError(
     ErrorType.STORAGE_UPLOAD_FAILED,
-    error?.message || 'File upload failed',
-    { component: 'FileUpload', action: 'upload' }
+    error?.message || "File upload failed",
+    { component: "FileUpload", action: "upload" }
   );
 
   const recoveryActions: ErrorRecoveryAction[] = [
     {
-      label: 'Choose Different File',
+      label: "Choose Different File",
       action: () => {
         // Trigger file picker
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.pdf';
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".pdf";
         input.click();
       },
     },
@@ -353,16 +381,16 @@ export function ErrorBoundary({
   context,
 }: ErrorBoundaryProps) {
   const handleError = (error: Error, errorInfo: ErrorInfo) => {
-    const appError = mapErrorToAppError(error, { 
+    const appError = mapErrorToAppError(error, {
       component: context,
-      action: 'render',
+      action: "render",
     });
-    
+
     logError(appError);
     onError?.(error, errorInfo);
   };
 
-  const FallbackComponent = fallback 
+  const FallbackComponent = fallback
     ? () => <>{fallback}</>
     : (props: FallbackProps) => (
         <EnhancedErrorFallback
@@ -394,10 +422,10 @@ export function PDFErrorBoundary({
   const handleError = (error: Error, errorInfo: ErrorInfo) => {
     const pdfError = createAppError(
       ErrorType.PDF_LOADING_ERROR,
-      error?.message || 'PDF component error',
-      { component: 'PDFViewer', action: 'render' }
+      error?.message || "PDF component error",
+      { component: "PDFViewer", action: "render" }
     );
-    
+
     logError(pdfError);
     onError?.(error, errorInfo);
   };
@@ -423,10 +451,10 @@ export function UploadErrorBoundary({
   const handleError = (error: Error, errorInfo: ErrorInfo) => {
     const uploadError = createAppError(
       ErrorType.STORAGE_UPLOAD_FAILED,
-      error?.message || 'Upload component error',
-      { component: 'FileUpload', action: 'render' }
+      error?.message || "Upload component error",
+      { component: "FileUpload", action: "render" }
     );
-    
+
     logError(uploadError);
     onError?.(error, errorInfo);
   };

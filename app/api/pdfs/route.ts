@@ -97,7 +97,7 @@ async function handleGET(): Promise<NextResponse<SupabasePDFListResponse>> {
     throw createServerError(
       ServerErrorType.AUTHENTICATION_ERROR,
       'User not authenticated',
-      { ...context, userId }
+      { ...context, userId: undefined }
     );
   }
 

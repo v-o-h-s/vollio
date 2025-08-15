@@ -5,8 +5,12 @@ import {
   STORAGE_CONFIG,
 } from "@/lib/supabaseClient";
 import type { SupabasePDFAccessResponse } from "@/lib/types";
-import { mapSupabaseError, withRetry, generateSignedUrl } from "@/lib/utils/supabase-helpers";
-import { 
+import {
+  mapSupabaseError,
+  withRetry,
+  generateSignedUrl,
+} from "@/lib/utils/supabase-helpers";
+import {
   withErrorHandling,
   extractRequestContext,
   createServerError,
@@ -14,7 +18,7 @@ import {
   validateRequired,
   validateUUID,
   checkRateLimit,
-  logServerError
+  logServerError,
 } from "@/lib/utils/server-error-handling";
 
 /**
@@ -31,12 +35,12 @@ async function fetchPDFById(supabaseClient: any, pdfId: string) {
     if (error.code === "PGRST116") {
       return null; // PDF not found or access denied by RLS
     }
-    
+
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
       `Failed to fetch PDF: ${error.message}`,
-      { operation: 'fetch_pdf_by_id', pdfId },
-      error
+      { operation: "fetch_pdf_by_id" },
+      { originalError: error, pdfId }
     );
   }
 
@@ -61,8 +65,8 @@ async function recordViewActivity(
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
       `Failed to record view activity: ${error.message}`,
-      { operation: 'record_view_activity', userId, pdfId },
-      error
+      { operation: "record_view_activity", userId },
+      { originalError: error, pdfId }
     );
   }
 }
@@ -72,26 +76,26 @@ async function handleGET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SupabasePDFAccessResponse>> {
-  const context = extractRequestContext(request, '/api/pdfs/[id]');
+  const context = extractRequestContext(request, "/api/pdfs/[id]");
 
   // Authenticate user
   const { userId } = await auth();
   if (!userId) {
     throw createServerError(
       ServerErrorType.AUTHENTICATION_ERROR,
-      'User not authenticated',
-      { ...context, userId }
+      "User not authenticated",
+      { ...context, userId: undefined }
     );
   }
 
   const { id } = await params;
 
   // Enhanced validation
-  validateRequired(id, 'PDF ID', { ...context, userId });
-  validateUUID(id, 'PDF ID', { ...context, userId, pdfId: id });
+  validateRequired(id, "PDF ID", { ...context, userId });
+  validateUUID(id, "PDF ID", { ...context, userId });
 
   // Rate limiting - 120 requests per minute per user
-  checkRateLimit(`access:${userId}`, 120, 60000, { ...context, userId, pdfId: id });
+  checkRateLimit(`access:${userId}`, 120, 60000, { ...context, userId });
 
   // Get authenticated Supabase client
   const supabaseClient = await getAuthenticatedSupabaseClient();
@@ -102,8 +106,9 @@ async function handleGET(
   if (!pdfData) {
     throw createServerError(
       ServerErrorType.VALIDATION_ERROR,
-      'PDF not found or access denied',
-      { ...context, userId, pdfId: id, operation: 'fetch_pdf' }
+      "PDF not found or access denied",
+      { ...context, userId, operation: "fetch_pdf" },
+      { pdfId: id }
     );
   }
 
@@ -120,15 +125,17 @@ async function handleGET(
     // Log but don't fail the request
     const activityServerError = createServerError(
       ServerErrorType.DATABASE_ERROR,
-      'Failed to record view activity',
-      { ...context, userId, pdfId: id, operation: 'record_activity' },
-      activityError
+      "Failed to record view activity",
+      { ...context, userId, operation: "record_activity" },
+      { originalError: activityError, pdfId: id }
     );
     logServerError(activityServerError);
   }
 
   // Log successful access
-  console.log(`✅ PDF accessed successfully: ${pdfData.filename} by user ${userId}`);
+  console.log(
+    `✅ PDF accessed successfully: ${pdfData.filename} by user ${userId}`
+  );
 
   // Return success response
   const response: SupabasePDFAccessResponse = {
@@ -147,10 +154,10 @@ async function handleGET(
 }
 
 // Export the wrapped handler
-export const GET = withErrorHandling(
-  handleGET,
-  { endpoint: '/api/pdfs/[id]', method: 'GET' }
-);
+export const GET = withErrorHandling(handleGET, {
+  endpoint: "/api/pdfs/[id]",
+  method: "GET",
+});
 
 /**
  * Deletes PDF from storage with enhanced error handling
@@ -167,8 +174,8 @@ async function deleteFromStorage(
     throw createServerError(
       ServerErrorType.STORAGE_ERROR,
       `Failed to delete file from storage: ${error.message}`,
-      { operation: 'delete_from_storage', storagePath },
-      error
+      { operation: "delete_from_storage" },
+      { originalError: error, storagePath }
     );
   }
 }
@@ -188,12 +195,12 @@ async function deletePDFFromDatabase(supabaseClient: any, pdfId: string) {
     if (error.code === "PGRST116") {
       return null; // PDF not found or access denied by RLS
     }
-    
+
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
       `Failed to delete PDF from database: ${error.message}`,
-      { operation: 'delete_pdf_from_database', pdfId },
-      error
+      { operation: "delete_pdf_from_database" },
+      { originalError: error, pdfId }
     );
   }
 
@@ -218,8 +225,8 @@ async function recordDeleteActivity(
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
       `Failed to record delete activity: ${error.message}`,
-      { operation: 'record_delete_activity', userId, pdfId },
-      error
+      { operation: "record_delete_activity", userId },
+      { originalError: error, pdfId }
     );
   }
 }
@@ -229,26 +236,26 @@ async function handleDELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SupabasePDFAccessResponse>> {
-  const context = extractRequestContext(request, '/api/pdfs/[id]');
+  const context = extractRequestContext(request, "/api/pdfs/[id]");
 
   // Authenticate user
   const { userId } = await auth();
   if (!userId) {
     throw createServerError(
       ServerErrorType.AUTHENTICATION_ERROR,
-      'User not authenticated',
-      { ...context, userId }
+      "User not authenticated",
+      { ...context, userId: undefined }
     );
   }
 
   const { id } = await params;
 
   // Enhanced validation
-  validateRequired(id, 'PDF ID', { ...context, userId });
-  validateUUID(id, 'PDF ID', { ...context, userId, pdfId: id });
+  validateRequired(id, "PDF ID", { ...context, userId });
+  validateUUID(id, "PDF ID", { ...context, userId });
 
   // Rate limiting - 10 deletes per minute per user
-  checkRateLimit(`delete:${userId}`, 10, 60000, { ...context, userId, pdfId: id });
+  checkRateLimit(`delete:${userId}`, 10, 60000, { ...context, userId });
 
   // Get authenticated Supabase client
   const supabaseClient = await getAuthenticatedSupabaseClient();
@@ -259,8 +266,9 @@ async function handleDELETE(
   if (!pdfData) {
     throw createServerError(
       ServerErrorType.VALIDATION_ERROR,
-      'PDF not found or access denied',
-      { ...context, userId, pdfId: id, operation: 'fetch_for_delete' }
+      "PDF not found or access denied",
+      { ...context, userId, operation: "fetch_for_delete" },
+      { pdfId: id }
     );
   }
 
@@ -272,8 +280,9 @@ async function handleDELETE(
   if (!deletedPDF) {
     throw createServerError(
       ServerErrorType.VALIDATION_ERROR,
-      'PDF not found or access denied',
-      { ...context, userId, pdfId: id, operation: 'delete_from_database' }
+      "PDF not found or access denied",
+      { ...context, userId, operation: "delete_from_database" },
+      { pdfId: id }
     );
   }
 
@@ -287,15 +296,17 @@ async function handleDELETE(
     // Log but don't fail the deletion
     const activityServerError = createServerError(
       ServerErrorType.DATABASE_ERROR,
-      'Failed to record delete activity',
-      { ...context, userId, pdfId: id, operation: 'record_delete_activity' },
-      activityError
+      "Failed to record delete activity",
+      { ...context, userId, operation: "record_delete_activity" },
+      { originalError: activityError, pdfId: id }
     );
     logServerError(activityServerError);
   }
 
   // Log successful deletion
-  console.log(`✅ PDF deleted successfully: ${deletedPDF.filename} by user ${userId}`);
+  console.log(
+    `✅ PDF deleted successfully: ${deletedPDF.filename} by user ${userId}`
+  );
 
   // Return success response
   const response: SupabasePDFAccessResponse = {
@@ -314,7 +325,7 @@ async function handleDELETE(
 }
 
 // Export the wrapped handler
-export const DELETE = withErrorHandling(
-  handleDELETE,
-  { endpoint: '/api/pdfs/[id]', method: 'DELETE' }
-);
+export const DELETE = withErrorHandling(handleDELETE, {
+  endpoint: "/api/pdfs/[id]",
+  method: "DELETE",
+});
