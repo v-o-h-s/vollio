@@ -68,11 +68,12 @@ inclusion: always
 ### API Design
 
 - Follow RESTful conventions in `/app/api/` routes
-- Use proper HTTP status codes
-- Implement consistent error response format
-- Validate request data with TypeScript interfaces
-- Use Supabase client with RLS for automatic security
+- Use `withErrorHandling` wrapper for all API routes
+- Use proper HTTP status codes and consistent error response format
+- Validate request data with TypeScript interfaces and server-side validation
+- Use `getAuthenticatedSupabaseClient()` with RLS for automatic security
 - Implement proper error cleanup (e.g., remove uploaded files on database failures)
+- Use comprehensive error logging and user-friendly error messages
 
 ## Performance Guidelines
 
@@ -84,10 +85,12 @@ inclusion: always
 
 ## Error Handling
 
-- Implement ErrorBoundary components for graceful failures
-- Use try-catch blocks in async operations
-- Provide meaningful error messages to users
-- Log errors appropriately for debugging
+- Use `ErrorBoundary` components for graceful React error handling
+- Implement specialized error boundaries (`PDFErrorBoundary`, `UploadErrorBoundary`)
+- Use error handling hooks (`useErrorHandler`, `useUploadErrorHandler`, `usePDFErrorHandler`)
+- Follow comprehensive error handling patterns from `@/lib/utils/error-handling`
+- Provide meaningful error messages to users with recovery actions
+- Log detailed errors server-side while sanitizing user-facing messages
 
 ## Testing Standards
 

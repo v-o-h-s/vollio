@@ -6,12 +6,12 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 
 ### Core Functionality
 
-- **Secure PDF Upload & Storage**: Comprehensive file validation with Supabase Storage integration, signed URLs, and automatic expiration handling
+- **Secure PDF Upload & Storage**: Complete Supabase Storage integration with comprehensive file validation, signed URLs, and automatic expiration handling
 - **Advanced PDF Viewer**: Full Syncfusion PDF Viewer integration with text selection, zoom, search, navigation, and coordinate-based positioning
 - **Intelligent Text Selection**: Precise coordinate calculation for desktop tooltips and mobile-optimized annotation dialogs
 - **Real-time Activity Tracking**: Debounced user activity monitoring with automatic cache invalidation and recent activity display
 - **Cross-Document Navigation**: Seamless navigation between PDFs and annotations with cross-tab communication via PostMessage API
-- **Comprehensive Error Handling**: Retry mechanisms, fallbath automatic cache invalidation
+- **Comprehensive Error Handling**: Retry mechanisms, fallback UI components, and graceful error recovery
 
 ### User Experience
 
@@ -29,6 +29,18 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 - **Performance Optimized**: Debounced activity tracking, lazy loading, memoization, and efficient rendering
 - **Accessibility**: ARIA labels, keyboard navigation, screen reader support, and semantic HTML
 - **Signed URL Management**: Automatic URL refresh, expiration handling, and secure file access
+
+## 📚 Documentation
+
+### System Documentation
+- **[Error Handling System](docs/ERROR_HANDLING.md)** - Comprehensive error management architecture and implementation
+- **[Recent Activity System](docs/RECENT_ACTIVITY.md)** - Activity tracking, user experience, and resume functionality
+
+### Project Documentation
+- **[API Documentation](API_DOCUMENTATION.md)** - Complete API reference and endpoint documentation
+- **[Supabase Setup](SUPABASE_SETUP.md)** - Database configuration and migration guide
+- **[Project Overview](PROJECT_OVERVIEW.md)** - High-level architecture and system design
+- **[Project Status](PROJECT_STATUS.md)** - Current implementation status and roadmap
 
 ## 🚀 Quick Start
 
@@ -101,8 +113,9 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 - **TypeScript**: Strict mode for type safety
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **State Management**: Redux Toolkit with RTK Query
-- **Authentication**: Clerk for user management
-- **Database**: Supabase with Row Level Security
+- **Authentication**: Clerk with JWT integration
+- **Database**: Supabase with Row Level Security (RLS)
+- **File Storage**: Supabase Storage with signed URLs
 - **PDF Rendering**: Syncfusion PDF Viewer (licensed)
 - **Testing**: Vitest with React Testing Library
 
@@ -135,6 +148,7 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 - **AnnotationPreviewCard**: Hover preview cards with annotation content and edit/delete actions
 - **Activity Tracking System**: Real-time user activity monitoring with debounced tracking
 - **Dashboard**: PDF management with recent activity display and signed URL integration
+- **Error Boundaries**: Comprehensive error handling with recovery mechanisms
 
 ## 📱 User Experience
 
@@ -175,6 +189,9 @@ npm run test:coverage   # Run tests with coverage
 # Code Quality
 npm run lint            # Run ESLint
 npm run type-check      # Run TypeScript checks
+
+# Database
+npm run setup:supabase  # Verify Supabase setup
 ```
 
 ### Key Development Files
@@ -185,6 +202,7 @@ npm run type-check      # Run TypeScript checks
 - **Type Definitions**: `lib/types.ts` - Application-wide types including Supabase response types
 - **Supabase Client**: `lib/supabaseClient.ts` - Database configuration with RLS
 - **Activity Tracking**: `lib/utils/activity-tracking.ts` - User activity monitoring utilities
+- **Error Handling**: `lib/utils/error-handling.ts` - Comprehensive error management
 - **Test Setup**: `test/setup.ts` - Testing environment with comprehensive mocks
 
 ## 🔒 Security

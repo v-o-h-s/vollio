@@ -1,10 +1,10 @@
-# PDF Annotation API Documentation
+# Noto PDF Annotation API Documentation
 
-This document describes the API endpoints created for the PDF annotation system prototype.
+This document describes the API endpoints for the Noto PDF annotation application with Supabase backend integration.
 
 ## Authentication
 
-All endpoints require Clerk authentication. The `userId` is automatically extracted from the authenticated session.
+All endpoints require Clerk authentication with JWT tokens. The `userId` is automatically extracted from the authenticated session and used for Row Level Security (RLS) in Supabase.
 
 ## Endpoints
 
@@ -163,7 +163,7 @@ Delete an annotation.
 
 #### POST /api/pdfs/upload
 
-Upload a new PDF file.
+Upload a new PDF file to Supabase Storage with comprehensive validation and error handling.
 
 **Request:**
 
@@ -174,6 +174,8 @@ Upload a new PDF file.
 
 - File must be PDF type (`application/pdf`)
 - File size must be ≤ 50MB
+- Comprehensive security validation (malicious pattern detection, filename sanitization)
+- Rate limiting: 10 uploads per minute per user
 
 **Response:**
 
@@ -181,43 +183,75 @@ Upload a new PDF file.
 {
   "success": true,
   "data": {
-    "id": "pdf_1234567890_def456",
-    "userId": "user_123",
+    "id": "uuid-generated-id",
     "filename": "document.pdf",
+    "fileSize": 1048576,
     "uploadedAt": "2025-01-08T10:00:00.000Z",
-    "fileUrl": "blob:pdf_1234567890_def456"
+    "fileUrl": "https://supabase-signed-url",
+    "storagePath": "user_123/1704708000000_document.pdf"
   }
 }
 ```
 
-#### GET /api/pdfs/upload
+**Error Responses:**
 
-Get all PDFs for the authenticated user.
+- `400` - File validation failed, invalid file type, or file too large
+- `401` - User not authenticated
+- `429` - Rate limit exceeded
+- `500` - Storage or database error with cleanup
+
+#### GET /api/pdfs
+
+Get all PDFs for the authenticated user with recent activity and signed URLs.
+
+**Query Parameters:**
+
+- `limit` (optional): Maximum number of PDFs to return (default: 50)
+- `offset` (optional): Number of PDFs to skip for pagination (default: 0)
 
 **Response:**
 
 ```json
 {
   "success": true,
-  "data": [
-    {
-      "id": "pdf_1234567890_def456",
-      "userId": "user_123",
+  "data": {
+    "pdfs": [
+      {
+        "id": "uuid-generated-id",
+        "filename": "document.pdf",
+        "fileSize": 1048576,
+        "uploadedAt": "2025-01-08T10:00:00.000Z",
+        "fileUrl": "https://supabase-signed-url",
+        "mimeType": "application/pdf"
+      }
+    ],
+    "recentActivity": {
+      "pdfId": "uuid-generated-id",
       "filename": "document.pdf",
-      "uploadedAt": "2025-01-08T10:00:00.000Z",
-      "fileUrl": "blob:pdf_1234567890_def456"
-    }
-  ]
+      "accessedAt": "2025-01-08T11:00:00.000Z",
+      "fileUrl": "https://supabase-signed-url",
+      "activityType": "view"
+    },
+    "totalCount": 1
+  }
 }
 ```
+
+**Features:**
+
+- Automatic user data filtering via RLS
+- Fresh signed URLs generated for each request
+- Recent activity tracking with last accessed PDF
+- Rate limiting: 60 requests per minute per user
+- Comprehensive error handling with fallback for missing signed URLs
 
 #### GET /api/pdfs/[id]
 
-Get a specific PDF by ID.
+Get a specific PDF by ID with fresh signed URL and activity tracking.
 
 **Path Parameters:**
 
-- `id`: The PDF ID
+- `id`: The PDF UUID
 
 **Response:**
 
@@ -225,14 +259,30 @@ Get a specific PDF by ID.
 {
   "success": true,
   "data": {
-    "id": "pdf_1234567890_def456",
-    "userId": "user_123",
+    "id": "uuid-generated-id",
     "filename": "document.pdf",
+    "fileSize": 1048576,
     "uploadedAt": "2025-01-08T10:00:00.000Z",
-    "fileUrl": "blob:pdf_1234567890_def456"
+    "fileUrl": "https://supabase-signed-url",
+    "mimeType": "application/pdf"
   }
 }
 ```
+
+**Features:**
+
+- Automatic user access verification via RLS
+- Fresh signed URL generated for secure file access
+- Activity tracking records "view" activity
+- Rate limiting: 120 requests per minute per user
+- Comprehensive error handling for missing or inaccessible files
+
+**Error Responses:**
+
+- `404` - PDF not found or user doesn't have access
+- `401` - User not authenticated
+- `429` - Rate limit exceeded
+- `500` - Storage or database error
 
 #### DELETE /api/pdfs/[id]
 
@@ -274,31 +324,66 @@ All endpoints return consistent error responses:
 - `404` - Not Found (resource doesn't exist)
 - `500` - Internal Server Error
 
-## Mock Database
+## Supabase Backend Integration
 
-For the prototype implementation, all data is stored in memory using the `MockDatabase` class in `lib/mock-db.ts`. This provides:
+The application uses Supabase for both database and file storage with comprehensive security and error handling:
 
-- In-memory storage for annotations and PDFs
-- User isolation (users can only access their own data)
-- CRUD operations for both annotations and PDFs
-- Utility methods for development and testing
+### Database Features
 
-**Note:** In a production implementation, this would be replaced with a real database (PostgreSQL, MongoDB, etc.) and proper file storage (AWS S3, Google Cloud Storage, etc.).
+- **PostgreSQL Database**: Production-ready database with ACID compliance
+- **Row Level Security (RLS)**: Automatic user data isolation at database level
+- **JWT Integration**: Clerk authentication tokens used for RLS policies
+- **Activity Tracking**: Real-time user activity monitoring and recent activity display
+- **Comprehensive Error Handling**: Retry logic, error mapping, and graceful fallbacks
+
+### Storage Features
+
+- **Supabase Storage**: Secure file storage with private buckets
+- **Signed URLs**: Time-limited file access with automatic expiration (1 hour default)
+- **File Organization**: User-specific paths (`{userId}/{timestamp}_{filename}`)
+- **Security Validation**: Comprehensive file validation with malicious pattern detection
+- **Automatic Cleanup**: Failed uploads are automatically cleaned up to prevent orphaned files
+
+### Performance & Reliability
+
+- **Connection Pooling**: Efficient database connection management
+- **Retry Logic**: Exponential backoff for failed operations
+- **Caching**: RTK Query caching with intelligent invalidation
+- **Rate Limiting**: Per-user rate limits to prevent abuse
+- **Monitoring**: Comprehensive error logging and performance tracking
 
 ## Usage Examples
 
-### Creating an annotation workflow:
+### Complete PDF workflow:
 
-1. Upload PDF: `POST /api/pdfs/upload`
-2. Get PDF details: `GET /api/pdfs/[id]`
-3. Create annotation: `POST /api/annotations`
-4. Get annotations for PDF: `GET /api/annotations?pdfId={id}`
-5. Update annotation: `PUT /api/annotations`
+1. **Upload PDF**: `POST /api/pdfs/upload` with FormData
+2. **List PDFs**: `GET /api/pdfs` to get all user PDFs with recent activity
+3. **Access PDF**: `GET /api/pdfs/[id]` to get individual PDF with fresh signed URL
+4. **Create annotation**: `POST /api/annotations` (when annotation system is implemented)
+5. **Get annotations**: `GET /api/annotations?pdfId={id}` (when annotation system is implemented)
 
-### Retrieving annotations for a specific page:
+### Frontend Integration with RTK Query:
 
+```typescript
+import { useUploadPDFMutation, useGetPDFsQuery, useGetPDFQuery } from '@/lib/store/apiSlice';
+
+// Upload PDF
+const [uploadPDF, { isLoading }] = useUploadPDFMutation();
+const handleUpload = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const result = await uploadPDF(formData).unwrap();
+};
+
+// Get all PDFs with recent activity
+const { data: pdfList, error, isLoading } = useGetPDFsQuery();
+
+// Get individual PDF with automatic signed URL refresh
+const { data: pdfData } = useGetPDFQuery(pdfId, {
+  pollingInterval: 30 * 60 * 1000 // Refresh every 30 minutes
+});
 ```
-GET /api/annotations?pdfId=pdf_123&page=1
-```
 
-This will return all annotations for page 1 of the specified PDF.
+### Error Handling:
+
+All API endpoints return consistent error responses with user-friendly messages and technical details for debugging. The frontend automatically handles common errors like authentication failures, rate limiting, and network issues.

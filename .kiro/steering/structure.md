@@ -23,9 +23,10 @@ inclusion: always
 ### State & Logic
 
 - **Redux Store**: `lib/store/` with feature slices (`annotationSlice.ts`, `apiSlice.ts`)
-- **API Clients**: `lib/api/` for external service interactions
+- **Supabase Client**: `lib/supabaseClient.ts` for database and storage operations
 - **Utilities**: Feature-specific in `lib/utils/[feature].ts`, shared in `lib/utils.ts`
-- **Types**: Shared in `lib/types.ts`, component-specific inline or co-located
+- **Types**: Shared in `lib/types.ts`, database types in `lib/types/database.ts`
+- **Error Handling**: Comprehensive error utilities in `lib/utils/error-handling.ts`
 
 ### Custom Hooks
 
@@ -72,8 +73,10 @@ export function ComponentName({ prop }: ComponentProps) {
 ### API Routes
 
 - **Pattern**: Export named functions for HTTP methods (GET, POST, PUT, DELETE)
+- **Error Handling**: Use `withErrorHandling` wrapper for all API routes
 - **Validation**: Use TypeScript interfaces for request/response validation
-- **Errors**: Return consistent error format with proper HTTP status codes
+- **Authentication**: Use Clerk `auth()` for user verification
+- **Database**: Use `getAuthenticatedSupabaseClient()` for all operations
 
 ## Critical Rules
 

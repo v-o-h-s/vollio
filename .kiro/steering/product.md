@@ -6,82 +6,72 @@ inclusion: always
 
 ## Core Product Requirements
 
-**Noto** is a PDF annotation and note-taking application with these essential features:
+**Noto** is a PDF annotation and note-taking application. When implementing features, always consider these essential capabilities:
 
-- **PDF Upload & Viewing**: Users upload PDFs via `/api/pdfs/upload` with Supabase Storage integration and view them with Syncfusion PDF Viewer
-- **Text Selection & Annotation**: Click-drag text selection creates annotations with coordinate-based positioning
-- **Annotation Management**: CRUD operations for annotations stored in Supabase with RLS protection
-- **Cross-Document Navigation**: Users can navigate between PDFs and their associated annotations
-- **Responsive Interface**: Mobile-first design with touch-friendly annotation interactions
-- **Secure File Access**: Time-limited signed URLs for PDF access with automatic cleanup
+### Primary Features
+- **PDF Upload & Storage**: Use `/api/pdfs/upload` endpoint with Supabase Storage, organize files by `{userId}/{timestamp}_{filename}`
+- **PDF Viewing**: Integrate Syncfusion PDF Viewer component (licensed) for all PDF rendering
+- **Text Annotation**: Implement click-drag text selection with coordinate-based positioning (not DOM-based)
+- **Annotation CRUD**: Store all annotations in Supabase with automatic RLS protection
+- **Cross-Document Navigation**: Enable seamless switching between PDFs and their annotations
+- **Mobile-First Design**: Prioritize touch-friendly interactions and responsive layouts
 
-## User Experience Principles
+### Authentication & Security Rules
+- **Authentication Required**: All features require Clerk authentication - redirect unauthenticated users to sign-in
+- **Data Isolation**: Rely on Supabase RLS policies for automatic user data separation
+- **File Security**: Use time-limited signed URLs for PDF access, implement automatic cleanup on failures
+- **Input Validation**: Validate all file uploads (size, type, content) before processing
 
-- **Intuitive Annotation Flow**: Select text → Add note → Save annotation (minimal clicks)
-- **Visual Feedback**: Highlight annotated text, show tooltips on hover, preview cards for context
-- **Seamless Navigation**: Dashboard shows all PDFs and annotations, easy switching between documents
-- **Authentication Required**: All features require Clerk authentication, redirect unauthenticated users
+## Implementation Guidelines
 
-## Technical Constraints
+### User Experience Patterns
+When building UI flows, follow these established patterns:
+- **Annotation Flow**: Text selection → Note dialog → Save (minimize clicks)
+- **Visual Feedback**: Always highlight annotated text, show hover tooltips, use preview cards
+- **Navigation**: Dashboard as central hub, easy PDF switching, breadcrumb navigation
+- **Error Handling**: Show user-friendly messages, provide retry options, log detailed errors
 
-- **PDF Rendering**: Must use Syncfusion PDF Viewer component (licensed)
-- **Coordinate System**: Annotations tied to PDF page coordinates, not DOM elements
-- **State Persistence**: All annotations saved to Supabase backend, synced via Redux store
-- **Mobile Support**: Touch gestures for text selection, responsive annotation dialogs
-- **Performance**: Handle large PDFs efficiently, lazy load annotations
-- **Security**: Row Level Security (RLS) enabled for automatic user data isolation
-- **File Storage**: Supabase Storage with signed URLs for secure file access
+### Technical Implementation Rules
+- **PDF Coordinates**: Always use PDF page coordinates for annotations, never DOM positions
+- **State Management**: Use Redux Toolkit with RTK Query for all API calls and caching
+- **Mobile Support**: Implement touch gestures for text selection, use mobile-specific dialogs
+- **Performance**: Lazy load annotations, handle large PDFs efficiently, cache API responses
+- **Cross-tab Sync**: Use PostMessage API for real-time annotation synchronization
 
-## Feature Boundaries
+### Feature Boundaries
+**Always Implement:**
+- PDF viewing and text annotation functionality
+- User authentication and secure data persistence
+- Mobile-responsive interfaces
+- Cross-tab synchronization
 
-**In Scope:**
-
-- PDF viewing and text annotation only
-- Basic note-taking (text only, no rich formatting)
-- User authentication and data persistence
-- Cross-tab synchronization of annotations
-
-**Out of Scope:**
-
-- PDF editing or modification
-- Collaborative features or sharing
-- Advanced formatting or multimedia notes
+**Never Implement:**
+- PDF editing or content modification
+- Collaborative real-time features
+- Rich text formatting in notes
 - Offline functionality
 
-## User Workflow Patterns
+## Development Context
 
-1. **New User**: Sign up → Upload PDF → Select text → Create first annotation
-2. **Returning User**: Dashboard → Select PDF → Review/add annotations → Navigate between documents
-3. **Mobile User**: Touch-select text → Mobile dialog → Save annotation → Continue reading
+### Available Infrastructure
+When building features, leverage these completed systems:
+- **Supabase Backend**: Database with RLS, file storage with signed URLs, comprehensive error handling
+- **Authentication**: Clerk integration with JWT-based RLS policies
+- **PDF System**: Upload API (`/api/pdfs/upload`), Syncfusion viewer integration, coordinate-based annotations
+- **UI Components**: Complete annotation component suite (tooltips, dialogs, overlays, preview cards)
+- **State Management**: Redux store with RTK Query, typed hooks, and selectors
+- **Mobile Support**: Touch-friendly interfaces, responsive dialogs, mobile-specific interactions
+- **Cross-tab Sync**: PostMessage-based navigation and state synchronization
 
-When implementing features, prioritize these core workflows and ensure they remain smooth and intuitive.
+### Current Development Focus
+When working on new features, prioritize:
+1. **API Integration**: Connect existing UI components with Supabase backend APIs
+2. **Dashboard Functionality**: Complete PDF listing and individual PDF access endpoints
+3. **Data Flow**: Replace mock data with real RTK Query API calls throughout the application
 
-## Current Implementation Status
-
-### ✅ Completed Features
-
-- **Supabase Integration**: Full backend integration with RLS-enabled database and storage
-- **PDF Upload System**: Secure file upload with validation, signed URL generation, and metadata storage
-- **User Authentication**: Clerk integration with JWT-based RLS policies and automatic user isolation
-- **Database Schema**: Complete schema with PDFs, annotations, and user activity tables
-- **File Storage**: Organized user-based storage with automatic cleanup and security policies
-- **Error Handling**: Comprehensive error mapping, retry logic, and user-friendly error messages
-- **PDF Annotation Interface**: Complete Syncfusion PDF Viewer integration with text selection
-- **Annotation Components**: Full suite of annotation UI components (tooltips, dialogs, overlays, previews)
-- **Mobile Responsiveness**: Touch-friendly annotation dialogs and responsive design
-- **State Management**: Redux Toolkit with RTK Query for API calls and caching
-- **Cross-tab Navigation**: PostMessage-based navigation between browser tabs
-- **Keyboard Shortcuts**: Desktop keyboard navigation and annotation shortcuts
-
-### 🚧 In Progress
-
-- **API Endpoints**: Completing PDF listing and individual PDF access endpoints
-- **Dashboard Integration**: Connecting UI components with Supabase backend APIs
-- **RTK Query Integration**: Replacing mock data with real API calls throughout the application
-
-### 📋 Planned Features
-
-- **Advanced Search**: Full-text search across PDFs and annotations
-- **Annotation Types**: Support for different annotation types (highlight, note, drawing)
-- **Export Functionality**: Export annotations to various formats
-- **Collaborative Features**: Real-time multi-user annotation editing (future consideration)
+### Code Integration Points
+- Use `getAuthenticatedSupabaseClient()` for all database operations
+- Import components from `@/components/[feature]/` directories
+- Use typed Redux hooks from `@/lib/store/hooks`
+- Follow established error handling patterns in `@/lib/utils/error-handling`
+- Implement mobile-responsive patterns from existing components

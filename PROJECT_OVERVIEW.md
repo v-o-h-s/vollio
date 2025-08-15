@@ -10,27 +10,30 @@ Noto is a modern, secure, and responsive PDF annotation application that enables
 
 #### Backend Infrastructure
 
-- **Supabase Integration**: Complete database schema with Row Level Security (RLS)
-- **File Storage**: Secure PDF storage with user-organized paths and signed URLs
-- **Authentication**: Clerk integration with JWT-based RLS policies
-- **API Endpoints**: Robust PDF upload endpoint with comprehensive error handling
-- **Database Operations**: Full CRUD operations with retry logic and error mapping
+- **Supabase Integration**: Complete database schema with Row Level Security (RLS) and JWT integration
+- **File Storage**: Secure PDF storage with user-organized paths, signed URLs, and automatic cleanup
+- **Authentication**: Clerk integration with JWT-based RLS policies for automatic user data isolation
+- **API Endpoints**: Complete PDF upload, listing, and individual access endpoints with comprehensive error handling
+- **Database Operations**: Full CRUD operations with retry logic, error mapping, and activity tracking
+- **Security**: File validation, malicious pattern detection, rate limiting, and user isolation
 
 #### Frontend Components
 
-- **PDF Viewer**: Complete Syncfusion PDF Viewer integration with text selection
+- **PDF Viewer**: Complete Syncfusion PDF Viewer integration with Supabase backend and activity tracking
 - **Annotation System**: Full suite of annotation components (tooltips, dialogs, overlays, previews)
-- **Mobile Support**: Touch-friendly interfaces with responsive design
-- **State Management**: Redux Toolkit with RTK Query for API calls and caching
+- **Mobile Support**: Touch-friendly interfaces with responsive design and proper touch targets
+- **State Management**: Redux Toolkit with RTK Query for API calls, caching, and real-time updates
 - **Cross-tab Communication**: PostMessage-based navigation between browser tabs
-- **Keyboard Shortcuts**: Desktop keyboard navigation and accessibility features
+- **Error Handling**: Comprehensive error boundaries with recovery mechanisms and user guidance
+- **Dashboard**: PDF management interface with recent activity display and file operations
 
 #### Security & Performance
 
-- **File Validation**: Comprehensive PDF validation with security checks
-- **Error Handling**: User-friendly error boundaries and recovery mechanisms
-- **Performance Optimization**: Memoization, lazy loading, and efficient rendering
-- **Accessibility**: ARIA labels, keyboard navigation, and screen reader support
+- **File Validation**: Comprehensive PDF validation with security checks and malicious pattern detection
+- **Error Handling**: User-friendly error boundaries, retry mechanisms, and graceful error recovery
+- **Performance Optimization**: Memoization, lazy loading, efficient rendering, and debounced operations
+- **Accessibility**: ARIA labels, keyboard navigation, screen reader support, and semantic HTML
+- **Signed URL Management**: Automatic URL refresh, expiration handling, and secure file access
 
 ### 🚧 In Progress (Near Completion)
 
