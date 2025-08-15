@@ -1,12 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import {
   getAuthenticatedSupabaseClient,
-  API_CONFIG,
 } from "@/lib/supabaseClient";
 import type { SupabasePDFListResponse } from "@/lib/types";
 import {
-  mapSupabaseError,
   withRetry,
   generateSignedUrl,
 } from "@/lib/utils/supabase-helpers";
@@ -15,9 +13,15 @@ import {
   extractRequestContext,
   createServerError,
   ServerErrorType,
-  checkRateLimit,
   logServerError
 } from "@/lib/utils/server-error-handling";
+import {
+  checkEnhancedRateLimit,
+} from "@/lib/utils/security-validation";
+import {
+  requireAuthentication,
+  validateAuthentication,
+} from "@/lib/utils/auth-validation";
 
 /**
  * Fetches all user's PDFs with sorting and enhanced error handling
@@ -88,21 +92,21 @@ async function fetchRecentActivity(supabaseClient: any) {
 }
 
 // Enhanced GET handler with comprehensive error handling
-async function handleGET(): Promise<NextResponse<SupabasePDFListResponse>> {
-  const context = { endpoint: '/api/pdfs', method: 'GET' };
+async function handleGET(request: NextRequest): Promise<NextResponse<SupabasePDFListResponse>> {
+  const context = extractRequestContext(request, '/api/pdfs');
 
-  // Authenticate user
-  const { userId } = await auth();
-  if (!userId) {
-    throw createServerError(
-      ServerErrorType.AUTHENTICATION_ERROR,
-      'User not authenticated',
-      { ...context, userId: undefined }
-    );
+  // Enhanced authentication validation
+  const authContext = await requireAuthentication(request, ['read']);
+  const userId = authContext.userId;
+
+  // Additional validation check
+  const authValidation = await validateAuthentication(request);
+  if (authValidation.shouldRefresh) {
+    console.warn(`⚠️ User ${userId} should refresh their authentication token`);
   }
 
-  // Rate limiting - 60 requests per minute per user
-  checkRateLimit(`list:${userId}`, 60, 60000, { ...context, userId });
+  // Enhanced rate limiting for API calls
+  checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });
 
   // Get authenticated Supabase client with proper RLS
   const supabaseClient = await getAuthenticatedSupabaseClient();

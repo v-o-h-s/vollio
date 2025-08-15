@@ -6,7 +6,6 @@ import {
 } from "@/lib/supabaseClient";
 import type { SupabasePDFAccessResponse } from "@/lib/types";
 import {
-  mapSupabaseError,
   withRetry,
   generateSignedUrl,
 } from "@/lib/utils/supabase-helpers";
@@ -17,9 +16,15 @@ import {
   ServerErrorType,
   validateRequired,
   validateUUID,
-  checkRateLimit,
   logServerError,
 } from "@/lib/utils/server-error-handling";
+import {
+  checkEnhancedRateLimit,
+} from "@/lib/utils/security-validation";
+import {
+  requireAuthentication,
+  validateAuthentication,
+} from "@/lib/utils/auth-validation";
 
 /**
  * Fetches PDF by ID using RLS for automatic user access validation with enhanced error handling
@@ -78,14 +83,14 @@ async function handleGET(
 ): Promise<NextResponse<SupabasePDFAccessResponse>> {
   const context = extractRequestContext(request, "/api/pdfs/[id]");
 
-  // Authenticate user
-  const { userId } = await auth();
-  if (!userId) {
-    throw createServerError(
-      ServerErrorType.AUTHENTICATION_ERROR,
-      "User not authenticated",
-      { ...context, userId: undefined }
-    );
+  // Enhanced authentication validation
+  const authContext = await requireAuthentication(request, ['read']);
+  const userId = authContext.userId;
+
+  // Additional validation check
+  const authValidation = await validateAuthentication(request);
+  if (authValidation.shouldRefresh) {
+    console.warn(`⚠️ User ${userId} should refresh their authentication token`);
   }
 
   const { id } = await params;
@@ -94,8 +99,8 @@ async function handleGET(
   validateRequired(id, "PDF ID", { ...context, userId });
   validateUUID(id, "PDF ID", { ...context, userId });
 
-  // Rate limiting - 120 requests per minute per user
-  checkRateLimit(`access:${userId}`, 120, 60000, { ...context, userId });
+  // Enhanced rate limiting for API calls
+  checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });
 
   // Get authenticated Supabase client
   const supabaseClient = await getAuthenticatedSupabaseClient();
@@ -238,14 +243,14 @@ async function handleDELETE(
 ): Promise<NextResponse<SupabasePDFAccessResponse>> {
   const context = extractRequestContext(request, "/api/pdfs/[id]");
 
-  // Authenticate user
-  const { userId } = await auth();
-  if (!userId) {
-    throw createServerError(
-      ServerErrorType.AUTHENTICATION_ERROR,
-      "User not authenticated",
-      { ...context, userId: undefined }
-    );
+  // Enhanced authentication validation
+  const authContext = await requireAuthentication(request, ['delete']);
+  const userId = authContext.userId;
+
+  // Additional validation check
+  const authValidation = await validateAuthentication(request);
+  if (authValidation.shouldRefresh) {
+    console.warn(`⚠️ User ${userId} should refresh their authentication token`);
   }
 
   const { id } = await params;
@@ -254,8 +259,8 @@ async function handleDELETE(
   validateRequired(id, "PDF ID", { ...context, userId });
   validateUUID(id, "PDF ID", { ...context, userId });
 
-  // Rate limiting - 10 deletes per minute per user
-  checkRateLimit(`delete:${userId}`, 10, 60000, { ...context, userId });
+  // Enhanced rate limiting for API calls
+  checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });
 
   // Get authenticated Supabase client
   const supabaseClient = await getAuthenticatedSupabaseClient();

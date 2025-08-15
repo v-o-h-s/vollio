@@ -15,6 +15,11 @@ Welcome to the comprehensive documentation for the Noto PDF annotation applicati
 - **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference with Supabase integration details
 - **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database and storage configuration guide
 
+### System Architecture
+
+- **[Error Handling System](./docs/ERROR_HANDLING.md)** - Comprehensive error management architecture and patterns
+- **[Recent Activity System](./docs/RECENT_ACTIVITY.md)** - Activity tracking, user experience, and resume functionality
+
 ## 🏗️ Architecture Documentation
 
 ### System Design
@@ -26,7 +31,8 @@ Welcome to the comprehensive documentation for the Noto PDF annotation applicati
 ### Implementation Guides
 
 - **[Cross-Tab Implementation](./CROSS_TAB_IMPLEMENTATION_SUMMARY.md)** - Multi-tab navigation system
-- **[Supabase Backend Spec](./.kiro/specs/supabase-pdf-backend/)** - Backend implementation plan and tasks
+- **[Supabase Backend Spec](./.kiro/specs/supabase-pdf-backend/)** - Backend implementation plan and tasks (mostly complete)
+- **[Implementation Tasks](./.kiro/specs/supabase-pdf-backend/tasks.md)** - Detailed task completion status
 
 ## 🧩 Component Documentation
 

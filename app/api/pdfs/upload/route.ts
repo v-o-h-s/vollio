@@ -5,17 +5,25 @@ import {
   STORAGE_CONFIG,
 } from "@/lib/supabaseClient";
 import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types";
-import { validateFile, generateSignedUrl } from "@/lib/utils/supabase-helpers";
+import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
 import {
   withErrorHandling,
   extractRequestContext,
   createServerError,
   ServerErrorType,
   validateRequired,
-  validateFileUpload,
-  checkRateLimit,
   logServerError,
 } from "@/lib/utils/server-error-handling";
+import {
+  validateFileUploadSecurity,
+  checkUserQuota,
+  checkEnhancedRateLimit,
+  generateSecureStoragePath,
+} from "@/lib/utils/security-validation";
+import {
+  requireAuthentication,
+  validateAuthentication,
+} from "@/lib/utils/auth-validation";
 import { randomUUID } from "crypto";
 
 /**
@@ -26,7 +34,7 @@ async function uploadToStorage(
   file: File,
   userId: string
 ): Promise<StorageUploadResult> {
-  const storagePath = generateStoragePath(userId, file.name);
+  const storagePath = generateSecureStoragePath(userId, file.name);
 
   try {
     // Convert File to ArrayBuffer for upload
@@ -96,7 +104,7 @@ async function uploadToStorage(
   }
 }
 
-// Generate storage path for user's PDF
+// Generate storage path for user's PDF (deprecated - use generateSecureStoragePath)
 export function generateStoragePath(userId: string, filename: string): string {
   const timestamp = Date.now();
   const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, "_");
@@ -210,31 +218,47 @@ async function handlePOST(
   let supabaseClient: any = null;
   const context = extractRequestContext(request, "/api/pdfs/upload");
 
-  // Authenticate user
-  const { userId } = await auth();
-  if (!userId) {
-    throw createServerError(
-      ServerErrorType.AUTHENTICATION_ERROR,
-      "User not authenticated",
-      { ...context, userId: undefined }
-    );
+  // Enhanced authentication validation
+  const authContext = await requireAuthentication(request, ['upload', 'write']);
+  const userId = authContext.userId;
+
+  // Additional validation check
+  const authValidation = await validateAuthentication(request);
+  if (authValidation.shouldRefresh) {
+    console.warn(`⚠️ User ${userId} should refresh their authentication token`);
   }
 
-  // Rate limiting - 10 uploads per minute per user
-  checkRateLimit(`upload:${userId}`, 10, 60000, { ...context, userId });
+  // Enhanced rate limiting with multiple violation tracking
+  checkEnhancedRateLimit(userId, 'UPLOAD', { ...context, userId });
 
   // Parse form data
   const formData = await request.formData();
   const file = formData.get("file") as File;
 
-  // Enhanced file validation
+  // Basic validation
   validateRequired(file, "file", { ...context, userId });
-  validateFileUpload(
-    file,
-    STORAGE_CONFIG.MAX_FILE_SIZE,
-    STORAGE_CONFIG.ALLOWED_MIME_TYPES,
-    { ...context, userId, fileName: file?.name, fileSize: file?.size }
-  );
+
+  // Comprehensive security validation
+  const securityValidation = await validateFileUploadSecurity(file);
+  if (!securityValidation.valid) {
+    throw createServerError(
+      securityValidation.severity === 'critical' ? ServerErrorType.VALIDATION_ERROR : ServerErrorType.VALIDATION_ERROR,
+      securityValidation.error || 'File validation failed',
+      { ...context, userId, fileName: file?.name, fileSize: file?.size },
+      securityValidation.details
+    );
+  }
+
+  // Check user quota limits
+  const quotaInfo = await checkUserQuota(supabaseClient || await getAuthenticatedSupabaseClient(), userId);
+  if (!quotaInfo.canUpload) {
+    throw createServerError(
+      ServerErrorType.VALIDATION_ERROR,
+      `Upload quota exceeded: ${quotaInfo.quotaExceeded.join(', ')}`,
+      { ...context, userId, fileName: file?.name, fileSize: file?.size },
+      { quotaInfo }
+    );
+  }
 
   try {
     // Get authenticated Supabase client

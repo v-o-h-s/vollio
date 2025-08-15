@@ -109,15 +109,15 @@
   - Handle authentication errors and provide clear feedback
   - _Requirements: 4.4, 4.5, 5.1, 5.2, 5.3, 5.4_
 
-- [ ] 9. Add security enhancements
-- [ ] 9.1 Implement file validation and security checks
+- [x] 9. Add security enhancements
+- [x] 9.1 Implement file validation and security checks
 
   - Add server-side PDF validation beyond MIME type checking
   - Implement file size limits and quota management
   - Add rate limiting for upload operations
   - _Requirements: 1.2, 1.3, 4.1, 4.2, 4.3, 5.1_
 
-- [ ] 9.2 Enhance authentication and authorization
+- [x] 9.2 Enhance authentication and authorization
 
   - Verify Clerk authentication on all API endpoints
   - Test Row Level Security policies with different user scenarios
