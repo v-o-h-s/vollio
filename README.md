@@ -37,10 +37,10 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 - **[Recent Activity System](docs/RECENT_ACTIVITY.md)** - Activity tracking, user experience, and resume functionality
 
 ### Project Documentation
-- **[API Documentation](API_DOCUMENTATION.md)** - Complete API reference and endpoint documentation
-- **[Supabase Setup](SUPABASE_SETUP.md)** - Database configuration and migration guide
-- **[Project Overview](PROJECT_OVERVIEW.md)** - High-level architecture and system design
-- **[Project Status](PROJECT_STATUS.md)** - Current implementation status and roadmap
+- **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference and endpoint documentation
+- **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database configuration and migration guide
+- **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - High-level architecture and system design
+- **[Project Status](./docs/PROJECT_STATUS.md)** - Current implementation status and roadmap
 
 ## 🚀 Quick Start
 
@@ -246,18 +246,29 @@ npm run setup:supabase  # Verify Supabase setup
 
 ## 📚 Documentation
 
-### Additional Documentation
+### Complete Documentation Index
 
-- [API Documentation](./API_DOCUMENTATION.md) - Complete API reference
-- [Supabase Setup](./SUPABASE_SETUP.md) - Database configuration guide
-- [PDF Components](./components/pdf/README.md) - PDF component documentation
-- [Store Documentation](./lib/store/README.md) - Redux store guide
-- [Test Documentation](./test/README.md) - Testing strategy and coverage
+For comprehensive documentation covering all aspects of the Noto application, see the **[Documentation Index](./DOCUMENTATION_INDEX.md)** which provides organized access to all documentation resources.
 
-### Implementation Guides
+### Quick Access Documentation
 
-- [Cross-Tab Implementation](./CROSS_TAB_IMPLEMENTATION_SUMMARY.md) - Multi-tab navigation
-- [Supabase Backend Spec](./.kiro/specs/supabase-pdf-backend/) - Backend implementation plan
+- **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference with Supabase integration
+- **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Comprehensive project vision and architecture
+- **[Project Status](./docs/PROJECT_STATUS.md)** - Current implementation status and progress
+- **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database and storage configuration guide
+
+### Component & Implementation Guides
+
+- **[PDF Components](./components/pdf/README.md)** - PDF viewer and annotation component suite
+- **[Store Documentation](./lib/store/README.md)** - Redux state management and RTK Query
+- **[Test Documentation](./test/README.md)** - Testing strategy and comprehensive coverage
+- **[Error Handling](./docs/ERROR_HANDLING.md)** - Comprehensive error handling patterns
+
+### Development Guidelines
+
+- **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards and best practices
+- **[Project Structure](./.kiro/steering/structure.md)** - File organization and naming conventions
+- **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
 
 ## 🚀 Deployment
 

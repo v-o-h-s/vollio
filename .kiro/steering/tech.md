@@ -115,27 +115,34 @@ inclusion: always
 
 ### Database Operations
 
-- Use `getAuthenticatedSupabaseClient()` for all database operations
-- Rely on RLS policies for automatic user data filtering
-- Implement retry logic with `withRetry()` for critical operations
-- Use type guards to validate database row structures
-- Map database rows to application types with helper functions
+- Use `getAuthenticatedSupabaseClient()` for all database operations (implemented and tested)
+- Rely on RLS policies for automatic user data filtering (fully configured with Clerk JWT integration)
+- Implement retry logic with `withRetry()` for critical operations (implemented in supabase-helpers.ts)
+- Use type guards to validate database row structures (implemented: `isPDFRow`, `isUserActivityRow`)
+- Map database rows to application types with helper functions (implemented: `mapPDFRowToDocument`, `mapActivityRowToActivity`)
 
 ### File Storage
 
-- Organize files by user ID: `{userId}/{timestamp}_{filename}`
-- Generate signed URLs only when needed (they expire)
-- Implement cleanup on upload failures to prevent orphaned files
-- Validate files comprehensively before upload
-- Use proper MIME types and cache control headers
+- Organize files by user ID: `{userId}/{timestamp}_{filename}` (implemented in `generateStoragePath`)
+- Generate signed URLs only when needed with automatic refresh (implemented with 30-minute expiry)
+- Implement cleanup on upload failures to prevent orphaned files (implemented in upload route)
+- Validate files comprehensively before upload (implemented with security checks and malicious pattern detection)
+- Use proper MIME types and cache control headers (implemented in storage upload)
 
 ### Error Handling
 
-- Map Supabase errors to application error types
-- Implement proper cleanup on partial failures
-- Use non-blocking operations for non-critical features (e.g., activity logging)
-- Provide meaningful error messages to users
-- Log detailed errors for debugging while hiding sensitive information
+- Map Supabase errors to application error types (implemented in `mapSupabaseError`)
+- Implement proper cleanup on partial failures (implemented in all API routes)
+- Use non-blocking operations for non-critical features (implemented for activity logging)
+- Provide meaningful error messages to users (implemented with comprehensive error boundaries)
+- Log detailed errors for debugging while hiding sensitive information (implemented with server-side logging)
+
+### Activity Tracking
+
+- Real-time user activity monitoring with debounced API calls (implemented)
+- Recent activity display with automatic cache invalidation (implemented)
+- Activity recording for view, upload, and delete operations (implemented)
+- Non-blocking activity logging that doesn't fail main operations (implemented)
 
 ## Mobile Responsiveness
 

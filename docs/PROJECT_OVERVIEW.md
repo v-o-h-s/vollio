@@ -260,7 +260,7 @@ ANALYTICS_ID=your-analytics-id
 
 ### Technical Documentation
 
-- **[README.md](./README.md)**: Main project documentation and quick start
+- **[README.md](../README.md)**: Main project documentation and quick start
 - **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**: Complete API reference
 - **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**: Database configuration guide
 
@@ -336,11 +336,11 @@ Ready to contribute to Noto? Start with our [Quick Start Guide](./README.md#quic
 
 **Key Resources:**
 
-- **Setup**: [README.md](./README.md) for installation and configuration
+- **Setup**: [README.md](../README.md) for installation and configuration
 - **Architecture**: This document for overall project understanding
 - **API**: [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for endpoint details
-- **Components**: [Component READMEs](./components/) for UI implementation
-- **Testing**: [Test Documentation](./test/README.md) for quality assurance
+- **Components**: [Component READMEs](../components/) for UI implementation
+- **Testing**: [Test Documentation](../test/README.md) for quality assurance
 
 Welcome to the Noto development team! 🎉
 
