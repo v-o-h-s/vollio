@@ -53,3 +53,22 @@ export interface EditorExtensionConfig {
     allowBase64: boolean;
   };
 }
+
+export interface EditorState {
+  editor: Editor | null;
+  content: EditorContent | null;
+  isLoading: boolean;
+  error: string | null;
+  hasUnsavedChanges: boolean;
+}
+
+export interface EditorContextValue extends EditorState {
+  setEditor: (editor: Editor | null) => void;
+  updateContent: (content: EditorContent) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  clearError: () => void;
+  markAsSaved: () => void;
+  markAsUnsaved: () => void;
+  resetEditor: () => void;
+}

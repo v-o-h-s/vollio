@@ -5,7 +5,7 @@ import "./syncfusion.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ReduxProvider } from "@/lib/store/provider";
 import SyncfusionLicenseProvider from "@/components/SyncfusionLicenseProvider";
-
+import { EditorProvider } from "@/components/editor";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -18,7 +18,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Noto",
-  description: "Upload PDFs, add notes, and create flashcards for better studying",
+  description:
+    "Upload PDFs, add notes, and create flashcards for better studying",
 };
 
 export default function RootLayout({
@@ -31,27 +32,29 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClerkProvider appearance={{
-          layout: {
-            logoImageUrl: "/icons/logo.svg",
-
-          },
-          elements: {
-            card: "shadow-lg border rounded-xl p-6",
-            headerTitle: "text-2xl font-bold text-blue-600",
-            // customize other elements like social buttons, inputs, etc.
-          },
-          variables: {
-            colorPrimary: "#2563eb", // Tailwind blue-600
-          }
-        }}>
+        <ClerkProvider
+          appearance={{
+            layout: {
+              logoImageUrl: "/icons/logo.svg",
+            },
+            elements: {
+              card: "shadow-lg border rounded-xl p-6",
+              headerTitle: "text-2xl font-bold text-blue-600",
+              // customize other elements like social buttons, inputs, etc.
+            },
+            variables: {
+              colorPrimary: "#2563eb", // Tailwind blue-600
+            },
+          }}
+        >
           <SyncfusionLicenseProvider>
             <ReduxProvider>
-              {children}
+              <EditorProvider>
+                {children}
+              </EditorProvider>
             </ReduxProvider>
           </SyncfusionLicenseProvider>
         </ClerkProvider>
-
       </body>
     </html>
   );

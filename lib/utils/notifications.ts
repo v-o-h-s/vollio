@@ -184,6 +184,23 @@ export const navigationNotifications = {
     showError("PDF not found. Please upload the document first."),
 };
 
+// Annotation notifications
+export const annotationNotifications = {
+  createSuccess: () => showSuccess("Annotation created successfully!"),
+  
+  createError: (error: string) => showError(`Failed to create annotation: ${error}`),
+  
+  updateSuccess: () => showSuccess("Annotation updated successfully!"),
+  
+  updateError: (error: string) => showError(`Failed to update annotation: ${error}`),
+  
+  deleteSuccess: () => showSuccess("Annotation deleted successfully!"),
+  
+  deleteError: (error: string) => showError(`Failed to delete annotation: ${error}`),
+  
+  loadingError: (error: string) => showError(`Failed to load annotations: ${error}`),
+};
+
 // Utility functions
 export const dismissNotification = (toastId: string) => {
   toast.dismiss(toastId);

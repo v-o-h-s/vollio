@@ -51,6 +51,12 @@ const navigationItems = [
         href: '/dashboard/pdfs',
         icon: FileText,
         description: 'View and manage all your PDFs'
+    },
+    {
+        name: 'Editor Test',
+        href: '/dashboard/editor-test',
+        icon: FileText,
+        description: 'Test the Notion-like editor'
     }
 ]
 
