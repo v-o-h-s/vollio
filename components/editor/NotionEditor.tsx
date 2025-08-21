@@ -31,10 +31,14 @@ import { LinkDialog } from './LinkDialog';
 import { BubbleMenu } from './BubbleMenu';
 import { TableBubbleMenu } from './TableBubbleMenu';
 import { FloatingToolbar } from './FloatingToolbar';
+import { KeyboardShortcutsDialog } from './KeyboardShortcutsDialog';
+import { AccessibilityProvider, useAccessibility } from './AccessibilityProvider';
+import { AccessibilitySettingsDialog } from './AccessibilitySettingsDialog';
+import { useEditorKeyboardShortcuts, useEditorAccessibility } from '@/hooks/use-editor-keyboard-shortcuts';
 import { cn } from '@/lib/utils';
 import type { NotionEditorProps } from './types';
 
-export function NotionEditor({
+function NotionEditorInner({
   content,
   onChange,
   onUpdate,
@@ -45,6 +49,7 @@ export function NotionEditor({
   customToolbar,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+  const [isAccessibilitySettingsOpen, setIsAccessibilitySettingsOpen] = useState(false);
   const editor = useEditor({
     immediatelyRender:false,
     extensions: [
@@ -181,9 +186,15 @@ export function NotionEditor({
           'prose prose-sm sm:prose-base max-w-none',
           'focus:outline-none',
           'min-h-[200px] p-4',
+          settings.highContrast && 'high-contrast-editor',
+          settings.screenReaderOptimized && 'screen-reader-optimized',
           className
         ),
         'data-placeholder': placeholder,
+        'role': 'textbox',
+        'aria-multiline': 'true',
+        'aria-label': 'Rich text editor',
+        'aria-describedby': 'editor-keyboard-help editor-accessibility-info',
       },
     },
     onUpdate: ({ editor }) => {
@@ -210,20 +221,38 @@ export function NotionEditor({
     }
   }, [editor, editable]);
 
-  // Handle link dialog keyboard shortcut
+  // Set up keyboard shortcuts and accessibility
+  const { isHelpOpen, setIsHelpOpen } = useEditorKeyboardShortcuts({
+    editor,
+    enabled: editable,
+    onOpenLinkDialog: () => setIsLinkDialogOpen(true),
+  });
+
+  const { announceToScreenReader } = useEditorAccessibility(editor);
+  const { settings } = useAccessibility();
+
+  // Handle dialog keyboard shortcuts
   useEffect(() => {
     const handleOpenLinkDialog = () => {
       if (editor && !editor.isDestroyed) {
         setIsLinkDialogOpen(true);
+        announceToScreenReader('Link dialog opened');
       }
     };
 
+    const handleOpenAccessibilitySettings = () => {
+      setIsAccessibilitySettingsOpen(true);
+      announceToScreenReader('Accessibility settings dialog opened');
+    };
+
     document.addEventListener('openLinkDialog', handleOpenLinkDialog);
+    document.addEventListener('openAccessibilitySettings', handleOpenAccessibilitySettings);
     
     return () => {
       document.removeEventListener('openLinkDialog', handleOpenLinkDialog);
+      document.removeEventListener('openAccessibilitySettings', handleOpenAccessibilitySettings);
     };
-  }, [editor]);
+  }, [editor, announceToScreenReader]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -244,20 +273,91 @@ export function NotionEditor({
         </>
       )}
       <EditorContent 
+        id="editor-content"
         editor={editor} 
         className={cn(
           'w-full rounded-md border border-input bg-background',
           'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
-          'transition-all duration-200'
+          settings.reducedMotion ? 'transition-none' : 'transition-all duration-200',
+          settings.highContrast && 'border-2 border-foreground',
+          'focus-visible'
         )}
       />
+      
+      {/* Accessibility information for screen readers */}
+      <div id="editor-keyboard-help" className="sr-only">
+        Rich text editor. Press Cmd+/ or Ctrl+/ to view keyboard shortcuts. Use Tab to navigate between elements.
+      </div>
+      <div id="editor-accessibility-info" className="sr-only">
+        {settings.screenReaderOptimized && "Screen reader optimized mode is enabled. "}
+        {settings.keyboardNavigation && "Enhanced keyboard navigation is enabled. "}
+        Use arrow keys to navigate text, Enter to create new paragraphs, and slash commands for formatting.
+      </div>
+      
+      {/* Skip link for keyboard users */}
+      <a 
+        href="#editor-content" 
+        className="skip-link"
+        onFocus={() => announceToScreenReader('Skip to editor content')}
+      >
+        Skip to editor content
+      </a>
+      
       {editor && (
-        <LinkDialog
-          editor={editor}
-          isOpen={isLinkDialogOpen}
-          onClose={() => setIsLinkDialogOpen(false)}
-        />
+        <>
+          <LinkDialog
+            editor={editor}
+            isOpen={isLinkDialogOpen}
+            onClose={() => {
+              setIsLinkDialogOpen(false);
+              announceToScreenReader('Link dialog closed');
+            }}
+          />
+          <KeyboardShortcutsDialog
+            isOpen={isHelpOpen}
+            onClose={() => {
+              setIsHelpOpen(false);
+              announceToScreenReader('Keyboard shortcuts dialog closed');
+            }}
+          />
+          <AccessibilitySettingsDialog
+            isOpen={isAccessibilitySettingsOpen}
+            onClose={() => {
+              setIsAccessibilitySettingsOpen(false);
+              announceToScreenReader('Accessibility settings dialog closed');
+            }}
+          />
+        </>
+      )}
+      
+      {/* Accessibility settings button */}
+      {editable && (
+        <button
+          onClick={() => setIsAccessibilitySettingsOpen(true)}
+          className={cn(
+            "fixed bottom-4 right-4 z-50",
+            "w-12 h-12 rounded-full",
+            "bg-primary text-primary-foreground",
+            "shadow-lg hover:shadow-xl",
+            "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+            "transition-all duration-200",
+            settings.reducedMotion && "transition-none"
+          )}
+          aria-label="Open accessibility settings"
+          title="Accessibility Settings (Alt+A)"
+        >
+          <span className="sr-only">Open accessibility settings</span>
+          ♿
+        </button>
       )}
     </div>
+  );
+}
+
+export function NotionEditor(props: NotionEditorProps) {
+  return (
+    <AccessibilityProvider>
+      <NotionEditorInner {...props} />
+    </AccessibilityProvider>
   );
 }

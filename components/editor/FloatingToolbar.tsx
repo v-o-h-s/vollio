@@ -133,9 +133,11 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
   return (
     <div
       ref={toolbarRef}
+      role="toolbar"
+      aria-label="Text formatting toolbar"
       className={cn(
         "fixed z-50 flex items-center gap-1 rounded-lg border bg-background/95 backdrop-blur-sm shadow-lg p-1",
-        "animate-in fade-in-0 zoom-in-95 duration-200",
+        "animate-in fade-in-0 zoom-in-95 duration-200 floating-toolbar",
         className
       )}
       style={{
@@ -147,12 +149,14 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 p-0 focus-visible"
         onClick={() =>
           handleCommand(() => editor.chain().focus().toggleBold().run())
         }
         data-active={editor.isActive("bold")}
-        aria-label="Bold"
+        aria-label={`Bold ${editor.isActive("bold") ? "(active)" : ""}`}
+        aria-pressed={editor.isActive("bold")}
+        title="Bold (Ctrl+B)"
       >
         <Bold className="h-4 w-4" />
       </Button>
@@ -160,12 +164,14 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 p-0 focus-visible"
         onClick={() =>
           handleCommand(() => editor.chain().focus().toggleItalic().run())
         }
         data-active={editor.isActive("italic")}
-        aria-label="Italic"
+        aria-label={`Italic ${editor.isActive("italic") ? "(active)" : ""}`}
+        aria-pressed={editor.isActive("italic")}
+        title="Italic (Ctrl+I)"
       >
         <Italic className="h-4 w-4" />
       </Button>
@@ -173,12 +179,14 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 p-0 focus-visible"
         onClick={() =>
           handleCommand(() => editor.chain().focus().toggleUnderline().run())
         }
         data-active={editor.isActive("underline")}
-        aria-label="Underline"
+        aria-label={`Underline ${editor.isActive("underline") ? "(active)" : ""}`}
+        aria-pressed={editor.isActive("underline")}
+        title="Underline (Ctrl+U)"
       >
         <Underline className="h-4 w-4" />
       </Button>
@@ -186,12 +194,14 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 p-0 focus-visible"
         onClick={() =>
           handleCommand(() => editor.chain().focus().toggleStrike().run())
         }
         data-active={editor.isActive("strike")}
-        aria-label="Strikethrough"
+        aria-label={`Strikethrough ${editor.isActive("strike") ? "(active)" : ""}`}
+        aria-pressed={editor.isActive("strike")}
+        title="Strikethrough (Ctrl+Shift+X)"
       >
         <Strikethrough className="h-4 w-4" />
       </Button>
@@ -202,12 +212,14 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 p-0 focus-visible"
         onClick={() =>
           handleCommand(() => editor.chain().focus().toggleCode().run())
         }
         data-active={editor.isActive("code")}
-        aria-label="Inline Code"
+        aria-label={`Inline Code ${editor.isActive("code") ? "(active)" : ""}`}
+        aria-pressed={editor.isActive("code")}
+        title="Inline Code (Ctrl+E)"
       >
         <Code className="h-4 w-4" />
       </Button>
@@ -216,7 +228,7 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 p-0 focus-visible"
         onClick={() => {
           const url = window.prompt("Enter URL:");
           if (url) {
@@ -226,7 +238,9 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
           }
         }}
         data-active={editor.isActive("link")}
-        aria-label="Add Link"
+        aria-label={`Add Link ${editor.isActive("link") ? "(active)" : ""}`}
+        aria-pressed={editor.isActive("link")}
+        title="Add Link (Ctrl+K)"
       >
         <Link className="h-4 w-4" />
       </Button>
@@ -237,12 +251,14 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 p-0 focus-visible"
         onClick={() =>
           handleCommand(() => editor.chain().focus().toggleBlockquote().run())
         }
         data-active={editor.isActive("blockquote")}
-        aria-label="Quote"
+        aria-label={`Quote ${editor.isActive("blockquote") ? "(active)" : ""}`}
+        aria-pressed={editor.isActive("blockquote")}
+        title="Quote (Ctrl+Shift+9)"
       >
         <Quote className="h-4 w-4" />
       </Button>
@@ -251,7 +267,7 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 p-0 focus-visible"
         onClick={() => {
           // Toggle between paragraph and heading
           if (editor.isActive("heading")) {
@@ -263,7 +279,9 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
           }
         }}
         data-active={editor.isActive("heading")}
-        aria-label="Heading"
+        aria-label={`Heading ${editor.isActive("heading") ? "(active)" : ""}`}
+        aria-pressed={editor.isActive("heading")}
+        title="Toggle Heading (Ctrl+Alt+2)"
       >
         <Type className="h-4 w-4" />
       </Button>
@@ -274,12 +292,13 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 p-0 focus-visible"
         onClick={() => {
           // You can implement a dropdown menu here for more options
           console.log("More options clicked");
         }}
         aria-label="More Options"
+        title="More formatting options"
       >
         <MoreHorizontal className="h-4 w-4" />
       </Button>
@@ -288,12 +307,13 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-8 w-8 p-0"
+        className="h-8 w-8 p-0 focus-visible"
         onClick={() => {
           // Placeholder for color/highlight functionality
           console.log("Color options clicked");
         }}
         aria-label="Text Color"
+        title="Text color and highlighting"
       >
         <Palette className="h-4 w-4" />
       </Button>
