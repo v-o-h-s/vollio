@@ -1,7 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { History } from '@tiptap/extension-history';
 import { Document } from '@tiptap/extension-document';
 import { Paragraph } from '@tiptap/extension-paragraph';
@@ -14,6 +14,7 @@ import { Strike } from '@tiptap/extension-strike';
 import { BulletList } from '@tiptap/extension-bullet-list';
 import { OrderedList } from '@tiptap/extension-ordered-list';
 import { ListItem } from '@tiptap/extension-list-item';
+import { Code } from '@tiptap/extension-code';
 import { CodeBlock } from '@tiptap/extension-code-block';
 import { Blockquote } from '@tiptap/extension-blockquote';
 import { HorizontalRule } from '@tiptap/extension-horizontal-rule';
@@ -29,6 +30,7 @@ import { EnhancedLink } from './extensions/EnhancedLink';
 import { LinkDialog } from './LinkDialog';
 import { BubbleMenu } from './BubbleMenu';
 import { TableBubbleMenu } from './TableBubbleMenu';
+import { FloatingToolbar } from './FloatingToolbar';
 import { cn } from '@/lib/utils';
 import type { NotionEditorProps } from './types';
 
@@ -40,6 +42,7 @@ export function NotionEditor({
   editable = true,
   className,
   autoFocus = false,
+  customToolbar,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const editor = useEditor({
@@ -94,6 +97,11 @@ export function NotionEditor({
       ListItem.configure({
         HTMLAttributes: {
           class: 'leading-relaxed',
+        },
+      }),
+      Code.configure({
+        HTMLAttributes: {
+          class: 'bg-muted px-1.5 py-0.5 rounded text-sm font-mono',
         },
       }),
       CodeBlock.configure({
@@ -232,6 +240,7 @@ export function NotionEditor({
         <>
           <BubbleMenu editor={editor} />
           <TableBubbleMenu editor={editor} />
+          {customToolbar ? customToolbar(editor) : <FloatingToolbar editor={editor} />}
         </>
       )}
       <EditorContent 

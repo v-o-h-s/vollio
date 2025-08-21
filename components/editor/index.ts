@@ -1,15 +1,6 @@
 export { NotionEditor } from './NotionEditor';
-export { EditorToolbar } from "./EditorToolbar"
+export { FloatingToolbar } from './FloatingToolbar';
+export { AdvancedFloatingToolbar } from './AdvancedFloatingToolbar';
+export { FloatingToolbarDemo } from './FloatingToolbarDemo';
 export { EditorProvider, useEditorContext, useEditorErrorRecovery } from './EditorProvider';
-export { BubbleMenu } from './BubbleMenu';
-export { SlashCommand, slashCommandSuggestion } from './extensions/SlashCommand';
-export { KeyboardShortcuts } from './extensions/KeyboardShortcuts';
-export type { 
-  NotionEditorProps, 
-  EditorContent, 
-  EditorToolbarProps, 
-  EditorCommand, 
-  EditorExtensionConfig,
-  EditorState,
-  EditorContextValue
-} from './types';
+export type { NotionEditorProps, EditorContent, EditorState, EditorContextValue } from './types';

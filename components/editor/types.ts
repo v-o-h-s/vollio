@@ -24,6 +24,7 @@ export interface NotionEditorProps {
   editable?: boolean;
   className?: string;
   autoFocus?: boolean;
+  customToolbar?: (editor: Editor) => React.ReactNode;
 }
 
 export interface EditorToolbarProps {

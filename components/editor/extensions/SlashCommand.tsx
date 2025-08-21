@@ -212,10 +212,9 @@ interface SlashCommandListProps {
   items: SlashCommandItem[];
   command: (item: SlashCommandItem) => void;
   selectedIndex: number;
-  onKeyDown?: (event: KeyboardEvent) => boolean;
 }
 
-function SlashCommandList({ items, command, selectedIndex, onKeyDown }: SlashCommandListProps) {
+function SlashCommandList({ items, command, selectedIndex }: SlashCommandListProps) {
   return (
     <div className="z-50 h-auto max-h-[330px] w-72 overflow-y-auto rounded-md border border-border bg-background p-1 shadow-md">
       {items.length > 0 ? (
@@ -293,8 +292,11 @@ export const slashCommandSuggestion = {
     let selectedIndex = 0;
 
     const updateSelectedIndex = (newIndex: number, items: SlashCommandItem[]) => {
-      selectedIndex = Math.max(0, Math.min(newIndex, items.length - 1));
-      component.updateProps({ selectedIndex });
+      const itemCount = Array.isArray(items) ? items.length : 0;
+      selectedIndex = Math.max(0, Math.min(newIndex, Math.max(0, itemCount - 1)));
+      if (component && typeof component.updateProps === 'function') {
+        component.updateProps({ selectedIndex });
+      }
     };
 
     return {
@@ -322,7 +324,9 @@ export const slashCommandSuggestion = {
       },
 
       onUpdate(props: any) {
-        component.updateProps({ ...props, selectedIndex });
+        if (component && typeof component.updateProps === 'function') {
+          component.updateProps({ ...props, selectedIndex });
+        }
 
         if (!props.clientRect || !popup) {
           return;
@@ -339,25 +343,54 @@ export const slashCommandSuggestion = {
         if (event.key === 'Escape') {
           if (popup) {
             popup.remove();
+            popup = null;
+          }
+          if (component) {
+            try {
+              component.destroy();
+            } catch (_) {}
+            component = undefined as any;
           }
           return true;
         }
 
         if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          event.stopPropagation();
           updateSelectedIndex(selectedIndex - 1, props.items);
           return true;
         }
 
         if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          event.stopPropagation();
           updateSelectedIndex(selectedIndex + 1, props.items);
           return true;
         }
 
         if (event.key === 'Enter') {
-          const selectedItem = props.items[selectedIndex];
+          const items = Array.isArray(props.items) ? props.items : [];
+          const selectedItem = items[selectedIndex];
           if (selectedItem) {
-            props.command(selectedItem);
+            try {
+              props.command(selectedItem);
+            } catch (err) {
+              console.error('SlashCommand execution error', err);
+            }
           }
+
+          // Clean up immediately after command
+          if (popup) {
+            popup.remove();
+            popup = null;
+          }
+          if (component) {
+            try {
+              component.destroy();
+            } catch (_) {}
+            component = undefined as any;
+          }
+
           return true;
         }
 

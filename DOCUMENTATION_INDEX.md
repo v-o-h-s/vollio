@@ -1,235 +1,216 @@
-# Noto PDF Annotation App - Documentation Index
+# Noto Documentation Index
 
-Welcome to the comprehensive documentation for the Noto PDF annotation application. This index provides quick access to all documentation resources organized by topic and audience.
+This document provides a comprehensive index of all documentation resources for the Noto PDF annotation application. Use this as your starting point to find specific information about any aspect of the system.
 
-## 📚 Quick Start Documentation
+## 📖 Getting Started
 
-### For New Developers
-
-- **[README.md](./README.md)** - Main project overview, setup instructions, and quick start guide
+### Essential Reading
+- **[README.md](./README.md)** - Main project overview, quick start guide, and feature summary
 - **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Comprehensive project vision, architecture, and roadmap
 - **[Project Status](./docs/PROJECT_STATUS.md)** - Current implementation status and development progress
 
-### For API Integration
+### Setup & Installation
+- **[Quick Start Guide](./README.md#quick-start)** - Environment setup and installation instructions
+- **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database configuration and migration guide
+- **[Environment Configuration](./README.md#environment-configuration)** - Required environment variables and configuration
 
-- **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference with Supabase integration details
-- **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database and storage configuration guide
+## 🏗️ Architecture & Technical Documentation
 
 ### System Architecture
-
-- **[Error Handling System](./docs/ERROR_HANDLING.md)** - Comprehensive error management architecture and patterns
-- **[Recent Activity System](./docs/RECENT_ACTIVITY.md)** - Activity tracking, user experience, and resume functionality
-
-## 🏗️ Architecture Documentation
-
-### System Design
-
 - **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards, patterns, and best practices
 - **[Project Structure](./.kiro/steering/structure.md)** - File organization and naming conventions
-- **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
+- **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference and endpoint documentation
 
-### Implementation Guides
-
-- **[Cross-Tab Implementation](./CROSS_TAB_IMPLEMENTATION_SUMMARY.md)** - Multi-tab navigation system
-- **[Supabase Backend Spec](./.kiro/specs/supabase-pdf-backend/)** - Backend implementation plan and tasks (mostly complete)
-- **[Implementation Tasks](./.kiro/specs/supabase-pdf-backend/tasks.md)** - Detailed task completion status
+### Core Systems
+- **[Error Handling System](./docs/ERROR_HANDLING.md)** - Comprehensive error management architecture
+- **[Recent Activity System](./docs/RECENT_ACTIVITY.md)** - Activity tracking and user experience features
+- **[Security Enhancements](./SECURITY_ENHANCEMENTS.md)** - Security features and implementation details
 
 ## 🧩 Component Documentation
 
-### Core Components
+### PDF System Components
+- **[PDF Components Overview](./components/pdf/README.md)** - Complete PDF viewer and annotation system
+  - PDFAnnotationViewer - Main PDF viewer with Supabase integration
+  - AnnotationOverlay - Interactive annotation highlights
+  - AnnotationTooltip - Desktop text selection interface
+  - MobileAnnotationDialog - Mobile annotation creation
+  - AnnotationPreviewCard - Hover preview functionality
+  - FallbackUI - Error state components
 
-- **[PDF Components](./components/pdf/README.md)** - PDF viewer and annotation component suite
-- **[Store Documentation](./lib/store/README.md)** - Redux state management and RTK Query setup
+### Rich Text Editor System
+- **[Editor Components Overview](./components/editor/README.md)** - TipTap-based rich text editing system
+  - NotionEditor - Main editor component with full TipTap integration
+  - FloatingToolbar - Context-aware formatting toolbar
+  - AdvancedFloatingToolbar - Feature-rich editing toolbar
+  - PDFAnnotationToolbar - Specialized toolbar for PDF annotations
+  - EditorProvider - Context provider for editor state management
 
-### Specialized Documentation
+### UI Components
+- **[UI Components](./components/ui/)** - shadcn/ui based component library
+  - Button, Dialog, Input, Card, Popover, Separator
+  - Loading states, Error notifications, Keyboard shortcuts help
+  - Mobile-responsive and accessible design patterns
 
-- **[Error Handling](./docs/ERROR_HANDLING.md)** - Comprehensive error handling patterns and guidelines
-- **[Recent Activity](./docs/RECENT_ACTIVITY.md)** - Activity tracking system documentation
+### Dashboard & Layout
+- **[Dashboard Components](./components/dashboard/)** - PDF management interface
+  - RecentActivityDisplay - User activity tracking and display
+  - Dashboard sidebar and navigation components
 
-## 🧪 Testing & Quality
+## 🔧 Development Resources
 
-### Testing Documentation
+### State Management
+- **[Redux Store Documentation](./lib/store/README.md)** - Complete state management guide
+  - Store configuration with RTK Query
+  - Annotation state management
+  - API integration patterns
+  - Typed hooks and selectors
 
-- **[Test Suite](./test/README.md)** - Testing strategy, coverage, and running tests
-- **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database schema and storage configuration
+### Utilities & Helpers
+- **[Utility Functions](./lib/utils/)** - Core utility functions and helpers
+  - Error handling utilities
+  - Supabase integration helpers
+  - Activity tracking utilities
+  - PDF coordinate calculations
+  - Cross-tab navigation utilities
 
-### Development Tools
+### Custom Hooks
+- **[Custom Hooks](./hooks/)** - React hooks for common functionality
+  - Activity tracking hooks
+  - Error handling hooks
+  - Keyboard shortcuts
+  - Mobile detection
 
-- **[Development Specs](./.kiro/specs/)** - Feature specifications and implementation plans
-- **[Steering Guidelines](./.kiro/steering/)** - Development guidelines and best practices
+## 🧪 Testing Documentation
 
-## 📖 Documentation by Audience
+### Test Strategy & Coverage
+- **[Test Documentation](./test/README.md)** - Comprehensive testing strategy and coverage
+  - Unit tests for utilities and state management
+  - Integration tests for component interactions
+  - End-to-end workflow testing
+  - Mobile and responsive behavior testing
 
-### 👨‍💻 Developers
+### Test Files Organization
+- **Unit Tests**: `test/utils/`, `test/store/`, `test/hooks/`
+- **Component Tests**: `test/components/`
+- **Integration Tests**: `test/e2e/`
+- **Mobile Tests**: `test/mobile/`
+- **Security Tests**: `test/security/`
 
-**Getting Started:**
+## 🚀 Deployment & Operations
 
-1. [README.md](./README.md) - Setup and quick start
-2. [Technical Guidelines](./.kiro/steering/tech.md) - Code standards
-3. [Project Structure](./.kiro/steering/structure.md) - File organization
+### Production Deployment
+- **[Deployment Guide](./README.md#deployment)** - Production deployment instructions
+- **[Environment Variables](./README.md#environment-configuration)** - Required configuration
+- **[Performance Considerations](./docs/PROJECT_OVERVIEW.md#performance-characteristics)** - Optimization guidelines
 
-**Implementation:**
+### Database & Storage
+- **[Database Schema](./supabase/)** - Complete database structure and migrations
+  - Initial schema setup
+  - Row Level Security policies
+  - Storage bucket configurations
+  - Verification scripts
 
-1. [API Documentation](./docs/API_DOCUMENTATION.md) - Backend integration
-2. [Component Documentation](./components/pdf/README.md) - Frontend components
-3. [Error Handling](./docs/ERROR_HANDLING.md) - Error management patterns
+## 📱 User Experience & Design
 
-**Testing:**
+### Product Requirements
+- **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
+- **[User Experience Design](./docs/PROJECT_OVERVIEW.md#user-experience-design)** - Desktop and mobile UX patterns
 
-1. [Test Documentation](./test/README.md) - Testing strategy
-2. [Supabase Setup](./docs/SUPABASE_SETUP.md) - Database testing
+### Accessibility & Mobile
+- **[Mobile Responsiveness](./README.md#mobile-experience)** - Mobile-first design principles
+- **[Accessibility Features](./docs/PROJECT_OVERVIEW.md#accessibility-features)** - WCAG compliance and inclusive design
 
-### 🏢 Project Managers
+## 🔒 Security Documentation
 
-**Project Overview:**
+### Authentication & Authorization
+- **[Security Architecture](./docs/PROJECT_OVERVIEW.md#security-architecture)** - Complete security overview
+- **[Authentication Flow](./SECURITY_ENHANCEMENTS.md)** - Clerk integration and JWT handling
+- **[Row Level Security](./supabase/README.md)** - Database security policies
 
-1. [Project Overview](./docs/PROJECT_OVERVIEW.md) - Vision and architecture
-2. [Project Status](./docs/PROJECT_STATUS.md) - Current progress
-3. [Product Context](./.kiro/steering/product.md) - Feature requirements
+### File Security
+- **[File Upload Security](./docs/API_DOCUMENTATION.md)** - Secure file handling patterns
+- **[Storage Security](./SECURITY_ENHANCEMENTS.md)** - Signed URLs and access control
 
-**Implementation Progress:**
+## 🐛 Troubleshooting & Support
 
-1. [Supabase Backend Tasks](./.kiro/specs/supabase-pdf-backend/tasks.md) - Backend completion status
-2. [Cross-Tab Implementation](./CROSS_TAB_IMPLEMENTATION_SUMMARY.md) - Feature implementation
+### Error Handling
+- **[Error Handling Patterns](./docs/ERROR_HANDLING.md)** - Comprehensive error management
+- **[Debugging Guide](./.kiro/steering/checking.md)** - Problem resolution and debugging approach
+- **[Common Issues](./README.md#troubleshooting)** - Frequently encountered problems and solutions
 
-### 🎨 Designers
+### Development Support
+- **[Contributing Guidelines](./README.md#contributing)** - How to contribute to the project
+- **[Code Quality Standards](./README.md#code-style)** - Coding standards and best practices
+- **[Git Workflow](./docs/PROJECT_OVERVIEW.md#git-workflow)** - Development process and review guidelines
 
-**User Experience:**
+## 📊 Monitoring & Analytics
 
-1. [Product Context](./.kiro/steering/product.md) - UX principles and patterns
-2. [PDF Components](./components/pdf/README.md) - UI component specifications
-3. [Project Overview](./docs/PROJECT_OVERVIEW.md) - User experience design
+### Performance Monitoring
+- **[Performance Metrics](./docs/PROJECT_OVERVIEW.md#success-metrics)** - Key performance indicators
+- **[Optimization Guidelines](./docs/PROJECT_OVERVIEW.md#performance-characteristics)** - Performance best practices
 
-### 🔧 DevOps/Infrastructure
+### User Analytics
+- **[Activity Tracking](./docs/RECENT_ACTIVITY.md)** - User behavior monitoring
+- **[Usage Patterns](./docs/PROJECT_STATUS.md)** - Feature usage and adoption metrics
 
-**Setup & Deployment:**
+## 🔮 Future Development
 
-1. [Supabase Setup](./docs/SUPABASE_SETUP.md) - Database and storage configuration
-2. [README.md](./README.md) - Environment setup and deployment
-3. [API Documentation](./docs/API_DOCUMENTATION.md) - Backend infrastructure
+### Roadmap & Planning
+- **[Development Roadmap](./docs/PROJECT_OVERVIEW.md#development-roadmap)** - Future feature planning
+- **[Feature Specifications](./.kiro/specs/)** - Detailed feature specifications and implementation plans
 
-## 📋 Documentation by Feature
+### Enhancement Opportunities
+- **[Future Enhancements](./components/pdf/README.md#future-enhancements)** - Planned improvements and new features
+- **[Performance Improvements](./test/README.md#performance)** - Optimization opportunities
 
-### PDF Management
+## 📞 Quick Reference
 
-- **Upload System**: [API Documentation](./docs/API_DOCUMENTATION.md#pdf-management-api)
-- **File Storage**: [Supabase Setup](./docs/SUPABASE_SETUP.md)
-- **PDF Viewer**: [PDF Components](./components/pdf/README.md)
-
-### Annotation System
-
-- **Component Suite**: [PDF Components](./components/pdf/README.md)
-- **State Management**: [Store Documentation](./lib/store/README.md)
-- **Cross-Tab Sync**: [Cross-Tab Implementation](./CROSS_TAB_IMPLEMENTATION_SUMMARY.md)
-
-### User Interface
-
-- **Responsive Design**: [Technical Guidelines](./.kiro/steering/tech.md#mobile-responsiveness)
-- **Error Handling**: [Error Handling](./docs/ERROR_HANDLING.md)
-- **Activity Tracking**: [Recent Activity](./docs/RECENT_ACTIVITY.md)
-
-### Backend Integration
-
-- **Database Schema**: [Supabase Setup](./docs/SUPABASE_SETUP.md)
-- **API Endpoints**: [API Documentation](./docs/API_DOCUMENTATION.md)
-- **Authentication**: [Technical Guidelines](./.kiro/steering/tech.md#security-considerations)
-
-## 🔍 Quick Reference
-
-### Common Tasks
-
-**Setting up development environment:**
-
+### Key Commands
 ```bash
-# See README.md for complete setup
-npm install
-# Configure .env.local with Supabase and Clerk credentials
-npm run dev
+# Development
+npm run dev              # Start development server
+npm run build           # Build for production
+npm run test            # Run test suite
+npm run lint            # Code quality checks
+
+# Database
+npm run setup:supabase  # Verify Supabase setup
 ```
 
-**Running tests:**
+### Important File Locations
+- **Main App**: `app/` - Next.js App Router pages and API routes
+- **Components**: `components/` - React components organized by feature
+- **State Management**: `lib/store/` - Redux store and RTK Query setup
+- **Utilities**: `lib/utils/` - Helper functions and utilities
+- **Tests**: `test/` - Comprehensive test suite
+- **Database**: `supabase/` - Database schema and migrations
+- **Configuration**: `.kiro/steering/` - Development guidelines and standards
 
-```bash
-# See test/README.md for complete testing guide
-npm run test:run        # Run all tests
-npm run test:coverage   # Run with coverage
-npm run test:ui         # Interactive test UI
-```
+### Key URLs (Development)
+- **Application**: http://localhost:3000
+- **Dashboard**: http://localhost:3000/dashboard
+- **API Endpoints**: http://localhost:3000/api/*
+- **Test UI**: npm run test:ui
 
-**Database setup:**
+## 📝 Documentation Maintenance
 
-```bash
-# See docs/SUPABASE_SETUP.md for complete guide
-# Run migrations in Supabase SQL editor
-npm run setup:supabase  # Verify setup
-```
-
-### Key File Locations
-
-**Configuration:**
-
-- Environment: `.env.local`
-- TypeScript: `tsconfig.json`
-- Tailwind: `tailwind.config.js`
-- Vitest: `vitest.config.ts`
-
-**Core Implementation:**
-
-- API Routes: `app/api/pdfs/`
-- PDF Components: `components/pdf/`
-- State Management: `lib/store/`
-- Error Handling: `lib/utils/error-handling.ts`
-- Supabase Client: `lib/supabaseClient.ts`
-
-**Documentation:**
-
-- Main docs: `docs/` directory and root `README.md`
-- Component docs: `components/*/README.md`
-- Specs: `.kiro/specs/`
-- Guidelines: `.kiro/steering/`
-
-## 🆘 Getting Help
-
-### Documentation Issues
-
-- Check the specific component or feature documentation
-- Review error handling patterns in [Error Handling](./docs/ERROR_HANDLING.md)
-- Consult the [Technical Guidelines](./.kiro/steering/tech.md) for code standards
-
-### Development Issues
-
-- Review [Project Status](./docs/PROJECT_STATUS.md) for known issues
-- Check [Test Documentation](./test/README.md) for testing guidance
-- Consult [API Documentation](./docs/API_DOCUMENTATION.md) for backend integration
-
-### Setup Issues
-
-- Follow [README.md](./README.md) setup instructions
-- Review [Supabase Setup](./docs/SUPABASE_SETUP.md) for database configuration
-- Check environment variable configuration
-
-## 📝 Contributing to Documentation
-
-When updating documentation:
-
-1. **Keep it current**: Update relevant docs when implementing features
-2. **Be comprehensive**: Include examples, error cases, and edge scenarios
-3. **Follow patterns**: Use consistent formatting and structure
-4. **Cross-reference**: Link related documentation appropriately
-5. **Test examples**: Ensure code examples work and are up-to-date
+### Keeping Documentation Current
+- Update component READMEs when adding new features
+- Maintain API documentation with endpoint changes
+- Update steering files with new patterns and guidelines
+- Keep test documentation current with coverage changes
 
 ### Documentation Standards
-
 - Use clear, concise language
-- Include practical examples and code snippets
-- Provide both high-level overviews and detailed implementation guides
-- Keep table of contents and cross-references updated
-- Use consistent formatting and markdown structure
+- Include code examples where helpful
+- Maintain consistent formatting and structure
+- Link between related documentation sections
+- Update version information and timestamps
 
 ---
 
 **Last Updated**: January 2025  
-**Version**: 1.0.0  
-**Maintained by**: Noto Development Team
+**Documentation Version**: 1.0.0  
+**Project Version**: 1.0.0
 
-For questions about documentation or to suggest improvements, please refer to the project's issue tracker or contact the development team.
+For questions about documentation or to suggest improvements, please refer to the [Contributing Guidelines](./README.md#contributing) or contact the development team.

@@ -14,7 +14,8 @@ inclusion: always
 - **Authentication**: Clerk with JWT integration
 - **Database**: Supabase with Row Level Security (RLS)
 - **File Storage**: Supabase Storage with signed URLs
-- **PDF Rendering**: Syncfusion PDF Viewer
+- **PDF Rendering**: Syncfusion PDF Viewer (licensed)
+- **Rich Text Editor**: TipTap with floating toolbars and extensions
 - **Testing**: Vitest + React Testing Library
 
 ## Code Style & Conventions
@@ -144,9 +145,42 @@ inclusion: always
 - Activity recording for view, upload, and delete operations (implemented)
 - Non-blocking activity logging that doesn't fail main operations (implemented)
 
+## Rich Text Editor Guidelines
+
+### TipTap Integration
+
+- Use TipTap core with React integration for rich text editing
+- Implement floating toolbars for context-aware formatting options
+- Use extension system for custom functionality (slash commands, image upload, enhanced links)
+- Follow established editor patterns from `components/editor/` directory
+
+### Editor Components
+
+- **NotionEditor**: Main editor component with full TipTap integration
+- **FloatingToolbar**: Context-aware toolbar that appears on text selection
+- **AdvancedFloatingToolbar**: Feature-rich toolbar with color picker and advanced options
+- **PDFAnnotationToolbar**: Specialized toolbar for PDF annotation workflows
+- **EditorProvider**: Context provider for editor state management
+
+### Editor Extensions
+
+- **SlashCommand**: Notion-style slash commands for quick formatting
+- **ImageUpload**: Drag-and-drop image upload with preview
+- **EnhancedLink**: Advanced link handling with validation
+- **KeyboardShortcuts**: Standard keyboard shortcuts for formatting
+
+### Editor State Management
+
+- Use EditorProvider for editor-specific state
+- Integrate with Redux store for annotation content
+- Handle unsaved changes and auto-save functionality
+- Implement proper error recovery for editor failures
+
 ## Mobile Responsiveness
 
 - Use Tailwind responsive prefixes consistently
 - Test on mobile devices and various screen sizes
 - Implement touch-friendly interactions
 - Consider mobile-specific UI patterns for complex features
+- Ensure floating toolbars adapt to mobile viewports
+- Use mobile-specific dialogs for annotation creation

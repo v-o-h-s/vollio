@@ -9,9 +9,23 @@ inclusion: always
 ### Components
 
 - **UI Components**: `components/ui/` - shadcn/ui components only (button, dialog, etc.)
-- **Feature Components**: `components/[feature]/` - PDF (`components/pdf/`), notes (`components/note/`)
+- **Feature Components**: `components/[feature]/` - PDF (`components/pdf/`), Editor (`components/editor/`), Dashboard (`components/dashboard/`)
 - **Layout Components**: `components/` root - shared layouts like `dashboard-sidebar.tsx`
 - **Export Pattern**: Use `index.ts` files in feature directories for clean imports
+
+### Editor Components
+
+- **Editor Core**: `components/editor/` - TipTap-based rich text editor system
+  - `NotionEditor.tsx` - Main editor component with full TipTap integration
+  - `EditorProvider.tsx` - Context provider for editor state management
+  - `FloatingToolbar.tsx` - Context-aware formatting toolbar
+  - `AdvancedFloatingToolbar.tsx` - Feature-rich editing toolbar
+  - `PDFAnnotationToolbar.tsx` - Specialized toolbar for PDF annotations
+- **Editor Extensions**: `components/editor/extensions/` - TipTap extensions
+  - `SlashCommand.tsx` - Notion-style slash commands
+  - `ImageUpload.tsx` - Drag-and-drop image upload
+  - `EnhancedLink.tsx` - Advanced link handling
+  - `KeyboardShortcuts.ts` - Standard keyboard shortcuts
 
 ### Pages & Routes
 

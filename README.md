@@ -2,12 +2,15 @@
 
 Noto is a modern, secure PDF annotation application built with Next.js 15 and React 19. It enables users to upload PDFs, select text, and create rich annotations with seamless cross-device functionality and enterprise-grade security.
 
+> **Status**: Core infrastructure complete with PDF viewing, text selection, and annotation creation. Full backend integration with Supabase and comprehensive error handling implemented.
+
 ## ✨ Features
 
 ### Core Functionality
 
 - **Secure PDF Upload & Storage**: Complete Supabase Storage integration with comprehensive file validation, signed URLs, and automatic expiration handling
 - **Advanced PDF Viewer**: Full Syncfusion PDF Viewer integration with text selection, zoom, search, navigation, and coordinate-based positioning
+- **Rich Text Editor**: TipTap-based editor with floating toolbars, slash commands, and advanced formatting options
 - **Intelligent Text Selection**: Precise coordinate calculation for desktop tooltips and mobile-optimized annotation dialogs
 - **Real-time Activity Tracking**: Debounced user activity monitoring with automatic cache invalidation and recent activity display
 - **Cross-Document Navigation**: Seamless navigation between PDFs and annotations with cross-tab communication via PostMessage API
@@ -32,15 +35,30 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 
 ## 📚 Documentation
 
-### System Documentation
-- **[Error Handling System](docs/ERROR_HANDLING.md)** - Comprehensive error management architecture and implementation
-- **[Recent Activity System](docs/RECENT_ACTIVITY.md)** - Activity tracking, user experience, and resume functionality
+### Complete Documentation Index
 
-### Project Documentation
-- **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference and endpoint documentation
-- **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database configuration and migration guide
-- **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - High-level architecture and system design
-- **[Project Status](./docs/PROJECT_STATUS.md)** - Current implementation status and roadmap
+For comprehensive documentation covering all aspects of the Noto application, see the **[Documentation Index](./DOCUMENTATION_INDEX.md)** which provides organized access to all documentation resources.
+
+### Quick Access Documentation
+
+- **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference with Supabase integration
+- **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Comprehensive project vision and architecture
+- **[Project Status](./docs/PROJECT_STATUS.md)** - Current implementation status and progress
+- **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database and storage configuration guide
+
+### Component & Implementation Guides
+
+- **[PDF Components](./components/pdf/README.md)** - PDF viewer and annotation component suite
+- **[Editor Components](./components/editor/README.md)** - Rich text editor and floating toolbar system
+- **[Store Documentation](./lib/store/README.md)** - Redux state management and RTK Query
+- **[Test Documentation](./test/README.md)** - Testing strategy and comprehensive coverage
+- **[Error Handling](./docs/ERROR_HANDLING.md)** - Comprehensive error handling patterns
+
+### Development Guidelines
+
+- **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards and best practices
+- **[Project Structure](./.kiro/steering/structure.md)** - File organization and naming conventions
+- **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
 
 ## 🚀 Quick Start
 
@@ -142,6 +160,8 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 ### Key Components
 
 - **PDFAnnotationViewer**: Main PDF viewer with Syncfusion integration, Supabase URL handling, and activity tracking
+- **NotionEditor**: Rich text editor with TipTap integration, floating toolbars, and advanced formatting
+- **FloatingToolbar Suite**: Multiple toolbar variants for different editing contexts (basic, advanced, PDF annotation)
 - **AnnotationOverlay**: Renders interactive annotation highlights with hover states and click handling
 - **AnnotationTooltip**: Desktop text selection interface with smart positioning
 - **MobileAnnotationDialog**: Mobile-optimized annotation creation with touch-friendly design

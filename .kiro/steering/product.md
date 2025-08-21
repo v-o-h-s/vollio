@@ -11,6 +11,7 @@ inclusion: always
 ### Primary Features
 - **PDF Upload & Storage**: Use `/api/pdfs/upload` endpoint with Supabase Storage, organize files by `{userId}/{timestamp}_{filename}`
 - **PDF Viewing**: Integrate Syncfusion PDF Viewer component (licensed) for all PDF rendering
+- **Rich Text Editing**: Use TipTap-based NotionEditor with floating toolbars for annotation content creation
 - **Text Annotation**: Implement click-drag text selection with coordinate-based positioning (not DOM-based)
 - **Annotation CRUD**: Store all annotations in Supabase with automatic RLS protection
 - **Cross-Document Navigation**: Enable seamless switching between PDFs and their annotations
@@ -26,7 +27,8 @@ inclusion: always
 
 ### User Experience Patterns
 When building UI flows, follow these established patterns:
-- **Annotation Flow**: Text selection → Note dialog → Save (minimize clicks)
+- **Annotation Flow**: Text selection → Note dialog with rich editor → Save (minimize clicks)
+- **Rich Text Editing**: Use floating toolbars for context-aware formatting, slash commands for quick actions
 - **Visual Feedback**: Always highlight annotated text, show hover tooltips, use preview cards
 - **Navigation**: Dashboard as central hub, easy PDF switching, breadcrumb navigation
 - **Error Handling**: Show user-friendly messages, provide retry options, log detailed errors
@@ -58,6 +60,7 @@ When building features, leverage these completed and tested systems:
 - **Supabase Backend**: Complete database with RLS, file storage with signed URLs, comprehensive error handling, and activity tracking
 - **Authentication**: Full Clerk integration with JWT-based RLS policies and automatic user data isolation
 - **PDF System**: Complete upload API (`/api/pdfs/upload`), listing API (`/api/pdfs`), individual access API (`/api/pdfs/[id]`), Syncfusion viewer integration, and coordinate-based annotations
+- **Rich Text Editor**: Complete TipTap integration with NotionEditor, floating toolbars, slash commands, and editor extensions
 - **UI Components**: Complete annotation component suite (tooltips, dialogs, overlays, preview cards) with mobile responsiveness
 - **State Management**: Redux store with RTK Query, typed hooks, selectors, and real-time cache invalidation
 - **Mobile Support**: Touch-friendly interfaces, responsive dialogs, mobile-specific interactions, and gesture handling
