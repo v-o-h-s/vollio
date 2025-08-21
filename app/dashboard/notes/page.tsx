@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useNoteSync } from "@/hooks/use-note-sync";
+import { NoteListSkeleton } from "@/components/ui/note-skeleton";
+import { NoteCard } from "@/components/ui/note-card";
 
 /**
  * Notes List Page
@@ -24,6 +27,12 @@ const NotesPage: React.FC = () => {
     error,
     refetch,
   } = useGetNotesQuery({});
+
+  // Cross-tab synchronization
+  useNoteSync({
+    enableAutoNavigation: false, // Don't auto-navigate from list page
+    enableAutoUpdate: true,
+  });
 
   const handleCreateNote = () => {
     router.push("/dashboard/notes/new");
@@ -50,16 +59,7 @@ const NotesPage: React.FC = () => {
           </Button>
         </div>
         
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="p-6 animate-pulse">
-              <div className="h-4 bg-gray-200 rounded mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded mb-4 w-3/4"></div>
-              <div className="h-20 bg-gray-200 rounded mb-4"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-            </Card>
-          ))}
-        </div>
+        <NoteListSkeleton />
       </div>
     );
   }
@@ -124,53 +124,12 @@ const NotesPage: React.FC = () => {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {notes.map((note) => (
-              <Card
+              <NoteCard
                 key={note.id}
-                className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => handleEditNote(note.id)}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-semibold text-gray-900 line-clamp-2">
-                    {note.title}
-                  </h3>
-                  {note.pdfAnnotationId && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewPDFAnnotation(note.pdfAnnotationId!);
-                      }}
-                      className="flex-shrink-0 ml-2"
-                    >
-                      <ExternalLink size={14} />
-                    </Button>
-                  )}
-                </div>
-                
-                {/* Note content preview */}
-                <div className="text-gray-600 text-sm mb-4 line-clamp-3">
-                  {note.content?.content?.[0]?.content?.[0]?.text || "Empty note"}
-                </div>
-                
-                {/* Metadata */}
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Calendar size={12} />
-                    <span>
-                      {formatDistanceToNow(new Date(note.updatedAt), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                  </div>
-                  
-                  {note.pdfAnnotationId && (
-                    <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-                      Linked to PDF
-                    </span>
-                  )}
-                </div>
-              </Card>
+                note={note}
+                onEdit={handleEditNote}
+                onViewAnnotation={handleViewPDFAnnotation}
+              />
             ))}
           </div>
         )}

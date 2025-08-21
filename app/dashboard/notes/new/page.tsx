@@ -3,14 +3,15 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCreateNoteMutation } from "@/lib/store/apiSlice";
-import { NotionEditor } from "@/components/editor/NotionEditor";
-import { EditorProvider } from "@/components/editor/EditorProvider";
+import { LazyNotionEditor } from "@/components/editor/LazyNotionEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Save, FileText } from "lucide-react";
 import { JSONContent } from "@/lib/types";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useNoteSync } from "@/hooks/use-note-sync";
+import { noteNotifications } from "@/lib/utils/note-notifications";
 
 /**
  * Interface for PDF selection data passed via URL params
@@ -49,6 +50,9 @@ const NewNotePage: React.FC = () => {
 
   // Mutations
   const [createNote] = useCreateNoteMutation();
+
+  // Cross-tab synchronization
+  const { broadcastCreate } = useNoteSync();
 
   // Parse selection data from URL params if present
   useEffect(() => {
@@ -125,11 +129,12 @@ const NewNotePage: React.FC = () => {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      alert("Please enter a title for your note");
+      noteNotifications.createError("Please enter a title for your note");
       return;
     }
 
     setIsSaving(true);
+    const loadingToast = noteNotifications.loading("Creating note...");
     
     try {
       const annotationId = searchParams.get("annotationId");
@@ -140,6 +145,9 @@ const NewNotePage: React.FC = () => {
         pdfAnnotationId: annotationId || undefined,
       }).unwrap();
 
+      // Broadcast creation to other tabs
+      broadcastCreate(result);
+
       // If we have selection data, we need to create an annotation
       if (selectionData) {
         // TODO: Create annotation and link it to the note
@@ -147,10 +155,13 @@ const NewNotePage: React.FC = () => {
         console.log("TODO: Create annotation for selection:", selectionData);
       }
 
+      noteNotifications.dismiss(loadingToast);
+      noteNotifications.createSuccess(title.trim());
       router.push(`/dashboard/notes/${result.id}`);
     } catch (error) {
       console.error("Failed to create note:", error);
-      alert("Failed to create note. Please try again.");
+      noteNotifications.dismiss(loadingToast);
+      noteNotifications.createError();
     } finally {
       setIsSaving(false);
     }
@@ -230,14 +241,12 @@ const NewNotePage: React.FC = () => {
           </div>
 
           {/* Rich Text Editor */}
-          <EditorProvider>
-            <NotionEditor
-              initialContent={content}
-              onChange={setContent}
-              placeholder="Start writing your note..."
-              className="min-h-[400px]"
-            />
-          </EditorProvider>
+          <LazyNotionEditor
+            initialContent={content}
+            onChange={setContent}
+            placeholder="Start writing your note..."
+            className="min-h-[400px]"
+          />
         </Card>
 
         {/* Footer Actions */}

@@ -11,13 +11,15 @@ import {
   Upload,
   AlertTriangle,
   RefreshCw,
+  Edit3,
 } from "lucide-react";
-import { useGetPDFsQuery } from "@/lib/store/apiSlice";
+import { useGetPDFsQuery, useGetNotesQuery } from "@/lib/store/apiSlice";
 import { useRouter } from "next/navigation";
 import { RecentActivityDisplay } from "@/components/dashboard";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppError } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { useNoteSync } from "@/hooks/use-note-sync";
 
 // Simple time formatting function
 const formatTimeAgo = (date: string | Date) => {
@@ -50,9 +52,22 @@ export default function DashboardPage() {
     refetch,
   } = useGetPDFsQuery();
 
+  // Fetch user's notes
+  const {
+    data: notes = [],
+    isLoading: isLoadingNotes,
+    error: notesError,
+  } = useGetNotesQuery({});
+
   const pdfs = pdfData?.pdfs || [];
   const recentActivity = pdfData?.recentActivity;
   const totalCount = pdfData?.totalCount || 0;
+
+  // Cross-tab synchronization
+  useNoteSync({
+    enableAutoNavigation: false, // Don't auto-navigate from dashboard
+    enableAutoUpdate: true,
+  });
 
   const handleUploadClick = () => {
     // TODO: Create upload page or modal
@@ -61,6 +76,14 @@ export default function DashboardPage() {
 
   const handlePDFClick = (pdfId: string) => {
     router.push(`/dashboard/pdf/${pdfId}`);
+  };
+
+  const handleCreateNote = () => {
+    router.push("/dashboard/notes/new");
+  };
+
+  const handleViewNotes = () => {
+    router.push("/dashboard/notes");
   };
 
   return (
@@ -176,7 +199,9 @@ export default function DashboardPage() {
                 <BookOpen size={24} className="text-white" />
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-gray-900">0</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {isLoadingNotes ? "..." : notes.length}
+                </div>
                 <div className="text-xs text-gray-500 font-medium">Created</div>
               </div>
             </div>
@@ -184,11 +209,20 @@ export default function DashboardPage() {
               Notes Created
             </h3>
             <p className="text-gray-600 text-sm font-medium">
-              Start taking notes on your PDFs
+              {isLoadingNotes
+                ? "Loading..."
+                : notes.length === 0
+                ? "Start taking notes on your PDFs"
+                : `${notes.length} note${notes.length === 1 ? "" : "s"} created`}
             </p>
             <div className="mt-4 pt-4 border-t border-gray-100">
-              <button className="text-green-600 text-sm font-semibold hover:text-green-700 transition-colors">
-                Create your first note →
+              <button 
+                onClick={notes.length === 0 ? handleCreateNote : handleViewNotes}
+                className="text-green-600 text-sm font-semibold hover:text-green-700 transition-colors"
+              >
+                {notes.length === 0
+                  ? "Create your first note"
+                  : "View all notes"} →
               </button>
             </div>
           </div>
@@ -253,21 +287,26 @@ export default function DashboardPage() {
               </button>
             </div>
 
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100/50 p-6 rounded-2xl border border-gray-200/60">
+            <div className="bg-gradient-to-br from-green-50 to-green-100/50 p-6 rounded-2xl border border-green-200/60">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-10 h-10 bg-gray-500 rounded-xl flex items-center justify-center">
-                  <Clock size={20} className="text-white" />
+                <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                  <Edit3 size={20} className="text-white" />
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-gray-900">
-                    Recent Activity
+                    Create Note
                   </h3>
-                  <p className="text-gray-600 text-sm font-medium">
-                    Track your progress
+                  <p className="text-green-700 text-sm font-medium">
+                    Rich text editor with PDF linking
                   </p>
                 </div>
               </div>
-              <RecentActivityDisplay showTitle={false} compact={true} />
+              <button
+                onClick={handleCreateNote}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-green-500/25"
+              >
+                Create New Note
+              </button>
             </div>
           </div>
         </div>
@@ -281,6 +320,61 @@ export default function DashboardPage() {
           </div>
           <RecentActivityDisplay />
         </div>
+
+        {/* Recent Notes Section */}
+        {!isLoadingNotes && notes.length > 0 && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                Recent Notes
+              </h2>
+              <button
+                onClick={handleViewNotes}
+                className="text-green-600 text-sm font-semibold hover:text-green-700 transition-colors"
+              >
+                View All Notes →
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {notes.slice(0, 6).map((note) => (
+                <div
+                  key={note.id}
+                  onClick={() => router.push(`/dashboard/notes/${note.id}`)}
+                  className="group bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg hover:shadow-green-500/10 hover:border-green-200 transition-all duration-300 cursor-pointer"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <Edit3 size={24} className="text-white" />
+                  </div>
+
+                  <div className="space-y-2 mb-4">
+                    <h3 className="font-bold text-lg text-gray-900 truncate group-hover:text-green-600 transition-colors">
+                      {note.title}
+                    </h3>
+                    <div className="text-sm text-gray-500 line-clamp-2">
+                      {note.content?.content?.[0]?.content?.[0]?.text || "Empty note"}
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span>{formatTimeAgo(note.updatedAt)}</span>
+                      {note.pdfAnnotationId && (
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
+                          Linked to PDF
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <button className="flex items-center gap-2 text-green-600 text-sm font-semibold hover:text-green-700 transition-colors">
+                      <Edit3 size={16} />
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* PDF List Section */}
         {!isLoadingPDFs && totalCount > 0 && (

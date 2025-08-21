@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGetNoteQuery, useUpdateNoteMutation, useDeleteNoteMutation } from "@/lib/store/apiSlice";
-import { NotionEditor } from "@/components/editor/NotionEditor";
-import { EditorProvider } from "@/components/editor/EditorProvider";
+import { LazyNotionEditor } from "@/components/editor/LazyNotionEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -20,6 +19,9 @@ import {
 import { JSONContent } from "@/lib/types";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { formatDistanceToNow } from "date-fns";
+import { useNoteSync } from "@/hooks/use-note-sync";
+import { NoteEditorSkeleton } from "@/components/ui/note-skeleton";
+import { noteNotifications } from "@/lib/utils/note-notifications";
 
 interface NotePageProps {
   params: {
@@ -58,6 +60,12 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
   const [updateNote] = useUpdateNoteMutation();
   const [deleteNote] = useDeleteNoteMutation();
 
+  // Cross-tab synchronization
+  const { broadcastUpdate, broadcastDelete } = useNoteSync({
+    enableAutoNavigation: true,
+    enableAutoUpdate: true,
+  });
+
   // Initialize form data when note loads
   useEffect(() => {
     if (note) {
@@ -78,7 +86,7 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      alert("Please enter a title for your note");
+      noteNotifications.updateError("Please enter a title for your note");
       return;
     }
 
@@ -94,9 +102,17 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
       }).unwrap();
 
       setHasUnsavedChanges(false);
+
+      // Broadcast update to other tabs
+      broadcastUpdate(id, {
+        title: title.trim(),
+        content,
+      });
+
+      noteNotifications.updateSuccess(title.trim());
     } catch (error) {
       console.error("Failed to update note:", error);
-      alert("Failed to save note. Please try again.");
+      noteNotifications.updateError();
     } finally {
       setIsSaving(false);
     }
@@ -108,13 +124,21 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
     }
 
     setIsDeleting(true);
+    const loadingToast = noteNotifications.loading("Deleting note...");
     
     try {
       await deleteNote(id).unwrap();
+      
+      // Broadcast deletion to other tabs
+      broadcastDelete(id);
+      
+      noteNotifications.dismiss(loadingToast);
+      noteNotifications.deleteSuccess(title);
       router.push("/dashboard/notes");
     } catch (error) {
       console.error("Failed to delete note:", error);
-      alert("Failed to delete note. Please try again.");
+      noteNotifications.dismiss(loadingToast);
+      noteNotifications.deleteError();
       setIsDeleting(false);
     }
   };
@@ -138,25 +162,7 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="sm" onClick={() => router.back()}>
-            <ArrowLeft size={16} />
-          </Button>
-          <div className="h-8 bg-gray-200 rounded w-48 animate-pulse"></div>
-        </div>
-        
-        <Card className="p-6">
-          <div className="h-6 bg-gray-200 rounded mb-6 animate-pulse"></div>
-          <div className="space-y-3">
-            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
-          </div>
-        </Card>
-      </div>
-    );
+    return <NoteEditorSkeleton />;
   }
 
   // Error state
@@ -305,14 +311,12 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
           </div>
 
           {/* Rich Text Editor */}
-          <EditorProvider>
-            <NotionEditor
-              initialContent={content}
-              onChange={setContent}
-              placeholder="Start writing your note..."
-              className="min-h-[400px]"
-            />
-          </EditorProvider>
+          <LazyNotionEditor
+            initialContent={content}
+            onChange={setContent}
+            placeholder="Start writing your note..."
+            className="min-h-[400px]"
+          />
         </Card>
 
         {/* Footer Actions */}

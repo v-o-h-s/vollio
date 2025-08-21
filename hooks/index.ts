@@ -20,8 +20,12 @@ export { useRetry } from './use-retry';
 export { useNetworkStatus } from './use-network-status';
 export { useEditorErrorRecovery } from './use-editor-error-recovery';
 
+// Cross-tab synchronization hooks
+export { useNoteSync } from './use-note-sync';
+
 // Re-export types
 export type { AutoSaveOptions, AutoSaveState } from './use-auto-save';
 export type { OfflineStorageOptions, OfflineStorageState } from './use-offline-storage';
 export type { RetryOptions, RetryState } from './use-retry';
 export type { NetworkStatus, NetworkStatusOptions } from './use-network-status';
+export type { UseNoteSyncOptions, UseNoteSyncReturn } from './use-note-sync';
