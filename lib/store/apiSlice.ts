@@ -11,9 +11,15 @@ import {
   Annotation,
   PDFDocument,
   UserActivity,
+  Note,
+  JSONContent,
   SupabaseUploadResponse,
   SupabasePDFListResponse,
   SupabasePDFAccessResponse,
+  SupabaseNotesResponse,
+  SupabaseNoteResponse,
+  CreateNoteRequest,
+  UpdateNoteRequest,
 } from "../types";
 import { AppError, ErrorType } from "../types/errors";
 import {
@@ -94,7 +100,7 @@ const baseQueryWithRetry: BaseQueryFn = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithRetry,
-  tagTypes: ["Annotation", "PDF"],
+  tagTypes: ["Annotation", "PDF", "Note"],
   endpoints: (builder) => ({
     // PDF endpoints with enhanced error handling
     uploadPDF: builder.mutation<PDFDocument, FormData>({
@@ -380,6 +386,231 @@ export const apiSlice = createApi({
         }
       },
     }),
+
+    // Notes endpoints with error handling
+    getNotes: builder.query<Note[], { pdfAnnotationId?: string }>({
+      query: ({ pdfAnnotationId } = {}) => ({
+        url: "notes",
+        params: pdfAnnotationId ? { pdfAnnotationId } : undefined,
+      }),
+      transformResponse: (response: SupabaseNotesResponse) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch notes",
+            { component: "NotesList", action: "fetch" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any) => {
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            { component: "NotesList", action: "fetch" }
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            { component: "NotesList", action: "fetch" }
+          );
+        }
+        return mapErrorToAppError(response, {
+          component: "NotesList",
+          action: "fetch",
+        });
+      },
+      providesTags: (result) => [
+        { type: "Note", id: "LIST" },
+        ...(result?.map((note) => ({ type: "Note" as const, id: note.id })) ||
+          []),
+      ],
+    }),
+
+    getNote: builder.query<Note, string>({
+      query: (noteId) => `notes/${noteId}`,
+      transformResponse: (response: SupabaseNoteResponse) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch note",
+            { component: "NoteEditor", action: "load" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any, meta, noteId) => {
+        const context = { component: "NoteEditor", action: "load", noteId };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Note not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result, error, noteId) => [{ type: "Note", id: noteId }],
+    }),
+
+    createNote: builder.mutation<Note, CreateNoteRequest>({
+      query: (noteData) => ({
+        url: "notes",
+        method: "POST",
+        body: noteData,
+      }),
+      transformResponse: (response: SupabaseNoteResponse) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to create note",
+            { component: "NoteEditor", action: "create" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "NoteEditor", action: "create" };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid note data",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: [{ type: "Note", id: "LIST" }],
+    }),
+
+    updateNote: builder.mutation<Note, { id: string; updates: UpdateNoteRequest }>({
+      query: ({ id, updates }) => ({
+        url: `notes/${id}`,
+        method: "PUT",
+        body: updates,
+      }),
+      transformResponse: (response: SupabaseNoteResponse) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to update note",
+            { component: "NoteEditor", action: "update" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any, meta, { id }) => {
+        const context = { component: "NoteEditor", action: "update", noteId: id };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid note data",
+            context
+          );
+        } else if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Note not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Note", id: "LIST" },
+        { type: "Note", id },
+      ],
+    }),
+
+    deleteNote: builder.mutation<{ success: boolean }, string>({
+      query: (noteId) => ({
+        url: `notes/${noteId}`,
+        method: "DELETE",
+      }),
+      transformResponse: (response: any) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to delete note",
+            { component: "NoteEditor", action: "delete" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, noteId) => {
+        const context = { component: "NoteEditor", action: "delete", noteId };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Note not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, noteId) => [
+        { type: "Note", id: "LIST" },
+        { type: "Note", id: noteId },
+      ],
+    }),
   }),
 });
 
@@ -389,6 +620,11 @@ export const {
   useGetPDFsQuery,
   useGetPDFQuery,
   useDeletePDFMutation,
+  useGetNotesQuery,
+  useGetNoteQuery,
+  useCreateNoteMutation,
+  useUpdateNoteMutation,
+  useDeleteNoteMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

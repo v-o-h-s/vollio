@@ -21,6 +21,7 @@ import { usePathname } from 'next/navigation'
 import {
     Home,
     FileText,
+    NotebookPen,
     PanelLeftClose,
     PanelLeftOpen,
     Menu,
@@ -51,6 +52,12 @@ const navigationItems = [
         href: '/dashboard/pdfs',
         icon: FileText,
         description: 'View and manage all your PDFs'
+    },
+    {
+        name: 'Notes',
+        href: '/dashboard/notes',
+        icon: NotebookPen,
+        description: 'Create and manage rich text notes'
     },
     {
         name: 'Editor Test',

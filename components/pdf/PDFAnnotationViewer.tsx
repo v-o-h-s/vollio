@@ -240,7 +240,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       })
     );
 
-    router.push(`/dashboard/note/new?selection=${selectionData}`);
+    router.push(`/dashboard/notes/new?selection=${selectionData}`);
   }, [activeSelection, currentPdfData, router]);
 
   /**
@@ -278,7 +278,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       const annotation = annotations[annotationId];
       if (annotation) {
         // Navigate to the note for this annotation
-        router.push(`/dashboard/note/${annotationId}`);
+        // We need to find the note that's linked to this annotation
+        router.push(`/dashboard/annotations/${annotationId}`);
       }
     },
     [annotations, router]
@@ -289,7 +290,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    */
   const handleAnnotationEdit = useCallback(
     (annotationId: string) => {
-      router.push(`/dashboard/note/${annotationId}`);
+      // Navigate to edit the note linked to this annotation
+      router.push(`/dashboard/annotations/${annotationId}`);
     },
     [router]
   );

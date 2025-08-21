@@ -111,6 +111,38 @@ export interface Database {
           updated_at?: string;
         };
       };
+      notes: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          content: any; // TipTap JSONContent
+          pdf_annotation_id: string | null;
+          created_at: string;
+          updated_at: string;
+          is_deleted: boolean;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title?: string;
+          content?: any; // TipTap JSONContent
+          pdf_annotation_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          is_deleted?: boolean;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          content?: any; // TipTap JSONContent
+          pdf_annotation_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          is_deleted?: boolean;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -144,5 +176,9 @@ export type AnnotationInsert =
   Database["public"]["Tables"]["annotations"]["Insert"];
 export type AnnotationUpdate =
   Database["public"]["Tables"]["annotations"]["Update"];
+
+export type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
+export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
+export type NoteUpdate = Database["public"]["Tables"]["notes"]["Update"];
 
 export type ActivityType = Database["public"]["Enums"]["activity_type"];

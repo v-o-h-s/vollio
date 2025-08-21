@@ -31,6 +31,29 @@ export interface Annotation {
   updatedAt: string; // ISO string for Redux serialization
 }
 
+// TipTap JSONContent interface for rich text editor
+export interface JSONContent {
+  type?: string;
+  attrs?: Record<string, any>;
+  content?: JSONContent[];
+  marks?: Array<{
+    type: string;
+    attrs?: Record<string, any>;
+  }>;
+  text?: string;
+}
+
+export interface Note {
+  id: string;
+  userId: string;
+  title: string;
+  content: JSONContent; // TipTap JSONContent format
+  pdfAnnotationId?: string | null;
+  createdAt: string; // ISO string for Redux serialization
+  updatedAt: string; // ISO string for Redux serialization
+  isDeleted: boolean;
+}
+
 export interface PDFDocument {
   id: string;
   userId: string;
@@ -277,6 +300,30 @@ export interface SupabaseActivityResponse {
     };
   };
   error?: string;
+}
+
+// Notes API response interfaces
+export interface SupabaseNotesResponse {
+  success: boolean;
+  data?: Note[];
+  error?: string;
+}
+
+export interface SupabaseNoteResponse {
+  success: boolean;
+  data?: Note;
+  error?: string;
+}
+
+export interface CreateNoteRequest {
+  title?: string;
+  content: JSONContent;
+  pdfAnnotationId?: string;
+}
+
+export interface UpdateNoteRequest {
+  title?: string;
+  content?: JSONContent;
 }
 
 // Authentication-related interfaces
