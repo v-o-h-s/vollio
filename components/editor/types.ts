@@ -61,6 +61,9 @@ export interface EditorState {
   isLoading: boolean;
   error: string | null;
   hasUnsavedChanges: boolean;
+  isSaving: boolean;
+  lastSaved: Date | null;
+  saveError: Error | null;
 }
 
 export interface EditorContextValue extends EditorState {
@@ -72,4 +75,6 @@ export interface EditorContextValue extends EditorState {
   markAsSaved: () => void;
   markAsUnsaved: () => void;
   resetEditor: () => void;
+  saveNow: () => Promise<void>;
+  resetSaveError: () => void;
 }

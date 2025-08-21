@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useCallback, useState, useRef } from 'react';
 import type { Editor } from '@tiptap/react';
 import type { EditorContent } from './types';
+import { useEditorAutoSave } from '@/hooks/use-editor-auto-save';
 
 interface EditorState {
   editor: Editor | null;
@@ -10,6 +11,9 @@ interface EditorState {
   isLoading: boolean;
   error: string | null;
   hasUnsavedChanges: boolean;
+  isSaving: boolean;
+  lastSaved: Date | null;
+  saveError: Error | null;
 }
 
 interface EditorContextValue extends EditorState {
@@ -21,6 +25,8 @@ interface EditorContextValue extends EditorState {
   markAsSaved: () => void;
   markAsUnsaved: () => void;
   resetEditor: () => void;
+  saveNow: () => Promise<void>;
+  resetSaveError: () => void;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -28,13 +34,23 @@ const EditorContext = createContext<EditorContextValue | null>(null);
 interface EditorProviderProps {
   children: React.ReactNode;
   initialContent?: EditorContent;
+  noteId?: string;
+  title?: string;
+  autoSaveEnabled?: boolean;
+  autoSaveDelay?: number;
   onError?: (error: string) => void;
+  onSave?: (content: EditorContent) => void;
 }
 
 export function EditorProvider({ 
   children, 
   initialContent,
-  onError 
+  noteId,
+  title,
+  autoSaveEnabled = true,
+  autoSaveDelay = 2000,
+  onError,
+  onSave
 }: EditorProviderProps) {
   const [state, setState] = useState<EditorState>({
     editor: null,
@@ -42,9 +58,39 @@ export function EditorProvider({
     isLoading: false,
     error: null,
     hasUnsavedChanges: false,
+    isSaving: false,
+    lastSaved: null,
+    saveError: null,
   });
 
   const errorTimeoutRef = useRef<NodeJS.Timeout|null>(null);
+
+  // Auto-save functionality
+  const autoSaveState = useEditorAutoSave(
+    { content: state.content || { type: 'doc' }, title },
+    {
+      noteId,
+      delay: autoSaveDelay,
+      enabled: autoSaveEnabled && !!state.content,
+      onSaveStart: () => {
+        setState(prev => ({ ...prev, isSaving: true, saveError: null }));
+      },
+      onSaveComplete: () => {
+        setState(prev => ({ 
+          ...prev, 
+          isSaving: false, 
+          hasUnsavedChanges: false,
+          lastSaved: new Date(),
+          saveError: null 
+        }));
+        onSave?.(state.content!);
+      },
+      onError: (error) => {
+        setState(prev => ({ ...prev, isSaving: false, saveError: error }));
+        onError?.(error.message);
+      },
+    }
+  );
 
   const setEditor = useCallback((editor: Editor | null) => {
     setState(prev => ({ ...prev, editor }));
@@ -100,11 +146,22 @@ export function EditorProvider({
       isLoading: false,
       error: null,
       hasUnsavedChanges: false,
+      isSaving: false,
+      lastSaved: null,
+      saveError: null,
     });
   }, [initialContent]);
 
+  const resetSaveError = useCallback(() => {
+    setState(prev => ({ ...prev, saveError: null }));
+    autoSaveState.resetError();
+  }, [autoSaveState]);
+
   const contextValue: EditorContextValue = {
     ...state,
+    isSaving: autoSaveState.isSaving,
+    lastSaved: autoSaveState.lastSaved,
+    saveError: autoSaveState.error,
     setEditor,
     updateContent,
     setLoading,
@@ -113,6 +170,8 @@ export function EditorProvider({
     markAsSaved,
     markAsUnsaved,
     resetEditor,
+    saveNow: autoSaveState.saveNow,
+    resetSaveError,
   };
 
   return (
