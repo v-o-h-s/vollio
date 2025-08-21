@@ -2,7 +2,9 @@
 export { useActivityTracking } from './use-activity-tracking';
 export { useErrorHandling } from './use-error-handling';
 export { useKeyboardShortcuts } from './use-keyboard-shortcuts';
-export { useMobile } from './use-mobile';
+export { useMobile, useIsMobile } from './use-mobile';
+export { useTouchGestures, useHapticFeedback } from './use-touch-gestures';
+export { useMobileKeyboard, useMobileFocus, preventIOSZoom } from './use-mobile-keyboard';
 
 // Auto-save and persistence hooks
 export { useAutoSave } from './use-auto-save';

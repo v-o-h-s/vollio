@@ -1065,4 +1065,108 @@ body:has(.pdf-focus-mode) .mx-auto {
 
 .floating-toolbar {
   animation: floating-toolbar-appear 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}/* Mobile
+ Editor Styles */
+@media (max-width: 768px) {
+  /* Prevent zoom on iOS */
+  input, textarea, select, [contenteditable] {
+    font-size: 16px !important;
+  }
+
+  /* Touch-friendly editor styles */
+  .ProseMirror {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Mobile toolbar styles */
+  .mobile-editor-toolbar {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  /* Selection handle styles */
+  .selection-handle {
+    touch-action: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Floating toolbar adjustments */
+  .floating-toolbar {
+    transform: scale(1.1);
+    min-height: 44px; /* iOS minimum touch target */
+  }
+
+  /* Keyboard height adjustment */
+  .editor-container {
+    height: calc(100vh - var(--keyboard-height, 0px));
+    transition: height 0.3s ease;
+  }
+
+  /* Viewport height adjustment */
+  .mobile-editor-content {
+    min-height: var(--viewport-height, 100vh);
+    padding-bottom: var(--keyboard-height, 0px);
+  }
+}
+
+/* Haptic feedback animation */
+@keyframes haptic-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.haptic-feedback {
+  animation: haptic-pulse 0.1s ease-out;
+}
+
+/* Touch gesture indicators */
+.drag-indicator {
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  animation: pulse 1s infinite;
+}
+
+.selection-highlight {
+  background: var(--primary);
+  opacity: 0.2;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Mobile slash command styles */
+.mobile-slash-command {
+  max-height: 60vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile formatting panel */
+.mobile-formatting-panel {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border);
+}
+
+/* Ensure proper touch targets */
+.mobile-touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Smooth transitions for mobile interactions */
+.mobile-transition {
+  transition: all 0.2s ease-out;
+}
+
+/* Prevent text selection on UI elements */
+.mobile-ui-element {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
