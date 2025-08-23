@@ -50,6 +50,8 @@ function NotionEditorInner({
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [isAccessibilitySettingsOpen, setIsAccessibilitySettingsOpen] = useState(false);
+  const { settings } = useAccessibility();
+  
   const editor = useEditor({
     immediatelyRender:false,
     extensions: [
@@ -229,7 +231,6 @@ function NotionEditorInner({
   });
 
   const { announceToScreenReader } = useEditorAccessibility(editor);
-  const { settings } = useAccessibility();
 
   // Handle dialog keyboard shortcuts
   useEffect(() => {

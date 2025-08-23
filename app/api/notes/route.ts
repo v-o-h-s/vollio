@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/utils/supabase-helpers";
+import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import { withErrorHandling } from "@/lib/utils/server-error-handling";
 import { NoteInsert, NoteUpdate } from "@/lib/types/database";
 
@@ -15,7 +15,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const pdfAnnotationId = searchParams.get("pdfAnnotationId");
 
-  let query = supabase
+  let query = (await supabase)
     .from("notes")
     .select("*")
     .eq("is_deleted", false)
@@ -77,7 +77,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     pdf_annotation_id: pdfAnnotationId || null,
   };
 
-  const { data: note, error } = await supabase
+  const { data: note, error } = await (await supabase)
     .from("notes")
     .insert(noteData)
     .select()

@@ -10,10 +10,11 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 
 - **Secure PDF Upload & Storage**: Complete Supabase Storage integration with comprehensive file validation, signed URLs, and automatic expiration handling
 - **Advanced PDF Viewer**: Full Syncfusion PDF Viewer integration with text selection, zoom, search, navigation, and coordinate-based positioning
-- **Rich Text Editor**: TipTap-based editor with floating toolbars, slash commands, and advanced formatting options
+- **Notion-like Rich Text Editor**: Complete TipTap-based block editor with floating toolbars, slash commands, advanced formatting, cross-tab synchronization, and seamless PDF annotation integration
 - **Intelligent Text Selection**: Precise coordinate calculation for desktop tooltips and mobile-optimized annotation dialogs
 - **Real-time Activity Tracking**: Debounced user activity monitoring with automatic cache invalidation and recent activity display
-- **Cross-Document Navigation**: Seamless navigation between PDFs and annotations with cross-tab communication via PostMessage API
+- **Cross-Document Navigation**: Seamless navigation between PDFs, annotations, and notes with cross-tab communication via PostMessage API and BroadcastChannel
+- **Note Management System**: Complete note creation, editing, and management with rich text content, PDF linking, and real-time synchronization
 - **Comprehensive Error Handling**: Retry mechanisms, fallback UI components, and graceful error recovery
 
 ### User Experience
@@ -135,6 +136,7 @@ For comprehensive documentation covering all aspects of the Noto application, se
 - **Database**: Supabase with Row Level Security (RLS)
 - **File Storage**: Supabase Storage with signed URLs
 - **PDF Rendering**: Syncfusion PDF Viewer (licensed)
+- **Rich Text Editor**: TipTap with custom extensions for block-based editing
 - **Testing**: Vitest with React Testing Library
 
 ### Project Structure
@@ -147,7 +149,8 @@ For comprehensive documentation covering all aspects of the Noto application, se
 ├── components/            # React components
 │   ├── ui/               # shadcn/ui components
 │   ├── pdf/              # PDF-related components
-│   └── note/             # Note-taking components
+│   ├── editor/           # Notion-like rich text editor components
+│   └── dashboard/        # Dashboard and navigation components
 ├── lib/                   # Utilities and configurations
 │   ├── store/            # Redux store and slices
 │   ├── types/            # TypeScript type definitions
@@ -159,36 +162,55 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 ### Key Components
 
+#### PDF System
 - **PDFAnnotationViewer**: Main PDF viewer with Syncfusion integration, Supabase URL handling, and activity tracking
-- **NotionEditor**: Rich text editor with TipTap integration, floating toolbars, and advanced formatting
-- **FloatingToolbar Suite**: Multiple toolbar variants for different editing contexts (basic, advanced, PDF annotation)
 - **AnnotationOverlay**: Renders interactive annotation highlights with hover states and click handling
 - **AnnotationTooltip**: Desktop text selection interface with smart positioning
 - **MobileAnnotationDialog**: Mobile-optimized annotation creation with touch-friendly design
 - **AnnotationPreviewCard**: Hover preview cards with annotation content and edit/delete actions
+
+#### Notion-like Editor System
+- **NotionEditor**: Complete block-based rich text editor with TipTap integration
+- **EditorProvider**: Context provider for editor state management and cross-component communication
+- **FloatingToolbar Suite**: Multiple toolbar variants (basic, advanced, PDF annotation) with intelligent positioning
+- **SlashCommand Extension**: Notion-style slash commands for quick block creation and formatting
+- **ImageUpload Extension**: Drag-and-drop image upload with Supabase storage integration
+- **EnhancedLink Extension**: Advanced link handling with validation and auto-detection
+- **KeyboardShortcuts Extension**: Comprehensive keyboard shortcuts for accessibility and efficiency
+- **LazyNotionEditor**: Performance-optimized wrapper with lazy loading and skeleton states
+
+#### Note Management System
+- **Note Creation/Editing Pages**: Complete CRUD interface for note management with rich text editing
+- **NoteCard**: Optimized note display component with preview and metadata
+- **NoteSkeleton**: Loading states and skeleton UI for better perceived performance
+- **Cross-tab Synchronization**: Real-time note updates across browser tabs using BroadcastChannel and PostMessage
+
+#### Core Infrastructure
 - **Activity Tracking System**: Real-time user activity monitoring with debounced tracking
-- **Dashboard**: PDF management with recent activity display and signed URL integration
-- **Error Boundaries**: Comprehensive error handling with recovery mechanisms
+- **Dashboard**: PDF and note management with recent activity display and signed URL integration
+- **Error Boundaries**: Comprehensive error handling with recovery mechanisms and user-friendly messages
+- **Toast Notification System**: User feedback for all operations with contextual messages
 
 ## 📱 User Experience
 
 ### Desktop Workflow
 
-1. Upload PDF via drag-and-drop or file picker
-2. PDF loads in Syncfusion viewer with full navigation
-3. Select text to show annotation tooltip
-4. Create annotation with note content
-5. View existing annotations with hover previews
-6. Navigate between PDFs from dashboard
+1. **PDF Management**: Upload PDF via drag-and-drop or file picker
+2. **PDF Viewing**: PDF loads in Syncfusion viewer with full navigation and search
+3. **Text Annotation**: Select text to show annotation tooltip with rich text editor
+4. **Note Creation**: Create standalone notes with Notion-like block editor
+5. **Rich Text Editing**: Use slash commands, floating toolbars, and keyboard shortcuts
+6. **Cross-tab Sync**: Real-time updates across browser tabs and windows
+7. **Navigation**: Seamless switching between PDFs, annotations, and notes
 
 ### Mobile Workflow
 
-1. Upload PDF with touch-friendly interface
-2. PDF displays with mobile-optimized viewer
-3. Touch-select text to open annotation dialog
-4. Create annotation in full-screen modal
-5. Tap existing annotations to view/edit
-6. Swipe navigation between documents
+1. **Touch-friendly Upload**: Upload PDF with mobile-optimized interface
+2. **Mobile PDF Viewer**: PDF displays with touch gestures and zoom controls
+3. **Touch Text Selection**: Long-press text to open annotation dialog
+4. **Mobile Editor**: Full-screen rich text editor with touch-optimized controls
+5. **Gesture Navigation**: Swipe and tap navigation between documents and notes
+6. **Responsive Design**: Adaptive UI that works seamlessly across all screen sizes
 
 ## 🔧 Development
 

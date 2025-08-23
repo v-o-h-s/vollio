@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Editor } from '@tiptap/react';
 import {
   Copy,
-  Cut,
+  Scissors,
   Clipboard,
   Bold,
   Italic,
@@ -71,7 +71,7 @@ export function MobileContextMenu({
         {
           id: 'cut',
           label: 'Cut',
-          icon: Cut,
+          icon: Scissors,
           action: () => {
             document.execCommand('cut');
             successFeedback();

@@ -22,6 +22,7 @@ This folder contains the comprehensive documentation for the Noto PDF annotation
 
 ### Component Documentation
 - **[PDF Components](../components/pdf/README.md)** - PDF viewer and annotation component suite
+- **[Editor Components](../components/editor/README.md)** - Notion-like rich text editor system with floating toolbars and cross-tab sync
 - **[Store Documentation](../lib/store/README.md)** - Redux state management and RTK Query setup
 - **[Test Documentation](../test/README.md)** - Testing strategy, coverage, and running tests
 
@@ -41,6 +42,7 @@ For a complete overview of all documentation resources organized by audience and
 
 ### By Feature
 - **PDF Management**: [API Documentation](./API_DOCUMENTATION.md) → [PDF Components](../components/pdf/README.md)
+- **Rich Text Editor**: [Editor Components](../components/editor/README.md) → [Technical Guidelines](../.kiro/steering/tech.md)
 - **Backend Integration**: [Supabase Setup](./SUPABASE_SETUP.md) → [API Documentation](./API_DOCUMENTATION.md)
 - **Error Handling**: [Error Handling](./ERROR_HANDLING.md) → [Technical Guidelines](../.kiro/steering/tech.md)
 

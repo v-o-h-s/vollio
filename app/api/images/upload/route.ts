@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { getAuthenticatedSupabaseClient } from '@/lib/utils/supabase-helpers';
+import { getAuthenticatedSupabaseClient } from '@/lib/supabaseClient'; 
 import { withErrorHandling } from '@/lib/utils/server-error-handling';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -43,7 +43,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       );
     }
 
-    const supabase = getAuthenticatedSupabaseClient();
+    const supabase = await getAuthenticatedSupabaseClient();
     
     // Generate unique filename
     const timestamp = Date.now();
