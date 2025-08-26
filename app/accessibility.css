@@ -1,0 +1,626 @@
+/* Enhanced Accessibility Styles for WCAG AA Compliance */
+
+/* Screen Reader Only Content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip Links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 9999;
+  font-weight: 600;
+  transition: top 0.2s ease-in-out;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* High Contrast Mode Styles */
+.high-contrast {
+  --background: #000000;
+  --foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #333333;
+  --secondary-foreground: #ffffff;
+  --muted: #333333;
+  --muted-foreground: #cccccc;
+  --accent: #ffffff;
+  --accent-foreground: #000000;
+  --destructive: #ff6b6b;
+  --border: #ffffff;
+  --input: #333333;
+  --ring: #ffffff;
+  --card: #111111;
+  --card-foreground: #ffffff;
+  --popover: #111111;
+  --popover-foreground: #ffffff;
+}
+
+.high-contrast * {
+  border-color: var(--border) !important;
+}
+
+.high-contrast button,
+.high-contrast [role="button"] {
+  border: 2px solid var(--border) !important;
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+.high-contrast button:hover,
+.high-contrast [role="button"]:hover {
+  background: var(--foreground) !important;
+  color: var(--background) !important;
+}
+
+.high-contrast input,
+.high-contrast textarea,
+.high-contrast select {
+  border: 2px solid var(--border) !important;
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+.high-contrast a {
+  color: var(--primary) !important;
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+}
+
+.high-contrast a:hover {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+
+/* Enhanced Focus Indicators */
+.keyboard-navigation *:focus-visible {
+  outline: 3px solid var(--ring) !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+.keyboard-navigation button:focus-visible,
+.keyboard-navigation [role="button"]:focus-visible {
+  box-shadow: 0 0 0 3px var(--ring) !important;
+}
+
+.keyboard-navigation input:focus-visible,
+.keyboard-navigation textarea:focus-visible,
+.keyboard-navigation select:focus-visible {
+  box-shadow: 0 0 0 3px var(--ring) !important;
+}
+
+/* Enhanced focus for editor elements */
+.keyboard-navigation .ProseMirror:focus-visible {
+  outline: 3px solid var(--ring) !important;
+  outline-offset: 2px !important;
+}
+
+.keyboard-navigation .editor-toolbar button:focus-visible {
+  outline: 2px solid var(--ring) !important;
+  outline-offset: 1px !important;
+}
+
+/* Reduced Motion Preferences */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+.reduced-motion .loading-shimmer {
+  animation: none !important;
+  background: var(--muted) !important;
+}
+
+/* Screen Reader Optimized Mode */
+.screen-reader-optimized {
+  /* Increase text size for better readability */
+  font-size: 1.125rem !important;
+  line-height: 1.8 !important;
+}
+
+.screen-reader-optimized .ProseMirror {
+  font-size: 1.125rem !important;
+  line-height: 1.8 !important;
+}
+
+.screen-reader-optimized button,
+.screen-reader-optimized [role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  padding: 12px 16px !important;
+}
+
+.screen-reader-optimized input,
+.screen-reader-optimized textarea,
+.screen-reader-optimized select {
+  min-height: 44px !important;
+  padding: 12px 16px !important;
+  font-size: 1rem !important;
+}
+
+/* Enhanced Editor Accessibility */
+.editor-accessibility-enhanced {
+  /* Better text contrast */
+  color: var(--foreground);
+  background: var(--background);
+}
+
+.editor-accessibility-enhanced .ProseMirror {
+  /* Improved readability */
+  font-size: 1rem;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  word-spacing: 0.05em;
+}
+
+.editor-accessibility-enhanced .ProseMirror h1,
+.editor-accessibility-enhanced .ProseMirror h2,
+.editor-accessibility-enhanced .ProseMirror h3 {
+  /* Better heading contrast */
+  font-weight: 700;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+}
+
+.editor-accessibility-enhanced .ProseMirror p {
+  /* Better paragraph spacing */
+  margin-bottom: 1em;
+}
+
+.editor-accessibility-enhanced .ProseMirror a {
+  /* Enhanced link visibility */
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+.editor-accessibility-enhanced .ProseMirror a:hover {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* Focus Mode Accessibility */
+.focus-mode-accessibility {
+  /* Ensure focus mode is accessible */
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.focus-mode-exit-button {
+  /* Accessible exit button */
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.focus-mode-exit-button:hover {
+  background: var(--primary-foreground);
+  color: var(--primary);
+  transform: scale(1.05);
+}
+
+.focus-mode-exit-button:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.focus-mode-controls {
+  /* Accessible floating controls */
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  gap: 8px;
+}
+
+.focus-mode-controls button {
+  background: var(--background);
+  color: var(--foreground);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.focus-mode-controls button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--accent);
+}
+
+.focus-mode-controls button:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Keyboard Hint Accessibility */
+.keyboard-hint {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: keyboard-hint-appear 0.3s ease-out;
+}
+
+@keyframes keyboard-hint-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Mode Toggle Accessibility */
+.mode-toggle-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  min-height: 36px;
+}
+
+.mode-toggle-button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  border-color: var(--accent);
+}
+
+.mode-toggle-button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.mode-toggle-button.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+.mode-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-left: auto;
+}
+
+/* Editor Status Bar Accessibility */
+.editor-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--muted);
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.editor-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.editor-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.editor-stat-label {
+  font-weight: 500;
+}
+
+.editor-stat-value {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+/* Accessibility Settings Button */
+.accessibility-settings-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 50;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.accessibility-settings-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.accessibility-settings-button:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Enhanced Table Accessibility */
+.ProseMirror table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.ProseMirror th {
+  background: var(--muted);
+  font-weight: 600;
+}
+
+.ProseMirror th:focus-visible,
+.ProseMirror td:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+/* Enhanced List Accessibility */
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 2rem;
+  margin: 1rem 0;
+}
+
+.ProseMirror li {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.ProseMirror li:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Enhanced Code Block Accessibility */
+.ProseMirror pre {
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.ProseMirror pre:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Enhanced Blockquote Accessibility */
+.ProseMirror blockquote {
+  border-left: 4px solid var(--primary);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--muted-foreground);
+  background: var(--muted);
+  border-radius: 0 6px 6px 0;
+  padding: 1rem;
+}
+
+.ProseMirror blockquote:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Mobile Accessibility Improvements */
+@media (max-width: 768px) {
+  .keyboard-navigation button,
+  .keyboard-navigation [role="button"] {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  .focus-mode-exit-button {
+    top: 10px;
+    left: 10px;
+    padding: 10px 14px;
+  }
+  
+  .focus-mode-controls {
+    top: 10px;
+    right: 10px;
+  }
+  
+  .accessibility-settings-button {
+    bottom: 16px;
+    right: 16px;
+    width: 52px;
+    height: 52px;
+  }
+  
+  .keyboard-hint {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    transform: none;
+    font-size: 0.8rem;
+  }
+}
+
+/* Print Accessibility */
+@media print {
+  .skip-link,
+  .focus-mode-exit-button,
+  .focus-mode-controls,
+  .accessibility-settings-button,
+  .keyboard-hint,
+  .mode-toggle-button,
+  .editor-status-bar {
+    display: none !important;
+  }
+  
+  .ProseMirror {
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+}
+
+/* Color Contrast Utilities */
+.contrast-aa {
+  /* Ensure WCAG AA compliance (4.5:1 ratio) */
+  color: var(--foreground);
+  background: var(--background);
+}
+
+.contrast-aaa {
+  /* Ensure WCAG AAA compliance (7:1 ratio) */
+  color: #000000;
+  background: #ffffff;
+}
+
+.dark .contrast-aaa {
+  color: #ffffff;
+  background: #000000;
+}
+
+/* Focus Visible Polyfill Support */
+.js-focus-visible :focus:not(.focus-visible) {
+  outline: none;
+}
+
+/* Ensure all interactive elements have proper focus styles */
+button:focus-visible,
+[role="button"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Enhanced error states for accessibility */
+.error-state {
+  border-color: var(--destructive) !important;
+  color: var(--destructive) !important;
+}
+
+.error-state:focus-visible {
+  outline-color: var(--destructive) !important;
+}
+
+.error-message {
+  color: var(--destructive);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.error-message::before {
+  content: "⚠️";
+  font-size: 1rem;
+}
+
+/* Success states for accessibility */
+.success-state {
+  border-color: var(--success-color) !important;
+  color: var(--success-color) !important;
+}
+
+.success-message {
+  color: var(--success-color);
+  font-size: 0.875rem;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.success-message::before {
+  content: "✅";
+  font-size: 1rem;
+}

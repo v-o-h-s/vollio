@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useGetNoteQuery, useUpdateNoteMutation, useDeleteNoteMutation } from "@/lib/store/apiSlice";
 import { LazyNotionEditor } from "@/components/editor/LazyNotionEditor";
@@ -14,7 +14,11 @@ import {
   ExternalLink, 
   FileText,
   Calendar,
-  RefreshCw 
+  RefreshCw,
+  Maximize2,
+  Minimize2,
+  Focus,
+  Eye
 } from "lucide-react";
 import { JSONContent } from "@/lib/types";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -22,6 +26,8 @@ import { formatDistanceToNow } from "date-fns";
 import { useNoteSync } from "@/hooks/use-note-sync";
 import { NoteEditorSkeleton } from "@/components/ui/note-skeleton";
 import { noteNotifications } from "@/lib/utils/note-notifications";
+import { cn } from "@/lib/utils";
+import type { EditorMode } from "@/components/editor/types";
 
 interface NotePageProps {
   params: {
@@ -34,6 +40,7 @@ interface NotePageProps {
  * 
  * Allows users to view and edit existing notes with the Notion-like editor.
  * Shows linked PDF annotation information and provides navigation.
+ * Supports multiple viewing modes: normal, fullscreen, and focus.
  */
 const NotePage: React.FC<NotePageProps> = ({ params }) => {
   const router = useRouter();
@@ -48,6 +55,8 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [editorMode, setEditorMode] = useState<EditorMode>('normal');
+  const [showKeyboardHint, setShowKeyboardHint] = useState(false);
 
   // Queries and mutations
   const {
@@ -83,6 +92,43 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
       setHasUnsavedChanges(titleChanged || contentChanged);
     }
   }, [title, content, note]);
+
+  // Handle mode changes with animations
+  const handleModeChange = useCallback((newMode: EditorMode) => {
+    setEditorMode(newMode);
+    
+    // Show keyboard hint for focus mode
+    if (newMode === 'focus') {
+      setShowKeyboardHint(true);
+      setTimeout(() => setShowKeyboardHint(false), 3000);
+    }
+  }, []);
+
+  // Keyboard shortcuts for mode switching
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // F11 for focus mode
+      if (event.key === 'F11') {
+        event.preventDefault();
+        handleModeChange(editorMode === 'focus' ? 'normal' : 'focus');
+      }
+      
+      // Escape to exit focus mode
+      if (event.key === 'Escape' && editorMode === 'focus') {
+        event.preventDefault();
+        handleModeChange('normal');
+      }
+      
+      // Ctrl/Cmd + Shift + F for fullscreen
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'F') {
+        event.preventDefault();
+        handleModeChange(editorMode === 'fullscreen' ? 'normal' : 'fullscreen');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [editorMode, handleModeChange]);
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -153,6 +199,19 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
     }
   };
 
+  // Mode toggle handlers
+  const handleToggleFullscreen = () => {
+    handleModeChange(editorMode === 'fullscreen' ? 'normal' : 'fullscreen');
+  };
+
+  const handleToggleFocus = () => {
+    handleModeChange(editorMode === 'focus' ? 'normal' : 'focus');
+  };
+
+  const handleExitMode = () => {
+    handleModeChange('normal');
+  };
+
   const handleViewPDFAnnotation = () => {
     if (note?.pdfAnnotationId) {
       // Navigate to the PDF with the annotation highlighted
@@ -198,147 +257,311 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
     );
   }
 
+  // Render mode toggle buttons
+  const renderModeToggle = () => {
+    if (editorMode === 'focus') return null;
+
+    return (
+      <div className="flex items-center gap-2 p-2 border-b border-border bg-muted/50">
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => handleModeChange('normal')}
+            className={cn(
+              "mode-toggle-button",
+              editorMode === 'normal' && "active"
+            )}
+            title="Normal mode"
+          >
+            <Eye size={16} />
+            <span>Normal</span>
+          </button>
+          
+          <button
+            onClick={handleToggleFullscreen}
+            className={cn(
+              "mode-toggle-button",
+              editorMode === 'fullscreen' && "active"
+            )}
+            title="Fullscreen mode (Ctrl+Shift+F)"
+          >
+            <Maximize2 size={16} />
+            <span>Fullscreen</span>
+          </button>
+          
+          <button
+            onClick={handleToggleFocus}
+            className={cn(
+              "mode-toggle-button",
+              editorMode === 'focus' && "active"
+            )}
+            title="Focus mode (F11)"
+          >
+            <Focus size={16} />
+            <span>Focus</span>
+          </button>
+        </div>
+        
+        <div className="mode-indicator">
+          {editorMode === 'normal' && <Eye size={12} />}
+          {editorMode === 'fullscreen' && <Maximize2 size={12} />}
+          {editorMode === 'focus' && <Focus size={12} />}
+          <span>{editorMode.charAt(0).toUpperCase() + editorMode.slice(1)}</span>
+        </div>
+      </div>
+    );
+  };
+
+  // Render floating controls for focus mode
+  const renderFocusControls = () => {
+    if (editorMode !== 'focus') return null;
+
+    return (
+      <>
+        {/* Exit button */}
+        <button
+          onClick={handleExitMode}
+          className="focus-mode-exit-button"
+          title="Exit focus mode (Esc)"
+        >
+          <ArrowLeft size={16} />
+          <span>Exit Focus</span>
+        </button>
+
+        {/* Floating controls */}
+        <div className="focus-mode-controls">
+          <button
+            onClick={handleToggleFullscreen}
+            title="Switch to fullscreen mode"
+          >
+            <Maximize2 size={16} />
+          </button>
+          
+          <button
+            onClick={handleSave}
+            disabled={isSaving || !hasUnsavedChanges || !title.trim()}
+            title="Save note"
+          >
+            <Save size={16} />
+          </button>
+        </div>
+      </>
+    );
+  };
+
+  // Render keyboard hint
+  const renderKeyboardHint = () => {
+    if (!showKeyboardHint) return null;
+
+    return (
+      <div className="keyboard-hint">
+        Press <strong>Esc</strong> to exit focus mode, <strong>F11</strong> to toggle
+      </div>
+    );
+  };
+
+  // Get container classes based on mode
+  const getContainerClass = () => {
+    const baseClass = "editor-layout layout-transition";
+    const modeClass = `editor-${editorMode}`;
+    
+    if (editorMode === 'normal') {
+      return `${baseClass} ${modeClass} container mx-auto px-4 py-8 max-w-4xl`;
+    }
+    
+    return `${baseClass} ${modeClass}`;
+  };
+
+  // Render header (only in normal and fullscreen modes)
+  const renderHeader = () => {
+    if (editorMode === 'focus') return null;
+
+    return (
+      <div className={cn(
+        "flex items-center justify-between mb-6",
+        editorMode === 'fullscreen' && "px-8 pt-8"
+      )}>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBack}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft size={16} />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Edit Note</h1>
+            <div className="flex items-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-1">
+                <Calendar size={12} />
+                <span>
+                  Updated {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}
+                </span>
+              </div>
+              {note.pdfAnnotationId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleViewPDFAnnotation}
+                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 p-0 h-auto"
+                >
+                  <ExternalLink size={12} />
+                  <span>View PDF Annotation</span>
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="flex items-center gap-2 text-red-600 hover:text-red-700"
+          >
+            <Trash2 size={16} />
+            {isDeleting ? "Deleting..." : "Delete"}
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={isSaving || !hasUnsavedChanges || !title.trim()}
+            className="flex items-center gap-2"
+          >
+            <Save size={16} />
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <ErrorBoundary>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBack}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft size={16} />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Edit Note</h1>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
-                  <Calendar size={12} />
-                  <span>
-                    Updated {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}
-                  </span>
-                </div>
-                {note.pdfAnnotationId && (
+      <div className={getContainerClass()}>
+        {renderModeToggle()}
+        
+        <div className={cn(
+          "editor-content-wrapper",
+          `mode-${editorMode}`
+        )}>
+          <div className="editor-content">
+            {renderHeader()}
+
+            {/* PDF Annotation Link Card */}
+            {note.pdfAnnotationId && editorMode !== 'focus' && (
+              <Card className={cn(
+                "p-4 mb-6 bg-blue-50 border-blue-200",
+                editorMode === 'fullscreen' && "mx-8"
+              )}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FileText size={20} className="text-blue-600" />
+                    <div>
+                      <h3 className="font-medium text-blue-900">
+                        Linked to PDF Annotation
+                      </h3>
+                      <p className="text-sm text-blue-700">
+                        This note is connected to a PDF annotation
+                      </p>
+                    </div>
+                  </div>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={handleViewPDFAnnotation}
-                    className="flex items-center gap-1 text-blue-600 hover:text-blue-700 p-0 h-auto"
+                    className="flex items-center gap-2"
                   >
-                    <ExternalLink size={12} />
-                    <span>View PDF Annotation</span>
+                    <ExternalLink size={14} />
+                    View in PDF
                   </Button>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="flex items-center gap-2 text-red-600 hover:text-red-700"
-            >
-              <Trash2 size={16} />
-              {isDeleting ? "Deleting..." : "Delete"}
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={isSaving || !hasUnsavedChanges || !title.trim()}
-              className="flex items-center gap-2"
-            >
-              <Save size={16} />
-              {isSaving ? "Saving..." : "Save"}
-            </Button>
-          </div>
-        </div>
+                </div>
+              </Card>
+            )}
 
-        {/* PDF Annotation Link Card */}
-        {note.pdfAnnotationId && (
-          <Card className="p-4 mb-6 bg-blue-50 border-blue-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <FileText size={20} className="text-blue-600" />
-                <div>
-                  <h3 className="font-medium text-blue-900">
-                    Linked to PDF Annotation
-                  </h3>
-                  <p className="text-sm text-blue-700">
-                    This note is connected to a PDF annotation
-                  </p>
+            {/* Unsaved Changes Warning */}
+            {hasUnsavedChanges && editorMode !== 'focus' && (
+              <Card className={cn(
+                "p-3 mb-6 bg-yellow-50 border-yellow-200",
+                editorMode === 'fullscreen' && "mx-8"
+              )}>
+                <div className="flex items-center gap-2 text-yellow-800">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <span className="text-sm font-medium">You have unsaved changes</span>
+                </div>
+              </Card>
+            )}
+
+            {/* Note Editor */}
+            <Card className={cn(
+              editorMode === 'normal' && "p-6",
+              editorMode === 'fullscreen' && "mx-8 p-6 flex-1",
+              editorMode === 'focus' && "border-none shadow-none bg-transparent p-0 flex-1"
+            )}>
+              {/* Title Input */}
+              <div className={cn(
+                "mb-6",
+                editorMode === 'focus' && "mb-8"
+              )}>
+                <Input
+                  type="text"
+                  placeholder="Enter note title..."
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className={cn(
+                    "text-xl font-semibold border-none px-0 focus:ring-0 focus:border-none",
+                    editorMode === 'focus' && "text-3xl font-bold"
+                  )}
+                  style={{ boxShadow: "none" }}
+                />
+              </div>
+
+              {/* Rich Text Editor */}
+              <LazyNotionEditor
+                initialContent={content}
+                onChange={setContent}
+                placeholder="Start writing your note..."
+                className={cn(
+                  editorMode === 'normal' && "min-h-[400px]",
+                  editorMode === 'fullscreen' && "min-h-[500px]",
+                  editorMode === 'focus' && "min-h-[600px]"
+                )}
+                mode={editorMode}
+                onModeChange={handleModeChange}
+                showModeToggle={false}
+                showWordCount={true}
+                showReadingTime={true}
+              />
+            </Card>
+
+            {/* Footer Actions - Only in normal mode */}
+            {editorMode === 'normal' && (
+              <div className="flex items-center justify-between mt-6">
+                <div className="text-sm text-gray-500">
+                  <span>Use "/" to insert blocks and format text</span>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <Button variant="outline" onClick={handleBack}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSave}
+                    disabled={isSaving || !hasUnsavedChanges || !title.trim()}
+                    className="flex items-center gap-2"
+                  >
+                    <Save size={16} />
+                    {isSaving ? "Saving..." : "Save Changes"}
+                  </Button>
                 </div>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleViewPDFAnnotation}
-                className="flex items-center gap-2"
-              >
-                <ExternalLink size={14} />
-                View in PDF
-              </Button>
-            </div>
-          </Card>
-        )}
-
-        {/* Unsaved Changes Warning */}
-        {hasUnsavedChanges && (
-          <Card className="p-3 mb-6 bg-yellow-50 border-yellow-200">
-            <div className="flex items-center gap-2 text-yellow-800">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              <span className="text-sm font-medium">You have unsaved changes</span>
-            </div>
-          </Card>
-        )}
-
-        {/* Note Editor */}
-        <Card className="p-6">
-          {/* Title Input */}
-          <div className="mb-6">
-            <Input
-              type="text"
-              placeholder="Enter note title..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="text-xl font-semibold border-none px-0 focus:ring-0 focus:border-none"
-              style={{ boxShadow: "none" }}
-            />
-          </div>
-
-          {/* Rich Text Editor */}
-          <LazyNotionEditor
-            initialContent={content}
-            onChange={setContent}
-            placeholder="Start writing your note..."
-            className="min-h-[400px]"
-          />
-        </Card>
-
-        {/* Footer Actions */}
-        <div className="flex items-center justify-between mt-6">
-          <div className="text-sm text-gray-500">
-            <span>Use "/" to insert blocks and format text</span>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={handleBack}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={isSaving || !hasUnsavedChanges || !title.trim()}
-              className="flex items-center gap-2"
-            >
-              <Save size={16} />
-              {isSaving ? "Saving..." : "Save Changes"}
-            </Button>
+            )}
           </div>
         </div>
+        
+        {renderFocusControls()}
+        {renderKeyboardHint()}
       </div>
     </ErrorBoundary>
   );

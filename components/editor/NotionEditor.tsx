@@ -1,8 +1,9 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { History } from '@tiptap/extension-history';
+import TextAlign from '@tiptap/extension-text-align';
 import { Document } from '@tiptap/extension-document';
 import { Paragraph } from '@tiptap/extension-paragraph';
 import { Text } from '@tiptap/extension-text';
@@ -35,7 +36,14 @@ import { KeyboardShortcutsDialog } from './KeyboardShortcutsDialog';
 import { AccessibilityProvider, useAccessibility } from './AccessibilityProvider';
 import { AccessibilitySettingsDialog } from './AccessibilitySettingsDialog';
 import { useEditorKeyboardShortcuts, useEditorAccessibility } from '@/hooks/use-editor-keyboard-shortcuts';
+import { useMobileEditor, useMobileEditorEnhancements } from '@/hooks/use-mobile-editor';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { MultiModeEditor, useEditorMode, type EditorMode } from './MultiModeEditor';
+import { AdaptiveFloatingToolbar } from './AdaptiveFloatingToolbar';
+import { ContextualToolbar } from './ContextualToolbar';
+import { EditorStatsDisplay } from './EditorStatsDisplay';
+import { TypographySettings } from './TypographySettings';
 import type { NotionEditorProps } from './types';
 
 function NotionEditorInner({
@@ -47,10 +55,67 @@ function NotionEditorInner({
   className,
   autoFocus = false,
   customToolbar,
+  mode: initialMode = 'normal',
+  onModeChange,
+  showModeToggle = false,
+  showWordCount = false,
+  showReadingTime = false,
+  showContextualToolbar: showContextualToolbarProp = true,
+  distractionFreeMode: distractionFreeModeProp = false,
+  enhancedTypography = true,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [isAccessibilitySettingsOpen, setIsAccessibilitySettingsOpen] = useState(false);
+  const [showContextualToolbar, setShowContextualToolbar] = useState(showContextualToolbarProp);
+  const [distractionFreeMode, setDistractionFreeMode] = useState(distractionFreeModeProp);
   const { settings } = useAccessibility();
+  
+  // Mobile detection and enhancements
+  const isMobile = useIsMobile();
+  useMobileEditorEnhancements();
+  
+  // Multi-mode editor state
+  const { mode, setMode } = useEditorMode(initialMode);
+  
+  // Mobile editor management
+  const {
+    containerRef,
+    handleInputFocus,
+    handleInputBlur,
+    preventZoom,
+    isKeyboardVisible,
+    keyboardHeight,
+    viewportHeight,
+    isGestureActive,
+    hapticFeedback,
+  } = useMobileEditor({
+    enableGestures: isMobile,
+    enableHapticFeedback: isMobile,
+    enableKeyboardAdjustments: isMobile,
+    onModeChange: (newMode) => {
+      setMode(newMode);
+      onModeChange?.(newMode);
+    },
+    onSwipeLeft: () => {
+      // Could implement navigation between notes
+      console.log('Swipe left detected');
+    },
+    onSwipeRight: () => {
+      // Could implement navigation between notes
+      console.log('Swipe right detected');
+    },
+  });
+  
+  // Handle mode changes
+  const handleModeChange = useCallback((newMode: EditorMode) => {
+    setMode(newMode);
+    onModeChange?.(newMode);
+    
+    // Mobile haptic feedback
+    if (isMobile) {
+      hapticFeedback.success();
+    }
+  }, [setMode, onModeChange, isMobile, hapticFeedback]);
   
   const editor = useEditor({
     immediatelyRender:false,
@@ -61,7 +126,10 @@ function NotionEditorInner({
       }),
       Paragraph.configure({
         HTMLAttributes: {
-          class: 'text-base leading-relaxed',
+          class: cn(
+            'text-base leading-relaxed',
+            isMobile && 'mobile-paragraph'
+          ),
         },
       }),
       Text,
@@ -178,6 +246,10 @@ function NotionEditorInner({
       }),
       // Add keyboard shortcuts
       KeyboardShortcuts,
+      // Add text alignment
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
     ],
     content: content || '',
     editable,
@@ -188,8 +260,14 @@ function NotionEditorInner({
           'prose prose-sm sm:prose-base max-w-none',
           'focus:outline-none',
           'min-h-[200px] p-4',
+          `editor-${mode}`,
+          enhancedTypography && 'editor-typography-optimized',
           settings.highContrast && 'high-contrast-editor',
           settings.screenReaderOptimized && 'screen-reader-optimized',
+          distractionFreeMode && 'editor-distraction-free',
+          isMobile && 'mobile-editor',
+          isMobile && isKeyboardVisible && 'mobile-keyboard-visible',
+          isMobile && isGestureActive && 'mobile-gesture-active',
           className
         ),
         'data-placeholder': placeholder,
@@ -197,6 +275,26 @@ function NotionEditorInner({
         'aria-multiline': 'true',
         'aria-label': 'Rich text editor',
         'aria-describedby': 'editor-keyboard-help editor-accessibility-info',
+        ...(isMobile && {
+          'data-mobile': 'true',
+          'data-keyboard-height': keyboardHeight.toString(),
+          'data-viewport-height': viewportHeight.toString(),
+        }),
+      },
+      handleDOMEvents: {
+        ...(isMobile && {
+          focus: (view, event) => {
+            const target = event.target as HTMLElement;
+            handleInputFocus(target);
+            preventZoom();
+            return false;
+          },
+          blur: (view, event) => {
+            const target = event.target as HTMLElement;
+            handleInputBlur(target);
+            return false;
+          },
+        }),
       },
     },
     onUpdate: ({ editor }) => {
@@ -223,12 +321,81 @@ function NotionEditorInner({
     }
   }, [editor, editable]);
 
+  // Calculate word count and reading time
+  const stats = useMemo(() => {
+    if (!editor) return { wordCount: 0, readingTime: 0 };
+    
+    const text = editor.getText();
+    const wordCount = text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    const readingTime = Math.max(1, Math.ceil(wordCount / 200)); // 200 words per minute
+    
+    return { wordCount, readingTime };
+  }, [editor, content]);
+
   // Set up keyboard shortcuts and accessibility
   const { isHelpOpen, setIsHelpOpen } = useEditorKeyboardShortcuts({
     editor,
     enabled: editable,
     onOpenLinkDialog: () => setIsLinkDialogOpen(true),
   });
+  
+  // Enhanced keyboard shortcuts for mode switching and features with accessibility
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // F11 for focus mode
+      if (event.key === 'F11') {
+        event.preventDefault();
+        const newMode = mode === 'focus' ? 'normal' : 'focus';
+        handleModeChange(newMode);
+        announceToScreenReader(`Switched to ${newMode} mode`);
+      }
+      
+      // Escape to exit focus mode
+      if (event.key === 'Escape' && mode === 'focus') {
+        event.preventDefault();
+        handleModeChange('normal');
+        announceToScreenReader('Exited focus mode');
+      }
+      
+      // Ctrl/Cmd + Shift + F for fullscreen
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'F') {
+        event.preventDefault();
+        const newMode = mode === 'fullscreen' ? 'normal' : 'fullscreen';
+        handleModeChange(newMode);
+        announceToScreenReader(`Switched to ${newMode} mode`);
+      }
+      
+      // Ctrl/Cmd + Shift + D for distraction-free mode
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'D') {
+        event.preventDefault();
+        setDistractionFreeMode(prev => {
+          const newValue = !prev;
+          announceToScreenReader(`Distraction-free mode ${newValue ? 'enabled' : 'disabled'}`);
+          return newValue;
+        });
+      }
+      
+      // Ctrl/Cmd + Shift + T for contextual toolbar toggle
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'T') {
+        event.preventDefault();
+        setShowContextualToolbar(prev => {
+          const newValue = !prev;
+          announceToScreenReader(`Contextual toolbar ${newValue ? 'shown' : 'hidden'}`);
+          return newValue;
+        });
+      }
+      
+      // Alt + A for accessibility settings
+      if (event.altKey && event.key === 'a') {
+        event.preventDefault();
+        setIsAccessibilitySettingsOpen(true);
+        announceToScreenReader('Accessibility settings opened');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [mode, handleModeChange, announceToScreenReader]);
 
   const { announceToScreenReader } = useEditorAccessibility(editor);
 
@@ -265,12 +432,39 @@ function NotionEditorInner({
   }, [editor]);
 
   return (
-    <div className="w-full">
+    <MultiModeEditor
+      mode={mode}
+      onModeChange={handleModeChange}
+      showModeToggle={showModeToggle && !isMobile} // Hide mode toggle on mobile, use gestures instead
+      showWordCount={showWordCount}
+      showReadingTime={showReadingTime}
+      wordCount={stats.wordCount}
+      readingTime={stats.readingTime}
+      className={cn(
+        "w-full",
+        isMobile && "mobile-editor-container"
+      )}
+      ref={containerRef}
+    >
       {editor && (
         <>
           <BubbleMenu editor={editor} />
           <TableBubbleMenu editor={editor} />
-          {customToolbar ? customToolbar(editor) : <FloatingToolbar editor={editor} />}
+          {customToolbar ? (
+            customToolbar(editor)
+          ) : (
+            <>
+              <FloatingToolbar editor={editor} />
+              <AdaptiveFloatingToolbar editor={editor} mode={mode} />
+              {showContextualToolbar && (
+                <ContextualToolbar 
+                  editor={editor} 
+                  minimal={mode === 'focus' || distractionFreeMode}
+                  autoHide={distractionFreeMode}
+                />
+              )}
+            </>
+          )}
         </>
       )}
       <EditorContent 
@@ -281,9 +475,32 @@ function NotionEditorInner({
           'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
           settings.reducedMotion ? 'transition-none' : 'transition-all duration-200',
           settings.highContrast && 'border-2 border-foreground',
+          distractionFreeMode && 'editor-distraction-free',
+          isMobile && 'mobile-editor-content',
+          isMobile && mode === 'focus' && 'mobile-focus-mode',
           'focus-visible'
         )}
       />
+      
+      {/* Enhanced Stats Display */}
+      {(showWordCount || showReadingTime) && (
+        <EditorStatsDisplay
+          editor={editor}
+          minimal={mode === 'focus' || distractionFreeMode}
+          showWordCount={showWordCount}
+          showReadingTime={showReadingTime}
+          showCharacterCount={mode !== 'focus'}
+          showReadingLevel={mode === 'normal'}
+        />
+      )}
+      
+      {/* Typography Settings */}
+      {editable && mode === 'normal' && (
+        <TypographySettings 
+          editor={editor}
+          className="fixed bottom-20 right-6 z-40"
+        />
+      )}
       
       {/* Accessibility information for screen readers */}
       <div id="editor-keyboard-help" className="sr-only">
@@ -351,7 +568,7 @@ function NotionEditorInner({
           ♿
         </button>
       )}
-    </div>
+    </MultiModeEditor>
   );
 }
 

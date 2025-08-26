@@ -52,12 +52,12 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
   }, {} as Record<string, EditorKeyboardShortcut[]>);
 
   const categories = [
-    { value: 'all', label: 'All Shortcuts' },
-    { value: 'formatting', label: 'Text Formatting' },
-    { value: 'blocks', label: 'Blocks & Structure' },
-    { value: 'editing', label: 'Editing & History' },
-    { value: 'navigation', label: 'Navigation' },
-    { value: 'tables', label: 'Tables' },
+    { value: 'all', label: 'All Shortcuts', icon: '⌨️' },
+    { value: 'formatting', label: 'Text Formatting', icon: '✨' },
+    { value: 'blocks', label: 'Blocks & Structure', icon: '📝' },
+    { value: 'editing', label: 'Editing & History', icon: '✏️' },
+    { value: 'navigation', label: 'Navigation & Modes', icon: '🧭' },
+    { value: 'tables', label: 'Tables', icon: '📊' },
   ];
 
   const formatShortcutKey = (key: string): string => {
@@ -120,7 +120,7 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
                 aria-label="Search keyboard shortcuts"
               />
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap" role="tablist" aria-label="Shortcut categories">
               {categories.map((category) => (
                 <Button
                   key={category.value}
@@ -128,7 +128,26 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
                   size="sm"
                   onClick={() => setSelectedCategory(category.value)}
                   className="text-xs"
+                  role="tab"
+                  aria-selected={selectedCategory === category.value}
+                  aria-controls="shortcuts-content"
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                      e.preventDefault();
+                      const currentIndex = categories.findIndex(c => c.value === category.value);
+                      const nextIndex = e.key === 'ArrowRight' 
+                        ? (currentIndex + 1) % categories.length
+                        : (currentIndex - 1 + categories.length) % categories.length;
+                      
+                      const nextButton = document.querySelector(
+                        `[role="tab"][aria-controls="shortcuts-content"]:nth-child(${nextIndex + 1})`
+                      ) as HTMLElement;
+                      nextButton?.focus();
+                      setSelectedCategory(categories[nextIndex].value);
+                    }
+                  }}
                 >
+                  <span className="mr-1" aria-hidden="true">{category.icon}</span>
                   {category.label}
                 </Button>
               ))}
@@ -136,7 +155,12 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
           </div>
 
           {/* Shortcuts List */}
-          <div className="flex-1 overflow-y-auto space-y-6 pr-2">
+          <div 
+            id="shortcuts-content"
+            className="flex-1 overflow-y-auto space-y-6 pr-2"
+            role="tabpanel"
+            aria-labelledby="keyboard-shortcuts-description"
+          >
             {Object.keys(filteredShortcuts).length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>No shortcuts found matching your search.</p>
@@ -156,16 +180,22 @@ export function KeyboardShortcutsDialog({ isOpen, onClose }: KeyboardShortcutsDi
                     {shortcuts.map((shortcut, index) => (
                       <div
                         key={`${category}-${index}`}
-                        className="flex items-center justify-between py-2 px-3 rounded-md bg-muted/30 hover:bg-muted/50 transition-colors"
+                        className="flex items-center justify-between py-2 px-3 rounded-md bg-muted/30 hover:bg-muted/50 transition-colors focus-within:ring-2 focus-within:ring-ring"
+                        tabIndex={0}
+                        role="listitem"
+                        aria-label={`${shortcut.description}, keyboard shortcut: ${formatShortcutKey(shortcut.key)}`}
                       >
                         <span className="text-sm text-foreground">
                           {shortcut.description}
                         </span>
-                        <kbd className={cn(
-                          "inline-flex items-center gap-1 px-2 py-1",
-                          "bg-background border border-border rounded text-xs font-mono",
-                          "text-muted-foreground shadow-sm"
-                        )}>
+                        <kbd 
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2 py-1",
+                            "bg-background border border-border rounded text-xs font-mono",
+                            "text-muted-foreground shadow-sm"
+                          )}
+                          aria-label={`Keyboard shortcut: ${formatShortcutKey(shortcut.key)}`}
+                        >
                           {formatShortcutKey(shortcut.key)}
                         </kbd>
                       </div>

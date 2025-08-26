@@ -4,6 +4,17 @@ export { AdvancedFloatingToolbar } from './AdvancedFloatingToolbar';
 export { FloatingToolbarDemo } from './FloatingToolbarDemo';
 export { EditorProvider, useEditorContext, useEditorErrorRecovery } from './EditorProvider';
 
+// Enhanced typography and focus features
+export { ContextualToolbar } from './ContextualToolbar';
+export { EditorStatsDisplay, useEditorStats } from './EditorStatsDisplay';
+export { TypographySettings, useTypographySettings } from './TypographySettings';
+
+// Multi-mode editor components
+export { MultiModeEditor, useEditorMode } from './MultiModeEditor';
+export { AdaptiveFloatingToolbar } from './AdaptiveFloatingToolbar';
+export { MultiModeEditorDemo } from './MultiModeEditorDemo';
+export type { EditorMode, MultiModeEditorProps } from './MultiModeEditor';
+
 // Mobile-optimized components
 export { MobileNotionEditor } from './MobileNotionEditor';
 export { MobileEditorToolbar } from './MobileEditorToolbar';

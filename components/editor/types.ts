@@ -1,4 +1,5 @@
 import type { Editor } from '@tiptap/react';
+import type { EditorMode } from './MultiModeEditor';
 
 export interface EditorContent {
   type: 'doc';
@@ -25,6 +26,14 @@ export interface NotionEditorProps {
   className?: string;
   autoFocus?: boolean;
   customToolbar?: (editor: Editor) => React.ReactNode;
+  mode?: EditorMode;
+  onModeChange?: (mode: EditorMode) => void;
+  showModeToggle?: boolean;
+  showWordCount?: boolean;
+  showReadingTime?: boolean;
+  showContextualToolbar?: boolean;
+  distractionFreeMode?: boolean;
+  enhancedTypography?: boolean;
 }
 
 export interface EditorToolbarProps {
