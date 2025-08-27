@@ -34,6 +34,11 @@ export interface NotionEditorProps {
   showContextualToolbar?: boolean;
   distractionFreeMode?: boolean;
   enhancedTypography?: boolean;
+  // Auto-save props
+  autoSave?: boolean;
+  noteId?: string;
+  onAutoSave?: (content: EditorContent, noteId: string) => Promise<void>;
+  autoSaveDelay?: number;
 }
 
 export interface EditorToolbarProps {

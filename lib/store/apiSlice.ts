@@ -513,7 +513,10 @@ export const apiSlice = createApi({
       invalidatesTags: [{ type: "Note", id: "LIST" }],
     }),
 
-    updateNote: builder.mutation<Note, { id: string; updates: UpdateNoteRequest }>({
+    updateNote: builder.mutation<
+      Note,
+      { id: string; updates: UpdateNoteRequest }
+    >({
       query: ({ id, updates }) => ({
         url: `notes/${id}`,
         method: "PUT",
@@ -530,7 +533,11 @@ export const apiSlice = createApi({
         return response.data;
       },
       transformErrorResponse: (response: any, meta, { id }) => {
-        const context = { component: "NoteEditor", action: "update", noteId: id };
+        const context = {
+          component: "NoteEditor",
+          action: "update",
+          noteId: id,
+        };
 
         if (response.status === 400) {
           return createAppError(

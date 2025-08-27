@@ -1,120 +1,113 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useDebounce } from './use-debounce';
+"use client";
 
-export interface AutoSaveOptions {
+import { useCallback, useEffect, useRef, useState } from "react";
+import debounce from "lodash.debounce"
+/* the debounce function works as follows :
+    debounce(function,delay) , the function will wait for delay ms then it runs the function
+    if during that delay debounce is called again , it will start the timer from 0s
+*/
+
+export type AutoSaveStatus = "idle" | "saving" | "saved" | "error";
+
+interface UseAutoSaveOptions {
+  onSave: (content: any) => Promise<void>;
   delay?: number;
-  onSave: (data: any) => Promise<void>;
-  onError?: (error: Error) => void;
-  onSaveStart?: () => void;
-  onSaveComplete?: () => void;
   enabled?: boolean;
 }
 
-export interface AutoSaveState {
-  isSaving: boolean;
+interface UseAutoSaveReturn {
+  status: AutoSaveStatus;
   lastSaved: Date | null;
-  error: Error | null;
-  hasUnsavedChanges: boolean;
+  error: string | null;
+  updateContent: (content: any) => void;
 }
 
-export function useAutoSave<T>(data: T, options: AutoSaveOptions) {
-  const {
-    delay = 2000,
-    onSave,
-    onError,
-    onSaveStart,
-    onSaveComplete,
-    enabled = true,
-  } = options;
+export function useAutoSave({
+  onSave,
+  delay = 500,
+  enabled = true,
+}: UseAutoSaveOptions): UseAutoSaveReturn {
+  const [status, setStatus] = useState<AutoSaveStatus>("idle");
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const contentRef = useRef<any>(null); /// this is for content updating , we have used useref instead of usestate because we don't want uneccessary renders , hope that won't cause some bugs in the future
+  const isTypingRef = useRef(false);
 
-  const [state, setState] = useState<AutoSaveState>({
-    isSaving: false,
-    lastSaved: null,
-    error: null,
-    hasUnsavedChanges: false,
-  });
-
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastSavedDataRef = useRef<T>(data);
-  const isInitialRender = useRef(true);
-
-  // Debounced data to trigger auto-save
-  const debouncedData = useDebounce(data, delay);
-
-  // Manual save function
-  const saveNow = useCallback(async () => {
-    if (!enabled || state.isSaving) return;
+  const performSave = useCallback(async () => {
+    if (!enabled || !contentRef.current) return;
 
     try {
-      setState(prev => ({ ...prev, isSaving: true, error: null }));
-      onSaveStart?.();
+      setStatus("saving");
+      setError(null);
+      await onSave(contentRef.current);
+      setStatus("saved");
+      setLastSaved(new Date());
 
-      await onSave(data);
-      
-      setState(prev => ({
-        ...prev,
-        isSaving: false,
-        lastSaved: new Date(),
-        hasUnsavedChanges: false,
-        error: null,
-      }));
-      
-      lastSavedDataRef.current = data;
-      onSaveComplete?.();
-    } catch (error) {
-      const saveError = error instanceof Error ? error : new Error('Save failed');
-      setState(prev => ({
-        ...prev,
-        isSaving: false,
-        error: saveError,
-      }));
-      onError?.(saveError);
+      // Reset to idle after showing "saved" for a moment
+      setTimeout(() => {
+        if (status === "saved") {
+          setStatus("idle");
+        }
+      }, 2000);
+    } catch (err) {
+      setStatus("error");
+      setError(err instanceof Error ? err.message : "Failed to save");
+      console.error("Auto-save error:", err);
     }
-  }, [data, enabled, state.isSaving, onSave, onSaveStart, onSaveComplete, onError]);
+  }, [onSave, enabled, status]);
 
-  // Auto-save effect
-  useEffect(() => {
-    if (!enabled || isInitialRender.current) {
-      isInitialRender.current = false;
-      return;
-    }
+  const debouncedSave = useCallback(debounce(performSave, delay), [
+    performSave,
+    delay,
+  ]);
 
-    // Check if data has actually changed
-    const hasChanged = JSON.stringify(debouncedData) !== JSON.stringify(lastSavedDataRef.current);
-    
-    if (hasChanged && !state.isSaving) {
-      setState(prev => ({ ...prev, hasUnsavedChanges: true }));
-      saveNow();
-    }
-  }, [debouncedData, enabled, state.isSaving, saveNow]);
+  const updateContent = useCallback(
+    // this function is used to update the content and save it after delay
+    (content: any) => {
+      contentRef.current = content;
 
-  // Mark as having unsaved changes when data changes
-  useEffect(() => {
-    if (!isInitialRender.current) {
-      const hasChanged = JSON.stringify(data) !== JSON.stringify(lastSavedDataRef.current);
-      if (hasChanged) {
-        setState(prev => ({ ...prev, hasUnsavedChanges: true }));
-      }
-    }
-  }, [data]);
+      if (!enabled) return;
 
-  // Cleanup timeout on unmount
+      // Set typing state
+      isTypingRef.current = true;
+      setStatus("saving");
+      setError(null);
+
+      // Clear any existing debounced calls and create new one
+      debouncedSave.cancel();
+      debouncedSave();
+      /* you may be wondering because the updateContent should run everytime the content updated
+         and that also means that debouncedSave will run but since we are using debouncing , that wont 
+         happen because :
+          the first time you call debouncedSave(), it waits delay ms before running performSave.
+          If debouncedSave() is called again before the delay finishes, it cancels the previous timer and starts a new one.
+      */
+      // Reset typing state after delay + buffer
+      setTimeout(() => {
+        isTypingRef.current = false;
+      }, delay + 100);
+    },
+    [enabled, delay, debouncedSave]
+  );
+
+  const triggerSave = useCallback(() => {
+    debouncedSave.cancel();
+    performSave();
+  }, [debouncedSave, performSave]);
+  // this function is suppose to run if the user saves the content manually but i guess that will never happen since my app does not give freedom to people, i mean that is what capitalism is all about <3
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
+      debouncedSave.cancel();
     };
-  }, []);
-
-  // Reset error function
-  const resetError = useCallback(() => {
-    setState(prev => ({ ...prev, error: null }));
-  }, []);
+  }, [debouncedSave]);
 
   return {
-    ...state,
-    saveNow,
-    resetError,
+    status,
+    lastSaved,
+    triggerSave, // this function is suppose to run if the user saves the content manually but i guess that will never happen since my app does not give freedom to people, i mean that is what capitalism is all about <3
+    error,
+    updateContent,
   };
 }

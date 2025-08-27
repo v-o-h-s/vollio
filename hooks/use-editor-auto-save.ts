@@ -1,13 +1,14 @@
-import { useCallback } from 'react';
-import { useAutoSave } from './use-auto-save';
-import type { EditorContent } from '@/components/editor/types';
+import { useCallback } from "react";
+import { useAutoSave } from "./use-auto-save";
+import { useUpdateNoteMutation } from "@/lib/store/apiSlice";
+import type { EditorContent } from "@/components/editor/types";
 
 export interface EditorAutoSaveOptions {
   noteId?: string;
   delay?: number;
-  onError?: (error: Error) => void;
-  onSaveStart?: () => void;
-  onSaveComplete?: () => void;
+  //onError?: (error: Error) => void;
+  // onSaveStart?: () => void;
+  // onSaveComplete?: () => void;
   enabled?: boolean;
 }
 
@@ -23,42 +24,46 @@ export function useEditorAutoSave(
   const {
     noteId,
     delay = 2000,
-    onError,
-    onSaveStart,
-    onSaveComplete,
+    // onError,
+    //onSaveStart,
+    //onSaveComplete,
     enabled = true,
   } = options;
 
-  const saveToAPI = useCallback(async (saveData: EditorSaveData) => {
-    if (!noteId) {
-      throw new Error('Note ID is required for saving');
-    }
+  const [updateNote] = useUpdateNoteMutation();
 
-    const response = await fetch(`/api/notes/${noteId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        content: saveData.content,
-        title: saveData.title,
-      }),
-    });
+  const saveToAPI = useCallback(
+    async (saveData: EditorSaveData) => {
+      if (!noteId) {
+        throw new Error("Note ID is required for saving");
+      }
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Save failed with status ${response.status}`);
-    }
+      try {
+        await updateNote({
+          id: noteId,
+          updates: {
+            content: saveData.content,
+            title: saveData.title,
+          },
+        }).unwrap();
+      } catch (error: any) {
+        // RTK Query errors come wrapped, extract the actual error
+        const actualError = error?.data || error;
+        throw new Error(
+          actualError?.error || actualError?.message || "Save failed"
+        );
+      }
+    },
+    [noteId, updateNote]
+  );
 
-    return response.json();
-  }, [noteId]);
-
-  return useAutoSave(data, {
-    delay,
-    onSave: saveToAPI,
-    onError,
-    onSaveStart,
-    onSaveComplete,
-    enabled: enabled && !!noteId,
-  });
+  // return useAutoSave(data, {
+  //   delay,
+  //   onSave: saveToAPI,
+  //   onError,
+  //   onSaveStart,
+  //   onSaveComplete,
+  //   enabled: enabled && !!noteId,
+  // });
+  return useAutoSave({ onSave: () => saveToAPI(data), delay, enabled });
 }

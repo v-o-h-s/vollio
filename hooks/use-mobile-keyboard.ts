@@ -24,23 +24,33 @@ export function useMobileKeyboard(options: MobileKeyboardOptions = {}) {
   const [keyboardState, setKeyboardState] = useState<MobileKeyboardState>({
     isVisible: false,
     height: 0,
-    viewportHeight: window.innerHeight,
+    viewportHeight: typeof window !== 'undefined' ? window.innerHeight : 0,
   });
 
   const handleViewportChange = useCallback(() => {
+    // Skip if we're on the server
+    if (typeof window === 'undefined') return;
+    
     const currentHeight = window.visualViewport?.height || window.innerHeight;
     const windowHeight = window.innerHeight;
     const heightDifference = windowHeight - currentHeight;
     const isKeyboardVisible = heightDifference > windowHeight * threshold;
 
     setKeyboardState(prev => {
+      // Only update if there's actually a change
+      if (prev.isVisible === isKeyboardVisible && 
+          prev.height === (isKeyboardVisible ? heightDifference : 0) &&
+          prev.viewportHeight === currentHeight) {
+        return prev; // No change, return previous state
+      }
+
       const newState = {
         isVisible: isKeyboardVisible,
         height: isKeyboardVisible ? heightDifference : 0,
         viewportHeight: currentHeight,
       };
 
-      // Trigger callbacks if state changed
+      // Trigger callbacks if visibility state changed
       if (prev.isVisible !== newState.isVisible) {
         if (newState.isVisible) {
           onShow?.(newState.height);
@@ -65,15 +75,19 @@ export function useMobileKeyboard(options: MobileKeyboardOptions = {}) {
   }, [onShow, onHide, adjustViewport, threshold]);
 
   useEffect(() => {
+    // Skip if we're on the server
+    if (typeof window === 'undefined') return;
+    
     // Use Visual Viewport API if available (modern browsers)
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', handleViewportChange);
       
-      // Initial check
-      handleViewportChange();
+      // Initial check with a small delay to avoid SSR issues
+      const timeoutId = setTimeout(handleViewportChange, 100);
       
       return () => {
         window.visualViewport?.removeEventListener('resize', handleViewportChange);
+        clearTimeout(timeoutId);
         
         // Cleanup styles
         if (adjustViewport) {
@@ -88,10 +102,13 @@ export function useMobileKeyboard(options: MobileKeyboardOptions = {}) {
       };
       
       window.addEventListener('resize', handleResize);
-      handleViewportChange();
+      
+      // Initial check with delay
+      const timeoutId = setTimeout(handleViewportChange, 100);
       
       return () => {
         window.removeEventListener('resize', handleResize);
+        clearTimeout(timeoutId);
         
         if (adjustViewport) {
           document.documentElement.style.removeProperty('--keyboard-height');
