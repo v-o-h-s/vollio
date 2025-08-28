@@ -24,7 +24,7 @@ export function useMobileKeyboard(options: MobileKeyboardOptions = {}) {
   const [keyboardState, setKeyboardState] = useState<MobileKeyboardState>({
     isVisible: false,
     height: 0,
-    viewportHeight: typeof window !== 'undefined' ? window.innerHeight : 0,
+    viewportHeight: 0,
   });
 
   const handleViewportChange = useCallback(() => {
@@ -77,6 +77,12 @@ export function useMobileKeyboard(options: MobileKeyboardOptions = {}) {
   useEffect(() => {
     // Skip if we're on the server
     if (typeof window === 'undefined') return;
+
+    // Initialize viewport height
+    setKeyboardState(prev => ({
+      ...prev,
+      viewportHeight: window.innerHeight,
+    }));
     
     // Use Visual Viewport API if available (modern browsers)
     if (window.visualViewport) {
@@ -192,6 +198,8 @@ export function useMobileFocus() {
   }, []);
 
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+
     const handleFocusIn = (event: FocusEvent) => {
       const target = event.target as HTMLElement;
       if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true')) {
@@ -221,6 +229,8 @@ export function useMobileFocus() {
 
 // Utility function to prevent zoom on iOS
 export function preventIOSZoom() {
+  if (typeof document === 'undefined') return () => {};
+
   // Add viewport meta tag to prevent zoom
   const viewport = document.querySelector('meta[name="viewport"]');
   if (viewport) {

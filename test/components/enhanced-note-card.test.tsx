@@ -4,9 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { EnhancedNoteCard } from '@/components/ui/enhanced-note-card';
 import { Note } from '@/lib/types';
 
-// Mock date-fns
-vi.mock('date-fns', () => ({
-  formatDistanceToNow: vi.fn(() => '2 hours ago'),
+// Mock date utilities
+vi.mock('@/lib/utils/dates', () => ({
+  safeFormatDistanceToNow: vi.fn(() => '2 hours ago'),
 }));
 
 describe('EnhancedNoteCard', () => {

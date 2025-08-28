@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { JSONContent } from "@/lib/types";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { formatDistanceToNow } from "date-fns";
+import { safeFormatDistanceToNow } from "@/lib/utils/dates";
 import { useNoteSync } from "@/hooks/use-note-sync";
 import { NoteEditorSkeleton } from "@/components/ui/note-skeleton";
 import { noteNotifications } from "@/lib/utils/note-notifications";
@@ -339,7 +339,7 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
               <div className="flex items-center gap-1">
                 <Calendar size={12} />
                 <span>
-                  Updated {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}
+                  Updated {safeFormatDistanceToNow(note.updated_at || note.updatedAt)}
                 </span>
               </div>
               {note.pdfAnnotationId && (

@@ -3,7 +3,7 @@ import { Note } from "@/lib/types";
 import { EnhancedNoteCard } from "./enhanced-note-card";
 import { Button } from "./button";
 import { Input } from "./input";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/hooks/use-mobile";
 import { useTouchGestures } from "@/hooks/use-touch-gestures";
 import {
   DropdownMenu,
@@ -88,7 +88,7 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
   onSortChange,
   onFilterChange
 }) => {
-  const isMobile = useIsMobile();
+  const { isMobile } = useMobile();
   const [currentViewMode, setCurrentViewMode] = useState(viewMode);
   const [currentSortBy, setCurrentSortBy] = useState(sortBy);
   const [currentSortOrder, setCurrentSortOrder] = useState(sortOrder);
@@ -137,7 +137,13 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
             case 'recent':
               const dayAgo = new Date();
               dayAgo.setDate(dayAgo.getDate() - 1);
-              return new Date(note.updatedAt) > dayAgo;
+              const noteDate = note.updated_at || note.updatedAt;
+              if (!noteDate) return false;
+              try {
+                return new Date(noteDate) > dayAgo;
+              } catch {
+                return false;
+              }
             case 'long':
               const wordCount = countWords(extractTextFromContent(note.content));
               return wordCount > 500;
@@ -160,7 +166,13 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
           comparison = (a.title || 'Untitled').localeCompare(b.title || 'Untitled');
           break;
         case 'created':
-          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          const aCreated = a.created_at || a.createdAt;
+          const bCreated = b.created_at || b.createdAt;
+          try {
+            comparison = new Date(aCreated || 0).getTime() - new Date(bCreated || 0).getTime();
+          } catch {
+            comparison = 0;
+          }
           break;
         case 'wordCount':
           const aWords = countWords(extractTextFromContent(a.content));
@@ -169,7 +181,13 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
           break;
         case 'updated':
         default:
-          comparison = new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+          const aUpdated = a.updated_at || a.updatedAt;
+          const bUpdated = b.updated_at || b.updatedAt;
+          try {
+            comparison = new Date(aUpdated || 0).getTime() - new Date(bUpdated || 0).getTime();
+          } catch {
+            comparison = 0;
+          }
           break;
       }
 

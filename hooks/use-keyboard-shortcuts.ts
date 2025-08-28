@@ -8,7 +8,7 @@ interface UseKeyboardShortcutsOptions {
   enabled?: boolean;
   preventDefault?: boolean;
   stopPropagation?: boolean;
-  target?: HTMLElement | Document;
+  target?: HTMLElement | Document | null;
 }
 
 /**
@@ -35,14 +35,16 @@ export function useKeyboardShortcuts(
     enabled = true,
     preventDefault = true,
     stopPropagation = false,
-    target = document,
+    target,
   } = options;
 
   const shortcutsRef = useRef(shortcuts);
   shortcutsRef.current = shortcuts;
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || typeof window === 'undefined') return;
+
+    const eventTarget = target || document;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       const shortcut = getShortcutFromEvent(event);
@@ -59,10 +61,10 @@ export function useKeyboardShortcuts(
       }
     };
 
-    target.addEventListener("keydown", handleKeyDown);
+    eventTarget.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      target.removeEventListener("keydown", handleKeyDown);
+      eventTarget.removeEventListener("keydown", handleKeyDown);
     };
   }, [enabled, preventDefault, stopPropagation, target]);
 }
@@ -71,7 +73,7 @@ function getShortcutFromEvent(event: KeyboardEvent): string {
   const parts: string[] = [];
   
   // Handle modifiers
-  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
   
   if (event.ctrlKey && !isMac) {
     parts.push("ctrl");
@@ -123,7 +125,7 @@ function getShortcutFromEvent(event: KeyboardEvent): string {
  * Utility function to format shortcut for display
  */
 export function formatShortcut(shortcut: string): string {
-  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
   
   return shortcut
     .split("+")

@@ -69,7 +69,7 @@ export function useTouchGestures(options: TouchGestureOptions = {}) {
         if (touchState.current) {
           onLongPress(event);
           // Add haptic feedback
-          if ('vibrate' in navigator) {
+          if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
             navigator.vibrate(100);
           }
         }
@@ -122,7 +122,7 @@ export function useTouchGestures(options: TouchGestureOptions = {}) {
       if (onTap) {
         onTap(event);
         // Add subtle haptic feedback
-        if ('vibrate' in navigator) {
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
           navigator.vibrate(25);
         }
       }
@@ -148,7 +148,7 @@ export function useTouchGestures(options: TouchGestureOptions = {}) {
       }
       
       // Add haptic feedback for swipes
-      if ('vibrate' in navigator) {
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         navigator.vibrate(50);
       }
     }
@@ -195,7 +195,7 @@ export function useTouchGestures(options: TouchGestureOptions = {}) {
 // Utility hook for haptic feedback
 export function useHapticFeedback() {
   const vibrate = useCallback((pattern: number | number[]) => {
-    if ('vibrate' in navigator) {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       navigator.vibrate(pattern);
     }
   }, []);

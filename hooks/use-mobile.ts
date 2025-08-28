@@ -20,6 +20,8 @@ export function useMobile(): UseMobileReturn {
   });
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
     const checkDevice = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;

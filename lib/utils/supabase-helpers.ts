@@ -217,8 +217,8 @@ export function mapPDFRowToDocument(row: PDFRow): PDFDocument {
     fileSize: row.file_size,
     storagePath: row.storage_path,
     mimeType: row.mime_type,
-    uploadedAt: new Date(row.uploaded_at),
-    updatedAt: new Date(row.updated_at),
+    uploadedAt: row.uploaded_at ? new Date(row.uploaded_at) : new Date(),
+    updatedAt: row.updated_at ? new Date(row.updated_at) : new Date(),
   };
 }
 

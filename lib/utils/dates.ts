@@ -2,6 +2,8 @@
  * Date utility functions for handling various date formats and operations
  */
 
+import { formatDistanceToNow, isValid, parseISO, format } from 'date-fns';
+
 /**
  * Converts various date inputs to a JavaScript Date object
  */
@@ -175,4 +177,79 @@ export function getStartOfDay(input: string | Date | number): Date {
 export function getEndOfDay(input: string | Date | number): Date {
   const date = toDate(input);
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+}
+
+/**
+ * Safely formats a date to "time ago" format using date-fns
+ * Handles invalid dates, null values, and string dates
+ */
+export function safeFormatDistanceToNow(date: string | Date | null | undefined): string {
+  if (!date) return 'Unknown';
+  
+  try {
+    let dateObj: Date;
+    
+    if (typeof date === 'string') {
+      dateObj = parseISO(date);
+    } else {
+      dateObj = date;
+    }
+    
+    if (!isValid(dateObj)) {
+      return 'Invalid date';
+    }
+    
+    return formatDistanceToNow(dateObj, { addSuffix: true });
+  } catch (error) {
+    console.warn('Error formatting date:', error);
+    return 'Unknown';
+  }
+}
+
+/**
+ * Safely formats a date to a specific format using date-fns
+ * Handles invalid dates, null values, and string dates
+ */
+export function safeFormatDate(date: string | Date | null | undefined, formatString: string = 'PPP'): string {
+  if (!date) return 'Unknown';
+  
+  try {
+    let dateObj: Date;
+    
+    if (typeof date === 'string') {
+      dateObj = parseISO(date);
+    } else {
+      dateObj = date;
+    }
+    
+    if (!isValid(dateObj)) {
+      return 'Invalid date';
+    }
+    
+    return format(dateObj, formatString);
+  } catch (error) {
+    console.warn('Error formatting date:', error);
+    return 'Unknown';
+  }
+}
+
+/**
+ * Checks if a date is valid using date-fns validation
+ */
+export function isValidDateSafe(date: string | Date | null | undefined): boolean {
+  if (!date) return false;
+  
+  try {
+    let dateObj: Date;
+    
+    if (typeof date === 'string') {
+      dateObj = parseISO(date);
+    } else {
+      dateObj = date;
+    }
+    
+    return isValid(dateObj);
+  } catch (error) {
+    return false;
+  }
 }

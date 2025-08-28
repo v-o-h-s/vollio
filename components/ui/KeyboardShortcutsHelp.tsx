@@ -1,8 +1,13 @@
 import React from "react";
-import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { formatShortcut } from "@/hooks/use-keyboard-shortcuts";
+
+interface ShortcutInfo {
+    key: string;
+    description: string;
+}
 
 interface KeyboardShortcutsHelpProps {
-    shortcuts: ReturnType<typeof useKeyboardShortcuts>["shortcuts"];
+    shortcuts: ShortcutInfo[];
 }
 
 /**
@@ -18,7 +23,7 @@ export function KeyboardShortcutsHelp({ shortcuts }: KeyboardShortcutsHelpProps)
                 <div key={index} className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">{shortcut.description}</span>
                     <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-xs font-mono">
-                        {shortcut.displayKey}
+                        {formatShortcut(shortcut.key)}
                     </kbd>
                 </div>
             ))}

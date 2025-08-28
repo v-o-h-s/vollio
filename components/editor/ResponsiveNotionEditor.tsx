@@ -1,12 +1,12 @@
 'use client';
 
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useMobile } from '@/hooks/use-mobile';
 import { NotionEditor } from './NotionEditor';
 import { MobileNotionEditor } from './MobileNotionEditor';
 import type { NotionEditorProps } from './types';
 
 export function ResponsiveNotionEditor(props: NotionEditorProps) {
-  const isMobile = useIsMobile();
+  const isMobile = isMobile();
 
   // Use mobile-optimized editor on mobile devices
   if (isMobile) {

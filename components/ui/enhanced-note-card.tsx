@@ -12,7 +12,7 @@ import {
   Trash2,
   Copy
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { safeFormatDistanceToNow } from "@/lib/utils/dates";
 import { Note, JSONContent } from "@/lib/types";
 import {
   DropdownMenu,
@@ -257,9 +257,7 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
                   <div className="flex items-center gap-1">
                     <Calendar size={12} />
                     <span>
-                      {formatDistanceToNow(new Date(note.updatedAt), {
-                        addSuffix: true,
-                      })}
+                      {safeFormatDistanceToNow(note.updatedAt || note.updatedAt)}
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -376,9 +374,7 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
             <div className="flex items-center gap-1">
               <Calendar size={12} />
               <span>
-                {formatDistanceToNow(new Date(note.updatedAt), {
-                  addSuffix: true,
-                })}
+                {safeFormatDistanceToNow(note.updatedAt || note.updatedAt)}
               </span>
             </div>
             

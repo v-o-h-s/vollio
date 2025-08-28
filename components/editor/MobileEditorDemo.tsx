@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ResponsiveNotionEditor } from './ResponsiveNotionEditor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useMobile } from '@/hooks/use-mobile';
 
 export function MobileEditorDemo() {
   const [content, setContent] = useState({
@@ -83,7 +83,7 @@ export function MobileEditorDemo() {
     ],
   });
 
-  const isMobile = useIsMobile();
+  const { isMobile } = useMobile();
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 space-y-4">

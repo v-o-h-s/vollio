@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, ExternalLink, Edit3 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { safeFormatDistanceToNow } from "@/lib/utils/dates";
 import { Note } from "@/lib/types";
 
 interface NoteCardProps {
@@ -65,9 +65,7 @@ export const NoteCard = memo<NoteCardProps>(({ note, onEdit, onViewAnnotation })
         <div className="flex items-center gap-1">
           <Calendar size={12} />
           <span>
-            {formatDistanceToNow(new Date(note.updatedAt), {
-              addSuffix: true,
-            })}
+            {safeFormatDistanceToNow(note.updated_at || note.updatedAt)}
           </span>
         </div>
         

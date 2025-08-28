@@ -47,7 +47,7 @@ vi.mock('@/hooks/use-activity-tracking', () => ({
 
 // Mock mobile hook
 vi.mock('@/hooks/use-mobile', () => ({
-  useIsMobile: () => false,
+  useMobile: () => ({ isMobile: false, isTablet: false, isDesktop: true, hasTouch: false, orientation: 'landscape', screenSize: 'lg' }),
 }));
 
 // Mock RTK Query

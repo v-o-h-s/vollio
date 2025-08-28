@@ -24,7 +24,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useMobile } from '@/hooks/use-mobile';
 
 /**
  * Props interface for AnnotationTooltip component
@@ -53,7 +53,7 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
     const tooltipRef = useRef<HTMLDivElement>(null);
     const [adjustedPosition, setAdjustedPosition] = useState(position);
     const [isDelayedVisible, setIsDelayedVisible] = useState(false);
-    const isMobile = useIsMobile();
+    const { isMobile } = useMobile();
 
     // Don't show tooltip on mobile devices - use mobile dialog instead
     if (isMobile) {

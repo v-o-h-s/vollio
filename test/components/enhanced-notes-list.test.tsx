@@ -24,7 +24,7 @@ vi.mock('@/components/ui/enhanced-note-card', () => ({
 
 // Mock hooks
 vi.mock('@/hooks/use-mobile', () => ({
-  useIsMobile: vi.fn(() => false),
+  useMobile: vi.fn(() => ({ isMobile: false, isTablet: false, isDesktop: true, hasTouch: false, orientation: 'landscape', screenSize: 'lg' })),
 }));
 
 vi.mock('@/hooks/use-touch-gestures', () => ({
@@ -312,8 +312,8 @@ describe('EnhancedNotesList', () => {
 
   describe('Responsive Behavior', () => {
     it('should adapt layout for mobile devices', () => {
-      const { useIsMobile } = require('@/hooks/use-mobile');
-      useIsMobile.mockReturnValue(true);
+      const { useMobile } = require('@/hooks/use-mobile');
+      useMobile.mockReturnValue({ isMobile: true, isTablet: false, isDesktop: false, hasTouch: true, orientation: 'portrait', screenSize: 'sm' });
 
       render(<EnhancedNotesList {...mockProps} />);
 

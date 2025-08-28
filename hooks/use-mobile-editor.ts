@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useIsMobile } from "./use-mobile";
+import { useMobile } from "./use-mobile";
 import { useMobileKeyboard } from "./use-mobile-keyboard";
 import { useTouchGestures, useHapticFeedback } from "./use-touch-gestures";
 import type { EditorMode } from "@/lib/types";
@@ -33,14 +33,14 @@ export function useMobileEditor(options: MobileEditorOptions = {}) {
     onSwipeRight,
   } = options;
 
-  const isMobile = useIsMobile();
+  const { isMobile } = useMobile();
   const containerRef = useRef<HTMLElement | null>(null);
 
   const [state, setState] = useState<MobileEditorState>({
     mode: "normal",
     isKeyboardVisible: false,
     keyboardHeight: 0,
-    viewportHeight: typeof window !== "undefined" ? window.innerHeight : 0,
+    viewportHeight: 0,
     isGestureActive: false,
     touchPosition: null,
   });
@@ -113,7 +113,7 @@ export function useMobileEditor(options: MobileEditorOptions = {}) {
         tapFeedback();
       }
     },
-    onLongPress: (event) => {
+    onLongPress: () => {
       if (!enableGestures) return;
 
       // Long press could trigger mode switching or context menu
@@ -121,7 +121,7 @@ export function useMobileEditor(options: MobileEditorOptions = {}) {
         successFeedback();
       }
     },
-    onSwipeLeft: (event) => {
+    onSwipeLeft: () => {
       if (!enableGestures) return;
 
       setState((prev) => ({ ...prev, isGestureActive: true }));
@@ -137,7 +137,7 @@ export function useMobileEditor(options: MobileEditorOptions = {}) {
         setState((prev) => ({ ...prev, isGestureActive: false }));
       }, 300);
     },
-    onSwipeRight: (event) => {
+    onSwipeRight: () => {
       if (!enableGestures) return;
 
       setState((prev) => ({ ...prev, isGestureActive: true }));
@@ -153,7 +153,7 @@ export function useMobileEditor(options: MobileEditorOptions = {}) {
         setState((prev) => ({ ...prev, isGestureActive: false }));
       }, 300);
     },
-    onSwipeUp: (event) => {
+    onSwipeUp: () => {
       if (!enableGestures) return;
 
       // Swipe up could trigger fullscreen mode
@@ -161,7 +161,7 @@ export function useMobileEditor(options: MobileEditorOptions = {}) {
         handleModeChange("fullscreen");
       }
     },
-    onSwipeDown: (event) => {
+    onSwipeDown: () => {
       if (!enableGestures) return;
 
       // Swipe down could exit fullscreen/focus mode
@@ -221,7 +221,7 @@ export function useMobileEditor(options: MobileEditorOptions = {}) {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       // Handle hardware back button on Android
-      if (event.key === "Escape" || event.keyCode === 27) {
+      if (event.key === "Escape") {
         if (state.mode !== "normal") {
           event.preventDefault();
           handleModeChange("normal");
@@ -244,6 +244,16 @@ export function useMobileEditor(options: MobileEditorOptions = {}) {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isMobile, state.mode, handleModeChange]);
+
+  // Initialize viewport height on client side
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setState((prev) => ({
+        ...prev,
+        viewportHeight: window.innerHeight,
+      }));
+    }
+  }, []);
 
   // Viewport orientation change handling
   useEffect(() => {
@@ -493,7 +503,7 @@ export function useMobileEditor(options: MobileEditorOptions = {}) {
 
 // Utility hook for mobile-specific editor enhancements
 export function useMobileEditorEnhancements() {
-  const isMobile = useIsMobile();
+  const { isMobile } = useMobile();
 
   // Prevent double-tap zoom
   useEffect(() => {

@@ -43,7 +43,7 @@ import {
 } from "@/lib/store/annotationSlice";
 import { useGetPDFQuery } from "@/lib/store/apiSlice";
 import { PDFDocument, Annotation, Rectangle } from "@/lib/types";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMobile } from "@/hooks/use-mobile";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PDFViewerFallback } from "@/components/pdf/FallbackUI";
 import AnnotationTooltip from "@/components/pdf/AnnotationTooltip";
@@ -105,7 +105,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Hooks
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const isMobile = useIsMobile();
+  const { isMobile } = useMobile();
   const { trackPDFView } = useActivityTracking();
 
   // Redux state

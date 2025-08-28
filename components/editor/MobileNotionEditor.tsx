@@ -36,7 +36,7 @@ import { MobileContextMenu } from './MobileContextMenu';
 import { MobileDragDrop } from './MobileDragDrop';
 import { MobileSlashCommand } from './MobileSlashCommand';
 import { MobileFormattingPanel } from './MobileFormattingPanel';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useMobile } from '@/hooks/use-mobile';
 import { useMobileKeyboard } from '@/hooks/use-mobile-keyboard';
 import { cn } from '@/lib/utils';
 import type { NotionEditorProps } from './types';
@@ -59,7 +59,7 @@ export function MobileNotionEditor({
   const [slashCommandVisible, setSlashCommandVisible] = useState(false);
   const [slashCommandPosition, setSlashCommandPosition] = useState({ x: 0, y: 0 });
   const [formattingPanelVisible, setFormattingPanelVisible] = useState(false);
-  const isMobile = useIsMobile();
+  const { isMobile } = useMobile();
   const { keyboardHeight, isKeyboardVisible } = useMobileKeyboard({
     adjustViewport: true,
   });
