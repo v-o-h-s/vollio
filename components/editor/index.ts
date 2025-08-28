@@ -2,18 +2,14 @@ export { NotionEditor } from './NotionEditor';
 export { FloatingToolbar } from './FloatingToolbar';
 export { AdvancedFloatingToolbar } from './AdvancedFloatingToolbar';
 export { FloatingToolbarDemo } from './FloatingToolbarDemo';
-export { EditorProvider, useEditorContext, useEditorErrorRecovery } from './EditorProvider';
+export { EditorProvider, useEditorContext } from './EditorProvider';
 
 // Enhanced typography and focus features
-export { ContextualToolbar } from './ContextualToolbar';
-export { EditorStatsDisplay, useEditorStats } from './EditorStatsDisplay';
-export { TypographySettings, useTypographySettings } from './TypographySettings';
+
+// Auto-save and status components
+export { AutoSaveStatus } from './AutoSaveStatus';
 
 // Multi-mode editor components
-export { MultiModeEditor, useEditorMode } from './MultiModeEditor';
-export { AdaptiveFloatingToolbar } from './AdaptiveFloatingToolbar';
-export { MultiModeEditorDemo } from './MultiModeEditorDemo';
-export type { EditorMode, MultiModeEditorProps } from './MultiModeEditor';
 
 // Mobile-optimized components
 export { MobileNotionEditor } from './MobileNotionEditor';
@@ -26,11 +22,10 @@ export { MobileSlashCommand } from './MobileSlashCommand';
 export { MobileFormattingPanel } from './MobileFormattingPanel';
 export { ResponsiveNotionEditor } from './ResponsiveNotionEditor';
 
-// Auto-save and offline support
+// Auto-save support
 export { NotionEditorWithAutoSave } from './NotionEditorWithAutoSave';
 export { RobustNotionEditor } from './RobustNotionEditor';
-export { SaveStatusIndicator } from './SaveStatusIndicator';
-export { OfflineStatusIndicator } from './OfflineStatusIndicator';
+
 export { EditorErrorBoundary } from './EditorErrorBoundary';
 
-export type { NotionEditorProps, EditorContent, EditorState, EditorContextValue } from './types';
+export type { NotionEditorProps, JSONContent, EditorState, EditorContextValue } from '@/lib/types';

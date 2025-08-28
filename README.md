@@ -20,7 +20,7 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 ### User Experience
 
 - **Responsive Design**: Mobile-first design with touch-friendly interactions and adaptive UI components
-- **Keyboard Shortcuts**: Desktop keyboard navigation and annotation shortcuts
+- **Keyboard Shortcuts**: Desktop keyboard shortcuts for efficient workflow
 - **Visual Feedback**: Annotation highlights, hover previews, tooltips, and loading states
 - **Authentication**: Secure user authentication with Clerk and JWT-based RLS
 - **Error Handling**: Comprehensive error boundaries, retry mechanisms, and user-friendly error messages
@@ -31,7 +31,7 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 - **Row Level Security**: Automatic user data isolation with Supabase RLS policies
 - **File Validation**: Comprehensive PDF validation with security checks and malicious pattern detection
 - **Performance Optimized**: Debounced activity tracking, lazy loading, memoization, and efficient rendering
-- **Accessibility**: ARIA labels, keyboard navigation, screen reader support, and semantic HTML
+- **User Experience**: Intuitive interfaces and efficient workflows
 - **Signed URL Management**: Automatic URL refresh, expiration handling, and secure file access
 
 ## 📚 Documentation
@@ -176,7 +176,7 @@ For comprehensive documentation covering all aspects of the Noto application, se
 - **SlashCommand Extension**: Notion-style slash commands for quick block creation and formatting
 - **ImageUpload Extension**: Drag-and-drop image upload with Supabase storage integration
 - **EnhancedLink Extension**: Advanced link handling with validation and auto-detection
-- **KeyboardShortcuts Extension**: Comprehensive keyboard shortcuts for accessibility and efficiency
+- **KeyboardShortcuts Extension**: Essential keyboard shortcuts for efficient editing
 - **LazyNotionEditor**: Performance-optimized wrapper with lazy loading and skeleton states
 
 #### Note Management System
@@ -284,7 +284,7 @@ npm run setup:supabase  # Verify Supabase setup
 - Mock external dependencies (Syncfusion, Supabase, Clerk)
 - Test user interactions and edge cases
 - Performance testing with large datasets
-- Accessibility testing with screen readers
+- User experience testing across devices
 
 ## 📚 Documentation
 
@@ -346,7 +346,7 @@ Ensure all environment variables are configured in production:
 - Use Tailwind CSS for styling with shadcn/ui components
 - Write tests for new features and bug fixes
 - Follow the established project structure and naming conventions
-- Ensure mobile responsiveness and accessibility compliance
+- Ensure mobile responsiveness and intuitive user experience
 
 ### Code Style
 

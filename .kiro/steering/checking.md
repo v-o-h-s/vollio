@@ -77,5 +77,21 @@ return NextResponse.json(
 After any changes, verify these core flows work:
 - **Authentication**: Sign-in → Dashboard access → Protected API calls
 - **PDF workflow**: Upload → View → Annotate → Save → Cross-tab sync
-- **Mobile experience**: Touch selection → Annotation dialog → Save
+- **Note workflow**: Create → Edit → Auto-save → Navigation → Persistence
+- **Mobile experience**: Touch selection → Annotation dialog → Note editing → Save
+- **Auto-save functionality**: Content changes → Debounced save → Status feedback → Error recovery
 - **Error recovery**: Network failures → Retry mechanisms → User feedback
+
+## Current Development Context
+
+### Active Features
+- **Note System**: Complete frontend with auto-save, needs API endpoints and database schema
+- **Rich Text Editor**: Full TipTap integration with NotionEditor, auto-save, and keyboard shortcuts
+- **Auto-Save Hook**: `useAutoSave` with debounced saves, status tracking, and error handling
+
+### Common Issues to Check
+- **Import Paths**: Ensure all `@/` imports are correct and components exist
+- **TypeScript Errors**: Fix implicit `any` types and deprecated API usage
+- **Auto-Save Integration**: Verify debounced saves work correctly with status feedback
+- **Mobile Responsiveness**: Test touch interactions and responsive layouts
+- **Error Boundaries**: Ensure proper error handling and recovery mechanisms

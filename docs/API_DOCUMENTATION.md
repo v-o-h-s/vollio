@@ -8,6 +8,186 @@ All endpoints require Clerk authentication with JWT tokens. The `userId` is auto
 
 ## Endpoints
 
+### Notes API
+
+#### GET /api/notes
+
+Get all notes for the authenticated user.
+
+**Query Parameters:**
+
+- `limit` (optional): Maximum number of notes to return (default: 50)
+- `offset` (optional): Number of notes to skip for pagination (default: 0)
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "note_1234567890_abc123",
+      "userId": "user_123",
+      "title": "My Note Title",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Note content here..."
+              }
+            ]
+          }
+        ]
+      },
+      "createdAt": "2025-01-08T10:00:00.000Z",
+      "updatedAt": "2025-01-08T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### POST /api/notes
+
+Create a new note.
+
+**Request Body:**
+
+```json
+{
+  "title": "My Note Title",
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Note content here..."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "note_1234567890_abc123",
+    "userId": "user_123",
+    "title": "My Note Title",
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Note content here..."
+            }
+          ]
+        }
+      ]
+    },
+    "createdAt": "2025-01-08T10:00:00.000Z",
+    "updatedAt": "2025-01-08T10:00:00.000Z"
+  }
+}
+```
+
+#### PUT /api/notes/[id]
+
+Update an existing note.
+
+**Path Parameters:**
+
+- `id`: The note ID
+
+**Request Body:**
+
+```json
+{
+  "title": "Updated Note Title",
+  "content": {
+    "type": "doc",
+    "content": [
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "Updated note content..."
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "note_1234567890_abc123",
+    "userId": "user_123",
+    "title": "Updated Note Title",
+    "content": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Updated note content..."
+            }
+          ]
+        }
+      ]
+    },
+    "createdAt": "2025-01-08T10:00:00.000Z",
+    "updatedAt": "2025-01-08T10:05:00.000Z"
+  }
+}
+```
+
+#### DELETE /api/notes/[id]
+
+Delete a note.
+
+**Path Parameters:**
+
+- `id`: The note ID to delete
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "note_1234567890_abc123",
+    "userId": "user_123",
+    "title": "Deleted Note Title",
+    "content": {...},
+    "createdAt": "2025-01-08T10:00:00.000Z",
+    "updatedAt": "2025-01-08T10:00:00.000Z"
+  }
+}
+```
+
 ### Annotations API
 
 #### GET /api/annotations
@@ -362,10 +542,25 @@ The application uses Supabase for both database and file storage with comprehens
 4. **Create annotation**: `POST /api/annotations` (when annotation system is implemented)
 5. **Get annotations**: `GET /api/annotations?pdfId={id}` (when annotation system is implemented)
 
+### Complete Notes workflow:
+
+1. **Create note**: `POST /api/notes` with title and content
+2. **List notes**: `GET /api/notes` to get all user notes
+3. **Update note**: `PUT /api/notes/[id]` with updated content
+4. **Delete note**: `DELETE /api/notes/[id]` to remove note
+
 ### Frontend Integration with RTK Query:
 
 ```typescript
-import { useUploadPDFMutation, useGetPDFsQuery, useGetPDFQuery } from '@/lib/store/apiSlice';
+import { 
+  useUploadPDFMutation, 
+  useGetPDFsQuery, 
+  useGetPDFQuery,
+  useCreateNoteMutation,
+  useGetNotesQuery,
+  useUpdateNoteMutation,
+  useDeleteNoteMutation
+} from '@/lib/store/apiSlice';
 
 // Upload PDF
 const [uploadPDF, { isLoading }] = useUploadPDFMutation();
@@ -382,6 +577,24 @@ const { data: pdfList, error, isLoading } = useGetPDFsQuery();
 const { data: pdfData } = useGetPDFQuery(pdfId, {
   pollingInterval: 30 * 60 * 1000 // Refresh every 30 minutes
 });
+
+// Notes management
+const [createNote] = useCreateNoteMutation();
+const [updateNote] = useUpdateNoteMutation();
+const [deleteNote] = useDeleteNoteMutation();
+const { data: notes } = useGetNotesQuery();
+
+// Create note with auto-save
+const handleCreateNote = async (title: string, content: any) => {
+  const result = await createNote({ title, content }).unwrap();
+  return result.data;
+};
+
+// Update note with auto-save
+const handleUpdateNote = async (id: string, title: string, content: any) => {
+  const result = await updateNote({ id, title, content }).unwrap();
+  return result.data;
+};
 ```
 
 ### Error Handling:

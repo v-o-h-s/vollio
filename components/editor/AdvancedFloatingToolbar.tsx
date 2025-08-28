@@ -168,11 +168,15 @@ export function AdvancedFloatingToolbar({
 
   // Placeholder functions for future enhancement
   const handleHighlight = () => {
-    console.log('Highlight functionality - requires @tiptap/extension-highlight package');
+    console.log(
+      "Highlight functionality - requires @tiptap/extension-highlight package"
+    );
   };
 
   const handleTextColor = () => {
-    console.log('Text color functionality - requires @tiptap/extension-color package');
+    console.log(
+      "Text color functionality - requires @tiptap/extension-color package"
+    );
   };
 
   return (

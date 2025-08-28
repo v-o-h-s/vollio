@@ -1,12 +1,10 @@
 "use client";
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import debounce from "lodash.debounce"
 /* the debounce function works as follows :
     debounce(function,delay) , the function will wait for delay ms then it runs the function
     if during that delay debounce is called again , it will start the timer from 0s
 */
-
 export type AutoSaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface UseAutoSaveOptions {
@@ -90,11 +88,7 @@ export function useAutoSave({
     [enabled, delay, debouncedSave]
   );
 
-  const triggerSave = useCallback(() => {
-    debouncedSave.cancel();
-    performSave();
-  }, [debouncedSave, performSave]);
-  // this function is suppose to run if the user saves the content manually but i guess that will never happen since my app does not give freedom to people, i mean that is what capitalism is all about <3
+
 
   // Cleanup on unmount
   useEffect(() => {
@@ -106,7 +100,6 @@ export function useAutoSave({
   return {
     status,
     lastSaved,
-    triggerSave, // this function is suppose to run if the user saves the content manually but i guess that will never happen since my app does not give freedom to people, i mean that is what capitalism is all about <3
     error,
     updateContent,
   };

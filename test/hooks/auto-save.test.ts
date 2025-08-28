@@ -29,7 +29,6 @@ describe('useAutoSave', () => {
     expect(result.current.isSaving).toBe(false);
     expect(result.current.lastSaved).toBe(null);
     expect(result.current.error).toBe(null);
-    expect(result.current.hasUnsavedChanges).toBe(false);
   });
 
   it('should debounce auto-save calls', async () => {
@@ -89,21 +88,7 @@ describe('useAutoSave', () => {
     expect(mockOnError).toHaveBeenCalledWith(saveError);
   });
 
-  it('should allow manual save', async () => {
-    const { result } = renderHook(() =>
-      useAutoSave('test data', {
-        onSave: mockOnSave,
-        enabled: false, // Disable auto-save
-      })
-    );
 
-    await act(async () => {
-      await result.current.saveNow();
-    });
-
-    expect(mockOnSave).toHaveBeenCalledWith('test data');
-    expect(result.current.lastSaved).toBeInstanceOf(Date);
-  });
 
   it('should not save when disabled', async () => {
     const { result, rerender } = renderHook(

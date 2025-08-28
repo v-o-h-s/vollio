@@ -25,8 +25,8 @@ export function createAppError(
   context?: ErrorContext,
   details?: any
 ): AppError {
-  const severity = ERROR_SEVERITY_MAP[type] || ErrorSeverity.MEDIUM;
-  const errorMessage = ERROR_MESSAGES[type];
+  const severity = ERROR_SEVERITY_MAP[type] || ErrorSeverity.MEDIUM;// level of error
+  const errorMessage = ERROR_MESSAGES[type]; // gives title message and action
 
   return {
     type,

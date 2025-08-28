@@ -112,7 +112,7 @@ import {
   getPageNumberFromElement 
 } from '@/lib/utils/pdfCoordinates';
 
-// Cross-tab navigation
+// Cross-tab synchronization
 import { 
   createNavigationHash,
   parseNavigationHash,

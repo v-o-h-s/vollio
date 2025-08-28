@@ -1,25 +1,19 @@
 import React, { lazy, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
-import type { EditorMode } from "./types";
+import { JSONContent } from "@/lib/types";
 
 // Lazy load the heavy editor components
 const NotionEditor = lazy(() => import("./NotionEditor").then(module => ({ default: module.NotionEditor })));
 const EditorProvider = lazy(() => import("./EditorProvider").then(module => ({ default: module.EditorProvider })));
 
 interface LazyNotionEditorProps {
-  initialContent?: any;
-  onChange?: (content: any) => void;
+  initialContent?: JSONContent | string;
+  onChange?: (content: JSONContent) => void;
   placeholder?: string;
   className?: string;
-  mode?: EditorMode;
-  onModeChange?: (mode: EditorMode) => void;
-  showModeToggle?: boolean;
   showWordCount?: boolean;
   showReadingTime?: boolean;
-  showContextualToolbar?: boolean;
-  distractionFreeMode?: boolean;
-  enhancedTypography?: boolean;
 }
 
 const EditorSkeleton = () => (

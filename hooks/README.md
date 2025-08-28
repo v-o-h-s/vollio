@@ -110,14 +110,14 @@ function FileUploadComponent() {
 
 ### User Interface
 
-#### `use-keyboard-shortcuts.ts` - Keyboard Navigation
+#### `use-keyboard-shortcuts.ts` - Keyboard Shortcuts
 
-**Purpose**: Provides keyboard shortcut handling for enhanced accessibility and power user features.
+**Purpose**: Provides keyboard shortcut handling for efficient editor workflow and formatting.
 
 **Key Features**:
 - Configurable keyboard shortcuts
 - Context-aware shortcut activation
-- Accessibility compliance (ARIA integration)
+- Efficient workflow shortcuts
 - Cross-browser compatibility
 
 **Usage**:
@@ -410,7 +410,7 @@ export function useCustomHook(options: UseCustomHookOptions): UseCustomHookRetur
 - **Performance Monitoring**: Add performance tracking to hooks
 - **Analytics Integration**: Built-in analytics tracking
 - **A/B Testing**: Hook-based feature flag support
-- **Accessibility**: Enhanced accessibility utilities
+- **User Experience**: Enhanced user interaction utilities
 
 ---
 

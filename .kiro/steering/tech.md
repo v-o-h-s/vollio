@@ -156,7 +156,7 @@ inclusion: always
 
 ### Editor Components
 
-- **NotionEditor**: Main editor component with full TipTap integration
+- **NotionEditor**: Main editor component with full TipTap integration, auto-save, and keyboard shortcuts
 - **FloatingToolbar**: Context-aware toolbar that appears on text selection
 - **AdvancedFloatingToolbar**: Feature-rich toolbar with color picker and advanced options
 - **PDFAnnotationToolbar**: Specialized toolbar for PDF annotation workflows
@@ -172,9 +172,18 @@ inclusion: always
 ### Editor State Management
 
 - Use EditorProvider for editor-specific state
-- Integrate with Redux store for annotation content
-- Handle unsaved changes and auto-save functionality
+- Integrate with Redux store for annotation and note content
+- Handle unsaved changes and auto-save functionality with debounced saves
 - Implement proper error recovery for editor failures
+- Support keyboard shortcuts (Ctrl/Cmd+S for save, Escape for navigation)
+
+### Auto-Save Implementation
+
+- Use `useAutoSave` hook for debounced auto-save functionality
+- Implement visual feedback for save status (saving, saved, error states)
+- Handle creation vs. update operations automatically
+- Provide manual save options with keyboard shortcuts
+- Warn users before leaving with unsaved changes
 
 ## Mobile Responsiveness
 

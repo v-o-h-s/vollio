@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useIsMobile } from "./use-mobile";
 import { useMobileKeyboard } from "./use-mobile-keyboard";
 import { useTouchGestures, useHapticFeedback } from "./use-touch-gestures";
-type EditorMode = "normal" | "fullscreen" | "focus";
+import type { EditorMode } from "@/lib/types";
 interface MobileEditorOptions {
   enableGestures?: boolean;
   enableHapticFeedback?: boolean;

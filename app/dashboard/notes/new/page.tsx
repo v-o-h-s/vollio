@@ -1,504 +1,291 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCreateNoteMutation } from "@/lib/store/apiSlice";
-import { LazyNotionEditor } from "@/components/editor/LazyNotionEditor";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { 
-  ArrowLeft, 
-  Save, 
+import { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Save,
+  Loader2,
+  Check,
+  AlertCircle,
+  Clock,
   FileText,
-  Maximize2,
-  Focus,
-  Eye
 } from "lucide-react";
-import { JSONContent } from "@/lib/types";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { useNoteSync } from "@/hooks/use-note-sync";
-import { noteNotifications } from "@/lib/utils/note-notifications";
-import { cn } from "@/lib/utils";
-import type { EditorMode } from "@/components/editor/types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
+import { AutoSaveStatus } from "@/components/editor/AutoSaveStatus";
 
-/**
- * Interface for PDF selection data passed via URL params
- */
-interface PDFSelectionData {
-  text: string;
-  pageNumber: number;
-  coordinates: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  pdfId: string;
-  pdfFilename: string;
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { useMobile } from "@/hooks/use-mobile";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { cn } from "@/lib/utils";
+
+interface NewNoteContent {
+  title?: string;
+  content: any;
 }
 
-/**
- * New Note Creation Page
- * 
- * Allows users to create new notes with the Notion-like editor.
- * Can be initialized with PDF annotation data for linked notes.
- * Supports multiple viewing modes: normal, fullscreen, and focus.
- */
-const NewNotePage: React.FC = () => {
+export default function NewNotePage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  // State
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState<JSONContent>({
-    type: "doc",
-    content: [{ type: "paragraph" }],
+  const { isMobile } = useMobile();
+  const [noteContent, setNoteContent] = useState<NewNoteContent>({
+    content: null,
   });
-  const [isSaving, setIsSaving] = useState(false);
-  const [selectionData, setSelectionData] = useState<PDFSelectionData | null>(null);
-  const [editorMode, setEditorMode] = useState<EditorMode>('normal');
-  const [showKeyboardHint, setShowKeyboardHint] = useState(false);
+  const [noteId, setNoteId] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Mutations
-  const [createNote] = useCreateNoteMutation();
+  // Auto-save functionality
+  const handleAutoSave = useCallback(
+    async (content: any) => {
+      try {
+        if (!noteId) {
+          // Create new note first
+          setIsCreating(true);
+          const response = await fetch("/api/notes", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              title: extractTitleFromContent(content) || "Untitled Note",
+              content,
+            }),
+          });
 
-  // Cross-tab synchronization
-  const { broadcastCreate } = useNoteSync();
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to create note");
+          }
 
-  // Handle mode changes with animations
-  const handleModeChange = useCallback((newMode: EditorMode) => {
-    setEditorMode(newMode);
-    
-    // Show keyboard hint for focus mode
-    if (newMode === 'focus') {
-      setShowKeyboardHint(true);
-      setTimeout(() => setShowKeyboardHint(false), 3000);
+          const result = await response.json();
+          setNoteId(result.data.id);
+          setIsCreating(false);
+        } else {
+          // Update existing note
+          const response = await fetch(`/api/notes/${noteId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              title: extractTitleFromContent(content) || "Untitled Note",
+              content,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to save note");
+          }
+        }
+      } catch (error) {
+        setIsCreating(false);
+        throw error;
+      }
+    },
+    [noteId]
+  );
+
+  const {
+    status: autoSaveStatus,
+    lastSaved,
+    error: autoSaveError,
+    updateContent,
+  } = useAutoSave({
+    onSave: handleAutoSave,
+    delay: 1000, // 1 second delay for auto-save
+    enabled: true,
+  });
+
+  // Extract title from editor content
+  const extractTitleFromContent = (content: any): string | null => {
+    if (!content || !content.content) return null;
+
+    const firstNode = content.content[0];
+    if (firstNode && firstNode.type === "heading" && firstNode.content) {
+      return firstNode.content.map((c: any) => c.text).join("");
     }
-  }, []);
 
-  // Keyboard shortcuts for mode switching
+    if (firstNode && firstNode.type === "paragraph" && firstNode.content) {
+      const text = firstNode.content.map((c: any) => c.text).join("");
+      return text.length > 50 ? text.substring(0, 50) + "..." : text;
+    }
+
+    return null;
+  };
+
+  // Handle editor content changes
+  const handleEditorChange = useCallback(
+    (content: any) => {
+      setNoteContent((prev) => ({ ...prev, content }));
+      setHasUnsavedChanges(true);
+      
+      // Only trigger auto-save if content is not empty
+      if (content && content.content && content.content.length > 0) {
+        updateContent(content);
+      }
+    },
+    [updateContent]
+  );
+
+  // Handle successful save is now handled via onSaveSuccess callback
+
+  // Handle go back
+  const handleGoBack = useCallback(() => {
+    router.push("/dashboard/notes");
+  }, [router]);
+
+  // Handle manual save
+  const handleManualSave = useCallback(async () => {
+    if (noteContent.content) {
+      try {
+        await handleAutoSave(noteContent.content);
+      } catch (error) {
+        console.error("Manual save failed:", error);
+      }
+    }
+  }, [noteContent.content, handleAutoSave]);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    "mod+s": (event) => {
+      event.preventDefault();
+      handleManualSave();
+    },
+    "escape": (event) => {
+      event.preventDefault();
+      if (!hasUnsavedChanges || confirm("You have unsaved changes. Are you sure you want to leave?")) {
+        handleGoBack();
+      }
+    },
+  });
+
+  // Warn user before leaving if there are unsaved changes
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // F11 for focus mode
-      if (event.key === 'F11') {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges || autoSaveStatus === "saving" || isCreating) {
         event.preventDefault();
-        handleModeChange(editorMode === 'focus' ? 'normal' : 'focus');
-      }
-      
-      // Escape to exit focus mode
-      if (event.key === 'Escape' && editorMode === 'focus') {
-        event.preventDefault();
-        handleModeChange('normal');
-      }
-      
-      // Ctrl/Cmd + Shift + F for fullscreen
-      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'F') {
-        event.preventDefault();
-        handleModeChange(editorMode === 'fullscreen' ? 'normal' : 'fullscreen');
+        return "You have unsaved changes. Are you sure you want to leave?";
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [editorMode, handleModeChange]);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges, autoSaveStatus, isCreating]);
 
-  // Parse selection data from URL params if present
-  useEffect(() => {
-    const selectionParam = searchParams.get("selection");
-    const annotationId = searchParams.get("annotationId");
-    
-    if (selectionParam) {
-      try {
-        const parsed = JSON.parse(decodeURIComponent(selectionParam)) as PDFSelectionData;
-        setSelectionData(parsed);
-        
-        // Set initial title based on PDF selection
-        setTitle(`Note from ${parsed.pdfFilename}`);
-        
-        // Set initial content with the selected text
-        setContent({
-          type: "doc",
-          content: [
-            {
-              type: "blockquote",
-              content: [
-                {
-                  type: "paragraph",
-                  content: [
-                    {
-                      type: "text",
-                      text: parsed.text,
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              type: "paragraph",
-              content: [
-                {
-                  type: "text",
-                  text: `From page ${parsed.pageNumber} of ${parsed.pdfFilename}`,
-                  marks: [{ type: "italic" }],
-                },
-              ],
-            },
-            {
-              type: "paragraph",
-            },
-          ],
-        });
-      } catch (error) {
-        console.error("Failed to parse selection data:", error);
-      }
-    } else if (annotationId) {
-      // If we have an annotation ID, set up the note to be linked to it
-      setTitle("Note for PDF Annotation");
-      setContent({
-        type: "doc",
-        content: [
-          {
-            type: "paragraph",
-            content: [
-              {
-                type: "text",
-                text: "This note is linked to a PDF annotation.",
-                marks: [{ type: "italic" }],
-              },
-            ],
-          },
-          {
-            type: "paragraph",
-          },
-        ],
-      });
-    }
-  }, [searchParams]);
-
-  const handleSave = async () => {
-    if (!title.trim()) {
-      noteNotifications.createError("Please enter a title for your note");
-      return;
-    }
-
-    setIsSaving(true);
-    const loadingToast = noteNotifications.loading("Creating note...");
-    
-    try {
-      const annotationId = searchParams.get("annotationId");
-      
-      const result = await createNote({
-        title: title.trim(),
-        content,
-        pdfAnnotationId: annotationId || undefined,
-      }).unwrap();
-
-      // Broadcast creation to other tabs
-      broadcastCreate(result);
-
-      // If we have selection data, we need to create an annotation
-      if (selectionData) {
-        // TODO: Create annotation and link it to the note
-        // This would involve calling the annotations API
-        console.log("TODO: Create annotation for selection:", selectionData);
-      }
-
-      noteNotifications.dismiss(loadingToast);
-      noteNotifications.createSuccess(title.trim());
-      router.push(`/dashboard/notes/${result.id}`);
-    } catch (error) {
-      console.error("Failed to create note:", error);
-      noteNotifications.dismiss(loadingToast);
-      noteNotifications.createError();
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleCancel = () => {
-    router.back();
-  };
-
-  // Mode toggle handlers
-  const handleToggleFullscreen = () => {
-    handleModeChange(editorMode === 'fullscreen' ? 'normal' : 'fullscreen');
-  };
-
-  const handleToggleFocus = () => {
-    handleModeChange(editorMode === 'focus' ? 'normal' : 'focus');
-  };
-
-  const handleExitMode = () => {
-    handleModeChange('normal');
-  };
-
-  // Render mode toggle buttons
-  const renderModeToggle = () => {
-    if (editorMode === 'focus') return null;
-
-    return (
-      <div className="flex items-center gap-2 p-2 border-b border-border bg-muted/50">
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => handleModeChange('normal')}
-            className={cn(
-              "mode-toggle-button",
-              editorMode === 'normal' && "active"
-            )}
-            title="Normal mode"
-          >
-            <Eye size={16} />
-            <span>Normal</span>
-          </button>
-          
-          <button
-            onClick={handleToggleFullscreen}
-            className={cn(
-              "mode-toggle-button",
-              editorMode === 'fullscreen' && "active"
-            )}
-            title="Fullscreen mode (Ctrl+Shift+F)"
-          >
-            <Maximize2 size={16} />
-            <span>Fullscreen</span>
-          </button>
-          
-          <button
-            onClick={handleToggleFocus}
-            className={cn(
-              "mode-toggle-button",
-              editorMode === 'focus' && "active"
-            )}
-            title="Focus mode (F11)"
-          >
-            <Focus size={16} />
-            <span>Focus</span>
-          </button>
-        </div>
-        
-        <div className="mode-indicator">
-          {editorMode === 'normal' && <Eye size={12} />}
-          {editorMode === 'fullscreen' && <Maximize2 size={12} />}
-          {editorMode === 'focus' && <Focus size={12} />}
-          <span>{editorMode.charAt(0).toUpperCase() + editorMode.slice(1)}</span>
-        </div>
-      </div>
-    );
-  };
-
-  // Render floating controls for focus mode
-  const renderFocusControls = () => {
-    if (editorMode !== 'focus') return null;
-
-    return (
-      <>
-        {/* Exit button */}
-        <button
-          onClick={handleExitMode}
-          className="focus-mode-exit-button"
-          title="Exit focus mode (Esc)"
-        >
-          <ArrowLeft size={16} />
-          <span>Exit Focus</span>
-        </button>
-
-        {/* Floating controls */}
-        <div className="focus-mode-controls">
-          <button
-            onClick={handleToggleFullscreen}
-            title="Switch to fullscreen mode"
-          >
-            <Maximize2 size={16} />
-          </button>
-          
-          <button
-            onClick={handleSave}
-            disabled={isSaving || !title.trim()}
-            title="Save note"
-          >
-            <Save size={16} />
-          </button>
-        </div>
-      </>
-    );
-  };
-
-  // Render keyboard hint
-  const renderKeyboardHint = () => {
-    if (!showKeyboardHint) return null;
-
-    return (
-      <div className="keyboard-hint">
-        Press <strong>Esc</strong> to exit focus mode, <strong>F11</strong> to toggle
-      </div>
-    );
-  };
-
-  // Get container classes based on mode
-  const getContainerClass = () => {
-    const baseClass = "editor-layout layout-transition";
-    const modeClass = `editor-${editorMode}`;
-    
-    if (editorMode === 'normal') {
-      return `${baseClass} ${modeClass} container mx-auto px-4 py-8 max-w-4xl`;
-    }
-    
-    return `${baseClass} ${modeClass}`;
-  };
-
-  // Render header (only in normal and fullscreen modes)
-  const renderHeader = () => {
-    if (editorMode === 'focus') return null;
-
-    return (
-      <div className={cn(
-        "flex items-center justify-between mb-6",
-        editorMode === 'fullscreen' && "px-8 pt-8"
-      )}>
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCancel}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft size={16} />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">New Note</h1>
-            {selectionData && (
-              <p className="text-sm text-gray-600">
-                Creating note from PDF selection
-              </p>
-            )}
-          </div>
-        </div>
-        
-        <Button
-          onClick={handleSave}
-          disabled={isSaving || !title.trim()}
-          className="flex items-center gap-2"
-        >
-          <Save size={16} />
-          {isSaving ? "Saving..." : "Save Note"}
-        </Button>
-      </div>
-    );
+  // Get current note title for display
+  const getCurrentTitle = () => {
+    const extracted = extractTitleFromContent(noteContent.content);
+    return extracted || "New Note";
   };
 
   return (
     <ErrorBoundary>
-      <div className={getContainerClass()}>
-        {renderModeToggle()}
-        
-        <div className={cn(
-          "editor-content-wrapper",
-          `mode-${editorMode}`
-        )}>
-          <div className="editor-content">
-            {renderHeader()}
+      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <header className="flex items-center justify-between p-4 lg:px-6 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-10">
+            <div className="flex items-center gap-2 lg:gap-4 min-w-0 flex-1">
+              <Button
+                variant="ghost"
+                size={isMobile ? "sm" : "default"}
+                onClick={handleGoBack}
+                className="flex items-center gap-2 hover:bg-accent shrink-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back to Notes</span>
+                <span className="sm:hidden">Back</span>
+              </Button>
+              
+              <div className="hidden sm:block h-6 w-px bg-border shrink-0" />
+              
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
+                <div className="flex flex-col min-w-0 flex-1">
+                  <h1 className="text-base lg:text-lg font-semibold text-foreground truncate">
+                    {getCurrentTitle()}
+                  </h1>
 
-            {/* Selection Info Card */}
-            {selectionData && editorMode !== 'focus' && (
-              <Card className={cn(
-                "p-4 mb-6 bg-blue-50 border-blue-200",
-                editorMode === 'fullscreen' && "mx-8"
-              )}>
-                <div className="flex items-start gap-3">
-                  <FileText size={20} className="text-blue-600 mt-0.5" />
-                  <div>
-                    <h3 className="font-medium text-blue-900 mb-1">
-                      PDF Selection
-                    </h3>
-                    <p className="text-sm text-blue-700 mb-2">
-                      From page {selectionData.pageNumber} of {selectionData.pdfFilename}
-                    </p>
-                    <blockquote className="text-sm text-blue-800 italic border-l-2 border-blue-300 pl-3">
-                      "{selectionData.text}"
-                    </blockquote>
-                  </div>
                 </div>
-              </Card>
-            )}
+              </div>
+            </div>
 
-            {/* Note Editor */}
-            <Card className={cn(
-              editorMode === 'normal' && "p-6",
-              editorMode === 'fullscreen' && "mx-8 p-6 flex-1",
-              editorMode === 'focus' && "border-none shadow-none bg-transparent p-0 flex-1"
-            )}>
-              {/* Title Input */}
-              <div className={cn(
-                "mb-6",
-                editorMode === 'focus' && "mb-8"
-              )}>
-                <Input
-                  type="text"
-                  placeholder="Enter note title..."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className={cn(
-                    "text-xl font-semibold border-none px-0 focus:ring-0 focus:border-none",
-                    editorMode === 'focus' && "text-3xl font-bold"
-                  )}
-                  style={{ boxShadow: "none" }}
+            <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+              {!isMobile && (
+                <AutoSaveStatus
+                  status={isCreating ? "saving" : autoSaveStatus}
+                  lastSaved={lastSaved}
+                  error={autoSaveError}
+                  isCreating={isCreating}
+                  size="sm"
+                />
+              )}
+              
+              <Button
+                variant="outline"
+                size={isMobile ? "sm" : "default"}
+                onClick={handleManualSave}
+                disabled={
+                  !noteContent.content ||
+                  autoSaveStatus === "saving" ||
+                  isCreating
+                }
+                className="flex items-center gap-2"
+              >
+                {autoSaveStatus === "saving" || isCreating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">Save</span>
+              </Button>
+            </div>
+          </header>
+
+          {/* Editor Area */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-auto">
+              <div className="max-w-4xl mx-auto w-full p-3 lg:p-6">
+                <RobustNotionEditor
+                  content={noteContent.content}
+                  onChange={handleEditorChange}
+                  onSaveSuccess={() => setHasUnsavedChanges(false)}
+                  placeholder="Start writing your note..."
+                  autoFocus={true}
+                  autoSave={true}
+                  noteId={noteId || undefined}
+                  onAutoSave={(content, id) => handleAutoSave(content)}
+                  autoSaveDelay={1000}
+                  className="min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)] border-none shadow-none bg-transparent"
+                  editorProps={{
+                    attributes: {
+                      class: "prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none max-w-none",
+                    },
+                  }}
                 />
               </div>
-
-              {/* Rich Text Editor */}
-              <LazyNotionEditor
-                initialContent={content}
-                onChange={setContent}
-                placeholder="Start writing your note..."
-                className={cn(
-                  editorMode === 'normal' && "min-h-[400px]",
-                  editorMode === 'fullscreen' && "min-h-[500px]",
-                  editorMode === 'focus' && "min-h-[600px]"
-                )}
-                mode={editorMode}
-                onModeChange={handleModeChange}
-                showModeToggle={false}
-                showWordCount={true}
-                showReadingTime={true}
-              />
-            </Card>
-
-            {/* Footer Actions - Only in normal mode */}
-            {editorMode === 'normal' && (
-              <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-gray-500">
-                  {selectionData ? (
-                    <span>This note will be linked to your PDF annotation</span>
-                  ) : (
-                    <span>Use "/" to insert blocks and format text</span>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Button variant="outline" onClick={handleCancel}>
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleSave}
-                    disabled={isSaving || !title.trim()}
-                    className="flex items-center gap-2"
-                  >
-                    <Save size={16} />
-                    {isSaving ? "Saving..." : "Save Note"}
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
+
+          {/* Mobile Auto-save Status - Fixed Position */}
+          {isMobile && (
+            <div className="fixed bottom-4 left-4 right-4 z-20 flex justify-center">
+              <AutoSaveStatus
+                status={isCreating ? "saving" : autoSaveStatus}
+                lastSaved={lastSaved}
+                error={autoSaveError}
+                isCreating={isCreating}
+                size="default"
+                className="shadow-lg backdrop-blur-sm"
+              />
+            </div>
+          )}
         </div>
-        
-        {renderFocusControls()}
-        {renderKeyboardHint()}
       </div>
     </ErrorBoundary>
   );
-};
-
-export default NewNotePage;
+}

@@ -12,7 +12,7 @@ All editor components have been successfully implemented and integrated into the
 - ✅ Cross-tab synchronization using BroadcastChannel and PostMessage APIs
 - ✅ Performance optimizations with lazy loading and memoization
 - ✅ Comprehensive error handling and recovery mechanisms
-- ✅ Full accessibility support with keyboard shortcuts and screen reader compatibility
+- ✅ Basic keyboard shortcuts for essential editor functions
 - ✅ Mobile-first responsive design with touch-friendly interactions
 
 ## 🧩 Core Components
@@ -160,7 +160,7 @@ Notion-style slash commands for quick block creation and formatting.
 **Features:**
 - Comprehensive command palette with search
 - Block type suggestions (headings, lists, code, etc.)
-- Keyboard navigation and selection
+- Keyboard shortcuts and selection
 - Mobile-optimized touch interface
 - Extensible command system
 
@@ -178,7 +178,7 @@ Drag-and-drop image upload with Supabase storage integration.
 - Paste image from clipboard
 - Supabase storage integration
 - Image resize handles
-- Alt text support for accessibility
+- Image upload and display functionality
 
 ### EnhancedLink Extension ✅
 Advanced link handling with validation and auto-detection.
@@ -191,14 +191,13 @@ Advanced link handling with validation and auto-detection.
 - Mobile-friendly link creation
 
 ### KeyboardShortcuts Extension ✅
-Comprehensive keyboard shortcuts for accessibility and efficiency.
+Essential keyboard shortcuts for efficient text editing.
 
 **Features:**
 - Standard formatting shortcuts (Ctrl/Cmd+B, I, U, etc.)
 - Block-level shortcuts (headings, lists, etc.)
 - Navigation shortcuts (undo/redo, select all)
 - Custom shortcuts for editor-specific actions
-- Full accessibility compliance
 
 ## 🎯 Key Features
 
@@ -310,7 +309,7 @@ Use the `customToolbar` prop to override the default toolbar:
 - Modern browsers with CSS backdrop-filter support
 - Fallback styling for older browsers
 - Touch event support for mobile devices
-- Proper keyboard navigation support
+- Keyboard shortcut support
 
 ## Examples
 
@@ -348,7 +347,7 @@ broadcastUpdate(noteId, updates);
 - **Note Creation**: New notes appear in all tabs instantly
 - **Content Updates**: Real-time content synchronization
 - **Note Deletion**: Removal synced across all tabs
-- **Navigation**: Focus events for cross-tab navigation
+- **Navigation**: Focus events for cross-tab synchronization
 
 ## 📝 Note Management System ✅
 

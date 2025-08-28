@@ -1,217 +1,161 @@
-"use client";
+import { useEffect, useRef } from "react";
 
-import { useEffect, useCallback } from "react";
-
-export interface KeyboardShortcut {
-  key: string;
-  ctrlKey?: boolean;
-  altKey?: boolean;
-  shiftKey?: boolean;
-  metaKey?: boolean;
-  action: () => void;
-  description: string;
-  preventDefault?: boolean;
-}
+type KeyboardShortcut = string;
+type ShortcutHandler = (event: KeyboardEvent) => void;
+type ShortcutMap = Record<KeyboardShortcut, ShortcutHandler>;
 
 interface UseKeyboardShortcutsOptions {
-  shortcuts: KeyboardShortcut[];
   enabled?: boolean;
+  preventDefault?: boolean;
+  stopPropagation?: boolean;
+  target?: HTMLElement | Document;
 }
 
 /**
- * Custom hook for managing keyboard shortcuts
- * Supports common modifier keys and provides accessibility features
+ * Hook for handling keyboard shortcuts
+ * 
+ * Supported modifiers:
+ * - mod: Ctrl on Windows/Linux, Cmd on Mac
+ * - ctrl: Ctrl key
+ * - cmd: Cmd key (Mac only)
+ * - alt: Alt key
+ * - shift: Shift key
+ * 
+ * Examples:
+ * - "mod+s": Ctrl+S on Windows, Cmd+S on Mac
+ * - "ctrl+shift+p": Ctrl+Shift+P
+ * - "escape": Escape key
+ * - "enter": Enter key
  */
-export function useKeyboardShortcuts({
-  shortcuts,
-  enabled = true,
-}: UseKeyboardShortcutsOptions) {
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (!enabled) return;
+export function useKeyboardShortcuts(
+  shortcuts: ShortcutMap,
+  options: UseKeyboardShortcutsOptions = {}
+) {
+  const {
+    enabled = true,
+    preventDefault = true,
+    stopPropagation = false,
+    target = document,
+  } = options;
 
-      // Don't trigger shortcuts when user is typing in input fields
-      const target = event.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.contentEditable === "true"
-      ) {
-        return;
-      }
-
-      // Find matching shortcut
-      const matchingShortcut = shortcuts.find((shortcut) => {
-        const keyMatches =
-          shortcut.key.toLowerCase() === event.key.toLowerCase();
-        const ctrlMatches = (shortcut.ctrlKey ?? false) === event.ctrlKey;
-        const altMatches = (shortcut.altKey ?? false) === event.altKey;
-        const shiftMatches = (shortcut.shiftKey ?? false) === event.shiftKey;
-        const metaMatches = (shortcut.metaKey ?? false) === event.metaKey;
-
-        return (
-          keyMatches && ctrlMatches && altMatches && shiftMatches && metaMatches
-        );
-      });
-
-      if (matchingShortcut) {
-        if (matchingShortcut.preventDefault !== false) {
-          event.preventDefault();
-        }
-        matchingShortcut.action();
-      }
-    },
-    [shortcuts, enabled]
-  );
+  const shortcutsRef = useRef(shortcuts);
+  shortcutsRef.current = shortcuts;
 
   useEffect(() => {
     if (!enabled) return;
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const shortcut = getShortcutFromEvent(event);
+      const handler = shortcutsRef.current[shortcut];
+
+      if (handler) {
+        if (preventDefault) {
+          event.preventDefault();
+        }
+        if (stopPropagation) {
+          event.stopPropagation();
+        }
+        handler(event);
+      }
     };
-  }, [handleKeyDown, enabled]);
 
-  return {
-    shortcuts: shortcuts.map((shortcut) => ({
-      ...shortcut,
-      displayKey: formatShortcutDisplay(shortcut),
-    })),
-  };
+    target.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      target.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [enabled, preventDefault, stopPropagation, target]);
 }
 
-/**
- * Format keyboard shortcut for display in UI
- */
-function formatShortcutDisplay(shortcut: KeyboardShortcut): string {
+function getShortcutFromEvent(event: KeyboardEvent): string {
   const parts: string[] = [];
-
-  // Use Cmd on Mac, Ctrl on other platforms
-  const isMac =
-    typeof navigator !== "undefined" &&
-    navigator.platform.toUpperCase().indexOf("MAC") >= 0;
-
-  if (shortcut.ctrlKey) {
-    parts.push(isMac ? "⌘" : "Ctrl");
+  
+  // Handle modifiers
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  
+  if (event.ctrlKey && !isMac) {
+    parts.push("ctrl");
   }
-  if (shortcut.altKey) {
-    parts.push(isMac ? "⌥" : "Alt");
+  
+  if (event.metaKey && isMac) {
+    parts.push("cmd");
   }
-  if (shortcut.shiftKey) {
-    parts.push("⇧");
+  
+  // Handle "mod" key (Ctrl on Windows/Linux, Cmd on Mac)
+  if ((event.ctrlKey && !isMac) || (event.metaKey && isMac)) {
+    // We'll replace this with "mod" later if the shortcut uses "mod"
   }
-  if (shortcut.metaKey) {
-    parts.push("⌘");
+  
+  if (event.altKey) {
+    parts.push("alt");
+  }
+  
+  if (event.shiftKey) {
+    parts.push("shift");
   }
 
-  // Format key display
-  const keyDisplay =
-    shortcut.key.length === 1
-      ? shortcut.key.toUpperCase()
-      : shortcut.key.charAt(0).toUpperCase() + shortcut.key.slice(1);
+  // Handle the main key
+  const key = event.key.toLowerCase();
+  
+  // Special key mappings
+  const keyMap: Record<string, string> = {
+    " ": "space",
+    "arrowup": "up",
+    "arrowdown": "down",
+    "arrowleft": "left",
+    "arrowright": "right",
+  };
+  
+  const mappedKey = keyMap[key] || key;
+  parts.push(mappedKey);
 
-  parts.push(keyDisplay);
-
-  return parts.join(isMac ? "" : "+");
+  const shortcut = parts.join("+");
+  
+  // Handle "mod" shortcut by creating both versions
+  const modShortcut = shortcut
+    .replace("ctrl+", "mod+")
+    .replace("cmd+", "mod+");
+    
+  return modShortcut;
 }
 
 /**
- * Hook for annotation-specific keyboard shortcuts
+ * Utility function to format shortcut for display
  */
-export function useAnnotationKeyboardShortcuts({
-  onCreateNote,
-  onSaveNote,
-  onCancelNote,
-  onDeleteNote,
-  onNavigateNext,
-  onNavigatePrevious,
-  onToggleSearch,
-  onZoomIn,
-  onZoomOut,
-  onZoomReset,
-  enabled = true,
-}: {
-  onCreateNote?: () => void;
-  onSaveNote?: () => void;
-  onCancelNote?: () => void;
-  onDeleteNote?: () => void;
-  onNavigateNext?: () => void;
-  onNavigatePrevious?: () => void;
-  onToggleSearch?: () => void;
-  onZoomIn?: () => void;
-  onZoomOut?: () => void;
-  onZoomReset?: () => void;
-  enabled?: boolean;
-}) {
-  const shortcuts: KeyboardShortcut[] = [
-    // Note creation and editing
-    {
-      key: "n",
-      ctrlKey: true,
-      action: () => onCreateNote?.(),
-      description: "Create new note",
-    },
-    {
-      key: "s",
-      ctrlKey: true,
-      action: () => onSaveNote?.(),
-      description: "Save current note",
-    },
-    {
-      key: "Escape",
-      action: () => onCancelNote?.(),
-      description: "Cancel current action",
-    },
-    {
-      key: "Delete",
-      action: () => onDeleteNote?.(),
-      description: "Delete selected annotation",
-    },
-
-    // Navigation
-    {
-      key: "ArrowRight",
-      ctrlKey: true,
-      action: () => onNavigateNext?.(),
-      description: "Next annotation",
-    },
-    {
-      key: "ArrowLeft",
-      ctrlKey: true,
-      action: () => onNavigatePrevious?.(),
-      description: "Previous annotation",
-    },
-
-    // Search and view
-    {
-      key: "f",
-      ctrlKey: true,
-      action: () => onToggleSearch?.(),
-      description: "Toggle search",
-    },
-    {
-      key: "=",
-      ctrlKey: true,
-      action: () => onZoomIn?.(),
-      description: "Zoom in",
-    },
-    {
-      key: "-",
-      ctrlKey: true,
-      action: () => onZoomOut?.(),
-      description: "Zoom out",
-    },
-    {
-      key: "0",
-      ctrlKey: true,
-      action: () => onZoomReset?.(),
-      description: "Reset zoom",
-    },
-  ].filter((shortcut) => {
-    // Only include shortcuts that have corresponding actions
-    return shortcut.action !== undefined;
-  });
-
-  return useKeyboardShortcuts({ shortcuts, enabled });
+export function formatShortcut(shortcut: string): string {
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  
+  return shortcut
+    .split("+")
+    .map(part => {
+      switch (part) {
+        case "mod":
+          return isMac ? "⌘" : "Ctrl";
+        case "ctrl":
+          return isMac ? "⌃" : "Ctrl";
+        case "cmd":
+          return "⌘";
+        case "alt":
+          return isMac ? "⌥" : "Alt";
+        case "shift":
+          return isMac ? "⇧" : "Shift";
+        case "enter":
+          return "↵";
+        case "escape":
+          return "Esc";
+        case "space":
+          return "Space";
+        case "up":
+          return "↑";
+        case "down":
+          return "↓";
+        case "left":
+          return "←";
+        case "right":
+          return "→";
+        default:
+          return part.toUpperCase();
+      }
+    })
+    .join(isMac ? "" : "+");
 }

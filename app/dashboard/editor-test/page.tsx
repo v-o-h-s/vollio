@@ -3,7 +3,7 @@
 import React from "react";
 import { FloatingToolbarDemo } from "@/components/editor/FloatingToolbarDemo";
 import { MobileEditorDemo } from "@/components/editor/MobileEditorDemo";
-import { MultiModeEditorDemo } from "@/components/editor/MultiModeEditorDemo";
+
 import { NotionEditor } from "@/components/editor/NotionEditor";
 import { Separator } from "@/components/ui/separator";
 
@@ -18,31 +18,21 @@ export default function EditorTestPage() {
       </div>
       
       <div>
-        <h2 className="text-2xl font-semibold mb-4">Enhanced NotionEditor with Multi-Mode Support</h2>
+        <h2 className="text-2xl font-semibold mb-4">Enhanced NotionEditor</h2>
         <p className="text-muted-foreground mb-4">
-          Test the enhanced NotionEditor with normal, fullscreen, and focus modes. Use F11 for focus mode, Ctrl+Shift+F for fullscreen, or use the mode toggle buttons.
+          Test the enhanced NotionEditor with rich text editing capabilities.
         </p>
         <NotionEditor 
-          placeholder="Start writing with the enhanced multi-mode editor..."
-          showModeToggle={true}
+          placeholder="Start writing with the enhanced editor..."
           showWordCount={true}
           showReadingTime={true}
-          mode="normal"
           className="min-h-[400px]"
         />
       </div>
       
       <Separator />
       
-      <div>
-        <h2 className="text-2xl font-semibold mb-4">Multi-Mode Editor Demo (Standalone)</h2>
-        <p className="text-muted-foreground mb-4">
-          Standalone multi-mode editor component for comparison.
-        </p>
-        <MultiModeEditorDemo />
-      </div>
-      
-      <Separator />
+
       
       <MobileEditorDemo />
       

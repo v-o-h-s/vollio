@@ -1,4 +1,4 @@
-import type { EditorContent } from '@/components/editor/types';
+import type { JSONContent } from '@/lib/types';
 
 export interface ConflictData<T = any> {
   local: T;
@@ -25,7 +25,7 @@ export function resolveConflict<T>(
     case 'last-write-wins':
       return resolveLastWriteWins(conflict);
     case 'merge-content':
-      return mergeEditorContent(conflict as ConflictData<EditorContent>) as ConflictResolution<T>;
+      return mergeEditorContent(conflict as ConflictData<JSONContent>) as ConflictResolution<T>;
     case 'manual':
       return {
         resolved: conflict.local,
@@ -52,13 +52,13 @@ function resolveLastWriteWins<T>(conflict: ConflictData<T>): ConflictResolution<
 /**
  * Merge editor content by combining non-conflicting changes
  */
-function mergeEditorContent(conflict: ConflictData<EditorContent>): ConflictResolution<EditorContent> {
+function mergeEditorContent(conflict: ConflictData<JSONContent>): ConflictResolution<JSONContent> {
   const { local, remote } = conflict;
   
   // Simple merge strategy: prefer local content but preserve structure
   // In a real implementation, you'd do more sophisticated merging
   try {
-    const merged: EditorContent = {
+    const merged: JSONContent = {
       type: 'doc',
       content: [
         ...(local.content || []),

@@ -14,7 +14,8 @@ inclusion: always
 - **Rich Text Editing**: Use TipTap-based NotionEditor with floating toolbars for annotation content creation
 - **Text Annotation**: Implement click-drag text selection with coordinate-based positioning (not DOM-based)
 - **Annotation CRUD**: Store all annotations in Supabase with automatic RLS protection
-- **Cross-Document Navigation**: Enable seamless switching between PDFs and their annotations
+- **Note-Taking System**: Standalone note creation and editing with rich text editor and auto-save functionality
+- **Cross-Document Navigation**: Enable seamless switching between PDFs, annotations, and notes
 - **Mobile-First Design**: Prioritize touch-friendly interactions and responsive layouts
 
 ### Authentication & Security Rules
@@ -60,14 +61,15 @@ When building features, leverage these completed and tested systems:
 - **Supabase Backend**: Complete database with RLS, file storage with signed URLs, comprehensive error handling, and activity tracking
 - **Authentication**: Full Clerk integration with JWT-based RLS policies and automatic user data isolation
 - **PDF System**: Complete upload API (`/api/pdfs/upload`), listing API (`/api/pdfs`), individual access API (`/api/pdfs/[id]`), Syncfusion viewer integration, and coordinate-based annotations
-- **Rich Text Editor**: Complete TipTap integration with NotionEditor, floating toolbars, slash commands, and editor extensions
+- **Rich Text Editor**: Complete TipTap integration with NotionEditor, floating toolbars, slash commands, editor extensions, and auto-save functionality
+- **Note-Taking System**: Complete note creation, editing, and management with auto-save, word count, and keyboard shortcuts
 - **UI Components**: Complete annotation component suite (tooltips, dialogs, overlays, preview cards) with mobile responsiveness
 - **State Management**: Redux store with RTK Query, typed hooks, selectors, and real-time cache invalidation
 - **Mobile Support**: Touch-friendly interfaces, responsive dialogs, mobile-specific interactions, and gesture handling
 - **Cross-tab Sync**: PostMessage-based navigation and state synchronization with error handling
 - **Error Handling**: Comprehensive error boundaries, recovery mechanisms, and user-friendly error messages
 - **Activity Tracking**: Real-time user activity monitoring with debounced API calls and recent activity display
-- **Dashboard**: Complete PDF management interface with recent activity, upload functionality, and signed URL handling
+- **Dashboard**: Complete PDF and note management interface with recent activity, upload functionality, and signed URL handling
 
 ### Current Development Status
 The core infrastructure is complete and functional:
@@ -79,10 +81,11 @@ The core infrastructure is complete and functional:
 
 ### Current Development Focus
 When working on new features, prioritize:
-1. **Feature Enhancement**: Add advanced annotation features like annotation types, search, and export
-2. **Performance Optimization**: Implement virtual scrolling, caching improvements, and mobile optimizations
-3. **User Experience**: Enhance accessibility, keyboard navigation, and collaborative features
-4. **Testing Coverage**: Expand test coverage for edge cases and integration scenarios
+1. **Note System Completion**: Complete notes API endpoints (`/api/notes`), database schema, and full CRUD operations
+2. **Feature Enhancement**: Add advanced annotation features like annotation types, search, and export
+3. **Performance Optimization**: Implement virtual scrolling, caching improvements, and mobile optimizations
+4. **User Experience**: Enhance accessibility, keyboard navigation, and collaborative features
+5. **Testing Coverage**: Expand test coverage for edge cases and integration scenarios
 
 ### Code Integration Points
 - Use `getAuthenticatedSupabaseClient()` for all database operations

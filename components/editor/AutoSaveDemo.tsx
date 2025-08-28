@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { EditorContent } from './types';
+import type { JSONContent } from '@/lib/types';
 
 export function AutoSaveDemo() {
   const [noteId, setNoteId] = useState<string>('demo-note-1');
@@ -20,7 +20,7 @@ export function AutoSaveDemo() {
     setLogs(prev => [`[${timestamp}] ${message}`, ...prev.slice(0, 9)]);
   };
 
-  const handleSave = (content: EditorContent) => {
+  const handleSave = (content: JSONContent) => {
     addLog(`✅ Content saved successfully`);
   };
 
@@ -42,7 +42,7 @@ export function AutoSaveDemo() {
         <CardHeader>
           <CardTitle>Auto-Save Editor Demo</CardTitle>
           <CardDescription>
-            This demo shows the auto-save, offline support, and error recovery features
+            This demo shows the auto-save and error recovery features
             of the Notion-like editor.
           </CardDescription>
         </CardHeader>
@@ -99,7 +99,7 @@ export function AutoSaveDemo() {
         <CardHeader>
           <CardTitle>Editor</CardTitle>
           <CardDescription>
-            Start typing to see auto-save in action. Try going offline to test offline support.
+            Start typing to see auto-save in action.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -164,10 +164,7 @@ export function AutoSaveDemo() {
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <div><strong>Auto-Save:</strong> Type in the editor and watch for the "Saving..." indicator</div>
-          <div><strong>Offline Support:</strong> Disconnect your internet and continue editing</div>
           <div><strong>Error Recovery:</strong> The editor will handle network errors gracefully</div>
-          <div><strong>Conflict Resolution:</strong> Changes are merged when coming back online</div>
-          <div><strong>Local Backup:</strong> Content is automatically backed up to localStorage</div>
         </CardContent>
       </Card>
     </div>

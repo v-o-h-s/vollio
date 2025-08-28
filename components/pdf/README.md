@@ -61,7 +61,7 @@ This folder contains all PDF-related components for the Noto application. These 
 - Dynamic positioning based on PDF viewer zoom and scroll state
 - Touch-friendly interaction targets on mobile devices
 - Hover effects and visual feedback
-- Accessibility support with keyboard navigation
+- Keyboard shortcut support
 
 **Usage**:
 
@@ -92,7 +92,7 @@ This folder contains all PDF-related components for the Noto application. These 
 - Smart positioning to stay within viewport bounds
 - 200ms delay on hide for better user experience
 - Blue accent styling consistent with app theme (#3B82F6)
-- ARIA labels and semantic HTML for accessibility
+- Semantic HTML structure
 
 **Usage**:
 
@@ -116,7 +116,7 @@ This folder contains all PDF-related components for the Noto application. These 
 - Mobile-optimized annotation creation interface
 - Touch-friendly button sizing and interactions
 - Selected text preview with smart truncation
-- Radix UI Dialog integration for accessibility
+- Radix UI Dialog integration
 
 **Key Features**:
 
@@ -189,7 +189,7 @@ This folder contains all PDF-related components for the Noto application. These 
 - Consistent visual design with appropriate icons
 - Helpful error messages and troubleshooting tips
 - Action buttons for recovery (retry, cancel, help)
-- Responsive design and accessibility compliance
+- Responsive design
 
 **Usage**:
 
@@ -327,7 +327,7 @@ PDFAnnotationViewer (main container)
 - PDF loading and text selection workflow
 - Annotation creation and editing flow
 - Mobile/desktop responsive behavior
-- Keyboard navigation and shortcuts
+- Keyboard shortcuts and workflow
 
 ### E2E Tests
 
@@ -410,11 +410,11 @@ function PDFPageWithErrorHandling() {
 - **Caching**: Intelligent caching of PDF pages and annotations
 - **Progressive Loading**: Load annotations as user scrolls
 
-### Accessibility Enhancements
+### Future Enhancements
 
-- **Screen Reader Support**: Enhanced ARIA labels and descriptions
+- **Enhanced User Experience**: Improved interaction patterns
 - **High Contrast Mode**: Support for high contrast themes
-- **Keyboard Navigation**: Complete keyboard-only navigation
+- **Keyboard Shortcuts**: Complete keyboard shortcut support
 - **Voice Commands**: Voice-controlled annotation creation
 
 ---

@@ -2,9 +2,112 @@
  * Core types for PDF annotation system
  */
 
-
+import { JSONContent } from "@tiptap/core";
+import type { Editor } from "@tiptap/react";
 import { ActivityType } from "./types/database";
 
+// ============================================================================
+// EDITOR TYPES
+// ============================================================================
+
+/**
+ * Editor mode for different viewing experiences
+ */
+export type EditorMode = 'normal' | 'fullscreen' | 'focus';
+
+/**
+ * Re-export JSONContent from TipTap for convenience
+ */
+export type { JSONContent };
+
+/**
+ * Props for the main NotionEditor component
+ */
+export interface NotionEditorProps {
+  content?: JSONContent | string;
+  onChange?: (content: JSONContent) => void;
+  onUpdate?: (editor: Editor) => void;
+  placeholder?: string;
+  editable?: boolean;
+  className?: string;
+  autoFocus?: boolean;
+  customToolbar?: (editor: Editor) => React.ReactNode;
+
+  showWordCount?: boolean;
+  showReadingTime?: boolean;
+  // Auto-save props
+  autoSave?: boolean;
+  noteId?: string;
+  onAutoSave?: (content: JSONContent, noteId: string) => Promise<void>;
+  autoSaveDelay?: number;
+}
+
+/**
+ * Props for editor toolbar components
+ */
+export interface EditorToolbarProps {
+  editor: Editor | null;
+  className?: string;
+}
+
+/**
+ * Configuration for editor commands (buttons, shortcuts, etc.)
+ */
+export interface EditorCommand {
+  name: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  action: (editor: Editor) => void;
+  isActive?: (editor: Editor) => boolean;
+  isDisabled?: (editor: Editor) => boolean;
+}
+
+/**
+ * Configuration for TipTap extensions
+ */
+export interface EditorExtensionConfig {
+  heading?: {
+    levels: number[];
+  };
+  table?: {
+    resizable: boolean;
+    handleWidth: number;
+  };
+  image?: {
+    inline: boolean;
+    allowBase64: boolean;
+  };
+}
+
+/**
+ * Editor state for context management
+ */
+export interface EditorState {
+  editor: Editor | null;
+  content: JSONContent | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+/**
+ * Editor context value with state and actions
+ */
+export interface EditorContextValue extends EditorState {
+  setEditor: (editor: Editor | null) => void;
+  updateContent: (content: JSONContent) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  clearError: () => void;
+  resetEditor: () => void;
+}
+
+// ============================================================================
+// PDF ANNOTATION TYPES
+// ============================================================================
+
+/**
+ * Rectangle coordinates for PDF annotations
+ */
 export interface Rectangle {
   x: number;
   y: number;
@@ -12,6 +115,9 @@ export interface Rectangle {
   height: number;
 }
 
+/**
+ * Text selection data from PDF viewer
+ */
 export interface TextSelection {
   text: string;
   pageNumber: number;
@@ -19,6 +125,9 @@ export interface TextSelection {
   pdfId: string;
 }
 
+/**
+ * PDF annotation with coordinates and note content
+ */
 export interface Annotation {
   id: string;
   userId: string;
@@ -31,18 +140,9 @@ export interface Annotation {
   updatedAt: string; // ISO string for Redux serialization
 }
 
-// TipTap JSONContent interface for rich text editor
-export interface JSONContent {
-  type?: string;
-  attrs?: Record<string, any>;
-  content?: JSONContent[];
-  marks?: Array<{
-    type: string;
-    attrs?: Record<string, any>;
-  }>;
-  text?: string;
-}
-
+/**
+ * Note entity with rich text content
+ */
 export interface Note {
   id: string;
   userId: string;
@@ -54,6 +154,9 @@ export interface Note {
   isDeleted: boolean;
 }
 
+/**
+ * PDF document metadata and storage information
+ */
 export interface PDFDocument {
   id: string;
   userId: string;
@@ -66,6 +169,9 @@ export interface PDFDocument {
   fileUrl?: string; // Signed URL for frontend use
 }
 
+/**
+ * User activity tracking for PDF interactions
+ */
 export interface UserActivity {
   id: string;
   userId: string;
@@ -74,13 +180,22 @@ export interface UserActivity {
   accessedAt: string; // ISO string for Redux serialization
 }
 
+/**
+ * File upload progress tracking
+ */
 export interface UploadProgress {
   loaded: number;
   total: number;
   percentage: number;
 }
 
-// Re-export database types
+// ============================================================================
+// DATABASE TYPES
+// ============================================================================
+
+/**
+ * Re-export database types from Supabase schema
+ */
 export type {
   Database,
   PDFRow,
@@ -95,18 +210,27 @@ export type {
   ActivityType,
 } from "./types/database";
 
-// Re-export theme types
-
-// Re-export error types
+/**
+ * Re-export error types
+ */
 export * from "./types/errors";
 
-// API Response types
+// ============================================================================
+// API RESPONSE TYPES
+// ============================================================================
+
+/**
+ * Generic API response wrapper
+ */
 export interface APIResponse<T = any> {
   success: boolean;
   data?: T;
   error?: string;
 }
 
+/**
+ * PDF upload API response
+ */
 export interface UploadResponse {
   success: boolean;
   data?: {
@@ -119,6 +243,9 @@ export interface UploadResponse {
   error?: string;
 }
 
+/**
+ * PDF list API response
+ */
 export interface PDFListResponse {
   success: boolean;
   data?: {
@@ -139,6 +266,9 @@ export interface PDFListResponse {
   error?: string;
 }
 
+/**
+ * PDF access API response
+ */
 export interface PDFAccessResponse {
   success: boolean;
   data?: {
@@ -150,34 +280,54 @@ export interface PDFAccessResponse {
   error?: string;
 }
 
-// Additional API response interfaces
+/**
+ * File validation result
+ */
 export interface FileValidationResult {
   valid: boolean;
   error?: string;
 }
 
+/**
+ * Storage upload operation result
+ */
 export interface StorageUploadResult {
   path: string;
   fullPath: string;
   id: string;
 }
 
+/**
+ * Database insert operation result
+ */
 export interface DatabaseInsertResult {
   id: string;
   created: boolean;
 }
 
+/**
+ * Signed URL generation result
+ */
 export interface SignedUrlResult {
   url: string;
   expiresAt: Date;
 }
 
-// Supabase client helper interfaces
+// ============================================================================
+// SUPABASE CLIENT TYPES
+// ============================================================================
+
+/**
+ * Authenticated Supabase client result
+ */
 export interface AuthenticatedClientResult {
   client: any; // SupabaseClient<Database> - avoiding circular import
   userId: string;
 }
 
+/**
+ * Client authentication state
+ */
 export interface ClientAuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -185,7 +335,9 @@ export interface ClientAuthState {
   error: string | null;
 }
 
-// Database operation result interfaces
+/**
+ * Database operation result wrapper
+ */
 export interface DatabaseOperationResult<T = any> {
   success: boolean;
   data?: T;
@@ -193,6 +345,9 @@ export interface DatabaseOperationResult<T = any> {
   count?: number;
 }
 
+/**
+ * Storage operation result wrapper
+ */
 export interface StorageOperationResult {
   success: boolean;
   path?: string;
@@ -200,7 +355,9 @@ export interface StorageOperationResult {
   error?: string;
 }
 
-// Enhanced API response interfaces with better typing
+/**
+ * Paginated API response
+ */
 export interface PaginatedResponse<T> {
   success: boolean;
   data?: T[];
@@ -213,6 +370,9 @@ export interface PaginatedResponse<T> {
   error?: string;
 }
 
+/**
+ * Bulk operation response with individual results
+ */
 export interface BulkOperationResponse<T> {
   success: boolean;
   results?: Array<{
@@ -229,7 +389,13 @@ export interface BulkOperationResponse<T> {
   error?: string;
 }
 
-// Supabase-specific API response interfaces
+// ============================================================================
+// SUPABASE API RESPONSE TYPES
+// ============================================================================
+
+/**
+ * Supabase PDF upload response
+ */
 export interface SupabaseUploadResponse {
   success: boolean;
   data?: {
@@ -243,6 +409,9 @@ export interface SupabaseUploadResponse {
   error?: string;
 }
 
+/**
+ * Supabase PDF list response
+ */
 export interface SupabasePDFListResponse {
   success: boolean;
   data?: {
@@ -266,6 +435,9 @@ export interface SupabasePDFListResponse {
   error?: string;
 }
 
+/**
+ * Supabase PDF access response
+ */
 export interface SupabasePDFAccessResponse {
   success: boolean;
   data?: {
@@ -279,6 +451,9 @@ export interface SupabasePDFAccessResponse {
   error?: string;
 }
 
+/**
+ * Supabase activity tracking response
+ */
 export interface SupabaseActivityResponse {
   success: boolean;
   data?: {
@@ -302,31 +477,48 @@ export interface SupabaseActivityResponse {
   error?: string;
 }
 
-// Notes API response interfaces
+/**
+ * Supabase notes list response
+ */
 export interface SupabaseNotesResponse {
   success: boolean;
   data?: Note[];
   error?: string;
 }
 
+/**
+ * Supabase single note response
+ */
 export interface SupabaseNoteResponse {
   success: boolean;
   data?: Note;
   error?: string;
 }
 
+/**
+ * Create note request payload
+ */
 export interface CreateNoteRequest {
   title?: string;
   content: JSONContent;
   pdfAnnotationId?: string;
 }
 
+/**
+ * Update note request payload
+ */
 export interface UpdateNoteRequest {
   title?: string;
   content?: JSONContent;
 }
 
-// Authentication-related interfaces
+// ============================================================================
+// AUTHENTICATION TYPES
+// ============================================================================
+
+/**
+ * Authentication operation result
+ */
 export interface AuthenticationResult {
   success: boolean;
   userId?: string;
@@ -334,6 +526,9 @@ export interface AuthenticationResult {
   error?: string;
 }
 
+/**
+ * JWT token validation result
+ */
 export interface TokenValidationResult {
   valid: boolean;
   userId?: string;
@@ -341,7 +536,13 @@ export interface TokenValidationResult {
   error?: string;
 }
 
-// Dashboard-specific interfaces
+// ============================================================================
+// DASHBOARD TYPES
+// ============================================================================
+
+/**
+ * Dashboard data aggregation
+ */
 export interface DashboardData {
   pdfs: PDFDocument[];
   recentActivity: UserActivity | null;
@@ -349,6 +550,9 @@ export interface DashboardData {
   totalSize: number;
 }
 
+/**
+ * Dashboard component state
+ */
 export interface DashboardState {
   data: DashboardData | null;
   isLoading: boolean;
@@ -356,7 +560,13 @@ export interface DashboardState {
   lastUpdated: string | null; // ISO string for Redux serialization
 }
 
-// Upload-specific interfaces
+// ============================================================================
+// UPLOAD TYPES
+// ============================================================================
+
+/**
+ * File upload component state
+ */
 export interface UploadState {
   isUploading: boolean;
   progress: number;
@@ -364,19 +574,31 @@ export interface UploadState {
   uploadedFile: PDFDocument | null;
 }
 
+/**
+ * Upload operation configuration
+ */
 export interface UploadOptions {
   onProgress?: (progress: UploadProgress) => void;
   onSuccess?: (pdf: PDFDocument) => void;
   onError?: (error: string) => void;
 }
 
-// Activity tracking interfaces
+// ============================================================================
+// ACTIVITY TRACKING TYPES
+// ============================================================================
+
+/**
+ * Activity tracking configuration
+ */
 export interface ActivityTrackingOptions {
   trackView?: boolean;
   trackUpload?: boolean;
   trackDelete?: boolean;
 }
 
+/**
+ * User activity summary statistics
+ */
 export interface ActivitySummary {
   totalViews: number;
   totalUploads: number;

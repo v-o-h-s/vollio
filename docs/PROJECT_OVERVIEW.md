@@ -21,42 +21,45 @@ Noto is a modern, secure, and responsive PDF annotation application that enables
 
 - **PDF Viewer**: Complete Syncfusion PDF Viewer integration with Supabase backend and activity tracking
 - **Annotation System**: Full suite of annotation components (tooltips, dialogs, overlays, previews)
+- **Rich Text Editor**: Complete TipTap integration with NotionEditor, auto-save, and keyboard shortcuts
+- **Note-Taking System**: Standalone note creation and editing with auto-save, word count, and status tracking
 - **Mobile Support**: Touch-friendly interfaces with responsive design and proper touch targets
 - **State Management**: Redux Toolkit with RTK Query for API calls, caching, and real-time updates
 - **Cross-tab Communication**: PostMessage-based navigation between browser tabs
 - **Error Handling**: Comprehensive error boundaries with recovery mechanisms and user guidance
-- **Dashboard**: PDF management interface with recent activity display and file operations
+- **Dashboard**: PDF and note management interface with recent activity display and file operations
 
 #### Security & Performance
 
 - **File Validation**: Comprehensive PDF validation with security checks and malicious pattern detection
 - **Error Handling**: User-friendly error boundaries, retry mechanisms, and graceful error recovery
 - **Performance Optimization**: Memoization, lazy loading, efficient rendering, and debounced operations
-- **Accessibility**: ARIA labels, keyboard navigation, screen reader support, and semantic HTML
+- **User Experience**: Intuitive interfaces and efficient workflows
 - **Signed URL Management**: Automatic URL refresh, expiration handling, and secure file access
 
 ### 🚧 In Progress (Near Completion)
 
-#### API Development
+#### Note System Development
 
-- **PDF Listing Endpoint**: `/api/pdfs` for fetching user's uploaded PDFs
-- **Individual PDF Access**: `/api/pdfs/[id]` for specific PDF retrieval
-- **Dashboard Integration**: Connecting UI components with Supabase backend
+- **Notes API**: Complete CRUD endpoints for note management (`/api/notes`, `/api/notes/[id]`)
+- **Database Schema**: Notes table with RLS policies and user isolation
+- **Note Management**: Full note listing, creation, editing, and deletion functionality
 
-#### Data Integration
+#### Advanced Features
 
-- **RTK Query Migration**: Replacing mock data with real API calls
-- **Real-time Updates**: Live annotation synchronization across components
-- **Activity Tracking**: User interaction logging and recent activity display
+- **Search System**: Full-text search across PDFs, annotations, and notes
+- **Export Features**: Export notes and annotations to various formats
+- **Enhanced Editor**: Advanced formatting options and collaborative editing features
 
 ### 📋 Planned Features (Next Phase)
 
 #### Advanced Functionality
 
-- **Search System**: Full-text search across PDFs and annotations
-- **Annotation Types**: Support for highlights, drawings, and rich media
-- **Export Features**: PDF export with annotations, various format support
-- **Collaborative Editing**: Real-time multi-user annotation capabilities
+- **Advanced Annotation Types**: Support for highlights, drawings, and rich media annotations
+- **Collaborative Features**: Real-time multi-user annotation and note editing capabilities
+- **Advanced Search**: AI-powered search across content with semantic understanding
+- **Integration APIs**: Export/import functionality for external tools and services
+- **Team Workspaces**: Shared spaces for collaborative document review and annotation
 
 ## 🏗️ Technical Architecture
 
@@ -141,7 +144,7 @@ noto-pdf-annotation/
 ### Desktop Experience
 
 - **Precision Interactions**: Pixel-perfect text selection and annotation
-- **Keyboard Navigation**: Complete keyboard accessibility with shortcuts
+- **Keyboard Shortcuts**: Essential shortcuts for efficient workflow
 - **Multi-Window Support**: Cross-tab communication for seamless workflow
 - **Hover Interfaces**: Tooltip-based annotation creation and previews
 
@@ -152,12 +155,12 @@ noto-pdf-annotation/
 - **Gesture Support**: Touch-based PDF navigation and text selection
 - **Responsive Design**: Adaptive layouts for various screen sizes
 
-### Accessibility Features
+### User Experience Features
 
-- **Screen Reader Support**: Comprehensive ARIA labels and descriptions
-- **Keyboard Navigation**: Complete keyboard-only operation capability
-- **High Contrast Support**: Accessible color schemes and contrast ratios
-- **Focus Management**: Proper focus handling for complex interactions
+- **Intuitive Interface**: Clean and user-friendly design
+- **Keyboard Shortcuts**: Complete keyboard shortcut support for efficiency
+- **High Contrast Support**: Multiple color schemes and contrast options
+- **Focus Management**: Smooth focus handling for complex interactions
 
 ## 🚀 Performance Characteristics
 
@@ -263,6 +266,7 @@ ANALYTICS_ID=your-analytics-id
 - **[README.md](../README.md)**: Main project documentation and quick start
 - **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**: Complete API reference
 - **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)**: Database configuration guide
+- **[NOTES_SYSTEM.md](./NOTES_SYSTEM.md)**: Notes system implementation and usage
 
 ### Component Documentation
 
@@ -288,7 +292,7 @@ ANALYTICS_ID=your-analytics-id
 - **TypeScript**: Strict mode compliance required
 - **Testing**: New features must include comprehensive tests
 - **Documentation**: Update relevant documentation with changes
-- **Accessibility**: Ensure WCAG 2.1 AA compliance for UI changes
+- **User Experience**: Ensure intuitive and user-friendly interfaces
 
 ### Development Process
 

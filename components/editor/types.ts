@@ -1,94 +1,18 @@
-import type { Editor } from '@tiptap/react';
-import type { EditorMode } from './MultiModeEditor';
+/**
+ * Editor types - Re-exported from lib/types.ts for convenience
+ * 
+ * This file maintains backward compatibility for existing imports
+ * while centralizing all types in lib/types.ts
+ */
 
-export interface EditorContent {
-  type: 'doc';
-  content?: Array<{
-    type: string;
-    attrs?: Record<string, any>;
-    content?: Array<{
-      type: string;
-      text?: string;
-      marks?: Array<{
-        type: string;
-        attrs?: Record<string, any>;
-      }>;
-    }>;
-  }>;
-}
-
-export interface NotionEditorProps {
-  content?: EditorContent | string;
-  onChange?: (content: EditorContent) => void;
-  onUpdate?: (editor: Editor) => void;
-  placeholder?: string;
-  editable?: boolean;
-  className?: string;
-  autoFocus?: boolean;
-  customToolbar?: (editor: Editor) => React.ReactNode;
-  mode?: EditorMode;
-  onModeChange?: (mode: EditorMode) => void;
-  showModeToggle?: boolean;
-  showWordCount?: boolean;
-  showReadingTime?: boolean;
-  showContextualToolbar?: boolean;
-  distractionFreeMode?: boolean;
-  enhancedTypography?: boolean;
-  // Auto-save props
-  autoSave?: boolean;
-  noteId?: string;
-  onAutoSave?: (content: EditorContent, noteId: string) => Promise<void>;
-  autoSaveDelay?: number;
-}
-
-export interface EditorToolbarProps {
-  editor: Editor | null;
-  className?: string;
-}
-
-export interface EditorCommand {
-  name: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  action: (editor: Editor) => void;
-  isActive?: (editor: Editor) => boolean;
-  isDisabled?: (editor: Editor) => boolean;
-}
-
-export interface EditorExtensionConfig {
-  heading?: {
-    levels: number[];
-  };
-  table?: {
-    resizable: boolean;
-    handleWidth: number;
-  };
-  image?: {
-    inline: boolean;
-    allowBase64: boolean;
-  };
-}
-
-export interface EditorState {
-  editor: Editor | null;
-  content: EditorContent | null;
-  isLoading: boolean;
-  error: string | null;
-  hasUnsavedChanges: boolean;
-  isSaving: boolean;
-  lastSaved: Date | null;
-  saveError: Error | null;
-}
-
-export interface EditorContextValue extends EditorState {
-  setEditor: (editor: Editor | null) => void;
-  updateContent: (content: EditorContent) => void;
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
-  clearError: () => void;
-  markAsSaved: () => void;
-  markAsUnsaved: () => void;
-  resetEditor: () => void;
-  saveNow: () => Promise<void>;
-  resetSaveError: () => void;
-}
+export type {
+  // Editor core types
+  EditorMode,
+  JSONContent,
+  NotionEditorProps,
+  EditorToolbarProps,
+  EditorCommand,
+  EditorExtensionConfig,
+  EditorState,
+  EditorContextValue,
+} from "@/lib/types";

@@ -35,11 +35,7 @@ export function useEditorKeyboardShortcuts({
       case 'openLinkDialog':
         onOpenLinkDialog?.();
         break;
-      case 'showAccessibilitySettings':
-        // Dispatch event to open accessibility settings
-        const accessibilityEvent = new CustomEvent('openAccessibilitySettings');
-        document.dispatchEvent(accessibilityEvent);
-        break;
+
     }
   }, [enabled, editor, onShowHelp, onOpenLinkDialog]);
 
@@ -97,7 +93,7 @@ export function useEditorKeyboardShortcuts({
     // Listen for custom events
     document.addEventListener('showKeyboardHelp', handleKeyboardEvents);
     document.addEventListener('openLinkDialog', handleKeyboardEvents);
-    document.addEventListener('showAccessibilitySettings', handleKeyboardEvents);
+
     
     // Listen for global keyboard events
     document.addEventListener('keydown', handleGlobalKeyDown);
@@ -105,7 +101,7 @@ export function useEditorKeyboardShortcuts({
     return () => {
       document.removeEventListener('showKeyboardHelp', handleKeyboardEvents);
       document.removeEventListener('openLinkDialog', handleKeyboardEvents);
-      document.removeEventListener('showAccessibilitySettings', handleKeyboardEvents);
+
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
   }, [handleKeyboardEvents, handleGlobalKeyDown, enabled]);
@@ -130,57 +126,3 @@ export function useEditorKeyboardShortcuts({
   };
 }
 
-/**
- * Hook for managing editor accessibility features
- */
-export function useEditorAccessibility(editor: Editor | null) {
-  useEffect(() => {
-    if (!editor) return;
-
-    const editorElement = editor.view.dom;
-    
-    // Set up accessibility attributes
-    editorElement.setAttribute('role', 'textbox');
-    editorElement.setAttribute('aria-multiline', 'true');
-    editorElement.setAttribute('aria-label', 'Rich text editor');
-    
-    // Add keyboard navigation hints
-    editorElement.setAttribute('aria-describedby', 'editor-keyboard-help');
-    
-    // Handle focus management
-    const handleFocus = () => {
-      editorElement.setAttribute('aria-expanded', 'true');
-    };
-    
-    const handleBlur = () => {
-      editorElement.setAttribute('aria-expanded', 'false');
-    };
-    
-    editorElement.addEventListener('focus', handleFocus);
-    editorElement.addEventListener('blur', handleBlur);
-    
-    return () => {
-      editorElement.removeEventListener('focus', handleFocus);
-      editorElement.removeEventListener('blur', handleBlur);
-    };
-  }, [editor]);
-
-  // Announce editor state changes to screen readers
-  const announceToScreenReader = useCallback((message: string) => {
-    const announcement = document.createElement('div');
-    announcement.setAttribute('aria-live', 'polite');
-    announcement.setAttribute('aria-atomic', 'true');
-    announcement.className = 'sr-only';
-    announcement.textContent = message;
-    
-    document.body.appendChild(announcement);
-    
-    setTimeout(() => {
-      document.body.removeChild(announcement);
-    }, 1000);
-  }, []);
-
-  return {
-    announceToScreenReader,
-  };
-}

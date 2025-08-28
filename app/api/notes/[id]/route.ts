@@ -29,7 +29,7 @@ export const GET = withErrorHandling(async (
     );
   }
 
-  const supabase = await await getAuthenticatedSupabaseClient();
+  const supabase = await getAuthenticatedSupabaseClient();
 
   const { data: note, error } = await supabase
     .from("notes")
@@ -96,7 +96,7 @@ export const PUT = withErrorHandling(async (
     );
   }
 
-  const supabase = await  getAuthenticatedSupabaseClient();
+  const supabase = await getAuthenticatedSupabaseClient();
 
   const updateData: NoteUpdate = {};
   if (title !== undefined) updateData.title = title;
@@ -149,7 +149,7 @@ export const DELETE = withErrorHandling(async (
     );
   }
 
-  const supabase = await  getAuthenticatedSupabaseClient();
+  const supabase = await getAuthenticatedSupabaseClient();
 
   // Soft delete by setting is_deleted to true
   const { data: note, error } = await supabase

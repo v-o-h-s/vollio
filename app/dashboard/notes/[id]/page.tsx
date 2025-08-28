@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { 
   ArrowLeft, 
-  Save, 
   Trash2, 
   ExternalLink, 
   FileText,
@@ -27,7 +26,7 @@ import { useNoteSync } from "@/hooks/use-note-sync";
 import { NoteEditorSkeleton } from "@/components/ui/note-skeleton";
 import { noteNotifications } from "@/lib/utils/note-notifications";
 import { cn } from "@/lib/utils";
-import type { EditorMode } from "@/components/editor/types";
+import type { EditorMode } from "@/lib/types";
 
 interface NotePageProps {
   params: {
@@ -52,9 +51,7 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
     type: "doc",
     content: [{ type: "paragraph" }],
   });
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [editorMode, setEditorMode] = useState<EditorMode>('normal');
   const [showKeyboardHint, setShowKeyboardHint] = useState(false);
 
@@ -80,18 +77,8 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
     if (note) {
       setTitle(note.title);
       setContent(note.content);
-      setHasUnsavedChanges(false);
     }
   }, [note]);
-
-  // Track unsaved changes
-  useEffect(() => {
-    if (note) {
-      const titleChanged = title !== note.title;
-      const contentChanged = JSON.stringify(content) !== JSON.stringify(note.content);
-      setHasUnsavedChanges(titleChanged || contentChanged);
-    }
-  }, [title, content, note]);
 
   // Handle mode changes with animations
   const handleModeChange = useCallback((newMode: EditorMode) => {
@@ -130,39 +117,7 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [editorMode, handleModeChange]);
 
-  const handleSave = async () => {
-    if (!title.trim()) {
-      noteNotifications.updateError("Please enter a title for your note");
-      return;
-    }
 
-    setIsSaving(true);
-    
-    try {
-      await updateNote({
-        id,
-        updates: {
-          title: title.trim(),
-          content,
-        },
-      }).unwrap();
-
-      setHasUnsavedChanges(false);
-
-      // Broadcast update to other tabs
-      broadcastUpdate(id, {
-        title: title.trim(),
-        content,
-      });
-
-      noteNotifications.updateSuccess(title.trim());
-    } catch (error) {
-      console.error("Failed to update note:", error);
-      noteNotifications.updateError();
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this note? This action cannot be undone.")) {
@@ -190,13 +145,7 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
   };
 
   const handleBack = () => {
-    if (hasUnsavedChanges) {
-      if (confirm("You have unsaved changes. Are you sure you want to leave?")) {
-        router.back();
-      }
-    } else {
-      router.back();
-    }
+    router.back();
   };
 
   // Mode toggle handlers
@@ -336,13 +285,7 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
             <Maximize2 size={16} />
           </button>
           
-          <button
-            onClick={handleSave}
-            disabled={isSaving || !hasUnsavedChanges || !title.trim()}
-            title="Save note"
-          >
-            <Save size={16} />
-          </button>
+
         </div>
       </>
     );
@@ -424,14 +367,6 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
             <Trash2 size={16} />
             {isDeleting ? "Deleting..." : "Delete"}
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={isSaving || !hasUnsavedChanges || !title.trim()}
-            className="flex items-center gap-2"
-          >
-            <Save size={16} />
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
         </div>
       </div>
     );
@@ -480,18 +415,7 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
               </Card>
             )}
 
-            {/* Unsaved Changes Warning */}
-            {hasUnsavedChanges && editorMode !== 'focus' && (
-              <Card className={cn(
-                "p-3 mb-6 bg-yellow-50 border-yellow-200",
-                editorMode === 'fullscreen' && "mx-8"
-              )}>
-                <div className="flex items-center gap-2 text-yellow-800">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span className="text-sm font-medium">You have unsaved changes</span>
-                </div>
-              </Card>
-            )}
+
 
             {/* Note Editor */}
             <Card className={cn(
@@ -544,15 +468,7 @@ const NotePage: React.FC<NotePageProps> = ({ params }) => {
                 
                 <div className="flex items-center gap-3">
                   <Button variant="outline" onClick={handleBack}>
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleSave}
-                    disabled={isSaving || !hasUnsavedChanges || !title.trim()}
-                    className="flex items-center gap-2"
-                  >
-                    <Save size={16} />
-                    {isSaving ? "Saving..." : "Save Changes"}
+                    Back to Notes
                   </Button>
                 </div>
               </div>

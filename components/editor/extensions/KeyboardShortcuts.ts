@@ -242,12 +242,7 @@ export const KeyboardShortcuts = Extension.create({
         document.dispatchEvent(event);
         return true;
       },
-      'Alt-a': () => {
-        // Dispatch custom event to show accessibility settings
-        const event = new CustomEvent('showAccessibilitySettings');
-        document.dispatchEvent(event);
-        return true;
-      },
+
     };
   },
 });

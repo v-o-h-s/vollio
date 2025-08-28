@@ -35,31 +35,11 @@ import { LinkDialog } from "./LinkDialog";
 import { BubbleMenu } from "./BubbleMenu";
 import { TableBubbleMenu } from "./TableBubbleMenu";
 import { FloatingToolbar } from "./FloatingToolbar";
-import { KeyboardShortcutsDialog } from "./KeyboardShortcutsDialog";
-import {
-  AccessibilityProvider,
-  useAccessibility,
-} from "./AccessibilityProvider";
-import { AccessibilitySettingsDialog } from "./AccessibilitySettingsDialog";
-import {
-  useEditorKeyboardShortcuts,
-  useEditorAccessibility,
-} from "@/hooks/use-editor-keyboard-shortcuts";
-import {
-  useMobileEditor,
-  useMobileEditorEnhancements,
-} from "@/hooks/use-mobile-editor";
-import { useIsMobile } from "@/hooks/use-mobile";
+
+import { useEditorKeyboardShortcuts } from "@/hooks/use-editor-keyboard-shortcuts";
+import { useMobileEditorEnhancements } from "@/hooks/use-mobile-editor";
+import { useMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import {
-  MultiModeEditor,
-  useEditorMode,
-  type EditorMode,
-} from "./MultiModeEditor";
-import { AdaptiveFloatingToolbar } from "./AdaptiveFloatingToolbar";
-import { ContextualToolbar } from "./ContextualToolbar";
-import { EditorStatsDisplay } from "./EditorStatsDisplay";
-import { TypographySettings } from "./TypographySettings";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import type { NotionEditorProps } from "./types";
@@ -73,14 +53,8 @@ function NotionEditorInner({
   className,
   autoFocus = false,
   customToolbar,
-  mode: initialMode = "normal",
-  onModeChange,
-  showModeToggle = false,
   showWordCount = false,
   showReadingTime = false,
-  showContextualToolbar: showContextualToolbarProp = true,
-  distractionFreeMode: distractionFreeModeProp = false,
-  enhancedTypography = true,
   // Auto-save props
   autoSave = false,
   noteId,
@@ -88,47 +62,38 @@ function NotionEditorInner({
   autoSaveDelay = 500,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
-  const [isAccessibilitySettingsOpen, setIsAccessibilitySettingsOpen] =
-    useState(false);
-  const [showContextualToolbar, setShowContextualToolbar] = useState(
-    showContextualToolbarProp
-  );
-  const [distractionFreeMode, setDistractionFreeMode] = useState(
-    distractionFreeModeProp
-  );
-  const { settings } = useAccessibility();
 
   // Mobile detection and enhancements
-  const isMobile = useIsMobile();
+  const { isMobile } = useMobile();
   useMobileEditorEnhancements();
 
-  // Multi-mode editor state
-  const { mode, setMode } = useEditorMode(initialMode);
-
   // Auto-save functionality
-  const handleAutoSave = useCallback(async (content: any) => {
-    if (!noteId) {
-      throw new Error("Note ID is required for auto-save");
-    }
-
-    if (onAutoSave) {
-      await onAutoSave(content, noteId);
-    } else {
-      // Default auto-save implementation
-      const response = await fetch(`/api/notes/${noteId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ content }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save note");
+  const handleAutoSave = useCallback(
+    async (content: any) => {
+      if (!noteId) {
+        throw new Error("Note ID is required for auto-save");
       }
-    }
-  }, [noteId, onAutoSave]);
+
+      if (onAutoSave) {
+        await onAutoSave(content, noteId);
+      } else {
+        // Default auto-save implementation
+        const response = await fetch(`/api/notes/${noteId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ content }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to save note");
+        }
+      }
+    },
+    [noteId, onAutoSave]
+  );
 
   const {
     status: autoSaveStatus,
@@ -141,49 +106,6 @@ function NotionEditorInner({
     enabled: autoSave && editable && !!noteId,
   });
 
-  // Mobile editor management
-  const {
-    containerRef,
-    handleInputFocus,
-    handleInputBlur,
-    preventZoom,
-    isKeyboardVisible,
-    keyboardHeight,
-    viewportHeight,
-    isGestureActive,
-    hapticFeedback,
-  } = useMobileEditor({
-    enableGestures: isMobile,
-    enableHapticFeedback: isMobile,
-    enableKeyboardAdjustments: isMobile,
-    onModeChange: (newMode) => {
-      setMode(newMode);
-      onModeChange?.(newMode);
-    },
-    onSwipeLeft: () => {
-      // Could implement navigation between notes
-      console.log("Swipe left detected");
-    },
-    onSwipeRight: () => {
-      // Could implement navigation between notes
-      console.log("Swipe right detected");
-    },
-  });
-
-  // Handle mode changes
-  const handleModeChange = useCallback(
-    (newMode: EditorMode) => {
-      setMode(newMode);
-      onModeChange?.(newMode);
-
-      // Mobile haptic feedback
-      if (isMobile) {
-        hapticFeedback.success();
-      }
-    },
-    [setMode, onModeChange, isMobile]
-  );
-
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -193,10 +115,7 @@ function NotionEditorInner({
       }),
       Paragraph.configure({
         HTMLAttributes: {
-          class: cn(
-            "text-base leading-relaxed",
-            isMobile && "mobile-paragraph"
-          ),
+          class: "text-base leading-relaxed",
         },
       }),
       Text,
@@ -330,48 +249,17 @@ function NotionEditorInner({
           "prose prose-sm sm:prose-base max-w-none",
           "focus:outline-none",
           "min-h-[200px] p-4",
-          `editor-${mode}`,
-          enhancedTypography && "editor-typography-optimized",
-          settings.highContrast && "high-contrast-editor",
-          settings.screenReaderOptimized && "screen-reader-optimized",
-          distractionFreeMode && "editor-distraction-free",
           isMobile && "mobile-editor",
-          isMobile && isKeyboardVisible && "mobile-keyboard-visible",
-          isMobile && isGestureActive && "mobile-gesture-active",
           className
         ),
         "data-placeholder": placeholder,
-        role: "textbox",
-        "aria-multiline": "true",
-        "aria-label": "Rich text editor",
-        "aria-describedby": "editor-keyboard-help editor-accessibility-info",
-        ...(isMobile && {
-          "data-mobile": "true",
-          "data-keyboard-height": keyboardHeight.toString(),
-          "data-viewport-height": viewportHeight.toString(),
-        }),
-      },
-      handleDOMEvents: {
-        ...(isMobile && {
-          focus: (view, event) => {
-            const target = event.target as HTMLElement;
-            handleInputFocus(target);
-            preventZoom();
-            return false;
-          },
-          blur: (view, event) => {
-            const target = event.target as HTMLElement;
-            handleInputBlur(target);
-            return false;
-          },
-        }),
       },
     },
     onUpdate: ({ editor }) => {
       const json = editor.getJSON();
       onChange?.(json as any);
       onUpdate?.(editor);
-      
+
       // Trigger auto-save if enabled
       if (autoSave && editable) {
         updateContent(json);
@@ -410,118 +298,27 @@ function NotionEditorInner({
     return { wordCount, readingTime };
   }, [editor, content]);
 
-  // Set up keyboard shortcuts and accessibility
-  const { isHelpOpen, setIsHelpOpen } = useEditorKeyboardShortcuts({
+  // Set up keyboard shortcuts
+  useEditorKeyboardShortcuts({
     editor,
     enabled: editable,
     onOpenLinkDialog: () => setIsLinkDialogOpen(true),
   });
-
-  // Move this BEFORE the useEffect that uses announceToScreenReader
-  const { announceToScreenReader } = useEditorAccessibility(editor);
-
-  // Enhanced keyboard shortcuts for mode switching and features with accessibility
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // F11 for focus mode
-      if (event.key === "F11") {
-        event.preventDefault();
-        const newMode = mode === "focus" ? "normal" : "focus";
-        handleModeChange(newMode);
-        announceToScreenReader(`Switched to ${newMode} mode`);
-      }
-
-      // Escape to exit focus mode
-      if (event.key === "Escape" && mode === "focus") {
-        event.preventDefault();
-        handleModeChange("normal");
-        announceToScreenReader("Exited focus mode");
-      }
-
-      // Ctrl/Cmd + Shift + F for fullscreen
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.shiftKey &&
-        event.key === "F"
-      ) {
-        event.preventDefault();
-        const newMode = mode === "fullscreen" ? "normal" : "fullscreen";
-        handleModeChange(newMode);
-        announceToScreenReader(`Switched to ${newMode} mode`);
-      }
-
-      // Ctrl/Cmd + Shift + D for distraction-free mode
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.shiftKey &&
-        event.key === "D"
-      ) {
-        event.preventDefault();
-        setDistractionFreeMode((prev) => {
-          const newValue = !prev;
-          announceToScreenReader(
-            `Distraction-free mode ${newValue ? "enabled" : "disabled"}`
-          );
-          return newValue;
-        });
-      }
-
-      // Ctrl/Cmd + Shift + T for contextual toolbar toggle
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.shiftKey &&
-        event.key === "T"
-      ) {
-        event.preventDefault();
-        setShowContextualToolbar((prev) => {
-          const newValue = !prev;
-          announceToScreenReader(
-            `Contextual toolbar ${newValue ? "shown" : "hidden"}`
-          );
-          return newValue;
-        });
-      }
-
-      // Alt + A for accessibility settings
-      if (event.altKey && event.key === "a") {
-        event.preventDefault();
-        setIsAccessibilitySettingsOpen(true);
-        announceToScreenReader("Accessibility settings opened");
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [mode, handleModeChange, announceToScreenReader]);
 
   // Handle dialog keyboard shortcuts
   useEffect(() => {
     const handleOpenLinkDialog = () => {
       if (editor && !editor.isDestroyed) {
         setIsLinkDialogOpen(true);
-        announceToScreenReader("Link dialog opened");
       }
     };
 
-    const handleOpenAccessibilitySettings = () => {
-      setIsAccessibilitySettingsOpen(true);
-      announceToScreenReader("Accessibility settings dialog opened");
-    };
-
     document.addEventListener("openLinkDialog", handleOpenLinkDialog);
-    document.addEventListener(
-      "openAccessibilitySettings",
-      handleOpenAccessibilitySettings
-    );
 
     return () => {
       document.removeEventListener("openLinkDialog", handleOpenLinkDialog);
-      document.removeEventListener(
-        "openAccessibilitySettings",
-        handleOpenAccessibilitySettings
-      );
     };
-  }, [editor, announceToScreenReader]);
+  }, [editor]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -533,17 +330,7 @@ function NotionEditorInner({
   }, [editor]);
 
   return (
-    <MultiModeEditor
-      mode={mode}
-      onModeChange={handleModeChange}
-      showModeToggle={showModeToggle && !isMobile} // Hide mode toggle on mobile, use gestures instead
-      showWordCount={showWordCount}
-      showReadingTime={showReadingTime}
-      wordCount={stats.wordCount}
-      readingTime={stats.readingTime}
-      className={cn("w-full", isMobile && "mobile-editor-container")}
-      ref={containerRef as React.RefObject<HTMLDivElement>}
-    >
+    <div className="w-full">
       {editor && (
         <>
           <BubbleMenu editor={editor} />
@@ -551,17 +338,7 @@ function NotionEditorInner({
           {customToolbar ? (
             customToolbar(editor)
           ) : (
-            <>
-              <FloatingToolbar editor={editor} />
-              <AdaptiveFloatingToolbar editor={editor} mode={mode} />
-              {showContextualToolbar && (
-                <ContextualToolbar
-                  editor={editor}
-                  minimal={mode === "focus" || distractionFreeMode}
-                  autoHide={distractionFreeMode}
-                />
-              )}
-            </>
+            <FloatingToolbar editor={editor} />
           )}
         </>
       )}
@@ -571,14 +348,7 @@ function NotionEditorInner({
         className={cn(
           "w-full rounded-md border border-input bg-background",
           "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
-          settings.reducedMotion
-            ? "transition-none"
-            : "transition-all duration-200",
-          settings.highContrast && "border-2 border-foreground",
-          distractionFreeMode && "editor-distraction-free",
-          isMobile && "mobile-editor-content",
-          isMobile && mode === "focus" && "mobile-focus-mode",
-          "focus-visible"
+          "transition-all duration-200"
         )}
       />
 
@@ -599,103 +369,17 @@ function NotionEditorInner({
         </div>
       )}
 
-      {/* Enhanced Stats Display */}
-      {!autoSave && (showWordCount || showReadingTime) && (
-        <EditorStatsDisplay
-          editor={editor}
-          minimal={mode === "focus" || distractionFreeMode}
-          showWordCount={showWordCount}
-          showReadingTime={showReadingTime}
-          showCharacterCount={mode !== "focus"}
-          showReadingLevel={mode === "normal"}
-        />
-      )}
-
-      {/* Typography Settings */}
-      {editable && mode === "normal" && (
-        <TypographySettings
-          editor={editor}
-          className="fixed bottom-20 right-6 z-40"
-        />
-      )}
-
-      {/* Accessibility information for screen readers */}
-      <div id="editor-keyboard-help" className="sr-only">
-        Rich text editor. Press Cmd+/ or Ctrl+/ to view keyboard shortcuts. Use
-        Tab to navigate between elements.
-      </div>
-      <div id="editor-accessibility-info" className="sr-only">
-        {settings.screenReaderOptimized &&
-          "Screen reader optimized mode is enabled. "}
-        {settings.keyboardNavigation &&
-          "Enhanced keyboard navigation is enabled. "}
-        Use arrow keys to navigate text, Enter to create new paragraphs, and
-        slash commands for formatting.
-      </div>
-
-      {/* Skip link for keyboard users */}
-      <a
-        href="#editor-content"
-        className="skip-link"
-        onFocus={() => announceToScreenReader("Skip to editor content")}
-      >
-        Skip to editor content
-      </a>
-
       {editor && (
-        <>
-          <LinkDialog
-            editor={editor}
-            isOpen={isLinkDialogOpen}
-            onClose={() => {
-              setIsLinkDialogOpen(false);
-              announceToScreenReader("Link dialog closed");
-            }}
-          />
-          <KeyboardShortcutsDialog
-            isOpen={isHelpOpen}
-            onClose={() => {
-              setIsHelpOpen(false);
-              announceToScreenReader("Keyboard shortcuts dialog closed");
-            }}
-          />
-          <AccessibilitySettingsDialog
-            isOpen={isAccessibilitySettingsOpen}
-            onClose={() => {
-              setIsAccessibilitySettingsOpen(false);
-              announceToScreenReader("Accessibility settings dialog closed");
-            }}
-          />
-        </>
+        <LinkDialog
+          editor={editor}
+          isOpen={isLinkDialogOpen}
+          onClose={() => setIsLinkDialogOpen(false)}
+        />
       )}
-
-      {/* Accessibility settings button */}
-      {editable && (
-        <button
-          onClick={() => setIsAccessibilitySettingsOpen(true)}
-          className={cn(
-            "fixed bottom-4 right-4 z-50",
-            "w-12 h-12 rounded-full",
-            "bg-primary text-primary-foreground",
-            "shadow-lg hover:shadow-xl",
-            "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-            "transition-all duration-200",
-            settings.reducedMotion && "transition-none"
-          )}
-          aria-label="Open accessibility settings"
-          title="Accessibility Settings (Alt+A)"
-        >
-          <span className="sr-only">Open accessibility settings</span>♿
-        </button>
-      )}
-    </MultiModeEditor>
+    </div>
   );
 }
 
 export function NotionEditor(props: NotionEditorProps) {
-  return (
-    <AccessibilityProvider>
-      <NotionEditorInner {...props} />
-    </AccessibilityProvider>
-  );
+  return <NotionEditorInner {...props} />;
 }

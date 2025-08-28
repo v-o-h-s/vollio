@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import { NotionEditor } from "../NotionEditor";
-import type { EditorContent } from "../types";
+import type { JSONContent } from "@/lib/types";
 
 interface AutoSaveExampleProps {
   noteId: string;
-  initialContent?: EditorContent;
+  initialContent?: JSONContent;
 }
 
 export function AutoSaveExample({ noteId, initialContent }: AutoSaveExampleProps) {
-  const [content, setContent] = useState<EditorContent | undefined>(initialContent);
+  const [content, setContent] = useState<JSONContent | undefined>(initialContent);
 
-  const handleAutoSave = async (content: EditorContent, noteId: string) => {
+  const handleAutoSave = async (content: JSONContent, noteId: string) => {
     // Custom auto-save logic if needed
     const response = await fetch(`/api/notes/${noteId}`, {
       method: "PUT",

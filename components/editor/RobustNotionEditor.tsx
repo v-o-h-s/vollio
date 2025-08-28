@@ -1,234 +1,170 @@
-'use client';
+"use client";
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { NotionEditor } from './NotionEditor';
-import { EditorErrorBoundary } from './EditorErrorBoundary';
-import { SaveStatusIndicator } from './SaveStatusIndicator';
-import { OfflineStatusIndicator } from './OfflineStatusIndicator';
-import { useEditorWithOffline } from '@/hooks/use-editor-with-offline';
-import { useEditorErrorRecovery } from '@/hooks/use-editor-error-recovery';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { AlertTriangle, RefreshCw, Download } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { NotionEditorProps, EditorContent } from './types';
+import { useState, useCallback, useEffect, useRef } from "react";
+import { NotionEditor } from "./NotionEditor";
+import { EditorErrorBoundary } from "./EditorErrorBoundary";
+import { useEditorErrorRecovery } from "@/hooks/use-editor-error-recovery";
+import { cn } from "@/lib/utils";
+import type { NotionEditorProps } from "./types";
 
-interface RobustNotionEditorProps extends Omit<NotionEditorProps, 'onChange'> {
-  noteId?: string;
-  title?: string;
-  autoSaveEnabled?: boolean;
-  autoSaveDelay?: number;
-  showStatusIndicators?: boolean;
-  onSave?: (content: EditorContent) => void;
-  onError?: (error: string) => void;
-  onRecovery?: () => void;
+interface RobustNotionEditorProps
+  extends Omit<NotionEditorProps, "onAutoSave"> {
+  onSaveSuccess?: () => void;
+  onAutoSave?: (content: any, noteId?: string) => Promise<void>;
 }
 
-function EditorWithRecovery({
+export function RobustNotionEditor({
+  content,
+  onChange,
+  onSaveSuccess,
+  placeholder = "Start writing...",
+  autoFocus = false,
+  autoSave = false,
   noteId,
-  title,
-  autoSaveEnabled = true,
+  onAutoSave,
   autoSaveDelay = 2000,
-  showStatusIndicators = true,
-  onSave,
-  onError,
-  onRecovery,
-  content: initialContent,
-  ...editorProps
+  className,
 }: RobustNotionEditorProps) {
-  const [editorContent, setEditorContent] = useState<EditorContent | null>(
-    typeof initialContent === 'string' ? null : initialContent || null
+  const [editorKey, setEditorKey] = useState(0);
+  const [lastValidContent, setLastValidContent] = useState(content);
+  const contentRef = useRef(content);
+
+  // Update content ref when content changes
+  useEffect(() => {
+    if (content !== undefined) {
+      contentRef.current = content;
+      setLastValidContent(content);
+    }
+  }, [content]);
+
+  const {
+    hasError,
+    errorMessage,
+    retryCount,
+    handleError,
+    handleRecovery,
+    canRetry,
+  } = useEditorErrorRecovery({
+    maxRetries: 3,
+    onRecovery: () => {
+      // Force re-render with incremented key
+      setEditorKey((prev) => prev + 1);
+    },
+  });
+
+  // Enhanced onChange handler with error protection
+  const handleChange = useCallback(
+    (newContent: any) => {
+      try {
+        // Validate content structure
+        if (newContent && typeof newContent === "object") {
+          setLastValidContent(newContent);
+          contentRef.current = newContent;
+          onChange?.(newContent);
+        }
+      } catch (error) {
+        console.error("Editor content change error:", error);
+        handleError(error as Error);
+      }
+    },
+    [onChange, handleError]
   );
 
-  // Offline support and auto-save
-  const offlineEditor = useEditorWithOffline(editorContent, {
-    noteId,
-    title,
-    autoSaveDelay,
-    enabled: autoSaveEnabled,
-    onError: (error) => {
-      onError?.(error.message);
-      errorRecovery.handleError(error, 'save-failed');
-    },
-    onConflict: (resolution) => {
-      console.log('Conflict resolved:', resolution);
-      setEditorContent(resolution.resolved);
-    },
-    onSync: () => {
-      onSave?.(editorContent!);
-    },
-  });
-
-  // Error recovery
-  const errorRecovery = useEditorErrorRecovery(editorContent, {
-    noteId,
-    onError: (error, context) => {
-      console.error(`Editor error in ${context}:`, error);
-      onError?.(error.message);
-    },
-    onRecovery: (context) => {
-      console.log(`Editor recovered from ${context}`);
-      onRecovery?.();
-    },
-  });
-
-  // Handle content changes
-  const handleContentChange = useCallback((newContent: EditorContent) => {
-    setEditorContent(newContent);
-    offlineEditor.updateContent(newContent);
-  }, [offlineEditor]);
-
-  // Handle editor errors
-  const handleEditorError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
-    errorRecovery.handleError(error, 'editor-crash');
-  }, [errorRecovery]);
-
-  // Load backup if available and no initial content
-  useEffect(() => {
-    if (!editorContent && errorRecovery.backupAvailable) {
-      const backup = errorRecovery.loadBackup();
-      if (backup) {
-        setEditorContent(backup);
-        offlineEditor.updateContent(backup);
+  // Enhanced auto-save handler with error protection
+  const handleAutoSave = useCallback(
+    async (saveContent: any, saveNoteId: string) => {
+      try {
+        if (onAutoSave) {
+          await onAutoSave(saveContent, saveNoteId);
+          onSaveSuccess?.();
+        }
+      } catch (error) {
+        console.error("Auto-save error:", error);
+        handleError(error as Error);
+        throw error; // Re-throw to let auto-save hook handle it
       }
-    }
-  }, [editorContent, errorRecovery, offlineEditor]);
+    },
+    [onAutoSave, onSaveSuccess, handleError]
+  );
 
-  // Download backup function
-  const downloadBackup = useCallback(() => {
-    const backup = errorRecovery.loadBackup();
-    if (backup) {
-      const blob = new Blob([JSON.stringify(backup, null, 2)], { 
-        type: 'application/json' 
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `editor-backup-${noteId || 'temp'}-${new Date().toISOString()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-  }, [errorRecovery, noteId]);
+  // Recovery handler
+  const handleRetry = useCallback(() => {
+    handleRecovery();
+  }, [handleRecovery]);
 
-  // Show error recovery UI if there's an unrecoverable error
-  if (errorRecovery.hasError && !errorRecovery.isRecovering) {
+  if (hasError) {
     return (
-      <Card className="w-full">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
-            <div className="flex-1 space-y-3">
-              <div>
-                <h3 className="font-semibold text-destructive">Editor Error</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {errorRecovery.lastError?.message || 'An unexpected error occurred'}
-                </p>
-                {errorRecovery.errorContext && (
-                  <p className="text-xs text-muted-foreground">
-                    Context: {errorRecovery.errorContext}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  onClick={errorRecovery.attemptRecovery}
-                  disabled={errorRecovery.isRecovering}
-                >
-                  <RefreshCw className={cn(
-                    "h-4 w-4 mr-2",
-                    errorRecovery.isRecovering && "animate-spin"
-                  )} />
-                  {errorRecovery.isRecovering ? 'Recovering...' : 'Try Recovery'}
-                </Button>
-
-                {errorRecovery.backupAvailable && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={downloadBackup}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Download Backup
-                  </Button>
-                )}
-
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={errorRecovery.resetError}
-                >
-                  Reset Editor
-                </Button>
-              </div>
-
-              {errorRecovery.recoveryAttempts > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  Recovery attempts: {errorRecovery.recoveryAttempts}
-                </p>
-              )}
-            </div>
+      <div
+        className={cn(
+          "flex flex-col items-center justify-center p-8 text-center",
+          className
+        )}
+      >
+        <div className="max-w-md space-y-4">
+          <div className="text-destructive">
+            <h3 className="font-semibold">Editor Error</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {errorMessage || "The editor encountered an unexpected error."}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+
+          {canRetry && (
+            <button
+              onClick={handleRetry}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Retry ({retryCount}/3)
+            </button>
+          )}
+
+          <div className="text-xs text-muted-foreground">
+            Your content has been preserved and will be restored when the editor
+            recovers.
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="w-full space-y-2">
-      {showStatusIndicators && (
-        <div className="flex justify-between items-center">
-          <OfflineStatusIndicator
-            isOnline={offlineEditor.isOnline}
-            isSyncing={offlineEditor.isSyncing}
-            hasPendingChanges={offlineEditor.hasPendingChanges}
-            syncError={offlineEditor.syncError}
-            conflictResolution={offlineEditor.conflictResolution}
-            onSync={offlineEditor.syncNow}
-            onClearConflict={offlineEditor.clearConflictResolution}
-          />
-          
-          <SaveStatusIndicator
-            isSaving={offlineEditor.isSaving}
-            lastSaved={offlineEditor.lastSaved}
-            error={offlineEditor.saveError}
-            hasUnsavedChanges={offlineEditor.hasUnsavedChanges}
-            onRetry={offlineEditor.saveNow}
-          />
-        </div>
-      )}
-
-      <NotionEditor
-        {...editorProps}
-        content={editorContent}
-        onChange={handleContentChange}
-      />
-
-      {errorRecovery.isRecovering && (
-        <div className="text-sm text-muted-foreground flex items-center gap-2 p-2 bg-blue-50 rounded border">
-          <RefreshCw className="h-4 w-4 animate-spin" />
-          Attempting recovery...
-        </div>
-      )}
-    </div>
-  );
-}
-
-export function RobustNotionEditor(props: RobustNotionEditorProps) {
-  return (
     <EditorErrorBoundary
-      onError={(error, errorInfo) => {
-        console.error('Editor Error Boundary:', error, errorInfo);
-        props.onError?.(error.message);
-      }}
-      onRecover={() => {
-        props.onRecovery?.();
-      }}
+      onError={handleError}
+      fallback={
+        <div
+          className={cn(
+            "flex flex-col items-center justify-center p-8",
+            className
+          )}
+        >
+          <div className="text-center space-y-4">
+            <div className="text-destructive">
+              <h3 className="font-semibold">Editor Crashed</h3>
+              <p className="text-sm text-muted-foreground">
+                The editor has crashed unexpectedly.
+              </p>
+            </div>
+            <button
+              onClick={handleRetry}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Restart Editor
+            </button>
+          </div>
+        </div>
+      }
     >
-      <EditorWithRecovery {...props} />
+      <NotionEditor
+        key={editorKey}
+        content={contentRef.current}
+        onChange={handleChange}
+        placeholder={placeholder}
+        autoFocus={autoFocus}
+        autoSave={autoSave}
+        noteId={noteId}
+        onAutoSave={handleAutoSave}
+        autoSaveDelay={autoSaveDelay}
+        className={className}
+      />
     </EditorErrorBoundary>
   );
 }

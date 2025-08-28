@@ -23,6 +23,7 @@ This document provides a comprehensive index of all documentation resources for 
 
 ### Core Systems
 - **[Error Handling System](./docs/ERROR_HANDLING.md)** - Comprehensive error management architecture
+- **[Notes System](./docs/NOTES_SYSTEM.md)** - Complete note-taking system with auto-save functionality
 - **[Recent Activity System](./docs/RECENT_ACTIVITY.md)** - Activity tracking and user experience features
 - **[Security Enhancements](./SECURITY_ENHANCEMENTS.md)** - Security features and implementation details
 
@@ -48,7 +49,7 @@ This document provides a comprehensive index of all documentation resources for 
   - SlashCommand Extension - Notion-style slash commands for quick formatting
   - ImageUpload Extension - Drag-and-drop image upload with Supabase integration
   - EnhancedLink Extension - Advanced link handling with validation
-  - KeyboardShortcuts Extension - Comprehensive accessibility and keyboard support
+  - KeyboardShortcuts Extension - Essential keyboard shortcuts for efficient editing
   - Cross-tab Synchronization - Real-time updates using BroadcastChannel and PostMessage
   - Note Management System - Complete CRUD operations with rich text content
 
@@ -78,7 +79,7 @@ This document provides a comprehensive index of all documentation resources for 
   - Supabase integration helpers
   - Activity tracking utilities
   - PDF coordinate calculations
-  - Cross-tab navigation utilities
+  - Cross-tab synchronization utilities
 
 ### Custom Hooks
 - **[Custom Hooks](./hooks/)** - React hooks for common functionality
@@ -123,9 +124,9 @@ This document provides a comprehensive index of all documentation resources for 
 - **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
 - **[User Experience Design](./docs/PROJECT_OVERVIEW.md#user-experience-design)** - Desktop and mobile UX patterns
 
-### Accessibility & Mobile
+### User Experience & Mobile
 - **[Mobile Responsiveness](./README.md#mobile-experience)** - Mobile-first design principles
-- **[Accessibility Features](./docs/PROJECT_OVERVIEW.md#accessibility-features)** - WCAG compliance and inclusive design
+- **[User Experience Features](./docs/PROJECT_OVERVIEW.md#user-experience-features)** - Intuitive and user-friendly design
 
 ## 🔒 Security Documentation
 

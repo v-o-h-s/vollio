@@ -61,7 +61,7 @@ Tests for the annotation overlay component:
 - Annotation rendering and positioning
 - Mouse and keyboard interactions
 - Hover state management
-- Accessibility features (ARIA attributes, keyboard navigation)
+- Keyboard shortcut features
 - Performance optimization
 - Edge cases (overlapping annotations, zero dimensions)
 
@@ -89,7 +89,7 @@ Mobile-specific functionality testing:
 - Touch gesture handling (pinch-to-zoom, scroll vs selection)
 - Viewport size changes and orientation
 - Cross-device compatibility
-- Mobile accessibility features
+- Mobile user experience features
 - Performance optimization for mobile devices
 
 ## Test Coverage Areas
@@ -102,7 +102,7 @@ Mobile-specific functionality testing:
 - ✅ Text selection in PDF viewer with coordinate calculation
 - ✅ Annotation creation, editing, and deletion
 - ✅ Annotation positioning and coordinate calculations
-- ✅ Cross-tab navigation and communication
+- ✅ Cross-tab communication and synchronization
 - ✅ State management with Redux and RTK Query
 
 ### User Interface
@@ -111,7 +111,7 @@ Mobile-specific functionality testing:
 - ✅ Annotation tooltips and preview cards
 - ✅ Mobile-specific dialogs and interactions
 - ✅ Hover effects and visual feedback
-- ✅ Keyboard navigation and accessibility
+- ✅ Keyboard shortcuts and user interactions
 
 ### Error Handling
 

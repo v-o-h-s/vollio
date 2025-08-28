@@ -6,10 +6,10 @@ import { AdvancedFloatingToolbar } from './AdvancedFloatingToolbar';
 import { FloatingToolbar } from './FloatingToolbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import type { EditorContent } from './types';
+import type { JSONContent } from '@/lib/types';
 
 export function FloatingToolbarDemo() {
-  const [content, setContent] = useState<EditorContent>({
+  const [content, setContent] = useState<JSONContent>({
     type: 'doc',
     content: [
       {

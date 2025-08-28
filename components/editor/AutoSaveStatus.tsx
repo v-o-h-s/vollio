@@ -1,58 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2, Check, AlertCircle, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Loader2, 
+  Check, 
+  AlertCircle, 
+  Clock,
+  Wifi,
+  WifiOff 
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { AutoSaveStatus } from "@/hooks/use-auto-save";
+
+type AutoSaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface AutoSaveStatusProps {
   status: AutoSaveStatus;
-  lastSaved: Date | null;
-  error: string | null;
+  lastSaved?: Date | null;
+  error?: string | null;
+  isCreating?: boolean;
+  size?: "sm" | "default" | "lg";
   className?: string;
+  showIcon?: boolean;
+  showText?: boolean;
 }
 
 export function AutoSaveStatus({
   status,
   lastSaved,
   error,
+  isCreating = false,
+  size = "default",
   className,
+  showIcon = true,
+  showText = true,
 }: AutoSaveStatusProps) {
-  const [timeAgo, setTimeAgo] = useState<string>("");
-
-  // Update time ago every minute
-  useEffect(() => {
-    if (!lastSaved) return;
-
-    const updateTimeAgo = () => {
-      const now = new Date();
-      const diff = now.getTime() - lastSaved.getTime();
-      const minutes = Math.floor(diff / 60000);
-      
-      if (minutes < 1) {
-        setTimeAgo("just now");
-      } else if (minutes === 1) {
-        setTimeAgo("1 minute ago");
-      } else if (minutes < 60) {
-        setTimeAgo(`${minutes} minutes ago`);
-      } else {
-        const hours = Math.floor(minutes / 60);
-        if (hours === 1) {
-          setTimeAgo("1 hour ago");
-        } else {
-       
-   setTimeAgo(`${hours} hours ago`);
-        }
-      }
-    };
-
-    updateTimeAgo();
-    const interval = setInterval(updateTimeAgo, 60000); // Update every minute
-
-    return () => clearInterval(interval);
-  }, [lastSaved]);
-
+  
   const getStatusIcon = () => {
+    if (isCreating) {
+      return <Loader2 className="h-3 w-3 animate-spin" />;
+    }
+
     switch (status) {
       case "saving":
         return <Loader2 className="h-3 w-3 animate-spin" />;
@@ -66,44 +53,86 @@ export function AutoSaveStatus({
   };
 
   const getStatusText = () => {
+    if (isCreating) {
+      return "Creating...";
+    }
+
     switch (status) {
       case "saving":
         return "Saving...";
       case "saved":
+        if (lastSaved) {
+          const now = new Date();
+          const diff = now.getTime() - lastSaved.getTime();
+          const seconds = Math.floor(diff / 1000);
+          
+          if (seconds < 10) {
+            return "Saved just now";
+          } else if (seconds < 60) {
+            return `Saved ${seconds}s ago`;
+          } else {
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) {
+              return `Saved ${minutes}m ago`;
+            } else {
+              const hours = Math.floor(minutes / 60);
+              return `Saved ${hours}h ago`;
+            }
+          }
+        }
         return "Saved";
       case "error":
         return error || "Save failed";
       default:
-        return lastSaved ? `Saved ${timeAgo}` : "Not saved";
+        return lastSaved ? "Auto-save enabled" : "Start typing to save";
     }
   };
 
-  const getStatusColor = () => {
+  const getStatusVariant = (): "default" | "secondary" | "destructive" | "outline" => {
+    if (isCreating) {
+      return "secondary";
+    }
+
     switch (status) {
       case "saving":
-        return "text-blue-600";
+        return "secondary";
       case "saved":
-        return "text-green-600";
+        return "default";
       case "error":
-        return "text-red-600";
+        return "destructive";
       default:
-        return "text-muted-foreground";
+        return "outline";
+    }
+  };
+
+  const getSizeClasses = () => {
+    switch (size) {
+      case "sm":
+        return "px-2 py-1 text-xs";
+      case "lg":
+        return "px-4 py-2 text-sm";
+      default:
+        return "px-3 py-1.5 text-xs";
     }
   };
 
   return (
-    <div
+    <Badge
+      variant={getStatusVariant()}
       className={cn(
-        "flex items-center gap-1.5 text-xs font-medium transition-colors",
-        getStatusColor(),
+        "flex items-center gap-1.5 font-medium transition-all duration-200",
+        getSizeClasses(),
+        status === "saved" && "animate-pulse",
+        status === "error" && "animate-bounce",
         className
       )}
-      role="status"
-      aria-live="polite"
-      aria-label={getStatusText()}
     >
-      {getStatusIcon()}
-      <span>{getStatusText()}</span>
-    </div>
+      {showIcon && getStatusIcon()}
+      {showText && (
+        <span className="whitespace-nowrap">
+          {getStatusText()}
+        </span>
+      )}
+    </Badge>
   );
 }
