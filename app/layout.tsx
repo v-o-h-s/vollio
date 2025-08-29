@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   title: "Noto",
   description:
     "Upload PDFs, add notes, and create flashcards for better studying",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -35,7 +40,7 @@ export default function RootLayout({
         <ClerkProvider
           appearance={{
             layout: {
-              logoImageUrl: "/icons/logo.svg",
+              logoImageUrl: "/logo.png",
             },
             elements: {
               card: "shadow-lg border rounded-xl p-6",
@@ -49,9 +54,7 @@ export default function RootLayout({
         >
           <SyncfusionLicenseProvider>
             <ReduxProvider>
-              <EditorProvider>
-                {children}
-              </EditorProvider>
+              <EditorProvider>{children}</EditorProvider>
             </ReduxProvider>
           </SyncfusionLicenseProvider>
         </ClerkProvider>
