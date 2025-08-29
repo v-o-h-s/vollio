@@ -43,12 +43,10 @@ import {
 } from "@/lib/store/annotationSlice";
 import { useGetPDFQuery } from "@/lib/store/apiSlice";
 import { PDFDocument, Annotation, Rectangle } from "@/lib/types";
-import { useMobile } from "@/hooks/use-mobile";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PDFViewerFallback } from "@/components/pdf/FallbackUI";
 import AnnotationTooltip from "@/components/pdf/AnnotationTooltip";
 import AnnotationPreviewCard from "@/components/pdf/AnnotationPreviewCard";
-import MobileAnnotationDialog from "@/components/pdf/MobileAnnotationDialog";
 import { FileText, AlertCircle, RefreshCw } from "lucide-react";
 import { useActivityTracking } from "@/hooks/use-activity-tracking";
 
@@ -105,7 +103,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Hooks
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isMobile } = useMobile();
+  // Responsive design handled via CSS
   const { trackPDFView } = useActivityTracking();
 
   // Redux state
@@ -207,10 +205,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
       dispatch(setActiveSelection(selection));
 
-      if (isMobile) {
-        // On mobile, show the annotation dialog
-        // This will be handled by the MobileAnnotationDialog component
-      } else {
+      // Show annotation tooltip for text selection else {
         // On desktop, show the tooltip
         dispatch(
           showTooltip({
@@ -220,7 +215,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         );
       }
     },
-    [currentPdfData, dispatch, isMobile]
+    [currentPdfData, dispatch]
   );
 
   /**
@@ -250,7 +245,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     (annotationId: string | null) => {
       dispatch(setHoveredAnnotation(annotationId));
 
-      if (annotationId && !isMobile) {
+      if (annotationId) {
         const annotation = annotations[annotationId];
         if (annotation) {
           dispatch(
@@ -267,7 +262,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         dispatch(hidePreviewCard());
       }
     },
-    [annotations, dispatch, isMobile]
+    [annotations, dispatch]
   );
 
   /**
@@ -477,7 +472,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           enableMeasureAnnotation={false}
           enableInkAnnotation={false}
           enableStickyNotesAnnotation={false}
-          zoomMode={isMobile ? "FitToPage" : "FitToWidth"}
+          zoomMode="FitToWidth"
         >
           <Inject
             services={[
@@ -526,37 +521,25 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           ))}
         </div>
 
-        {/* Desktop Annotation Tooltip */}
-        {!isMobile && (
-          <AnnotationTooltip
-            visible={tooltipState.visible}
-            position={tooltipState.position}
-            onCreateNote={handleCreateAnnotation}
-            onClose={() => {
-              dispatch(setActiveSelection(null));
-              dispatch(hideTooltip());
-            }}
-          />
-        )}
+        {/* Annotation Tooltip */}
+        <AnnotationTooltip
+          visible={tooltipState.visible}
+          position={tooltipState.position}
+          onCreateNote={handleCreateAnnotation}
+          onClose={() => {
+            dispatch(setActiveSelection(null));
+            dispatch(hideTooltip());
+          }}
+        />
 
-        {/* Desktop Annotation Preview Card */}
-        {!isMobile && previewCard.visible && previewCard.annotationId && (
+        {/* Annotation Preview Card */}
+        {previewCard.visible && previewCard.annotationId && (
           <AnnotationPreviewCard
             visible={previewCard.visible}
             annotation={annotations[previewCard.annotationId]}
             position={previewCard.position}
             onEdit={handleAnnotationEdit}
             onClose={() => dispatch(hidePreviewCard())}
-          />
-        )}
-
-        {/* Mobile Annotation Dialog */}
-        {isMobile && activeSelection && (
-          <MobileAnnotationDialog
-            selectedText={activeSelection.text}
-            visible={true}
-            onCreateNote={handleCreateAnnotation}
-            onClose={() => dispatch(setActiveSelection(null))}
           />
         )}
 

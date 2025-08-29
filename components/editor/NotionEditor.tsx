@@ -37,8 +37,6 @@ import { TableBubbleMenu } from "./TableBubbleMenu";
 import { FloatingToolbar } from "./FloatingToolbar";
 
 import { useEditorKeyboardShortcuts } from "@/hooks/use-editor-keyboard-shortcuts";
-import { useMobileEditorEnhancements } from "@/hooks/use-mobile-editor";
-import { useMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { useAutoSave } from "@/hooks/use-auto-save";
@@ -63,9 +61,7 @@ function NotionEditorInner({
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
 
-  // Mobile detection and enhancements
-  const { isMobile } = useMobile();
-  useMobileEditorEnhancements();
+  // Responsive design handled via CSS
 
   // Auto-save functionality
   const handleAutoSave = useCallback(
@@ -249,7 +245,7 @@ function NotionEditorInner({
           "prose prose-sm sm:prose-base max-w-none",
           "focus:outline-none",
           "min-h-[200px] p-4",
-          isMobile && "mobile-editor",
+          "responsive-editor",
           className
         ),
         "data-placeholder": placeholder,

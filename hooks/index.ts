@@ -2,9 +2,6 @@
 export { useActivityTracking } from './use-activity-tracking';
 export { useErrorHandling } from './use-error-handling';
 export { useKeyboardShortcuts } from './use-keyboard-shortcuts';
-export { useMobile } from './use-mobile';
-export { useTouchGestures } from './use-touch-gestures';
-export { useMobileKeyboard } from './use-mobile-keyboard';
 
 // Auto-save and persistence hooks
 export { useAutoSave } from './use-auto-save';

@@ -45,10 +45,7 @@ vi.mock('@/hooks/use-activity-tracking', () => ({
   }),
 }));
 
-// Mock mobile hook
-vi.mock('@/hooks/use-mobile', () => ({
-  useMobile: () => ({ isMobile: false, isTablet: false, isDesktop: true, hasTouch: false, orientation: 'landscape', screenSize: 'lg' }),
-}));
+// Mobile hooks removed - app is desktop/laptop focused
 
 // Mock RTK Query
 vi.mock('@/lib/store/apiSlice', () => ({

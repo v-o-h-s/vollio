@@ -25,7 +25,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { Annotation } from '@/lib/types';
-import { useMobile } from '@/hooks/use-mobile';
 
 /**
  * Props interface for AnnotationPreviewCard component
@@ -57,7 +56,7 @@ const AnnotationPreviewCard: React.FC<AnnotationPreviewCardProps> = ({
 }) => {
     const [adjustedPosition, setAdjustedPosition] = useState(position);
     const contentRef = useRef<HTMLDivElement>(null);
-    const { isMobile } = useMobile();
+    // Responsive design handled via CSS
 
     // Truncate note content to ~100 characters with proper word boundary
     const truncateContent = (content: string, maxLength: number = 100): string => {
@@ -221,13 +220,10 @@ const AnnotationPreviewCard: React.FC<AnnotationPreviewCardProps> = ({
                             border-transparent 
                             hover:border-blue-200
                             font-medium
-                            ${isMobile
-                                ? 'text-sm py-3 px-3 min-h-[44px]' // Touch-friendly sizing for mobile
-                                : 'text-xs py-1.5 px-2' // Compact sizing for desktop
-                            }
+                            text-xs py-1.5 px-2
                         `}
                     >
-                        {isMobile ? 'Tap to edit note' : 'Click to edit note'}
+                        Click to edit note
                     </button>
 
                     {/* Arrow pointing to annotation */}

@@ -165,8 +165,7 @@ For comprehensive documentation covering all aspects of the Noto application, se
 #### PDF System
 - **PDFAnnotationViewer**: Main PDF viewer with Syncfusion integration, Supabase URL handling, and activity tracking
 - **AnnotationOverlay**: Renders interactive annotation highlights with hover states and click handling
-- **AnnotationTooltip**: Desktop text selection interface with smart positioning
-- **MobileAnnotationDialog**: Mobile-optimized annotation creation with touch-friendly design
+- **AnnotationTooltip**: Text selection interface with smart positioning
 - **AnnotationPreviewCard**: Hover preview cards with annotation content and edit/delete actions
 
 #### Notion-like Editor System

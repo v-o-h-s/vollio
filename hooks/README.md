@@ -146,53 +146,9 @@ function AnnotationEditor() {
 - Context-aware activation and deactivation
 - Help system integration for shortcut discovery
 
-#### `use-mobile.ts` - Mobile Device Detection
+#### Responsive Design
 
-**Purpose**: Provides responsive design utilities and mobile device detection for adaptive UI behavior.
-
-**Key Features**:
-- Accurate mobile device detection
-- Screen size and orientation tracking
-- Touch capability detection
-- Responsive breakpoint utilities
-
-**Usage**:
-```tsx
-import { useMobile } from '@/hooks/use-mobile';
-
-function ResponsiveComponent() {
-  const { 
-    isMobile, 
-    isTablet, 
-    isDesktop, 
-    orientation,
-    screenSize,
-    hasTouch 
-  } = useMobile();
-
-  return (
-    <div>
-      {isMobile ? (
-        <MobileAnnotationDialog />
-      ) : (
-        <DesktopAnnotationTooltip />
-      )}
-      
-      {hasTouch && <TouchOptimizedControls />}
-      
-      {orientation === 'landscape' && <LandscapeLayout />}
-    </div>
-  );
-}
-```
-
-**Key Properties**:
-- `isMobile` - Boolean for mobile device detection
-- `isTablet` - Boolean for tablet device detection
-- `isDesktop` - Boolean for desktop device detection
-- `orientation` - Current device orientation ('portrait' | 'landscape')
-- `screenSize` - Current screen dimensions
-- `hasTouch` - Boolean for touch capability detection
+The application uses CSS-based responsive design to adapt to different screen sizes (desktop, laptop, tablet) without requiring separate mobile-specific components or hooks.
 
 ## 🏗️ Hook Architecture
 
@@ -287,19 +243,14 @@ function FileOperationComponent() {
 ### Responsive Design Pattern
 ```tsx
 function AdaptiveComponent() {
-  const { isMobile, hasTouch } = useMobile();
   const shortcuts = useKeyboardShortcuts({
     'Ctrl+S': handleSave,
     'Escape': handleCancel,
   });
 
   return (
-    <div {...(!isMobile ? shortcuts.getProps() : {})}>
-      {isMobile ? (
-        <MobileInterface hasTouch={hasTouch} />
-      ) : (
-        <DesktopInterface />
-      )}
+    <div {...shortcuts.getProps()}>
+      <ResponsiveInterface />
     </div>
   );
 }

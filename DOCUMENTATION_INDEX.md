@@ -33,8 +33,7 @@ This document provides a comprehensive index of all documentation resources for 
 - **[PDF Components Overview](./components/pdf/README.md)** - Complete PDF viewer and annotation system
   - PDFAnnotationViewer - Main PDF viewer with Supabase integration
   - AnnotationOverlay - Interactive annotation highlights
-  - AnnotationTooltip - Desktop text selection interface
-  - MobileAnnotationDialog - Mobile annotation creation
+  - AnnotationTooltip - Text selection interface
   - AnnotationPreviewCard - Hover preview functionality
   - FallbackUI - Error state components
 

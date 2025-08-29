@@ -15,7 +15,6 @@ const requiredFiles = [
   'components/pdf/AnnotationTooltip.tsx',
   'components/pdf/AnnotationPreviewCard.tsx',
   'components/pdf/AnnotationOverlay.tsx',
-  'components/pdf/MobileAnnotationDialog.tsx',
   'components/pdf/FallbackUI.tsx',
   'lib/store/annotationSlice.ts',
   'lib/store/apiSlice.ts',
@@ -23,7 +22,7 @@ const requiredFiles = [
   'lib/utils/notifications.ts',
   'lib/utils/crossTabNavigation.ts',
   'lib/utils/pdfCoordinates.ts',
-  'hooks/use-mobile.ts',
+
   'hooks/use-keyboard-shortcuts.ts',
   'components/ErrorBoundary.tsx',
   'components/ui/loading.tsx'

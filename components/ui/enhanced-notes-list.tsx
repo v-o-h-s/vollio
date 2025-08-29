@@ -3,8 +3,7 @@ import { Note } from "@/lib/types";
 import { EnhancedNoteCard } from "./enhanced-note-card";
 import { Button } from "./button";
 import { Input } from "./input";
-import { useMobile } from "@/hooks/use-mobile";
-import { useTouchGestures } from "@/hooks/use-touch-gestures";
+// Responsive design handled via CSS
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,7 +87,7 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
   onSortChange,
   onFilterChange
 }) => {
-  const { isMobile } = useMobile();
+  // Responsive design handled via CSS
   const [currentViewMode, setCurrentViewMode] = useState(viewMode);
   const [currentSortBy, setCurrentSortBy] = useState(sortBy);
   const [currentSortOrder, setCurrentSortOrder] = useState(sortOrder);

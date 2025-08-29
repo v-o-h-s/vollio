@@ -107,9 +107,9 @@ This folder contains all PDF-related components for the Noto application. These 
 
 ---
 
-#### `MobileAnnotationDialog.tsx` - Mobile Text Selection UI
+#### Responsive Design
 
-**Purpose**: Full-screen modal dialog for creating annotations on mobile devices.
+The PDF annotation system uses responsive design to adapt to different screen sizes without requiring separate mobile components.
 
 **Key Responsibilities**:
 
@@ -127,14 +127,7 @@ This folder contains all PDF-related components for the Noto application. These 
 
 **Usage**:
 
-```tsx
-<MobileAnnotationDialog
-  selectedText="Selected text content..."
-  visible={showMobileDialog}
-  onCreateNote={handleCreateNote}
-  onClose={handleCloseMobileDialog}
-/>
-```
+The annotation system automatically adapts to different screen sizes using responsive CSS.
 
 ---
 
@@ -221,8 +214,7 @@ This folder contains all PDF-related components for the Noto application. These 
 ```
 PDFAnnotationViewer (main container)
 ├── AnnotationOverlay (highlights existing annotations)
-├── AnnotationTooltip (desktop text selection UI)
-├── MobileAnnotationDialog (mobile text selection UI)
+├── AnnotationTooltip (text selection UI)
 ├── AnnotationPreviewCard (hover preview of annotations)
 └── FallbackUI components (error states)
 ```
@@ -302,7 +294,7 @@ PDFAnnotationViewer (main container)
 
 - **Activity Tracking**: `lib/utils/activity-tracking.ts` - User activity monitoring
 - **Activity Tracking Hook**: `hooks/use-activity-tracking.ts` - React hook for activity tracking
-- **Mobile Detection**: `hooks/use-mobile.ts` - Responsive design hook
+- **Responsive Design**: CSS-based responsive design for different screen sizes
 - **Supabase Helpers**: `lib/utils/supabase-helpers.ts` - Database and storage utilities
 - **Error Boundaries**: `components/ErrorBoundary.tsx` - Error handling components
 

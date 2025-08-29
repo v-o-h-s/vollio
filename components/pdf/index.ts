@@ -7,8 +7,7 @@
  * Component Hierarchy:
  * PDFAnnotationViewer (main container)
  * ├── AnnotationOverlay (highlights existing annotations)
- * ├── AnnotationTooltip (desktop text selection UI)
- * ├── MobileAnnotationDialog (mobile text selection UI)
+ * ├── AnnotationTooltip (text selection UI)
  * └── AnnotationPreviewCard (hover preview of annotations)
  *
  * Usage:
@@ -29,8 +28,7 @@ export { default as AnnotationPreviewCard } from "./AnnotationPreviewCard";
 
 // Overlay component for rendering annotation highlights
 
-// Mobile dialog for text selection (not exported by default, used internally)
-export { default as MobileAnnotationDialog } from "./MobileAnnotationDialog";
+// Mobile dialog removed - app is desktop/laptop focused
 
 // Fallback UI components for error states
 export * from "./FallbackUI";

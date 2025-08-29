@@ -1,18 +1,19 @@
-'use client';
+"use client";
 
-import { useMobile } from '@/hooks/use-mobile';
-import { NotionEditor } from './NotionEditor';
-import { MobileNotionEditor } from './MobileNotionEditor';
-import type { NotionEditorProps } from './types';
+import { NotionEditor } from "./NotionEditor";
+import type { NotionEditorProps } from "./types";
 
+/**
+ * ResponsiveNotionEditor - A responsive wrapper around NotionEditor
+ *
+ * This component provides responsive design for different screen sizes
+ * (desktop, laptop, tablet) while using the same core editor.
+ * The editor automatically adapts its UI based on screen size using CSS.
+ */
 export function ResponsiveNotionEditor(props: NotionEditorProps) {
-  const isMobile = isMobile();
-
-  // Use mobile-optimized editor on mobile devices
-  if (isMobile) {
-    return <MobileNotionEditor {...props} />;
-  }
-
-  // Use standard editor on desktop
-  return <NotionEditor {...props} />;
+  return (
+    <div className="responsive-editor-container">
+      <NotionEditor {...props} />
+    </div>
+  );
 }

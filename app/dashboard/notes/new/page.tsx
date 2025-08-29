@@ -17,7 +17,6 @@ import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
 import { AutoSaveStatus } from "@/components/editor/AutoSaveStatus";
 
 import { useAutoSave } from "@/hooks/use-auto-save";
-import { useMobile } from "@/hooks/use-mobile";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { cn } from "@/lib/utils";
@@ -29,7 +28,7 @@ interface NewNoteContent {
 
 export default function NewNotePage() {
   const router = useRouter();
-  const { isMobile } = useMobile();
+  // Responsive design handled via CSS
   const [noteContent, setNoteContent] = useState<NewNoteContent>({
     content: null,
   });
@@ -192,7 +191,7 @@ export default function NewNotePage() {
             <div className="flex items-center gap-2 lg:gap-4 min-w-0 flex-1">
               <Button
                 variant="ghost"
-                size={isMobile ? "sm" : "default"}
+                size="default"
                 onClick={handleGoBack}
                 className="flex items-center gap-2 hover:bg-accent shrink-0"
               >
@@ -215,19 +214,17 @@ export default function NewNotePage() {
             </div>
 
             <div className="flex items-center gap-2 lg:gap-3 shrink-0">
-              {!isMobile && (
-                <AutoSaveStatus
-                  status={isCreating ? "saving" : autoSaveStatus}
-                  lastSaved={lastSaved}
-                  error={autoSaveError}
-                  isCreating={isCreating}
-                  size="sm"
-                />
-              )}
+              <AutoSaveStatus
+                status={isCreating ? "saving" : autoSaveStatus}
+                lastSaved={lastSaved}
+                error={autoSaveError}
+                isCreating={isCreating}
+                size="sm"
+              />
               
               <Button
                 variant="outline"
-                size={isMobile ? "sm" : "default"}
+                size="default"
                 onClick={handleManualSave}
                 disabled={
                   !noteContent.content ||
@@ -271,19 +268,7 @@ export default function NewNotePage() {
             </div>
           </div>
 
-          {/* Mobile Auto-save Status - Fixed Position */}
-          {isMobile && (
-            <div className="fixed bottom-4 left-4 right-4 z-20 flex justify-center">
-              <AutoSaveStatus
-                status={isCreating ? "saving" : autoSaveStatus}
-                lastSaved={lastSaved}
-                error={autoSaveError}
-                isCreating={isCreating}
-                size="default"
-                className="shadow-lg backdrop-blur-sm"
-              />
-            </div>
-          )}
+          {/* Auto-save status is shown in the header */}
         </div>
       </div>
     </ErrorBoundary>
