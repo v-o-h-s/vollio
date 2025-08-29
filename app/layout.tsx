@@ -38,7 +38,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider defaultTheme="system" storageKey="noto-theme">
+        <ThemeProvider defaultTheme="light" storageKey="noto-theme">
           <ClerkProvider
             appearance={{
               layout: {

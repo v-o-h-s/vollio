@@ -1,22 +1,10 @@
 /**
- * Theme utility functions for system preference detection and storage
+ * Theme utility functions for storage and application
  */
 
 import type { ThemeMode } from '@/lib/types/theme';
 
 const STORAGE_KEY = 'noto-theme';
-const MEDIA_QUERY = '(prefers-color-scheme: dark)';
-
-/**
- * Detects the user's system theme preference
- */
-export function getSystemPreference(): 'light' | 'dark' {
-  if (typeof window === 'undefined') {
-    return 'light';
-  }
-  
-  return window.matchMedia(MEDIA_QUERY).matches ? 'dark' : 'light';
-}
 
 /**
  * Gets the stored theme preference from localStorage
@@ -28,7 +16,7 @@ export function getStoredTheme(storageKey: string = STORAGE_KEY): ThemeMode | nu
   
   try {
     const stored = localStorage.getItem(storageKey);
-    if (stored && ['light', 'dark', 'system'].includes(stored)) {
+    if (stored && ['light', 'dark'].includes(stored)) {
       return stored as ThemeMode;
     }
   } catch (error) {
@@ -54,19 +42,9 @@ export function setStoredTheme(theme: ThemeMode, storageKey: string = STORAGE_KE
 }
 
 /**
- * Resolves the actual theme to apply based on the theme mode and system preference
- */
-export function resolveTheme(theme: ThemeMode, systemPreference: 'light' | 'dark'): 'light' | 'dark' {
-  if (theme === 'system') {
-    return systemPreference;
-  }
-  return theme;
-}
-
-/**
  * Applies the theme to the document element
  */
-export function applyTheme(resolvedTheme: 'light' | 'dark'): void {
+export function applyTheme(theme: ThemeMode): void {
   if (typeof window === 'undefined') {
     return;
   }
@@ -77,56 +55,19 @@ export function applyTheme(resolvedTheme: 'light' | 'dark'): void {
   root.classList.remove('light', 'dark');
   
   // Add the new theme class
-  root.classList.add(resolvedTheme);
+  root.classList.add(theme);
   
   // Update the data attribute for CSS custom properties
-  root.setAttribute('data-theme', resolvedTheme);
-}
-
-/**
- * Creates a media query listener for system preference changes
- */
-export function createSystemPreferenceListener(
-  callback: (preference: 'light' | 'dark') => void
-): () => void {
-  if (typeof window === 'undefined') {
-    return () => {};
-  }
-  
-  const mediaQuery = window.matchMedia(MEDIA_QUERY);
-  
-  const handleChange = (e: MediaQueryListEvent) => {
-    callback(e.matches ? 'dark' : 'light');
-  };
-  
-  // Add listener
-  mediaQuery.addEventListener('change', handleChange);
-  
-  // Return cleanup function
-  return () => {
-    mediaQuery.removeEventListener('change', handleChange);
-  };
+  root.setAttribute('data-theme', theme);
 }
 
 /**
  * Gets the initial theme configuration
  */
 export function getInitialTheme(
-  defaultTheme: ThemeMode = 'system',
+  defaultTheme: ThemeMode = 'light',
   storageKey: string = STORAGE_KEY
-): {
-  theme: ThemeMode;
-  systemPreference: 'light' | 'dark';
-  resolvedTheme: 'light' | 'dark';
-} {
-  const systemPreference = getSystemPreference();
+): ThemeMode {
   const storedTheme = getStoredTheme(storageKey);
-  const theme = storedTheme || defaultTheme;
-  const resolvedTheme = resolveTheme(theme, systemPreference);
-  
-  return {
-    theme,
-    systemPreference,
-    resolvedTheme,
-  };
+  return storedTheme || defaultTheme;
 }

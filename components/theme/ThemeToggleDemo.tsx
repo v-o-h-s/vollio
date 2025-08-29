@@ -11,7 +11,7 @@ import { useTheme } from '@/hooks/use-theme';
  * Useful for testing and documentation purposes
  */
 export function ThemeToggleDemo() {
-  const { theme, resolvedTheme } = useTheme();
+  const { theme } = useTheme();
 
   return (
     <div className="space-y-6 p-6">
@@ -21,8 +21,7 @@ export function ThemeToggleDemo() {
           Showcase of different ThemeToggle variants with various configurations.
         </p>
         <div className="text-sm text-muted-foreground">
-          Current theme: <span className="font-medium">{theme}</span> | 
-          Resolved: <span className="font-medium">{resolvedTheme}</span>
+          Current theme: <span className="font-medium">{theme}</span>
         </div>
       </div>
 
@@ -33,7 +32,7 @@ export function ThemeToggleDemo() {
         <CardHeader>
           <CardTitle>Button Variant</CardTitle>
           <CardDescription>
-            Cycles through light → dark → system themes on click. Best for simple theme switching.
+            Toggles between light and dark themes on click. Best for simple theme switching.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

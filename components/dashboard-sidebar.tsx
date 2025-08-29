@@ -8,6 +8,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState, useRef } from "react";
 import Link from "next/link";
@@ -25,10 +28,13 @@ import {
   Bell,
   HelpCircle,
   LogOut,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SignOutButton, useUser } from "@clerk/nextjs";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useTheme } from "@/hooks/use-theme";
 
 interface SidebarProps {
   className?: string;
@@ -63,6 +69,7 @@ const navigationItems = [
 
 export function DashboardSidebar({ className }: SidebarProps) {
   const user = useUser();
+  const { theme, setTheme } = useTheme();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -319,9 +326,6 @@ export function DashboardSidebar({ className }: SidebarProps) {
                   </div>
                 </div>
 
-                {/* Theme Toggle Button */}
-                <ThemeToggle variant="button" size="sm" className="p-2" />
-
                 {/* Settings Button */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -347,12 +351,40 @@ export function DashboardSidebar({ className }: SidebarProps) {
                         <Settings className="mr-2 h-4 w-4" />
                         Preferences
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <span className="mr-2">Theme</span>
-                        </div>
-                        <ThemeToggle variant="dropdown" size="sm" />
-                      </DropdownMenuItem>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          <div className="flex items-center">
+                            {theme === 'dark' ? (
+                              <Moon className="mr-2 h-4 w-4" />
+                            ) : (
+                              <Sun className="mr-2 h-4 w-4" />
+                            )}
+                            Theme
+                          </div>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem 
+                            onClick={() => setTheme('light')}
+                            className="flex items-center justify-between"
+                          >
+                            <div className="flex items-center">
+                              <Sun className="mr-2 h-4 w-4" />
+                              Light
+                            </div>
+                            {theme === 'light' && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setTheme('dark')}
+                            className="flex items-center justify-between"
+                          >
+                            <div className="flex items-center">
+                              <Moon className="mr-2 h-4 w-4" />
+                              Dark
+                            </div>
+                            {theme === 'dark' && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                          </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
                       <DropdownMenuItem>
                         <Bell className="mr-2 h-4 w-4" />
                         Notifications
