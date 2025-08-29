@@ -231,7 +231,8 @@ export default function NewNotePage() {
                   autoSaveStatus === "saving" ||
                   isCreating
                 }
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-white border-[#3B82F6] hover:bg-[#3B82F6]/90"
+                style={{ backgroundColor: '#3B82F6' }}
               >
                 {autoSaveStatus === "saving" || isCreating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

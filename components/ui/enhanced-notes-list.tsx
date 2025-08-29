@@ -272,7 +272,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
               variant={currentViewMode === 'grid' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewModeChange('grid')}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${currentViewMode === 'grid' ? 'text-white' : ''}`}
+              style={currentViewMode === 'grid' ? { backgroundColor: '#3B82F6' } : {}}
               title="Grid view"
             >
               <Grid3X3 size={16} />
@@ -281,7 +282,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
               variant={currentViewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewModeChange('list')}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${currentViewMode === 'list' ? 'text-white' : ''}`}
+              style={currentViewMode === 'list' ? { backgroundColor: '#3B82F6' } : {}}
               title="List view"
             >
               <List size={16} />
@@ -290,7 +292,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
               variant={currentViewMode === 'compact' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleViewModeChange('compact')}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${currentViewMode === 'compact' ? 'text-white' : ''}`}
+              style={currentViewMode === 'compact' ? { backgroundColor: '#3B82F6' } : {}}
               title="Compact view"
             >
               <LayoutGrid size={16} />
@@ -303,12 +306,13 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className={`flex items-center gap-2 ${activeFilters.length > 0 ? 'bg-primary/10 border-primary' : ''}`}
+                className={`flex items-center gap-2 ${activeFilters.length > 0 ? 'text-white border-[#3B82F6]' : ''}`}
+                style={activeFilters.length > 0 ? { backgroundColor: '#3B82F6' } : {}}
               >
                 <Filter size={16} />
                 Filter
                 {activeFilters.length > 0 && (
-                  <span className="ml-1 bg-primary text-primary-foreground rounded-full w-5 h-5 text-xs flex items-center justify-center">
+                  <span className="ml-1 bg-white text-[#3B82F6] rounded-full w-5 h-5 text-xs flex items-center justify-center">
                     {activeFilters.length}
                   </span>
                 )}
@@ -319,28 +323,28 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                 <Link size={16} className="mr-2" />
                 Linked to PDFs
                 {activeFilters.includes('linked') && (
-                  <span className="ml-auto text-primary">✓</span>
+                  <span className="ml-auto" style={{ color: '#3B82F6' }}>✓</span>
                 )}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => toggleFilter('empty')}>
                 <FileText size={16} className="mr-2" />
                 Empty Notes
                 {activeFilters.includes('empty') && (
-                  <span className="ml-auto text-primary">✓</span>
+                  <span className="ml-auto" style={{ color: '#3B82F6' }}>✓</span>
                 )}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => toggleFilter('recent')}>
                 <Clock size={16} className="mr-2" />
                 Recent (24h)
                 {activeFilters.includes('recent') && (
-                  <span className="ml-auto text-primary">✓</span>
+                  <span className="ml-auto" style={{ color: '#3B82F6' }}>✓</span>
                 )}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => toggleFilter('long')}>
                 <FileText size={16} className="mr-2" />
                 Long Notes (500+ words)
                 {activeFilters.includes('long') && (
-                  <span className="ml-auto text-primary">✓</span>
+                  <span className="ml-auto" style={{ color: '#3B82F6' }}>✓</span>
                 )}
               </DropdownMenuItem>
               {activeFilters.length > 0 && (
@@ -418,7 +422,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
               {activeFilters.map(filter => (
                 <span 
                   key={filter}
-                  className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"
+                  className="px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"
+                  style={{ backgroundColor: '#3B82F6', color: 'white' }}
                 >
                   {filter === 'linked' && <Link size={10} />}
                   {filter === 'empty' && <FileText size={10} />}
@@ -427,7 +432,7 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                   {filter}
                   <button
                     onClick={() => toggleFilter(filter)}
-                    className="ml-1 hover:bg-primary/20 rounded-full p-0.5"
+                    className="ml-1 hover:bg-white/20 rounded-full p-0.5"
                   >
                     <X size={8} />
                   </button>
@@ -499,7 +504,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                 </Button>
                 <Button 
                   onClick={onCreateNote}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-white"
+                  style={{ backgroundColor: '#3B82F6' }}
                 >
                   <Plus size={16} />
                   Create New Note
@@ -528,7 +534,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                 <Button 
                   onClick={onCreateNote}
                   size="lg"
-                  className="flex items-center gap-2 px-8 py-4 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift"
+                  className="flex items-center gap-2 px-8 py-4 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift text-white"
+                  style={{ backgroundColor: '#3B82F6' }}
                 >
                   <FileText size={18} />
                   Create your first note
