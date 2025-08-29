@@ -9,7 +9,8 @@ inclusion: always
 - **Framework**: Next.js 15 with App Router
 - **React**: Version 19
 - **TypeScript**: Strict mode enabled
-- **Styling**: Tailwind CSS + shadcn/ui components
+- **Styling**: Tailwind CSS + shadcn/ui components with comprehensive dark mode support
+- **Theme System**: Complete light/dark mode implementation with system preference detection
 - **State Management**: Redux Toolkit with RTK Query
 - **Authentication**: Clerk with JWT integration
 - **Database**: Supabase with Row Level Security (RLS)
@@ -65,6 +66,17 @@ inclusion: always
 - Use composition over inheritance
 - Implement proper error boundaries
 - Handle loading and error states consistently
+- Integrate theme context and support in UI components
+
+### Styling Guidelines
+
+- Use Tailwind CSS utility classes with dark mode support (`dark:` prefixes)
+- Implement theme-aware components using CSS custom properties and theme tokens
+- Use semantic color tokens: `bg-muted`, `text-foreground`, `border-border` for consistency
+- Apply theme-aware styling to skeleton components and loading states
+- Follow shadcn/ui component patterns with theme integration
+- Implement responsive design with mobile-first approach
+- Prefer theme tokens over hardcoded colors for maintainability
 
 ### API Design
 

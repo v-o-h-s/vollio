@@ -1,6 +1,6 @@
 # Notion-like Editor Components ✅ COMPLETED
 
-This directory contains a complete Notion-like block-based rich text editor system with floating toolbars, slash commands, and advanced formatting capabilities. The editor is fully integrated with the Noto PDF annotation system and provides seamless cross-tab synchronization.
+This directory contains a complete Notion-like block-based rich text editor system with floating toolbars, slash commands, advanced formatting capabilities, and comprehensive theme support. The editor is fully integrated with the Noto PDF annotation system and provides seamless cross-tab synchronization.
 
 ## 🎉 Implementation Status: FULLY COMPLETED
 
@@ -14,6 +14,8 @@ All editor components have been successfully implemented and integrated into the
 - ✅ Comprehensive error handling and recovery mechanisms
 - ✅ Basic keyboard shortcuts for essential editor functions
 - ✅ Mobile-first responsive design with touch-friendly interactions
+- ✅ Complete theme system integration with dark/light mode support
+- ✅ Theme-aware loading states and skeleton components
 
 ## 🧩 Core Components
 
@@ -64,10 +66,10 @@ import { EditorProvider } from '@/components/editor/EditorProvider';
 Performance-optimized wrapper with lazy loading and skeleton states.
 
 **Features:**
-- Lazy loading of heavy editor components
-- Skeleton loading states for better UX
+- Lazy loading with code splitting for improved performance
+- Theme-aware skeleton loading states for better UX during initialization
 - Automatic code splitting for improved performance
-- Suspense boundary with error handling
+- Suspense boundary with error handling and theme-consistent fallbacks
 
 **Usage:**
 ```tsx

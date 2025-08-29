@@ -6,7 +6,7 @@ inclusion: always
 
 ## Core Product Requirements
 
-**Noto** is a PDF annotation and note-taking application. When implementing features, always consider these essential capabilities:
+**Noto** is a PDF annotation and note-taking application with comprehensive theme support and modern UI/UX. When implementing features, always consider these essential capabilities:
 
 ### Primary Features
 - **PDF Upload & Storage**: Use `/api/pdfs/upload` endpoint with Supabase Storage, organize files by `{userId}/{timestamp}_{filename}`
@@ -14,8 +14,10 @@ inclusion: always
 - **Rich Text Editing**: Use TipTap-based NotionEditor with floating toolbars for annotation content creation
 - **Text Annotation**: Implement click-drag text selection with coordinate-based positioning (not DOM-based)
 - **Annotation CRUD**: Store all annotations in Supabase with automatic RLS protection
-- **Note-Taking System**: Standalone note creation and editing with rich text editor and auto-save functionality
+- **Advanced Note-Taking System**: Enhanced notes interface with grid/list/compact views, filtering, sorting, and search
 - **Cross-Document Navigation**: Enable seamless switching between PDFs, annotations, and notes
+- **Complete Theme System**: Light/dark mode support with system preference detection and theme-aware components
+- **Responsive Dashboard**: Collapsible sidebar with theme selection, user profile management, and modern navigation
 - **Mobile-First Design**: Prioritize touch-friendly interactions and responsive layouts
 
 ### Authentication & Security Rules
@@ -30,13 +32,15 @@ inclusion: always
 When building UI flows, follow these established patterns:
 - **Annotation Flow**: Text selection → Note dialog with rich editor → Save (minimize clicks)
 - **Rich Text Editing**: Use floating toolbars for context-aware formatting, slash commands for quick actions
+- **Theme Integration**: All components must support light/dark modes with theme-aware styling
 - **Visual Feedback**: Always highlight annotated text, show hover tooltips, use preview cards
-- **Navigation**: Dashboard as central hub, easy PDF switching, breadcrumb navigation
+- **Navigation**: Dashboard as central hub with collapsible sidebar, easy PDF switching, breadcrumb navigation
 - **Error Handling**: Show user-friendly messages, provide retry options, log detailed errors
 
 ### Technical Implementation Rules
 - **PDF Coordinates**: Always use PDF page coordinates for annotations, never DOM positions
 - **State Management**: Use Redux Toolkit with RTK Query for all API calls and caching
+- **Theme Support**: Implement theme-aware styling using CSS custom properties and Tailwind dark mode classes
 - **Mobile Support**: Implement touch gestures for text selection, use mobile-specific dialogs
 - **Performance**: Lazy load annotations, handle large PDFs efficiently, cache API responses
 - **Cross-tab Sync**: Use PostMessage API for real-time annotation synchronization
@@ -45,8 +49,9 @@ When building UI flows, follow these established patterns:
 **Always Implement:**
 - PDF viewing and text annotation functionality
 - User authentication and secure data persistence
-- Mobile-responsive interfaces
+- Mobile-responsive interfaces with theme support
 - Cross-tab synchronization
+- Theme-aware loading states and skeleton components
 
 **Never Implement:**
 - PDF editing or content modification

@@ -1,8 +1,46 @@
 # Custom Hooks
 
-This directory contains custom React hooks that provide reusable functionality across the Noto PDF annotation application.
+This directory contains custom React hooks that provide reusable functionality across the Noto PDF annotation application, including theme management, activity tracking, error handling, and UI interactions.
 
 ## 📁 Hook Overview
+
+### Theme Management
+
+#### `use-theme.ts` - Theme System Integration
+
+**Purpose**: Provides React integration for the comprehensive theme system with light/dark mode support and system preference detection.
+
+**Key Features**:
+- Light, dark, and system theme modes
+- Persistent storage with localStorage
+- System preference detection and automatic updates
+- Cross-tab synchronization
+- TypeScript support with proper type safety
+
+**Usage**:
+```tsx
+import { useTheme } from '@/hooks/use-theme';
+
+function ThemeAwareComponent() {
+  const { theme, setTheme, toggleTheme } = useTheme();
+
+  return (
+    <div>
+      <p>Current theme: {theme}</p>
+      <button onClick={() => setTheme('dark')}>Dark Mode</button>
+      <button onClick={() => setTheme('light')}>Light Mode</button>
+      <button onClick={toggleTheme}>Toggle Theme</button>
+    </div>
+  );
+}
+```
+
+**Key Methods**:
+- `theme` - Current theme setting ('light' | 'dark')
+- `setTheme(mode)` - Set specific theme mode
+- `toggleTheme()` - Toggle between light and dark modes
+
+---
 
 ### Activity Tracking
 

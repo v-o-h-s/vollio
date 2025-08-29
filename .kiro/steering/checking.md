@@ -36,6 +36,12 @@ When encountering errors or implementation challenges:
 
 ## Common Error Patterns
 
+### Theme System Issues
+- **Theme not persisting**: Check localStorage permissions and ensure ThemeProvider is not remounting
+- **Theme flashing**: Verify theme script runs before React hydration and CSS includes both theme variants
+- **Components not theme-aware**: Ensure components use theme tokens (`bg-muted`, `text-foreground`) instead of hardcoded colors
+- **Skeleton loading issues**: Verify skeleton components use `bg-muted` and loading-shimmer uses theme-aware CSS custom properties
+
 ### Database Operations
 - **RLS violations**: Check user authentication and policy configuration
 - **Type mismatches**: Validate database row structure with type guards

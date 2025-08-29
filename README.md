@@ -1,8 +1,8 @@
 # Noto - PDF Annotation Application
 
-Noto is a modern, secure PDF annotation application built with Next.js 15 and React 19. It enables users to upload PDFs, select text, and create rich annotations with seamless cross-device functionality and enterprise-grade security.
+Noto is a modern, secure PDF annotation application built with Next.js 15 and React 19. It enables users to upload PDFs, select text, and create rich annotations with seamless cross-device functionality, enterprise-grade security, and comprehensive theme support.
 
-> **Status**: Core infrastructure complete with PDF viewing, text selection, and annotation creation. Full backend integration with Supabase and comprehensive error handling implemented.
+> **Status**: Production-ready core features with PDF viewing, text selection, annotation creation, rich text editing, and complete dark/light theme system. Full backend integration with Supabase, comprehensive error handling, and mobile-responsive design implemented.
 
 ## ✨ Features
 
@@ -16,12 +16,16 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 - **Cross-Document Navigation**: Seamless navigation between PDFs, annotations, and notes with cross-tab communication via PostMessage API and BroadcastChannel
 - **Note Management System**: Complete note creation, editing, and management with rich text content, PDF linking, and real-time synchronization
 - **Comprehensive Error Handling**: Retry mechanisms, fallback UI components, and graceful error recovery
+- **Complete Theme System**: Light/dark mode support with system preference detection, persistent storage, and theme-aware skeleton loading states
 
 ### User Experience
 
 - **Responsive Design**: Mobile-first design with touch-friendly interactions and adaptive UI components
+- **Modern Dashboard**: Collapsible sidebar with theme selection, user profile management, and intuitive navigation
+- **Enhanced Notes Interface**: Grid, list, and compact view modes with advanced filtering, sorting, and search capabilities
+- **Theme Support**: Comprehensive dark/light mode implementation with custom theme toggle in dashboard sidebar
 - **Keyboard Shortcuts**: Desktop keyboard shortcuts for efficient workflow
-- **Visual Feedback**: Annotation highlights, hover previews, tooltips, and loading states
+- **Visual Feedback**: Annotation highlights, hover previews, tooltips, and loading states with theme-aware styling
 - **Authentication**: Secure user authentication with Clerk and JWT-based RLS
 - **Error Handling**: Comprehensive error boundaries, retry mechanisms, and user-friendly error messages
 - **Real-time Updates**: Automatic signed URL refresh and activity synchronization
@@ -61,7 +65,27 @@ For comprehensive documentation covering all aspects of the Noto application, se
 - **[Project Structure](./.kiro/steering/structure.md)** - File organization and naming conventions
 - **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
 
-## 🚀 Quick Start
+## 🆕 Recent Major Improvements
+
+### Complete Theme System
+- **Dark/Light Mode**: Full theme support with system preference detection
+- **Custom Theme Toggle**: Integrated theme selection in dashboard sidebar dropdown
+- **Theme-Aware Components**: All UI elements including loading skeletons adapt to current theme
+- **Cross-tab Synchronization**: Theme changes synchronized across all open browser tabs
+
+### Enhanced Dashboard Experience  
+- **Collapsible Sidebar**: Modern sidebar design with user profile management
+- **Advanced Notes Interface**: Grid, list, and compact view modes with filtering and search
+- **Mobile-First Design**: Optimized touch interactions and responsive layouts
+- **Performance Optimized**: Theme-aware skeleton loading states and smooth animations
+
+### Improved Note Management
+- **Multiple View Modes**: Choose between grid, list, or compact display formats
+- **Advanced Filtering**: Filter by linked PDFs, recent activity, word count, and content status
+- **Real-time Search**: Instant search across note titles and content
+- **Rich Editor Integration**: Complete TipTap editor with auto-save and theme support
+
+## ⚡ Quick Start
 
 ### Prerequisites
 

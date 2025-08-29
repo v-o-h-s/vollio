@@ -9,18 +9,24 @@ inclusion: always
 ### Components
 
 #### UI Components (`components/ui/`)
-- **shadcn/ui Base Components**: `button.tsx`, `dialog.tsx`, `card.tsx`, `input.tsx`, `label.tsx`, `popover.tsx`, `separator.tsx`, `skeleton.tsx`, `dropdown-menu.tsx`, `badge.tsx`
+- **shadcn/ui Base Components**: `button.tsx`, `dialog.tsx`, `card.tsx`, `input.tsx`, `label.tsx`, `popover.tsx`, `separator.tsx`, `skeleton.tsx` (theme-aware), `dropdown-menu.tsx`, `badge.tsx`, `theme-toggle.tsx`
 - **Enhanced UI Components**: 
   - `error-notification.tsx` - User-friendly error display with retry options
-  - `loading.tsx` - Loading states and spinners
+  - `loading.tsx` - Loading states and spinners with theme support
   - `KeyboardShortcutsHelp.tsx` - Keyboard shortcuts help dialog
   - `note-card.tsx` - Note display card with preview and metadata
-  - `note-skeleton.tsx` - Loading skeleton for notes
-  - `enhanced-note-card.tsx` - Advanced note card with rich interactions
-  - `enhanced-notes-list.tsx` - Optimized notes list with virtualization
-  - `enhanced-notes-list-skeleton.tsx` - Loading skeleton for notes list
+  - `note-skeleton.tsx` - Theme-aware loading skeleton for notes
+  - `enhanced-note-card.tsx` - Advanced note card with rich interactions and theme support
+  - `enhanced-notes-list.tsx` - Optimized notes list with virtualization, filtering, and theme integration
+  - `enhanced-notes-list-skeleton.tsx` - Theme-aware loading skeleton for notes list
 
 #### Feature Components (`components/[feature]/`)
+
+##### Theme Components (`components/theme/`)
+- **ThemeProvider.tsx** - Context provider for theme state management with localStorage persistence and system preference detection
+- **ThemeDemo.tsx** - Interactive demo component showcasing theme functionality and features
+- **ThemeToggleDemo.tsx** - Comprehensive demo of different ThemeToggle variants and configurations
+- **README.md** - Complete documentation covering theme system features, API reference, and implementation guides
 
 ##### PDF Components (`components/pdf/`)
 - **PDFAnnotationViewer.tsx** - Main PDF viewer with Syncfusion integration, Supabase backend, activity tracking, and annotation workflow
@@ -86,7 +92,9 @@ inclusion: always
   - `AutoSaveExample.tsx` - Auto-save implementation example
 
 ##### Dashboard Components (`components/dashboard/`)
-- **RecentActivityDisplay.tsx** - User activity tracking display with real-time updates and cache invalidation
+##### Dashboard Components (`components/dashboard/`)
+- **dashboard-sidebar.tsx** - Main navigation sidebar with collapsible design, theme selection dropdown, and user profile management
+- **RecentActivityDisplay.tsx** - Recent activity widget for dashboard overview
 
 #### Layout Components (`components/` root)
 - **dashboard-sidebar.tsx** - Collapsible sidebar with navigation, user profile, and settings dropdown
