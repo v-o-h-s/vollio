@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ReduxProvider } from "@/lib/store/provider";
 import SyncfusionLicenseProvider from "@/components/SyncfusionLicenseProvider";
 import { EditorProvider } from "@/components/editor";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -37,27 +38,29 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ClerkProvider
-          appearance={{
-            layout: {
-              logoImageUrl: "/logo.png",
-            },
-            elements: {
-              card: "shadow-lg border rounded-xl p-6",
-              headerTitle: "text-2xl font-bold text-blue-600",
-              // customize other elements like social buttons, inputs, etc.
-            },
-            variables: {
-              colorPrimary: "#2563eb", // Tailwind blue-600
-            },
-          }}
-        >
-          <SyncfusionLicenseProvider>
-            <ReduxProvider>
-              <EditorProvider>{children}</EditorProvider>
-            </ReduxProvider>
-          </SyncfusionLicenseProvider>
-        </ClerkProvider>
+        <ThemeProvider defaultTheme="system" storageKey="noto-theme">
+          <ClerkProvider
+            appearance={{
+              layout: {
+                logoImageUrl: "/logo.png",
+              },
+              elements: {
+                card: "shadow-lg border rounded-xl p-6",
+                headerTitle: "text-2xl font-bold text-blue-600",
+                // customize other elements like social buttons, inputs, etc.
+              },
+              variables: {
+                colorPrimary: "#2563eb", // Tailwind blue-600
+              },
+            }}
+          >
+            <SyncfusionLicenseProvider>
+              <ReduxProvider>
+                <EditorProvider>{children}</EditorProvider>
+              </ReduxProvider>
+            </SyncfusionLicenseProvider>
+          </ClerkProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

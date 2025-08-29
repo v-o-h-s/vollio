@@ -5,7 +5,7 @@ export { EnhancedNotesListSkeleton } from './enhanced-notes-list-skeleton';
 
 // Existing UI components
 export { Button } from './button';
-export { Card } from './card';
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './card';
 export { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './dialog';
 export { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from './dropdown-menu';
 export { Input } from './input';
@@ -18,3 +18,4 @@ export { NoteSkeleton } from './note-skeleton';
 export { ErrorNotification } from './error-notification';
 export { Loading } from './loading';
 export { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
+export { ThemeToggle } from './theme-toggle';

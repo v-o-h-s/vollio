@@ -8,7 +8,7 @@ export default function DashboardLayout({
 }) {
     return (
 
-        <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100/50">
+        <div className="flex h-screen bg-background">
             <DashboardSidebar />
             <main className="flex-1 overflow-auto">
 
@@ -21,18 +21,22 @@ export default function DashboardLayout({
                 position="top-right"
                 toastOptions={{
                     duration: 4000,
+                    className: '',
                     style: {
-                        background: '#363636',
-                        color: '#fff',
+                        background: 'hsl(var(--card))',
+                        color: 'hsl(var(--card-foreground))',
+                        border: '1px solid hsl(var(--border))',
                     },
                     success: {
                         style: {
-                            background: '#10b981',
+                            background: 'hsl(var(--primary))',
+                            color: 'hsl(var(--primary-foreground))',
                         },
                     },
                     error: {
                         style: {
-                            background: '#ef4444',
+                            background: 'hsl(var(--destructive))',
+                            color: 'hsl(var(--destructive-foreground))',
                         },
                     },
                 }}

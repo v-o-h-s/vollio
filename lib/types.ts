@@ -610,3 +610,17 @@ export interface ActivitySummary {
     viewCount: number;
   } | null;
 }
+// ============================================================================
+// THEME TYPES
+// ============================================================================
+
+/**
+ * Re-export theme types for convenience
+ */
+export type {
+  ThemeMode,
+  ThemeConfig,
+  ThemeContextValue,
+  ThemeProviderProps,
+  ThemeState,
+} from "./types/theme";

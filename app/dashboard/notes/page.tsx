@@ -79,8 +79,7 @@ const NotesPage: React.FC = () => {
           </div>
           <Button 
             onClick={handleCreateNote} 
-            className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift text-white"
-            style={{ backgroundColor: '#3B82F6' }}
+            className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift"
           >
             <Plus size={18} />
             New Note
@@ -104,8 +103,7 @@ const NotesPage: React.FC = () => {
           </div>
           <Button 
             onClick={handleCreateNote} 
-            className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift text-white"
-            style={{ backgroundColor: '#3B82F6' }}
+            className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <Plus size={18} />
             New Note
@@ -134,8 +132,7 @@ const NotesPage: React.FC = () => {
               </Button>
               <Button 
                 onClick={handleCreateNote} 
-                className="flex items-center gap-2 px-6 py-3 text-white"
-                style={{ backgroundColor: '#3B82F6' }}
+                className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Plus size={16} />
                 Create Note Instead
@@ -174,8 +171,7 @@ const NotesPage: React.FC = () => {
           </div>
           <Button 
             onClick={handleCreateNote} 
-            className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift text-white"
-            style={{ backgroundColor: '#3B82F6' }}
+            className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift bg-primary text-primary-foreground hover:bg-primary/90"
           >
             <Plus size={18} />
             New Note
