@@ -72,14 +72,18 @@ export interface PDFAnnotationViewerProps {
  * Interface for text selection event data from Syncfusion
  */
 interface TextSelectionEventArgs {
-  text: string;
-  pageNumber: number;
-  bounds: {
-    x: number;
-    y: number;
+  textContent: string;
+  pageIndex: number;
+  textBounds: Array<{
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
     width: number;
     height: number;
-  };
+    pageIndex: number;
+  }>;
+  name: string;
 }
 
 /**
@@ -114,6 +118,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   const tooltipState = useAppSelector(
     (state) => state.annotations.tooltipState
   );
+
   const previewCard = useAppSelector((state) => state.annotations.previewCard);
   const hoveredAnnotation = useAppSelector(
     (state) => state.annotations.hoveredAnnotation
@@ -135,9 +140,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   const currentPdfData = freshPdfData || pdfDocument;
 
   // Configure resource URL for Syncfusion PDF Viewer (following official solution)
-  const resourceUrl = typeof window !== 'undefined' 
-    ? `${window.location.protocol}//${window.location.host}/lib`
-    : '/lib';
+  const resourceUrl =
+    typeof window !== "undefined"
+      ? `${window.location.protocol}//${window.location.host}/lib`
+      : "/lib";
 
   /**
    * Handle PDF document loading
@@ -189,30 +195,149 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    */
   const handleTextSelection = useCallback(
     (args: TextSelectionEventArgs) => {
-      if (!currentPdfData || !args.text.trim()) return;
+      try {
+        // Validate input parameters
+        if (
+          !currentPdfData ||
+          !args ||
+          !args.textContent ||
+          !args.textContent.trim()
+        ) {
+          console.log("Validation failed - missing data");
+          return;
+        }
 
-      const selection = {
-        text: args.text.trim(),
-        pageNumber: args.pageNumber,
-        coordinates: {
-          x: args.bounds.x,
-          y: args.bounds.y,
-          width: args.bounds.width,
-          height: args.bounds.height,
-        } as Rectangle,
-        pdfId: currentPdfData.id,
-      };
+        // Validate textBounds array
+        if (
+          !args.textBounds ||
+          !Array.isArray(args.textBounds) ||
+          args.textBounds.length === 0
+        ) {
+          console.warn("Invalid textBounds array in text selection:", args);
+          return;
+        }
 
-      dispatch(setActiveSelection(selection));
+        // Calculate overall selection bounds
+        const left = Math.min(...args.textBounds.map((b) => b.left));
+        const right = Math.max(...args.textBounds.map((b) => b.right));
+        const top = Math.min(...args.textBounds.map((b) => b.top));
+        const bottom = Math.max(...args.textBounds.map((b) => b.bottom));
 
-      // Show annotation tooltip for text selection else {
-        // On desktop, show the tooltip
-        dispatch(
-          showTooltip({
-            x: args.bounds.x + args.bounds.width / 2,
-            y: args.bounds.y - 10,
-          })
-        );
+        const x = left;
+        const y = top;
+        const width = right - left;
+        const height = bottom - top;
+
+        // Validate page index
+        if (typeof args.pageIndex !== "number" || args.pageIndex < 0) {
+          console.warn("Invalid page index in text selection:", args.pageIndex);
+          return;
+        }
+
+        const selection = {
+          text: args.textContent.trim(),
+          pageNumber: args.pageIndex,
+          coordinates: {
+            x,
+            y,
+            width,
+            height,
+          } as Rectangle,
+          pdfId: currentPdfData.id,
+        };
+
+        dispatch(setActiveSelection(selection));
+
+        // Show annotation tooltip for text selection
+        // Convert PDF coordinates to screen coordinates
+        let screenX = x + width / 2;
+        let screenY = y - 10;
+
+        // Convert PDF coordinates to screen coordinates using Syncfusion's coordinate system
+        if (pdfViewerRef.current) {
+          try {
+            // Use Syncfusion's built-in coordinate conversion if available
+            const viewer = pdfViewerRef.current;
+
+            // Get the PDF viewer container element
+            const viewerElement = viewer.element;
+            if (viewerElement) {
+              // Look for the page canvas or page container
+              const pageCanvas =
+                viewerElement.querySelector(
+                  `canvas[id*="${args.pageIndex}"]`
+                ) ||
+                viewerElement.querySelector(".e-pv-page-canvas") ||
+                viewerElement.querySelector(`#pagecanvas_${args.pageIndex}`);
+
+              if (pageCanvas) {
+                const canvasRect = pageCanvas.getBoundingClientRect();
+
+                // Convert PDF coordinates to screen coordinates using canvas position
+                screenX = canvasRect.left + x + width / 2;
+                screenY = canvasRect.top + y - 10;
+
+                console.log("Using canvas coordinate conversion:", {
+                  pdfCoords: { x, y, width, height },
+                  canvasRect: {
+                    left: canvasRect.left,
+                    top: canvasRect.top,
+                    width: canvasRect.width,
+                    height: canvasRect.height,
+                  },
+                  screenCoords: { x: screenX, y: screenY },
+                });
+              } else {
+                // Fallback to viewer element
+                const viewerRect = viewerElement.getBoundingClientRect();
+                screenX = viewerRect.left + x + width / 2;
+                screenY = viewerRect.top + y - 10;
+
+                console.log("Using viewer element fallback:", {
+                  pdfCoords: { x, y, width, height },
+                  viewerRect: { left: viewerRect.left, top: viewerRect.top },
+                  screenCoords: { x: screenX, y: screenY },
+                });
+              }
+            }
+          } catch (error) {
+            console.warn(
+              "Could not convert PDF coordinates to screen coordinates:",
+              error
+            );
+            // Ultimate fallback to original coordinates
+            screenX = x + width / 2;
+            screenY = y - 10;
+          }
+        }
+
+        // Ensure tooltip stays within viewport bounds
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Adjust if tooltip would go off screen
+        if (screenX > viewportWidth - 200) {
+          screenX = viewportWidth - 200;
+        }
+        if (screenX < 10) {
+          screenX = 10;
+        }
+        if (screenY < 10) {
+          screenY = screenY + height + 20; // Position below if too close to top
+        }
+        if (screenY > viewportHeight - 100) {
+          screenY = screenY - 60; // Position above if too close to bottom
+        }
+
+        const tooltipPosition = {
+          x: screenX,
+          y: screenY,
+        };
+
+        dispatch(showTooltip(tooltipPosition));
+      } catch (error) {
+        console.error("Error handling text selection:", error);
+        // Don't throw - text selection errors shouldn't break the viewer
       }
     },
     [currentPdfData, dispatch]
@@ -318,12 +443,25 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    */
   const handleDocumentClick = useCallback(
     (event: React.MouseEvent) => {
+      console.log("Document click triggered");
+
+      // Don't clear selection if there's currently selected text
+      const selection = window.getSelection();
+      if (selection && selection.toString().trim()) {
+        console.log(
+          "Ignoring document click - text is selected:",
+          selection.toString()
+        );
+        return;
+      }
+
       // Clear active selection and tooltip when clicking on empty areas
       const target = event.target as HTMLElement;
       if (
         !target.closest(".annotation-tooltip") &&
         !target.closest(".annotation-preview")
       ) {
+        console.log("Hiding tooltip due to document click");
         dispatch(setActiveSelection(null));
         dispatch(hideTooltip());
         dispatch(hidePreviewCard());
@@ -365,12 +503,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             className="text-blue-500 mx-auto mb-4 animate-spin"
           />
           <p className="text-gray-600 font-medium">Loading PDF...</p>
-          //typescript is tyring to fuck w me
-          {/* 
-          {pdfDocument && pdfDocument.filename && (
+          {/* {pdfDocument?.filename && (
             <p className="text-gray-500 text-sm">{pdfDocument.filename}</p>
-          )}
-           */}
+          )} */}
         </div>
       </div>
     );
@@ -441,7 +576,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     >
       <div
         className={`relative w-full h-full overflow-hidden ${className}`}
-        onClick={handleDocumentClick}
+        // onClick={handleDocumentClick} // Temporarily disabled for debugging
       >
         {/* Syncfusion PDF Viewer */}
         <PdfViewerComponent
@@ -454,6 +589,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           documentLoad={handleDocumentLoad}
           documentLoadFailed={handleDocumentLoadFailed}
           textSelectionEnd={handleTextSelection}
+          textSelectionStart={(args: any) => {
+            console.log("Text selection started:", args);
+          }}
           enableTextSelection={true}
           enableTextSearch={true}
           enableNavigation={true}
