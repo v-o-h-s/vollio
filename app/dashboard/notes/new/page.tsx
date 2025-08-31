@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   Save,
@@ -10,6 +10,7 @@ import {
   AlertCircle,
   Clock,
   FileText,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,23 +19,124 @@ import { AutoSaveStatus } from "@/components/editor/AutoSaveStatus";
 
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { useNoteSync } from "@/hooks/use-note-sync";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { cn } from "@/lib/utils";
+import { Rectangle } from "@/lib/types";
 
 interface NewNoteContent {
   title?: string;
   content: any;
 }
 
+interface SelectionData {
+  text: string;
+  pageNumber: number;
+  coordinates: Rectangle;
+  pdfId: string;
+  pdfFilename: string;
+}
+
 export default function NewNotePage() {
   const router = useRouter();
-  // Responsive design handled via CSS
+  const searchParams = useSearchParams();
+  
+  // Parse selection data from URL params
+  const [selectionData, setSelectionData] = useState<SelectionData | null>(null);
   const [noteContent, setNoteContent] = useState<NewNoteContent>({
     content: null,
   });
   const [noteId, setNoteId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [annotationCreated, setAnnotationCreated] = useState(false);
+
+  // Cross-tab synchronization
+  const { broadcastCreate } = useNoteSync();
+
+  // Parse selection data from URL on mount
+  useEffect(() => {
+    const selectionParam = searchParams.get('selection');
+    if (selectionParam) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(selectionParam));
+        setSelectionData(decoded);
+        
+        // Pre-populate editor with selected text
+        const initialContent = {
+          type: 'doc',
+          content: [
+            {
+              type: 'blockquote',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: decoded.text,
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: '',
+                },
+              ],
+            },
+          ],
+        };
+        
+        setNoteContent({ content: initialContent });
+        console.log('Parsed selection data:', decoded);
+      } catch (error) {
+        console.error('Failed to parse selection data:', error);
+      }
+    }
+  }, [searchParams]);
+
+  // Create annotation when note is created
+  const createAnnotation = useCallback(async (noteId: string) => {
+    if (!selectionData || annotationCreated) return;
+
+    try {
+      const response = await fetch('/api/annotations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pdfId: selectionData.pdfId,
+          noteId: noteId,
+          selectedText: selectionData.text,
+          pageNumber: selectionData.pageNumber,
+          coordinates: selectionData.coordinates,
+          noteContent: extractTitleFromContent(noteContent.content) || 'Untitled Note',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create annotation');
+      }
+
+      const result = await response.json();
+      setAnnotationCreated(true);
+      console.log('Annotation created:', result.data);
+      
+      // Note: Cross-tab sync for annotations will be handled by the annotation API
+      // The PDF viewer will automatically update when the annotation is created
+      
+    } catch (error) {
+      console.error('Failed to create annotation:', error);
+      // Don't throw - annotation creation failure shouldn't break note creation
+    }
+  }, [selectionData, noteContent.content, annotationCreated]);
 
   // Auto-save functionality
   const handleAutoSave = useCallback(
@@ -60,8 +162,17 @@ export default function NewNotePage() {
           }
 
           const result = await response.json();
-          setNoteId(result.data.id);
+          const newNoteId = result.data.id;
+          setNoteId(newNoteId);
           setIsCreating(false);
+          
+          // Broadcast note creation for cross-tab sync
+          broadcastCreate(result.data);
+          
+          // Create annotation if we have selection data
+          if (selectionData && !annotationCreated) {
+            await createAnnotation(newNoteId);
+          }
         } else {
           // Update existing note
           const response = await fetch(`/api/notes/${noteId}`, {
@@ -85,7 +196,7 @@ export default function NewNotePage() {
         throw error;
       }
     },
-    [noteId]
+    [noteId, broadcastCreate, selectionData, annotationCreated, createAnnotation]
   );
 
   const {
@@ -132,10 +243,30 @@ export default function NewNotePage() {
 
   // Handle successful save is now handled via onSaveSuccess callback
 
-  // Handle go back
+  // Handle go back - navigate back to PDF if we came from annotation
   const handleGoBack = useCallback(() => {
-    router.push("/dashboard/notes");
-  }, [router]);
+    if (selectionData) {
+      // Try to navigate back to the PDF tab
+      const pdfUrl = `/dashboard/pdf-notes?pdf=${selectionData.pdfId}`;
+      
+      // Try cross-tab navigation first
+      if (window.opener && !window.opener.closed) {
+        try {
+          window.opener.location.href = pdfUrl;
+          window.opener.focus();
+          window.close();
+          return;
+        } catch (error) {
+          console.warn('Cross-tab navigation failed:', error);
+        }
+      }
+      
+      // Fallback to regular navigation
+      router.push(pdfUrl);
+    } else {
+      router.push("/dashboard/notes");
+    }
+  }, [router, selectionData]);
 
   // Handle manual save
   const handleManualSave = useCallback(async () => {
@@ -208,7 +339,14 @@ export default function NewNotePage() {
                   <h1 className="text-base lg:text-lg font-semibold text-foreground truncate">
                     {getCurrentTitle()}
                   </h1>
-
+                  {selectionData && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Badge variant="secondary" className="text-xs">
+                        PDF Annotation
+                      </Badge>
+                      <span className="truncate">{selectionData.pdfFilename}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -221,6 +359,30 @@ export default function NewNotePage() {
                 isCreating={isCreating}
                 size="sm"
               />
+              
+              {selectionData && noteId && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    const pdfUrl = `/dashboard/pdf-notes?pdf=${selectionData.pdfId}`;
+                    if (window.opener && !window.opener.closed) {
+                      try {
+                        window.opener.location.href = pdfUrl;
+                        window.opener.focus();
+                      } catch (error) {
+                        router.push(pdfUrl);
+                      }
+                    } else {
+                      router.push(pdfUrl);
+                    }
+                  }}
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  <span className="hidden sm:inline">View in PDF</span>
+                </Button>
+              )}
               
               <Button
                 variant="outline"

@@ -66,6 +66,7 @@ export interface Database {
           id: string;
           user_id: string;
           pdf_id: string;
+          note_id: string;
           page_number: number;
           selected_text: string;
           note_content: string;
@@ -82,6 +83,7 @@ export interface Database {
           id?: string;
           user_id: string;
           pdf_id: string;
+          note_id: string;
           page_number: number;
           selected_text: string;
           note_content: string;
@@ -98,6 +100,7 @@ export interface Database {
           id?: string;
           user_id?: string;
           pdf_id?: string;
+          note_id?: string;
           page_number?: number;
           selected_text?: string;
           note_content?: string;
@@ -117,7 +120,6 @@ export interface Database {
           user_id: string;
           title: string;
           content: any; // TipTap JSONContent
-          pdf_annotation_id: string | null;
           created_at: string;
           updated_at: string;
           is_deleted: boolean;
@@ -127,7 +129,6 @@ export interface Database {
           user_id: string;
           title?: string;
           content?: any; // TipTap JSONContent
-          pdf_annotation_id?: string | null;
           created_at?: string;
           updated_at?: string;
           is_deleted?: boolean;
@@ -137,7 +138,6 @@ export interface Database {
           user_id?: string;
           title?: string;
           content?: any; // TipTap JSONContent
-          pdf_annotation_id?: string | null;
           created_at?: string;
           updated_at?: string;
           is_deleted?: boolean;

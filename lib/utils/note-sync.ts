@@ -31,28 +31,39 @@ export interface NoteFocusMessage {
   timestamp: number;
 }
 
-export type NoteSyncMessage = 
-  | NoteUpdateMessage 
-  | NoteCreateMessage 
-  | NoteDeleteMessage 
+export type NoteSyncMessage =
+  | NoteUpdateMessage
+  | NoteCreateMessage
+  | NoteDeleteMessage
   | NoteFocusMessage;
 
 /**
  * Validates note sync message data
  */
 export function isValidNoteSyncMessage(data: any): data is NoteSyncMessage {
-  if (!data || typeof data.type !== "string" || typeof data.timestamp !== "number") {
+  if (
+    !data ||
+    typeof data.type !== "string" ||
+    typeof data.timestamp !== "number"
+  ) {
     return false;
   }
 
   switch (data.type) {
     case "NOTE_UPDATE":
+      // For update messages, we need a noteId and at least one field to update
+      const hasValidTitle =
+        data.title !== undefined && typeof data.title === "string";
+      const hasValidContent =
+        data.content !== undefined &&
+        typeof data.content === "object" &&
+        data.content !== null &&
+        data.content.type;
+
       return (
-        typeof data.noteId === "string" &&
-        (data.title === undefined || typeof data.title === "string") &&
-        (data.content === undefined || (typeof data.content === "object" && data.content.type))
+        typeof data.noteId === "string" && (hasValidTitle || hasValidContent)
       );
-    
+
     case "NOTE_CREATE":
       return (
         data.note &&
@@ -60,11 +71,11 @@ export function isValidNoteSyncMessage(data: any): data is NoteSyncMessage {
         typeof data.note.title === "string" &&
         typeof data.note.content === "object"
       );
-    
+
     case "NOTE_DELETE":
     case "NOTE_FOCUS":
       return typeof data.noteId === "string";
-    
+
     default:
       return false;
   }
@@ -96,9 +107,11 @@ export function broadcastNoteUpdate(
   }
 
   // Also try postMessage for cross-origin scenarios
+  // here window.opener is the parent of the current tab (i.e the tab that opened this tab)
   try {
     if (window.opener && !window.opener.closed) {
       window.opener.postMessage(message, "*");
+      //send the message to the parent 
     }
   } catch (error) {
     console.warn("Failed to send note update via postMessage:", error);
@@ -196,7 +209,10 @@ export function broadcastNoteFocus(noteId: string): void {
  * Sets up cross-tab note synchronization listeners
  */
 export function setupNoteSyncListeners(callbacks: {
-  onNoteUpdate?: (noteId: string, updates: { title?: string; content?: JSONContent }) => void;
+  onNoteUpdate?: (
+    noteId: string,
+    updates: { title?: string; content?: JSONContent }
+  ) => void;
   onNoteCreate?: (note: Note) => void;
   onNoteDelete?: (noteId: string) => void;
   onNoteFocus?: (noteId: string) => void;
@@ -207,7 +223,7 @@ export function setupNoteSyncListeners(callbacks: {
   if (typeof window !== "undefined" && "BroadcastChannel" in window) {
     try {
       const channel = new BroadcastChannel("noto-notes-sync");
-      
+
       const handleBroadcastMessage = (event: MessageEvent<NoteSyncMessage>) => {
         if (!isValidNoteSyncMessage(event.data)) {
           return;
@@ -223,15 +239,15 @@ export function setupNoteSyncListeners(callbacks: {
               content: message.content,
             });
             break;
-          
+
           case "NOTE_CREATE":
             callbacks.onNoteCreate?.(message.note);
             break;
-          
+
           case "NOTE_DELETE":
             callbacks.onNoteDelete?.(message.noteId);
             break;
-          
+
           case "NOTE_FOCUS":
             callbacks.onNoteFocus?.(message.noteId);
             break;
@@ -264,15 +280,15 @@ export function setupNoteSyncListeners(callbacks: {
           content: message.content,
         });
         break;
-      
+
       case "NOTE_CREATE":
         callbacks.onNoteCreate?.(message.note);
         break;
-      
+
       case "NOTE_DELETE":
         callbacks.onNoteDelete?.(message.noteId);
         break;
-      
+
       case "NOTE_FOCUS":
         callbacks.onNoteFocus?.(message.noteId);
         break;
@@ -286,7 +302,7 @@ export function setupNoteSyncListeners(callbacks: {
 
   // Return cleanup function
   return () => {
-    cleanupFunctions.forEach(cleanup => cleanup());
+    cleanupFunctions.forEach((cleanup) => cleanup());
   };
 }
 
@@ -301,7 +317,7 @@ export function navigateToNoteInTab(noteId: string): boolean {
   if (window.opener && !window.opener.closed) {
     try {
       const noteUrl = `/dashboard/notes/${noteId}`;
-      
+
       // Check if opener is accessible
       const openerLocation = window.opener.location;
       if (openerLocation && typeof openerLocation.pathname === "string") {

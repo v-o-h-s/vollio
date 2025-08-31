@@ -618,6 +618,107 @@ export const apiSlice = createApi({
         { type: "Note", id: noteId },
       ],
     }),
+
+    // Annotation endpoints
+    getAnnotations: builder.query<Annotation[], string | void>({
+      query: (pdfId) => ({
+        url: "annotations",
+        params: pdfId ? { pdfId } : undefined,
+      }),
+      transformResponse: (response: ApiResponse<Annotation[]>) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch annotations",
+            { component: "PDFAnnotationViewer", action: "fetch" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "PDFAnnotationViewer", action: "fetch" };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result) => [
+        { type: "Annotation", id: "LIST" },
+        ...(result?.map((annotation) => ({ type: "Annotation" as const, id: annotation.id })) || []),
+      ],
+    }),
+
+    createAnnotation: builder.mutation<Annotation, {
+      pdfId: string;
+      noteId: string;
+      selectedText: string;
+      pageNumber: number;
+      coordinates: { x: number; y: number; width: number; height: number };
+      noteContent?: string;
+    }>({
+      query: (annotationData) => ({
+        url: "annotations",
+        method: "POST",
+        body: annotationData,
+      }),
+      transformResponse: (response: ApiResponse<Annotation>) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to create annotation",
+            { component: "PDFAnnotationViewer", action: "create" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "PDFAnnotationViewer", action: "create" };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid annotation data",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        } else if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "PDF or note not found",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: [
+        { type: "Annotation", id: "LIST" },
+        { type: "PDF", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -632,6 +733,8 @@ export const {
   useCreateNoteMutation,
   useUpdateNoteMutation,
   useDeleteNoteMutation,
+  useGetAnnotationsQuery,
+  useCreateAnnotationMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

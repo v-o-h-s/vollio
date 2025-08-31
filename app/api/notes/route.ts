@@ -12,19 +12,12 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   }
 
   const supabase = getAuthenticatedSupabaseClient();
-  const { searchParams } = new URL(request.url);
-  const pdfAnnotationId = searchParams.get("pdfAnnotationId");
 
   let query = (await supabase)
     .from("notes")
     .select("*")
     .eq("is_deleted", false)
     .order("updated_at", { ascending: false });
-
-  // Filter by PDF annotation if specified
-  if (pdfAnnotationId) {
-    query = query.eq("pdf_annotation_id", pdfAnnotationId);
-  }
 
   const { data: notes, error } = await query;
 
@@ -50,7 +43,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   }
 
   const body = await request.json();
-  const { title, content, pdfAnnotationId } = body;
+  const { title, content } = body;
 
   // Validate required fields
   if (!content) {
@@ -74,7 +67,6 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     user_id: userId,
     title: title || "Untitled",
     content,
-    pdf_annotation_id: pdfAnnotationId || null,
   };
 
   const { data: note, error } = await (await supabase)

@@ -41,7 +41,7 @@ import {
   showPreviewCard,
   hidePreviewCard,
 } from "@/lib/store/annotationSlice";
-import { useGetPDFQuery } from "@/lib/store/apiSlice";
+import { useGetPDFQuery, useGetAnnotationsQuery } from "@/lib/store/apiSlice";
 import { PDFDocument, Annotation, Rectangle } from "@/lib/types";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PDFViewerFallback } from "@/components/pdf/FallbackUI";
@@ -111,14 +111,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   const { trackPDFView } = useActivityTracking();
 
   // Redux state
-  const annotations = useAppSelector((state) => state.annotations.annotations);
   const activeSelection = useAppSelector(
     (state) => state.annotations.activeSelection
   );
   const tooltipState = useAppSelector(
     (state) => state.annotations.tooltipState
   );
-
   const previewCard = useAppSelector((state) => state.annotations.previewCard);
   const hoveredAnnotation = useAppSelector(
     (state) => state.annotations.hoveredAnnotation
@@ -134,6 +132,18 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     skip: !pdfDocument?.id,
     // Refetch every 30 minutes to get fresh signed URLs
     pollingInterval: 30 * 60 * 1000,
+  });
+
+  // Get annotations for this PDF
+  const {
+    data: annotations = [],
+    error: annotationsError,
+    isLoading: isAnnotationsLoading,
+    refetch: refetchAnnotations,
+  } = useGetAnnotationsQuery(pdfDocument?.id || "", {
+    skip: !pdfDocument?.id,
+    // Poll for new annotations every 30 seconds for cross-tab sync
+    pollingInterval: 30 * 1000,
   });
 
   // Use fresh PDF data if available, otherwise use prop data
@@ -371,7 +381,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       dispatch(setHoveredAnnotation(annotationId));
 
       if (annotationId) {
-        const annotation = annotations[annotationId];
+        const annotation = annotations.find(a => a.id === annotationId);
         if (annotation) {
           dispatch(
             showPreviewCard({
@@ -395,11 +405,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    */
   const handleAnnotationClick = useCallback(
     (annotationId: string) => {
-      const annotation = annotations[annotationId];
+      const annotation = annotations.find(a => a.id === annotationId);
       if (annotation) {
         // Navigate to the note for this annotation
-        // We need to find the note that's linked to this annotation
-        router.push(`/dashboard/annotations/${annotationId}`);
+        router.push(`/dashboard/notes/${annotation.noteId}`);
       }
     },
     [annotations, router]
@@ -410,10 +419,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    */
   const handleAnnotationEdit = useCallback(
     (annotationId: string) => {
-      // Navigate to edit the note linked to this annotation
-      router.push(`/dashboard/annotations/${annotationId}`);
+      const annotation = annotations.find(a => a.id === annotationId);
+      if (annotation) {
+        // Navigate to edit the note linked to this annotation
+        router.push(`/dashboard/notes/${annotation.noteId}`);
+      }
     },
-    [router]
+    [annotations, router]
   );
 
   /**
@@ -470,10 +482,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     [dispatch]
   );
 
-  // Get current annotations for this PDF
-  const currentAnnotations = Object.values(annotations).filter(
-    (annotation) => annotation.pdfId === currentPdfData?.id
-  );
+  // Current annotations are already filtered by PDF ID from the API
+  const currentAnnotations = annotations;
 
   // Handle loading states
   if (!pdfDocument) {
@@ -674,7 +684,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         {previewCard.visible && previewCard.annotationId && (
           <AnnotationPreviewCard
             visible={previewCard.visible}
-            annotation={annotations[previewCard.annotationId]}
+            annotation={annotations.find(a => a.id === previewCard.annotationId)}
             position={previewCard.position}
             onEdit={handleAnnotationEdit}
             onClose={() => dispatch(hidePreviewCard())}
