@@ -12,7 +12,6 @@ import {
   PDFDocument,
   UserActivity,
   Note,
-  JSONContent,
   SupabaseUploadResponse,
   SupabasePDFListResponse,
   SupabasePDFAccessResponse,
@@ -132,7 +131,7 @@ export const apiSlice = createApi({
           fileUrl: data.fileUrl, // the url used to accessed the document in the database
         } as PDFDocument;
       },
-      transformErrorResponse: (response: any, meta, arg) => {
+      transformErrorResponse: (response: any, _meta, arg) => {
         // Extract file information for error context
         const file = arg.get("file") as File;
         const fileName = file?.name || "unknown";
@@ -322,7 +321,7 @@ export const apiSlice = createApi({
 
         return mapErrorToAppError(response, context);
       },
-      providesTags: (result, error, pdfId) => [{ type: "PDF", id: pdfId }],
+      providesTags: (_result, _error, pdfId) => [{ type: "PDF", id: pdfId }],
     }),
 
     // Delete PDF endpoint with error handling
@@ -366,11 +365,11 @@ export const apiSlice = createApi({
 
         return mapErrorToAppError(response, context);
       },
-      invalidatesTags: (result, error, pdfId) => [
+      invalidatesTags: (_result, _error, pdfId) => [
         { type: "PDF", id: "LIST" },
         { type: "PDF", id: pdfId },
       ],
-      async onQueryStarted(pdfId, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_pdfId, { queryFulfilled }) {
         try {
           await queryFulfilled;
           pdfNotifications.deleteSuccess();

@@ -12,9 +12,17 @@ export const store = configureStore({
       serializableCheck: {
         // Ignore these action types that may contain non-serializable data
         ignoredActions: [
-          "annotations/setPdfDocument",
-          "api/executeQuery/fulfilled",
+          // RTK Query actions
+          "api/executeQuery/pending",
+          "api/executeQuery/fulfilled", 
+          "api/executeQuery/rejected",
+          "api/executeMutation/pending",
           "api/executeMutation/fulfilled",
+          "api/executeMutation/rejected",
+          // Annotation actions
+          "annotations/setPdfDocument",
+          // Ignore all RTK Query internal actions
+          /^api\//,
         ],
         // Ignore these field paths in all actions
         ignoredActionsPaths: [
@@ -24,12 +32,20 @@ export const store = configureStore({
           "payload.accessedAt",
           "meta.arg.originalArgs",
           "meta.baseQueryMeta",
+          "meta.arg",
+          "meta.requestId",
+          "meta.requestStatus",
+          "payload.meta",
+          "error.meta",
         ],
         // Ignore these paths in the state
         ignoredPaths: [
           "annotations.currentPdf",
           "api.queries",
           "api.mutations",
+          "api.provided",
+          "api.subscriptions",
+          "api.config",
         ],
       },
     }).concat(apiSlice.middleware),
