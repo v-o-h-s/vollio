@@ -1,181 +1,138 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient"; 
+import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import { withErrorHandling } from "@/lib/utils/server-error-handling";
-import { NoteUpdate } from "@/lib/types/database";
 
-interface RouteParams {
-  params: {
-    id: string;
-  };
-}
-
+// GET /api/notes/[id] - Get a specific note
 export const GET = withErrorHandling(async (
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: { id: string } }
 ) => {
   const { userId } = await auth();
-
+  
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = params;
-
-  if (!id) {
-    return NextResponse.json(
-      { error: "Note ID is required" },
-      { status: 400 }
-    );
-  }
-
-  const supabase = await getAuthenticatedSupabaseClient();
-
-  const { data: note, error } = await supabase
+  const supabase = getAuthenticatedSupabaseClient();
+  
+  const { data: noteData, error } = await supabase
     .from("notes")
     .select("*")
-    .eq("id", id)
-    .eq("is_deleted", false)
+    .eq("id", params.id)
     .single();
 
   if (error) {
     if (error.code === "PGRST116") {
-      return NextResponse.json(
-        { error: "Note not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Note not found" }, { status: 404 });
     }
-    console.error("Error fetching note:", error);
+    console.error("Failed to fetch note:", error);
     return NextResponse.json(
       { error: "Failed to fetch note" },
       { status: 500 }
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    data: note,
-  });
+  // Transform database format to API format
+  const note = {
+    id: noteData.id,
+    userId: noteData.user_id,
+    title: noteData.title,
+    content: noteData.content,
+    pdfAnnotationId: noteData.pdf_annotation_id,
+    createdAt: noteData.created_at,
+    updatedAt: noteData.updated_at,
+    isDeleted: noteData.is_deleted,
+  };
+
+  return NextResponse.json({ success: true, data: note });
 });
 
+// PUT /api/notes/[id] - Update a specific note
 export const PUT = withErrorHandling(async (
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: { id: string } }
 ) => {
   const { userId } = await auth();
-
+  
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { id } = params;
-
-  if (!id) {
-    return NextResponse.json(
-      { error: "Note ID is required" },
-      { status: 400 }
-    );
   }
 
   const body = await request.json();
   const { title, content } = body;
 
-  // Validate that at least one field is being updated
-  if (!title && !content) {
+  if (!title || !content) {
     return NextResponse.json(
-      { error: "At least one field (title or content) must be provided" },
+      { error: "Title and content are required" },
       { status: 400 }
     );
   }
 
-  // Validate TipTap JSONContent structure if content is provided
-  if (content && (typeof content !== "object" || !content.type)) {
-    return NextResponse.json(
-      { error: "Invalid content format - must be TipTap JSONContent" },
-      { status: 400 }
-    );
-  }
-
-  const supabase = await getAuthenticatedSupabaseClient();
-
-  const updateData: NoteUpdate = {};
-  if (title !== undefined) updateData.title = title;
-  if (content !== undefined) updateData.content = content;
-
-  const { data: note, error } = await supabase
+  const supabase = getAuthenticatedSupabaseClient();
+  
+  const { data: noteData, error } = await supabase
     .from("notes")
-    .update(updateData)
-    .eq("id", id)
-    .eq("is_deleted", false)
+    .update({
+      title,
+      content,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", params.id)
     .select()
     .single();
 
   if (error) {
     if (error.code === "PGRST116") {
-      return NextResponse.json(
-        { error: "Note not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Note not found" }, { status: 404 });
     }
-    console.error("Error updating note:", error);
+    console.error("Failed to update note:", error);
     return NextResponse.json(
       { error: "Failed to update note" },
       { status: 500 }
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    data: note,
-  });
+  // Transform database format to API format
+  const note = {
+    id: noteData.id,
+    userId: noteData.user_id,
+    title: noteData.title,
+    content: noteData.content,
+    pdfAnnotationId: noteData.pdf_annotation_id,
+    createdAt: noteData.created_at,
+    updatedAt: noteData.updated_at,
+    isDeleted: noteData.is_deleted,
+  };
+
+  return NextResponse.json({ success: true, data: note });
 });
 
+// DELETE /api/notes/[id] - Delete a specific note
 export const DELETE = withErrorHandling(async (
   request: NextRequest,
-  { params }: RouteParams
+  { params }: { params: { id: string } }
 ) => {
   const { userId } = await auth();
-
+  
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = params;
-
-  if (!id) {
-    return NextResponse.json(
-      { error: "Note ID is required" },
-      { status: 400 }
-    );
-  }
-
-  const supabase = await getAuthenticatedSupabaseClient();
-
-  // Soft delete by setting is_deleted to true
-  const { data: note, error } = await supabase
+  const supabase = getAuthenticatedSupabaseClient();
+  
+  const { error } = await supabase
     .from("notes")
-    .update({ is_deleted: true })
-    .eq("id", id)
-    .eq("is_deleted", false)
-    .select()
-    .single();
+    .delete()
+    .eq("id", params.id);
 
   if (error) {
-    if (error.code === "PGRST116") {
-      return NextResponse.json(
-        { error: "Note not found" },
-        { status: 404 }
-      );
-    }
-    console.error("Error deleting note:", error);
+    console.error("Failed to delete note:", error);
     return NextResponse.json(
       { error: "Failed to delete note" },
       { status: 500 }
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    data: note,
-  });
+  return NextResponse.json({ success: true });
 });

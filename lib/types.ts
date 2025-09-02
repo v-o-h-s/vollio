@@ -38,8 +38,13 @@ export interface NotionEditorProps {
   // Auto-save props
   autoSave?: boolean;
   noteId?: string;
-  onAutoSave?: (content: JSONContent, noteId: string) => Promise<void>;
+  onAutoSave?: (content: JSONContent, noteId?: string) => Promise<string | void>;
   autoSaveDelay?: number;
+  onAutoSaveStatusChange?: (status: {
+    status: "idle" | "typing" | "saving" | "saved" | "error";
+    lastSaved: Date | null;
+    error: string | null;
+  }) => void;
 }
 
 /**
@@ -619,7 +624,6 @@ export interface ActivitySummary {
  */
 export type {
   ThemeMode,
-  ThemeConfig,
   ThemeContextValue,
   ThemeProviderProps,
   ThemeState,

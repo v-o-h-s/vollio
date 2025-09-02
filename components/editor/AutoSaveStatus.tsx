@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type AutoSaveStatus = "idle" | "saving" | "saved" | "error";
+type AutoSaveStatus = "idle" | "typing" | "saving" | "saved" | "error";
 
 interface AutoSaveStatusProps {
   status: AutoSaveStatus;
@@ -41,6 +41,8 @@ export function AutoSaveStatus({
     }
 
     switch (status) {
+      case "typing":
+        return <Clock className="h-3 w-3" />;
       case "saving":
         return <Loader2 className="h-3 w-3 animate-spin" />;
       case "saved":
@@ -58,6 +60,8 @@ export function AutoSaveStatus({
     }
 
     switch (status) {
+      case "typing":
+        return "Typing...";
       case "saving":
         return "Saving...";
       case "saved":
@@ -94,6 +98,8 @@ export function AutoSaveStatus({
     }
 
     switch (status) {
+      case "typing":
+        return "outline";
       case "saving":
         return "secondary";
       case "saved":

@@ -1,11 +1,11 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import debounce from "lodash.debounce"
+import debounce from "lodash.debounce";
 /* the debounce function works as follows :
     debounce(function,delay) , the function will wait for delay ms then it runs the function
     if during that delay debounce is called again , it will start the timer from 0s
 */
-export type AutoSaveStatus = "idle" | "saving" | "saved" | "error";
+export type AutoSaveStatus = "idle" | "typing" | "saving" | "saved" | "error";
 
 interface UseAutoSaveOptions {
   onSave: (content: any) => Promise<void>;
@@ -32,7 +32,9 @@ export function useAutoSave({
   const isTypingRef = useRef(false);
 
   const performSave = useCallback(async () => {
-    if (!enabled || !contentRef.current) return;
+    if (!enabled || !contentRef.current) {
+      return;
+    }
 
     try {
       setStatus("saving");
@@ -43,16 +45,17 @@ export function useAutoSave({
 
       // Reset to idle after showing "saved" for a moment
       setTimeout(() => {
-        if (status === "saved") {
-          setStatus("idle");
-        }
+        setStatus((currentStatus) => {
+          // Only reset to idle if we're still in "saved" state
+          return currentStatus === "saved" ? "idle" : currentStatus;
+        });
       }, 2000);
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Failed to save");
       console.error("Auto-save error:", err);
     }
-  }, [onSave, enabled, status]);
+  }, [onSave, enabled]);
 
   const debouncedSave = useCallback(debounce(performSave, delay), [
     performSave,
@@ -66,9 +69,9 @@ export function useAutoSave({
 
       if (!enabled) return;
 
-      // Set typing state
+      // Set typing state immediately
       isTypingRef.current = true;
-      setStatus("saving");
+      setStatus("typing");
       setError(null);
 
       // Clear any existing debounced calls and create new one
@@ -87,8 +90,6 @@ export function useAutoSave({
     },
     [enabled, delay, debouncedSave]
   );
-
-
 
   // Cleanup on unmount
   useEffect(() => {

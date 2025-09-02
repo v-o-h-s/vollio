@@ -2,16 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  ArrowLeft,
-  Save,
-  Loader2,
-  Check,
-  AlertCircle,
-  Clock,
-  FileText,
-  ExternalLink,
-} from "lucide-react";
+import { ArrowLeft, Save, Loader2, FileText, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
@@ -21,8 +12,12 @@ import { useAutoSave } from "@/hooks/use-auto-save";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useNoteSync } from "@/hooks/use-note-sync";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { cn } from "@/lib/utils";
 import { Rectangle } from "@/lib/types";
+import {
+  useCreateNoteMutation,
+  useUpdateNoteMutation,
+  useCreateAnnotationMutation,
+} from "@/lib/store/apiSlice";
 
 interface NewNoteContent {
   title?: string;
@@ -40,9 +35,11 @@ interface SelectionData {
 export default function NewNotePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Parse selection data from URL params
-  const [selectionData, setSelectionData] = useState<SelectionData | null>(null);
+  const [selectionData, setSelectionData] = useState<SelectionData | null>(
+    null
+  );
   const [noteContent, setNoteContent] = useState<NewNoteContent>({
     content: null,
   });
@@ -50,30 +47,35 @@ export default function NewNotePage() {
   const [isCreating, setIsCreating] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [annotationCreated, setAnnotationCreated] = useState(false);
+  
+  // Auto-save status from editor
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "typing" | "saving" | "saved" | "error">("idle");
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [autoSaveError, setAutoSaveError] = useState<string | null>(null);
 
   // Cross-tab synchronization
   const { broadcastCreate } = useNoteSync();
 
   // Parse selection data from URL on mount
   useEffect(() => {
-    const selectionParam = searchParams.get('selection');
+    const selectionParam = searchParams.get("selection");
     if (selectionParam) {
       try {
         const decoded = JSON.parse(decodeURIComponent(selectionParam));
         setSelectionData(decoded);
-        
+
         // Pre-populate editor with selected text
         const initialContent = {
-          type: 'doc',
+          type: "doc",
           content: [
             {
-              type: 'blockquote',
+              type: "blockquote",
               content: [
                 {
-                  type: 'paragraph',
+                  type: "paragraph",
                   content: [
                     {
-                      type: 'text',
+                      type: "text",
                       text: decoded.text,
                     },
                   ],
@@ -81,134 +83,112 @@ export default function NewNotePage() {
               ],
             },
             {
-              type: 'paragraph',
+              type: "paragraph",
               content: [
                 {
-                  type: 'text',
-                  text: '',
+                  type: "text",
+                  text: "",
                 },
               ],
             },
           ],
         };
-        
+
         setNoteContent({ content: initialContent });
-        console.log('Parsed selection data:', decoded);
+        console.log("Parsed selection data:", decoded);
       } catch (error) {
-        console.error('Failed to parse selection data:', error);
+        console.error("Failed to parse selection data:", error);
       }
     }
   }, [searchParams]);
 
-  // Create annotation when note is created
-  const createAnnotation = useCallback(async (noteId: string) => {
-    if (!selectionData || annotationCreated) return;
+  // RTK Query mutations
+  const [createNote] = useCreateNoteMutation();
+  const [updateNote] = useUpdateNoteMutation();
+  const [createAnnotation] = useCreateAnnotationMutation();
 
-    try {
-      const response = await fetch('/api/annotations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+  // Create annotation when note is created if we the note creating is triggered by text selection
+  const createAnnotationForNote = useCallback(
+    async (noteId: string) => {
+      if (!selectionData || annotationCreated) return;
+
+      try {
+        await createAnnotation({
           pdfId: selectionData.pdfId,
           noteId: noteId,
           selectedText: selectionData.text,
           pageNumber: selectionData.pageNumber,
           coordinates: selectionData.coordinates,
-          noteContent: extractTitleFromContent(noteContent.content) || 'Untitled Note',
-        }),
-      });
+          noteContent:
+            extractTitleFromContent(noteContent.content) || "Untitled Note",
+        }).unwrap();
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create annotation');
+        setAnnotationCreated(true);
+        console.log("Annotation created successfully");
+
+        // Note: Cross-tab sync for annotations will be handled by the annotation API
+        // The PDF viewer will automatically update when the annotation is created
+      } catch (error) {
+        console.error("Failed to create annotation:", error);
+        // Don't throw - annotation creation failure shouldn't break note creation
       }
+    },
+    [selectionData, noteContent.content, annotationCreated, createAnnotation]
+  );
 
-      const result = await response.json();
-      setAnnotationCreated(true);
-      console.log('Annotation created:', result.data);
-      
-      // Note: Cross-tab sync for annotations will be handled by the annotation API
-      // The PDF viewer will automatically update when the annotation is created
-      
-    } catch (error) {
-      console.error('Failed to create annotation:', error);
-      // Don't throw - annotation creation failure shouldn't break note creation
-    }
-  }, [selectionData, noteContent.content, annotationCreated]);
-
-  // Auto-save functionality
-  const handleAutoSave = useCallback(
-    async (content: any) => {
+  // Auto-save callback for the editor
+  const handleEditorAutoSave = useCallback(
+    async (content: any, currentNoteId?: string) => {
       try {
-        if (!noteId) {
+        if (!currentNoteId && !noteId) {
           // Create new note first
           setIsCreating(true);
-          const response = await fetch("/api/notes", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              title: extractTitleFromContent(content) || "Untitled Note",
-              content,
-            }),
-          });
+          const result = await createNote({
+            title: extractTitleFromContent(content) || "Untitled Note",
+            content,
+          }).unwrap();
 
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to create note");
-          }
-
-          const result = await response.json();
-          const newNoteId = result.data.id;
+          const newNoteId = result.id;
           setNoteId(newNoteId);
           setIsCreating(false);
-          
+
           // Broadcast note creation for cross-tab sync
-          broadcastCreate(result.data);
-          
+          broadcastCreate(result);
+
           // Create annotation if we have selection data
           if (selectionData && !annotationCreated) {
-            await createAnnotation(newNoteId);
+            await createAnnotationForNote(newNoteId);
           }
+
+          return newNoteId; // Return the new note ID to the editor
         } else {
           // Update existing note
-          const response = await fetch(`/api/notes/${noteId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
+          const idToUse = currentNoteId || noteId;
+          await updateNote({
+            id: idToUse!,
+            updates: {
               title: extractTitleFromContent(content) || "Untitled Note",
               content,
-            }),
-          });
+            },
+          }).unwrap();
 
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to save note");
-          }
+          return idToUse;
         }
       } catch (error) {
         setIsCreating(false);
         throw error;
       }
     },
-    [noteId, broadcastCreate, selectionData, annotationCreated, createAnnotation]
+    [
+      noteId,
+      broadcastCreate,
+      selectionData,
+      annotationCreated,
+      createNote,
+      updateNote,
+      createAnnotationForNote,
+    ]
   );
-
-  const {
-    status: autoSaveStatus,
-    lastSaved,
-    error: autoSaveError,
-    updateContent,
-  } = useAutoSave({
-    onSave: handleAutoSave,
-    delay: 1000, // 1 second delay for auto-save
-    enabled: true,
-  });
 
   // Extract title from editor content
   const extractTitleFromContent = (content: any): string | null => {
@@ -232,13 +212,23 @@ export default function NewNotePage() {
     (content: any) => {
       setNoteContent((prev) => ({ ...prev, content }));
       setHasUnsavedChanges(true);
+    },
+    []
+  );
+
+  // Handle auto-save status changes from editor
+  const handleAutoSaveStatusChange = useCallback(
+    (status: { status: "idle" | "typing" | "saving" | "saved" | "error"; lastSaved: Date | null; error: string | null }) => {
+      setAutoSaveStatus(status.status);
+      setLastSaved(status.lastSaved);
+      setAutoSaveError(status.error);
       
-      // Only trigger auto-save if content is not empty
-      if (content && content.content && content.content.length > 0) {
-        updateContent(content);
+      // Reset unsaved changes flag when successfully saved
+      if (status.status === "saved") {
+        setHasUnsavedChanges(false);
       }
     },
-    [updateContent]
+    []
   );
 
   // Handle successful save is now handled via onSaveSuccess callback
@@ -248,7 +238,7 @@ export default function NewNotePage() {
     if (selectionData) {
       // Try to navigate back to the PDF tab
       const pdfUrl = `/dashboard/pdf-notes?pdf=${selectionData.pdfId}`;
-      
+
       // Try cross-tab navigation first
       if (window.opener && !window.opener.closed) {
         try {
@@ -257,10 +247,10 @@ export default function NewNotePage() {
           window.close();
           return;
         } catch (error) {
-          console.warn('Cross-tab navigation failed:', error);
+          console.warn("Cross-tab navigation failed:", error);
         }
       }
-      
+
       // Fallback to regular navigation
       router.push(pdfUrl);
     } else {
@@ -272,12 +262,12 @@ export default function NewNotePage() {
   const handleManualSave = useCallback(async () => {
     if (noteContent.content) {
       try {
-        await handleAutoSave(noteContent.content);
+        await handleEditorAutoSave(noteContent.content, noteId || undefined);
       } catch (error) {
         console.error("Manual save failed:", error);
       }
     }
-  }, [noteContent.content, handleAutoSave]);
+  }, [noteContent.content, handleEditorAutoSave, noteId]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -285,9 +275,12 @@ export default function NewNotePage() {
       event.preventDefault();
       handleManualSave();
     },
-    "escape": (event) => {
+    escape: (event) => {
       event.preventDefault();
-      if (!hasUnsavedChanges || confirm("You have unsaved changes. Are you sure you want to leave?")) {
+      if (
+        !hasUnsavedChanges ||
+        confirm("You have unsaved changes. Are you sure you want to leave?")
+      ) {
         handleGoBack();
       }
     },
@@ -296,7 +289,11 @@ export default function NewNotePage() {
   // Warn user before leaving if there are unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges || autoSaveStatus === "saving" || isCreating) {
+      // Only warn if there are truly unsaved changes that haven't been auto-saved
+      const hasTrueUnsavedChanges = hasUnsavedChanges && autoSaveStatus !== "saved";
+      const isSaving = autoSaveStatus === "saving" || isCreating;
+      
+      if (hasTrueUnsavedChanges || isSaving) {
         event.preventDefault();
         return "You have unsaved changes. Are you sure you want to leave?";
       }
@@ -330,9 +327,9 @@ export default function NewNotePage() {
                 <span className="hidden sm:inline">Back to Notes</span>
                 <span className="sm:hidden">Back</span>
               </Button>
-              
+
               <div className="hidden sm:block h-6 w-px bg-border shrink-0" />
-              
+
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
                 <div className="flex flex-col min-w-0 flex-1">
@@ -344,7 +341,9 @@ export default function NewNotePage() {
                       <Badge variant="secondary" className="text-xs">
                         PDF Annotation
                       </Badge>
-                      <span className="truncate">{selectionData.pdfFilename}</span>
+                      <span className="truncate">
+                        {selectionData.pdfFilename}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -359,7 +358,7 @@ export default function NewNotePage() {
                 isCreating={isCreating}
                 size="sm"
               />
-              
+
               {selectionData && noteId && (
                 <Button
                   variant="ghost"
@@ -383,7 +382,7 @@ export default function NewNotePage() {
                   <span className="hidden sm:inline">View in PDF</span>
                 </Button>
               )}
-              
+
               <Button
                 variant="outline"
                 size="default"
@@ -391,10 +390,11 @@ export default function NewNotePage() {
                 disabled={
                   !noteContent.content ||
                   autoSaveStatus === "saving" ||
-                  isCreating
+                  isCreating ||
+                  (!hasUnsavedChanges && autoSaveStatus === "saved")
                 }
                 className="flex items-center gap-2 text-white border-[#3B82F6] hover:bg-[#3B82F6]/90"
-                style={{ backgroundColor: '#3B82F6' }}
+                style={{ backgroundColor: "#3B82F6" }}
               >
                 {autoSaveStatus === "saving" || isCreating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -418,14 +418,10 @@ export default function NewNotePage() {
                   autoFocus={true}
                   autoSave={true}
                   noteId={noteId || undefined}
-                  onAutoSave={(content, id) => handleAutoSave(content)}
+                  onAutoSave={handleEditorAutoSave}
+                  onAutoSaveStatusChange={handleAutoSaveStatusChange}
                   autoSaveDelay={1000}
-                  className="min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)] border-none shadow-none bg-transparent"
-                  editorProps={{
-                    attributes: {
-                      class: "prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none max-w-none",
-                    },
-                  }}
+                  className="min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)] border-none shadow-none bg-transparent prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none max-w-none"
                 />
               </div>
             </div>

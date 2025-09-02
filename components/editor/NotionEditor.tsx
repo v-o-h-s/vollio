@@ -58,23 +58,41 @@ function NotionEditorInner({
   noteId,
   onAutoSave,
   autoSaveDelay = 500,
+  onAutoSaveStatusChange,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
 
   // Responsive design handled via CSS
 
   // Auto-save functionality
+  const [currentNoteId, setCurrentNoteId] = useState<string | undefined>(noteId);
+
+  // Update currentNoteId when noteId prop changes
+  useEffect(() => {
+    if (noteId) {
+      setCurrentNoteId(noteId);
+    }
+  }, [noteId]);
+
   const handleAutoSave = useCallback(
     async (content: any) => {
-      if (!noteId) {
-        throw new Error("Note ID is required for auto-save");
-      }
-
       if (onAutoSave) {
-        await onAutoSave(content, noteId);
+        // Use the custom auto-save handler which can handle note creation
+        const resultNoteId = await onAutoSave(content, currentNoteId);
+        
+        // Update our local noteId if a new one was created
+        if (resultNoteId && !currentNoteId) {
+          setCurrentNoteId(resultNoteId);
+        }
+        
+        return resultNoteId;
       } else {
-        // Default auto-save implementation
-        const response = await fetch(`/api/notes/${noteId}`, {
+        // Default auto-save implementation - requires existing noteId
+        if (!currentNoteId) {
+          throw new Error("Note ID is required for default auto-save");
+        }
+
+        const response = await fetch(`/api/notes/${currentNoteId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -86,9 +104,11 @@ function NotionEditorInner({
           const errorData = await response.json();
           throw new Error(errorData.error || "Failed to save note");
         }
+        
+        return currentNoteId;
       }
     },
-    [noteId, onAutoSave]
+    [currentNoteId, onAutoSave]
   );
 
   const {
@@ -99,8 +119,19 @@ function NotionEditorInner({
   } = useAutoSave({
     onSave: handleAutoSave,
     delay: autoSaveDelay,
-    enabled: autoSave && editable && !!noteId,
+    enabled: autoSave && editable, // Remove the noteId requirement
   });
+
+  // Notify parent of auto-save status changes
+  useEffect(() => {
+    if (onAutoSaveStatusChange) {
+      onAutoSaveStatusChange({
+        status: autoSaveStatus,
+        lastSaved,
+        error: autoSaveError,
+      });
+    }
+  }, [autoSaveStatus, lastSaved, autoSaveError, onAutoSaveStatusChange]);
 
   const editor = useEditor({
     immediatelyRender: false,

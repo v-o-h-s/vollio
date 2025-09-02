@@ -2,42 +2,49 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import { withErrorHandling } from "@/lib/utils/server-error-handling";
-import { NoteInsert, NoteUpdate } from "@/lib/types/database";
 
+// GET /api/notes - List all notes for the authenticated user
 export const GET = withErrorHandling(async (request: NextRequest) => {
   const { userId } = await auth();
-
+  
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = getAuthenticatedSupabaseClient();
-
-  let query = (await supabase)
+  const supabase =await getAuthenticatedSupabaseClient();
+  
+  const { data: notesData, error } = await supabase
     .from("notes")
     .select("*")
-    .eq("is_deleted", false)
     .order("updated_at", { ascending: false });
 
-  const { data: notes, error } = await query;
-
   if (error) {
-    console.error("Error fetching notes:", error);
+    console.error("Failed to fetch notes:", error);
     return NextResponse.json(
       { error: "Failed to fetch notes" },
       { status: 500 }
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    data: notes,
-  });
+  // Transform database format to API format
+  const notes = notesData.map((note: any) => ({
+    id: note.id,
+    userId: note.user_id,
+    title: note.title,
+    content: note.content,
+    pdfAnnotationId: note.pdf_annotation_id,
+    createdAt: note.created_at,
+    updatedAt: note.updated_at,
+    isDeleted: note.is_deleted,
+  }));
+
+  return NextResponse.json({ success: true, data: notes });
 });
 
+// POST /api/notes - Create a new note
 export const POST = withErrorHandling(async (request: NextRequest) => {
   const { userId } = await auth();
-
+  
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -45,49 +52,44 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   const body = await request.json();
   const { title, content } = body;
 
-  // Validate required fields
-  if (!content) {
+  if (!title || !content) {
     return NextResponse.json(
-      { error: "Content is required" },
+      { error: "Title and content are required" },
       { status: 400 }
     );
   }
 
-  // Validate TipTap JSONContent structure
-  if (typeof content !== "object" || !content.type) {
-    return NextResponse.json(
-      { error: "Invalid content format - must be TipTap JSONContent" },
-      { status: 400 }
-    );
-  }
-
-  const supabase = getAuthenticatedSupabaseClient();
-
-  const noteData: NoteInsert = {
-    user_id: userId,
-    title: title || "Untitled",
-    content,
-  };
-
-  const { data: note, error } = await (await supabase)
+  const supabase =await getAuthenticatedSupabaseClient();
+  
+  const { data: noteData, error } = await supabase
     .from("notes")
-    .insert(noteData)
+    .insert({
+      title,
+      content,
+      user_id: userId,
+    })
     .select()
     .single();
 
   if (error) {
-    console.error("Error creating note:", error);
+    console.error("Failed to create note:", error);
     return NextResponse.json(
       { error: "Failed to create note" },
       { status: 500 }
     );
   }
 
-  return NextResponse.json(
-    {
-      success: true,
-      data: note,
-    },
-    { status: 201 }
-  );
+  // Transform database format to API format
+  const note = {
+    id: noteData.id,
+    userId: noteData.user_id,
+    title: noteData.title,
+    content: noteData.content,
+    pdfAnnotationId: noteData.pdf_annotation_id,
+    createdAt: noteData.created_at,
+    updatedAt: noteData.updated_at,
+    isDeleted: noteData.is_deleted,
+  };
+
+  return NextResponse.json({ success: true, data: note }, { status: 201 });
 });

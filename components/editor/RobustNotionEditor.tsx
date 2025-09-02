@@ -10,7 +10,12 @@ import type { NotionEditorProps } from "./types";
 interface RobustNotionEditorProps
   extends Omit<NotionEditorProps, "onAutoSave"> {
   onSaveSuccess?: () => void;
-  onAutoSave?: (content: any, noteId?: string) => Promise<void>;
+  onAutoSave?: (content: any, noteId?: string) => Promise<string | void>;
+  onAutoSaveStatusChange?: (status: {
+    status: "idle" | "typing" | "saving" | "saved" | "error";
+    lastSaved: Date | null;
+    error: string | null;
+  }) => void;
 }
 
 export function RobustNotionEditor({
@@ -22,6 +27,7 @@ export function RobustNotionEditor({
   autoSave = false,
   noteId,
   onAutoSave,
+  onAutoSaveStatusChange,
   autoSaveDelay = 2000,
   className,
 }: RobustNotionEditorProps) {
@@ -162,6 +168,7 @@ export function RobustNotionEditor({
         autoSave={autoSave}
         noteId={noteId}
         onAutoSave={handleAutoSave}
+        onAutoSaveStatusChange={onAutoSaveStatusChange}
         autoSaveDelay={autoSaveDelay}
         className={className}
       />

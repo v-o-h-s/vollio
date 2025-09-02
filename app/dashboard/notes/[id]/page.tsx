@@ -1,486 +1,335 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useGetNoteQuery, useUpdateNoteMutation, useDeleteNoteMutation } from "@/lib/store/apiSlice";
-import { LazyNotionEditor } from "@/components/editor/LazyNotionEditor";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { 
-  ArrowLeft, 
-  Trash2, 
-  ExternalLink, 
+import { useState, useCallback, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import {
+  ArrowLeft,
+  Save,
+  Loader2,
   FileText,
-  Calendar,
-  RefreshCw,
-  Maximize2,
-  Minimize2,
-  Focus,
-  Eye
+  Trash2,
+  ExternalLink,
 } from "lucide-react";
-import { JSONContent } from "@/lib/types";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { safeFormatDistanceToNow } from "@/lib/utils/dates";
-import { useNoteSync } from "@/hooks/use-note-sync";
-import { NoteEditorSkeleton } from "@/components/ui/note-skeleton";
-import { noteNotifications } from "@/lib/utils/note-notifications";
-import { cn } from "@/lib/utils";
-import type { EditorMode } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
+import { AutoSaveStatus } from "@/components/editor/AutoSaveStatus";
 
-interface NotePageProps {
-  params: {
-    id: string;
-  };
+import { useAutoSave } from "@/hooks/use-auto-save";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { useNoteSync } from "@/hooks/use-note-sync";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { 
+  useGetNoteQuery,
+  useUpdateNoteMutation,
+  useDeleteNoteMutation 
+} from "@/lib/store/apiSlice";
+
+interface NoteContent {
+  title?: string;
+  content: any;
 }
 
-/**
- * Note Editing Page
- * 
- * Allows users to view and edit existing notes with the Notion-like editor.
- * Shows linked PDF annotation information and provides navigation.
- * Supports multiple viewing modes: normal, fullscreen, and focus.
- */
-const NotePage: React.FC<NotePageProps> = ({ params }) => {
+export default function NoteEditPage() {
   const router = useRouter();
-  const { id } = params;
-  
-  // State
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState<JSONContent>({
-    type: "doc",
-    content: [{ type: "paragraph" }],
-  });
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [editorMode, setEditorMode] = useState<EditorMode>('normal');
-  const [showKeyboardHint, setShowKeyboardHint] = useState(false);
+  const params = useParams();
+  const noteId = params.id as string;
 
-  // Queries and mutations
-  const {
-    data: note,
-    isLoading,
-    error,
-    refetch,
-  } = useGetNoteQuery(id);
-  
+  // RTK Query hooks
+  const { data: note, isLoading, error } = useGetNoteQuery(noteId);
   const [updateNote] = useUpdateNoteMutation();
   const [deleteNote] = useDeleteNoteMutation();
 
-  // Cross-tab synchronization
-  const { broadcastUpdate, broadcastDelete } = useNoteSync({
-    enableAutoNavigation: true,
-    enableAutoUpdate: true,
+  const [noteContent, setNoteContent] = useState<NoteContent>({
+    content: null,
   });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Initialize form data when note loads
+  // Cross-tab synchronization
+  const { broadcastUpdate, broadcastDelete } = useNoteSync();
+
+  // Initialize content when note loads
   useEffect(() => {
     if (note) {
-      setTitle(note.title);
-      setContent(note.content);
+      setNoteContent({
+        title: note.title,
+        content: note.content,
+      });
     }
   }, [note]);
 
-  // Handle mode changes with animations
-  const handleModeChange = useCallback((newMode: EditorMode) => {
-    setEditorMode(newMode);
-    
-    // Show keyboard hint for focus mode
-    if (newMode === 'focus') {
-      setShowKeyboardHint(true);
-      setTimeout(() => setShowKeyboardHint(false), 3000);
+  // Extract title from editor content
+  const extractTitleFromContent = (content: any): string | null => {
+    if (!content || !content.content) return null;
+
+    const firstNode = content.content[0];
+    if (firstNode && firstNode.type === "heading" && firstNode.content) {
+      return firstNode.content.map((c: any) => c.text).join("");
     }
-  }, []);
 
-  // Keyboard shortcuts for mode switching
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // F11 for focus mode
-      if (event.key === 'F11') {
-        event.preventDefault();
-        handleModeChange(editorMode === 'focus' ? 'normal' : 'focus');
+    if (firstNode && firstNode.type === "paragraph" && firstNode.content) {
+      const text = firstNode.content.map((c: any) => c.text).join("");
+      return text.length > 50 ? text.substring(0, 50) + "..." : text;
+    }
+
+    return null;
+  };
+
+  // Auto-save functionality
+  const handleAutoSave = useCallback(
+    async (content: any) => {
+      try {
+        const result = await updateNote({
+          id: noteId,
+          updates: {
+            title: extractTitleFromContent(content) || "Untitled Note",
+            content,
+          },
+        }).unwrap();
+
+        // Broadcast note update for cross-tab sync
+        broadcastUpdate(result);
+      } catch (error) {
+        throw error;
       }
-      
-      // Escape to exit focus mode
-      if (event.key === 'Escape' && editorMode === 'focus') {
-        event.preventDefault();
-        handleModeChange('normal');
+    },
+    [noteId, updateNote, broadcastUpdate]
+  );
+
+  const {
+    status: autoSaveStatus,
+    lastSaved,
+    error: autoSaveError,
+    updateContent,
+  } = useAutoSave({
+    onSave: handleAutoSave,
+    delay: 1000, // 1 second delay for auto-save
+    enabled: true,
+  });
+
+  // Handle editor content changes
+  const handleEditorChange = useCallback(
+    (content: any) => {
+      setNoteContent((prev) => ({ ...prev, content }));
+      setHasUnsavedChanges(true);
+
+      // Only trigger auto-save if content is not empty
+      if (content && content.content && content.content.length > 0) {
+        updateContent(content);
       }
-      
-      // Ctrl/Cmd + Shift + F for fullscreen
-      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'F') {
-        event.preventDefault();
-        handleModeChange(editorMode === 'fullscreen' ? 'normal' : 'fullscreen');
+    },
+    [updateContent]
+  );
+
+  // Handle go back
+  const handleGoBack = useCallback(() => {
+    router.push("/dashboard/notes");
+  }, [router]);
+
+  // Handle manual save
+  const handleManualSave = useCallback(async () => {
+    if (noteContent.content) {
+      try {
+        await handleAutoSave(noteContent.content);
+      } catch (error) {
+        console.error("Manual save failed:", error);
       }
-    };
+    }
+  }, [noteContent.content, handleAutoSave]);
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [editorMode, handleModeChange]);
-
-
-
-  const handleDelete = async () => {
+  // Handle delete note
+  const handleDelete = useCallback(async () => {
     if (!confirm("Are you sure you want to delete this note? This action cannot be undone.")) {
       return;
     }
 
-    setIsDeleting(true);
-    const loadingToast = noteNotifications.loading("Deleting note...");
-    
     try {
-      await deleteNote(id).unwrap();
+      setIsDeleting(true);
+      await deleteNote(noteId).unwrap();
       
-      // Broadcast deletion to other tabs
-      broadcastDelete(id);
+      // Broadcast note deletion for cross-tab sync
+      broadcastDelete(noteId);
       
-      noteNotifications.dismiss(loadingToast);
-      noteNotifications.deleteSuccess(title);
+      // Navigate back to notes list
       router.push("/dashboard/notes");
     } catch (error) {
       console.error("Failed to delete note:", error);
-      noteNotifications.dismiss(loadingToast);
-      noteNotifications.deleteError();
       setIsDeleting(false);
     }
-  };
+  }, [noteId, deleteNote, broadcastDelete, router]);
 
-  const handleBack = () => {
-    router.back();
-  };
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    "mod+s": (event) => {
+      event.preventDefault();
+      handleManualSave();
+    },
+    escape: (event) => {
+      event.preventDefault();
+      if (
+        !hasUnsavedChanges ||
+        confirm("You have unsaved changes. Are you sure you want to leave?")
+      ) {
+        handleGoBack();
+      }
+    },
+  });
 
-  // Mode toggle handlers
-  const handleToggleFullscreen = () => {
-    handleModeChange(editorMode === 'fullscreen' ? 'normal' : 'fullscreen');
-  };
+  // Warn user before leaving if there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges || autoSaveStatus === "saving") {
+        event.preventDefault();
+        return "You have unsaved changes. Are you sure you want to leave?";
+      }
+    };
 
-  const handleToggleFocus = () => {
-    handleModeChange(editorMode === 'focus' ? 'normal' : 'focus');
-  };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges, autoSaveStatus]);
 
-  const handleExitMode = () => {
-    handleModeChange('normal');
-  };
-
-  const handleViewPDFAnnotation = () => {
-    if (note?.pdfAnnotationId) {
-      // Navigate to the PDF with the annotation highlighted
-      router.push(`/dashboard/annotations/${note.pdfAnnotationId}`);
-    }
+  // Get current note title for display
+  const getCurrentTitle = () => {
+    const extracted = extractTitleFromContent(noteContent.content);
+    return extracted || note?.title || "Untitled Note";
   };
 
   // Loading state
   if (isLoading) {
-    return <NoteEditorSkeleton />;
+    return (
+      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>Loading note...</span>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Error state
-  if (error || !note) {
+  if (error) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="flex items-center gap-4 mb-6">
-          <Button variant="ghost" size="sm" onClick={() => router.back()}>
-            <ArrowLeft size={16} />
-          </Button>
-          <h1 className="text-2xl font-bold text-gray-900">Note Not Found</h1>
-        </div>
-        
-        <Card className="p-8 text-center">
-          <FileText size={48} className="text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-red-600 mb-2">
-            Failed to load note
-          </h2>
-          <p className="text-red-500 mb-4">
-            The note could not be found or there was an error loading it.
-          </p>
-          <div className="flex items-center justify-center gap-3">
-            <Button onClick={() => refetch()} variant="outline">
-              <RefreshCw size={16} className="mr-2" />
-              Retry
-            </Button>
-            <Button onClick={() => router.push("/dashboard/notes")}>
+      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-lg font-semibold mb-2">Failed to load note</h2>
+            <p className="text-muted-foreground mb-4">
+              The note could not be found or you don't have permission to view it.
+            </p>
+            <Button onClick={handleGoBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Notes
             </Button>
           </div>
-        </Card>
+        </div>
       </div>
     );
   }
 
-  // Render mode toggle buttons
-  const renderModeToggle = () => {
-    if (editorMode === 'focus') return null;
+  return (
+    <ErrorBoundary>
+      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col">
+          {/* Header */}
+          <header className="flex items-center justify-between p-4 lg:px-6 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-10">
+            <div className="flex items-center gap-2 lg:gap-4 min-w-0 flex-1">
+              <Button
+                variant="ghost"
+                size="default"
+                onClick={handleGoBack}
+                className="flex items-center gap-2 hover:bg-accent shrink-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Back to Notes</span>
+                <span className="sm:hidden">Back</span>
+              </Button>
 
-    return (
-      <div className="flex items-center gap-2 p-2 border-b border-border bg-muted/50">
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => handleModeChange('normal')}
-            className={cn(
-              "mode-toggle-button",
-              editorMode === 'normal' && "active"
-            )}
-            title="Normal mode"
-          >
-            <Eye size={16} />
-            <span>Normal</span>
-          </button>
-          
-          <button
-            onClick={handleToggleFullscreen}
-            className={cn(
-              "mode-toggle-button",
-              editorMode === 'fullscreen' && "active"
-            )}
-            title="Fullscreen mode (Ctrl+Shift+F)"
-          >
-            <Maximize2 size={16} />
-            <span>Fullscreen</span>
-          </button>
-          
-          <button
-            onClick={handleToggleFocus}
-            className={cn(
-              "mode-toggle-button",
-              editorMode === 'focus' && "active"
-            )}
-            title="Focus mode (F11)"
-          >
-            <Focus size={16} />
-            <span>Focus</span>
-          </button>
-        </div>
-        
-        <div className="mode-indicator">
-          {editorMode === 'normal' && <Eye size={12} />}
-          {editorMode === 'fullscreen' && <Maximize2 size={12} />}
-          {editorMode === 'focus' && <Focus size={12} />}
-          <span>{editorMode.charAt(0).toUpperCase() + editorMode.slice(1)}</span>
-        </div>
-      </div>
-    );
-  };
+              <div className="hidden sm:block h-6 w-px bg-border shrink-0" />
 
-  // Render floating controls for focus mode
-  const renderFocusControls = () => {
-    if (editorMode !== 'focus') return null;
-
-    return (
-      <>
-        {/* Exit button */}
-        <button
-          onClick={handleExitMode}
-          className="focus-mode-exit-button"
-          title="Exit focus mode (Esc)"
-        >
-          <ArrowLeft size={16} />
-          <span>Exit Focus</span>
-        </button>
-
-        {/* Floating controls */}
-        <div className="focus-mode-controls">
-          <button
-            onClick={handleToggleFullscreen}
-            title="Switch to fullscreen mode"
-          >
-            <Maximize2 size={16} />
-          </button>
-          
-
-        </div>
-      </>
-    );
-  };
-
-  // Render keyboard hint
-  const renderKeyboardHint = () => {
-    if (!showKeyboardHint) return null;
-
-    return (
-      <div className="keyboard-hint">
-        Press <strong>Esc</strong> to exit focus mode, <strong>F11</strong> to toggle
-      </div>
-    );
-  };
-
-  // Get container classes based on mode
-  const getContainerClass = () => {
-    const baseClass = "editor-layout layout-transition";
-    const modeClass = `editor-${editorMode}`;
-    
-    if (editorMode === 'normal') {
-      return `${baseClass} ${modeClass} container mx-auto px-4 py-8 max-w-4xl`;
-    }
-    
-    return `${baseClass} ${modeClass}`;
-  };
-
-  // Render header (only in normal and fullscreen modes)
-  const renderHeader = () => {
-    if (editorMode === 'focus') return null;
-
-    return (
-      <div className={cn(
-        "flex items-center justify-between mb-6",
-        editorMode === 'fullscreen' && "px-8 pt-8"
-      )}>
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBack}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft size={16} />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Note</h1>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <div className="flex items-center gap-1">
-                <Calendar size={12} />
-                <span>
-                  Updated {safeFormatDistanceToNow(note.updated_at || note.updatedAt)}
-                </span>
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
+                <div className="flex flex-col min-w-0 flex-1">
+                  <h1 className="text-base lg:text-lg font-semibold text-foreground truncate">
+                    {getCurrentTitle()}
+                  </h1>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>
+                      Last updated: {note?.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : 'Unknown'}
+                    </span>
+                  </div>
+                </div>
               </div>
-              {note.pdfAnnotationId && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleViewPDFAnnotation}
-                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 p-0 h-auto"
-                >
-                  <ExternalLink size={12} />
-                  <span>View PDF Annotation</span>
-                </Button>
-              )}
+            </div>
+
+            <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+              <AutoSaveStatus
+                status={autoSaveStatus}
+                lastSaved={lastSaved}
+                error={autoSaveError}
+                size="sm"
+              />
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex items-center gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                {isDeleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">Delete</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="default"
+                onClick={handleManualSave}
+                disabled={
+                  !noteContent.content ||
+                  autoSaveStatus === "saving"
+                }
+                className="flex items-center gap-2 text-white border-[#3B82F6] hover:bg-[#3B82F6]/90"
+                style={{ backgroundColor: "#3B82F6" }}
+              >
+                {autoSaveStatus === "saving" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">Save</span>
+              </Button>
+            </div>
+          </header>
+
+          {/* Editor Area */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-auto">
+              <div className="max-w-4xl mx-auto w-full p-3 lg:p-6">
+                <RobustNotionEditor
+                  content={noteContent.content}
+                  onChange={handleEditorChange}
+                  onSaveSuccess={() => setHasUnsavedChanges(false)}
+                  placeholder="Start writing your note..."
+                  autoFocus={false}
+                  autoSave={true}
+                  noteId={noteId}
+                  onAutoSave={(content) => handleAutoSave(content)}
+                  autoSaveDelay={1000}
+                  className="min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)] border-none shadow-none bg-transparent prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none max-w-none"
+                />
+              </div>
             </div>
           </div>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="flex items-center gap-2 text-red-600 hover:text-red-700"
-          >
-            <Trash2 size={16} />
-            {isDeleting ? "Deleting..." : "Delete"}
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <ErrorBoundary>
-      <div className={getContainerClass()}>
-        {renderModeToggle()}
-        
-        <div className={cn(
-          "editor-content-wrapper",
-          `mode-${editorMode}`
-        )}>
-          <div className="editor-content">
-            {renderHeader()}
-
-            {/* PDF Annotation Link Card */}
-            {note.pdfAnnotationId && editorMode !== 'focus' && (
-              <Card className={cn(
-                "p-4 mb-6 bg-blue-50 border-blue-200",
-                editorMode === 'fullscreen' && "mx-8"
-              )}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText size={20} className="text-blue-600" />
-                    <div>
-                      <h3 className="font-medium text-blue-900">
-                        Linked to PDF Annotation
-                      </h3>
-                      <p className="text-sm text-blue-700">
-                        This note is connected to a PDF annotation
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleViewPDFAnnotation}
-                    className="flex items-center gap-2"
-                  >
-                    <ExternalLink size={14} />
-                    View in PDF
-                  </Button>
-                </div>
-              </Card>
-            )}
-
-
-
-            {/* Note Editor */}
-            <Card className={cn(
-              editorMode === 'normal' && "p-6",
-              editorMode === 'fullscreen' && "mx-8 p-6 flex-1",
-              editorMode === 'focus' && "border-none shadow-none bg-transparent p-0 flex-1"
-            )}>
-              {/* Title Input */}
-              <div className={cn(
-                "mb-6",
-                editorMode === 'focus' && "mb-8"
-              )}>
-                <Input
-                  type="text"
-                  placeholder="Enter note title..."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className={cn(
-                    "text-xl font-semibold border-none px-0 focus:ring-0 focus:border-none",
-                    editorMode === 'focus' && "text-3xl font-bold"
-                  )}
-                  style={{ boxShadow: "none" }}
-                />
-              </div>
-
-              {/* Rich Text Editor */}
-              <LazyNotionEditor
-                initialContent={content}
-                onChange={setContent}
-                placeholder="Start writing your note..."
-                className={cn(
-                  editorMode === 'normal' && "min-h-[400px]",
-                  editorMode === 'fullscreen' && "min-h-[500px]",
-                  editorMode === 'focus' && "min-h-[600px]"
-                )}
-                mode={editorMode}
-                onModeChange={handleModeChange}
-                showModeToggle={false}
-                showWordCount={true}
-                showReadingTime={true}
-              />
-            </Card>
-
-            {/* Footer Actions - Only in normal mode */}
-            {editorMode === 'normal' && (
-              <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-gray-500">
-                  <span>Use "/" to insert blocks and format text</span>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <Button variant="outline" onClick={handleBack}>
-                    Back to Notes
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {renderFocusControls()}
-        {renderKeyboardHint()}
       </div>
     </ErrorBoundary>
   );
-};
-
-export default NotePage;
+}
