@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the comprehensive security enhancements implemented for the Noto PDF Annotation App's Supabase backend. These enhancements address file validation, user quota management, rate limiting, authentication validation, and authorization testing to create a robust security framework.
+This document outlines the comprehensive security enhancements implemented for the Noto PDF Annotation App. These enhancements address file validation, user quota management, rate limiting, authentication validation, authorization testing, and secure note management to create a robust security framework with complete auto-save functionality.
 
 ## Task 9.1: File Validation and Security Checks
 
@@ -191,7 +191,16 @@ export async function testRLSPolicies(userId: string): Promise<{
 
 ## API Endpoint Security Updates
 
-### 1. Upload Endpoint (`/api/pdfs/upload`)
+### 1. Notes API Security (`/api/notes`)
+
+#### Security Enhancements
+- **Authentication Required**: All note operations require valid Clerk authentication
+- **Row Level Security**: Automatic user data isolation through Supabase RLS
+- **Content Validation**: Validates note content and prevents XSS attacks
+- **Auto-Save Security**: Secure handling of frequent auto-save operations
+- **Rate Limiting**: Prevents abuse of auto-save functionality
+
+### 2. Upload Endpoint (`/api/pdfs/upload`)
 
 #### Security Enhancements
 - **Enhanced Authentication**: Uses `requireAuthentication()` with upload permissions
@@ -200,7 +209,7 @@ export async function testRLSPolicies(userId: string): Promise<{
 - **Rate Limiting**: Enhanced rate limiting with violation tracking
 - **Secure Storage**: Uses `generateSecureStoragePath()` for file organization
 
-### 2. PDF Listing Endpoint (`/api/pdfs`)
+### 3. PDF Listing Endpoint (`/api/pdfs`)
 
 #### Security Improvements
 - **Permission Validation**: Requires 'read' permission
@@ -208,7 +217,7 @@ export async function testRLSPolicies(userId: string): Promise<{
 - **Token Refresh Warnings**: Logs when users should refresh tokens
 - **RLS Enforcement**: Relies on RLS for automatic data filtering
 
-### 3. Individual PDF Access (`/api/pdfs/[id]`)
+### 4. Individual PDF Access (`/api/pdfs/[id]`)
 
 #### Security Features
 - **GET Operations**: Requires 'read' permission with enhanced validation

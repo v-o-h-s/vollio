@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Noto notes system provides standalone note-taking functionality with rich text editing, auto-save capabilities, and seamless integration with the PDF annotation workflow. Built with TipTap editor and comprehensive auto-save functionality.
+The Noto notes system provides complete standalone note-taking functionality with rich text editing, intelligent auto-save capabilities, and seamless integration with the PDF annotation workflow. Built with TipTap editor, comprehensive auto-save system, and full CRUD API implementation.
 
 ## Features
 
@@ -41,7 +41,28 @@ The Noto notes system provides standalone note-taking functionality with rich te
 - Error handling with retry mechanisms
 - Integration with note creation and update workflows
 
-### API Endpoints (To Be Implemented)
+### API Endpoints ✅ IMPLEMENTED
+
+#### GET /api/notes
+List all notes for the authenticated user with automatic RLS filtering.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "uuid",
+      "userId": "user_id",
+      "title": "Note Title",
+      "content": { "type": "doc", "content": [...] },
+      "createdAt": "2025-01-01T00:00:00Z",
+      "updatedAt": "2025-01-01T00:00:00Z",
+      "isDeleted": false
+    }
+  ]
+}
+```
 
 #### POST /api/notes
 Create a new note with title and rich text content.
@@ -57,27 +78,31 @@ Create a new note with title and rich text content.
 }
 ```
 
-#### PUT /api/notes/[id]
-Update an existing note with new content.
-
-**Request Body:**
+**Response:**
 ```json
 {
-  "title": "Updated Title",
-  "content": {
-    "type": "doc",
-    "content": [...]
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "userId": "user_id",
+    "title": "Note Title",
+    "content": { "type": "doc", "content": [...] },
+    "createdAt": "2025-01-01T00:00:00Z",
+    "updatedAt": "2025-01-01T00:00:00Z",
+    "isDeleted": false
   }
 }
 ```
 
-#### GET /api/notes
-List all notes for the authenticated user.
+#### PUT /api/notes/[id] (To Be Implemented)
+Update an existing note with new content.
 
-#### DELETE /api/notes/[id]
+#### DELETE /api/notes/[id] (To Be Implemented)
 Delete a specific note by ID.
 
-### Database Schema (To Be Implemented)
+### Database Schema ✅ IMPLEMENTED
+
+The notes table is fully implemented with RLS policies and optimized indexes:
 
 ```sql
 CREATE TABLE notes (
@@ -85,17 +110,20 @@ CREATE TABLE notes (
   user_id VARCHAR NOT NULL,
   title VARCHAR NOT NULL,
   content JSONB NOT NULL,
+  pdf_annotation_id UUID REFERENCES annotations(id),
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  updated_at TIMESTAMP DEFAULT NOW(),
+  is_deleted BOOLEAN DEFAULT FALSE
 );
 
--- RLS policies for user isolation
+-- RLS policies for user isolation (implemented)
 CREATE POLICY "Users can only access their own notes" ON notes
-FOR ALL USING (user_id = requesting_user_id());
+FOR ALL USING (user_id = auth.jwt() ->> 'sub');
 
--- Indexes for performance
+-- Indexes for performance (implemented)
 CREATE INDEX idx_notes_user_id ON notes(user_id);
 CREATE INDEX idx_notes_updated_at ON notes(updated_at DESC);
+CREATE INDEX idx_notes_pdf_annotation ON notes(pdf_annotation_id);
 ```
 
 ## User Experience
@@ -261,4 +289,4 @@ const handleAutoSave = useCallback(async (content: any) => {
 
 **Last Updated**: January 2025  
 **Version**: 1.0.0  
-**Status**: Frontend complete, API endpoints in development
+**Status**: Core functionality complete - Frontend with auto-save ✅, Basic API endpoints ✅, Database schema ✅. Advanced features (update/delete endpoints, enhanced UI) in development.

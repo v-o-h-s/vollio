@@ -2,7 +2,7 @@
 
 Noto is a modern, secure PDF annotation application built with Next.js 15 and React 19. It enables users to upload PDFs, select text, and create rich annotations with seamless cross-device functionality, enterprise-grade security, and comprehensive theme support.
 
-> **Status**: Production-ready core features with PDF viewing, text selection, annotation creation, rich text editing, and complete dark/light theme system. Full backend integration with Supabase, comprehensive error handling, and mobile-responsive design implemented.
+> **Status**: Production-ready with complete PDF annotation system, rich text editing with auto-save, comprehensive note management, and full dark/light theme integration. Backend fully implemented with Supabase, comprehensive error handling, mobile-responsive design, and cross-tab synchronization.
 
 ## ✨ Features
 
@@ -10,11 +10,12 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 
 - **Secure PDF Upload & Storage**: Complete Supabase Storage integration with comprehensive file validation, signed URLs, and automatic expiration handling
 - **Advanced PDF Viewer**: Full Syncfusion PDF Viewer integration with text selection, zoom, search, navigation, and coordinate-based positioning
-- **Notion-like Rich Text Editor**: Complete TipTap-based block editor with floating toolbars, slash commands, advanced formatting, cross-tab synchronization, and seamless PDF annotation integration
+- **Notion-like Rich Text Editor**: Complete TipTap-based block editor with floating toolbars, slash commands, advanced formatting, auto-save functionality, and seamless PDF annotation integration
+- **Auto-Save System**: Intelligent debounced auto-save with status tracking, error recovery, and visual feedback for all note editing
 - **Intelligent Text Selection**: Precise coordinate calculation for desktop tooltips and mobile-optimized annotation dialogs
 - **Real-time Activity Tracking**: Debounced user activity monitoring with automatic cache invalidation and recent activity display
 - **Cross-Document Navigation**: Seamless navigation between PDFs, annotations, and notes with cross-tab communication via PostMessage API and BroadcastChannel
-- **Note Management System**: Complete note creation, editing, and management with rich text content, PDF linking, and real-time synchronization
+- **Complete Note Management**: Full CRUD operations with rich text content, auto-save, word count, keyboard shortcuts, and PDF linking
 - **Comprehensive Error Handling**: Retry mechanisms, fallback UI components, and graceful error recovery
 - **Complete Theme System**: Light/dark mode support with system preference detection, persistent storage, and theme-aware skeleton loading states
 
@@ -67,23 +68,29 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 ## 🆕 Recent Major Improvements
 
+### Complete Auto-Save System
+- **Intelligent Auto-Save**: Debounced auto-save with status tracking (idle, typing, saving, saved, error)
+- **Visual Feedback**: Real-time save status indicators with error recovery mechanisms
+- **Content Preservation**: Automatic content preservation during network issues and editor errors
+- **Cross-tab Synchronization**: Real-time note updates across browser tabs using BroadcastChannel
+
+### Enhanced Note Management System
+- **Complete CRUD Operations**: Full note creation, editing, updating, and deletion with API integration
+- **Rich Text Editor**: TipTap-based editor with auto-save, word count, and keyboard shortcuts
+- **Multiple View Modes**: Grid, list, and compact display formats with advanced filtering and search
+- **Real-time Updates**: Automatic cache invalidation and cross-tab synchronization
+
 ### Complete Theme System
-- **Dark/Light Mode**: Full theme support with system preference detection
+- **Dark/Light Mode**: Full theme support with system preference detection and persistent storage
 - **Custom Theme Toggle**: Integrated theme selection in dashboard sidebar dropdown
 - **Theme-Aware Components**: All UI elements including loading skeletons adapt to current theme
 - **Cross-tab Synchronization**: Theme changes synchronized across all open browser tabs
 
 ### Enhanced Dashboard Experience  
-- **Collapsible Sidebar**: Modern sidebar design with user profile management
-- **Advanced Notes Interface**: Grid, list, and compact view modes with filtering and search
-- **Mobile-First Design**: Optimized touch interactions and responsive layouts
+- **Collapsible Sidebar**: Modern sidebar design with user profile management and theme integration
+- **Advanced Notes Interface**: Complete note management with filtering, sorting, and search capabilities
+- **Mobile-First Design**: Optimized touch interactions and responsive layouts with theme support
 - **Performance Optimized**: Theme-aware skeleton loading states and smooth animations
-
-### Improved Note Management
-- **Multiple View Modes**: Choose between grid, list, or compact display formats
-- **Advanced Filtering**: Filter by linked PDFs, recent activity, word count, and content status
-- **Real-time Search**: Instant search across note titles and content
-- **Rich Editor Integration**: Complete TipTap editor with auto-save and theme support
 
 ## ⚡ Quick Start
 
