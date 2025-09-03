@@ -668,22 +668,22 @@
   max-width: 100% !important;
 }
 
-/* Fix scrollbar positioning */
+/* Fix scrollbar positioning - Blue Theme */
 .e-pv-viewer-container::-webkit-scrollbar {
   width: 12px !important;
 }
 
 .e-pv-viewer-container::-webkit-scrollbar-track {
-  background: #f1f1f1 !important;
+  background: rgba(241, 245, 249, 0.5) !important;
 }
 
 .e-pv-viewer-container::-webkit-scrollbar-thumb {
-  background: #888 !important;
+  background: rgba(59, 130, 246, 0.6) !important;
   border-radius: 6px !important;
 }
 
 .e-pv-viewer-container::-webkit-scrollbar-thumb:hover {
-  background: #555 !important;
+  background: rgba(59, 130, 246, 0.8) !important;
 }
 
 /* Syncfusion PDF Viewer Responsive Styles */
@@ -1216,10 +1216,10 @@ html {
   color: inherit;
 }
 
-/* Modern scrollbar styling */
+/* Modern scrollbar styling - Blue Theme */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -1227,31 +1227,31 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
-  border-radius: 3px;
+  background: rgba(59, 130, 246, 0.4);
+  border-radius: 4px;
   transition: all 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
-  border-radius: 3px;
+  background: rgba(59, 130, 246, 0.6);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: hsl(var(--primary) / 0.6);
+  background: rgba(59, 130, 246, 0.8);
 }
 
 /* Enhanced scrollbar for dark mode */
 .dark ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.2);
+  background: rgba(96, 165, 250, 0.3);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.4);
+  background: rgba(96, 165, 250, 0.5);
 }
 
 .dark ::-webkit-scrollbar-thumb:active {
-  background: hsl(var(--primary) / 0.5);
+  background: rgba(96, 165, 250, 0.7);
 }
 
 /* Scrollbar corner styling */
@@ -1271,12 +1271,12 @@ html {
 
 /* Enhanced scrollbar for specific sections */
 .landing-page ::-webkit-scrollbar-thumb {
-  background: linear-gradient(45deg, hsl(var(--primary) / 0.3), hsl(var(--primary) / 0.5));
-  border-radius: 3px;
+  background: linear-gradient(45deg, rgba(59, 130, 246, 0.4), rgba(59, 130, 246, 0.6));
+  border-radius: 4px;
 }
 
 .landing-page ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(45deg, hsl(var(--primary) / 0.5), hsl(var(--primary) / 0.7));
+  background: linear-gradient(45deg, rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.8));
 }
 
 /* Smooth scrolling behavior */
@@ -1287,17 +1287,17 @@ html {
 
 /* Custom scrollbar for video demo container */
 .video-demo-container ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
 }
 
 .video-demo-container ::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary) / 0.4);
-  border-radius: 2px;
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 3px;
 }
 
 .video-demo-container ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary) / 0.6);
+  background: rgba(59, 130, 246, 0.7);
 }
 
 /* Modern navigation animations */
