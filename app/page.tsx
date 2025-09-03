@@ -1,6 +1,7 @@
 import {
   LandingHeader,
   HeroSection,
+  VideoDemo,
   HomeSection,
   FeaturesSection,
   AboutSection,
@@ -11,7 +12,7 @@ import {
 
 export default function Page() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen landing-page">
       <LandingHeader />
 
       {/* Unified Background for Entire Page */}
@@ -25,6 +26,7 @@ export default function Page() {
         {/* All Content with Unified Background */}
         <div className="relative z-10">
           <HeroSection />
+          <VideoDemo />
           <HomeSection />
           <FeaturesSection />
           <AboutSection />

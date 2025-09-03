@@ -1,5 +1,6 @@
 export { LandingHeader } from "./LandingHeader";
 export { HeroSection } from "./HeroSection";
+export { VideoDemo } from "./VideoDemo";
 export { HomeSection } from "./HomeSection";
 export { FeaturesSection } from "./FeaturesSection";
 export { AboutSection } from "./AboutSection";

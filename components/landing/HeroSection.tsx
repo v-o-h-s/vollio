@@ -2,9 +2,9 @@
 
 export function HeroSection() {
   return (
-    <section className="relative">
+    <section className="relative h-[80vh] flex items-center justify-center">
       {/* Hero Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
           {/* Two-line Heading */}
           <div className="mb-6">
@@ -23,7 +23,7 @@ export function HeroSection() {
           </p>
           
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button className="px-8 py-4 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 dark:from-blue-500 dark:to-violet-500 dark:hover:from-blue-600 dark:hover:to-violet-600 text-white font-body font-elegant-semibold rounded-xl shadow-2xl hover:shadow-blue-500/25 dark:hover:shadow-blue-400/25 transition-all duration-300 transform hover:scale-105 tracking-luxury">
               Get Started Free
             </button>
