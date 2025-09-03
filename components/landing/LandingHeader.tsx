@@ -33,7 +33,7 @@ export function LandingHeader() {
                 height={32}
                 className="h-8 w-8"
               />
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 dark:from-blue-400 dark:to-violet-400 bg-clip-text text-transparent">Noto</span>
+              <span className="text-xl font-heading font-elegant-bold bg-gradient-to-r from-blue-600 to-violet-600 dark:from-blue-400 dark:to-violet-400 bg-clip-text text-transparent tracking-elegant">Noto</span>
             </Link>
           </div>
 
@@ -43,7 +43,7 @@ export function LandingHeader() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-sm font-medium text-muted-foreground transition-all duration-200 hover:text-foreground hover:scale-105 dark:hover:text-blue-400"
+                className="text-sm font-body font-elegant-medium text-muted-foreground transition-all duration-200 hover:text-foreground hover:scale-105 dark:hover:text-blue-400 tracking-luxury"
               >
                 {item.name}
               </Link>
@@ -61,7 +61,7 @@ export function LandingHeader() {
                 <Button 
                   variant="default" 
                   size="sm"
-                  className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 dark:from-blue-500 dark:to-violet-500 dark:hover:from-blue-600 dark:hover:to-violet-600 border-0 shadow-lg hover:shadow-xl transition-all duration-200"
+                  className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 dark:from-blue-500 dark:to-violet-500 dark:hover:from-blue-600 dark:hover:to-violet-600 border-0 shadow-lg hover:shadow-xl transition-all duration-200 font-body font-elegant-semibold tracking-luxury"
                 >
                   Sign In
                 </Button>
@@ -96,7 +96,7 @@ export function LandingHeader() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block px-3 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted dark:hover:bg-slate-800/50 rounded-md transition-all duration-200"
+                  className="block px-3 py-2 text-base font-body font-elegant-medium text-muted-foreground hover:text-foreground hover:bg-muted dark:hover:bg-slate-800/50 rounded-md transition-all duration-200"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
