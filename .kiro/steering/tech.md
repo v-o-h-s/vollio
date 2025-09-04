@@ -17,7 +17,23 @@ inclusion: always
 - **File Storage**: Supabase Storage with signed URLs
 - **PDF Rendering**: Syncfusion PDF Viewer (licensed)
 - **Rich Text Editor**: TipTap with floating toolbars and extensions
+- **UI Components**: Custom confirmation dialogs and floating status indicators
+- **Auto-Save Architecture**: Context-based status management with RTK Query integration
 - **Testing**: Vitest + React Testing Library
+
+## Recent Technical Implementations
+
+### UI/UX Architecture
+- **Custom Dialog Components**: Styled confirmation dialogs replacing browser alerts
+- **Context-Based State**: AutoSaveStatusProvider for global auto-save status management
+- **Floating Components**: Bottom-right positioned status indicators with scoped visibility
+- **Obsidian-Style Design**: Clean interface with separate title input and borderless layouts
+
+### RTK Query Patterns
+- **Mutation Integration**: All CRUD operations use RTK Query mutations for consistency
+- **Cache Management**: Automatic cache invalidation and real-time updates
+- **Error Handling**: Comprehensive error recovery with toast notifications
+- **Loading States**: Visual feedback during all async operations
 
 ## Code Style & Conventions
 
@@ -89,6 +105,30 @@ inclusion: always
 - Use `getAuthenticatedSupabaseClient()` with RLS for automatic security
 - Implement proper error cleanup (e.g., remove uploaded files on database failures)
 - Use comprehensive error logging and user-friendly error messages
+
+### RTK Query Best Practices
+
+- **Use RTK Query for All API Operations**: Replace direct fetch calls with RTK Query mutations and queries
+- **Mutation Pattern**: Use `useMutation` hooks for create, update, delete operations
+- **Cache Management**: Leverage automatic cache invalidation with proper tags
+- **Error Handling**: Use `.unwrap()` for throwing errors in try-catch blocks
+- **Loading States**: Extract `isLoading` from mutation hooks for UI feedback
+- **Optimistic Updates**: Use RTK Query's optimistic update patterns where appropriate
+- **Type Safety**: Properly type all mutations and queries with TypeScript interfaces
+
+```typescript
+// Preferred RTK Query pattern
+const [deleteNote, { isLoading: isDeleting }] = useDeleteNoteMutation();
+
+const handleDelete = async () => {
+  try {
+    await deleteNote(noteId).unwrap();
+    toast.success("Note deleted successfully");
+  } catch (error) {
+    toast.error("Failed to delete note");
+  }
+};
+```
 
 ## Performance Guidelines
 

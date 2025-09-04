@@ -2,7 +2,16 @@
 
 ## Overview
 
-This document summarizes the comprehensive updates made to all markdown documentation files to reflect the current state of the Noto PDF annotation application, particularly focusing on the recently implemented auto-save system and complete notes management functionality.
+This document summarizes the comprehensive updates made to all markdown documentation files to reflect the current state of the Noto PDF annotation application, particularly focusing on the recently implemented auto-save system, complete notes management functionality, and latest UI improvements including custom confirmation dialogs and enhanced auto-save status display.
+
+## 📝 Recent Changes (September 2025)
+
+### UI/UX Improvements ✅ IMPLEMENTED
+- **Custom Delete Confirmation Dialogs**: Replaced browser `window.confirm()` with styled React components
+- **Auto-Save Status Positioning**: Moved FloatingAutoSaveStatus to bottom-right with scoped visibility
+- **Obsidian-Style Interface**: Implemented separate title input with clean, borderless design
+- **Enhanced Error Handling**: Added toast notifications and comprehensive error recovery
+- **Context-Based Architecture**: AutoSaveStatusProvider for global auto-save state management
 
 ## 📝 Files Updated
 

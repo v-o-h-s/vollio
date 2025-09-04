@@ -78,6 +78,10 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 ### Enhanced Note Management System
 - **Complete CRUD Operations**: Full note creation, editing, updating, and deletion with API integration
+- **Custom Delete Confirmations**: Styled confirmation dialogs with loading states and error handling
+- **Auto-Save Status Display**: Floating status indicators positioned in bottom-right of note editing pages
+- **Obsidian-Style Interface**: Clean design with separate title input and borderless editor layout
+- **Enhanced Error Handling**: Toast notifications and comprehensive error recovery mechanisms
 - **Rich Text Editor**: TipTap-based editor with auto-save, word count, and keyboard shortcuts
 - **Multiple View Modes**: Grid, list, and compact display formats with advanced filtering and search
 - **Real-time Updates**: Automatic cache invalidation and cross-tab synchronization

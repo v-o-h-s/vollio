@@ -19,6 +19,7 @@ inclusion: always
   - `enhanced-note-card.tsx` - Advanced note card with rich interactions and theme support
   - `enhanced-notes-list.tsx` - Optimized notes list with virtualization, filtering, and theme integration
   - `enhanced-notes-list-skeleton.tsx` - Theme-aware loading skeleton for notes list
+  - `delete-confirmation-dialog.tsx` - Custom styled confirmation dialog with loading states and error handling
 
 #### Feature Components (`components/[feature]/`)
 
@@ -92,9 +93,11 @@ inclusion: always
   - `AutoSaveExample.tsx` - Auto-save implementation example
 
 ##### Dashboard Components (`components/dashboard/`)
-##### Dashboard Components (`components/dashboard/`)
 - **dashboard-sidebar.tsx** - Main navigation sidebar with collapsible design, theme selection dropdown, and user profile management
 - **RecentActivityDisplay.tsx** - Recent activity widget for dashboard overview
+- **AutoSaveStatusProvider.tsx** - Context provider for global auto-save status management
+- **FloatingAutoSaveStatus.tsx** - Bottom-right positioned auto-save status indicator with real-time updates
+- **SidebarProvider.tsx** - Context provider for sidebar state management (collapsed/expanded)
 
 #### Layout Components (`components/` root)
 - **dashboard-sidebar.tsx** - Collapsible sidebar with navigation, user profile, and settings dropdown

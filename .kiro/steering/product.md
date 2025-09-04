@@ -15,6 +15,9 @@ inclusion: always
 - **Text Annotation**: Implement click-drag text selection with coordinate-based positioning (not DOM-based)
 - **Annotation CRUD**: Store all annotations in Supabase with automatic RLS protection
 - **Advanced Note-Taking System**: Enhanced notes interface with grid/list/compact views, filtering, sorting, and search
+- **Auto-Save Status Management**: Context-based auto-save status with floating indicators positioned in bottom-right
+- **Custom UI Components**: Styled confirmation dialogs, floating status indicators, and enhanced error handling
+- **Obsidian-Style Interface**: Clean design with separate title input, borderless layouts, and intuitive workflows
 - **Cross-Document Navigation**: Enable seamless switching between PDFs, annotations, and notes
 - **Complete Theme System**: Light/dark mode support with system preference detection and theme-aware components
 - **Responsive Dashboard**: Collapsible sidebar with theme selection, user profile management, and modern navigation
@@ -36,6 +39,10 @@ When building UI flows, follow these established patterns:
 - **Visual Feedback**: Always highlight annotated text, show hover tooltips, use preview cards
 - **Navigation**: Dashboard as central hub with collapsible sidebar, easy PDF switching, breadcrumb navigation
 - **Error Handling**: Show user-friendly messages, provide retry options, log detailed errors
+- **Confirmation Dialogs**: Use custom styled confirmation dialogs instead of browser alerts
+- **Auto-Save Feedback**: Provide real-time status indicators for save operations with visual feedback
+- **Loading States**: Show loading spinners and disabled states during async operations
+- **Toast Notifications**: Use toast messages for success/error feedback with appropriate styling
 
 ### Technical Implementation Rules
 - **PDF Coordinates**: Always use PDF page coordinates for annotations, never DOM positions

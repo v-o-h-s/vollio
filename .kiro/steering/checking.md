@@ -47,6 +47,18 @@ When encountering errors or implementation challenges:
 - **Type mismatches**: Validate database row structure with type guards
 - **Connection issues**: Use `getAuthenticatedSupabaseClient()` consistently
 
+### RTK Query Issues
+- **Cache Management**: Ensure proper cache invalidation with appropriate tags
+- **Mutation Errors**: Use `.unwrap()` in try-catch blocks for proper error handling
+- **Loading States**: Extract `isLoading` from mutation hooks for UI feedback
+- **Type Safety**: Properly type all mutations and queries with interfaces
+
+### UI Component Issues
+- **Confirmation Dialogs**: Use custom `DeleteConfirmationDialog` instead of browser `window.confirm()`
+- **Auto-Save Status**: Ensure `AutoSaveStatusProvider` is wrapped around components that need status
+- **Context Errors**: Check that context hooks are used within their respective providers
+- **Loading States**: Always show loading spinners during async operations
+
 ### File Operations
 - **Upload failures**: Implement cleanup in catch blocks to prevent orphaned files
 - **Storage access**: Generate fresh signed URLs, don't cache expired ones
