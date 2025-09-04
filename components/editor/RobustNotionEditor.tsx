@@ -8,14 +8,9 @@ import { cn } from "@/lib/utils";
 import type { NotionEditorProps } from "./types";
 
 interface RobustNotionEditorProps
-  extends Omit<NotionEditorProps, "onAutoSave"> {
+  extends Omit<NotionEditorProps, "onChange"> {
+  onChange?: (content: any) => void;
   onSaveSuccess?: () => void;
-  onAutoSave?: (content: any, noteId?: string) => Promise<string | void>;
-  onAutoSaveStatusChange?: (status: {
-    status: "idle" | "typing" | "saving" | "saved" | "error";
-    lastSaved: Date | null;
-    error: string | null;
-  }) => void;
 }
 
 export function RobustNotionEditor({
@@ -26,7 +21,6 @@ export function RobustNotionEditor({
   autoFocus = false,
   autoSave = false,
   noteId,
-  onAutoSave,
   onAutoSaveStatusChange,
   autoSaveDelay = 2000,
   className,
@@ -76,22 +70,10 @@ export function RobustNotionEditor({
     [onChange, handleError]
   );
 
-  // Enhanced auto-save handler with error protection
-  const handleAutoSave = useCallback(
-    async (saveContent: any, saveNoteId: string) => {
-      try {
-        if (onAutoSave) {
-          await onAutoSave(saveContent, saveNoteId);
-          onSaveSuccess?.();
-        }
-      } catch (error) {
-        console.error("Auto-save error:", error);
-        handleError(error as Error);
-        throw error; // Re-throw to let auto-save hook handle it
-      }
-    },
-    [onAutoSave, onSaveSuccess, handleError]
-  );
+  // Handle note ID changes from the editor
+  const handleSaveSuccess = useCallback(() => {
+    onSaveSuccess?.();
+  }, [onSaveSuccess]);
 
   // Recovery handler
   const handleRetry = useCallback(() => {
@@ -167,7 +149,6 @@ export function RobustNotionEditor({
         autoFocus={autoFocus}
         autoSave={autoSave}
         noteId={noteId}
-        onAutoSave={handleAutoSave}
         onAutoSaveStatusChange={onAutoSaveStatusChange}
         autoSaveDelay={autoSaveDelay}
         className={className}

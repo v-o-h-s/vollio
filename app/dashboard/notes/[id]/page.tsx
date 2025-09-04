@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import {
   ArrowLeft,
-  Save,
   Loader2,
   FileText,
   Trash2,
@@ -13,9 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
-import { AutoSaveStatus } from "@/components/editor/AutoSaveStatus";
 
-import { useAutoSave } from "@/hooks/use-auto-save";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useNoteSync } from "@/hooks/use-note-sync";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -76,67 +73,19 @@ export default function NoteEditPage() {
     return null;
   };
 
-  // Auto-save functionality
-  const handleAutoSave = useCallback(
-    async (content: any) => {
-      try {
-        const result = await updateNote({
-          id: noteId,
-          updates: {
-            title: extractTitleFromContent(content) || "Untitled Note",
-            content,
-          },
-        }).unwrap();
-
-        // Broadcast note update for cross-tab sync
-        broadcastUpdate(result);
-      } catch (error) {
-        throw error;
-      }
-    },
-    [noteId, updateNote, broadcastUpdate]
-  );
-
-  const {
-    status: autoSaveStatus,
-    lastSaved,
-    error: autoSaveError,
-    updateContent,
-  } = useAutoSave({
-    onSave: handleAutoSave,
-    delay: 1000, // 1 second delay for auto-save
-    enabled: true,
-  });
-
   // Handle editor content changes
   const handleEditorChange = useCallback(
     (content: any) => {
       setNoteContent((prev) => ({ ...prev, content }));
       setHasUnsavedChanges(true);
-
-      // Only trigger auto-save if content is not empty
-      if (content && content.content && content.content.length > 0) {
-        updateContent(content);
-      }
     },
-    [updateContent]
+    []
   );
 
   // Handle go back
   const handleGoBack = useCallback(() => {
     router.push("/dashboard/notes");
   }, [router]);
-
-  // Handle manual save
-  const handleManualSave = useCallback(async () => {
-    if (noteContent.content) {
-      try {
-        await handleAutoSave(noteContent.content);
-      } catch (error) {
-        console.error("Manual save failed:", error);
-      }
-    }
-  }, [noteContent.content, handleAutoSave]);
 
   // Handle delete note
   const handleDelete = useCallback(async () => {
@@ -161,10 +110,6 @@ export default function NoteEditPage() {
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
-    "mod+s": (event) => {
-      event.preventDefault();
-      handleManualSave();
-    },
     escape: (event) => {
       event.preventDefault();
       if (
@@ -179,7 +124,7 @@ export default function NoteEditPage() {
   // Warn user before leaving if there are unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges || autoSaveStatus === "saving") {
+      if (hasUnsavedChanges) {
         event.preventDefault();
         return "You have unsaved changes. Are you sure you want to leave?";
       }
@@ -187,7 +132,7 @@ export default function NoteEditPage() {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [hasUnsavedChanges, autoSaveStatus]);
+  }, [hasUnsavedChanges]);
 
   // Get current note title for display
   const getCurrentTitle = () => {
@@ -266,13 +211,6 @@ export default function NoteEditPage() {
             </div>
 
             <div className="flex items-center gap-2 lg:gap-3 shrink-0">
-              <AutoSaveStatus
-                status={autoSaveStatus}
-                lastSaved={lastSaved}
-                error={autoSaveError}
-                size="sm"
-              />
-
               <Button
                 variant="ghost"
                 size="sm"
@@ -286,25 +224,6 @@ export default function NoteEditPage() {
                   <Trash2 className="h-4 w-4" />
                 )}
                 <span className="hidden sm:inline">Delete</span>
-              </Button>
-
-              <Button
-                variant="outline"
-                size="default"
-                onClick={handleManualSave}
-                disabled={
-                  !noteContent.content ||
-                  autoSaveStatus === "saving"
-                }
-                className="flex items-center gap-2 text-white border-[#3B82F6] hover:bg-[#3B82F6]/90"
-                style={{ backgroundColor: "#3B82F6" }}
-              >
-                {autoSaveStatus === "saving" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                <span className="hidden sm:inline">Save</span>
               </Button>
             </div>
           </header>
@@ -321,7 +240,6 @@ export default function NoteEditPage() {
                   autoFocus={false}
                   autoSave={true}
                   noteId={noteId}
-                  onAutoSave={(content) => handleAutoSave(content)}
                   autoSaveDelay={1000}
                   className="min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)] border-none shadow-none bg-transparent prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none max-w-none"
                 />

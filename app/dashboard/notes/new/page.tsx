@@ -10,12 +10,9 @@ import { AutoSaveStatus } from "@/components/editor/AutoSaveStatus";
 
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
-import { useNoteSync } from "@/hooks/use-note-sync";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Rectangle } from "@/lib/types";
 import {
-  useCreateNoteMutation,
-  useUpdateNoteMutation,
   useCreateAnnotationMutation,
 } from "@/lib/store/apiSlice";
 
@@ -52,9 +49,6 @@ export default function NewNotePage() {
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "typing" | "saving" | "saved" | "error">("idle");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [autoSaveError, setAutoSaveError] = useState<string | null>(null);
-
-  // Cross-tab synchronization
-  const { broadcastCreate } = useNoteSync();
 
   // Parse selection data from URL on mount
   useEffect(() => {
@@ -102,10 +96,25 @@ export default function NewNotePage() {
     }
   }, [searchParams]);
 
-  // RTK Query mutations
-  const [createNote] = useCreateNoteMutation();
-  const [updateNote] = useUpdateNoteMutation();
+  // RTK Query mutations for PDF annotations
   const [createAnnotation] = useCreateAnnotationMutation();
+
+  // Extract title from editor content
+  const extractTitleFromContent = (content: any): string | null => {
+    if (!content || !content.content) return null;
+
+    const firstNode = content.content[0];
+    if (firstNode && firstNode.type === "heading" && firstNode.content) {
+      return firstNode.content.map((c: any) => c.text).join("");
+    }
+
+    if (firstNode && firstNode.type === "paragraph" && firstNode.content) {
+      const text = firstNode.content.map((c: any) => c.text).join("");
+      return text.length > 50 ? text.substring(0, 50) + "..." : text;
+    }
+
+    return null;
+  };
 
   // Create annotation when note is created if we the note creating is triggered by text selection
   const createAnnotationForNote = useCallback(
@@ -136,76 +145,10 @@ export default function NewNotePage() {
     [selectionData, noteContent.content, annotationCreated, createAnnotation]
   );
 
-  // Auto-save callback for the editor
-  const handleEditorAutoSave = useCallback(
-    async (content: any, currentNoteId?: string) => {
-      try {
-        if (!currentNoteId && !noteId) {
-          // Create new note first
-          setIsCreating(true);
-          const result = await createNote({
-            title: extractTitleFromContent(content) || "Untitled Note",
-            content,
-          }).unwrap();
-
-          const newNoteId = result.id;
-          setNoteId(newNoteId);
-          setIsCreating(false);
-
-          // Broadcast note creation for cross-tab sync
-          broadcastCreate(result);
-
-          // Create annotation if we have selection data
-          if (selectionData && !annotationCreated) {
-            await createAnnotationForNote(newNoteId);
-          }
-
-          return newNoteId; // Return the new note ID to the editor
-        } else {
-          // Update existing note
-          const idToUse = currentNoteId || noteId;
-          await updateNote({
-            id: idToUse!,
-            updates: {
-              title: extractTitleFromContent(content) || "Untitled Note",
-              content,
-            },
-          }).unwrap();
-
-          return idToUse;
-        }
-      } catch (error) {
-        setIsCreating(false);
-        throw error;
-      }
-    },
-    [
-      noteId,
-      broadcastCreate,
-      selectionData,
-      annotationCreated,
-      createNote,
-      updateNote,
-      createAnnotationForNote,
-    ]
-  );
-
-  // Extract title from editor content
-  const extractTitleFromContent = (content: any): string | null => {
-    if (!content || !content.content) return null;
-
-    const firstNode = content.content[0];
-    if (firstNode && firstNode.type === "heading" && firstNode.content) {
-      return firstNode.content.map((c: any) => c.text).join("");
-    }
-
-    if (firstNode && firstNode.type === "paragraph" && firstNode.content) {
-      const text = firstNode.content.map((c: any) => c.text).join("");
-      return text.length > 50 ? text.substring(0, 50) + "..." : text;
-    }
-
-    return null;
-  };
+  // Handle note creation success - simplified since editor handles everything
+  const handleSaveSuccess = useCallback(() => {
+    setHasUnsavedChanges(false);
+  }, []);
 
   // Handle editor content changes
   const handleEditorChange = useCallback(
@@ -258,16 +201,15 @@ export default function NewNotePage() {
     }
   }, [router, selectionData]);
 
-  // Handle manual save
+  // Handle manual save (mostly handled by auto-save now)
   const handleManualSave = useCallback(async () => {
-    if (noteContent.content) {
-      try {
-        await handleEditorAutoSave(noteContent.content, noteId || undefined);
-      } catch (error) {
-        console.error("Manual save failed:", error);
-      }
+    // Manual save is now handled internally by the editor
+    // This is mainly for user feedback and ensuring save happens immediately
+    if (autoSaveStatus === "typing" && noteContent.content) {
+      setAutoSaveStatus("saving");
+      // The editor will handle the actual save via auto-save
     }
-  }, [noteContent.content, handleEditorAutoSave, noteId]);
+  }, [autoSaveStatus, noteContent.content]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -413,12 +355,11 @@ export default function NewNotePage() {
                 <RobustNotionEditor
                   content={noteContent.content}
                   onChange={handleEditorChange}
-                  onSaveSuccess={() => setHasUnsavedChanges(false)}
+                  onSaveSuccess={handleSaveSuccess}
                   placeholder="Start writing your note..."
                   autoFocus={true}
                   autoSave={true}
                   noteId={noteId || undefined}
-                  onAutoSave={handleEditorAutoSave}
                   onAutoSaveStatusChange={handleAutoSaveStatusChange}
                   autoSaveDelay={1000}
                   className="min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)] border-none shadow-none bg-transparent prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none max-w-none"

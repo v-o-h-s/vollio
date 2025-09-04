@@ -56,7 +56,6 @@ function NotionEditorInner({
   // Auto-save props
   autoSave = false,
   noteId,
-  onAutoSave,
   autoSaveDelay = 500,
   onAutoSaveStatusChange,
 }: NotionEditorProps) {
@@ -74,41 +73,68 @@ function NotionEditorInner({
     }
   }, [noteId]);
 
+  // Helper function to extract title from editor content
+  const extractTitleFromContent = useCallback((content: any): string => {
+    if (!content || !content.content) return "Untitled Note";
+
+    const firstNode = content.content[0];
+    if (firstNode && firstNode.type === "heading" && firstNode.content) {
+      return firstNode.content.map((c: any) => c.text || "").join("");
+    }
+
+    if (firstNode && firstNode.type === "paragraph" && firstNode.content) {
+      const text = firstNode.content.map((c: any) => c.text || "").join("");
+      return text.length > 50 ? text.substring(0, 50) + "..." : text || "Untitled Note";
+    }
+
+    return "Untitled Note";
+  }, []);
+
+  // Internal auto-save handler
   const handleAutoSave = useCallback(
     async (content: any) => {
-      if (onAutoSave) {
-        // Use the custom auto-save handler which can handle note creation
-        const resultNoteId = await onAutoSave(content, currentNoteId);
-        
-        // Update our local noteId if a new one was created
-        if (resultNoteId && !currentNoteId) {
-          setCurrentNoteId(resultNoteId);
-        }
-        
-        return resultNoteId;
-      } else {
-        // Default auto-save implementation - requires existing noteId
-        if (!currentNoteId) {
-          throw new Error("Note ID is required for default auto-save");
+      const title = extractTitleFromContent(content);
+
+      if (!currentNoteId) {
+        // Create new note
+        const response = await fetch("/api/notes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ title, content }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to create note");
         }
 
+        const { data } = await response.json();
+        const newNoteId = data.id;
+        
+        setCurrentNoteId(newNoteId);
+        
+        return newNoteId;
+      } else {
+        // Update existing note
         const response = await fetch(`/api/notes/${currentNoteId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ content }),
+          body: JSON.stringify({ title, content }),
         });
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to save note");
+          throw new Error(errorData.error || "Failed to update note");
         }
         
         return currentNoteId;
       }
     },
-    [currentNoteId, onAutoSave]
+    [currentNoteId, extractTitleFromContent]
   );
 
   const {
@@ -119,7 +145,7 @@ function NotionEditorInner({
   } = useAutoSave({
     onSave: handleAutoSave,
     delay: autoSaveDelay,
-    enabled: autoSave && editable, // Remove the noteId requirement
+    enabled: autoSave && editable,
   });
 
   // Notify parent of auto-save status changes

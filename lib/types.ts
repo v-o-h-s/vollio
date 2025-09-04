@@ -38,7 +38,6 @@ export interface NotionEditorProps {
   // Auto-save props
   autoSave?: boolean;
   noteId?: string;
-  onAutoSave?: (content: JSONContent, noteId?: string) => Promise<string | void>;
   autoSaveDelay?: number;
   onAutoSaveStatusChange?: (status: {
     status: "idle" | "typing" | "saving" | "saved" | "error";
