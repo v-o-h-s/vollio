@@ -6,7 +6,7 @@ import { withErrorHandling } from "@/lib/utils/server-error-handling";
 // GET /api/notes/[id] - Get a specific note
 export const GET = withErrorHandling(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { userId } = await auth();
   
@@ -14,12 +14,13 @@ export const GET = withErrorHandling(async (
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = getAuthenticatedSupabaseClient();
+  const { id } = await params;
+  const supabase = await getAuthenticatedSupabaseClient();
   
   const { data: noteData, error } = await supabase
     .from("notes")
     .select("*")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (error) {
@@ -51,7 +52,7 @@ export const GET = withErrorHandling(async (
 // PUT /api/notes/[id] - Update a specific note
 export const PUT = withErrorHandling(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { userId } = await auth();
   
@@ -59,6 +60,7 @@ export const PUT = withErrorHandling(async (
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { id } = await params;
   const body = await request.json();
   const { title, content } = body;
 
@@ -69,7 +71,7 @@ export const PUT = withErrorHandling(async (
     );
   }
 
-  const supabase = getAuthenticatedSupabaseClient();
+  const supabase = await getAuthenticatedSupabaseClient();
   
   const { data: noteData, error } = await supabase
     .from("notes")
@@ -78,7 +80,7 @@ export const PUT = withErrorHandling(async (
       content,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", params.id)
+    .eq("id", id)
     .select()
     .single();
 
@@ -111,7 +113,7 @@ export const PUT = withErrorHandling(async (
 // DELETE /api/notes/[id] - Delete a specific note
 export const DELETE = withErrorHandling(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { userId } = await auth();
   
@@ -119,12 +121,13 @@ export const DELETE = withErrorHandling(async (
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = getAuthenticatedSupabaseClient();
+  const { id } = await params;
+  const supabase = await getAuthenticatedSupabaseClient();
   
   const { error } = await supabase
     .from("notes")
     .delete()
-    .eq("id", params.id);
+    .eq("id", id);
 
   if (error) {
     console.error("Failed to delete note:", error);
