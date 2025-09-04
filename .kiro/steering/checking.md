@@ -98,6 +98,29 @@ After any changes, verify these core flows work:
 ### Common Issues to Check
 - **Import Paths**: Ensure all `@/` imports are correct and components exist
 - **TypeScript Errors**: Fix implicit `any` types and deprecated API usage
-- **Auto-Save Integration**: Verify debounced saves work correctly with status feedback
+- **RTK Query Usage**: Verify all server communication uses RTK Query mutations/queries instead of direct fetch
+- **Auto-Save Architecture**: Ensure editors handle auto-save internally without complex parent callbacks
+- **Component Simplification**: Remove unnecessary callback props and complex state management between components
 - **Mobile Responsiveness**: Test touch interactions and responsive layouts
 - **Error Boundaries**: Ensure proper error handling and recovery mechanisms
+
+## RTK Query Implementation Checklist
+
+When implementing or refactoring API calls:
+- ✅ Use `useCreateNoteMutation` instead of direct fetch to `/api/notes`
+- ✅ Use `useUpdateNoteMutation` instead of manual PUT requests
+- ✅ Use `useGetNotesQuery` for fetching note lists with automatic caching
+- ✅ Leverage RTK Query's automatic loading and error states
+- ✅ Use `invalidatesTags` for cache synchronization after mutations
+- ❌ Avoid direct fetch calls unless absolutely necessary (file uploads, etc.)
+
+## Auto-Save Architecture Checklist
+
+When working with editor components:
+- ✅ Auto-save should be handled internally by NotionEditor components
+- ✅ Use RTK Query mutations for create/update operations in auto-save
+- ✅ Provide simple `onSaveSuccess` callbacks for parent notifications if needed
+- ✅ Remove complex `onAutoSave`, `onNoteIdChange` callback props
+- ✅ Extract titles automatically from editor content for new notes
+- ❌ Avoid passing save functions down from parent components
+- ❌ Avoid complex state management between editor and parent for saving

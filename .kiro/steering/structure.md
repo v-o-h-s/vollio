@@ -39,13 +39,13 @@ inclusion: always
 
 ##### Editor Components (`components/editor/`)
 - **Core Editor Components**:
-  - `NotionEditor.tsx` - Main TipTap-based block editor with auto-save and keyboard shortcuts
+  - `NotionEditor.tsx` - Main TipTap-based block editor with internal auto-save, RTK Query integration, and simplified API
   - `EditorProvider.tsx` - Context provider for editor state management and cross-tab sync
   - `LazyNotionEditor.tsx` - Performance-optimized wrapper with lazy loading and skeleton states
   - `ResponsiveNotionEditor.tsx` - Responsive editor that adapts to screen size
-  - `RobustNotionEditor.tsx` - Editor with enhanced error handling and recovery
+  - `RobustNotionEditor.tsx` - Editor with enhanced error handling and recovery (no callback complexity)
   - `MultiModeEditor.tsx` - Editor with multiple editing modes (rich text, markdown, etc.)
-  - `NotionEditorWithAutoSave.tsx` - Editor with integrated auto-save functionality
+  - `NotionEditorWithAutoSave.tsx` - [DEPRECATED] - Auto-save is now built into base NotionEditor
 
 - **Floating Toolbar Components**:
   - `FloatingToolbar.tsx` - Basic floating toolbar with essential formatting options

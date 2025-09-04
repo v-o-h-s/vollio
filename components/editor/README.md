@@ -22,12 +22,14 @@ All editor components have been successfully implemented and integrated into the
 ### Main Editor Components
 
 #### NotionEditor ✅
-The main block-based rich text editor component with complete TipTap integration.
+The main block-based rich text editor component with complete TipTap integration and internal auto-save functionality.
 
 **Features:**
 - Block-based editing with drag-and-drop reordering
 - Slash command system for quick formatting
-- Auto-save functionality with debounced updates
+- **Internal auto-save functionality using RTK Query mutations**
+- **Automatic note creation and updates without parent callbacks**
+- **Simplified component API with minimal props**
 - Undo/redo support with keyboard shortcuts
 - Mobile-responsive design with touch support
 - Integration with PDF annotation system
@@ -37,8 +39,9 @@ The main block-based rich text editor component with complete TipTap integration
 import { NotionEditor } from '@/components/editor/NotionEditor';
 
 <NotionEditor
-  initialContent={content}
-  onChange={setContent}
+  initialNoteId={noteId} // Optional: for editing existing notes
+  initialContent={content} // Optional: for setting initial content
+  onSaveSuccess={() => console.log('Note saved!')} // Optional: success callback
   placeholder="Start writing..."
   className="min-h-[400px]"
 />
@@ -357,10 +360,10 @@ Complete note management system with rich text editing and PDF integration.
 
 ### Note Management Features
 
-- **CRUD Operations**: Full create, read, update, delete functionality
+- **CRUD Operations**: Full create, read, update, delete functionality via RTK Query
 - **Rich Text Content**: TipTap JSONContent format with full formatting
 - **PDF Linking**: Bidirectional linking with PDF annotations
-- **Auto-save**: Debounced automatic saving with user feedback
+- **Internal Auto-save**: Editor-managed automatic saving using RTK Query mutations with debounced updates and user feedback
 - **Error Recovery**: Comprehensive error handling with retry mechanisms
 
 ### Note Management Components

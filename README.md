@@ -10,8 +10,8 @@ Noto is a modern, secure PDF annotation application built with Next.js 15 and Re
 
 - **Secure PDF Upload & Storage**: Complete Supabase Storage integration with comprehensive file validation, signed URLs, and automatic expiration handling
 - **Advanced PDF Viewer**: Full Syncfusion PDF Viewer integration with text selection, zoom, search, navigation, and coordinate-based positioning
-- **Notion-like Rich Text Editor**: Complete TipTap-based block editor with floating toolbars, slash commands, advanced formatting, auto-save functionality, and seamless PDF annotation integration
-- **Auto-Save System**: Intelligent debounced auto-save with status tracking, error recovery, and visual feedback for all note editing
+- **Notion-like Rich Text Editor**: Complete TipTap-based block editor with floating toolbars, slash commands, advanced formatting, internal auto-save functionality, and seamless PDF annotation integration
+- **Auto-Save Architecture**: Editor-internal auto-save using RTK Query with intelligent debouncing, status tracking, error recovery, and visual feedback for all note editing
 - **Intelligent Text Selection**: Precise coordinate calculation for desktop tooltips and mobile-optimized annotation dialogs
 - **Real-time Activity Tracking**: Debounced user activity monitoring with automatic cache invalidation and recent activity display
 - **Cross-Document Navigation**: Seamless navigation between PDFs, annotations, and notes with cross-tab communication via PostMessage API and BroadcastChannel
@@ -68,11 +68,13 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 ## 🆕 Recent Major Improvements
 
-### Complete Auto-Save System
-- **Intelligent Auto-Save**: Debounced auto-save with status tracking (idle, typing, saving, saved, error)
+### Complete Auto-Save Architecture
+- **Editor-Internal Auto-Save**: Auto-save functionality built into NotionEditor components using RTK Query
+- **RTK Query Integration**: All save operations use RTK Query mutations for consistency and caching
+- **Simplified Component API**: Removed complex callback props in favor of internal auto-save management
+- **Automatic Note Creation**: Seamlessly creates new notes when content is added without manual intervention
 - **Visual Feedback**: Real-time save status indicators with error recovery mechanisms
 - **Content Preservation**: Automatic content preservation during network issues and editor errors
-- **Cross-tab Synchronization**: Real-time note updates across browser tabs using BroadcastChannel
 
 ### Enhanced Note Management System
 - **Complete CRUD Operations**: Full note creation, editing, updating, and deletion with API integration

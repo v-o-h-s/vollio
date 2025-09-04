@@ -1,10 +1,25 @@
 # Noto PDF Annotation API Documentation
 
-This document describes the API endpoints for the Noto PDF annotation application with Supabase backend integration.
+This document describes the API endpoints for the Noto PDF annotation application with Supabase backend integration. All API interactions should use RTK Query mutations and queries for consistency, caching, and automatic error handling.
 
 ## Authentication
 
 All endpoints require Clerk authentication with JWT tokens. The `userId` is automatically extracted from the authenticated session and used for Row Level Security (RLS) in Supabase.
+
+## Client Integration
+
+**Important**: Always use RTK Query for API calls instead of direct fetch requests. This ensures consistent caching, loading states, and error handling across the application.
+
+```typescript
+// Preferred: Use RTK Query
+import { useGetNotesQuery, useCreateNoteMutation } from '@/lib/store/apiSlice';
+
+const { data: notes, isLoading, error } = useGetNotesQuery();
+const [createNote] = useCreateNoteMutation();
+
+// Avoid: Direct fetch calls
+// const response = await fetch('/api/notes');
+```
 
 ## Endpoints
 

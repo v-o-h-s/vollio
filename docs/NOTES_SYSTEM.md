@@ -2,44 +2,50 @@
 
 ## Overview
 
-The Noto notes system provides complete standalone note-taking functionality with rich text editing, intelligent auto-save capabilities, and seamless integration with the PDF annotation workflow. Built with TipTap editor, comprehensive auto-save system, and full CRUD API implementation.
+The Noto notes system provides complete standalone note-taking functionality with rich text editing, internal auto-save capabilities using RTK Query, and seamless integration with the PDF annotation workflow. Built with TipTap editor, simplified auto-save architecture, and full CRUD API implementation.
 
 ## Features
 
 ### Core Functionality
 - **Rich Text Editing**: TipTap-based NotionEditor with full formatting capabilities
-- **Auto-Save**: Debounced auto-save with visual status feedback and error recovery
+- **Internal Auto-Save**: Editor-managed auto-save using RTK Query mutations with debounced updates
+- **Simplified Architecture**: Auto-save handled internally without complex parent callbacks
 - **Keyboard Shortcuts**: Ctrl/Cmd+S for manual save, Escape for navigation
 - **Word Count**: Real-time word count display for better writing awareness
 - **Mobile Responsive**: Touch-friendly interface with adaptive layouts
 
-### Auto-Save System
-- **Debounced Saves**: 1-second delay to prevent excessive API calls
+### Auto-Save Architecture
+- **RTK Query Integration**: All save operations use RTK Query mutations for consistency
+- **Editor-Internal**: Auto-save logic contained within NotionEditor components
+- **Automatic Note Creation**: Creates new notes automatically when content is added
+- **Title Extraction**: Automatically extracts titles from editor content
 - **Status Tracking**: Visual feedback for saving, saved, and error states
 - **Error Recovery**: Automatic retry mechanisms and user-friendly error messages
-- **Unsaved Changes Warning**: Browser warning when leaving with unsaved content
 
 ## Technical Implementation
 
 ### Frontend Components
 
 #### NewNotePage (`app/dashboard/notes/new/page.tsx`)
-- Main note creation interface with auto-save integration
+- Simplified note creation interface with minimal props
 - Real-time word count and save status display
 - Keyboard shortcuts and navigation handling
 - Comprehensive error handling and recovery
 
 #### NotionEditor (`components/editor/NotionEditor.tsx`)
 - TipTap-based rich text editor with full formatting
-- Auto-save integration with debounced content updates
+- **Internal auto-save using RTK Query mutations**
+- **Simplified API without complex callback props**
+- **Automatic note creation and title extraction**
 - Floating toolbars and slash commands for enhanced UX
 - Mobile-responsive design with touch-friendly interactions
 
 #### useAutoSave Hook (`hooks/use-auto-save.ts`)
-- Debounced auto-save functionality with configurable delay
-- Status tracking (idle, saving, saved, error)
+- Integrated within NotionEditor for internal auto-save management
+- RTK Query mutation integration for create/update operations
+- Status tracking (idle, typing, saving, saved, error)
 - Error handling with retry mechanisms
-- Integration with note creation and update workflows
+- Debounced updates to prevent excessive API calls
 
 ### API Endpoints ✅ IMPLEMENTED
 

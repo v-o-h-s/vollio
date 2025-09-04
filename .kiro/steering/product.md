@@ -39,7 +39,9 @@ When building UI flows, follow these established patterns:
 
 ### Technical Implementation Rules
 - **PDF Coordinates**: Always use PDF page coordinates for annotations, never DOM positions
+- **Server Communication**: Always use RTK Query for API calls - never use direct fetch calls
 - **State Management**: Use Redux Toolkit with RTK Query for all API calls and caching
+- **Auto-Save Architecture**: Editor components handle auto-save internally using RTK Query mutations
 - **Theme Support**: Implement theme-aware styling using CSS custom properties and Tailwind dark mode classes
 - **Mobile Support**: Implement touch gestures for text selection, use mobile-specific dialogs
 - **Performance**: Lazy load annotations, handle large PDFs efficiently, cache API responses

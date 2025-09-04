@@ -2,52 +2,50 @@
 
 This directory contains custom React hooks that provide reusable functionality across the Noto PDF annotation application. These hooks handle common patterns like auto-save, error handling, activity tracking, and mobile interactions.
 
-## 🔄 Auto-Save System
+## 🔄 Auto-Save Architecture
 
-### useAutoSave Hook ✅ COMPLETED
+### useAutoSave Hook ✅ INTEGRATED
 
 **File**: `hooks/use-auto-save.ts`
 
-The `useAutoSave` hook provides intelligent debounced auto-save functionality with comprehensive status tracking and error recovery.
+The `useAutoSave` hook provides intelligent debounced auto-save functionality and is now integrated directly within NotionEditor components for simplified architecture.
 
 #### Features
 
+- **Editor-Internal Integration**: Used internally by NotionEditor components, not directly by parent components
+- **RTK Query Integration**: Uses RTK Query mutations for all save operations
 - **Debounced Saving**: Prevents excessive API calls by debouncing save operations
 - **Status Tracking**: Real-time status updates (idle, typing, saving, saved, error)
 - **Error Recovery**: Handles save failures with retry mechanisms
-- **Content Preservation**: Uses refs to avoid unnecessary re-renders
-- **Visual Feedback**: Provides status information for UI components
+- **Automatic Note Creation**: Seamlessly creates new notes when content is added
+- **Title Extraction**: Automatically extracts titles from editor content
 
-#### Usage
+#### Internal Usage (within NotionEditor)
 
 ```typescript
 import { useAutoSave } from '@/hooks/use-auto-save';
+import { useCreateNoteMutation, useUpdateNoteMutation } from '@/lib/store/apiSlice';
 
-function NoteEditor({ noteId }: { noteId?: string }) {
+function NotionEditor({ initialNoteId, onSaveSuccess }: NotionEditorProps) {
+  const [createNote] = useCreateNoteMutation();
+  const [updateNote] = useUpdateNoteMutation();
+  
   const { status, lastSaved, error, updateContent } = useAutoSave({
     onSave: async (content) => {
-      if (noteId) {
-        await updateNote({ id: noteId, content });
+      if (currentNoteId) {
+        await updateNote({ id: currentNoteId, content }).unwrap();
       } else {
-        const newNote = await createNote({ content });
-        // Handle new note creation
+        const newNote = await createNote({ content }).unwrap();
+        setCurrentNoteId(newNote.id);
       }
+      onSaveSuccess?.();
     },
-    delay: 500, // 500ms debounce delay
-    enabled: true, // Enable auto-save
+    delay: 500,
+    enabled: true,
   });
 
-  const handleContentChange = (newContent: any) => {
-    updateContent(newContent);
-  };
-
-  return (
-    <div>
-      <Editor onChange={handleContentChange} />
-      <AutoSaveStatus 
-        status={status} 
-        lastSaved={lastSaved} 
-        error={error} 
+  // Editor handles all auto-save internally
+}
       />
     </div>
   );

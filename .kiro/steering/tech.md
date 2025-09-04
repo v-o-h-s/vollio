@@ -56,9 +56,11 @@ inclusion: always
 ### State Management
 
 - Use Redux Toolkit slices for feature-based state
-- Implement RTK Query for API calls and caching
+- **Always use RTK Query for server communication** - preferred over direct fetch calls
+- RTK Query provides automatic caching, loading states, and synchronization
 - Use typed hooks from `lib/store/hooks.ts`
 - Keep selectors in dedicated files with memoization
+- Prefer mutations and queries over manual API calls for consistency
 
 ### Component Structure
 
@@ -189,13 +191,17 @@ inclusion: always
 - Implement proper error recovery for editor failures
 - Support keyboard shortcuts (Ctrl/Cmd+S for save, Escape for navigation)
 
-### Auto-Save Implementation
+### Auto-Save Architecture
 
-- Use `useAutoSave` hook for debounced auto-save functionality
-- Implement visual feedback for save status (saving, saved, error states)
-- Handle creation vs. update operations automatically
-- Provide manual save options with keyboard shortcuts
-- Warn users before leaving with unsaved changes
+- **Editor-Internal Auto-Save**: NotionEditor components handle auto-save internally without requiring parent component callbacks
+- Use RTK Query mutations for create and update operations (following the "always use RTK Query" principle)
+- Implement debounced saves with `useAutoSave` hook integration
+- Provide visual feedback for save status (idle, typing, saving, saved, error states)
+- Handle both note creation and updates automatically within the editor
+- Extract titles from editor content automatically for new notes
+- Simplify parent component APIs by removing complex callback functions
+- Use `onSaveSuccess` callbacks only when parents need to respond to save events
+- Maintain cross-tab synchronization through RTK Query cache invalidation
 
 ## Mobile Responsiveness
 
