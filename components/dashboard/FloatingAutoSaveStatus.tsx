@@ -87,7 +87,7 @@ export function FloatingAutoSaveStatus() {
   }
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 ml-64"> {/* ml-64 to account for sidebar width */}
+    <div className="fixed bottom-4 right-4 z-50"> {/* Positioned in bottom right */}
       <Badge 
         variant={getStatusVariant()}
         className={cn(
