@@ -1101,7 +1101,7 @@ we add the two styles so it can be compatible with all browsers out there
 }
 
 /* Enhanced dark theme for landing page */
-.dark {
+.dark .landing-page {
   --background: #0a0a0a;
   --foreground: #fafafa;
   --card: #0f0f0f;
@@ -1331,7 +1331,7 @@ html {
 
 /* Modern dark theme specific adjustments */
 .dark .bg-background {
-  background-color: #0a0a0a;
+  background-color: #191919;
 }
 
 .dark .text-slate-400 {

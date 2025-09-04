@@ -69,7 +69,7 @@ const NotesPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 py-8 max-w-7xl bg-background min-h-screen">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-bold text-foreground tracking-tight">Notes</h1>
@@ -93,7 +93,7 @@ const NotesPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 py-8 max-w-7xl bg-background min-h-screen">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-bold text-foreground tracking-tight">Notes</h1>
@@ -146,7 +146,7 @@ const NotesPage: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 py-8 max-w-7xl bg-background min-h-screen">
         {/* Enhanced Header with Better Typography and Spacing */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
           <div className="space-y-2">
