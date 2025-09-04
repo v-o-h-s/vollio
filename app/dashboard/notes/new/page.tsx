@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
 import { AutoSaveStatus } from "@/components/editor/AutoSaveStatus";
+import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveStatus";
 
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
@@ -371,6 +372,7 @@ export default function NewNotePage() {
           {/* Auto-save status is shown in the header */}
         </div>
       </div>
+      <FloatingAutoSaveStatus />
     </ErrorBoundary>
   );
 }

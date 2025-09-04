@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
+import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveStatus";
 
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useNoteSync } from "@/hooks/use-note-sync";
@@ -248,6 +249,7 @@ export default function NoteEditPage() {
           </div>
         </div>
       </div>
+      <FloatingAutoSaveStatus />
     </ErrorBoundary>
   );
 }
