@@ -40,6 +40,7 @@ import { useEditorKeyboardShortcuts } from "@/hooks/use-editor-keyboard-shortcut
 import { cn } from "@/lib/utils";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useCreateNoteMutation, useUpdateNoteMutation } from "@/lib/store/apiSlice";
 import type { NotionEditorProps } from "./types";
 
 function NotionEditorInner({
@@ -65,6 +66,10 @@ function NotionEditorInner({
 
   // Auto-save functionality
   const [currentNoteId, setCurrentNoteId] = useState<string | undefined>(noteId);
+
+  // RTK Query mutations for note operations
+  const [createNote] = useCreateNoteMutation();
+  const [updateNote] = useUpdateNoteMutation();
 
   // Update currentNoteId when noteId prop changes
   useEffect(() => {
@@ -96,45 +101,20 @@ function NotionEditorInner({
       const title = extractTitleFromContent(content);
 
       if (!currentNoteId) {
-        // Create new note
-        const response = await fetch("/api/notes", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ title, content }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to create note");
-        }
-
-        const { data } = await response.json();
-        const newNoteId = data.id;
+        // Create new note using RTK Query
+        const newNote = await createNote({ title, content }).unwrap();
+        const newNoteId = newNote.id;
         
         setCurrentNoteId(newNoteId);
-        
-        return newNoteId;
       } else {
-        // Update existing note
-        const response = await fetch(`/api/notes/${currentNoteId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ title, content }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to update note");
-        }
-        
-        return currentNoteId;
+        // Update existing note using RTK Query
+        await updateNote({ 
+          id: currentNoteId, 
+          updates: { title, content } 
+        }).unwrap();
       }
     },
-    [currentNoteId, extractTitleFromContent]
+    [currentNoteId, extractTitleFromContent, createNote, updateNote]
   );
 
   const {
