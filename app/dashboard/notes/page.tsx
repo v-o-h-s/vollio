@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useGetNotesQuery } from "@/lib/store/apiSlice";
+import { useGetNotesQuery, useDeleteNoteMutation } from "@/lib/store/apiSlice";
 import { useRouter } from "next/navigation";
 import { Plus, FileText, Sparkles, BookOpen, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useNoteSync } from "@/hooks/use-note-sync";
 import { EnhancedNotesListSkeleton } from "@/components/ui/enhanced-notes-list-skeleton";
 import { EnhancedNotesList } from "@/components/ui/enhanced-notes-list";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
+import toast from "react-hot-toast";
 
 /**
  * Notes List Page
@@ -25,12 +27,25 @@ const NotesPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filterBy, setFilterBy] = useState('');
   
+  // Delete confirmation dialog state
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    noteId: string | null;
+    noteTitle: string;
+  }>({
+    isOpen: false,
+    noteId: null,
+    noteTitle: '',
+  });
+  
   const {
     data: notes = [],
     isLoading,
     error,
     refetch,
   } = useGetNotesQuery({});
+
+  const [deleteNote, { isLoading: isDeleting }] = useDeleteNoteMutation();
 
   // Cross-tab synchronization
   useNoteSync({
@@ -53,8 +68,52 @@ const NotesPage: React.FC = () => {
   };
 
   const handleDeleteNote = (noteId: string) => {
-    // TODO: Implement delete functionality with confirmation
-    console.log('Delete note:', noteId);
+    // Find the note to get its title for confirmation
+    const noteToDelete = notes.find(note => note.id === noteId);
+    const noteTitle = noteToDelete?.title || "Untitled Note";
+    
+    // Open confirmation dialog
+    setDeleteDialog({
+      isOpen: true,
+      noteId,
+      noteTitle,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteDialog.noteId) return;
+
+    try {
+      // Show loading toast
+      const loadingToast = toast.loading("Deleting note...");
+
+      // Delete the note
+      await deleteNote(deleteDialog.noteId).unwrap();
+
+      // Close dialog
+      setDeleteDialog({ isOpen: false, noteId: null, noteTitle: '' });
+
+      // Show success toast
+      toast.success(`"${deleteDialog.noteTitle}" has been deleted`, {
+        id: loadingToast,
+      });
+
+      // Optionally refetch the notes list to ensure UI is in sync
+      refetch();
+    } catch (error) {
+      console.error("Failed to delete note:", error);
+      
+      // Show error toast
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : "Failed to delete note. Please try again."
+      );
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialog({ isOpen: false, noteId: null, noteTitle: '' });
   };
 
   const handleDuplicateNote = (noteId: string) => {
@@ -197,6 +256,15 @@ const NotesPage: React.FC = () => {
             setSortOrder(newSortOrder);
           }}
           onFilterChange={setFilterBy}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteConfirmationDialog
+          isOpen={deleteDialog.isOpen}
+          onClose={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          noteTitle={deleteDialog.noteTitle}
+          isDeleting={isDeleting}
         />
       </div>
     </ErrorBoundary>
