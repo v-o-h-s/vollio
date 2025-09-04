@@ -129,15 +129,15 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
 
   // Determine card classes based on variant
   const cardClasses = useMemo(() => {
-    const baseClasses = "enhanced-note-card group cursor-pointer transition-all duration-normal hover-lift";
+    const baseClasses = "enhanced-note-card group cursor-pointer transition-all duration-300 hover-lift relative overflow-hidden rounded-xl";
     
     switch (variant) {
       case 'list':
-        return `${baseClasses} p-5 hover:shadow-lg border-l-4 border-l-transparent hover:border-l-primary`;
+        return `${baseClasses} p-5 hover:shadow-lg border-l-4 border-l-transparent hover:border-l-primary bg-gradient-to-r from-card/95 via-card to-accent/5 backdrop-blur-sm border border-border/50`;
       case 'compact':
-        return `${baseClasses} p-4 hover:shadow-md`;
+        return `${baseClasses} p-4 hover:shadow-md bg-gradient-to-br from-card via-card/90 to-muted/20 backdrop-blur-sm border border-border/40 rounded-lg`;
       default: // grid
-        return `${baseClasses} p-6 hover:shadow-xl`;
+        return `${baseClasses} p-6 hover:shadow-xl bg-gradient-to-br from-card via-accent/5 to-primary/5 backdrop-blur-sm border border-border/30 rounded-2xl`;
     }
   }, [variant]);
 
@@ -170,7 +170,10 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
   if (variant === 'list') {
     return (
       <Card className={cardClasses} onClick={handleCardClick}>
-        <div className="flex items-start gap-4">
+        {/* Hover overlay effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        
+        <div className="flex items-start gap-4 relative z-10">
           {/* Main content */}
           <div className="flex-1 min-w-0 space-y-2">
             {/* Title and actions */}
@@ -286,8 +289,13 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
 
   return (
     <Card className={cardClasses} onClick={handleCardClick}>
-      {/* Header with title and actions */}
-      <div className="flex items-start justify-between mb-3">
+      {/* Hover overlay effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-accent/6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      
+      {/* Content wrapper */}
+      <div className="relative z-10">
+        {/* Header with title and actions */}
+        <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
           <h3 className={titleClasses}>
             {note.title || "Untitled Note"}
@@ -418,6 +426,7 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
           </Button>
         </div>
       )}
+      </div>
     </Card>
   );
 });

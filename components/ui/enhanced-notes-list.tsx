@@ -136,7 +136,7 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
             case 'recent':
               const dayAgo = new Date();
               dayAgo.setDate(dayAgo.getDate() - 1);
-              const noteDate = note.updated_at || note.updatedAt;
+              const noteDate = note.updatedAt || note.updatedAt;
               if (!noteDate) return false;
               try {
                 return new Date(noteDate) > dayAgo;
@@ -165,8 +165,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
           comparison = (a.title || 'Untitled').localeCompare(b.title || 'Untitled');
           break;
         case 'created':
-          const aCreated = a.created_at || a.createdAt;
-          const bCreated = b.created_at || b.createdAt;
+          const aCreated = a.createdAt || a.createdAt;
+          const bCreated = b.createdAt || b.createdAt;
           try {
             comparison = new Date(aCreated || 0).getTime() - new Date(bCreated || 0).getTime();
           } catch {
@@ -180,8 +180,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
           break;
         case 'updated':
         default:
-          const aUpdated = a.updated_at || a.updatedAt;
-          const bUpdated = b.updated_at || b.updatedAt;
+          const aUpdated = a.updatedAt || a.updatedAt;
+          const bUpdated = b.updatedAt || b.updatedAt;
           try {
             comparison = new Date(aUpdated || 0).getTime() - new Date(bUpdated || 0).getTime();
           } catch {
