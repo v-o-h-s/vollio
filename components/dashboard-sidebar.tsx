@@ -35,6 +35,7 @@ import {
 import { cn } from "@/lib/utils";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import { useTheme } from "@/hooks/use-theme";
+import { useSidebar } from "@/components/dashboard/SidebarProvider";
 
 interface SidebarProps {
   className?: string;

@@ -40,6 +40,7 @@ import { useEditorKeyboardShortcuts } from "@/hooks/use-editor-keyboard-shortcut
 import { cn } from "@/lib/utils";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useAutoSaveStatus } from "@/components/dashboard/AutoSaveStatusProvider";
 import { useCreateNoteMutation, useUpdateNoteMutation } from "@/lib/store/apiSlice";
 import type { NotionEditorProps } from "./types";
 
@@ -121,6 +122,9 @@ function NotionEditorInner({
     enabled: autoSave && editable,
   });
 
+  // Global auto-save status context
+  const { updateStatus: updateGlobalAutoSaveStatus } = useAutoSaveStatus();
+
   // Handle title change
   const handleTitleChange = useCallback((newTitle: string) => {
     setNoteTitle(newTitle);
@@ -136,6 +140,16 @@ function NotionEditorInner({
       });
     }
   }, [autoSaveStatus, lastSaved, autoSaveError, onAutoSaveStatusChange]);
+
+  // Update global auto-save status context
+  useEffect(() => {
+    updateGlobalAutoSaveStatus(
+      autoSaveStatus,
+      lastSaved,
+      autoSaveError,
+      !currentNoteId // isCreating is true when we don't have a noteId yet
+    );
+  }, [autoSaveStatus, lastSaved, autoSaveError, currentNoteId, updateGlobalAutoSaveStatus]);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -371,7 +385,7 @@ function NotionEditorInner({
   return (
     <div className="w-full">
       {/* Obsidian-style Title Section */}
-      <div className="mb-4 border rounded-md bg-background">
+      <div className="mb-4 bg-background">
         <input
           type="text"
           value={noteTitle}
@@ -404,28 +418,11 @@ function NotionEditorInner({
         id="editor-content"
         editor={editor}
         className={cn(
-          "w-full rounded-md border border-input bg-background",
-          "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+          "w-full bg-background",
+          "focus-within:outline-none",
           "transition-all duration-200"
         )}
       />
-
-      {/* Auto-save Status */}
-      {autoSave && (
-        <div className="flex items-center justify-between px-4 py-2 border-t border-border bg-muted/30">
-          <AutoSaveStatus
-            status={autoSaveStatus}
-            lastSaved={lastSaved}
-            error={autoSaveError}
-          />
-          {(showWordCount || showReadingTime) && (
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              {showWordCount && <span>{stats.wordCount} words</span>}
-              {showReadingTime && <span>{stats.readingTime} min read</span>}
-            </div>
-          )}
-        </div>
-      )}
 
       {editor && (
         <LinkDialog
