@@ -61,6 +61,7 @@ function NotionEditorInner({
   onAutoSaveStatusChange,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
+  const [noteTitle, setNoteTitle] = useState("Untitled Note");
 
   // Responsive design handled via CSS
 
@@ -80,20 +81,12 @@ function NotionEditorInner({
 
   // Helper function to extract title from editor content
   const extractTitleFromContent = useCallback((content: any): string => {
-    if (!content || !content.content) return "Untitled Note";
+    // If we have a manually set title that's not empty, use that
+    if (noteTitle.trim()) return noteTitle.trim();
 
-    const firstNode = content.content[0];
-    if (firstNode && firstNode.type === "heading" && firstNode.content) {
-      return firstNode.content.map((c: any) => c.text || "").join("");
-    }
-
-    if (firstNode && firstNode.type === "paragraph" && firstNode.content) {
-      const text = firstNode.content.map((c: any) => c.text || "").join("");
-      return text.length > 50 ? text.substring(0, 50) + "..." : text || "Untitled Note";
-    }
-
+    // Always default to "Untitled Note" when no manual title is set
     return "Untitled Note";
-  }, []);
+  }, [noteTitle]);
 
   // Internal auto-save handler
   const handleAutoSave = useCallback(
@@ -127,6 +120,11 @@ function NotionEditorInner({
     delay: autoSaveDelay,
     enabled: autoSave && editable,
   });
+
+  // Handle title change
+  const handleTitleChange = useCallback((newTitle: string) => {
+    setNoteTitle(newTitle);
+  }, []);
 
   // Notify parent of auto-save status changes
   useEffect(() => {
@@ -317,6 +315,14 @@ function NotionEditorInner({
     }
   }, [editor, editable]);
 
+  // Trigger auto-save when title changes
+  useEffect(() => {
+    if (autoSave && editable && editor && noteTitle && noteTitle !== "Untitled Note") {
+      const currentContent = editor.getJSON();
+      updateContent(currentContent);
+    }
+  }, [noteTitle, autoSave, editable, editor, updateContent]);
+
   // Calculate word count and reading time
   const stats = useMemo(() => {
     if (!editor) return { wordCount: 0, readingTime: 0 };
@@ -364,6 +370,25 @@ function NotionEditorInner({
 
   return (
     <div className="w-full">
+      {/* Obsidian-style Title Section */}
+      <div className="mb-4 border rounded-md bg-background">
+        <input
+          type="text"
+          value={noteTitle}
+          onChange={(e) => handleTitleChange(e.target.value)}
+          placeholder="Untitled Note"
+          disabled={!editable}
+          className={cn(
+            "w-full px-4 py-3 text-xl font-semibold bg-transparent border-0",
+            "focus:outline-none focus:ring-0 placeholder:text-muted-foreground",
+            "resize-none overflow-hidden"
+          )}
+          style={{ fontSize: '1.5rem', lineHeight: '2rem' }}
+        />
+        <hr className="border-border" />
+      </div>
+
+      {/* Content Section */}
       {editor && (
         <>
           <BubbleMenu editor={editor} />
