@@ -9,14 +9,14 @@ export const GET = withErrorHandling(async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   const { userId } = await auth();
-  
+
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
   const supabase = await getAuthenticatedSupabaseClient();
-  
+
   const { data: noteData, error } = await supabase
     .from("notes")
     .select("*")
@@ -55,7 +55,7 @@ export const PUT = withErrorHandling(async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   const { userId } = await auth();
-  
+
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -72,7 +72,7 @@ export const PUT = withErrorHandling(async (
   }
 
   const supabase = await getAuthenticatedSupabaseClient();
-  
+
   const { data: noteData, error } = await supabase
     .from("notes")
     .update({
@@ -116,14 +116,14 @@ export const DELETE = withErrorHandling(async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   const { userId } = await auth();
-  
+
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
   const supabase = await getAuthenticatedSupabaseClient();
-  
+
   const { error } = await supabase
     .from("notes")
     .delete()

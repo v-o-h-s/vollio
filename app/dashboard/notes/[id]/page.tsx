@@ -150,8 +150,7 @@ export default function NoteEditPage() {
 
   // Get current note title for display
   const getCurrentTitle = () => {
-    const extracted = extractTitleFromContent(noteContent.content);
-    return extracted || note?.title || "Untitled Note";
+    return note?.title || "Untitled Note";
   };
 
   // Calculate word count

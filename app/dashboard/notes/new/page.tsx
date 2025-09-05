@@ -100,23 +100,6 @@ export default function NewNotePage() {
   // RTK Query mutations for PDF annotations
   const [createAnnotation] = useCreateAnnotationMutation();
 
-  // Extract title from editor content
-  const extractTitleFromContent = (content: any): string | null => {
-    if (!content || !content.content) return null;
-
-    const firstNode = content.content[0];
-    if (firstNode && firstNode.type === "heading" && firstNode.content) {
-      return firstNode.content.map((c: any) => c.text).join("");
-    }
-
-    if (firstNode && firstNode.type === "paragraph" && firstNode.content) {
-      const text = firstNode.content.map((c: any) => c.text).join("");
-      return text.length > 50 ? text.substring(0, 50) + "..." : text;
-    }
-
-    return null;
-  };
-
   // Create annotation when note is created if we the note creating is triggered by text selection
   const createAnnotationForNote = useCallback(
     async (noteId: string) => {
@@ -130,7 +113,7 @@ export default function NewNotePage() {
           pageNumber: selectionData.pageNumber,
           coordinates: selectionData.coordinates,
           noteContent:
-            extractTitleFromContent(noteContent.content) || "Untitled Note",
+            "Untitled Note", // Use default title since we store title separately
         }).unwrap();
 
         setAnnotationCreated(true);
@@ -248,8 +231,7 @@ export default function NewNotePage() {
 
   // Get current note title for display
   const getCurrentTitle = () => {
-    const extracted = extractTitleFromContent(noteContent.content);
-    return extracted || "New Note";
+    return "New Note"; // Simple default since we store title separately
   };
 
   return (
