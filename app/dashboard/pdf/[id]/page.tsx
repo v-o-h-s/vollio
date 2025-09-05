@@ -75,16 +75,16 @@ export default function PDFViewerPage() {
   // Handle loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <RefreshCw
             size={48}
-            className="text-blue-500 mx-auto mb-4 animate-spin"
+            className="text-primary mx-auto mb-4 animate-spin"
           />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-foreground mb-2">
             Loading PDF...
           </h2>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Please wait while we load your document
           </p>
         </div>
@@ -95,13 +95,13 @@ export default function PDFViewerPage() {
   // Handle error state
   if (error || !pdfDocument) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md">
-          <AlertCircle size={48} className="text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <AlertCircle size={48} className="text-destructive mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-foreground mb-2">
             PDF Not Found
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-muted-foreground mb-6">
             The PDF you're looking for could not be found or you don't have
             permission to view it.
           </p>
@@ -129,13 +129,13 @@ export default function PDFViewerPage() {
 
   return (
     <div
-      className={`min-h-screen bg-white focus-mode-transition pdf-viewer-page ${
+      className={`min-h-screen bg-background focus-mode-transition pdf-viewer-page ${
         isFocusMode ? "pdf-focus-mode" : ""
       }`}
       data-pdf-viewer="true"
     >
       {/* Header */}
-      <div className="border-b border-gray-200 bg-white sticky top-0 z-10">
+      <div className="border-b border-border bg-card sticky top-0 z-10">
         <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <Button
@@ -148,8 +148,8 @@ export default function PDFViewerPage() {
               <span className="hidden sm:inline">Back</span>
             </Button>
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <FileText size={18} className="text-gray-500 flex-shrink-0" />
-              <h1 className="text-sm sm:text-lg font-semibold text-gray-900 truncate">
+              <FileText size={18} className="text-muted-foreground flex-shrink-0" />
+              <h1 className="text-sm sm:text-lg font-semibold text-foreground truncate">
                 {pdfDocument.filename}
               </h1>
             </div>
@@ -194,9 +194,9 @@ export default function PDFViewerPage() {
 
       {/* Focus Mode Hint */}
       {isFocusMode && showHint && (
-        <div className="focus-mode-hint">
+        <div className="focus-mode-hint fixed top-4 left-1/2 transform -translate-x-1/2 bg-card border border-border text-foreground px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity">
           Press{" "}
-          <kbd className="px-1 py-0.5 bg-gray-700 rounded text-xs">Esc</kbd> to
+          <kbd className="px-1 py-0.5 bg-muted text-muted-foreground rounded text-xs">Esc</kbd> to
           exit focus mode
         </div>
       )}
