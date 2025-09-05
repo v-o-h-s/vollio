@@ -18,16 +18,17 @@ import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-di
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useNoteSync } from "@/hooks/use-note-sync";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { 
+import {
   useGetNoteQuery,
   useUpdateNoteMutation,
-  useDeleteNoteMutation 
+  useDeleteNoteMutation
 } from "@/lib/store/apiSlice";
 import toast from "react-hot-toast";
+import type { JSONContent } from "@tiptap/core";
 
 interface NoteContent {
-  title?: string;
-  content: any;
+  title: string;
+  content: JSONContent | null;
 }
 
 export default function NoteEditPage() {
@@ -39,8 +40,8 @@ export default function NoteEditPage() {
   const { data: note, isLoading, error } = useGetNoteQuery(noteId);
   const [updateNote] = useUpdateNoteMutation();
   const [deleteNote] = useDeleteNoteMutation();
-
   const [noteContent, setNoteContent] = useState<NoteContent>({
+    title: "",
     content: null,
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -49,42 +50,26 @@ export default function NoteEditPage() {
 
   // Cross-tab synchronization
   const { broadcastUpdate, broadcastDelete } = useNoteSync();
-
   // Initialize content when note loads
   useEffect(() => {
     if (note) {
       setNoteContent({
-        title: note.title,
+        title: note.title || "",
         content: note.content,
       });
     }
   }, [note]);
 
-  // Extract title from editor content
-  const extractTitleFromContent = (content: any): string | null => {
-    if (!content || !content.content) return null;
-
-    const firstNode = content.content[0];
-    if (firstNode && firstNode.type === "heading" && firstNode.content) {
-      return firstNode.content.map((c: any) => c.text).join("");
-    }
-
-    if (firstNode && firstNode.type === "paragraph" && firstNode.content) {
-      const text = firstNode.content.map((c: any) => c.text).join("");
-      return text.length > 50 ? text.substring(0, 50) + "..." : text;
-    }
-
-    return null;
-  };
-
   // Handle editor content changes
   const handleEditorChange = useCallback(
-    (content: any) => {
-      setNoteContent((prev) => ({ ...prev, content }));
+    (newContent: JSONContent | null) => {
+      setNoteContent((prev) => ({ ...prev, content: newContent }));
       setHasUnsavedChanges(true);
     },
     []
   );
+
+
 
   // Handle go back
   const handleGoBack = useCallback(() => {
@@ -100,13 +85,13 @@ export default function NoteEditPage() {
     try {
       setIsDeleting(true);
       await deleteNote(noteId).unwrap();
-      
+
       // Broadcast note deletion for cross-tab sync
       broadcastDelete(noteId);
-      
+
       // Show success message
       toast.success("Note deleted successfully");
-      
+
       // Navigate back to notes list
       router.push("/dashboard/notes");
     } catch (error) {
@@ -150,13 +135,13 @@ export default function NoteEditPage() {
 
   // Get current note title for display
   const getCurrentTitle = () => {
-    return note?.title || "Untitled Note";
+    return noteContent.title || "Untitled Note";
   };
 
   // Calculate word count
   const getWordCount = () => {
     if (!noteContent.content || !noteContent.content.content) return 0;
-    
+
     let text = "";
     const extractText = (node: any) => {
       if (node.type === "text") {
@@ -165,7 +150,7 @@ export default function NoteEditPage() {
         node.content.forEach(extractText);
       }
     };
-    
+
     noteContent.content.content.forEach(extractText);
     return text.trim().split(/\s+/).filter(word => word.length > 0).length;
   };
@@ -276,7 +261,7 @@ export default function NoteEditPage() {
                   <span className="hidden sm:inline">Unsaved changes</span>
                 </div>
               )}
-              
+
               <Button
                 variant="ghost"
                 size="sm"
@@ -295,7 +280,6 @@ export default function NoteEditPage() {
           </header>
 
           {/* Enhanced Editor Area */}
-                    {/* Enhanced Editor Area */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-auto">
               <div className="max-w-4xl mx-auto w-full p-3 lg:p-6">

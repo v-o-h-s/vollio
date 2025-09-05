@@ -24,7 +24,7 @@ export type { JSONContent };
  * Props for the main NotionEditor component
  */
 export interface NotionEditorProps {
-  content?: JSONContent | string;
+  content?: JSONContent | null;
   onChange?: (content: JSONContent) => void;
   onUpdate?: (editor: Editor) => void;
   placeholder?: string;
