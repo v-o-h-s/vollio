@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
 import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveStatus";
+import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useNoteSync } from "@/hooks/use-note-sync";
@@ -22,6 +23,7 @@ import {
   useUpdateNoteMutation,
   useDeleteNoteMutation 
 } from "@/lib/store/apiSlice";
+import toast from "react-hot-toast";
 
 interface NoteContent {
   title?: string;
@@ -43,6 +45,7 @@ export default function NoteEditPage() {
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Cross-tab synchronization
   const { broadcastUpdate, broadcastDelete } = useNoteSync();
@@ -89,11 +92,11 @@ export default function NoteEditPage() {
   }, [router]);
 
   // Handle delete note
-  const handleDelete = useCallback(async () => {
-    if (!confirm("Are you sure you want to delete this note? This action cannot be undone.")) {
-      return;
-    }
+  const handleDelete = useCallback(() => {
+    setShowDeleteDialog(true);
+  }, []);
 
+  const handleConfirmDelete = useCallback(async () => {
     try {
       setIsDeleting(true);
       await deleteNote(noteId).unwrap();
@@ -101,13 +104,23 @@ export default function NoteEditPage() {
       // Broadcast note deletion for cross-tab sync
       broadcastDelete(noteId);
       
+      // Show success message
+      toast.success("Note deleted successfully");
+      
       // Navigate back to notes list
       router.push("/dashboard/notes");
     } catch (error) {
       console.error("Failed to delete note:", error);
+      toast.error("Failed to delete note. Please try again.");
       setIsDeleting(false);
+    } finally {
+      setShowDeleteDialog(false);
     }
   }, [noteId, deleteNote, broadcastDelete, router]);
+
+  const handleCancelDelete = useCallback(() => {
+    setShowDeleteDialog(false);
+  }, []);
 
   // Keyboard shortcuts
   useKeyboardShortcuts({
@@ -141,34 +154,67 @@ export default function NoteEditPage() {
     return extracted || note?.title || "Untitled Note";
   };
 
-  // Loading state
+  // Calculate word count
+  const getWordCount = () => {
+    if (!noteContent.content || !noteContent.content.content) return 0;
+    
+    let text = "";
+    const extractText = (node: any) => {
+      if (node.type === "text") {
+        text += node.text + " ";
+      } else if (node.content) {
+        node.content.forEach(extractText);
+      }
+    };
+    
+    noteContent.content.content.forEach(extractText);
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  // Loading state with improved styling
   if (isLoading) {
     return (
       <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
         <div className="flex-1 flex items-center justify-center">
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span>Loading note...</span>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="relative">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <div className="absolute inset-0 h-8 w-8 rounded-full border-2 border-primary/20"></div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium text-foreground">Loading note...</h3>
+              <p className="text-sm text-muted-foreground">Please wait while we fetch your note</p>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  // Error state
+  // Error state with improved styling
   if (error) {
     return (
       <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-lg font-semibold mb-2">Failed to load note</h2>
-            <p className="text-muted-foreground mb-4">
-              The note could not be found or you don't have permission to view it.
+          <div className="text-center max-w-md mx-auto p-6">
+            <div className="mb-4">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+                <ExternalLink className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+            </div>
+            <h2 className="text-xl font-semibold text-foreground mb-3">Note not found</h2>
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              The note you're looking for could not be found or you don't have permission to view it.
             </p>
-            <Button onClick={handleGoBack}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Notes
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={handleGoBack} className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back to Notes
+              </Button>
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -180,44 +226,64 @@ export default function NoteEditPage() {
       <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
-          {/* Header */}
-          <header className="flex items-center justify-between p-4 lg:px-6 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-10">
-            <div className="flex items-center gap-2 lg:gap-4 min-w-0 flex-1">
+          {/* Enhanced Header */}
+          <header className="flex items-center justify-between p-4 lg:px-6 border-b border-border/50 bg-background/95 backdrop-blur-sm sticky top-0 z-20">
+            <div className="flex items-center gap-3 lg:gap-4 min-w-0 flex-1">
               <Button
                 variant="ghost"
-                size="default"
+                size="sm"
                 onClick={handleGoBack}
-                className="flex items-center gap-2 hover:bg-accent shrink-0"
+                className="flex items-center gap-2 hover:bg-accent/80 shrink-0"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span className="hidden sm:inline">Back to Notes</span>
                 <span className="sm:hidden">Back</span>
               </Button>
 
-              <div className="hidden sm:block h-6 w-px bg-border shrink-0" />
+              <div className="hidden sm:block h-5 w-px bg-border/60 shrink-0" />
 
               <div className="flex items-center gap-3 min-w-0 flex-1">
-                <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                  <FileText className="h-4 w-4 text-primary" />
+                </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <h1 className="text-base lg:text-lg font-semibold text-foreground truncate">
+                  <h1 className="text-lg lg:text-xl font-semibold text-foreground truncate leading-tight">
                     {getCurrentTitle()}
                   </h1>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span>
-                      Last updated: {note?.updatedAt ? new Date(note.updatedAt).toLocaleDateString() : 'Unknown'}
+                      Last updated: {note?.updatedAt ? new Date(note.updatedAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }) : 'Unknown'}
                     </span>
+                    {noteContent.content && (
+                      <>
+                        <span>•</span>
+                        <span>{getWordCount()} words</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+              {hasUnsavedChanges && (
+                <div className="flex items-center gap-2 text-xs text-orange-600 dark:text-orange-400">
+                  <div className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
+                  <span className="hidden sm:inline">Unsaved changes</span>
+                </div>
+              )}
+              
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="flex items-center gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="flex items-center gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"
               >
                 {isDeleting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -229,7 +295,8 @@ export default function NoteEditPage() {
             </div>
           </header>
 
-          {/* Editor Area */}
+          {/* Enhanced Editor Area */}
+                    {/* Enhanced Editor Area */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-auto">
               <div className="max-w-4xl mx-auto w-full p-3 lg:p-6">
@@ -241,7 +308,7 @@ export default function NoteEditPage() {
                   autoFocus={false}
                   autoSave={true}
                   noteId={noteId}
-                  autoSaveDelay={1000}
+                  autoSaveDelay={1500}
                   className="min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)] border-none shadow-none bg-transparent prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none max-w-none"
                 />
               </div>
@@ -249,6 +316,16 @@ export default function NoteEditPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        isOpen={showDeleteDialog}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        noteTitle={getCurrentTitle()}
+        isDeleting={isDeleting}
+      />
+
       <FloatingAutoSaveStatus />
     </ErrorBoundary>
   );
