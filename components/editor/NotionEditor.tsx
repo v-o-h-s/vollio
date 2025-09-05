@@ -43,6 +43,7 @@ import { useAutoSave } from "@/hooks/use-auto-save";
 import { useAutoSaveStatus } from "@/components/dashboard/AutoSaveStatusProvider";
 import { useCreateNoteMutation, useUpdateNoteMutation } from "@/lib/store/apiSlice";
 import type { NotionEditorProps } from "./types";
+import type { JSONContent, NoteContent } from "@/lib/types";
 
 function NotionEditorInner({
   content,
@@ -62,10 +63,8 @@ function NotionEditorInner({
   onAutoSaveStatusChange,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
-  const [noteTitle, setNoteTitle] = useState("Untitled Note");
-
-  // Responsive design handled via CSS
-
+  const [noteTitle, setNoteTitle] = useState(content?.title || "Untitled Note");
+  
   // Auto-save functionality
   const [currentNoteId, setCurrentNoteId] = useState<string | undefined>(noteId);
 
@@ -73,42 +72,39 @@ function NotionEditorInner({
   const [createNote] = useCreateNoteMutation();
   const [updateNote] = useUpdateNoteMutation();
 
-  // Update currentNoteId when noteId prop changes
+  // Update title when content prop changes
   useEffect(() => {
-    if (noteId) {
-      setCurrentNoteId(noteId);
+    if (content?.title && content.title !== noteTitle) {
+      setNoteTitle(content.title);
     }
-  }, [noteId]);
-
-  // Helper function to extract title from editor content
-  const extractTitleFromContent = useCallback((content: any): string => {
-    // If we have a manually set title that's not empty, use that
-    if (noteTitle.trim()) return noteTitle.trim();
-
-    // Always default to "Untitled Note" when no manual title is set
-    return "Untitled Note";
-  }, [noteTitle]);
+  }, [content?.title, noteTitle]);
 
   // Internal auto-save handler
   const handleAutoSave = useCallback(
-    async (content: any) => {
-      const title = extractTitleFromContent(content);
+    async (noteContent: NoteContent) => {
+      const title = noteContent.title || noteTitle.trim() || "Untitled Note";
+      const content = noteContent.content;
+
+      if (!content) {
+        console.warn("Auto-save called with empty content");
+        return;
+      }
 
       if (!currentNoteId) {
         // Create new note using RTK Query
         const newNote = await createNote({ title, content }).unwrap();
         const newNoteId = newNote.id;
-        
+
         setCurrentNoteId(newNoteId);
       } else {
         // Update existing note using RTK Query
-        await updateNote({ 
-          id: currentNoteId, 
-          updates: { title, content } 
+        await updateNote({
+          id: currentNoteId,
+          updates: { title, content }
         }).unwrap();
       }
     },
-    [currentNoteId, extractTitleFromContent, createNote, updateNote]
+    [currentNoteId, noteTitle, createNote, updateNote]
   );
 
   const {
@@ -125,10 +121,7 @@ function NotionEditorInner({
   // Global auto-save status context
   const { updateStatus: updateGlobalAutoSaveStatus } = useAutoSaveStatus();
 
-  // Handle title change
-  const handleTitleChange = useCallback((newTitle: string) => {
-    setNoteTitle(newTitle);
-  }, []);
+ 
 
   // Notify parent of auto-save status changes
   useEffect(() => {
@@ -285,7 +278,7 @@ function NotionEditorInner({
         types: ["heading", "paragraph"],
       }),
     ],
-    content: content || "",
+    content: content?.content || "",
     editable,
     autofocus: autoFocus,
     editorProps: {
@@ -307,20 +300,29 @@ function NotionEditorInner({
 
       // Trigger auto-save if enabled
       if (autoSave && editable) {
-        updateContent(json);
+        updateContent({title: noteTitle, content: json});
       }
     },
   });
-
+ // Handle title change
+  const handleTitleChange = useCallback((newTitle: string) => {
+    setNoteTitle(newTitle);
+    
+    // Trigger auto-save when title changes
+    if (autoSave && editable && editor) {
+      const currentContent = { title: newTitle, content: editor.getJSON() };
+      updateContent(currentContent);
+    }
+  }, [autoSave, editable, editor, updateContent]);
   // Handle content updates when prop changes
   useEffect(() => {
-    if (editor && content !== undefined) {
+    if (editor && content?.content !== undefined) {
       const currentContent = editor.getJSON();
-      if (JSON.stringify(currentContent) !== JSON.stringify(content)) {
-        editor.commands.setContent(content, { emitUpdate: false });
+      if (JSON.stringify(currentContent) !== JSON.stringify(content.content)) {
+        editor.commands.setContent(content.content, { emitUpdate: false });
       }
     }
-  }, [editor, content]);
+  }, [editor, content?.content]);
 
   // Handle editable state changes
   useEffect(() => {
@@ -328,14 +330,6 @@ function NotionEditorInner({
       editor.setEditable(editable);
     }
   }, [editor, editable]);
-
-  // Trigger auto-save when title changes
-  useEffect(() => {
-    if (autoSave && editable && editor && noteTitle && noteTitle !== "Untitled Note") {
-      const currentContent = editor.getJSON();
-      updateContent(currentContent);
-    }
-  }, [noteTitle, autoSave, editable, editor, updateContent]);
 
   // Calculate word count and reading time
   const stats = useMemo(() => {
@@ -349,7 +343,7 @@ function NotionEditorInner({
     const readingTime = Math.max(1, Math.ceil(wordCount / 200)); // 200 words per minute
 
     return { wordCount, readingTime };
-  }, [editor, content]);
+  }, [editor, content?.content]);
 
   // Set up keyboard shortcuts
   useEditorKeyboardShortcuts({
@@ -384,7 +378,7 @@ function NotionEditorInner({
 
   return (
     <div className="w-full">
-      {/* Obsidian-style Title Section */}
+      {/* Title Section */}
       <div className="mb-4 bg-background">
         <input
           type="text"

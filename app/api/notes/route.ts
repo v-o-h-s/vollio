@@ -59,6 +59,14 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     );
   }
 
+  // Validate content is a proper TipTap document structure
+  if (typeof content !== 'object' || !content.type) {
+    return NextResponse.json(
+      { error: "Content must be a valid TipTap document with a type property" },
+      { status: 400 }
+    );
+  }
+
   const supabase =await getAuthenticatedSupabaseClient();
   
   const { data: noteData, error } = await supabase

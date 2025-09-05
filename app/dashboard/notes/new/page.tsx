@@ -337,8 +337,6 @@ export default function NewNotePage() {
               <div className="max-w-4xl mx-auto w-full p-3 lg:p-6">
                 <RobustNotionEditor
                   content={noteContent.content}
-                  onChange={handleEditorChange}
-                  onSaveSuccess={handleSaveSuccess}
                   placeholder="Start writing your note..."
                   autoFocus={true}
                   autoSave={true}

@@ -50,9 +50,11 @@ export default function NoteEditPage() {
 
   // Cross-tab synchronization
   const { broadcastUpdate, broadcastDelete } = useNoteSync();
+
   // Initialize content when note loads
   useEffect(() => {
     if (note) {
+     
       setNoteContent({
         title: note.title || "",
         content: note.content,
@@ -60,14 +62,7 @@ export default function NoteEditPage() {
     }
   }, [note]);
 
-  // Handle editor content changes
-  const handleEditorChange = useCallback(
-    (newContent: JSONContent | null) => {
-      setNoteContent((prev) => ({ ...prev, content: newContent }));
-      setHasUnsavedChanges(true);
-    },
-    []
-  );
+ 
 
 
 
@@ -283,17 +278,28 @@ export default function NoteEditPage() {
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-auto">
               <div className="max-w-4xl mx-auto w-full p-3 lg:p-6">
-                <RobustNotionEditor
-                  content={noteContent.content}
-                  onChange={handleEditorChange}
-                  onSaveSuccess={() => setHasUnsavedChanges(false)}
-                  placeholder="Start writing your note..."
-                  autoFocus={false}
-                  autoSave={true}
-                  noteId={noteId}
-                  autoSaveDelay={1500}
-                  className="min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)] border-none shadow-none bg-transparent prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none max-w-none"
-                />
+                {noteContent.content !== null ? (
+                  <RobustNotionEditor
+                    key={`editor-${noteId}`} // Force re-render when noteId changes
+                    content={{
+                      title: noteContent.title,
+                      content: noteContent.content
+                    }}
+                    placeholder="Start writing your note..."
+                    autoFocus={false}
+                    autoSave={true}
+                    noteId={noteId}
+                    autoSaveDelay={1500}
+                    className="min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)] border-none shadow-none bg-transparent prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none max-w-none"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)]">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Loading content...</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

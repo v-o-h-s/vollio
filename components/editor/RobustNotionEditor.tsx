@@ -9,14 +9,10 @@ import type { NotionEditorProps } from "./types";
 
 interface RobustNotionEditorProps
   extends Omit<NotionEditorProps, "onChange"> {
-  onChange?: (content: any) => void;
-  onSaveSuccess?: () => void;
 }
 
 export function RobustNotionEditor({
   content,
-  onChange,
-  onSaveSuccess,
   placeholder = "Start writing...",
   autoFocus = false,
   autoSave = false,
@@ -52,28 +48,9 @@ export function RobustNotionEditor({
     },
   });
 
-  // Enhanced onChange handler with error protection
-  const handleChange = useCallback(
-    (newContent: any) => {
-      try {
-        // Validate content structure
-        if (newContent && typeof newContent === "object") {
-          setLastValidContent(newContent);
-          contentRef.current = newContent;
-          onChange?.(newContent);
-        }
-      } catch (error) {
-        console.error("Editor content change error:", error);
-        handleError(error as Error);
-      }
-    },
-    [onChange, handleError]
-  );
-
-  // Handle note ID changes from the editor
-  const handleSaveSuccess = useCallback(() => {
-    onSaveSuccess?.();
-  }, [onSaveSuccess]);
+  // Enhanced onChange handler with error protection - removed since NotionEditor handles internally
+  // const handleChange = useCallback(...) - No longer needed
+  // onSaveSuccess handler - removed since NotionEditor handles internally
 
   // Recovery handler
   const handleRetry = useCallback(() => {
@@ -144,7 +121,6 @@ export function RobustNotionEditor({
       <NotionEditor
         key={editorKey}
         content={contentRef.current}
-        onChange={handleChange}
         placeholder={placeholder}
         autoFocus={autoFocus}
         autoSave={autoSave}

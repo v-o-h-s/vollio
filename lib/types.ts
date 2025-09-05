@@ -5,7 +5,6 @@
 import { JSONContent } from "@tiptap/core";
 import type { Editor } from "@tiptap/react";
 import { ActivityType } from "./types/database";
-
 // ============================================================================
 // EDITOR TYPES
 // ============================================================================
@@ -23,8 +22,12 @@ export type { JSONContent };
 /**
  * Props for the main NotionEditor component
  */
+export interface NoteContent {
+  title: string,
+  content?: JSONContent | null
+}
 export interface NotionEditorProps {
-  content?: JSONContent | null;
+  content?: NoteContent
   onChange?: (content: JSONContent) => void;
   onUpdate?: (editor: Editor) => void;
   placeholder?: string;

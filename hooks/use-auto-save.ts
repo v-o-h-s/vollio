@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import debounce from "lodash.debounce";
+import { NoteContent } from "@/lib/types";
 /* the debounce function works as follows :
     debounce(function,delay) , the function will wait for delay ms then it runs the function
     if during that delay debounce is called again , it will start the timer from 0s
@@ -17,7 +18,7 @@ interface UseAutoSaveReturn {
   status: AutoSaveStatus;
   lastSaved: Date | null;
   error: string | null;
-  updateContent: (content: any) => void;
+  updateContent: (content: NoteContent) => void;
 }
 
 export function useAutoSave({
@@ -64,7 +65,7 @@ export function useAutoSave({
 
   const updateContent = useCallback(
     // this function is used to update the content and save it after delay
-    (content: any) => {
+    (content: NoteContent) => {
       contentRef.current = content;
 
       if (!enabled) return;
