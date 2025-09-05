@@ -5,6 +5,7 @@
  *
  * A dedicated page for viewing and managing all user's uploaded PDFs.
  * Uses the PDFListDisplay component to provide a modern, grid-based interface.
+ * Follows the dashboard design system with consistent styling and theming.
  *
  * Features:
  * - Modern grid layout of all user PDFs
@@ -18,54 +19,67 @@
  */
 
 import { useState } from "react";
-import { Search, Filter, Grid, List } from "lucide-react";
+import { Search, Filter, Grid, List, Upload, Plus } from "lucide-react";
 import { PDFListDisplay } from "@/components/pdf";
+import { Button } from "@/components/ui/button";
 
 export default function PDFsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   return (
-    <div className="space-y-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl bg-background min-h-screen">
       {/* Header Section */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold text-gray-900 tracking-tight">
-          Your PDFs
-        </h1>
-        <p className="text-lg text-gray-600 font-medium">
-          Manage and organize your PDF documents
-        </p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+        <div className="space-y-1">
+          <h1 className="text-4xl font-bold text-foreground tracking-tight">
+            Your PDFs
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Manage and organize your PDF documents
+          </p>
+        </div>
+        
+        <Button 
+          className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift"
+        >
+          <Plus size={18} />
+          Upload PDF
+        </Button>
       </div>
 
       {/* Search and Filter Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-8">
         <div className="relative flex-1 max-w-md">
           <Search
             size={20}
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
           />
           <input
             type="text"
             placeholder="Search PDFs..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground transition-colors"
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
             <Filter size={18} />
             Filter
-          </button>
+          </Button>
 
-          <div className="flex items-center bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center bg-muted rounded-lg p-1">
             <button
               onClick={() => setViewMode("grid")}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === "grid"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-background text-primary shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <Grid size={18} />
@@ -74,8 +88,8 @@ export default function PDFsPage() {
               onClick={() => setViewMode("list")}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === "list"
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900"
+                  ? "bg-background text-primary shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <List size={18} />

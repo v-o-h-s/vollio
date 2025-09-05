@@ -222,13 +222,13 @@ export default function PDFListDisplay({
       <div className={`space-y-6 ${className}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl border border-gray-200 p-6 animate-pulse">
-              <div className="w-12 h-12 bg-gray-200 rounded-xl mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-2/3 mb-4"></div>
+            <div key={i} className="bg-card rounded-2xl border border-border p-6 animate-pulse">
+              <div className="w-12 h-12 bg-muted rounded-xl mb-4"></div>
+              <div className="h-4 bg-muted rounded mb-2"></div>
+              <div className="h-3 bg-muted rounded w-2/3 mb-4"></div>
               <div className="flex justify-between">
-                <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                <div className="h-3 bg-muted rounded w-1/3"></div>
+                <div className="h-3 bg-muted rounded w-1/4"></div>
               </div>
             </div>
           ))}
@@ -245,18 +245,18 @@ export default function PDFListDisplay({
 
     return (
       <div className={`space-y-6 ${className}`}>
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle size={32} className="text-red-600" />
+        <div className="bg-destructive/5 border border-destructive/20 rounded-2xl p-8 text-center">
+          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle size={32} className="text-destructive" />
           </div>
-          <h3 className="text-xl font-bold text-red-900 mb-2">{errorTitle}</h3>
-          <p className="text-red-700 mb-4">{errorMessage}</p>
+          <h3 className="text-xl font-bold text-destructive mb-2">{errorTitle}</h3>
+          <p className="text-destructive/80 mb-4">{errorMessage}</p>
           
           {/* Error context if available */}
           {appError?.context && (
-            <div className="bg-red-100 rounded-lg p-3 mb-4 text-left max-w-md mx-auto">
-              <p className="text-xs text-red-600 font-medium mb-1">Error Details:</p>
-              <div className="text-xs text-red-700">
+            <div className="bg-destructive/10 rounded-lg p-3 mb-4 text-left max-w-md mx-auto">
+              <p className="text-xs text-destructive font-medium mb-1">Error Details:</p>
+              <div className="text-xs text-destructive/80">
                 {appError.context.component && <div>Component: {appError.context.component}</div>}
                 {appError.context.action && <div>Action: {appError.context.action}</div>}
               </div>
@@ -266,7 +266,7 @@ export default function PDFListDisplay({
           <div className="flex gap-3 justify-center">
             <Button
               onClick={() => refetch()}
-              className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground flex items-center gap-2"
             >
               <RefreshCw size={16} />
               Try Again
@@ -276,7 +276,7 @@ export default function PDFListDisplay({
               <Button
                 onClick={() => window.location.reload()}
                 variant="outline"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 border-destructive/20 text-destructive hover:bg-destructive/5"
               >
                 <RefreshCw size={16} />
                 Refresh Page
@@ -287,10 +287,10 @@ export default function PDFListDisplay({
           {/* Show technical details in development */}
           {process.env.NODE_ENV === 'development' && appError?.technicalMessage && (
             <details className="mt-4 text-left max-w-md mx-auto">
-              <summary className="text-xs text-red-600 cursor-pointer">
+              <summary className="text-xs text-destructive cursor-pointer">
                 Technical Details (Dev)
               </summary>
-              <pre className="text-xs text-red-600 mt-2 p-2 bg-red-100 rounded overflow-auto max-h-32">
+              <pre className="text-xs text-destructive/80 mt-2 p-2 bg-destructive/10 rounded overflow-auto max-h-32">
                 {appError.technicalMessage}
               </pre>
             </details>
@@ -305,12 +305,12 @@ export default function PDFListDisplay({
       <div className={`space-y-6 ${className}`}>
         {/* Upload Error Display */}
         {uploadError && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+          <div className="bg-destructive/5 border border-destructive/20 rounded-2xl p-6">
             <div className="flex items-start gap-3">
-              <AlertTriangle size={20} className="text-red-500 mt-0.5" />
+              <AlertTriangle size={20} className="text-destructive mt-0.5" />
               <div className="flex-1">
-                <h4 className="font-semibold text-red-900 mb-1">Upload Failed</h4>
-                <p className="text-red-700 text-sm mb-3">{uploadError.userMessage}</p>
+                <h4 className="font-semibold text-destructive mb-1">Upload Failed</h4>
+                <p className="text-destructive/80 text-sm mb-3">{uploadError.userMessage}</p>
                 
                 <div className="flex gap-2">
                   {uploadError.retryable && (
@@ -318,7 +318,7 @@ export default function PDFListDisplay({
                       onClick={() => retryUpload(() => Promise.resolve())}
                       disabled={isRetryingUpload}
                       size="sm"
-                      className="bg-red-600 hover:bg-red-700 text-white"
+                      className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                     >
                       <RefreshCw size={14} className={isRetryingUpload ? 'animate-spin' : ''} />
                       {isRetryingUpload ? 'Retrying...' : 'Try Again'}
@@ -331,6 +331,7 @@ export default function PDFListDisplay({
                       onClick={action.action}
                       size="sm"
                       variant="outline"
+                      className="border-destructive/20 text-destructive hover:bg-destructive/5"
                     >
                       {action.label}
                     </Button>
@@ -340,6 +341,7 @@ export default function PDFListDisplay({
                     onClick={clearUploadError}
                     size="sm"
                     variant="outline"
+                    className="border-destructive/20 text-destructive hover:bg-destructive/5"
                   >
                     Dismiss
                   </Button>
@@ -359,8 +361,8 @@ export default function PDFListDisplay({
               className={`
                 relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300
                 ${isDragOver
-                  ? 'border-blue-400 bg-blue-50'
-                  : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100'
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border bg-muted/30 hover:border-border/60 hover:bg-muted/50'
                 }
                 ${isUploading || isRetryingUpload ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}
               `}
@@ -374,22 +376,22 @@ export default function PDFListDisplay({
                 className="hidden"
               />
 
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Upload size={32} className="text-blue-600" />
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Upload size={32} className="text-primary" />
               </div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-foreground mb-2">
                 {isDragOver ? 'Drop your PDF here' : 'Upload PDF'}
               </h3>
 
-              <p className="text-gray-600 mb-4">
+              <p className="text-muted-foreground mb-4">
                 {isUploading || isRetryingUpload
                   ? 'Uploading...'
                   : 'Drag and drop a PDF file here, or click to browse'
                 }
               </p>
 
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Maximum file size: 50MB • Supported format: PDF
               </p>
             </div>
@@ -403,7 +405,7 @@ export default function PDFListDisplay({
             <div
               key={pdf.id}
               onClick={() => handlePDFClick(pdf)}
-              className="group bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-200 transition-all duration-300 cursor-pointer"
+              className="group bg-gradient-to-br from-card to-muted/20 rounded-2xl border border-border p-6 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20 hover:from-card/90 hover:to-muted/30 transition-all duration-300 cursor-pointer"
             >
               {/* PDF Icon */}
               <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
@@ -412,10 +414,10 @@ export default function PDFListDisplay({
 
               {/* PDF Info */}
               <div className="space-y-2 mb-4">
-                <h3 className="font-bold text-lg text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                <h3 className="font-bold text-lg text-foreground truncate group-hover:text-primary transition-colors">
                   {pdf.filename}
                 </h3>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <HardDrive size={14} />
                     <span>{formatFileSize(pdf.fileSize)}</span>
@@ -428,8 +430,8 @@ export default function PDFListDisplay({
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <button className="flex items-center gap-2 text-blue-600 text-sm font-semibold hover:text-blue-700 transition-colors">
+              <div className="flex items-center justify-between pt-4 border-t border-border">
+                <button className="flex items-center gap-2 text-primary text-sm font-semibold hover:text-primary/80 transition-colors">
                   <Eye size={16} />
                   Open
                 </button>
@@ -439,7 +441,7 @@ export default function PDFListDisplay({
                     e.stopPropagation()
                     // TODO: Implement more actions menu
                   }}
-                  className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="p-1 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <MoreVertical size={16} />
                 </button>
@@ -449,25 +451,25 @@ export default function PDFListDisplay({
         </div>
       ) : (
         /* Empty State */
-        <div className="bg-gray-50 rounded-2xl p-12 text-center">
-          <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
-            <FileText size={40} className="text-gray-400" />
+        <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-2xl p-12 text-center border border-border/50">
+          <div className="w-20 h-20 bg-gradient-to-br from-muted to-muted/60 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+            <FileText size={40} className="text-muted-foreground" />
           </div>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">No PDFs uploaded yet</h3>
+          <h3 className="text-2xl font-bold text-foreground mb-3">No PDFs uploaded yet</h3>
 
-          <p className="text-gray-600 font-medium mb-6 max-w-md mx-auto">
+          <p className="text-muted-foreground font-medium mb-6 max-w-md mx-auto">
             Upload your first PDF to start creating notes and annotations.
             Your documents will appear here once uploaded.
           </p>
 
           {showUpload && (
-            <button
+            <Button
               onClick={openFilePicker}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors shadow-lg shadow-blue-500/25"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-colors shadow-lg shadow-primary/25"
             >
               Upload Your First PDF
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -475,7 +477,7 @@ export default function PDFListDisplay({
       {/* Total Count */}
       {totalCount > pdfs.length && (
         <div className="text-center py-4">
-          <p className="text-gray-500 text-sm">
+          <p className="text-muted-foreground text-sm">
             Showing {pdfs.length} of {totalCount} PDFs
           </p>
         </div>
