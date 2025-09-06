@@ -370,8 +370,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       })
     );
 
-    router.push(`/dashboard/notes/new?selection=${selectionData}`);
-  }, [activeSelection, currentPdfData, router]);
+    // Open in new tab/window
+    window.open(`/dashboard/notes/new?selection=${selectionData}`, '_blank');
+  }, [activeSelection, currentPdfData]);
 
   /**
    * Handle annotation hover events
