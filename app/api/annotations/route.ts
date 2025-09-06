@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import { withErrorHandling } from "@/lib/utils/server-error-handling";
 import { z } from "zod";
+import { Content } from "next/font/google";
 
 // Validation schema for annotation creation
 const createAnnotationSchema = z.object({
@@ -19,7 +20,7 @@ const createAnnotationSchema = z.object({
     width: z.number().min(0, "Width must be positive"),
     height: z.number().min(0, "Height must be positive"),
   }),
-  noteContent: z.string().optional(),
+  noteContent: z.string().optional(),// will be modified later
 });
 
 /**
@@ -96,7 +97,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
         selected_text: selectedText,
         page_number: pageNumber,
         coordinates: coordinates,
-        note_content: noteContent || selectedText.substring(0, 100),
+        content: "this is annotation content",
       })
       .select(
         `
@@ -107,7 +108,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
         selected_text,
         page_number,
         coordinates,
-        note_content,
+        content,
         created_at,
         updated_at
       `
@@ -131,7 +132,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       selectedText: annotation.selected_text,
       pageNumber: annotation.page_number,
       coordinates: annotation.coordinates,
-      noteContent: annotation.note_content,
+      content: annotation.content,
       createdAt: annotation.created_at,
       updatedAt: annotation.updated_at,
     };
@@ -182,7 +183,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
         selected_text,
         page_number,
         coordinates,
-        note_content,
+        content,
         created_at,
         updated_at
       `
@@ -214,7 +215,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       selectedText: annotation.selected_text,
       pageNumber: annotation.page_number,
       coordinates: annotation.coordinates,
-      noteContent: annotation.note_content,
+      content: annotation.content,
       createdAt: annotation.created_at,
       updatedAt: annotation.updated_at,
     }));

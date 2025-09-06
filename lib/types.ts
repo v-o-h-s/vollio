@@ -141,7 +141,7 @@ export interface Annotation {
   pdfId: string;
   pageNumber: number;
   selectedText: string;
-  noteContent: string;
+  content: string;
   coordinates: Rectangle;
   createdAt: string; // ISO string for Redux serialization
   updatedAt: string; // ISO string for Redux serialization
