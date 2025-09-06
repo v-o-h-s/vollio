@@ -2,16 +2,27 @@
 
 ## Overview
 
-This document summarizes the comprehensive updates made to all markdown documentation files to reflect the current state of the Noto PDF annotation application, particularly focusing on the recently implemented auto-save system, complete notes management functionality, and latest UI improvements including custom confirmation dialogs and enhanced auto-save status display.
+This document summarizes the comprehensive updates made to all markdown documentation files to reflect the current state of the Noto PDF annotation application, particularly focusing on the recently implemented auto-save system, complete notes management functionality, UI consistency improvements, and enhanced PDF annotation workflow.
 
 ## 📝 Recent Changes (September 2025)
 
 ### UI/UX Improvements ✅ IMPLEMENTED
+- **Dashboard Design System Consistency**: Applied semantic CSS variables across all PDF components
+- **PDF Annotation New Tab Navigation**: Enhanced workflow with window.open() for better context switching
+- **Unified Header Design**: Integrated Focus Mode button into main header container with modern styling
+- **Gradient Background Enhancements**: Updated PDF cards and components with gradient effects
 - **Custom Delete Confirmation Dialogs**: Replaced browser `window.confirm()` with styled React components
 - **Auto-Save Status Positioning**: Moved FloatingAutoSaveStatus to bottom-right with scoped visibility
 - **Obsidian-Style Interface**: Implemented separate title input with clean, borderless design
 - **Enhanced Error Handling**: Added toast notifications and comprehensive error recovery
 - **Context-Based Architecture**: AutoSaveStatusProvider for global auto-save state management
+
+### PDF Component Enhancements ✅ IMPLEMENTED
+- **PDFListDisplay Styling**: Migrated to semantic colors with gradient backgrounds
+- **PDF Viewer Page Updates**: Applied dashboard design system with unified theming
+- **Header Container Redesign**: Added visual separators and integrated controls
+- **Focus Mode Integration**: Seamless focus mode toggle within header design
+- **Error State Consistency**: Standardized error handling across all PDF components
 
 ## 📝 Files Updated
 
