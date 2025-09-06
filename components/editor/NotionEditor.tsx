@@ -61,6 +61,7 @@ function NotionEditorInner({
   noteId,
   autoSaveDelay = 500,
   onAutoSaveStatusChange,
+  onNoteCreated,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState(content?.title || "Untitled Note");
@@ -96,6 +97,12 @@ function NotionEditorInner({
         const newNoteId = newNote.id;
 
         setCurrentNoteId(newNoteId);
+        
+        // Call the onNoteCreated callback if provided
+        console.log("Note created, calling onNoteCreated callback:", { newNoteId, onNoteCreated: !!onNoteCreated });
+        if (onNoteCreated) {
+          onNoteCreated(newNoteId);
+        }
       } else {
         // Update existing note using RTK Query
         await updateNote({
@@ -104,7 +111,7 @@ function NotionEditorInner({
         }).unwrap();
       }
     },
-    [currentNoteId, noteTitle, createNote, updateNote]
+    [currentNoteId, noteTitle, createNote, updateNote, onNoteCreated]
   );
 
   const {

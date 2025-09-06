@@ -69,7 +69,7 @@ export interface Database {
           note_id: string;
           page_number: number;
           selected_text: string;
-          note_content: string;
+          content: string;
           coordinates: {
             x: number;
             y: number;
@@ -86,7 +86,7 @@ export interface Database {
           note_id: string;
           page_number: number;
           selected_text: string;
-          note_content: string;
+          content: string;
           coordinates: {
             x: number;
             y: number;
@@ -103,7 +103,7 @@ export interface Database {
           note_id?: string;
           page_number?: number;
           selected_text?: string;
-          note_content?: string;
+          content?: string;
           coordinates?: {
             x: number;
             y: number;

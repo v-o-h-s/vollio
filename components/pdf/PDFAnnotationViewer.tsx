@@ -145,6 +145,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     // Poll for new annotations every 30 seconds for cross-tab sync
     pollingInterval: 30 * 1000,
   });
+  console.log(annotations)
 
   // Use fresh PDF data if available, otherwise use prop data
   const currentPdfData = freshPdfData || pdfDocument;
@@ -356,6 +357,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   /**
    * Handle annotation creation from tooltip or mobile dialog
    */
+
   const handleCreateAnnotation = useCallback(() => {
     if (!activeSelection || !currentPdfData) return;
 

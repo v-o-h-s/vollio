@@ -171,6 +171,8 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
     return null;
   }
 
+
+  
   return (
     <div
       ref={tooltipRef}

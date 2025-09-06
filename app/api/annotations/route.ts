@@ -97,7 +97,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
         selected_text: selectedText,
         page_number: pageNumber,
         coordinates: coordinates,
-        content: "this is annotation content",
+        content: noteContent || selectedText, // Use noteContent if provided, otherwise fall back to selectedText
       })
       .select(
         `
@@ -137,7 +137,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       updatedAt: annotation.updated_at,
     };
 
-    console.log("Annotation created successfully:", annotationResponse);
+    console.log("Annotation created successfully:", annotationResponse); // will be deleted
 
     return NextResponse.json({
       success: true,
@@ -219,7 +219,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       createdAt: annotation.created_at,
       updatedAt: annotation.updated_at,
     }));
-
+    console.log("Fetched annotations:", annotationsResponse);//will be deleted 
     return NextResponse.json({
       success: true,
       data: annotationsResponse,

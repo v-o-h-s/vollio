@@ -106,18 +106,20 @@ export default function NewNotePage() {
       if (!selectionData || annotationCreated) return;
 
       try {
+        // Get the current note content as text for the annotation
+        const noteContentText = noteContent.title || "Untitled Note";
+        
         await createAnnotation({
           pdfId: selectionData.pdfId,
           noteId: noteId,
           selectedText: selectionData.text,
           pageNumber: selectionData.pageNumber,
           coordinates: selectionData.coordinates,
-          noteContent:
-            "Untitled Note", // Use default title since we store title separately
+          noteContent: noteContentText, // Use the note title as annotation content
         }).unwrap();
 
         setAnnotationCreated(true);
-        console.log("Annotation created successfully");
+        console.log("Annotation created successfully, linking to note:", noteId);
 
         // Note: Cross-tab sync for annotations will be handled by the annotation API
         // The PDF viewer will automatically update when the annotation is created
@@ -126,13 +128,18 @@ export default function NewNotePage() {
         // Don't throw - annotation creation failure shouldn't break note creation
       }
     },
-    [selectionData, noteContent.content, annotationCreated, createAnnotation]
+    [selectionData, noteContent.title, annotationCreated, createAnnotation]
   );
 
-  // Handle note creation success - simplified since editor handles everything
-  const handleSaveSuccess = useCallback(() => {
-    setHasUnsavedChanges(false);
-  }, []);
+  // Handle note creation success
+  const handleNoteCreated = useCallback(
+    (newNoteId: string) => {
+      setNoteId(newNoteId);
+      // Create annotation if this note was created from PDF text selection
+      createAnnotationForNote(newNoteId);
+    },
+    [createAnnotationForNote]
+  );
 
   // Handle editor content changes
   const handleEditorChange = useCallback(
@@ -164,7 +171,7 @@ export default function NewNotePage() {
   const handleGoBack = useCallback(() => {
     if (selectionData) {
       // Try to navigate back to the PDF tab
-      const pdfUrl = `/dashboard/pdf-notes?pdf=${selectionData.pdfId}`;
+      const pdfUrl = `/dashboard/pdfs?pdf=${selectionData.pdfId}`;
 
       // Try cross-tab navigation first
       if (window.opener && !window.opener.closed) {
@@ -289,7 +296,7 @@ export default function NewNotePage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    const pdfUrl = `/dashboard/pdf-notes?pdf=${selectionData.pdfId}`;
+                    const pdfUrl = `/dashboard/pdfs?pdf=${selectionData.pdfId}`;
                     if (window.opener && !window.opener.closed) {
                       try {
                         window.opener.location.href = pdfUrl;
@@ -342,6 +349,7 @@ export default function NewNotePage() {
                   autoSave={true}
                   noteId={noteId || undefined}
                   onAutoSaveStatusChange={handleAutoSaveStatusChange}
+                  onNoteCreated={handleNoteCreated}
                   autoSaveDelay={1000}
                   className="min-h-[calc(100vh-8rem)] lg:min-h-[calc(100vh-12rem)] border-none shadow-none bg-transparent prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto focus:outline-none max-w-none"
                 />

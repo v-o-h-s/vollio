@@ -11,19 +11,24 @@ import annotationSlice, {
   hideTooltip,
   showPreviewCard,
   hidePreviewCard,
-  setHoveredAnnotation
+  setHoveredAnnotation,
+  clearAnnotations
 } from '@/lib/store/annotationSlice'
 import type { PDFDocument, Annotation, TextSelection } from '@/lib/types'
 
 describe('annotationSlice', () => {
   let store: ReturnType<typeof configureStore>
 
-  beforeEach(() => {
-    store = configureStore({
+  const createTestStore = () => {
+    return configureStore({
       reducer: {
         annotations: annotationSlice,
       },
     })
+  }
+
+  beforeEach(() => {
+    store = createTestStore()
   })
 
   const mockPdfDocument: PDFDocument = {
@@ -233,51 +238,62 @@ describe('annotationSlice', () => {
 
   describe('active selection management', () => {
     it('should set active text selection', () => {
-      store.dispatch(sstoreetAcelection(mockTetiSelect = crea  teT 
+      store.dispatch(setActiveSelection(mockTextSelection))
       
-      const state =    //  tooltipations
-     ;ate.activeSeloEqual(mockTextS)
+      const state = store.getState().annotations
+      expect(state.activeSelection).toEqual(mockTextSelection)
     })
-sible).to
- hould clear active sel=> {
-      sto(setActivection(moction))
-      expe(store.getSannotations.activeSelection).toEqual(mockTSelection)
+
+    it('should clear active selection', () => {
+      store.dispatch(setActiveSelection(mockTextSelection))
+      expect(store.getState().annotations.activeSelection).toEqual(mockTextSelection)
     
-      stspatch(setion(null))
+      store.dispatch(setActiveSelection(null))
       
-  state = store.getotations
-      exstate.activtoBeNull()
-    }
+      const state = store.getState().annotations
+      expect(state.activeSelection).toBeNull()
   })
 
-  describoltip({ x: annotation manage 150,     e> {
-    it('shgetState().annions.tooation', () => {
-    ltipStatBispae(trsetHoveredAnnotatiue);annot-1'))
-    
-   onst stat= store.getState()otations
-pect(state.hdAnnotation)e('annotation-1'
-      // Then hide      storespatch(hideToo());
+  describe('tooltip management', () => {
+    it('should show tooltip with annotation ID', () => {
+      const store = createTestStore();
+      store.dispatch(setHoveredAnnotation('annotation-1'));
+      
+      const state = store.getState().annotations;
+      expect(state.hoveredAnnotation).toBe('annotation-1');
+    });
 
-    it('should cle   hovered anno    at', () => {
-   e.vpatch(setHovon('annotation-1'
-      expect(sto().annotns.hoveredAnnotatitoBe('annotation')
+    it('should clear hovered annotation', () => {
+      const store = createTestStore();
+      store.dispatch(setHoveredAnnotation('annotation-1'));
+      expect(store.getState().annotations.hoveredAnnotation).toBe('annotation-1');
       
- ispatch(setHoveredAnnotaull))
+      store.dispatch(setHoveredAnnotation(null));
       
-st state = store.annotations
-      exptation).toBeNull()
- 
-    
-})   state = store.({gte().anno);
- tatstate.tisible).Be(false);
-      extooltipState. x: 0, 0 }); });
-te
-  e('preview card s manage() => { {
-  
-    ('should show preview  with annotation ID and position',   t store = createTee();
-      const sition = { x: 200,};
-      onId: ation.id, position }al(posit;
- 'shoeview card
+      const state = store.getState().annotations;
+      expect(state.hoveredAnnotation).toBeNull();
+    });
+  });
+
+  describe('preview card management', () => {
+    it('should show preview card with annotation ID and position', () => {
+      const store = createTestStore();
+      const position = { x: 200, y: 300 };
+      
+      store.dispatch(showPreviewCard({ 
+        annotationId: mockAnnotation.id, 
+        position 
+      }));
+      
+      const state = store.getState().annotations;
+      expect(state.previewCard.visible).toBe(true);
+      expect(state.previewCard.annotationId).toBe(mockAnnotation.id);
+      expect(state.previewCard.position).toEqual(position);
+    });
+
+    it('should hide preview card', () => {
+      const store = createTestStore();
+      
       store.dispatch(showPreviewCard({ 
         annotationId: mockAnnotation.id, 
         position: { x: 200, y: 300 } 
@@ -365,13 +381,14 @@ te
       expect(state.tooltipState.visible).toBe(true);
       expect(state.previewCard.visible).toBe(true);
     });
+
+    it('should set hovered annotation', () => {
+      const store = createTestStore();
+      
+      store.dispatch(setHoveredAnnotation('annotation-1'));
+      
+      const state = store.getState().annotations;
+      expect(state.hoveredAnnotation).toBe('annotation-1');
+    });
   });
 });
-      // First t storuld he = createTestStoreid   });e preview> {
-     
-
- 
-      tore.getState().annotard.vnnotationId).toBe(mockAnnotation.iis;
-      expect(staible)eviewCard.positi.totitrue);
-      ate.previewC
-      expect(state.prev    const state   sre.dispatchviewCard({ an

@@ -9,6 +9,7 @@ import type { NotionEditorProps } from "./types";
 
 interface RobustNotionEditorProps
   extends Omit<NotionEditorProps, "onChange"> {
+  onNoteCreated?: (noteId: string) => void;
 }
 
 export function RobustNotionEditor({
@@ -18,6 +19,7 @@ export function RobustNotionEditor({
   autoSave = false,
   noteId,
   onAutoSaveStatusChange,
+  onNoteCreated,
   autoSaveDelay = 2000,
   className,
 }: RobustNotionEditorProps) {
@@ -126,6 +128,7 @@ export function RobustNotionEditor({
         autoSave={autoSave}
         noteId={noteId}
         onAutoSaveStatusChange={onAutoSaveStatusChange}
+        onNoteCreated={onNoteCreated}
         autoSaveDelay={autoSaveDelay}
         className={className}
       />

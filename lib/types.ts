@@ -47,6 +47,7 @@ export interface NotionEditorProps {
     lastSaved: Date | null;
     error: string | null;
   }) => void;
+  onNoteCreated?: (noteId: string) => void;
 }
 
 /**
