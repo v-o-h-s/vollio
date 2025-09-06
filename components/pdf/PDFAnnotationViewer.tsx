@@ -406,25 +406,29 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    */
   const handleAnnotationClick = useCallback(
     (annotationId: string) => {
-      const annotation = annotations.find(a => a.id === annotationId);
-      if (annotation) {
-        // Navigate to the note for this annotation
-        router.push(`/dashboard/notes/${annotation.noteId}`);
-      }
+      // const annotation = annotations.find(a => a.id === annotationId);
+      // if (annotation) {
+      //   // Navigate to the note for this annotation
+      //   router.push(`/dashboard/notes/${annotation.noteId}`);
+      // }
+      (console.log("the annotation is clicked"))
     },
     [annotations, router]
   );
-
   /**
    * Handle annotation edit from preview card
    */
+
+  
   const handleAnnotationEdit = useCallback(
     (annotationId: string) => {
-      const annotation = annotations.find(a => a.id === annotationId);
-      if (annotation) {
-        // Navigate to edit the note linked to this annotation
-        router.push(`/dashboard/notes/${annotation.noteId}`);
-      }
+      // const annotation = annotations.find(a => a.id === annotationId);
+      // if (annotation) {
+      //   // Navigate to edit the note linked to this annotation
+      //   router.push(`/dashboard/notes/${annotation.noteId}`);
+      // }
+      console.log(" you are editing the annotation")
+      
     },
     [annotations, router]
   );
@@ -665,7 +669,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 e.stopPropagation();
                 handleAnnotationClick(annotation.id);
               }}
-              title={`${annotation.selectedText} - ${annotation.noteContent}`}
+              title={`${annotation.selectedText} - ${annotation.content}`}
             />
           ))}
         </div>
@@ -685,7 +689,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         {previewCard.visible && previewCard.annotationId && (
           <AnnotationPreviewCard
             visible={previewCard.visible}
-            annotation={annotations.find(a => a.id === previewCard.annotationId)}
+            annotation={annotations.find(a => a.id === previewCard.annotationId)as Annotation}// trust me bro just in debugging 
             position={previewCard.position}
             onEdit={handleAnnotationEdit}
             onClose={() => dispatch(hidePreviewCard())}

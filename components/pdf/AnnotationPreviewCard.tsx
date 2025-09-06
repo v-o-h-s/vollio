@@ -201,7 +201,7 @@ const AnnotationPreviewCard: React.FC<AnnotationPreviewCardProps> = ({
                             Note:
                         </p>
                         <p className="text-sm text-gray-900 leading-relaxed">
-                            {truncateContent(annotation.noteContent)}
+                            {truncateContent(annotation.content)}
                         </p>
                     </div>
 
