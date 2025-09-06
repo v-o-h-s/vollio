@@ -99,7 +99,6 @@ function NotionEditorInner({
         setCurrentNoteId(newNoteId);
         
         // Call the onNoteCreated callback if provided
-        console.log("Note created, calling onNoteCreated callback:", { newNoteId, onNoteCreated: !!onNoteCreated });
         if (onNoteCreated) {
           onNoteCreated(newNoteId);
         }

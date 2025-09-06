@@ -137,7 +137,6 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       updatedAt: annotation.updated_at,
     };
 
-    console.log("Annotation created successfully:", annotationResponse); // will be deleted
 
     return NextResponse.json({
       success: true,
@@ -219,7 +218,6 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
       createdAt: annotation.created_at,
       updatedAt: annotation.updated_at,
     }));
-    console.log("Fetched annotations:", annotationsResponse);//will be deleted 
     return NextResponse.json({
       success: true,
       data: annotationsResponse,
