@@ -1,3 +1,4 @@
+// TODO pls update the any types to proper types from Syncfusion if possible
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -46,7 +47,6 @@ interface textBounds {
   y: number;
   width: number;
   height: number;
-  pageNumber: number;
 }
 
 
@@ -121,7 +121,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       y: b.top,
       width: b.width,
       height: b.height,
-      pageNumber: args.pageNumber,
     }));
   };
 
@@ -129,21 +128,19 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   const handleSelectionTextEnd = useCallback((args: any) => {
 
     // TODO use this as way to highlight text pls daddy
-    const selectionsArgs = extractSelectionBounds(args);
-    
-    // Convert textBounds to the format expected by addAnnotation
-    const annotationBounds = selectionsArgs.map(bound => ({
-      x: bound.x,
-      y: bound.y,
-      width: bound.width,
-      height: bound.height
-    }));
-  
-    // Cast to any to bypass TypeScript strictness for minimal working solution
-    pdfViewerRef.current?.annotation.addAnnotation("Highlight", {
-      bounds: annotationBounds,
-      pageNumber: args.pageIndex || 0
-    } as any);
+    // const annotationBounds = extractSelectionBounds(args);
+
+    // // Convert textBounds to the format expected by addAnnotation
+
+
+    // // Cast to any to bypass TypeScript strictness for minimal working solution
+    // pdfViewerRef.current?.annotation.addAnnotation("Highlight", {
+    //   bounds: annotationBounds,
+    //   pageNumber: args.pageIndex || 0,
+    //   customData: { id: 'highlight-123', note: 'Important point' },
+    //   isLock:  true,
+
+    // } as any);
     // Always close any existing toolbar first
     setShowSelectionToolbar(false);
 
@@ -542,12 +539,16 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           enableTextMarkupAnnotation={true} // Enable highlighting
           zoomMode="FitToWidth"
           textSelectionEnd={(args) => handleSelectionTextEnd(args)}
-          // Highlight settings
-          highlightSettings={{
-            author: 'User',
-            subject: 'Highlight',
-            color: '#FFFF00', // Yellow highlight
-            opacity: 0.4,
+          annotationMouseover={(args) => {
+            console.log("Hovered annotation:", args);
+            // You can show your custom toolbar here
+          }}
+          annotationMouseLeave={(args) => {
+           // console.log("Mouse left annotation:", args);
+          }}
+          annotationDoubleClick={(args) => {
+            console.log("Clicked annotation:", args);
+            // You can show your custom toolbar here
           }}
         >
           <Inject

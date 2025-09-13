@@ -156,7 +156,7 @@ export const NoteCreationModal: React.FC<NoteCreationModalProps> = ({
             <NotionEditor
               content={initialContent}
               autoFocus={true}
-              autoSave={false}
+              autoSave={true}
               onNoteCreated={handleNoteCreated}
               className="h-full"
               placeholder="Add your thoughts about the selected text..."
