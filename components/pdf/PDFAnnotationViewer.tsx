@@ -12,6 +12,7 @@ import {
   ThumbnailView,
   Print,
   Annotation,
+  AllowedInteraction,
 } from "@syncfusion/ej2-react-pdfviewer";
 import { useGetPDFQuery, useCreateNoteMutation } from "@/lib/store/apiSlice";
 import { PDFDocument } from "@/lib/types";
@@ -147,7 +148,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         !args.textContent ||
         !args.textContent.trim()
       ) {
-        
+
         return;
       }
 
@@ -183,8 +184,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
       // Store selection data
       const textContent = args.textContent.trim();
-     
-      
+
+
       // Set new state (don't clear showSelectionToolbar as it causes flicker)
       setSelectedText(textContent);
       setCurrentPageNumber(args.pageIndex);      // Convert PDF coordinates to screen coordinates
@@ -215,7 +216,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               screenX = canvasRect.left + x + width / 2;
               screenY = canvasRect.top + y - 10;
 
-              
+
             } else {
               // Fallback to viewer element
               const viewerRect = viewerElement.getBoundingClientRect();
@@ -267,12 +268,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         y: screenY,
       };
 
-    
+
 
       // Update all state immediately in sync, but use a small delay to ensure clean transitions
       setSelectionBounds(selectionBounds);
       setTooltipPosition(tooltipPosition);
-      
+
       // Ensure clean state transition for subsequent selections
       setTimeout(() => {
         setShowSelectionToolbar(true);
@@ -286,7 +287,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Handle note creation from selection
   const handleCreateNoteFromSelection = useCallback(() => {
-   
+
     setShowSelectionToolbar(false);
     setShowNoteModal(true);
   }, [selectedText, selectionBounds]);
@@ -306,21 +307,25 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     if (pdfViewerRef.current && selectionBounds && selectedText) {
       try {
         // Create highlight annotation using a more flexible approach
-        const annotationOptions = {
-          bounds: selectedTextBounds, // Use the extracted text bounds for accurate highlighting
+        const annotationOptions: Partial<HighlightSettings> = {
+          bounds: selectedTextBounds as textBounds[], // Use the extracted text bounds for accurate highlighting
           pageNumber: currentPageNumber, // Convert to 1-based page number for Syncfusion
           author: 'User',
           subject: 'Highlight',
-          note: `Note ID: ${noteId}`, // Store note ID for linking
+          annotationSelectorSettings: {},
           color: '#FFFF00',
           opacity: 0.4,
+          enableMultiPageAnnotation: false,
+          enableTextMarkupResizer: true,
           customData: { id: 'highlight-123', note: 'Important point' },
           isLock: true,
+          isPrint: false,
+
         };
         // Cast to any to bypass TypeScript strictness for minimal working solution
 
         // Cast to any to bypass TypeScript strictness for minimal working solution
-        pdfViewerRef.current?.annotation.addAnnotation("Highlight", annotationOptions as any);
+        pdfViewerRef.current?.annotation.addAnnotation("Highlight", annotationOptions as HighlightSettings);
 
 
         // TODO: Create annotation record in database with note linkage
