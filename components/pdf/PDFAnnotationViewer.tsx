@@ -15,7 +15,7 @@ import {
   AllowedInteraction,
 } from "@syncfusion/ej2-react-pdfviewer";
 import { useGetPDFQuery, useCreateNoteMutation } from "@/lib/store/apiSlice";
-import { PDFDocument } from "@/lib/types";
+import { PDFDocument, TextBounds } from "@/lib/types";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PDFViewerFallback } from "@/components/pdf/FallbackUI";
 import { FileText, AlertCircle, RefreshCw } from "lucide-react";
@@ -43,12 +43,6 @@ interface TextSelectionCompleteEventArgs {
   textBounds: any[];             // array of bounding boxes (x, y, width, height for each fragment)
 
 }
-interface textBounds {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
 
 
 
@@ -70,8 +64,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Text selection and toolbar state
   const [selectedText, setSelectedText] = useState<string>("");
-  const [selectionBounds, setSelectionBounds] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
-  const [selectedTextBounds, setSelectedTextBounds] = useState<textBounds[] | null>(null);
+  const [selectionBounds, setSelectionBounds] = useState<TextBounds | null>(null);
+  const [selectedTextBounds, setSelectedTextBounds] = useState<TextBounds[] | null>(null);
   const [showSelectionToolbar, setShowSelectionToolbar] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
@@ -117,7 +111,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
 
   // extracting the selection bounds
-  const extractSelectionBounds = (args: TextSelectionCompleteEventArgs): textBounds[] => {
+  const extractSelectionBounds = (args: TextSelectionCompleteEventArgs): TextBounds[] => {
     return args.textBounds.map((b) => ({
       x: b.left,
       y: b.top,
@@ -255,7 +249,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       }
 
       // Store selection bounds for highlight creation later
-      const selectionBounds = {
+      const selectionBounds: TextBounds = {
         x,
         y,
         width,
@@ -308,7 +302,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       try {
         // Create highlight annotation using a more flexible approach
         const annotationOptions: Partial<HighlightSettings> = {
-          bounds: selectedTextBounds as textBounds[], // Use the extracted text bounds for accurate highlighting
+          bounds: selectedTextBounds as TextBounds[], // Use the extracted text bounds for accurate highlighting
           pageNumber: currentPageNumber, // Convert to 1-based page number for Syncfusion
           author: 'User',
           subject: 'Highlight',

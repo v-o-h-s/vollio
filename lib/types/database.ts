@@ -114,6 +114,65 @@ export interface Database {
           updated_at?: string;
         };
       };
+      highlights: {
+        Row: {
+          id: string;
+          user_id: string;
+          pdf_id: string;
+          note_id: string | null;
+          content: string;
+          title: string | null;
+          color: string;
+          opacity: number;
+          page_number: number;
+          textbounds: Array<{
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+          }>;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          pdf_id: string;
+          note_id?: string | null;
+          content: string;
+          title?: string | null;
+          color?: string;
+          opacity?: number;
+          page_number: number;
+          textbounds: Array<{
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+          }>;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          pdf_id?: string;
+          note_id?: string | null;
+          content?: string;
+          title?: string | null;
+          color?: string;
+          opacity?: number;
+          page_number?: number;
+          textbounds?: Array<{
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+          }>;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
       notes: {
         Row: {
           id: string;
@@ -176,6 +235,10 @@ export type AnnotationInsert =
   Database["public"]["Tables"]["annotations"]["Insert"];
 export type AnnotationUpdate =
   Database["public"]["Tables"]["annotations"]["Update"];
+
+export type HighlightRow = Database["public"]["Tables"]["highlights"]["Row"];
+export type HighlightInsert = Database["public"]["Tables"]["highlights"]["Insert"];
+export type HighlightUpdate = Database["public"]["Tables"]["highlights"]["Update"];
 
 export type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
 export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
