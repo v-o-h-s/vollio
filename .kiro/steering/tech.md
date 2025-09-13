@@ -30,6 +30,9 @@ inclusion: always
 - **Coordinate Conversion System**: Multiple fallback methods for accurate PDF positioning
 - **Syncfusion Integration**: Type-safe annotation creation with highlight-note linking
 - **Portal-Based Rendering**: React Portal usage for proper z-index management outside PDF containers
+- **State Race Condition Fix**: Eliminated showSelectionToolbar state clearing that caused tooltip flicker
+- **Immediate State Updates**: Removed setTimeout delays that caused race conditions in tooltip visibility
+- **Clean State Transitions**: Proper state management for reliable tooltip appearance on repeated selections
 
 ### Enhanced PDF Selection Workflow
 - **Smart Canvas Detection**: Page-specific canvas element detection with querySelector fallbacks
@@ -74,7 +77,7 @@ inclusion: always
 ```typescript
 // Coordinate conversion with fallback methods
 const handleTextSelection = useCallback((args: TextSelectionEventArgs) => {
-  // 1. Validate input data
+  // 1. Validate input data first before any state changes
   if (!args?.textContent?.trim() || !args.textBounds?.length) return;
   
   // 2. Calculate bounds using Math.min/max
@@ -85,11 +88,34 @@ const handleTextSelection = useCallback((args: TextSelectionEventArgs) => {
   
   // 4. Adjust for viewport boundaries
   const adjustedPosition = adjustForViewport(screenPosition);
+  
+  // 5. Update state immediately without clearing showSelectionToolbar first
+  setSelectionBounds(bounds);
+  setTooltipPosition(adjustedPosition);
+  
+  // 6. Use minimal delay only for final show state to prevent race conditions
+  setTimeout(() => setShowSelectionToolbar(true), 10);
 }, [dependencies]);
 
-// Portal-based floating components
+// Portal-based floating components with proper visibility logic
 const FloatingComponent = ({ position, visible }) => {
-  if (!visible) return null;
+  const [isDelayedVisible, setIsDelayedVisible] = useState(false);
+  
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | undefined;
+    
+    if (visible) {
+      setIsDelayedVisible(true); // Show immediately
+    } else {
+      timeoutId = setTimeout(() => setIsDelayedVisible(false), 200); // Delayed hide
+    }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [visible]);
+  
+  if (!isDelayedVisible) return null;
   
   return createPortal(
     <div className="fixed z-[9999]" style={{ left: position.x, top: position.y }}>

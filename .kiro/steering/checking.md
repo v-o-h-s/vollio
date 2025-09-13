@@ -48,10 +48,25 @@ When encountering errors or implementation challenges:
 - **Connection issues**: Use `getAuthenticatedSupabaseClient()` consistently
 
 ### RTK Query Issues
-- **Cache Management**: Ensure proper cache invalidation with appropriate tags
-- **Mutation Errors**: Use `.unwrap()` in try-catch blocks for proper error handling
-- **Loading States**: Extract `isLoading` from mutation hooks for UI feedback
-- **Type Safety**: Properly type all mutations and queries with interfaces
+- **Cache invalidation**: Use proper tag invalidation after mutations
+- **Loading states**: Handle isLoading, isError states in components
+- **Type safety**: Define proper TypeScript interfaces for API responses
+
+### PDF Annotation Issues
+- **Tooltip Race Conditions**: Don't clear showSelectionToolbar state at start of selection handler
+- **Coordinate Conversion**: Ensure proper PDF-to-screen coordinate mapping with canvas detection
+- **State Flicker**: Avoid rapid state changes (false→true) that confuse visibility logic
+- **Event Handler Conflicts**: Check for pageClick events interfering with text selection
+- **Debug Patterns**: Use development-only debug panels to track state changes in real-time
+
+#### PDF Annotation Debugging Checklist
+When tooltip doesn't appear on subsequent selections:
+1. Check if showSelectionToolbar state is being cleared unnecessarily
+2. Verify setTimeout delays aren't causing race conditions  
+3. Ensure validation happens before any state changes
+4. Check console for coordinate conversion errors
+5. Verify tooltip position is within viewport bounds
+6. Test with debug panel showing real-time state values
 
 ### UI Component Issues
 - **Confirmation Dialogs**: Use custom `DeleteConfirmationDialog` instead of browser `window.confirm()`
@@ -115,6 +130,9 @@ After any changes, verify these core flows work:
 - **Component Simplification**: Remove unnecessary callback props and complex state management between components
 - **Mobile Responsiveness**: Test touch interactions and responsive layouts
 - **Error Boundaries**: Ensure proper error handling and recovery mechanisms
+- **PDF Tooltip State Management**: Avoid clearing showSelectionToolbar state unnecessarily - causes race conditions
+- **React State Race Conditions**: Don't clear state immediately before setting it - use validation first approach
+- **Tooltip Visibility Logic**: Implement proper delayed hide (200ms) but immediate show for floating components
 
 ## RTK Query Implementation Checklist
 
