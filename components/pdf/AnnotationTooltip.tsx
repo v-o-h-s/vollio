@@ -55,12 +55,12 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
   const [isDelayedVisible, setIsDelayedVisible] = useState(false);
 
   //   // Debug logging
-  //   console.log("AnnotationTooltip render:", {
-  //     visible,
-  //     position,
-  //     adjustedPosition,
-  //     isDelayedVisible,
-  //   });
+  console.log("AnnotationTooltip render:", {
+    visible,
+    position,
+    adjustedPosition,
+    isDelayedVisible,
+  });
 
   // Tooltip is always shown for desktop/laptop/tablet usage
 
@@ -201,7 +201,12 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
       >
         {/* shadcn-style menu item */}
         <div
-          onClick={onCreateNote}
+          onClick={(e) => {
+            console.log('Create note button clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            onCreateNote();
+          }}
           className="
                         relative flex cursor-default items-center gap-2 
                         rounded-sm px-2 py-1.5 text-sm 

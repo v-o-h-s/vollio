@@ -127,6 +127,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   /* Text Selection Handlers */
   const handleSelectionTextEnd = useCallback((args: any) => {
 
+    console.log('Text selection event triggered:', args);
+
     // TODO use this as way to highlight text pls daddy
     // const annotationBounds = extractSelectionBounds(args);
 
@@ -152,7 +154,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         !args.textContent ||
         !args.textContent.trim()
       ) {
-        console.log("Validation failed - missing data");
+        console.log("Validation failed - missing data:", {
+          hasPdfData: !!currentPdfData,
+          hasArgs: !!args,
+          hasTextContent: !!(args?.textContent),
+          textContentTrimmed: args?.textContent?.trim()
+        });
         return;
       }
 
@@ -188,6 +195,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
       // Store selection data
       const textContent = args.textContent.trim();
+      console.log('Setting selected text:', textContent);
+      console.log('Setting current page number:', args.pageIndex);
       setSelectedText(textContent);
       setCurrentPageNumber(args.pageIndex);
 
@@ -289,8 +298,15 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
       setTooltipPosition(tooltipPosition);
 
+      console.log('About to show selection toolbar:', {
+        textContent,
+        tooltipPosition,
+        selectionBounds
+      });
+
       // Small delay to ensure clean state reset
       setTimeout(() => {
+        console.log('Setting showSelectionToolbar to true');
         setShowSelectionToolbar(true);
       }, 50);
     } catch (error) {
@@ -302,9 +318,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Handle note creation from selection
   const handleCreateNoteFromSelection = useCallback(() => {
+    console.log('handleCreateNoteFromSelection called');
+    console.log('Selected text:', selectedText);
+    console.log('Selection bounds:', selectionBounds);
     setShowSelectionToolbar(false);
     setShowNoteModal(true);
-  }, []);
+  }, [selectedText, selectionBounds]);
 
   // Handle closing selection toolbar
   const handleCloseSelectionToolbar = useCallback(() => {
@@ -347,26 +366,21 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       }
     }
 
-    // Close modal and reset state
-    setShowNoteModal(false);
-    setSelectedText("");
-    setSelectionBounds(null);
+    // DON'T close modal automatically - let user control when to close
+    // setShowNoteModal(false);
+    // setSelectedText("");
+    // setSelectionBounds(null);
 
-    // Allow time for modal to close before enabling new selections
-    setTimeout(() => {
-      console.log('Ready for new text selection');
-    }, 300);
+    console.log('Note created but modal remains open for continued editing');
   }, [selectionBounds, selectedText, currentPageNumber]);
 
   // Handle modal close without creating note
   const handleCloseNoteModal = useCallback(() => {
-    console.log('Note modal closed without creating note');
+    console.log('Note modal closed manually by user');
     setShowNoteModal(false);
-    // Don't clear selection state immediately to allow user to try again
-    setTimeout(() => {
-      setSelectedText("");
-      setSelectionBounds(null);
-    }, 100);
+    // Clear selection state when modal is manually closed
+    setSelectedText("");
+    setSelectionBounds(null);
   }, []);
 
   // Handle highlight hover
@@ -538,7 +552,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           enableNavigationToolbar={true}
           enableTextMarkupAnnotation={true} // Enable highlighting
           zoomMode="FitToWidth"
+          textSelectionStart={(args) => {
+            console.log('Text selection STARTED:', args);
+          }}
           textSelectionEnd={(args) => handleSelectionTextEnd(args)}
+          pageClick={(args) => {
+            console.log('Page clicked:', args);
+          }}
           annotationMouseover={(args) => {
             console.log("Hovered annotation:", args);
             // You can show your custom toolbar here
@@ -605,6 +625,14 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           pdfTitle={currentPdfData?.filename}
           onNoteCreated={handleNoteCreated}
         />
+        {/* Debug info */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="fixed bottom-4 left-4 z-50 bg-black text-white p-2 rounded text-xs">
+            <div>Selection Toolbar: {showSelectionToolbar ? 'true' : 'false'}</div>
+            <div>Note Modal: {showNoteModal ? 'true' : 'false'}</div>
+            <div>Selected Text: {selectedText || 'none'}</div>
+          </div>
+        )}
 
         {/* Highlight Hover Toolbar */}
         <HighlightHoverToolbar
