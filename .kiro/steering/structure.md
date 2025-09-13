@@ -30,9 +30,13 @@ inclusion: always
 - **README.md** - Complete documentation covering theme system features, API reference, and implementation guides
 
 ##### PDF Components (`components/pdf/`)
-- **PDFAnnotationViewer.tsx** - Main PDF viewer with Syncfusion integration, Supabase backend, activity tracking, and annotation workflow
+- **PDFAnnotationViewer.tsx** - Main PDF viewer with Syncfusion integration, enhanced coordinate conversion, and complete annotation workflow
+- **AnnotationTooltip.tsx** - Enhanced text selection UI with sophisticated PDF-to-screen coordinate conversion and viewport boundary detection
+- **NoteCreationModal.tsx** - Large modal for note creation with NotionEditor integration, auto-save, and enhanced layout with selected text reference
+- **HighlightHoverToolbar.tsx** - Mini toolbar for existing highlights with "View Note" and "Open" buttons, router navigation integration
+- **NotePreviewModal.tsx** - Read-only note preview modal with TipTap editor for quick viewing without leaving PDF
+- **FloatingSelectionToolbar.tsx** - Alternative floating toolbar with React Portal rendering and smart positioning (maintained as option)
 - **AnnotationOverlay.tsx** - Interactive annotation highlights over PDF pages with zoom-aware positioning
-- **AnnotationTooltip.tsx** - Desktop text selection UI with floating tooltip and "Create note" button
 - **MobileAnnotationDialog.tsx** - Mobile-optimized full-screen annotation creation dialog
 - **AnnotationPreviewCard.tsx** - Hover preview of annotation content with edit functionality
 - **PDFListDisplay.tsx** - PDF list component with recent activity and file operations

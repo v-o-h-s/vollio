@@ -26,6 +26,11 @@ export { default as AnnotationTooltip } from "./AnnotationTooltip";
 // Preview card for annotation hover states
 export { default as AnnotationPreviewCard } from "./AnnotationPreviewCard";
 
+// Text selection and note creation workflow
+export { NoteCreationModal } from "./NoteCreationModal";
+export { HighlightHoverToolbar } from "./HighlightHoverToolbar";
+export { NotePreviewModal } from "./NotePreviewModal";
+
 // Overlay component for rendering annotation highlights
 
 // Mobile dialog removed - app is desktop/laptop focused

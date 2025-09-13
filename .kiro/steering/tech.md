@@ -23,6 +23,20 @@ inclusion: always
 
 ## Recent Technical Implementations
 
+### PDF Annotation Architecture
+- **AnnotationTooltip Integration**: Sophisticated PDF-to-screen coordinate conversion with canvas detection
+- **Multi-Component Workflow**: NoteCreationModal, HighlightHoverToolbar, NotePreviewModal integration
+- **Coordinate Conversion System**: Multiple fallback methods for accurate PDF positioning
+- **Syncfusion Integration**: Type-safe annotation creation with highlight-note linking
+- **Portal-Based Rendering**: React Portal usage for proper z-index management outside PDF containers
+
+### Enhanced PDF Selection Workflow
+- **Smart Canvas Detection**: Page-specific canvas element detection with querySelector fallbacks
+- **Viewport Boundary Handling**: Automatic tooltip repositioning to stay within screen bounds
+- **Text Selection Processing**: Comprehensive validation and bounds calculation from textBounds arrays
+- **Highlight Creation**: Automatic highlight annotation creation linked to note IDs
+- **Navigation Integration**: Seamless routing between PDF viewer and note pages
+
 ### UI/UX Architecture
 - **Custom Dialog Components**: Styled confirmation dialogs replacing browser alerts
 - **Context-Based State**: AutoSaveStatusProvider for global auto-save status management
@@ -52,6 +66,49 @@ inclusion: always
 - Use PascalCase for component names and files
 - Keep components focused and single-responsibility
 - Use proper TypeScript props interfaces
+
+#### PDF Annotation Component Patterns
+```typescript
+// Coordinate conversion with fallback methods
+const handleTextSelection = useCallback((args: TextSelectionEventArgs) => {
+  // 1. Validate input data
+  if (!args?.textContent?.trim() || !args.textBounds?.length) return;
+  
+  // 2. Calculate bounds using Math.min/max
+  const bounds = calculateSelectionBounds(args.textBounds);
+  
+  // 3. Convert PDF coordinates to screen coordinates
+  const screenPosition = convertPDFToScreenCoords(bounds, pdfViewerRef.current);
+  
+  // 4. Adjust for viewport boundaries
+  const adjustedPosition = adjustForViewport(screenPosition);
+}, [dependencies]);
+
+// Portal-based floating components
+const FloatingComponent = ({ position, visible }) => {
+  if (!visible) return null;
+  
+  return createPortal(
+    <div className="fixed z-[9999]" style={{ left: position.x, top: position.y }}>
+      {/* Component content */}
+    </div>,
+    document.body
+  );
+};
+
+// Syncfusion annotation integration
+const createHighlight = useCallback((noteId: string, bounds: Rectangle) => {
+  if (!pdfViewerRef.current) return;
+  
+  const annotationData = {
+    bounds: [bounds],
+    pageNumber: currentPageNumber + 1, // Convert to 1-based
+    note: `Note ID: ${noteId}`,
+  };
+  
+  (pdfViewerRef.current.annotation as any).addAnnotation("Highlight", annotationData);
+}, [currentPageNumber]);
+```
 
 ### File Naming
 

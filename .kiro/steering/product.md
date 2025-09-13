@@ -12,13 +12,15 @@ inclusion: always
 - **PDF Upload & Storage**: Use `/api/pdfs/upload` endpoint with Supabase Storage, organize files by `{userId}/{timestamp}_{filename}`
 - **PDF Viewing**: Integrate Syncfusion PDF Viewer component (licensed) for all PDF rendering
 - **Rich Text Editing**: Use TipTap-based NotionEditor with floating toolbars for annotation content creation
-- **Text Annotation**: Implement click-drag text selection with coordinate-based positioning (not DOM-based)
-- **Annotation CRUD**: Store all annotations in Supabase with automatic RLS protection
+- **Enhanced Text Annotation**: Comprehensive text selection workflow with AnnotationTooltip, coordinate conversion, and automatic highlight creation
+- **PDF Annotation Workflow**: Text selection → AnnotationTooltip → NoteCreationModal → automatic highlight → HighlightHoverToolbar for existing annotations
+- **Coordinate-Based Positioning**: PDF-to-screen coordinate conversion with canvas detection and viewport boundary handling
+- **Annotation CRUD**: Store all annotations in Supabase with automatic RLS protection and note-highlight linking
 - **Advanced Note-Taking System**: Enhanced notes interface with grid/list/compact views, filtering, sorting, and search
 - **Auto-Save Status Management**: Context-based auto-save status with floating indicators positioned in bottom-right
 - **Custom UI Components**: Styled confirmation dialogs, floating status indicators, and enhanced error handling
 - **Obsidian-Style Interface**: Clean design with separate title input, borderless layouts, and intuitive workflows
-- **Cross-Document Navigation**: Enable seamless switching between PDFs, annotations, and notes
+- **Cross-Document Navigation**: Enable seamless switching between PDFs, annotations, and notes with router integration
 - **Complete Theme System**: Light/dark mode support with system preference detection and theme-aware components
 - **Responsive Dashboard**: Collapsible sidebar with theme selection, user profile management, and modern navigation
 - **Mobile-First Design**: Prioritize touch-friendly interactions and responsive layouts
@@ -33,11 +35,13 @@ inclusion: always
 
 ### User Experience Patterns
 When building UI flows, follow these established patterns:
-- **Annotation Flow**: Text selection → Note dialog with rich editor → Save (minimize clicks)
+- **Enhanced Annotation Flow**: Text selection → AnnotationTooltip with smart positioning → NoteCreationModal with NotionEditor → automatic highlight creation → HighlightHoverToolbar for future access
+- **Coordinate-Based Positioning**: Use PDF coordinates with sophisticated screen conversion, canvas detection, and viewport boundary adjustment
 - **Rich Text Editing**: Use floating toolbars for context-aware formatting, slash commands for quick actions
 - **Theme Integration**: All components must support light/dark modes with theme-aware styling
 - **Visual Feedback**: Always highlight annotated text, show hover tooltips, use preview cards
-- **Navigation**: Dashboard as central hub with collapsible sidebar, easy PDF switching, breadcrumb navigation
+- **Navigation**: Dashboard as central hub with collapsible sidebar, easy PDF switching, breadcrumb navigation, seamless PDF-to-notes routing
+- **Portal-Based UI**: Use React Portals for floating components with proper z-index management outside PDF containers
 - **Error Handling**: Show user-friendly messages, provide retry options, log detailed errors
 - **Confirmation Dialogs**: Use custom styled confirmation dialogs instead of browser alerts
 - **Auto-Save Feedback**: Provide real-time status indicators for save operations with visual feedback
@@ -45,11 +49,14 @@ When building UI flows, follow these established patterns:
 - **Toast Notifications**: Use toast messages for success/error feedback with appropriate styling
 
 ### Technical Implementation Rules
-- **PDF Coordinates**: Always use PDF page coordinates for annotations, never DOM positions
+- **PDF Coordinates**: Always use PDF page coordinates for annotations with sophisticated screen conversion using canvas detection
+- **Coordinate Conversion**: Implement fallback hierarchy: page-specific canvas → general canvas → viewer element → original coordinates
+- **Viewport Boundary Handling**: Automatically adjust tooltip/modal positioning to stay within visible screen area
 - **Server Communication**: Always use RTK Query for API calls - never use direct fetch calls
 - **State Management**: Use Redux Toolkit with RTK Query for all API calls and caching
 - **Auto-Save Architecture**: Editor components handle auto-save internally using RTK Query mutations
 - **Theme Support**: Implement theme-aware styling using CSS custom properties and Tailwind dark mode classes
+- **Portal Rendering**: Use React Portals for floating components to ensure proper z-index management
 - **Mobile Support**: Implement touch gestures for text selection, use mobile-specific dialogs
 - **Performance**: Lazy load annotations, handle large PDFs efficiently, cache API responses
 - **Cross-tab Sync**: Use PostMessage API for real-time annotation synchronization
