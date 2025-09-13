@@ -70,6 +70,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Text selection and toolbar state
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectionBounds, setSelectionBounds] = useState<{ x: number, y: number, width: number, height: number } | null>(null);
+  const [selectedTextBounds, setSelectedTextBounds] = useState<textBounds[] | null>(null);
   const [showSelectionToolbar, setShowSelectionToolbar] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
@@ -126,6 +127,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   /* Text Selection Handlers */
   const handleSelectionTextEnd = useCallback((args: any) => {
+    const textBounds = extractSelectionBounds(args)
+    setSelectedTextBounds(textBounds)
+
 
     console.log('Text selection event triggered:', args);
 
@@ -135,19 +139,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     // // Convert textBounds to the format expected by addAnnotation
 
 
-    // // Cast to any to bypass TypeScript strictness for minimal working solution
-    // pdfViewerRef.current?.annotation.addAnnotation("Highlight", {
-    //   bounds: annotationBounds,
-    //   pageNumber: args.pageIndex || 0,
-    //   customData: { id: 'highlight-123', note: 'Important point' },
-    //   isLock:  true,
-
-    // } as any);
-    // Always close any existing toolbar first
-    setShowSelectionToolbar(false);
 
     try {
-      // Validate input parameters
+      // Validate input parameters first before resetting any state
       if (
         !currentPdfData ||
         !args ||
@@ -193,10 +187,17 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         return;
       }
 
-      // Store selection data
+      // Store selection data - first clear any existing state then set new state
+      console.log('Clearing previous selection state and setting new selection');
+      setSelectedText(''); // Clear first
+      setSelectionBounds(null); // Clear first
+      setShowSelectionToolbar(false); // Clear first
+
       const textContent = args.textContent.trim();
       console.log('Setting selected text:', textContent);
       console.log('Setting current page number:', args.pageIndex);
+
+      // Set new state
       setSelectedText(textContent);
       setCurrentPageNumber(args.pageIndex);
 
@@ -288,15 +289,11 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         height,
       };
 
-      setSelectionBounds(selectionBounds);
-
       // Set tooltip position and show it
       const tooltipPosition = {
         x: screenX,
         y: screenY,
       };
-
-      setTooltipPosition(tooltipPosition);
 
       console.log('About to show selection toolbar:', {
         textContent,
@@ -304,11 +301,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         selectionBounds
       });
 
-      // Small delay to ensure clean state reset
-      setTimeout(() => {
-        console.log('Setting showSelectionToolbar to true');
-        setShowSelectionToolbar(true);
-      }, 50);
+      // Update all state immediately in sync
+      setSelectionBounds(selectionBounds);
+      setTooltipPosition(tooltipPosition);
+      setShowSelectionToolbar(true);
     } catch (error) {
       console.error("Error handling text selection:", error);
       // Don't throw - text selection errors shouldn't break the viewer
@@ -334,29 +330,28 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Handle note creation completion
   const handleNoteCreated = useCallback(async (noteId: string) => {
-    console.log('Note created, creating highlight for note:', noteId);
+
 
     // Create highlight annotation linked to the note
     if (pdfViewerRef.current && selectionBounds && selectedText) {
       try {
         // Create highlight annotation using a more flexible approach
         const annotationOptions = {
-          bounds: [{
-            x: selectionBounds.x,
-            y: selectionBounds.y,
-            width: selectionBounds.width,
-            height: selectionBounds.height,
-          }],
-          pageNumber: currentPageNumber + 1, // Convert to 1-based page number for Syncfusion
+          bounds: selectedTextBounds, // Use the extracted text bounds for accurate highlighting
+          pageNumber: currentPageNumber, // Convert to 1-based page number for Syncfusion
           author: 'User',
           subject: 'Highlight',
           note: `Note ID: ${noteId}`, // Store note ID for linking
           color: '#FFFF00',
           opacity: 0.4,
+          customData: { id: 'highlight-123', note: 'Important point' },
+          isLock: true,
         };
+        // Cast to any to bypass TypeScript strictness for minimal working solution
 
-        // Use type assertion to work around strict typing
-        (pdfViewerRef.current.annotation as any).addAnnotation("Highlight", annotationOptions);
+        // Cast to any to bypass TypeScript strictness for minimal working solution
+        pdfViewerRef.current?.annotation.addAnnotation("Highlight", annotationOptions as any);
+
 
         // TODO: Create annotation record in database with note linkage
         // This should be done via API call to store the relationship
@@ -564,7 +559,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             // You can show your custom toolbar here
           }}
           annotationMouseLeave={(args) => {
-           // console.log("Mouse left annotation:", args);
+            // console.log("Mouse left annotation:", args);
           }}
           annotationDoubleClick={(args) => {
             console.log("Clicked annotation:", args);

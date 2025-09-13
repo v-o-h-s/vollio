@@ -54,31 +54,52 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
   const [adjustedPosition, setAdjustedPosition] = useState(position);
   const [isDelayedVisible, setIsDelayedVisible] = useState(false);
 
-  //   // Debug logging
-  console.log("AnnotationTooltip render:", {
-    visible,
-    position,
-    adjustedPosition,
-    isDelayedVisible,
-  });
+  // Reset adjusted position when position prop changes
+  useEffect(() => {
+    setAdjustedPosition(position);
+  }, [position]);
 
   // Tooltip is always shown for desktop/laptop/tablet usage
 
-  // Handle viewport edge detection and positioning
+  // Handle fade-in/fade-out with 200ms delay on hide
   useEffect(() => {
-    if (!visible) {
-      return;
+    let timeoutId: NodeJS.Timeout;
+
+    if (visible) {
+      // Clear any pending hide timeout and show immediately
+      setIsDelayedVisible(true);
+    } else {
+      // Delayed hide (200ms as per requirements)
+      timeoutId = setTimeout(() => {
+        setIsDelayedVisible(false);
+      }, 200);
     }
 
-    // Set initial position immediately when visible becomes true
-    setAdjustedPosition(position);
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [visible]);
+
+  // Handle viewport edge detection and positioning
+  useEffect(() => {
+    if (!visible || !isDelayedVisible) {
+      return;
+    }
 
     // Then adjust for viewport bounds after a brief delay to ensure DOM is ready
     const adjustPosition = () => {
       if (!tooltipRef.current) {
         // If ref is not ready, try again after a short delay
-        // just for the record this function run will run forever unless the the DOM is ready
-        setTimeout(adjustPosition, 10);
+        // Limit the number of retries to avoid infinite loops
+        const retryCount = (adjustPosition as any).retryCount || 0;
+        if (retryCount < 10) {
+          (adjustPosition as any).retryCount = retryCount + 1;
+          setTimeout(adjustPosition, 10);
+        } else {
+          console.warn("Could not adjust tooltip position - DOM element not found");
+        }
         return;
       }
 
@@ -121,30 +142,11 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
       setAdjustedPosition({ x: adjustedX, y: adjustedY });
     };
 
-    // Start position adjustment after a brief delay
-    setTimeout(adjustPosition, 0);
-  }, [position, visible]);
-
-  // Handle fade-in/fade-out with 200ms delay on hide
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
-    if (visible) {
-      // Immediate show
-      setIsDelayedVisible(true);
-    } else {
-      // Delayed hide (200ms as per requirements)
-      timeoutId = setTimeout(() => {
-        setIsDelayedVisible(false);
-      }, 200);
-    }
-
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [visible]);
+    // Start position adjustment immediately, then again after DOM is ready
+    adjustPosition();
+    // Also try again after a delay to ensure DOM is fully rendered
+    setTimeout(adjustPosition, 50);
+  }, [position, visible, isDelayedVisible]);
 
   // Handle click outside to close
   useEffect(() => {
