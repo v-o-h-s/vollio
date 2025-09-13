@@ -10,17 +10,10 @@ export const selectActiveSelection = (state: RootState) =>
   state.annotations.activeSelection;
 export const selectHoveredAnnotation = (state: RootState) =>
   state.annotations.hoveredAnnotation;
-export const selectTooltipState = (state: RootState) =>
-  state.annotations.tooltipState;
 export const selectPreviewCard = (state: RootState) =>
   state.annotations.previewCard;
 
 // UI state selectors
-export const selectIsTooltipVisible = createSelector(
-  [selectTooltipState],
-  (tooltipState): boolean => tooltipState.visible
-);
-
 export const selectIsPreviewCardVisible = createSelector(
   [selectPreviewCard],
   (previewCard): boolean => previewCard.visible

@@ -24,7 +24,8 @@ inclusion: always
 ## Recent Technical Implementations
 
 ### PDF Annotation Architecture
-- **AnnotationTooltip Integration**: Sophisticated PDF-to-screen coordinate conversion with canvas detection
+- **AnnotationTooltip Integration**: Sophisticated PDF-to-screen coordinate conversion with canvas detection  
+- **Local State Management**: Tooltip state managed locally in PDFAnnotationViewer with React useState
 - **Multi-Component Workflow**: NoteCreationModal, HighlightHoverToolbar, NotePreviewModal integration
 - **Coordinate Conversion System**: Multiple fallback methods for accurate PDF positioning
 - **Syncfusion Integration**: Type-safe annotation creation with highlight-note linking
@@ -48,6 +49,8 @@ inclusion: always
 - **Cache Management**: Automatic cache invalidation and real-time updates
 - **Error Handling**: Comprehensive error recovery with toast notifications
 - **Loading States**: Visual feedback during all async operations
+- **Local UI State**: Tooltip positioning and visibility managed with local React state in components
+- **Redux for Persistence**: Only persistent application state stored in Redux (annotations, PDFs, selections)
 
 ## Code Style & Conventions
 

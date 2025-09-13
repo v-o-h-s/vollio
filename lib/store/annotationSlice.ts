@@ -1,23 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { PDFDocument, TextSelection, Annotation } from "../types";
 
-interface TooltipState {
-  visible: boolean;
-  position: { x: number; y: number };
-}
-
 // will be used when implementing notes 
 interface PreviewCardState {
   visible: boolean;
   annotationId: string | null;
   position: { x: number; y: number };
 }
+
 interface AnnotationState {
   currentPdf: PDFDocument | null;
   annotations: Record<string, Annotation>;
   activeSelection: TextSelection | null;
   hoveredAnnotation: string | null;
-  tooltipState: TooltipState;
   previewCard: PreviewCardState;
 }
 
@@ -26,10 +21,6 @@ const initialState: AnnotationState = {
   annotations: {},
   activeSelection: null,
   hoveredAnnotation: null,
-  tooltipState: {
-    visible: false,
-    position: { x: 0, y: 0 },
-  },
   previewCard: {
     visible: false,
     annotationId: null,
@@ -47,7 +38,6 @@ const annotationSlice = createSlice({
       // Clear UI state when switching PDFs
       state.activeSelection = null;
       state.hoveredAnnotation = null;
-      state.tooltipState.visible = false;
       state.previewCard.visible = false;
     },
 
@@ -56,7 +46,6 @@ const annotationSlice = createSlice({
       state.annotations = {};
       state.activeSelection = null;
       state.hoveredAnnotation = null;
-      state.tooltipState.visible = false;
       state.previewCard.visible = false;
     },
 
@@ -104,23 +93,6 @@ const annotationSlice = createSlice({
       state.hoveredAnnotation = action.payload;
     },
 
-    // Tooltip actions
-    showTooltip: (state, action: PayloadAction<{ x: number; y: number }>) => {
-      state.tooltipState.visible = true;
-      state.tooltipState.position = action.payload;
-    },
-
-    hideTooltip: (state) => {
-      state.tooltipState.visible = false;
-    },
-
-    updateTooltipPosition: (
-      state,
-      action: PayloadAction<{ x: number; y: number }>
-    ) => {
-      state.tooltipState.position = action.payload;
-    },
-
     // Preview card actions
     showPreviewCard: (
       state,
@@ -157,9 +129,6 @@ export const {
   removeAnnotation,
   setActiveSelection,
   setHoveredAnnotation,
-  showTooltip,
-  hideTooltip,
-  updateTooltipPosition,
   showPreviewCard,
   hidePreviewCard,
   updatePreviewCardPosition,

@@ -18,7 +18,6 @@ interface AnnotationState {
   annotations: Record<string, Annotation>;
   activeSelection: TextSelection | null;
   hoveredAnnotation: string | null;
-  tooltipState: TooltipState;
   previewCard: PreviewCardState;
 }
 ```
@@ -41,7 +40,6 @@ interface AnnotationState {
 
 - `setActiveSelection(selection)` - Set currently selected text
 - `setHoveredAnnotation(id)` - Set hovered annotation
-- `setTooltipState({visible, position})` - Control annotation tooltip
 - `setPreviewCard({visible, annotationId, position})` - Control annotation preview
 
 ## RTK Query Endpoints

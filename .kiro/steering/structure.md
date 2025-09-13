@@ -4,6 +4,20 @@ inclusion: always
 
 # Project Structure & File Organization
 
+## Architecture Principles
+
+### State Management Strategy
+- **Redux Store**: Persistent application state (PDFs, annotations, user selections, preview cards)
+- **Local Component State**: Transient UI state (tooltip positioning, modal visibility, loading states)
+- **RTK Query**: All server communications, caching, and real-time updates
+- **Context Providers**: Scoped state management (AutoSaveStatusProvider, ThemeProvider)
+
+### Component State Guidelines
+- Use Redux for data that needs to persist across component unmounts
+- Use local useState for ephemeral UI state (visibility, positioning, form inputs)  
+- Tooltip states managed locally in PDF components, not in Redux
+- Preview card state in Redux for cross-component coordination
+
 ## File Placement Rules
 
 ### Components
