@@ -20,7 +20,7 @@ const updateHighlightSchema = z.object({
   title: z.string().optional(),
   color: z.string().optional(),
   opacity: z.number().min(0).max(1).optional(),
-  note_id: z.string().uuid().optional()
+  noteId: z.string().uuid().optional()
 });
 
 // GET /api/highlights/[id] - Get specific highlight
@@ -55,7 +55,26 @@ export async function GET(request: Request, { params }: RouteParams) {
       );
     }
 
-    return NextResponse.json({ highlight });
+    // Transform database response to camelCase for frontend
+    const transformedHighlight = {
+      ...highlight,
+      pdfId: highlight.pdf_id,
+      noteId: highlight.note_id,
+      pageNumber: highlight.page_number,
+      createdAt: highlight.created_at,
+      updatedAt: highlight.updated_at,
+      // Remove snake_case properties
+      pdf_id: undefined,
+      note_id: undefined,
+      page_number: undefined,
+      created_at: undefined,
+      updated_at: undefined,
+    };
+
+    return NextResponse.json({
+      success: true,
+      data: { highlight: transformedHighlight },
+    });
   } catch (error) {
     console.error("Error in GET /api/highlights/[id]:", error);
     return NextResponse.json(
@@ -87,6 +106,14 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     const validatedData = validationResult.data;
 
+    // Map noteId to note_id for database
+    const updateData = {
+      ...validatedData,
+      ...(validatedData.noteId !== undefined && { note_id: validatedData.noteId }),
+    };
+    // Remove noteId from the update data since database uses note_id
+    delete (updateData as any).noteId;
+
     // Check if highlight exists and belongs to user
     const { data: existingHighlight, error: fetchError } = await supabase
       .from("highlights")
@@ -105,7 +132,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const { data: updatedHighlight, error: updateError } = await supabase
       .from("highlights")
       .update({
-        ...validatedData,
+        ...updateData,
         updated_at: new Date().toISOString()
       })
       .eq("id", id)
@@ -124,8 +151,25 @@ export async function PUT(request: Request, { params }: RouteParams) {
       );
     }
 
-    return NextResponse.json({ 
-      highlight: updatedHighlight,
+    // Transform database response to camelCase for frontend
+    const transformedHighlight = {
+      ...updatedHighlight,
+      pdfId: updatedHighlight.pdf_id,
+      noteId: updatedHighlight.note_id,
+      pageNumber: updatedHighlight.page_number,
+      createdAt: updatedHighlight.created_at,
+      updatedAt: updatedHighlight.updated_at,
+      // Remove snake_case properties
+      pdf_id: undefined,
+      note_id: undefined,
+      page_number: undefined,
+      created_at: undefined,
+      updated_at: undefined,
+    };
+
+    return NextResponse.json({
+      success: true,
+      data: { highlight: transformedHighlight },
       message: "Highlight updated successfully"
     });
   } catch (error) {
@@ -171,7 +215,8 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       );
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
+      success: true,
       message: "Highlight deleted successfully"
     });
   } catch (error) {

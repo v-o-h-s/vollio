@@ -15,13 +15,13 @@ const textBoundsSchema = z.object({
 // Validation schema for highlight creation
 // Schema for creating highlights
 const createHighlightSchema = z.object({
-  pdf_id: z.string().uuid(),
-  note_id: z.string().uuid().optional(),
+  pdfId: z.string().uuid(),
+  noteId: z.string().uuid().optional(),
   content: z.string().min(1),
   title: z.string().optional(),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default("#FFFF00"),
   opacity: z.number().min(0.1).max(1.0).default(0.4),
-  page_number: z.number().int().min(1),
+  pageNumber: z.number().int().min(1),
   textbounds: z.array(z.object({
     x: z.number(),
     y: z.number(),
@@ -32,7 +32,7 @@ const createHighlightSchema = z.object({
 
 // Validation schema for highlight updates
 const updateHighlightSchema = createHighlightSchema.partial().omit({
-  pdf_id: true, // PDF ID cannot be changed
+  pdfId: true, // PDF ID cannot be changed
 });
 
 /**
@@ -125,12 +125,31 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 
   const totalPages = count ? Math.ceil(count / limit) : 1;
 
+  // Transform database response to camelCase for frontend
+  const transformedHighlights = highlights.map(highlight => ({
+    ...highlight,
+    pdfId: highlight.pdf_id,
+    noteId: highlight.note_id,
+    pageNumber: highlight.page_number,
+    createdAt: highlight.created_at,
+    updatedAt: highlight.updated_at,
+    // Remove snake_case properties
+    pdf_id: undefined,
+    note_id: undefined,
+    page_number: undefined,
+    created_at: undefined,
+    updated_at: undefined,
+  }));
+
   return NextResponse.json({
-    highlights,
+    success: true,
+    data: {
+      highlights: transformedHighlights,
+      total: count || 0,
+    },
     pagination: {
       page,
       limit,
-      total: count || 0,
       totalPages,
       hasNext: page < totalPages,
       hasPrev: page > 1,
@@ -173,7 +192,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
   const { data: pdf, error: pdfError } = await supabase
     .from("pdfs")
     .select("id")
-    .eq("id", validatedData.pdf_id)
+    .eq("id", validatedData.pdfId)
     .eq("user_id", userId)
     .single();
 
@@ -184,12 +203,12 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     );
   }
 
-  // If note_id is provided, verify note exists and belongs to user
-  if (validatedData.note_id) {
+  // If noteId is provided, verify note exists and belongs to user
+  if (validatedData.noteId) {
     const { data: note, error: noteError } = await supabase
       .from("notes")
       .select("id")
-      .eq("id", validatedData.note_id)
+      .eq("id", validatedData.noteId)
       .eq("user_id", userId)
       .single();
 
@@ -206,13 +225,13 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     .from("highlights")
     .insert({
       user_id: userId,
-      pdf_id: validatedData.pdf_id,
-      note_id: validatedData.note_id || null,
+      pdf_id: validatedData.pdfId,
+      note_id: validatedData.noteId || null,
       content: validatedData.content,
       title: validatedData.title || null,
       color: validatedData.color,
       opacity: validatedData.opacity,
-      page_number: validatedData.page_number,
+      page_number: validatedData.pageNumber,
       textbounds: validatedData.textbounds,
     })
     .select()
@@ -226,5 +245,24 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     );
   }
 
-  return NextResponse.json(highlight, { status: 201 });
+  // Transform database response to camelCase for frontend
+  const transformedHighlight = {
+    ...highlight,
+    pdfId: highlight.pdf_id,
+    noteId: highlight.note_id,
+    pageNumber: highlight.page_number,
+    createdAt: highlight.created_at,
+    updatedAt: highlight.updated_at,
+    // Remove snake_case properties
+    pdf_id: undefined,
+    note_id: undefined,
+    page_number: undefined,
+    created_at: undefined,
+    updated_at: undefined,
+  };
+
+  return NextResponse.json({
+    success: true,
+    data: { highlight: transformedHighlight },
+  }, { status: 201 });
 });

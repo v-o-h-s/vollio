@@ -9,6 +9,8 @@ import {
 } from "@reduxjs/toolkit/query/react";
 import {
   Annotation,
+  Highlight,
+  TextBounds,
   PDFDocument,
   UserActivity,
   Note,
@@ -99,7 +101,7 @@ const baseQueryWithRetry: BaseQueryFn = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithRetry,
-  tagTypes: ["Annotation", "PDF", "Note"],
+  tagTypes: ["Annotation", "Highlight", "PDF", "Note"],
   endpoints: (builder) => ({
     // PDF endpoints with enhanced error handling
     uploadPDF: builder.mutation<PDFDocument, FormData>({
@@ -387,10 +389,13 @@ export const apiSlice = createApi({
     }),
 
     // Notes endpoints with error handling
-    getNotes: builder.query<Note[], { pdfAnnotationId?: string }>({
-      query: ({ pdfAnnotationId } = {}) => ({
+    getNotes: builder.query<Note[], { pdfAnnotationId?: string; highlightId?: string }>({
+      query: ({ pdfAnnotationId, highlightId } = {}) => ({
         url: "notes",
-        params: pdfAnnotationId ? { pdfAnnotationId } : undefined,
+        params: { 
+          ...(pdfAnnotationId && { pdfAnnotationId }),
+          ...(highlightId && { highlightId })
+        },
       }),
       transformResponse: (response: SupabaseNotesResponse) => {
         if (!response.success || !response.data) {
@@ -718,6 +723,390 @@ export const apiSlice = createApi({
         { type: "PDF", id: "LIST" },
       ],
     }),
+
+    // Highlights endpoints - new system replacing annotations
+    getHighlights: builder.query<Highlight[], { pdfId?: string; noteId?: string; page?: number; limit?: number }>({
+      query: ({ pdfId, noteId, page = 1, limit = 50 } = {}) => ({
+        url: "highlights",
+        params: { 
+          ...(pdfId && { pdfId }),
+          ...(noteId && { noteId }),
+          page, 
+          limit 
+        },
+      }),
+      transformResponse: (response: ApiResponse<{ highlights: Highlight[]; total: number }>) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch highlights",
+            { component: "PDFAnnotationViewer", action: "fetch" }
+          );
+        }
+        return response.data.highlights;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "PDFAnnotationViewer", action: "fetch" };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result) => [
+        { type: "Highlight", id: "LIST" },
+        ...(result?.map((highlight) => ({ type: "Highlight" as const, id: highlight.id })) || []),
+      ],
+    }),
+
+    getHighlightsWithPagination: builder.query<
+      { highlights: Highlight[]; total: number; pagination: any },
+      { pdfId?: string; noteId?: string; page?: number; limit?: number }
+    >({
+      query: ({ pdfId, noteId, page = 1, limit = 50 } = {}) => ({
+        url: "highlights",
+        params: { 
+          ...(pdfId && { pdfId }),
+          ...(noteId && { noteId }),
+          page, 
+          limit 
+        },
+      }),
+      transformResponse: (response: ApiResponse<{ highlights: Highlight[]; total: number; pagination: any }>) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch highlights",
+            { component: "PDFAnnotationViewer", action: "fetch" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "PDFAnnotationViewer", action: "fetch" };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result) => [
+        { type: "Highlight", id: "LIST" },
+        ...(result?.highlights?.map((highlight) => ({ type: "Highlight" as const, id: highlight.id })) || []),
+      ],
+    }),
+
+    getHighlight: builder.query<Highlight, string>({
+      query: (highlightId) => `highlights/${highlightId}`,
+      transformResponse: (response: ApiResponse<{ highlight: Highlight }>) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch highlight",
+            { component: "PDFAnnotationViewer", action: "fetch" }
+          );
+        }
+        return response.data.highlight;
+      },
+      transformErrorResponse: (response: any, meta, highlightId) => {
+        const context = { component: "PDFAnnotationViewer", action: "fetch", highlightId };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Highlight not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result, error, highlightId) => [{ type: "Highlight", id: highlightId }],
+    }),
+
+    createHighlight: builder.mutation<Highlight, {
+      pdfId: string;
+      noteId?: string;
+      content: string;
+      title?: string;
+      color?: string;
+      opacity?: number;
+      pageNumber: number;
+      textbounds: TextBounds[];
+    }>({
+      query: (highlightData) => ({
+        url: "highlights",
+        method: "POST",
+        body: highlightData,
+      }),
+      transformResponse: (response: ApiResponse<{ highlight: Highlight }>) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to create highlight",
+            { component: "PDFAnnotationViewer", action: "create" }
+          );
+        }
+        return response.data.highlight;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "PDFAnnotationViewer", action: "create" };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid highlight data",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        } else if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "PDF or note not found",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: [
+        { type: "Highlight", id: "LIST" },
+        { type: "PDF", id: "LIST" },
+      ],
+    }),
+
+    updateHighlight: builder.mutation<Highlight, {
+      id: string;
+      updates: {
+        textbounds?: TextBounds[];
+        content?: string;
+        title?: string;
+        color?: string;
+        opacity?: number;
+        noteId?: string;
+      };
+    }>({
+      query: ({ id, updates }) => ({
+        url: `highlights/${id}`,
+        method: "PUT",
+        body: updates,
+      }),
+      transformResponse: (response: ApiResponse<{ highlight: Highlight }>) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to update highlight",
+            { component: "PDFAnnotationViewer", action: "update" }
+          );
+        }
+        return response.data.highlight;
+      },
+      transformErrorResponse: (response: any, meta, { id }) => {
+        const context = { component: "PDFAnnotationViewer", action: "update", highlightId: id };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid highlight data",
+            context
+          );
+        } else if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Highlight not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Highlight", id: "LIST" },
+        { type: "Highlight", id },
+      ],
+    }),
+
+    deleteHighlight: builder.mutation<{ success: boolean }, string>({
+      query: (highlightId) => ({
+        url: `highlights/${highlightId}`,
+        method: "DELETE",
+      }),
+      transformResponse: (response: any) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to delete highlight",
+            { component: "PDFAnnotationViewer", action: "delete" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, highlightId) => {
+        const context = { component: "PDFAnnotationViewer", action: "delete", highlightId };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Highlight not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, highlightId) => [
+        { type: "Highlight", id: "LIST" },
+        { type: "Highlight", id: highlightId },
+      ],
+    }),
+
+    bulkDeleteHighlights: builder.mutation<{ success: boolean; deletedCount: number }, string[]>({
+      query: (highlightIds) => ({
+        url: "highlights/bulk-delete",
+        method: "DELETE",
+        body: { ids: highlightIds },
+      }),
+      transformResponse: (response: any) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to delete highlights",
+            { component: "PDFAnnotationViewer", action: "bulkDelete" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "PDFAnnotationViewer", action: "bulkDelete" };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: [{ type: "Highlight", id: "LIST" }],
+    }),
+
+    searchHighlights: builder.query<Highlight[], { query: string; pdfId?: string; limit?: number }>({
+      query: ({ query, pdfId, limit = 20 }) => ({
+        url: "highlights/search",
+        params: { 
+          q: query,
+          ...(pdfId && { pdfId }),
+          limit
+        },
+      }),
+      transformResponse: (response: ApiResponse<{ highlights: Highlight[] }>) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to search highlights",
+            { component: "PDFAnnotationViewer", action: "search" }
+          );
+        }
+        return response.data.highlights;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "PDFAnnotationViewer", action: "search" };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: ["Highlight"],
+    }),
   }),
 });
 
@@ -734,6 +1123,15 @@ export const {
   useDeleteNoteMutation,
   useGetAnnotationsQuery,
   useCreateAnnotationMutation,
+  // Highlights hooks
+  useGetHighlightsQuery,
+  useGetHighlightsWithPaginationQuery,
+  useGetHighlightQuery,
+  useCreateHighlightMutation,
+  useUpdateHighlightMutation,
+  useDeleteHighlightMutation,
+  useBulkDeleteHighlightsMutation,
+  useSearchHighlightsQuery,
 } = apiSlice;
 
 // Export the reducer and middleware

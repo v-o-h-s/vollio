@@ -1,18 +1,5 @@
 /**
- * Core types for PDF export interface Highlight {
-  id: string;
-  user_id: string;
-  pdf_id: string;
-  note_id: string | null;
-  content: string;
-  title: string | null;
-  color: string;
-  opacity: number;
-  page_number: number;
-  textbounds: TextBounds[];
-  created_at: string;
-  updated_at: string;
-}em
+ * Core types for PDF annotation system
  */
 
 import { JSONContent } from "@tiptap/core";
@@ -40,17 +27,49 @@ export interface TextBounds {
 export interface Highlight {
   id: string;
   user_id: string;
-  pdf_id: string;
-  note_id?: string;
+  pdfId: string;
+  noteId: string | null;
   content: string;
-  title?: string;
+  title: string | null;
   color: string;
   opacity: number;
-  page_number: number;
-  bounds: TextBounds[];
-  coordinates: TextBounds;
-  created_at: string;
-  updated_at: string;
+  pageNumber: number;
+  textbounds: TextBounds[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================================
+// EDITOR TYPES
+// ============================================================================
+
+/**
+ * Text bounds interface for PDF annotations and highlights
+ * Used for both individual text fragments and coordinate arrays
+ */
+export interface TextBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Highlight data structure matching the database schema
+ */
+export interface Highlight {
+  id: string;
+  user_id: string;
+  pdfId: string;
+  noteId: string | null;
+  content: string;
+  title: string | null;
+  color: string;
+  opacity: number;
+  pageNumber: number;
+  textbounds: TextBounds[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================================================
