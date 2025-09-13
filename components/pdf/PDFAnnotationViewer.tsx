@@ -596,16 +596,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           pdfTitle={currentPdfData?.filename}
           onNoteCreated={handleNoteCreated}
         />
-        {/* Debug info */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="fixed bottom-4 left-4 z-50 bg-black text-white p-2 rounded text-xs">
-            <div>Selection Toolbar: {showSelectionToolbar ? 'true' : 'false'}</div>
-            <div>Note Modal: {showNoteModal ? 'true' : 'false'}</div>
-            <div>Selected Text: {selectedText || 'none'}</div>
-            <div>Tooltip Position: {`${tooltipPosition.x}, ${tooltipPosition.y}`}</div>
-            <div>Timestamp: {Date.now()}</div>
-          </div>
-        )}
+        
 
         {/* Highlight Hover Toolbar */}
         <HighlightHoverToolbar
