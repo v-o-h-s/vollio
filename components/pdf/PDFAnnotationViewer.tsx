@@ -187,21 +187,14 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         return;
       }
 
-      // Store selection data - first clear any existing state then set new state
-      console.log('Clearing previous selection state and setting new selection');
-      setSelectedText(''); // Clear first
-      setSelectionBounds(null); // Clear first
-      setShowSelectionToolbar(false); // Clear first
-
+      // Store selection data
       const textContent = args.textContent.trim();
       console.log('Setting selected text:', textContent);
       console.log('Setting current page number:', args.pageIndex);
-
-      // Set new state
+      
+      // Set new state (don't clear showSelectionToolbar as it causes flicker)
       setSelectedText(textContent);
-      setCurrentPageNumber(args.pageIndex);
-
-      // Convert PDF coordinates to screen coordinates
+      setCurrentPageNumber(args.pageIndex);      // Convert PDF coordinates to screen coordinates
       let screenX = x + width / 2;
       let screenY = y - 10;
 
@@ -301,10 +294,14 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         selectionBounds
       });
 
-      // Update all state immediately in sync
+      // Update all state immediately in sync, but use a small delay to ensure clean transitions
       setSelectionBounds(selectionBounds);
       setTooltipPosition(tooltipPosition);
-      setShowSelectionToolbar(true);
+      
+      // Ensure clean state transition for subsequent selections
+      setTimeout(() => {
+        setShowSelectionToolbar(true);
+      }, 10); // Very small delay to ensure clean state update
     } catch (error) {
       console.error("Error handling text selection:", error);
       // Don't throw - text selection errors shouldn't break the viewer
@@ -553,6 +550,11 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           textSelectionEnd={(args) => handleSelectionTextEnd(args)}
           pageClick={(args) => {
             console.log('Page clicked:', args);
+            // Close tooltip when clicking on empty page area (not during text selection)
+            if (showSelectionToolbar && !selectedText) {
+              setShowSelectionToolbar(false);
+              setSelectionBounds(null);
+            }
           }}
           annotationMouseover={(args) => {
             console.log("Hovered annotation:", args);
@@ -626,6 +628,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             <div>Selection Toolbar: {showSelectionToolbar ? 'true' : 'false'}</div>
             <div>Note Modal: {showNoteModal ? 'true' : 'false'}</div>
             <div>Selected Text: {selectedText || 'none'}</div>
+            <div>Tooltip Position: {`${tooltipPosition.x}, ${tooltipPosition.y}`}</div>
+            <div>Timestamp: {Date.now()}</div>
           </div>
         )}
 

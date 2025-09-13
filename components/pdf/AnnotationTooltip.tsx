@@ -63,10 +63,10 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
 
   // Handle fade-in/fade-out with 200ms delay on hide
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: NodeJS.Timeout | undefined;
 
     if (visible) {
-      // Clear any pending hide timeout and show immediately
+      // Show immediately 
       setIsDelayedVisible(true);
     } else {
       // Delayed hide (200ms as per requirements)
