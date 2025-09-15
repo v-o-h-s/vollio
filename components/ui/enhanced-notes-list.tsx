@@ -255,49 +255,56 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-          <Input
+          <Search 
+            size={16} 
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground/60" 
+          />
+          <input
+            type="text"
             placeholder="Search notes..."
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="pl-10"
+            className="w-full pl-9 pr-4 py-2.5 bg-transparent border border-border/30 rounded-lg focus:ring-2 focus:ring-ring/40 focus:border-ring/40 focus:bg-card/20 text-sm placeholder:text-muted-foreground/50 transition-all duration-200 hover:border-border/50"
           />
         </div>
 
         {/* Controls */}
         <div className="flex items-center gap-2">
           {/* View mode toggle */}
-          <div className="flex items-center border rounded-lg p-1">
-            <Button
-              variant={currentViewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
+          <div className="flex items-center bg-card/40 backdrop-blur-sm rounded-lg p-1 border border-border/30">
+            <button
               onClick={() => handleViewModeChange('grid')}
-              className={`h-8 w-8 p-0 ${currentViewMode === 'grid' ? 'text-white' : ''}`}
-              style={currentViewMode === 'grid' ? { backgroundColor: '#3B82F6' } : {}}
+              className={`p-2 rounded-md transition-all duration-200 ${
+                currentViewMode === 'grid'
+                  ? "bg-background/70 text-foreground shadow-sm border border-border/30"
+                  : "text-muted-foreground/60 hover:text-foreground hover:bg-background/30"
+              }`}
               title="Grid view"
             >
-              <Grid3X3 size={16} />
-            </Button>
-            <Button
-              variant={currentViewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
+              <Grid3X3 size={14} />
+            </button>
+            <button
               onClick={() => handleViewModeChange('list')}
-              className={`h-8 w-8 p-0 ${currentViewMode === 'list' ? 'text-white' : ''}`}
-              style={currentViewMode === 'list' ? { backgroundColor: '#3B82F6' } : {}}
+              className={`p-2 rounded-md transition-all duration-200 ${
+                currentViewMode === 'list'
+                  ? "bg-background/70 text-foreground shadow-sm border border-border/30"
+                  : "text-muted-foreground/60 hover:text-foreground hover:bg-background/30"
+              }`}
               title="List view"
             >
-              <List size={16} />
-            </Button>
-            <Button
-              variant={currentViewMode === 'compact' ? 'default' : 'ghost'}
-              size="sm"
+              <List size={14} />
+            </button>
+            <button
               onClick={() => handleViewModeChange('compact')}
-              className={`h-8 w-8 p-0 ${currentViewMode === 'compact' ? 'text-white' : ''}`}
-              style={currentViewMode === 'compact' ? { backgroundColor: '#3B82F6' } : {}}
+              className={`p-2 rounded-md transition-all duration-200 ${
+                currentViewMode === 'compact'
+                  ? "bg-background/70 text-foreground shadow-sm border border-border/30"
+                  : "text-muted-foreground/60 hover:text-foreground hover:bg-background/30"
+              }`}
               title="Compact view"
             >
-              <LayoutGrid size={16} />
-            </Button>
+              <LayoutGrid size={14} />
+            </button>
           </div>
 
           {/* Filter dropdown */}
@@ -306,42 +313,43 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className={`flex items-center gap-2 ${activeFilters.length > 0 ? 'text-white border-[#3B82F6]' : ''}`}
-                style={activeFilters.length > 0 ? { backgroundColor: '#3B82F6' } : {}}
+                className={`flex items-center gap-2 h-9 px-3 border-border/30 hover:border-border/50 hover:bg-card/40 backdrop-blur-sm rounded-lg ${
+                  activeFilters.length > 0 ? 'border-primary/50 bg-primary/10 text-primary' : ''
+                }`}
               >
-                <Filter size={16} />
-                Filter
+                <Filter size={14} />
+                <span className="hidden sm:inline">Filter</span>
                 {activeFilters.length > 0 && (
-                  <span className="ml-1 bg-white text-[#3B82F6] rounded-full w-5 h-5 text-xs flex items-center justify-center">
+                  <span className="ml-1 bg-primary text-primary-foreground rounded-full w-4 h-4 text-xs flex items-center justify-center">
                     {activeFilters.length}
                   </span>
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => toggleFilter('linked')}>
-                <Link size={16} className="mr-2" />
+            <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-md border-border/50 rounded-xl shadow-xl">
+              <DropdownMenuItem onClick={() => toggleFilter('linked')} className="hover:bg-accent/30 rounded-lg">
+                <Link size={14} className="mr-2" />
                 Linked to PDFs
                 {activeFilters.includes('linked') && (
                   <span className="ml-auto text-primary">✓</span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toggleFilter('empty')}>
-                <FileText size={16} className="mr-2" />
+              <DropdownMenuItem onClick={() => toggleFilter('empty')} className="hover:bg-accent/30 rounded-lg">
+                <FileText size={14} className="mr-2" />
                 Empty Notes
                 {activeFilters.includes('empty') && (
                   <span className="ml-auto text-primary">✓</span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toggleFilter('recent')}>
-                <Clock size={16} className="mr-2" />
+              <DropdownMenuItem onClick={() => toggleFilter('recent')} className="hover:bg-accent/30 rounded-lg">
+                <Clock size={14} className="mr-2" />
                 Recent (24h)
                 {activeFilters.includes('recent') && (
                   <span className="ml-auto text-primary">✓</span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toggleFilter('long')}>
-                <FileText size={16} className="mr-2" />
+              <DropdownMenuItem onClick={() => toggleFilter('long')} className="hover:bg-accent/30 rounded-lg">
+                <FileText size={14} className="mr-2" />
                 Long Notes (500+ words)
                 {activeFilters.includes('long') && (
                   <span className="ml-auto text-primary">✓</span>
@@ -350,8 +358,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
               {activeFilters.length > 0 && (
                 <>
                   <div className="border-t my-1" />
-                  <DropdownMenuItem onClick={clearAllFilters}>
-                    <X size={16} className="mr-2" />
+                  <DropdownMenuItem onClick={clearAllFilters} className="hover:bg-accent/30 rounded-lg">
+                    <X size={14} className="mr-2" />
                     Clear All Filters
                   </DropdownMenuItem>
                 </>
@@ -362,14 +370,18 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
           {/* Sort dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                {currentSortOrder === 'asc' ? <SortAsc size={16} /> : <SortDesc size={16} />}
-                Sort
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-2 h-9 px-3 border-border/30 hover:border-border/50 hover:bg-card/40 backdrop-blur-sm rounded-lg"
+              >
+                {currentSortOrder === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />}
+                <span className="hidden sm:inline">Sort</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => handleSortChange('updated')}>
-                <Calendar size={16} className="mr-2" />
+            <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-md border-border/50 rounded-xl shadow-xl">
+              <DropdownMenuItem onClick={() => handleSortChange('updated')} className="hover:bg-accent/30 rounded-lg">
+                <Calendar size={14} className="mr-2" />
                 Last Updated
                 {currentSortBy === 'updated' && (
                   <span className="ml-auto text-xs text-muted-foreground">
@@ -377,8 +389,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                   </span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSortChange('created')}>
-                <Calendar size={16} className="mr-2" />
+              <DropdownMenuItem onClick={() => handleSortChange('created')} className="hover:bg-accent/30 rounded-lg">
+                <Calendar size={14} className="mr-2" />
                 Date Created
                 {currentSortBy === 'created' && (
                   <span className="ml-auto text-xs text-muted-foreground">
@@ -386,8 +398,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                   </span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSortChange('title')}>
-                <FileText size={16} className="mr-2" />
+              <DropdownMenuItem onClick={() => handleSortChange('title')} className="hover:bg-accent/30 rounded-lg">
+                <FileText size={14} className="mr-2" />
                 Title
                 {currentSortBy === 'title' && (
                   <span className="ml-auto text-xs text-muted-foreground">
@@ -395,8 +407,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                   </span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSortChange('wordCount')}>
-                <Clock size={16} className="mr-2" />
+              <DropdownMenuItem onClick={() => handleSortChange('wordCount')} className="hover:bg-accent/30 rounded-lg">
+                <Clock size={14} className="mr-2" />
                 Word Count
                 {currentSortBy === 'wordCount' && (
                   <span className="ml-auto text-xs text-muted-foreground">

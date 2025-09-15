@@ -107,11 +107,12 @@ export function DashboardSidebar({ className }: SidebarProps) {
           // Desktop styles with smooth width transition
           "lg:relative lg:translate-x-0 lg:transition-[width] lg:duration-300 lg:ease-out",
           isCollapsed ? "lg:w-16" : "lg:w-64",
-          // Mobile styles with transform transition
-          "w-64 lg:w-auto transition-transform duration-300 ease-out",
+          // Mobile styles with transform transition  
+          "w-64 transition-transform duration-300 ease-out",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           className
         )}
+        style={{ minWidth: isCollapsed ? '4rem' : '16rem', maxWidth: isCollapsed ? '4rem' : '16rem' }}
       >
         {/* Branding Section */}
         <div
@@ -303,11 +304,11 @@ export function DashboardSidebar({ className }: SidebarProps) {
             {!isCollapsed && (
               <>
                 {/* User Info */}
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 max-w-[calc(16rem-6rem)]">
                   <div className="font-semibold text-sm text-sidebar-foreground truncate">
                     {user.user?.fullName}
                   </div>
-                  <div className="text-xs text-sidebar-foreground/60 truncate">
+                  <div className="text-xs text-sidebar-foreground/60 truncate" title={user.user?.emailAddresses[0].emailAddress}>
                     {user.user?.emailAddresses[0].emailAddress}
                   </div>
                 </div>

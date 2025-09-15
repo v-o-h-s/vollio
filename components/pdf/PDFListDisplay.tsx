@@ -222,13 +222,13 @@ export default function PDFListDisplay({
       <div className={`space-y-4 p-6 ${className}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => (
-            <div key={i} className="bg-card rounded-lg border border-border p-4 animate-pulse">
-              <div className="w-8 h-8 bg-muted rounded-lg mb-3"></div>
-              <div className="h-4 bg-muted rounded mb-2"></div>
-              <div className="h-3 bg-muted rounded w-2/3 mb-3"></div>
+            <div key={i} className="bg-card/50 backdrop-blur-sm rounded-lg border border-border/60 p-4 animate-pulse">
+              <div className="w-8 h-8 bg-card/60 backdrop-blur-sm rounded-lg mb-3"></div>
+              <div className="h-4 bg-card/60 backdrop-blur-sm rounded mb-2"></div>
+              <div className="h-3 bg-card/60 backdrop-blur-sm rounded w-2/3 mb-3"></div>
               <div className="flex justify-between items-center">
-                <div className="h-3 bg-muted rounded w-1/3"></div>
-                <div className="h-3 bg-muted rounded w-1/4"></div>
+                <div className="h-3 bg-card/60 backdrop-blur-sm rounded w-1/3"></div>
+                <div className="h-3 bg-card/60 backdrop-blur-sm rounded w-1/4"></div>
               </div>
             </div>
           ))}
@@ -364,8 +364,8 @@ export default function PDFListDisplay({
                 className={`
                   relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200
                   ${isDragOver
-                    ? 'border-border bg-muted/30'
-                    : 'border-border bg-muted/20 hover:border-border/60 hover:bg-muted/30'
+                    ? 'border-border bg-card/40 backdrop-blur-sm'
+                    : 'border-border bg-card/20 backdrop-blur-sm hover:border-border/60 hover:bg-card/40'
                   }
                   ${isUploading || isRetryingUpload ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}
                 `}
@@ -379,7 +379,7 @@ export default function PDFListDisplay({
                   className="hidden"
                 />
 
-                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 bg-card/60 backdrop-blur-sm rounded-lg flex items-center justify-center mx-auto mb-3">
                   <Upload size={24} className="text-muted-foreground" />
                 </div>
 
@@ -410,10 +410,10 @@ export default function PDFListDisplay({
               <div
                 key={pdf.id}
                 onClick={() => handlePDFClick(pdf)}
-                className="group bg-card rounded-lg border border-border p-4 hover:shadow-md hover:border-border/60 transition-all duration-200 cursor-pointer"
+                className="group bg-card/50 backdrop-blur-sm rounded-lg border border-border/60 p-4 hover:shadow-md hover:border-border/80 hover:bg-card/70 transition-all duration-200 cursor-pointer"
               >
                 {/* PDF Icon */}
-                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 bg-card/60 backdrop-blur-sm rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
                   <FileText size={16} className="text-muted-foreground" />
                 </div>
 
@@ -458,8 +458,8 @@ export default function PDFListDisplay({
       ) : (
         /* Empty State */
         <div className="p-6">
-          <div className="bg-muted/30 rounded-lg p-8 text-center border border-border/50">
-            <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4">
+          <div className="bg-card/30 backdrop-blur-sm rounded-lg p-8 text-center border border-border/40">
+            <div className="w-16 h-16 bg-card/60 backdrop-blur-sm rounded-lg flex items-center justify-center mx-auto mb-4">
               <FileText size={32} className="text-muted-foreground" />
             </div>
 
@@ -475,7 +475,7 @@ export default function PDFListDisplay({
                 onClick={openFilePicker}
                 size="sm"
                 variant="outline"
-                className="border-border text-foreground hover:bg-muted"
+                className="border-border/60 text-foreground hover:bg-card/50 backdrop-blur-sm"
               >
                 Upload Your First PDF
               </Button>

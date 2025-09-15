@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useGetNotesQuery, useDeleteNoteMutation } from "@/lib/store/apiSlice";
 import { useRouter } from "next/navigation";
-import { Plus, FileText, Sparkles, BookOpen, PenTool } from "lucide-react";
+import { Plus, FileText, Sparkles, BookOpen, PenTool, Type } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -46,6 +46,42 @@ const NotesPage: React.FC = () => {
   } = useGetNotesQuery({});
 
   const [deleteNote, { isLoading: isDeleting }] = useDeleteNoteMutation();
+
+  // Calculate content statistics
+  const extractTextFromContent = (content: any): string => {
+    if (!content || !content.content) return '';
+    
+    const extractText = (node: any): string => {
+      if (node.type === 'text') {
+        return node.text || '';
+      }
+      if (node.content && Array.isArray(node.content)) {
+        return node.content.map(extractText).join('');
+      }
+      return '';
+    };
+    
+    return content.content.map(extractText).join('');
+  };
+
+  const totalWords = notes.reduce((acc, note) => {
+    const text = extractTextFromContent(note.content);
+    const wordCount = text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    return acc + wordCount;
+  }, 0);
+
+  const totalCharacters = notes.reduce((acc, note) => {
+    const text = extractTextFromContent(note.content);
+    return acc + text.length;
+  }, 0);
+
+  // Format content size (using characters as "size")
+  const formatContentSize = (chars: number): string => {
+    if (chars === 0) return '0 chars';
+    if (chars < 1000) return `${chars} chars`;
+    if (chars < 1000000) return `${(chars / 1000).toFixed(1)}K chars`;
+    return `${(chars / 1000000).toFixed(1)}M chars`;
+  };
 
   // Cross-tab synchronization
   useNoteSync({
@@ -128,19 +164,20 @@ const NotesPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl bg-background min-h-screen">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-4xl font-bold text-foreground tracking-tight">Notes</h1>
-            <p className="text-muted-foreground text-lg">
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Notes</h1>
+            <p className="text-sm text-muted-foreground/80">
               Organize your thoughts and link them to PDF annotations
             </p>
           </div>
           <Button 
             onClick={handleCreateNote} 
-            className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift"
+            size="sm"
+            className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
-            <Plus size={18} />
+            <Plus size={14} />
             New Note
           </Button>
         </div>
@@ -152,24 +189,25 @@ const NotesPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-7xl bg-background min-h-screen">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-4xl font-bold text-foreground tracking-tight">Notes</h1>
-            <p className="text-muted-foreground text-lg">
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Notes</h1>
+            <p className="text-sm text-muted-foreground/80">
               Organize your thoughts and link them to PDF annotations
             </p>
           </div>
           <Button 
             onClick={handleCreateNote} 
-            className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift bg-primary text-primary-foreground hover:bg-primary/90"
+            size="sm"
+            className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
-            <Plus size={18} />
+            <Plus size={14} />
             New Note
           </Button>
         </div>
         
-        <Card className="p-12 text-center border-2 border-dashed border-destructive/20 bg-destructive/5">
+        <div className="bg-card/30 backdrop-blur-sm rounded-xl p-12 text-center border border-border/40">
           <div className="max-w-md mx-auto">
             <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-destructive/10 flex items-center justify-center">
               <FileText size={32} className="text-destructive" />
@@ -184,43 +222,50 @@ const NotesPage: React.FC = () => {
               <Button 
                 onClick={() => refetch()} 
                 variant="outline" 
-                className="flex items-center gap-2 px-6 py-3"
+                size="sm"
+                className="flex items-center gap-2 h-9 px-4 border-border/30 hover:border-border/50 hover:bg-card/40 backdrop-blur-sm rounded-lg"
               >
-                <Sparkles size={16} />
+                <Sparkles size={14} />
                 Try Again
               </Button>
               <Button 
                 onClick={handleCreateNote} 
-                className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90"
+                size="sm"
+                className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
-                <Plus size={16} />
+                <Plus size={14} />
                 Create Note Instead
               </Button>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     );
   }
 
   return (
     <ErrorBoundary>
-      <div className="container mx-auto px-4 py-8 max-w-7xl bg-background min-h-screen">
+      <div className="space-y-6">
         {/* Enhanced Header with Better Typography and Spacing */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold text-foreground tracking-tight">Notes</h1>
-            <p className="text-muted-foreground text-lg leading-relaxed">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Notes</h1>
+            <p className="text-sm text-muted-foreground/80">
               Organize your thoughts and link them to PDF annotations
             </p>
+            {/* Stats */}
             {notes.length > 0 && (
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-3">
+              <div className="flex items-center gap-4 text-xs text-muted-foreground/70 mt-2">
                 <div className="flex items-center gap-1">
-                  <BookOpen size={14} />
+                  <BookOpen size={12} />
                   <span>{notes.length} {notes.length === 1 ? 'note' : 'notes'}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <PenTool size={14} />
+                  <Type size={12} />
+                  <span>{totalWords.toLocaleString()} words</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <PenTool size={12} />
                   <span>
                     {notes.filter(note => note.pdfAnnotationId).length} linked to PDFs
                   </span>
@@ -230,9 +275,10 @@ const NotesPage: React.FC = () => {
           </div>
           <Button 
             onClick={handleCreateNote} 
-            className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift bg-primary text-primary-foreground hover:bg-primary/90"
+            size="sm"
+            className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
-            <Plus size={18} />
+            <Plus size={14} />
             New Note
           </Button>
         </div>
