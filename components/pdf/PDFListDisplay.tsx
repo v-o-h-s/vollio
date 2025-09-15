@@ -219,14 +219,14 @@ export default function PDFListDisplay({
   // Loading state
   if (isLoading) {
     return (
-      <div className={`space-y-6 ${className}`}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-card rounded-2xl border border-border p-6 animate-pulse">
-              <div className="w-12 h-12 bg-muted rounded-xl mb-4"></div>
+      <div className={`space-y-4 p-6 ${className}`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="bg-card rounded-lg border border-border p-4 animate-pulse">
+              <div className="w-8 h-8 bg-muted rounded-lg mb-3"></div>
               <div className="h-4 bg-muted rounded mb-2"></div>
-              <div className="h-3 bg-muted rounded w-2/3 mb-4"></div>
-              <div className="flex justify-between">
+              <div className="h-3 bg-muted rounded w-2/3 mb-3"></div>
+              <div className="flex justify-between items-center">
                 <div className="h-3 bg-muted rounded w-1/3"></div>
                 <div className="h-3 bg-muted rounded w-1/4"></div>
               </div>
@@ -244,13 +244,13 @@ export default function PDFListDisplay({
     const errorMessage = appError?.userMessage || 'There was an error loading your PDF files. Please check your connection and try again.'
 
     return (
-      <div className={`space-y-6 ${className}`}>
-        <div className="bg-destructive/5 border border-destructive/20 rounded-2xl p-8 text-center">
-          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle size={32} className="text-destructive" />
+      <div className={`space-y-4 p-6 ${className}`}>
+        <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-6 text-center">
+          <div className="w-12 h-12 bg-destructive/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle size={24} className="text-destructive" />
           </div>
-          <h3 className="text-xl font-bold text-destructive mb-2">{errorTitle}</h3>
-          <p className="text-destructive/80 mb-4">{errorMessage}</p>
+          <h3 className="text-lg font-semibold text-destructive mb-2">{errorTitle}</h3>
+          <p className="text-destructive/80 text-sm mb-4">{errorMessage}</p>
           
           {/* Error context if available */}
           {appError?.context && (
@@ -263,12 +263,13 @@ export default function PDFListDisplay({
             </div>
           )}
 
-          <div className="flex gap-3 justify-center">
+          <div className="flex gap-2 justify-center">
             <Button
               onClick={() => refetch()}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground flex items-center gap-2"
+              size="sm"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground flex items-center gap-2 h-8"
             >
-              <RefreshCw size={16} />
+              <RefreshCw size={12} />
               Try Again
             </Button>
             
@@ -276,7 +277,8 @@ export default function PDFListDisplay({
               <Button
                 onClick={() => window.location.reload()}
                 variant="outline"
-                className="flex items-center gap-2 border-destructive/20 text-destructive hover:bg-destructive/5"
+                size="sm"
+                className="flex items-center gap-2 border-destructive/20 text-destructive hover:bg-destructive/5 h-8"
               >
                 <RefreshCw size={16} />
                 Refresh Page
@@ -302,14 +304,14 @@ export default function PDFListDisplay({
 
   return (
     <ErrorBoundary context="PDFListDisplay">
-      <div className={`space-y-6 ${className}`}>
+      <div className={`space-y-4 ${className}`}>
         {/* Upload Error Display */}
         {uploadError && (
-          <div className="bg-destructive/5 border border-destructive/20 rounded-2xl p-6">
+          <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4 mx-6">
             <div className="flex items-start gap-3">
-              <AlertTriangle size={20} className="text-destructive mt-0.5" />
+              <AlertTriangle size={16} className="text-destructive mt-0.5" />
               <div className="flex-1">
-                <h4 className="font-semibold text-destructive mb-1">Upload Failed</h4>
+                <h4 className="font-medium text-destructive mb-1 text-sm">Upload Failed</h4>
                 <p className="text-destructive/80 text-sm mb-3">{uploadError.userMessage}</p>
                 
                 <div className="flex gap-2">
@@ -318,9 +320,9 @@ export default function PDFListDisplay({
                       onClick={() => retryUpload(() => Promise.resolve())}
                       disabled={isRetryingUpload}
                       size="sm"
-                      className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                      className="bg-destructive hover:bg-destructive/90 text-destructive-foreground h-8"
                     >
-                      <RefreshCw size={14} className={isRetryingUpload ? 'animate-spin' : ''} />
+                      <RefreshCw size={12} className={isRetryingUpload ? 'animate-spin' : ''} />
                       {isRetryingUpload ? 'Retrying...' : 'Try Again'}
                     </Button>
                   )}
@@ -331,7 +333,7 @@ export default function PDFListDisplay({
                       onClick={action.action}
                       size="sm"
                       variant="outline"
-                      className="border-destructive/20 text-destructive hover:bg-destructive/5"
+                      className="border-destructive/20 text-destructive hover:bg-destructive/5 h-8"
                     >
                       {action.label}
                     </Button>
@@ -341,7 +343,7 @@ export default function PDFListDisplay({
                     onClick={clearUploadError}
                     size="sm"
                     variant="outline"
-                    className="border-destructive/20 text-destructive hover:bg-destructive/5"
+                    className="border-destructive/20 text-destructive hover:bg-destructive/5 h-8"
                   >
                     Dismiss
                   </Button>
@@ -354,130 +356,138 @@ export default function PDFListDisplay({
         {/* Upload Section */}
         {showUpload && (
           <UploadErrorBoundary>
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`
-                relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300
-                ${isDragOver
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border bg-muted/30 hover:border-border/60 hover:bg-muted/50'
-                }
-                ${isUploading || isRetryingUpload ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}
-              `}
-              onClick={openFilePicker}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,application/pdf"
-                onChange={handleFileInputChange}
-                className="hidden"
-              />
+            <div className="p-6 border-t border-border">
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`
+                  relative border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200
+                  ${isDragOver
+                    ? 'border-border bg-muted/30'
+                    : 'border-border bg-muted/20 hover:border-border/60 hover:bg-muted/30'
+                  }
+                  ${isUploading || isRetryingUpload ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}
+                `}
+                onClick={openFilePicker}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handleFileInputChange}
+                  className="hidden"
+                />
 
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Upload size={32} className="text-primary" />
+                <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <Upload size={24} className="text-muted-foreground" />
+                </div>
+
+                <h3 className="text-base font-medium text-foreground mb-2">
+                  {isDragOver ? 'Drop your PDF here' : 'Upload PDF'}
+                </h3>
+
+                <p className="text-muted-foreground text-sm mb-3">
+                  {isUploading || isRetryingUpload
+                    ? 'Uploading...'
+                    : 'Drag and drop a PDF file here, or click to browse'
+                  }
+                </p>
+
+                <p className="text-xs text-muted-foreground">
+                  Maximum file size: 50MB • Supported format: PDF
+                </p>
               </div>
-
-              <h3 className="text-xl font-bold text-foreground mb-2">
-                {isDragOver ? 'Drop your PDF here' : 'Upload PDF'}
-              </h3>
-
-              <p className="text-muted-foreground mb-4">
-                {isUploading || isRetryingUpload
-                  ? 'Uploading...'
-                  : 'Drag and drop a PDF file here, or click to browse'
-                }
-              </p>
-
-              <p className="text-sm text-muted-foreground">
-                Maximum file size: 50MB • Supported format: PDF
-              </p>
             </div>
           </UploadErrorBoundary>
         )}
 
       {/* PDF Grid */}
       {pdfs.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pdfs.map((pdf) => (
-            <div
-              key={pdf.id}
-              onClick={() => handlePDFClick(pdf)}
-              className="group bg-gradient-to-br from-card to-muted/20 rounded-2xl border border-border p-6 hover:shadow-lg hover:shadow-primary/10 hover:border-primary/20 hover:from-card/90 hover:to-muted/30 transition-all duration-300 cursor-pointer"
-            >
-              {/* PDF Icon */}
-              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-                <FileText size={24} className="text-white" />
-              </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {pdfs.map((pdf) => (
+              <div
+                key={pdf.id}
+                onClick={() => handlePDFClick(pdf)}
+                className="group bg-card rounded-lg border border-border p-4 hover:shadow-md hover:border-border/60 transition-all duration-200 cursor-pointer"
+              >
+                {/* PDF Icon */}
+                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                  <FileText size={16} className="text-muted-foreground" />
+                </div>
 
-              {/* PDF Info */}
-              <div className="space-y-2 mb-4">
-                <h3 className="font-bold text-lg text-foreground truncate group-hover:text-primary transition-colors">
-                  {pdf.filename}
-                </h3>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <HardDrive size={14} />
-                    <span>{formatFileSize(pdf.fileSize)}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar size={14} />
-                    <span>{formatRelativeTime(pdf.uploadedAt)}</span>
+                {/* PDF Info */}
+                <div className="space-y-2 mb-3">
+                  <h3 className="font-medium text-sm text-foreground truncate group-hover:text-foreground/80 transition-colors">
+                    {pdf.filename}
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <HardDrive size={12} />
+                      <span>{formatFileSize(pdf.fileSize)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Calendar size={12} />
+                      <span>{formatRelativeTime(pdf.uploadedAt)}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Actions */}
-              <div className="flex items-center justify-between pt-4 border-t border-border">
-                <button className="flex items-center gap-2 text-primary text-sm font-semibold hover:text-primary/80 transition-colors">
-                  <Eye size={16} />
-                  Open
-                </button>
+                {/* Actions */}
+                <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <button className="flex items-center gap-2 text-foreground text-xs hover:text-foreground/80 transition-colors">
+                    <Eye size={12} />
+                    Open
+                  </button>
 
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    // TODO: Implement more actions menu
-                  }}
-                  className="p-1 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <MoreVertical size={16} />
-                </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // TODO: Implement more actions menu
+                    }}
+                    className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <MoreVertical size={12} />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       ) : (
         /* Empty State */
-        <div className="bg-gradient-to-br from-muted/40 to-muted/20 rounded-2xl p-12 text-center border border-border/50">
-          <div className="w-20 h-20 bg-gradient-to-br from-muted to-muted/60 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
-            <FileText size={40} className="text-muted-foreground" />
+        <div className="p-6">
+          <div className="bg-muted/30 rounded-lg p-8 text-center border border-border/50">
+            <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center mx-auto mb-4">
+              <FileText size={32} className="text-muted-foreground" />
+            </div>
+
+            <h3 className="text-lg font-semibold text-foreground mb-2">No PDFs uploaded yet</h3>
+
+            <p className="text-muted-foreground text-sm mb-4 max-w-md mx-auto">
+              Upload your first PDF to start creating notes and annotations.
+              Your documents will appear here once uploaded.
+            </p>
+
+            {showUpload && (
+              <Button
+                onClick={openFilePicker}
+                size="sm"
+                variant="outline"
+                className="border-border text-foreground hover:bg-muted"
+              >
+                Upload Your First PDF
+              </Button>
+            )}
           </div>
-
-          <h3 className="text-2xl font-bold text-foreground mb-3">No PDFs uploaded yet</h3>
-
-          <p className="text-muted-foreground font-medium mb-6 max-w-md mx-auto">
-            Upload your first PDF to start creating notes and annotations.
-            Your documents will appear here once uploaded.
-          </p>
-
-          {showUpload && (
-            <Button
-              onClick={openFilePicker}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-colors shadow-lg shadow-primary/25"
-            >
-              Upload Your First PDF
-            </Button>
-          )}
         </div>
       )}
 
       {/* Total Count */}
       {totalCount > pdfs.length && (
-        <div className="text-center py-4">
-          <p className="text-muted-foreground text-sm">
+        <div className="text-center py-3 px-6 border-t border-border">
+          <p className="text-muted-foreground text-xs">
             Showing {pdfs.length} of {totalCount} PDFs
           </p>
         </div>

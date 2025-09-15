@@ -78,13 +78,13 @@ export default function PDFViewerPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <RefreshCw
-            size={48}
+            size={40}
             className="text-primary mx-auto mb-4 animate-spin"
           />
-          <h2 className="text-xl font-semibold text-foreground mb-2">
+          <h2 className="text-lg font-semibold text-foreground mb-2">
             Loading PDF...
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Please wait while we load your document
           </p>
         </div>
@@ -97,28 +97,30 @@ export default function PDFViewerPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center max-w-md">
-          <AlertCircle size={48} className="text-destructive mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-foreground mb-2">
+          <AlertCircle size={40} className="text-destructive mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-foreground mb-2">
             PDF Not Found
           </h2>
-          <p className="text-muted-foreground mb-6">
+          <p className="text-sm text-muted-foreground mb-6">
             The PDF you're looking for could not be found or you don't have
             permission to view it.
           </p>
           <div className="flex gap-3 justify-center">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => router.push("/dashboard")}
               className="flex items-center gap-2"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={14} />
               Back to Dashboard
             </Button>
             <Button
+              size="sm"
               onClick={() => refetch()}
               className="flex items-center gap-2"
             >
-              <RefreshCw size={16} />
+              <RefreshCw size={14} />
               Try Again
             </Button>
           </div>
@@ -135,46 +137,46 @@ export default function PDFViewerPage() {
     >
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3">
+        <div className="flex items-center justify-between px-2 sm:px-4 py-2">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 bg-muted/20 rounded-lg px-3 py-2 border border-border/40">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => router.push("/dashboard")}
-              className="flex items-center gap-1 sm:gap-2 flex-shrink-0 hover:bg-background/80 transition-colors"
+              className="flex items-center gap-1 sm:gap-2 flex-shrink-0 hover:bg-background/80 transition-colors h-7 px-2"
             >
-              <ArrowLeft size={16} />
-              <span className="hidden sm:inline">Back</span>
+              <ArrowLeft size={14} />
+              <span className="hidden sm:inline text-sm">Back</span>
             </Button>
-            <div className="w-px h-6 bg-border flex-shrink-0" />
+            <div className="w-px h-5 bg-border flex-shrink-0" />
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <FileText size={16} className="text-white" />
+              <div className="w-7 h-7 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <FileText size={14} className="text-white" />
               </div>
-              <h1 className="text-sm sm:text-lg font-semibold text-foreground truncate">
+              <h1 className="text-sm font-semibold text-foreground truncate">
                 {pdfDocument.filename}
               </h1>
             </div>
-            <div className="w-px h-6 bg-border flex-shrink-0" />
+            <div className="w-px h-5 bg-border flex-shrink-0" />
             {/* Focus Mode Toggle */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsFocusMode(!isFocusMode)}
-              className="flex items-center gap-1 sm:gap-2 flex-shrink-0 focus-mode-button hover:bg-background/80 transition-colors"
+              className="flex items-center gap-1 sm:gap-2 flex-shrink-0 focus-mode-button hover:bg-background/80 transition-colors h-7 px-2"
               title={
                 isFocusMode ? "Exit Focus Mode (Esc)" : "Enter Focus Mode (F)"
               }
             >
               {isFocusMode ? (
                 <>
-                  <Minimize size={16} />
-                  <span className="hidden sm:inline">Exit Focus</span>
+                  <Minimize size={14} />
+                  <span className="hidden sm:inline text-sm">Exit Focus</span>
                 </>
               ) : (
                 <>
-                  <Maximize size={16} />
-                  <span className="hidden sm:inline">Focus Mode</span>
+                  <Maximize size={14} />
+                  <span className="hidden sm:inline text-sm">Focus Mode</span>
                 </>
               )}
             </Button>
@@ -184,7 +186,7 @@ export default function PDFViewerPage() {
 
       {/* PDF Viewer */}
       <div
-        className={`h-[calc(100vh-57px)] sm:h-[calc(100vh-65px)] w-full max-w-full overflow-hidden ${isFocusMode ? "!w-screen max-w-none" : "w-full max-w-full"
+        className={`h-[calc(100vh-49px)] w-full max-w-full overflow-hidden ${isFocusMode ? "!w-screen max-w-none" : "w-full max-w-full"
           }`}
       >
         <PDFAnnotationViewer
@@ -195,9 +197,9 @@ export default function PDFViewerPage() {
 
       {/* Focus Mode Hint */}
       {isFocusMode && showHint && (
-        <div className="focus-mode-hint   bg-card border border-border text-foreground px-4 py-2 rounded-lg shadow-lg z-50 ">
+        <div className="focus-mode-hint bg-card border border-border text-foreground px-3 py-1.5 rounded-md shadow-lg z-50 text-sm">
           Press{" "}
-          <kbd className="px-1 py-0.5 bg-muted text-muted-foreground rounded text-xs">Esc</kbd> to
+          <kbd className="px-1.5 py-0.5 bg-muted text-muted-foreground rounded text-xs font-mono">Esc</kbd> to
           exit focus mode
         </div>
       )}

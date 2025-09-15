@@ -19,87 +19,180 @@
  */
 
 import { useState } from "react";
-import { Search, Filter, Grid, List, Upload, Plus } from "lucide-react";
+import { Search, Filter, Grid, List, Upload, Plus, SortDesc, MoreHorizontal, FolderOpen } from "lucide-react";
 import { PDFListDisplay } from "@/components/pdf";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function PDFsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortBy, setSortBy] = useState("recent");
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl bg-background min-h-screen">
+    <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-4xl font-bold text-foreground tracking-tight">
-            Your PDFs
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+            PDF Library
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Manage and organize your PDF documents
+          <p className="text-sm text-muted-foreground">
+            Manage and organize your documents
           </p>
         </div>
         
-        <Button 
-          className="flex items-center gap-2 px-6 py-3 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift"
-        >
-          <Plus size={18} />
-          Upload PDF
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2 h-8"
+          >
+            <FolderOpen size={14} />
+            <span className="hidden sm:inline">Organize</span>
+          </Button>
+          <Button 
+            size="sm"
+            className="flex items-center gap-2 h-8"
+          >
+            <Plus size={14} />
+            Upload PDF
+          </Button>
+        </div>
       </div>
 
-      {/* Search and Filter Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-8">
-        <div className="relative flex-1 max-w-md">
-          <Search
-            size={20}
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
-          />
-          <input
-            type="text"
-            placeholder="Search PDFs..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent text-foreground placeholder:text-muted-foreground transition-colors"
-          />
-        </div>
+      {/* Enhanced Controls Bar */}
+      <div className="bg-card border border-border rounded-lg p-4">
+        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground"
+            />
+            <input
+              type="text"
+              placeholder="Search documents..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 bg-background border border-input rounded-md focus:ring-2 focus:ring-ring focus:border-transparent text-sm placeholder:text-muted-foreground transition-colors"
+            />
+          </div>
 
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Filter size={18} />
-            Filter
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Sort Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="flex items-center gap-2 h-8"
+                >
+                  <SortDesc size={14} />
+                  <span className="hidden sm:inline">Sort</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setSortBy("recent")}>
+                  Most Recent
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("name")}>
+                  Name A-Z
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("size")}>
+                  File Size
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("oldest")}>
+                  Oldest First
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-          <div className="flex items-center bg-muted rounded-lg p-1">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "grid"
-                  ? "bg-background text-primary shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+            {/* Filter */}
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="flex items-center gap-2 h-8"
             >
-              <Grid size={18} />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "list"
-                  ? "bg-background text-primary shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <List size={18} />
-            </button>
+              <Filter size={14} />
+              <span className="hidden sm:inline">Filter</span>
+            </Button>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center bg-muted rounded-md p-0.5">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`p-1.5 rounded-sm transition-colors ${
+                  viewMode === "grid"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="Grid view"
+              >
+                <Grid size={14} />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-1.5 rounded-sm transition-colors ${
+                  viewMode === "list"
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                title="List view"
+              >
+                <List size={14} />
+              </button>
+            </div>
+
+            {/* More Options */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                >
+                  <MoreHorizontal size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  Select All
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Export List
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  Bulk Actions
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
 
       {/* PDF List Display */}
-      <PDFListDisplay className="mt-8" showUpload={true} />
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <PDFListDisplay className="" showUpload={true} />
+      </div>
+
+      {/* Stats Footer */}
+      <div className="bg-card border border-border rounded-lg p-4">
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center gap-4">
+            <span>Total Documents: 0</span>
+            <span>Total Size: 0 MB</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>Last Updated: Never</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
