@@ -25,8 +25,9 @@ export default function PDFViewerPage() {
   const params = useParams();
   const router = useRouter();
   const pdfId = params.id as string;
-  const [isFocusMode, setIsFocusMode] = useState(false);
+  const [isFocusMode, setIsFocusMode] = useState(true); // Start in focus mode by default
   const [showHint, setShowHint] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(false); // Header hidden by default in focus mode
 
   // Keyboard shortcut for focus mode (F11 or F)
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function PDFViewerPage() {
       // Escape to exit focus mode
       else if (event.key === "Escape" && isFocusMode) {
         setIsFocusMode(false);
+        setIsHeaderVisible(true);
       }
     };
 
@@ -53,14 +55,25 @@ export default function PDFViewerPage() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isFocusMode]);
 
-  // Show hint when entering focus mode
+  // Handle focus mode changes
+  useEffect(() => {
+    if (isFocusMode) {
+      // In focus mode, header is hidden by default
+      setIsHeaderVisible(false);
+    } else {
+      // Show header immediately when exiting focus mode
+      setIsHeaderVisible(true);
+    }
+  }, [isFocusMode]);
+
+  // Show hint when first opening (since we start in focus mode)
   useEffect(() => {
     if (isFocusMode) {
       setShowHint(true);
-      const timer = setTimeout(() => setShowHint(false), 3000);
+      const timer = setTimeout(() => setShowHint(false), 4000); // Show longer for first time
       return () => clearTimeout(timer);
     }
-  }, [isFocusMode]);
+  }, []);
 
   // Fetch PDF data
   const {
@@ -130,79 +143,145 @@ export default function PDFViewerPage() {
   }
 
   return (
-    <div
-      className={`min-h-screen bg-background focus-mode-transition pdf-viewer-page ${isFocusMode ? "pdf-focus-mode" : ""
-        }`}
-      data-pdf-viewer="true"
-    >
-      {/* Header */}
-      <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="flex items-center justify-between px-2 sm:px-4 py-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 bg-muted/20 rounded-lg px-3 py-2 border border-border/40">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/dashboard")}
-              className="flex items-center gap-1 sm:gap-2 flex-shrink-0 hover:bg-background/80 transition-colors h-7 px-2"
-            >
-              <ArrowLeft size={14} />
-              <span className="hidden sm:inline text-sm">Back</span>
-            </Button>
-            <div className="w-px h-5 bg-border flex-shrink-0" />
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <div className="w-7 h-7 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <FileText size={14} className="text-white" />
+    <>
+      {/* Add custom styles for animations */}
+      <style jsx global>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out forwards;
+        }
+      `}</style>
+      
+      <div
+        className={`min-h-screen bg-background focus-mode-transition pdf-viewer-page ${isFocusMode ? "pdf-focus-mode" : ""
+          }`}
+        data-pdf-viewer="true"
+      >
+        {/* Floating Header */}
+        <div 
+          className={`fixed top-4 left-4 right-4 z-20 transition-transform duration-500 ease-in-out ${
+            isFocusMode && !isHeaderVisible ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
+          }`}
+        >
+          <div className="bg-card/90 backdrop-blur-md border border-border/50 rounded-xl shadow-lg">
+            <div className="flex items-center justify-between px-3 sm:px-4 py-2">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => router.push("/dashboard")}
+                  className="flex items-center gap-1 sm:gap-2 flex-shrink-0 hover:bg-background/80 transition-colors h-7 px-2 rounded-lg"
+                >
+                  <ArrowLeft size={14} />
+                  <span className="hidden sm:inline text-sm">Back</span>
+                </Button>
+                <div className="w-px h-5 bg-border/60 flex-shrink-0" />
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div className="w-7 h-7 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText size={14} className="text-white" />
+                  </div>
+                  <h1 className="text-sm font-semibold text-foreground truncate">
+                    {pdfDocument.filename}
+                  </h1>
+                </div>
+                <div className="w-px h-5 bg-border/60 flex-shrink-0" />
+                {/* Focus Mode Toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsFocusMode(!isFocusMode)}
+                  className="flex items-center gap-1 sm:gap-2 flex-shrink-0 focus-mode-button hover:bg-background/80 transition-colors h-7 px-2 rounded-lg"
+                  title={
+                    isFocusMode ? "Exit Focus Mode (Esc)" : "Enter Focus Mode (F)"
+                  }
+                >
+                  {isFocusMode ? (
+                    <>
+                      <Minimize size={14} />
+                      <span className="hidden sm:inline text-sm">Exit Focus</span>
+                    </>
+                  ) : (
+                    <>
+                      <Maximize size={14} />
+                      <span className="hidden sm:inline text-sm">Focus Mode</span>
+                    </>
+                  )}
+                </Button>
               </div>
-              <h1 className="text-sm font-semibold text-foreground truncate">
-                {pdfDocument.filename}
-              </h1>
             </div>
-            <div className="w-px h-5 bg-border flex-shrink-0" />
-            {/* Focus Mode Toggle */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsFocusMode(!isFocusMode)}
-              className="flex items-center gap-1 sm:gap-2 flex-shrink-0 focus-mode-button hover:bg-background/80 transition-colors h-7 px-2"
-              title={
-                isFocusMode ? "Exit Focus Mode (Esc)" : "Enter Focus Mode (F)"
-              }
-            >
-              {isFocusMode ? (
-                <>
-                  <Minimize size={14} />
-                  <span className="hidden sm:inline text-sm">Exit Focus</span>
-                </>
-              ) : (
-                <>
-                  <Maximize size={14} />
-                  <span className="hidden sm:inline text-sm">Focus Mode</span>
-                </>
-              )}
-            </Button>
           </div>
         </div>
-      </div>
 
-      {/* PDF Viewer */}
-      <div
-        className={`h-[calc(100vh-49px)] w-full max-w-full overflow-hidden ${isFocusMode ? "!w-screen max-w-none" : "w-full max-w-full"
-          }`}
-      >
-        <PDFAnnotationViewer
-          pdfDocument={pdfDocument}
-          className="w-full h-full max-w-full"
-        />
-      </div>
+        {/* Show Header Button (appears when header is hidden) */}
+        {isFocusMode && !isHeaderVisible && (
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-30">
+            <Button
+              onClick={() => setIsHeaderVisible(true)}
+              size="sm"
+              className="bg-card/90 backdrop-blur-sm border border-border/50 hover:bg-card text-foreground shadow-lg rounded-full px-3 py-2 animate-fade-in"
+            >
+              <ArrowLeft size={14} className="rotate-90" />
+              <span className="ml-2 text-sm">Show Header</span>
+            </Button>
+          </div>
+        )}
 
-      {/* Focus Mode Hint */}
-      {isFocusMode && showHint && (
-        <div className="focus-mode-hint bg-card border border-border text-foreground px-3 py-1.5 rounded-md shadow-lg z-50 text-sm">
-          Press{" "}
-          <kbd className="px-1.5 py-0.5 bg-muted text-muted-foreground rounded text-xs font-mono">Esc</kbd> to
-          exit focus mode
+        {/* PDF Viewer - Full viewport height with explicit top/bottom to avoid bottom gap */}
+        <div
+          className={`transition-all duration-300 ease-in-out fixed z-0`}
+          style={{
+            top: 0,
+            bottom: 0,
+            left: isFocusMode ? 0 : 256, // px - leave room for sidebar when not focused
+            width: isFocusMode ? '100vw' : 'calc(100vw - 256px)',
+            overflow: 'hidden',
+          }}
+        >
+          <div className="w-full h-full">
+            <PDFAnnotationViewer
+              pdfDocument={pdfDocument}
+              className="w-full h-full"
+            />
+          </div>
         </div>
-      )}
-    </div>
+
+        {/* Enter Focus Mode Button (when not in focus mode) */}
+        {!isFocusMode && (
+          <div className="fixed bottom-6 right-6 z-30">
+            <Button
+              onClick={() => setIsFocusMode(true)}
+              size="sm"
+              className="bg-primary text-primary-foreground shadow-lg rounded-full px-4 py-2 hover:bg-primary/90 transition-all duration-200"
+            >
+              <Maximize size={16} className="mr-2" />
+              Focus Mode
+            </Button>
+          </div>
+        )}
+
+        {/* Focus Mode Hint */}
+        {isFocusMode && showHint && (
+          <div className="fixed bottom-4 transform right-2 translate-x-1/2 bg-card/95 backdrop-blur-sm border border-border text-foreground px-4 py-3 rounded-lg shadow-xl z-50 text-sm animate-fade-in">
+            <div className="text-center">
+              <p className="font-medium mb-1">Welcome to Focus Mode</p>
+              <p className="text-muted-foreground">
+                Press{" "}
+                <kbd className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs font-mono">Esc</kbd>{" "}
+                or click "Exit Focus" to return to normal view
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
