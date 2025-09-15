@@ -89,7 +89,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
         onClick={toggleMobile}
         className="fixed top-6 left-6 z-50 flex lg:hidden items-center justify-center w-10 h-10 bg-background border border-border rounded-lg shadow-sm text-foreground"
       >
-        {isMobileOpen ? <X size={18} /> : <Menu size={18} />}
+        {isMobileOpen ? <X size={16} /> : <Menu size={16} />}
       </button>
 
       {/* Mobile Overlay */}
@@ -131,30 +131,27 @@ export function DashboardSidebar({ className }: SidebarProps) {
               <button
                 onClick={toggleCollapse}
                 title="Expand sidebar"
-                className="w-9 h-9 bg-sidebar-accent rounded-xl flex items-center justify-center shadow-lg hover:bg-sidebar-accent/80 transition-colors duration-200"
+                className="w-8 h-8 bg-sidebar-accent rounded-xl flex items-center justify-center shadow-lg hover:bg-sidebar-accent/80 transition-colors duration-200"
               >
-                <PanelLeftOpen size={18} className="text-sidebar-accent-foreground" />
+                <PanelLeftOpen size={16} className="text-sidebar-accent-foreground" />
               </button>
             ) : (
               // Logo and collapse button when expanded
               <>
                 <div className="flex items-center gap-3">
-                  <Image src="/logo.png" alt="logo" width={50} height={50} />
+                  <Image src="/logo.png" alt="logo" width={40} height={40} />
                   <div>
-                    <h1 className="font-bold text-xl text-sidebar-foreground tracking-tight">
+                    <h1 className="font-bold text-lg text-sidebar-foreground tracking-tight">
                       Noto
                     </h1>
-                    <p className="text-xs text-muted-foreground font-medium">
-                      Productivity Suite
-                    </p>
                   </div>
                 </div>
                 <button
                   onClick={toggleCollapse}
                   title="Collapse sidebar"
-                  className="hidden lg:flex w-8 h-8 bg-sidebar-accent hover:bg-sidebar-accent/80 rounded-lg items-center justify-center transition-colors duration-200"
+                  className="hidden lg:flex w-7 h-7 bg-sidebar-accent hover:bg-sidebar-accent/80 rounded-lg items-center justify-center transition-colors duration-200"
                 >
-                  <PanelLeftClose size={16} className="text-sidebar-foreground/70" />
+                  <PanelLeftClose size={14} className="text-sidebar-foreground/70" />
                 </button>
               </>
             )}
@@ -189,7 +186,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                   )}
                 >
                   <Icon
-                    size={20}
+                    size={16}
                     className={cn(
                       "flex-shrink-0",
                       isActive
@@ -198,19 +195,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                     )}
                   />
                   {!isCollapsed && (
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-sm">{item.name}</span>
-                      <span
-                        className={cn(
-                          "text-xs",
-                          isActive
-                            ? "text-blue-100"
-                            : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground/70"
-                        )}
-                      >
-                        {item.description}
-                      </span>
-                    </div>
+                    <span className="font-semibold text-sm">{item.name}</span>
                   )}
                   {isActive && !isCollapsed && (
                     <div className="absolute right-3 w-1.5 h-1.5 bg-white rounded-full" />
@@ -244,18 +229,18 @@ export function DashboardSidebar({ className }: SidebarProps) {
                 <DropdownMenuTrigger asChild>
                   <button
                     title="User menu"
-                    className="bg-sidebar-accent rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 w-10 h-10"
+                    className="bg-sidebar-accent rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 w-9 h-9"
                   >
                     {user.user && user && user.user.imageUrl ? (
                       <Image
                         src={user.user?.imageUrl}
-                        width={40}
-                        height={40}
+                        width={36}
+                        height={36}
                         alt="image"
                         className="rounded-2xl"
                       />
                     ) : (
-                      <User size={20} className="text-sidebar-accent-foreground" />
+                      <User size={18} className="text-sidebar-accent-foreground" />
                     )}
                   </button>
                 </DropdownMenuTrigger>
@@ -298,18 +283,18 @@ export function DashboardSidebar({ className }: SidebarProps) {
             ) : (
               <button
                 title="John Doe"
-                className="bg-sidebar-accent rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 w-10 h-10"
+                className="bg-sidebar-accent rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 w-9 h-9"
               >
                 {user.user && user && user.user.imageUrl ? (
                   <Image
                     src={user.user?.imageUrl}
-                    width={40}
-                    height={40}
+                    width={36}
+                    height={36}
                     alt="image"
                     className="rounded-2xl"
                   />
                 ) : (
-                  <User size={20} className="text-sidebar-accent-foreground" />
+                  <User size={18} className="text-sidebar-accent-foreground" />
                 )}
               </button>
             )}
@@ -333,11 +318,11 @@ export function DashboardSidebar({ className }: SidebarProps) {
                     <button
                       title="Settings"
                       className={cn(
-                        "p-2 rounded-lg transition-colors duration-200 hover:bg-sidebar-accent/50",
+                        "p-1.5 rounded-lg transition-colors duration-200 hover:bg-sidebar-accent/50",
                         "text-sidebar-foreground/60 hover:text-sidebar-foreground"
                       )}
                     >
-                      <Settings size={16} />
+                      <Settings size={14} />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" side="top">
