@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Playfair_Display, Poppins } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Playfair_Display, Poppins, Outfit } from "next/font/google";
 import "./globals.css";
 import "./syncfusion.css";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -36,6 +36,13 @@ const poppins = Poppins({
   display: "swap",
 });
 
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Noto",
   description:
@@ -55,7 +62,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${playfair.variable} ${poppins.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${playfair.variable} ${poppins.variable} ${outfit.variable} antialiased`}
       >
         <ThemeProvider defaultTheme="light" storageKey="noto-theme">
           <ClerkProvider
