@@ -221,7 +221,7 @@ export default function PDFViewerPage() {
           </div>
         </div>
 
-        {/* Show Header Button (appears when header is hidden) */}
+        {/* Show Header Button (appears when header is hidden ) */}
         {isFocusMode && !isHeaderVisible && (
           <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-30">
             <Button
