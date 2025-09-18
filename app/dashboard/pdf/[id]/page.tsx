@@ -28,8 +28,8 @@ export default function PDFViewerPage() {
   const [isFocusMode, setIsFocusMode] = useState(true); // Start in focus mode by default
   const [showHint, setShowHint] = useState(false);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false); // Header hidden by default in focus mode
-
-  // Keyboard shortcut for focus mode (F11 or F)
+  console.log("header Visibility", isHeaderVisible);
+  // Keyboard shortcut for focus mode (F)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // F key for focus mode
@@ -47,23 +47,11 @@ export default function PDFViewerPage() {
       // Escape to exit focus mode
       else if (event.key === "Escape" && isFocusMode) {
         setIsFocusMode(false);
-        setIsHeaderVisible(true);
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isFocusMode]);
-
-  // Handle focus mode changes
-  useEffect(() => {
-    if (isFocusMode) {
-      // In focus mode, header is hidden by default
-      setIsHeaderVisible(false);
-    } else {
-      // Show header immediately when exiting focus mode
-      setIsHeaderVisible(true);
-    }
   }, [isFocusMode]);
 
   // Show hint when first opening (since we start in focus mode)
@@ -160,16 +148,19 @@ export default function PDFViewerPage() {
           animation: fade-in 0.3s ease-out forwards;
         }
       `}</style>
-      
+
       <div
-        className={`min-h-screen bg-background focus-mode-transition pdf-viewer-page ${isFocusMode ? "pdf-focus-mode" : ""
-          }`}
+        className={`min-h-screen bg-background focus-mode-transition pdf-viewer-page ${
+          isFocusMode ? "pdf-focus-mode" : ""
+        }`}
         data-pdf-viewer="true"
       >
         {/* Floating Header */}
-        <div 
+        <div
           className={`fixed top-4 left-4 right-4 z-20 transition-transform duration-500 ease-in-out ${
-            isFocusMode && !isHeaderVisible ? '-translate-y-full opacity-0' : 'translate-y-0 opacity-100'
+            !isHeaderVisible
+              ? "-translate-y-full opacity-0"
+              : "translate-y-0 opacity-100"
           }`}
         >
           <div className="bg-card/90 backdrop-blur-md border border-border/50 rounded-xl shadow-lg">
@@ -198,30 +189,54 @@ export default function PDFViewerPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsFocusMode(!isFocusMode)}
+                  onClick={() => {
+                    setIsFocusMode(!isFocusMode), setIsHeaderVisible(false);
+                  }}
                   className="flex items-center gap-1 sm:gap-2 flex-shrink-0 focus-mode-button hover:bg-background/80 transition-colors h-7 px-2 rounded-lg"
                   title={
-                    isFocusMode ? "Exit Focus Mode (Esc)" : "Enter Focus Mode (F)"
+                    isFocusMode
+                      ? "Exit Focus Mode (Esc)"
+                      : "Enter Focus Mode (F)"
                   }
                 >
                   {isFocusMode ? (
                     <>
                       <Minimize size={14} />
-                      <span className="hidden sm:inline text-sm">Exit Focus</span>
+                      <span className="hidden sm:inline text-sm">
+                        Exit Focus
+                      </span>
                     </>
                   ) : (
                     <>
                       <Maximize size={14} />
-                      <span className="hidden sm:inline text-sm">Focus Mode</span>
+                      <span className="hidden sm:inline text-sm">
+                        Focus Mode
+                      </span>
                     </>
                   )}
                 </Button>
+                {/* Hide Header Button (only show in focus mode when header is visible) */}
+                {isFocusMode && (
+                  <>
+                    <div className="w-px h-5 bg-border/60 flex-shrink-0" />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsHeaderVisible(false)}
+                      className="flex items-center gap-1 sm:gap-2 flex-shrink-0 hover:bg-background/80 transition-colors h-7 px-2 rounded-lg"
+                      title="Hide Header"
+                    >
+                      <ArrowLeft size={14} className="-rotate-90" />
+                      <span className="hidden sm:inline text-sm">Hide</span>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Show Header Button (appears when header is hidden ) */}
+        {/* Show Header Button (appears when header is hidden in focus mode) */}
         {isFocusMode && !isHeaderVisible && (
           <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-30">
             <Button
@@ -242,8 +257,8 @@ export default function PDFViewerPage() {
             top: 0,
             bottom: 0,
             left: isFocusMode ? 0 : 256, // px - leave room for sidebar when not focused
-            width: isFocusMode ? '100vw' : 'calc(100vw - 256px)',
-            overflow: 'hidden',
+            width: isFocusMode ? "100vw" : "calc(100vw - 256px)",
+            overflow: "hidden",
           }}
         >
           <div className="w-full h-full">
@@ -275,7 +290,9 @@ export default function PDFViewerPage() {
               <p className="font-medium mb-1">Welcome to Focus Mode</p>
               <p className="text-muted-foreground">
                 Press{" "}
-                <kbd className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs font-mono">Esc</kbd>{" "}
+                <kbd className="px-2 py-1 bg-muted text-muted-foreground rounded text-xs font-mono">
+                  Esc
+                </kbd>{" "}
                 or click "Exit Focus" to return to normal view
               </p>
             </div>
