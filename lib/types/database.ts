@@ -202,6 +202,114 @@ export interface Database {
           is_deleted?: boolean;
         };
       };
+      quizzes: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          source_pdf_ids: string[];
+          question_count: number;
+          difficulty: string;
+          question_types: string[];
+          metadata: any; // QuizMetadata JSON
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          source_pdf_ids: string[];
+          question_count: number;
+          difficulty: string;
+          question_types: string[];
+          metadata?: any; // QuizMetadata JSON
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          source_pdf_ids?: string[];
+          question_count?: number;
+          difficulty?: string;
+          question_types?: string[];
+          metadata?: any; // QuizMetadata JSON
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      quiz_questions: {
+        Row: {
+          id: string;
+          quiz_id: string;
+          question_text: string;
+          question_type: string;
+          options: any; // string[] JSON for MCQ
+          correct_answer: string;
+          explanation: string;
+          difficulty: string;
+          order_index: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          quiz_id: string;
+          question_text: string;
+          question_type: string;
+          options?: any; // string[] JSON for MCQ
+          correct_answer: string;
+          explanation: string;
+          difficulty: string;
+          order_index: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          quiz_id?: string;
+          question_text?: string;
+          question_type?: string;
+          options?: any; // string[] JSON for MCQ
+          correct_answer?: string;
+          explanation?: string;
+          difficulty?: string;
+          order_index?: number;
+          created_at?: string;
+        };
+      };
+      quiz_attempts: {
+        Row: {
+          id: string;
+          quiz_id: string;
+          user_id: string;
+          answers: any; // Record<string, string> JSON
+          score: number;
+          total_questions: number;
+          time_taken: number | null;
+          completed_at: string;
+        };
+        Insert: {
+          id?: string;
+          quiz_id: string;
+          user_id: string;
+          answers: any; // Record<string, string> JSON
+          score: number;
+          total_questions: number;
+          time_taken?: number | null;
+          completed_at?: string;
+        };
+        Update: {
+          id?: string;
+          quiz_id?: string;
+          user_id?: string;
+          answers?: any; // Record<string, string> JSON
+          score?: number;
+          total_questions?: number;
+          time_taken?: number | null;
+          completed_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -243,5 +351,17 @@ export type HighlightUpdate = Database["public"]["Tables"]["highlights"]["Update
 export type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
 export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
 export type NoteUpdate = Database["public"]["Tables"]["notes"]["Update"];
+
+export type QuizRow = Database["public"]["Tables"]["quizzes"]["Row"];
+export type QuizInsert = Database["public"]["Tables"]["quizzes"]["Insert"];
+export type QuizUpdate = Database["public"]["Tables"]["quizzes"]["Update"];
+
+export type QuizQuestionRow = Database["public"]["Tables"]["quiz_questions"]["Row"];
+export type QuizQuestionInsert = Database["public"]["Tables"]["quiz_questions"]["Insert"];
+export type QuizQuestionUpdate = Database["public"]["Tables"]["quiz_questions"]["Update"];
+
+export type QuizAttemptRow = Database["public"]["Tables"]["quiz_attempts"]["Row"];
+export type QuizAttemptInsert = Database["public"]["Tables"]["quiz_attempts"]["Insert"];
+export type QuizAttemptUpdate = Database["public"]["Tables"]["quiz_attempts"]["Update"];
 
 export type ActivityType = Database["public"]["Enums"]["activity_type"];

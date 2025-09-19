@@ -686,6 +686,233 @@ export interface ActivitySummary {
   } | null;
 }
 // ============================================================================
+// QUIZ TYPES
+// ============================================================================
+
+/**
+ * Quiz difficulty levels
+ */
+export type QuizDifficulty = 'easy' | 'medium' | 'hard';
+
+/**
+ * Quiz question types
+ */
+export type QuizQuestionType = 'mcq' | 'truefalse';
+
+/**
+ * Quiz metadata for additional information
+ */
+export interface QuizMetadata {
+  sourceDocumentTitles: string[];
+  extractionMethod: 'pdfjs' | 'ocr';
+  generationTime: number;
+  aiModel: string;
+  totalTextLength?: number;
+  averageQuestionComplexity?: number;
+}
+
+/**
+ * Main quiz entity
+ */
+export interface Quiz {
+  id: string;
+  userId: string;
+  title: string;
+  sourcePdfIds: string[];
+  questionCount: number;
+  difficulty: QuizDifficulty;
+  questionTypes: QuizQuestionType[];
+  metadata: QuizMetadata;
+  createdAt: string; // ISO string for Redux serialization
+  updatedAt: string; // ISO string for Redux serialization
+}
+
+/**
+ * Individual quiz question
+ */
+export interface QuizQuestion {
+  id: string;
+  quizId: string;
+  questionText: string;
+  questionType: QuizQuestionType;
+  options?: string[]; // For MCQ questions (4 options)
+  correctAnswer: string;
+  explanation: string;
+  difficulty: QuizDifficulty;
+  orderIndex: number;
+  createdAt: string; // ISO string for Redux serialization
+}
+
+/**
+ * Quiz attempt/result record
+ */
+export interface QuizAttempt {
+  id: string;
+  quizId: string;
+  userId: string;
+  answers: Record<string, string>; // questionId -> selectedAnswer
+  score: number; // Percentage (0-100)
+  totalQuestions: number;
+  timeTaken?: number; // in seconds
+  completedAt: string; // ISO string for Redux serialization
+}
+
+/**
+ * Quiz generation request payload
+ */
+export interface QuizGenerationRequest {
+  text: string;
+  questionCount: number;
+  difficulty: QuizDifficulty;
+  questionTypes: QuizQuestionType[];
+  sourceDocuments: string[];
+  title?: string;
+}
+
+/**
+ * Text extraction request payload
+ */
+export interface TextExtractionRequest {
+  pdfId: string;
+  useOCR?: boolean;
+  extractionOptions?: {
+    pageRange?: { start: number; end: number };
+    cleanText?: boolean;
+    chunkSize?: number;
+  };
+}
+
+/**
+ * Text extraction response
+ */
+export interface TextExtractionResponse {
+  success: boolean;
+  text: string;
+  pageCount: number;
+  extractionMethod: 'pdfjs' | 'ocr';
+  processingTime: number;
+  error?: string;
+}
+
+/**
+ * Quiz generation response
+ */
+export interface QuizGenerationResponse {
+  success: boolean;
+  quizId: string;
+  questions: QuizQuestion[];
+  metadata: QuizMetadata;
+  error?: string;
+}
+
+/**
+ * Quiz attempt submission request
+ */
+export interface QuizAttemptRequest {
+  quizId: string;
+  answers: Record<string, string>;
+  timeTaken?: number;
+}
+
+/**
+ * Quiz attempt submission response
+ */
+export interface QuizAttemptResponse {
+  success: boolean;
+  attemptId: string;
+  score: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  results: Array<{
+    questionId: string;
+    correct: boolean;
+    userAnswer: string;
+    correctAnswer: string;
+    explanation: string;
+  }>;
+  error?: string;
+}
+
+/**
+ * Quiz configuration for generation
+ */
+export interface QuizConfiguration {
+  questionCount: number;
+  difficulty: QuizDifficulty;
+  questionTypes: QuizQuestionType[];
+  includeDiagrams?: boolean;
+  focusAreas?: string[];
+  excludeTopics?: string[];
+}
+
+/**
+ * Quiz statistics and analytics
+ */
+export interface QuizStatistics {
+  totalQuizzes: number;
+  totalAttempts: number;
+  averageScore: number;
+  bestScore: number;
+  mostRecentAttempt: string | null;
+  difficultyBreakdown: Record<QuizDifficulty, number>;
+  questionTypeBreakdown: Record<QuizQuestionType, number>;
+}
+
+/**
+ * Quiz list response with pagination
+ */
+export interface QuizListResponse {
+  success: boolean;
+  data?: {
+    quizzes: Quiz[];
+    totalCount: number;
+    statistics: QuizStatistics;
+  };
+  error?: string;
+}
+
+/**
+ * Quiz details response with questions
+ */
+export interface QuizDetailsResponse {
+  success: boolean;
+  data?: {
+    quiz: Quiz;
+    questions: QuizQuestion[];
+    attempts: QuizAttempt[];
+    statistics: {
+      totalAttempts: number;
+      averageScore: number;
+      bestScore: number;
+      lastAttempt: string | null;
+    };
+  };
+  error?: string;
+}
+
+/**
+ * Quiz history response
+ */
+export interface QuizHistoryResponse {
+  success: boolean;
+  data?: {
+    attempts: Array<QuizAttempt & {
+      quiz: {
+        title: string;
+        difficulty: QuizDifficulty;
+        questionCount: number;
+      };
+    }>;
+    summary: {
+      totalAttempts: number;
+      averageScore: number;
+      improvementTrend: 'improving' | 'declining' | 'stable';
+    };
+  };
+  error?: string;
+}
+
+// ============================================================================
 // THEME TYPES
 // ============================================================================
 
