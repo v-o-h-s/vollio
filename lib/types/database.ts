@@ -211,6 +211,8 @@ export interface Database {
           question_count: number;
           difficulty: string;
           question_types: string[];
+          notes: string | null;
+          generation_method: string;
           metadata: any; // QuizMetadata JSON
           created_at: string;
           updated_at: string;
@@ -223,6 +225,8 @@ export interface Database {
           question_count: number;
           difficulty: string;
           question_types: string[];
+          notes?: string | null;
+          generation_method?: string;
           metadata?: any; // QuizMetadata JSON
           created_at?: string;
           updated_at?: string;
@@ -235,6 +239,8 @@ export interface Database {
           question_count?: number;
           difficulty?: string;
           question_types?: string[];
+          notes?: string | null;
+          generation_method?: string;
           metadata?: any; // QuizMetadata JSON
           created_at?: string;
           updated_at?: string;
@@ -251,6 +257,9 @@ export interface Database {
           explanation: string;
           difficulty: string;
           order_index: number;
+          source_chunks: string[];
+          source_pages: number[];
+          confidence_score: number | null;
           created_at: string;
         };
         Insert: {
@@ -263,6 +272,9 @@ export interface Database {
           explanation: string;
           difficulty: string;
           order_index: number;
+          source_chunks?: string[];
+          source_pages?: number[];
+          confidence_score?: number | null;
           created_at?: string;
         };
         Update: {
@@ -275,6 +287,9 @@ export interface Database {
           explanation?: string;
           difficulty?: string;
           order_index?: number;
+          source_chunks?: string[];
+          source_pages?: number[];
+          confidence_score?: number | null;
           created_at?: string;
         };
       };
@@ -310,6 +325,94 @@ export interface Database {
           completed_at?: string;
         };
       };
+      document_chunks: {
+        Row: {
+          id: string;
+          user_id: string;
+          document_id: string;
+          chunk_index: number;
+          content: string;
+          embedding: number[];
+          token_count: number;
+          page_number: number;
+          section_title: string | null;
+          metadata: any; // ChunkMetadata JSON
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          document_id: string;
+          chunk_index: number;
+          content: string;
+          embedding: number[];
+          token_count: number;
+          page_number: number;
+          section_title?: string | null;
+          metadata?: any; // ChunkMetadata JSON
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          document_id?: string;
+          chunk_index?: number;
+          content?: string;
+          embedding?: number[];
+          token_count?: number;
+          page_number?: number;
+          section_title?: string | null;
+          metadata?: any; // ChunkMetadata JSON
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      document_processing_status: {
+        Row: {
+          id: string;
+          user_id: string;
+          document_id: string;
+          status: string;
+          total_chunks: number;
+          processed_chunks: number;
+          extraction_method: string | null;
+          error_message: string | null;
+          processing_started_at: string | null;
+          processing_completed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          document_id: string;
+          status: string;
+          total_chunks?: number;
+          processed_chunks?: number;
+          extraction_method?: string | null;
+          error_message?: string | null;
+          processing_started_at?: string | null;
+          processing_completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          document_id?: string;
+          status?: string;
+          total_chunks?: number;
+          processed_chunks?: number;
+          extraction_method?: string | null;
+          error_message?: string | null;
+          processing_started_at?: string | null;
+          processing_completed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -322,6 +425,11 @@ export interface Database {
     };
     Enums: {
       activity_type: "view" | "upload" | "delete";
+      quiz_difficulty: "easy" | "medium" | "hard";
+      quiz_question_type: "mcq" | "truefalse" | "fillblank";
+      generation_method: "simple" | "rag";
+      processing_status: "pending" | "processing" | "completed" | "failed";
+      extraction_method: "pdfjs" | "ocr";
     };
   };
 }
@@ -345,8 +453,10 @@ export type AnnotationUpdate =
   Database["public"]["Tables"]["annotations"]["Update"];
 
 export type HighlightRow = Database["public"]["Tables"]["highlights"]["Row"];
-export type HighlightInsert = Database["public"]["Tables"]["highlights"]["Insert"];
-export type HighlightUpdate = Database["public"]["Tables"]["highlights"]["Update"];
+export type HighlightInsert =
+  Database["public"]["Tables"]["highlights"]["Insert"];
+export type HighlightUpdate =
+  Database["public"]["Tables"]["highlights"]["Update"];
 
 export type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
 export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
@@ -356,12 +466,65 @@ export type QuizRow = Database["public"]["Tables"]["quizzes"]["Row"];
 export type QuizInsert = Database["public"]["Tables"]["quizzes"]["Insert"];
 export type QuizUpdate = Database["public"]["Tables"]["quizzes"]["Update"];
 
-export type QuizQuestionRow = Database["public"]["Tables"]["quiz_questions"]["Row"];
-export type QuizQuestionInsert = Database["public"]["Tables"]["quiz_questions"]["Insert"];
-export type QuizQuestionUpdate = Database["public"]["Tables"]["quiz_questions"]["Update"];
+export type QuizQuestionRow =
+  Database["public"]["Tables"]["quiz_questions"]["Row"];
+export type QuizQuestionInsert =
+  Database["public"]["Tables"]["quiz_questions"]["Insert"];
+export type QuizQuestionUpdate =
+  Database["public"]["Tables"]["quiz_questions"]["Update"];
 
-export type QuizAttemptRow = Database["public"]["Tables"]["quiz_attempts"]["Row"];
-export type QuizAttemptInsert = Database["public"]["Tables"]["quiz_attempts"]["Insert"];
-export type QuizAttemptUpdate = Database["public"]["Tables"]["quiz_attempts"]["Update"];
+export type QuizAttemptRow =
+  Database["public"]["Tables"]["quiz_attempts"]["Row"];
+export type QuizAttemptInsert =
+  Database["public"]["Tables"]["quiz_attempts"]["Insert"];
+export type QuizAttemptUpdate =
+  Database["public"]["Tables"]["quiz_attempts"]["Update"];
+
+export type DocumentChunkRow =
+  Database["public"]["Tables"]["document_chunks"]["Row"];
+export type DocumentChunkInsert =
+  Database["public"]["Tables"]["document_chunks"]["Insert"];
+export type DocumentChunkUpdate =
+  Database["public"]["Tables"]["document_chunks"]["Update"];
+
+export type DocumentProcessingStatusRow =
+  Database["public"]["Tables"]["document_processing_status"]["Row"];
+export type DocumentProcessingStatusInsert =
+  Database["public"]["Tables"]["document_processing_status"]["Insert"];
+export type DocumentProcessingStatusUpdate =
+  Database["public"]["Tables"]["document_processing_status"]["Update"];
 
 export type ActivityType = Database["public"]["Enums"]["activity_type"];
+export type QuizDifficultyEnum = Database["public"]["Enums"]["quiz_difficulty"];
+export type QuizQuestionTypeEnum =
+  Database["public"]["Enums"]["quiz_question_type"];
+export type GenerationMethodEnum =
+  Database["public"]["Enums"]["generation_method"];
+export type ProcessingStatusEnum =
+  Database["public"]["Enums"]["processing_status"];
+export type ExtractionMethodEnum =
+  Database["public"]["Enums"]["extraction_method"];
+
+// Additional types for quiz functionality
+export interface DocumentProcessingStatus {
+  id: string;
+  userId: string;
+  documentId: string;
+  status: ProcessingStatusEnum;
+  totalChunks: number;
+  processedChunks: number;
+  extractionMethod?: ExtractionMethodEnum;
+  errorMessage?: string;
+  processingStartedAt?: string;
+  processingCompletedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChunkReference {
+  chunkId: string;
+  content: string;
+  pageNumber: number;
+  relevanceScore: number;
+  documentTitle: string;
+}

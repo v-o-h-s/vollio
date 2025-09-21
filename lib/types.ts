@@ -79,7 +79,7 @@ export interface Highlight {
 /**
  * Editor mode for different viewing experiences
  */
-export type EditorMode = 'normal' | 'fullscreen' | 'focus';
+export type EditorMode = "normal" | "fullscreen" | "focus";
 
 /**
  * Re-export JSONContent from TipTap for convenience
@@ -90,11 +90,11 @@ export type { JSONContent };
  * Props for the main NotionEditor component
  */
 export interface NoteContent {
-  title: string,
-  content?: JSONContent | null
+  title: string;
+  content?: JSONContent | null;
 }
 export interface NotionEditorProps {
-  content?: NoteContent
+  content?: NoteContent;
   onChange?: (content: JSONContent) => void;
   onUpdate?: (editor: Editor) => void;
   placeholder?: string;
@@ -692,19 +692,33 @@ export interface ActivitySummary {
 /**
  * Quiz difficulty levels
  */
-export type QuizDifficulty = 'easy' | 'medium' | 'hard';
+export type QuizDifficulty = "easy" | "medium" | "hard";
 
 /**
- * Quiz question types
+ * Quiz question types (enhanced)
  */
-export type QuizQuestionType = 'mcq' | 'truefalse';
+export type QuizQuestionType = "mcq" | "truefalse" | "fillblank";
 
 /**
- * Quiz metadata for additional information
+ * RAG quiz metadata for additional information
+ */
+export interface RAGQuizMetadata {
+  sourceDocumentTitles: string[];
+  totalChunksSearched: number;
+  averageRelevanceScore: number;
+  generationTime: number;
+  aiModel: string;
+  embeddingModel: string;
+  searchQuery: string;
+  retrievalMethod: "vector_similarity" | "hybrid";
+}
+
+/**
+ * Legacy quiz metadata (for backward compatibility)
  */
 export interface QuizMetadata {
   sourceDocumentTitles: string[];
-  extractionMethod: 'pdfjs' | 'ocr';
+  extractionMethod: "pdfjs" | "ocr";
   generationTime: number;
   aiModel: string;
   totalTextLength?: number;
@@ -712,23 +726,28 @@ export interface QuizMetadata {
 }
 
 /**
- * Main quiz entity
+ * Main quiz entity (enhanced for RAG)
  */
 export interface Quiz {
   id: string;
   userId: string;
   title: string;
-  sourcePdfIds: string[];
+  sourceDocumentIds: string[]; // Changed from sourcePdfIds for clarity
+  pageRange?: { start: number; end: number };
   questionCount: number;
   difficulty: QuizDifficulty;
   questionTypes: QuizQuestionType[];
-  metadata: QuizMetadata;
+  notes?: string; // User-provided context and instructions for quiz generation
+  focusAreas?: string[];
+  learningObjectives?: string[];
+  generationMethod: "rag" | "simple";
+  metadata: RAGQuizMetadata;
   createdAt: string; // ISO string for Redux serialization
   updatedAt: string; // ISO string for Redux serialization
 }
 
 /**
- * Individual quiz question
+ * Individual quiz question (enhanced for RAG)
  */
 export interface QuizQuestion {
   id: string;
@@ -740,6 +759,9 @@ export interface QuizQuestion {
   explanation: string;
   difficulty: QuizDifficulty;
   orderIndex: number;
+  sourceChunks: string[]; // References to document chunks used
+  sourcePages: number[]; // Page numbers where content was sourced
+  confidenceScore?: number; // AI confidence in question quality (0.00-1.00)
   createdAt: string; // ISO string for Redux serialization
 }
 
@@ -758,7 +780,68 @@ export interface QuizAttempt {
 }
 
 /**
- * Quiz generation request payload
+ * Document chunk for vector storage and retrieval
+ */
+export interface DocumentChunk {
+  id: string;
+  userId: string;
+  documentId: string;
+  chunkIndex: number;
+  content: string;
+  embedding: number[];
+  tokenCount: number;
+  pageNumber: number;
+  sectionTitle?: string;
+  metadata: ChunkMetadata;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Metadata for document chunks
+ */
+export interface ChunkMetadata {
+  documentTitle: string;
+  extractionMethod: "pdfjs" | "ocr";
+  processingVersion: string;
+  contentType: "paragraph" | "heading" | "list" | "table" | "caption";
+  confidence?: number;
+}
+
+/**
+ * Document processing status tracking
+ */
+export interface DocumentProcessingStatus {
+  id: string;
+  userId: string;
+  documentId: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  totalChunks: number;
+  processedChunks: number;
+  extractionMethod?: "pdfjs" | "ocr";
+  errorMessage?: string;
+  processingStartedAt?: string;
+  processingCompletedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * RAG quiz generation request payload
+ */
+export interface RAGQuizGenerationRequest {
+  documentIds: string[];
+  pageRange?: { start: number; end: number };
+  questionCount: number;
+  difficulty: QuizDifficulty;
+  questionTypes: QuizQuestionType[];
+  notes?: string;
+  focusAreas?: string[];
+  learningObjectives?: string[];
+}
+
+/**
+ * Legacy quiz generation request (for backward compatibility)
  */
 export interface QuizGenerationRequest {
   text: string;
@@ -767,6 +850,7 @@ export interface QuizGenerationRequest {
   questionTypes: QuizQuestionType[];
   sourceDocuments: string[];
   title?: string;
+  notes?: string; // Additional context and instructions from user
 }
 
 /**
@@ -789,7 +873,7 @@ export interface TextExtractionResponse {
   success: boolean;
   text: string;
   pageCount: number;
-  extractionMethod: 'pdfjs' | 'ocr';
+  extractionMethod: "pdfjs" | "ocr";
   processingTime: number;
   error?: string;
 }
@@ -834,14 +918,88 @@ export interface QuizAttemptResponse {
 }
 
 /**
- * Quiz configuration for generation
+ * Content search request for vector similarity
+ */
+export interface ContentSearchRequest {
+  query: string;
+  documentIds: string[];
+  pageRange?: { start: number; end: number };
+  limit?: number;
+  similarityThreshold?: number;
+}
+
+/**
+ * Content search response with ranked chunks
+ */
+export interface ContentSearchResponse {
+  success: boolean;
+  chunks: Array<{
+    id: string;
+    content: string;
+    metadata: ChunkMetadata;
+    similarity: number;
+  }>;
+  totalResults: number;
+  error?: string;
+}
+
+/**
+ * Document processing request
+ */
+export interface DocumentProcessingRequest {
+  pdfId: string;
+  useOCR?: boolean;
+  forceReprocess?: boolean;
+}
+
+/**
+ * Document processing response
+ */
+export interface DocumentProcessingResponse {
+  success: boolean;
+  documentId: string;
+  totalChunks: number;
+  processingTime: number;
+  extractionMethod: "pdfjs" | "ocr";
+  status: "processing" | "completed" | "failed";
+  error?: string;
+}
+
+/**
+ * Question-chunk source mapping
+ */
+export interface QuestionChunkSource {
+  id: string;
+  questionId: string;
+  chunkId: string;
+  relevanceScore: number;
+  usageType: "primary" | "supporting" | "context";
+  createdAt: string;
+}
+
+/**
+ * Chunk reference for quiz generation
+ */
+export interface ChunkReference {
+  chunkId: string;
+  content: string;
+  pageNumber: number;
+  relevanceScore: number;
+  documentTitle: string;
+}
+
+/**
+ * Quiz configuration for generation (enhanced)
  */
 export interface QuizConfiguration {
   questionCount: number;
   difficulty: QuizDifficulty;
   questionTypes: QuizQuestionType[];
-  includeDiagrams?: boolean;
+  pageRange?: { start: number; end: number };
+  notes?: string; // User-provided context and instructions
   focusAreas?: string[];
+  learningObjectives?: string[];
+  includeDiagrams?: boolean;
   excludeTopics?: string[];
 }
 
@@ -896,17 +1054,19 @@ export interface QuizDetailsResponse {
 export interface QuizHistoryResponse {
   success: boolean;
   data?: {
-    attempts: Array<QuizAttempt & {
-      quiz: {
-        title: string;
-        difficulty: QuizDifficulty;
-        questionCount: number;
-      };
-    }>;
+    attempts: Array<
+      QuizAttempt & {
+        quiz: {
+          title: string;
+          difficulty: QuizDifficulty;
+          questionCount: number;
+        };
+      }
+    >;
     summary: {
       totalAttempts: number;
       averageScore: number;
-      improvementTrend: 'improving' | 'declining' | 'stable';
+      improvementTrend: "improving" | "declining" | "stable";
     };
   };
   error?: string;
