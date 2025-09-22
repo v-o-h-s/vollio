@@ -68,6 +68,15 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 ## 🆕 Recent Major Improvements
 
+### PDF Text Extraction Architecture ✅ IMPLEMENTED
+- **Syncfusion Primary Extraction**: Enterprise-grade text extraction using Syncfusion PDF Viewer for superior accuracy and layout preservation
+- **Advanced Layout Detection**: Intelligent recognition of document structure, tables, headings, lists, and formatting preservation
+- **OCR Fallback System**: Automatic fallback to node-tesseract-ocr for scanned documents and extraction failures with confidence thresholds
+- **Background Processing Queue**: Asynchronous document processing with progress tracking, timeout management, and job status monitoring
+- **Semantic Chunking**: Intelligent text segmentation with configurable overlap, content type detection, and boundary respect
+- **Multi-Language Support**: Comprehensive language detection and processing for international documents with OCR language packs
+- **Metadata Preservation**: Complete extraction of document metadata, page numbers, structural information, and processing statistics
+
 ### Complete Auto-Save Architecture
 - **Editor-Internal Auto-Save**: Auto-save functionality built into NotionEditor components using RTK Query
 - **RTK Query Integration**: All save operations use RTK Query mutations for consistency and caching
@@ -173,6 +182,9 @@ For comprehensive documentation covering all aspects of the Noto application, se
 - **Database**: Supabase with Row Level Security (RLS)
 - **File Storage**: Supabase Storage with signed URLs
 - **PDF Rendering**: Syncfusion PDF Viewer (licensed)
+- **Document Processing**: Advanced text extraction with Syncfusion primary extraction and OCR fallback
+- **Text Processing**: Semantic chunking service with intelligent content type detection
+- **Background Processing**: Asynchronous processing queue with progress tracking
 - **Rich Text Editor**: TipTap with custom extensions for block-based editing
 - **Testing**: Vitest with React Testing Library
 
@@ -189,6 +201,7 @@ For comprehensive documentation covering all aspects of the Noto application, se
 │   ├── editor/           # Notion-like rich text editor components
 │   └── dashboard/        # Dashboard and navigation components
 ├── lib/                   # Utilities and configurations
+│   ├── services/         # Document processing services (Syncfusion, OCR, chunking)
 │   ├── store/            # Redux store and slices
 │   ├── types/            # TypeScript type definitions
 │   └── utils/            # Utility functions

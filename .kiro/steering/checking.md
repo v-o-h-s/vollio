@@ -52,6 +52,23 @@ When encountering errors or implementation challenges:
 - **Loading states**: Handle isLoading, isError states in components
 - **Type safety**: Define proper TypeScript interfaces for API responses
 
+### Document Processing Issues
+- **Syncfusion License Errors**: Verify Syncfusion license is properly configured and not expired
+- **Text Extraction Failures**: Check fallback from Syncfusion to OCR is working correctly
+- **OCR Processing Errors**: Validate node-tesseract-ocr installation and language packs
+- **Chunking Failures**: Ensure semantic chunking respects content boundaries and token limits
+- **Processing Queue Issues**: Monitor background job status and timeout handling
+- **Memory Leaks**: Verify proper cleanup of temporary files and child processes
+
+#### Document Processing Debugging Checklist
+When text extraction fails:
+1. Check Syncfusion license status and component initialization
+2. Verify PDF buffer is valid and not corrupted
+3. Test OCR fallback with known scanned documents
+4. Monitor processing queue for stuck or failed jobs
+5. Check temporary file cleanup and disk space
+6. Validate chunking output for proper content segmentation
+
 ### PDF Annotation Issues
 - **Tooltip Race Conditions**: Don't clear showSelectionToolbar state at start of selection handler
 - **Coordinate Conversion**: Ensure proper PDF-to-screen coordinate mapping with canvas detection
@@ -110,6 +127,8 @@ return NextResponse.json(
 After any changes, verify these core flows work:
 - **Authentication**: Sign-in → Dashboard access → Protected API calls
 - **PDF workflow**: Upload → View → Annotate → Save → Cross-tab sync
+- **Document processing**: PDF upload → Syncfusion extraction → OCR fallback → Chunking → Storage
+- **Quiz generation**: Document selection → Text processing → Vector search → Question generation
 - **Note workflow**: Create → Edit → Auto-save → Navigation → Persistence
 - **Mobile experience**: Touch selection → Annotation dialog → Note editing → Save
 - **Auto-save functionality**: Content changes → Debounced save → Status feedback → Error recovery
@@ -154,3 +173,17 @@ When working with editor components:
 - ✅ Extract titles automatically from editor content for new notes
 - ❌ Avoid passing save functions down from parent components
 - ❌ Avoid complex state management between editor and parent for saving
+
+## Document Processing Implementation Checklist
+
+When implementing or debugging document processing:
+- ✅ Use `DocumentProcessingService` with Syncfusion as primary extraction method
+- ✅ Implement proper fallback to `OCRService` with node-tesseract-ocr
+- ✅ Use `ChunkingService` for semantic text segmentation with content type detection
+- ✅ Leverage `ProcessingQueue` for background processing of large documents
+- ✅ Implement proper error handling and cleanup for temporary files
+- ✅ Use RTK Query for all document processing API calls
+- ✅ Store processing status and progress in Supabase with RLS policies
+- ❌ Avoid blocking UI during document processing operations
+- ❌ Don't skip OCR fallback validation for scanned documents
+- ❌ Avoid processing documents without proper user authentication

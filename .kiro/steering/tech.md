@@ -23,6 +23,15 @@ inclusion: always
 
 ## Recent Technical Implementations
 
+### PDF Text Extraction Architecture
+- **Syncfusion Primary Extraction**: Enterprise-grade text extraction using Syncfusion PDF Viewer for superior accuracy
+- **Advanced Layout Detection**: Intelligent recognition of document structure, tables, and formatting preservation
+- **OCR Fallback System**: Automatic fallback to node-tesseract-ocr for scanned documents and extraction failures
+- **Background Processing Queue**: Asynchronous document processing with progress tracking and timeout management
+- **Semantic Chunking**: Intelligent text segmentation with configurable overlap and content type detection
+- **Multi-Language Support**: Comprehensive language detection and processing for international documents
+- **Metadata Preservation**: Complete extraction of document metadata, page numbers, and structural information
+
 ### PDF Annotation Architecture
 - **AnnotationTooltip Integration**: Sophisticated PDF-to-screen coordinate conversion with canvas detection  
 - **Local State Management**: Tooltip state managed locally in PDFAnnotationViewer with React useState
@@ -152,6 +161,84 @@ const createHighlight = useCallback((noteId: string, bounds: Rectangle) => {
 - Group imports: external libraries, internal components, types
 - Use named imports when possible
 - Import types with `import type` when only used for typing
+
+### Document Processing Patterns
+
+#### Syncfusion Text Extraction
+```typescript
+// Primary text extraction using Syncfusion
+const extractTextWithSyncfusion = async (pdfBuffer: Buffer, options: ProcessingOptions) => {
+  const extractor = new SyncfusionTextExtractor();
+  const result = await extractor.extractText(pdfBuffer, {
+    preserveFormatting: options.preserveFormatting,
+    extractTables: options.extractTables,
+    pageRange: options.pageRange
+  });
+  
+  if (result.success) {
+    return result.pageTexts.map(page => ({
+      pageNumber: page.pageNumber,
+      text: preprocessText(page.text),
+      metadata: page.metadata
+    }));
+  }
+  
+  throw new Error(result.error || 'Syncfusion extraction failed');
+};
+
+// OCR fallback with node-tesseract-ocr
+const extractTextWithOCR = async (pdfPath: string, options: OCROptions) => {
+  const ocrResult = await ocrService.processPDF(pdfPath, {
+    language: options.language || 'eng',
+    psmMode: options.psmMode || 3,
+    confidenceThreshold: options.confidenceThreshold || 30,
+    preprocessImage: true
+  });
+  
+  return ocrResult.results;
+};
+
+// Semantic chunking with content type detection
+const createSemanticChunks = (text: string, options: ChunkingOptions) => {
+  const chunkingResult = chunkingService.createChunks(text, {
+    chunkSize: options.chunkSize || 400,
+    chunkOverlap: options.chunkOverlap || 50,
+    preserveStructure: true,
+    respectSentenceBoundaries: true
+  });
+  
+  return chunkingResult.chunks.map(chunk => ({
+    id: chunk.id,
+    content: chunk.content,
+    tokenCount: chunk.tokenCount,
+    contentType: chunk.metadata.contentType,
+    hasOverlap: chunk.metadata.hasOverlap
+  }));
+};
+```
+
+#### Processing Queue Management
+```typescript
+// Background processing with progress tracking
+const processDocumentAsync = async (pdfBuffer: Buffer, documentTitle: string) => {
+  const jobId = processingQueue.addJob(
+    userId,
+    documentId,
+    pdfBuffer,
+    documentTitle,
+    { useOCR: false, preserveStructure: true }
+  );
+  
+  // Monitor progress
+  processingQueue.on('jobProgress', (job) => {
+    if (job.id === jobId) {
+      updateProcessingStatus(job.progress);
+    }
+  });
+  
+  return jobId;
+};
+```
 
 ## Architecture Patterns
 
