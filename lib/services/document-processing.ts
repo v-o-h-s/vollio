@@ -4,7 +4,11 @@ import { tmpdir } from "os";
 import { v4 as uuidv4 } from "uuid";
 import { ocrService, type OCROptions } from "./ocr-service";
 import { chunkingService, type ChunkingOptions } from "./chunking-service";
-import { syncfusionTextExtractor, type SyncfusionExtractionOptions } from "./syncfusion-text-extractor";
+import {
+  syncfusionTextExtractor,
+  type SyncfusionExtractionOptions,
+} from "./syncfusion-text-extractor";
+import { embeddingService, type EmbeddingOptions } from "./embedding-service";
 
 export interface DocumentChunk {
   id: string;
@@ -12,7 +16,8 @@ export interface DocumentChunk {
   pageNumber: number;
   chunkIndex: number;
   tokenCount: number;
-  sectionTitle?: string;   
+  sectionTitle?: string;
+  embedding?: number[]; // Vector embedding for semantic search
   metadata: ChunkMetadata;
 }
 
@@ -24,9 +29,14 @@ export interface ChunkMetadata {
   confidence?: number;
 }
 
-export interface ProcessingOptions extends OCROptions, ChunkingOptions, SyncfusionExtractionOptions {
+export interface ProcessingOptions
+  extends OCROptions,
+    ChunkingOptions,
+    SyncfusionExtractionOptions,
+    EmbeddingOptions {
   useOCR?: boolean;
   forceReprocess?: boolean;
+  generateEmbeddings?: boolean; // Whether to generate vector embeddings
 }
 
 export interface ProcessingResult {
@@ -69,7 +79,10 @@ export class DocumentProcessingService {
             };
           }
         } catch (error) {
-          console.warn("Syncfusion extraction failed, falling back to OCR:", error);
+          console.warn(
+            "Syncfusion extraction failed, falling back to OCR:",
+            error
+          );
         }
       }
 
@@ -106,22 +119,27 @@ export class DocumentProcessingService {
   ): Promise<ProcessingResult> {
     try {
       // Use the dedicated Syncfusion text extractor
-      const extractionResult = await syncfusionTextExtractor.extractText(pdfBuffer, {
-        enableTextSelection: options.enableTextSelection,
-        enableTextSearch: options.enableTextSearch,
-        extractImages: options.extractImages,
-        preserveFormatting: options.preserveFormatting,
-        timeout: options.timeout
-      });
+      const extractionResult = await syncfusionTextExtractor.extractText(
+        pdfBuffer,
+        {
+          enableTextSelection: options.enableTextSelection,
+          enableTextSearch: options.enableTextSearch,
+          extractImages: options.extractImages,
+          preserveFormatting: options.preserveFormatting,
+          timeout: options.timeout,
+        }
+      );
 
       if (!extractionResult.success) {
-        throw new Error(extractionResult.error || 'Syncfusion extraction failed');
+        throw new Error(
+          extractionResult.error || "Syncfusion extraction failed"
+        );
       }
 
       // Convert Syncfusion page texts to our format
-      const pageTexts = extractionResult.pageTexts.map(pageText => ({
+      const pageTexts = extractionResult.pageTexts.map((pageText) => ({
         pageNumber: pageText.pageNumber,
-        text: pageText.text
+        text: pageText.text,
       }));
 
       // Preprocess and chunk the text
@@ -130,7 +148,7 @@ export class DocumentProcessingService {
         text: this.preprocessText(text),
       }));
 
-      const chunks = this.createChunks(
+      const chunks = await this.createChunks(
         processedTexts,
         documentTitle,
         "syncfusion",
@@ -144,9 +162,12 @@ export class DocumentProcessingService {
         processingTime: 0, // Will be set by caller
         totalPages: extractionResult.totalPages,
       };
-
     } catch (error) {
-      throw new Error(`Syncfusion extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Syncfusion extraction failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   }
 
@@ -177,7 +198,7 @@ export class DocumentProcessingService {
         text: this.preprocessText(text),
       }));
 
-      const chunks = this.createChunks(
+      const chunks = await this.createChunks(
         processedTexts,
         documentTitle,
         "ocr",
@@ -252,13 +273,14 @@ export class DocumentProcessingService {
 
   /**
    * Create semantic chunks from processed text using advanced chunking service
+   * Optionally generates vector embeddings for each chunk
    */
-  private createChunks(
+  private async createChunks(
     pageTexts: Array<{ pageNumber: number; text: string }>,
     documentTitle: string,
     extractionMethod: "syncfusion" | "ocr",
     options: ProcessingOptions = {}
-  ): DocumentChunk[] {
+  ): Promise<DocumentChunk[]> {
     const chunks: DocumentChunk[] = [];
     let globalChunkIndex = 0;
 
@@ -276,7 +298,7 @@ export class DocumentProcessingService {
       });
 
       for (const chunk of chunkingResult.chunks) {
-        chunks.push({
+        const documentChunk: DocumentChunk = {
           id: chunk.id,
           content: chunk.content,
           pageNumber,
@@ -290,7 +312,62 @@ export class DocumentProcessingService {
             contentType: chunk.metadata.contentType,
             confidence: extractionMethod === "ocr" ? 85 : undefined, // Default OCR confidence
           },
-        });
+        };
+
+        chunks.push(documentChunk);
+      }
+    }
+
+    // Generate embeddings if requested
+    if (options.generateEmbeddings && chunks.length > 0) {
+      try {
+        console.log(`Generating embeddings for ${chunks.length} chunks...`);
+
+        const chunkTexts = chunks.map((chunk) => chunk.content);
+        const embeddingResult = await embeddingService.generateBatchEmbeddings(
+          chunkTexts,
+          {
+            model: options.model,
+            batchSize: options.batchSize || 50,
+            cacheEnabled: options.cacheEnabled !== false,
+            validateQuality: options.validateQuality !== false,
+            retryAttempts: options.retryAttempts || 3,
+          }
+        );
+
+        if (embeddingResult.success) {
+          // Add embeddings to chunks
+          embeddingResult.results.forEach((embeddingRes, index) => {
+            if (chunks[index]) {
+              chunks[index].embedding = embeddingRes.embedding;
+            }
+          });
+
+          console.log(
+            `✅ Generated embeddings for ${embeddingResult.totalProcessed} chunks`
+          );
+          console.log(
+            `   - Cache hit rate: ${(
+              embeddingResult.cacheHitRate * 100
+            ).toFixed(1)}%`
+          );
+          console.log(
+            `   - Average quality: ${
+              embeddingResult.averageQualityScore?.toFixed(3) || "N/A"
+            }`
+          );
+        } else {
+          console.warn(
+            `⚠️ Failed to generate embeddings: ${embeddingResult.error}`
+          );
+        }
+      } catch (error) {
+        console.warn(
+          `⚠️ Embedding generation failed: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+        // Continue without embeddings - they're optional
       }
     }
 
