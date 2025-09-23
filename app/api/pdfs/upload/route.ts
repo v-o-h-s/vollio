@@ -296,6 +296,47 @@ async function handlePOST(
       logServerError(activityServerError);
     }
 
+    // Trigger automatic document processing for quiz generation (non-critical)
+    try {
+      const { processingQueue } = await import("@/lib/services/processing-queue");
+      
+      // Download the file buffer for processing
+      const { data: fileData, error: downloadError } = await supabaseClient.storage
+        .from(STORAGE_CONFIG.BUCKET_NAME)
+        .download(uploadResult.path);
+
+      if (!downloadError && fileData) {
+        const fileBuffer = Buffer.from(await fileData.arrayBuffer());
+        
+        // Add to processing queue with default options
+        const jobId = processingQueue.addJob(
+          userId,
+          pdfId,
+          fileBuffer,
+          file.name,
+          {
+            useOCR: false, // Start with Syncfusion, fallback to OCR if needed
+            generateEmbeddings: true, // Generate embeddings for RAG
+            chunkSize: 400,
+            chunkOverlap: 50,
+            preserveStructure: true,
+            respectSentenceBoundaries: true,
+          }
+        );
+
+        console.log(`🚀 Automatic document processing queued: Job ID ${jobId} for PDF ${pdfId}`);
+      }
+    } catch (processingError) {
+      // Log but don't fail the upload
+      const processingServerError = createServerError(
+        ServerErrorType.PROCESSING_ERROR,
+        "Failed to trigger automatic document processing",
+        { ...context, userId, operation: "auto_processing", pdfId },
+        processingError
+      );
+      logServerError(processingServerError);
+    }
+
     // Log successful upload
     console.log(
       `✅ PDF uploaded successfully: ${file.name} (${file.size} bytes) for user ${userId}`

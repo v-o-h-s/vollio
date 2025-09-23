@@ -12,6 +12,7 @@ export enum ServerErrorType {
   DATABASE_ERROR = 'DATABASE_ERROR',
   STORAGE_ERROR = 'STORAGE_ERROR',
   EXTERNAL_SERVICE_ERROR = 'EXTERNAL_SERVICE_ERROR',
+  PROCESSING_ERROR = 'PROCESSING_ERROR',
   RATE_LIMIT_ERROR = 'RATE_LIMIT_ERROR',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
 }
@@ -70,6 +71,7 @@ const ERROR_STATUS_CODES: Record<ServerErrorType, number> = {
   [ServerErrorType.DATABASE_ERROR]: 500,
   [ServerErrorType.STORAGE_ERROR]: 500,
   [ServerErrorType.EXTERNAL_SERVICE_ERROR]: 502,
+  [ServerErrorType.PROCESSING_ERROR]: 500,
   [ServerErrorType.RATE_LIMIT_ERROR]: 429,
   [ServerErrorType.INTERNAL_ERROR]: 500,
 };
@@ -82,6 +84,7 @@ const ERROR_SEVERITIES: Record<ServerErrorType, ServerErrorSeverity> = {
   [ServerErrorType.DATABASE_ERROR]: ServerErrorSeverity.HIGH,
   [ServerErrorType.STORAGE_ERROR]: ServerErrorSeverity.HIGH,
   [ServerErrorType.EXTERNAL_SERVICE_ERROR]: ServerErrorSeverity.HIGH,
+  [ServerErrorType.PROCESSING_ERROR]: ServerErrorSeverity.HIGH,
   [ServerErrorType.RATE_LIMIT_ERROR]: ServerErrorSeverity.MEDIUM,
   [ServerErrorType.INTERNAL_ERROR]: ServerErrorSeverity.CRITICAL,
 };
@@ -94,6 +97,7 @@ const USER_ERROR_MESSAGES: Record<ServerErrorType, string> = {
   [ServerErrorType.DATABASE_ERROR]: 'Database error occurred. Please try again later.',
   [ServerErrorType.STORAGE_ERROR]: 'File storage error occurred. Please try again later.',
   [ServerErrorType.EXTERNAL_SERVICE_ERROR]: 'External service error occurred. Please try again later.',
+  [ServerErrorType.PROCESSING_ERROR]: 'Document processing error occurred. Please try again later.',
   [ServerErrorType.RATE_LIMIT_ERROR]: 'Too many requests. Please wait a moment and try again.',
   [ServerErrorType.INTERNAL_ERROR]: 'Internal server error occurred. Please try again later.',
 };

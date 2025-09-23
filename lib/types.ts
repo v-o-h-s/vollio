@@ -1085,3 +1085,197 @@ export type {
   ThemeProviderProps,
   ThemeState,
 } from "./types/theme";
+// ============================================================================
+// QUIZ PROCESSING TYPES
+// ============================================================================
+
+/**
+ * Document chunk interface for RAG processing
+ */
+export interface DocumentChunk {
+  id: string;
+  userId: string;
+  documentId: string;
+  chunkIndex: number;
+  content: string;
+  embedding?: number[];
+  tokenCount: number;
+  pageNumber: number;
+  sectionTitle?: string;
+  metadata: ChunkMetadata;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Chunk metadata interface
+ */
+export interface ChunkMetadata {
+  documentTitle: string;
+  extractionMethod: 'syncfusion' | 'ocr';
+  processingVersion: string;
+  contentType: 'paragraph' | 'heading' | 'list' | 'table' | 'caption';
+  confidence?: number;
+}
+
+/**
+ * Document processing status interface
+ */
+export interface DocumentProcessingStatus {
+  id: string;
+  userId: string;
+  documentId: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  totalChunks: number;
+  processedChunks: number;
+  extractionMethod?: 'syncfusion' | 'ocr';
+  errorMessage?: string;
+  processingStartedAt?: string;
+  processingCompletedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Document processing request interface
+ */
+export interface DocumentProcessingRequest {
+  pdfId: string;
+  useOCR?: boolean;
+  forceReprocess?: boolean;
+  generateEmbeddings?: boolean;
+  ocrOptions?: {
+    language?: string;
+    psmMode?: number;
+    confidenceThreshold?: number;
+    dpi?: number;
+    preprocessImage?: boolean;
+    autoDetectLanguage?: boolean;
+    multiLanguageSupport?: string[];
+  };
+  chunkingOptions?: {
+    chunkSize?: number;
+    chunkOverlap?: number;
+    preserveStructure?: boolean;
+    respectSentenceBoundaries?: boolean;
+    respectParagraphBoundaries?: boolean;
+  };
+  embeddingOptions?: {
+    model?: string;
+    batchSize?: number;
+    cacheEnabled?: boolean;
+    validateQuality?: boolean;
+    retryAttempts?: number;
+  };
+}
+
+/**
+ * Document processing response interface
+ */
+export interface DocumentProcessingResponse {
+  success: boolean;
+  jobId: string;
+  documentId: string;
+  status: 'processing' | 'queued';
+  estimatedTime?: number;
+  message: string;
+}
+
+/**
+ * Processing status response interface
+ */
+export interface ProcessingStatusResponse {
+  success: boolean;
+  data: {
+    id: string;
+    documentId: string;
+    status: 'pending' | 'processing' | 'completed' | 'failed';
+    progress: number;
+    totalChunks: number;
+    processedChunks: number;
+    extractionMethod?: 'syncfusion' | 'ocr';
+    errorMessage?: string;
+    processingStartedAt?: string;
+    processingCompletedAt?: string;
+    estimatedTimeRemaining?: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+/**
+ * Quiz interface for RAG-enhanced quizzes
+ */
+export interface Quiz {
+  id: string;
+  userId: string;
+  title: string;
+  sourceDocumentIds: string[];
+  pageRange?: { start: number; end: number };
+  questionCount: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+  questionTypes: ('mcq' | 'truefalse' | 'fillblank')[];
+  notes?: string;
+  focusAreas?: string[];
+  learningObjectives?: string[];
+  generationMethod: 'rag' | 'simple';
+  metadata: RAGQuizMetadata;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Quiz question interface with RAG support
+ */
+export interface QuizQuestion {
+  id: string;
+  quizId: string;
+  questionText: string;
+  questionType: 'mcq' | 'truefalse' | 'fillblank';
+  options?: string[];
+  correctAnswer: string;
+  explanation: string;
+  difficulty: string;
+  orderIndex: number;
+  sourceChunks: string[];
+  sourcePages: number[];
+  confidenceScore?: number;
+  createdAt: string;
+}
+
+/**
+ * Question chunk source mapping interface
+ */
+export interface QuestionChunkSource {
+  id: string;
+  questionId: string;
+  chunkId: string;
+  relevanceScore: number;
+  usageType: 'primary' | 'supporting' | 'context';
+  createdAt: string;
+}
+
+/**
+ * RAG quiz metadata interface
+ */
+export interface RAGQuizMetadata {
+  sourceDocumentTitles: string[];
+  totalChunksSearched: number;
+  averageRelevanceScore: number;
+  generationTime: number;
+  aiModel: string;
+  embeddingModel: string;
+  searchQuery: string;
+  retrievalMethod: 'vector_similarity' | 'hybrid';
+}
+
+/**
+ * Chunk reference interface for quiz generation
+ */
+export interface ChunkReference {
+  chunkId: string;
+  content: string;
+  pageNumber: number;
+  relevanceScore: number;
+  documentTitle: string;
+}

@@ -205,9 +205,23 @@ export class ProcessingQueue extends EventEmitter {
     this.processingTimeouts.set(job.id, timeout);
 
     try {
-      // Import the document processing service dynamically to avoid circular dependencies
+      // Import services dynamically to avoid circular dependencies
       const { documentProcessingService } = await import('./document-processing');
+      const { getAuthenticatedSupabaseClient } = await import('../supabaseClient');
       
+      // Get Supabase client
+      const supabaseClient = await getAuthenticatedSupabaseClient();
+
+      // Update database status to processing
+      await supabaseClient
+        .from('document_processing_status')
+        .update({
+          status: 'processing',
+          processing_started_at: job.startedAt.toISOString(),
+        })
+        .eq('user_id', job.userId)
+        .eq('document_id', job.documentId);
+
       // Update progress
       job.progress = 10;
       this.emit('jobProgress', job);
@@ -220,23 +234,69 @@ export class ProcessingQueue extends EventEmitter {
       );
 
       // Update progress
-      job.progress = 90;
+      job.progress = 70;
       this.emit('jobProgress', job);
 
       if (result.success) {
+        // Store chunks in database
+        await this.storeChunksInDatabase(supabaseClient, job, result.chunks);
+        
+        // Update final status
+        await supabaseClient
+          .from('document_processing_status')
+          .update({
+            status: 'completed',
+            total_chunks: result.chunks.length,
+            processed_chunks: result.chunks.length,
+            processing_completed_at: new Date().toISOString(),
+          })
+          .eq('user_id', job.userId)
+          .eq('document_id', job.documentId);
+
         job.status = 'completed';
         job.result = result;
         job.progress = 100;
         this.emit('jobCompleted', job);
       } else {
+        // Update failed status
+        await supabaseClient
+          .from('document_processing_status')
+          .update({
+            status: 'failed',
+            error_message: result.error || 'Processing failed',
+            processing_completed_at: new Date().toISOString(),
+          })
+          .eq('user_id', job.userId)
+          .eq('document_id', job.documentId);
+
         job.status = 'failed';
         job.error = result.error || 'Processing failed';
         this.emit('jobFailed', job);
       }
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      try {
+        // Update failed status in database
+        const { getAuthenticatedSupabaseClient } = await import('../supabaseClient');
+        const supabaseClient = await getAuthenticatedSupabaseClient();
+        
+        await supabaseClient
+          .from('document_processing_status')
+          .update({
+            status: 'failed',
+            error_message: errorMessage,
+            processing_completed_at: new Date().toISOString(),
+          })
+          .eq('user_id', job.userId)
+          .eq('document_id', job.documentId);
+      } catch (dbError) {
+        console.error('Failed to update database status:', dbError);
+      }
+
       job.status = 'failed';
-      job.error = error instanceof Error ? error.message : 'Unknown error';
+      job.error = errorMessage;
       this.emit('jobFailed', job);
     } finally {
       job.completedAt = new Date();
@@ -310,6 +370,55 @@ export class ProcessingQueue extends EventEmitter {
     this.maxConcurrentJobs = maxConcurrentJobs;
     this.emit('queueResumed');
     this.processNextJob();
+  }
+
+  /**
+   * Store processed chunks in the database
+   */
+  private async storeChunksInDatabase(supabaseClient: any, job: ProcessingJob, chunks: any[]): Promise<void> {
+    if (chunks.length === 0) return;
+
+    // Delete existing chunks for this document (in case of reprocessing)
+    await supabaseClient
+      .from('document_chunks')
+      .delete()
+      .eq('user_id', job.userId)
+      .eq('document_id', job.documentId);
+
+    // Prepare chunks for database insertion
+    const dbChunks = chunks.map(chunk => ({
+      id: chunk.id,
+      user_id: job.userId,
+      document_id: job.documentId,
+      chunk_index: chunk.chunkIndex,
+      content: chunk.content,
+      embedding: chunk.embedding || null, // pgvector handles arrays directly
+      token_count: chunk.tokenCount,
+      page_number: chunk.pageNumber,
+      section_title: chunk.sectionTitle,
+      metadata: chunk.metadata,
+    }));
+
+    // Insert chunks in batches to avoid query size limits
+    const batchSize = 100;
+    for (let i = 0; i < dbChunks.length; i += batchSize) {
+      const batch = dbChunks.slice(i, i + batchSize);
+      
+      const { error } = await supabaseClient
+        .from('document_chunks')
+        .insert(batch);
+
+      if (error) {
+        throw new Error(`Failed to store chunks batch ${i / batchSize + 1}: ${error.message}`);
+      }
+
+      // Update progress
+      const progress = 70 + Math.floor((i + batch.length) / dbChunks.length * 20);
+      job.progress = progress;
+      this.emit('jobProgress', job);
+    }
+
+    console.log(`✅ Stored ${chunks.length} chunks in database for document ${job.documentId}`);
   }
 
   /**
