@@ -6,14 +6,20 @@ import tesseract from 'node-tesseract-ocr';
 
 // Mock dependencies
 vi.mock('child_process');
-vi.mock('fs', () => ({
-  promises: {
-    mkdir: vi.fn(),
-    readdir: vi.fn(),
-    unlink: vi.fn(),
-    rmdir: vi.fn()
-  }
-}));
+vi.mock('fs', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    promises: {
+      mkdir: vi.fn(),
+      readdir: vi.fn(),
+      unlink: vi.fn(),
+      rmdir: vi.fn(),
+      readFile: vi.fn(),
+      writeFile: vi.fn()
+    }
+  };
+});
 vi.mock('node-tesseract-ocr');
 
 describe('OCRService', () => {
@@ -31,6 +37,7 @@ describe('OCRService', () => {
       vi.mocked(fs.readdir).mockResolvedValue(['page-001.png', 'page-002.png'] as any);
       vi.mocked(fs.unlink).mockResolvedValue(undefined);
       vi.mocked(fs.rmdir).mockResolvedValue(undefined);
+      vi.mocked(fs.readFile).mockResolvedValue(Buffer.from('fake-image-data'));
 
       // Mock ImageMagick convert process for PDF to images
       const mockConvertProcess = {
@@ -41,7 +48,38 @@ describe('OCRService', () => {
           }
         })
       };
-      vi.mocked(spawn).mockReturnValue(mockConvertProcess as any);
+      
+      // Mock ImageMagick identify process for image analysis
+      const mockIdentifyProcess = {
+        stdout: { on: vi.fn((event, callback) => {
+          if (event === 'data') {
+            callback(Buffer.from('800 600 150.5')); // width height mean
+          }
+        })},
+        stderr: { on: vi.fn() },
+        on: vi.fn((event, callback) => {
+          if (event === 'close') {
+            callback(0); // Success
+          }
+        })
+      };
+      
+      // Mock preprocessing convert process
+      const mockPreprocessProcess = {
+        stderr: { on: vi.fn() },
+        on: vi.fn((event, callback) => {
+          if (event === 'close') {
+            callback(0); // Success
+          }
+        })
+      };
+      
+      vi.mocked(spawn)
+        .mockReturnValueOnce(mockConvertProcess as any) // PDF to images
+        .mockReturnValueOnce(mockIdentifyProcess as any) // Image analysis for page 1
+        .mockReturnValueOnce(mockPreprocessProcess as any) // Preprocessing for page 1
+        .mockReturnValueOnce(mockIdentifyProcess as any) // Image analysis for page 2
+        .mockReturnValueOnce(mockPreprocessProcess as any); // Preprocessing for page 2
 
       // Mock Tesseract OCR
       vi.mocked(tesseract.recognize)
@@ -57,6 +95,8 @@ describe('OCRService', () => {
       expect(result.results[1].pageNumber).toBe(2);
       expect(result.results[1].text).toBe('This is text from page 2');
       expect(result.totalPages).toBe(2);
+      expect(result.cacheHitRate).toBeDefined();
+      expect(result.processingStrategy).toBeDefined();
     });
 
     it('should handle ImageMagick conversion failure', async () => {
@@ -93,6 +133,7 @@ describe('OCRService', () => {
       vi.mocked(fs.readdir).mockResolvedValue(['page-001.png'] as any);
       vi.mocked(fs.unlink).mockResolvedValue(undefined);
       vi.mocked(fs.rmdir).mockResolvedValue(undefined);
+      vi.mocked(fs.readFile).mockResolvedValue(Buffer.from('fake-image-data'));
 
       // Mock ImageMagick convert process
       const mockConvertProcess = {
@@ -103,7 +144,36 @@ describe('OCRService', () => {
           }
         })
       };
-      vi.mocked(spawn).mockReturnValue(mockConvertProcess as any);
+      
+      // Mock ImageMagick identify process
+      const mockIdentifyProcess = {
+        stdout: { on: vi.fn((event, callback) => {
+          if (event === 'data') {
+            callback(Buffer.from('800 600 150.5'));
+          }
+        })},
+        stderr: { on: vi.fn() },
+        on: vi.fn((event, callback) => {
+          if (event === 'close') {
+            callback(0);
+          }
+        })
+      };
+      
+      // Mock preprocessing process
+      const mockPreprocessProcess = {
+        stderr: { on: vi.fn() },
+        on: vi.fn((event, callback) => {
+          if (event === 'close') {
+            callback(0);
+          }
+        })
+      };
+      
+      vi.mocked(spawn)
+        .mockReturnValueOnce(mockConvertProcess as any)
+        .mockReturnValueOnce(mockIdentifyProcess as any)
+        .mockReturnValue(mockPreprocessProcess as any);
 
       // Mock Tesseract OCR failure
       vi.mocked(tesseract.recognize).mockRejectedValue(new Error('Tesseract failed'));
@@ -163,7 +233,25 @@ describe('OCRService', () => {
           }
         })
       };
-      vi.mocked(spawn).mockReturnValue(mockConvertProcess as any);
+      
+      // Mock ImageMagick identify process
+      const mockIdentifyProcess = {
+        stdout: { on: vi.fn((event, callback) => {
+          if (event === 'data') {
+            callback(Buffer.from('800 600 150.5'));
+          }
+        })},
+        stderr: { on: vi.fn() },
+        on: vi.fn((event, callback) => {
+          if (event === 'close') {
+            callback(0);
+          }
+        })
+      };
+      
+      vi.mocked(spawn)
+        .mockReturnValueOnce(mockConvertProcess as any)
+        .mockReturnValue(mockIdentifyProcess as any);
 
       // Mock Tesseract OCR
       vi.mocked(tesseract.recognize).mockResolvedValue('French text');
@@ -172,7 +260,8 @@ describe('OCRService', () => {
         language: 'fra',
         psmMode: 6,
         oem: 1,
-        dpi: 600
+        dpi: 600,
+        documentType: 'text_document' as const
       };
 
       await service.processPDF('/path/to/test.pdf', options);
@@ -188,24 +277,107 @@ describe('OCRService', () => {
     });
   });
 
-  describe('estimateConfidence', () => {
-    it('should estimate confidence correctly for good text', () => {
+  describe('calculateQualityMetrics', () => {
+    it('should calculate quality metrics for good text', () => {
       const goodText = 'This is a well-formed sentence with proper capitalization and punctuation.';
-      const confidence = (service as any).estimateConfidence(goodText);
+      const metrics = (service as any).calculateQualityMetrics(goodText);
       
-      expect(confidence).toBeGreaterThan(70);
+      expect(metrics.textLength).toBe(goodText.length);
+      expect(metrics.wordCount).toBeGreaterThan(0);
+      expect(metrics.overallQualityScore).toBeGreaterThan(0.5);
     });
 
-    it('should estimate low confidence for poor text', () => {
+    it('should calculate quality metrics for poor text', () => {
       const poorText = 'abc123!@#$%^&*()_+{}|:"<>?[]\\;\',./ aaaaaaa';
-      const confidence = (service as any).estimateConfidence(poorText);
+      const metrics = (service as any).calculateQualityMetrics(poorText);
       
-      expect(confidence).toBeLessThan(50);
+      expect(metrics.specialCharacterRatio).toBeGreaterThan(0.1);
+      expect(metrics.overallQualityScore).toBeLessThan(0.5);
     });
 
-    it('should return 0 confidence for empty text', () => {
-      const confidence = (service as any).estimateConfidence('');
-      expect(confidence).toBe(0);
+    it('should return zero metrics for empty text', () => {
+      const metrics = (service as any).calculateQualityMetrics('');
+      expect(metrics.textLength).toBe(0);
+      expect(metrics.wordCount).toBe(0);
+      expect(metrics.overallQualityScore).toBe(0);
+    });
+  });
+
+  describe('document type configurations', () => {
+    it('should provide settings for different document types', () => {
+      const settings = service.getDocumentTypeSettings('scientific_paper');
+      expect(settings).toBeDefined();
+      expect(settings.psmMode).toBeDefined();
+      expect(settings.dpi).toBeDefined();
+    });
+
+    it('should list available document types', () => {
+      const types = service.getAvailableDocumentTypes();
+      expect(types).toContain('text_document');
+      expect(types).toContain('scientific_paper');
+      expect(types).toContain('newspaper');
+    });
+
+    it('should list available fallback strategies', () => {
+      const strategies = service.getAvailableFallbackStrategies();
+      expect(strategies).toContain('retry_with_preprocessing');
+      expect(strategies).toContain('retry_with_different_psm');
+      expect(strategies).toContain('retry_with_different_language');
+    });
+  });
+
+  describe('options validation', () => {
+    it('should validate correct options', () => {
+      const validation = service.validateOptions({
+        confidenceThreshold: 50,
+        dpi: 300,
+        psmMode: 6,
+        oem: 3
+      });
+      
+      expect(validation.valid).toBe(true);
+      expect(validation.errors).toHaveLength(0);
+    });
+
+    it('should reject invalid confidence threshold', () => {
+      const validation = service.validateOptions({
+        confidenceThreshold: 150
+      });
+      
+      expect(validation.valid).toBe(false);
+      expect(validation.errors).toContain('Confidence threshold must be between 0 and 100');
+    });
+
+    it('should reject invalid DPI', () => {
+      const validation = service.validateOptions({
+        dpi: 50
+      });
+      
+      expect(validation.valid).toBe(false);
+      expect(validation.errors).toContain('DPI must be between 72 and 1200');
+    });
+
+    it('should reject invalid PSM mode', () => {
+      const validation = service.validateOptions({
+        psmMode: 20
+      });
+      
+      expect(validation.valid).toBe(false);
+      expect(validation.errors).toContain('PSM mode must be between 0 and 13');
+    });
+  });
+
+  describe('caching functionality', () => {
+    it('should provide cache statistics', () => {
+      const stats = service.getCacheStats();
+      expect(stats.size).toBeDefined();
+      expect(stats.maxSize).toBeDefined();
+    });
+
+    it('should clear cache', () => {
+      service.clearCache();
+      const stats = service.getCacheStats();
+      expect(stats.size).toBe(0);
     });
   });
 

@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 import { v4 as uuidv4 } from "uuid";
-import { ocrService, type OCROptions } from "./ocr-service";
+import { ocrService, type OCROptions, type DocumentType, type FallbackStrategy } from "./ocr-service";
 import { chunkingService, type ChunkingOptions } from "./chunking-service";
 import {
   syncfusionTextExtractor,
@@ -37,6 +37,10 @@ export interface ProcessingOptions
   useOCR?: boolean;
   forceReprocess?: boolean;
   generateEmbeddings?: boolean; // Whether to generate vector embeddings
+  documentType?: DocumentType;
+  autoDetectLanguage?: boolean;
+  multiLanguageSupport?: string[];
+  fallbackStrategies?: FallbackStrategy[];
 }
 
 export interface ProcessingResult {
@@ -229,17 +233,47 @@ export class DocumentProcessingService {
     pdfPath: string,
     options: ProcessingOptions
   ): Promise<Array<{ pageNumber: number; text: string; confidence?: number }>> {
-    const ocrResult = await ocrService.processPDF(pdfPath, {
+    // Determine document type from options or use default
+    const documentType = options.documentType || this.inferDocumentType(options);
+    
+    // Configure OCR with enhanced options
+    const ocrOptions: OCROptions = {
       language: options.language,
       psmMode: options.psmMode,
       oem: options.oem,
       confidenceThreshold: options.confidenceThreshold,
       dpi: options.dpi,
       preprocessImage: options.preprocessImage,
-    });
+      documentType,
+      enableCaching: true,
+      autoDetectLanguage: options.autoDetectLanguage || false,
+      multiLanguageSupport: options.multiLanguageSupport,
+      fallbackStrategies: options.fallbackStrategies || [
+        'retry_with_preprocessing',
+        'retry_with_different_psm',
+        'retry_with_different_language'
+      ]
+    };
+
+    const ocrResult = await ocrService.processPDF(pdfPath, ocrOptions);
 
     if (!ocrResult.success) {
       throw new Error(ocrResult.error || "OCR processing failed");
+    }
+
+    // Log OCR performance metrics
+    console.log(`📊 OCR Performance Metrics:`);
+    console.log(`   - Pages processed: ${ocrResult.totalPages}`);
+    console.log(`   - Average confidence: ${ocrResult.averageConfidence.toFixed(1)}%`);
+    console.log(`   - Cache hit rate: ${(ocrResult.cacheHitRate * 100).toFixed(1)}%`);
+    console.log(`   - Processing strategy: ${ocrResult.processingStrategy}`);
+    
+    if (ocrResult.languageDetection) {
+      console.log(`   - Detected language: ${ocrResult.languageDetection.detectedLanguage} (${(ocrResult.languageDetection.confidence * 100).toFixed(1)}%)`);
+    }
+    
+    if (ocrResult.fallbacksUsed.length > 0) {
+      console.log(`   - Fallbacks used: ${ocrResult.fallbacksUsed.join(', ')}`);
     }
 
     return ocrResult.results.map((result) => ({
@@ -247,6 +281,33 @@ export class DocumentProcessingService {
       text: result.text,
       confidence: result.confidence,
     }));
+  }
+
+  /**
+   * Infer document type from processing options
+   */
+  private inferDocumentType(options: ProcessingOptions): DocumentType {
+    // Simple heuristics to infer document type
+    // In a real application, you might use more sophisticated analysis
+    
+    if (options.language && options.language !== 'eng') {
+      return 'text_document'; // Multi-language documents are often regular text
+    }
+    
+    if (options.psmMode === 3) {
+      return 'mixed_content'; // Fully automatic suggests complex layout
+    }
+    
+    if (options.psmMode === 4) {
+      return 'single_column'; // Single column mode
+    }
+    
+    if (options.dpi && options.dpi > 350) {
+      return 'technical_manual'; // High DPI suggests detailed technical content
+    }
+    
+    // Default to text document
+    return 'text_document';
   }
 
   /**
