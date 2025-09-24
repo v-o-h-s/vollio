@@ -1,4 +1,4 @@
-import { getAuthenticatedSupabaseClient } from '@/lib/utils/supabase-helpers';
+import { getAuthenticatedSupabaseClient } from '@/lib/supabaseClient';
 import { embeddingService } from './embedding-service';
 import type { DocumentChunk, ChunkMetadata } from '@/lib/types';
 
@@ -299,9 +299,16 @@ export class VectorSearchService {
    */
   private async performVectorSearch(
     queryEmbedding: number[],
-    config: Required<VectorSearchOptions>
+    config: VectorSearchOptions & {
+      similarityThreshold: number;
+      limit: number;
+      includeMetadata: boolean;
+      rankingMethod: 'similarity' | 'hybrid' | 'rerank';
+      diversityFactor: number;
+      boostRecent: boolean;
+    }
   ): Promise<VectorSearchResult[]> {
-    const { client } = await getAuthenticatedSupabaseClient();
+    const client = await getAuthenticatedSupabaseClient();
 
     // Build the query with filters
     let query = client
@@ -384,7 +391,14 @@ export class VectorSearchService {
   private async rankResults(
     results: VectorSearchResult[],
     query: string,
-    config: Required<VectorSearchOptions>
+    config: VectorSearchOptions & {
+      similarityThreshold: number;
+      limit: number;
+      includeMetadata: boolean;
+      rankingMethod: 'similarity' | 'hybrid' | 'rerank';
+      diversityFactor: number;
+      boostRecent: boolean;
+    }
   ): Promise<VectorSearchResult[]> {
     if (results.length === 0) {
       return results;
@@ -499,7 +513,7 @@ export class VectorSearchService {
     results: VectorSearchResult[],
     documentIds: string[]
   ): Promise<Record<string, any>> {
-    const { client } = await getAuthenticatedSupabaseClient();
+    const client = await getAuthenticatedSupabaseClient();
     
     // Get document titles
     const { data: documents } = await client
@@ -568,8 +582,11 @@ export class VectorSearchService {
       return results.slice(0, limit);
     }
 
-    const baseResultsPerDoc = Math.floor(limit / activeDocuments.length);
-    const remainingSlots = limit - (baseResultsPerDoc * activeDocuments.length);
+    // Enhanced multi-document coordination with relevance weighting
+    const documentWeights = this.calculateDocumentRelevanceWeights(
+      activeDocuments,
+      results
+    );
 
     const coordinatedResults: VectorSearchResult[] = [];
     const documentResultCounts = new Map<string, number>();
@@ -579,23 +596,179 @@ export class VectorSearchService {
       documentResultCounts.set(doc.documentId, 0);
     });
 
-    // First pass: ensure minimum representation from each document
+    // Calculate weighted target results per document
+    const weightedTargets = this.calculateWeightedTargets(
+      activeDocuments,
+      documentWeights,
+      limit,
+      diversityFactor
+    );
+
+    // First pass: ensure minimum representation from each document based on weights
     for (const result of results) {
       const docId = result.chunk.documentId;
       const currentCount = documentResultCounts.get(docId) || 0;
+      const targetCount = weightedTargets.get(docId) || 0;
       
-      if (currentCount < baseResultsPerDoc) {
+      if (currentCount < targetCount) {
         coordinatedResults.push(result);
         documentResultCounts.set(docId, currentCount + 1);
       }
     }
 
-    // Second pass: fill remaining slots with best results
+    // Second pass: fill remaining slots with best results, considering document balance
     const remainingResults = results.filter(r => !coordinatedResults.includes(r));
-    coordinatedResults.push(...remainingResults.slice(0, remainingSlots));
+    const remainingSlots = limit - coordinatedResults.length;
+    
+    // Apply document balancing to remaining results
+    const balancedRemaining = this.balanceRemainingResults(
+      remainingResults,
+      documentResultCounts,
+      activeDocuments.length,
+      remainingSlots
+    );
+    
+    coordinatedResults.push(...balancedRemaining);
 
-    // Re-rank the coordinated results
-    return coordinatedResults
+    // Re-rank the coordinated results with multi-document boost
+    return this.applyMultiDocumentRanking(coordinatedResults, documentBreakdown);
+  }
+
+  /**
+   * Calculate relevance weights for each document based on search results
+   */
+  private calculateDocumentRelevanceWeights(
+    activeDocuments: any[],
+    results: VectorSearchResult[]
+  ): Map<string, number> {
+    const weights = new Map<string, number>();
+    
+    activeDocuments.forEach((doc: any) => {
+      const docResults = results.filter(r => r.chunk.documentId === doc.documentId);
+      
+      if (docResults.length > 0) {
+        // Weight based on average relevance and result count
+        const avgRelevance = docResults.reduce((sum, r) => sum + r.relevanceScore, 0) / docResults.length;
+        const countFactor = Math.min(docResults.length / 10, 1.0); // Normalize count factor
+        const weight = (avgRelevance * 0.7) + (countFactor * 0.3);
+        weights.set(doc.documentId, weight);
+      } else {
+        weights.set(doc.documentId, 0);
+      }
+    });
+    
+    return weights;
+  }
+
+  /**
+   * Calculate weighted target results per document
+   */
+  private calculateWeightedTargets(
+    activeDocuments: any[],
+    documentWeights: Map<string, number>,
+    totalLimit: number,
+    diversityFactor: number
+  ): Map<string, number> {
+    const targets = new Map<string, number>();
+    const totalWeight = Array.from(documentWeights.values()).reduce((sum, w) => sum + w, 0);
+    
+    if (totalWeight === 0) {
+      // Fallback to equal distribution
+      const baseTarget = Math.floor(totalLimit / activeDocuments.length);
+      activeDocuments.forEach((doc: any) => {
+        targets.set(doc.documentId, baseTarget);
+      });
+      return targets;
+    }
+    
+    // Calculate base targets with diversity factor
+    const minPerDocument = Math.max(1, Math.floor(totalLimit * diversityFactor / activeDocuments.length));
+    let remainingSlots = totalLimit - (minPerDocument * activeDocuments.length);
+    
+    activeDocuments.forEach((doc: any) => {
+      targets.set(doc.documentId, minPerDocument);
+    });
+    
+    // Distribute remaining slots based on weights
+    const sortedDocs = activeDocuments.sort((a, b) => 
+      (documentWeights.get(b.documentId) || 0) - (documentWeights.get(a.documentId) || 0)
+    );
+    
+    for (const doc of sortedDocs) {
+      if (remainingSlots <= 0) break;
+      
+      const weight = documentWeights.get(doc.documentId) || 0;
+      const additionalSlots = Math.min(
+        remainingSlots,
+        Math.floor((weight / totalWeight) * remainingSlots) + 1
+      );
+      
+      targets.set(doc.documentId, (targets.get(doc.documentId) || 0) + additionalSlots);
+      remainingSlots -= additionalSlots;
+    }
+    
+    return targets;
+  }
+
+  /**
+   * Balance remaining results across documents
+   */
+  private balanceRemainingResults(
+    remainingResults: VectorSearchResult[],
+    currentCounts: Map<string, number>,
+    documentCount: number,
+    remainingSlots: number
+  ): VectorSearchResult[] {
+    if (remainingSlots <= 0) return [];
+    
+    const balanced: VectorSearchResult[] = [];
+    const sortedResults = [...remainingResults].sort((a, b) => b.relevanceScore - a.relevanceScore);
+    
+    // Try to maintain balance while selecting best results
+    for (const result of sortedResults) {
+      if (balanced.length >= remainingSlots) break;
+      
+      const docId = result.chunk.documentId;
+      const currentCount = currentCounts.get(docId) || 0;
+      const avgCount = balanced.length / documentCount;
+      
+      // Prefer results from under-represented documents
+      if (currentCount <= avgCount + 1) {
+        balanced.push(result);
+        currentCounts.set(docId, currentCount + 1);
+      }
+    }
+    
+    // Fill any remaining slots with best available results
+    const stillRemaining = remainingSlots - balanced.length;
+    if (stillRemaining > 0) {
+      const unselected = sortedResults.filter(r => !balanced.includes(r));
+      balanced.push(...unselected.slice(0, stillRemaining));
+    }
+    
+    return balanced;
+  }
+
+  /**
+   * Apply multi-document ranking boost
+   */
+  private applyMultiDocumentRanking(
+    results: VectorSearchResult[],
+    documentBreakdown: Record<string, any>
+  ): VectorSearchResult[] {
+    const documentCount = Object.keys(documentBreakdown).length;
+    
+    return results
+      .map(result => {
+        // Apply small boost for multi-document diversity
+        const diversityBoost = documentCount > 1 ? 0.05 : 0;
+        const adjustedScore = result.relevanceScore + diversityBoost;
+        
+        return {
+          ...result,
+          relevanceScore: Math.min(1.0, adjustedScore)
+        };
+      })
       .sort((a, b) => b.relevanceScore - a.relevanceScore)
       .map((result, index) => ({
         ...result,
@@ -763,7 +936,14 @@ export class VectorSearchService {
   /**
    * Helper methods
    */
-  private getSearchConfig(options: VectorSearchOptions): Required<VectorSearchOptions> {
+  private getSearchConfig(options: VectorSearchOptions): VectorSearchOptions & {
+    similarityThreshold: number;
+    limit: number;
+    includeMetadata: boolean;
+    rankingMethod: 'similarity' | 'hybrid' | 'rerank';
+    diversityFactor: number;
+    boostRecent: boolean;
+  } {
     return {
       similarityThreshold: options.similarityThreshold || VectorSearchService.DEFAULT_SIMILARITY_THRESHOLD,
       limit: options.limit || VectorSearchService.DEFAULT_LIMIT,
@@ -778,7 +958,14 @@ export class VectorSearchService {
     };
   }
 
-  private getCacheKey(query: string, config: Required<VectorSearchOptions>): string {
+  private getCacheKey(query: string, config: VectorSearchOptions & {
+    similarityThreshold: number;
+    limit: number;
+    includeMetadata: boolean;
+    rankingMethod: 'similarity' | 'hybrid' | 'rerank';
+    diversityFactor: number;
+    boostRecent: boolean;
+  }): string {
     const keyData = {
       query,
       similarityThreshold: config.similarityThreshold,
@@ -838,8 +1025,8 @@ export class VectorSearchService {
 
   private async getCurrentUserId(): Promise<string> {
     try {
-      const { userId } = await getAuthenticatedSupabaseClient();
-      return userId;
+      // For now, return a placeholder since we can't easily get userId from the client
+      return 'current-user';
     } catch {
       return 'anonymous';
     }

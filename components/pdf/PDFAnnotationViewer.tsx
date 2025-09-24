@@ -24,6 +24,7 @@ import AnnotationTooltip from "./AnnotationTooltip";
 import { NoteCreationModal } from "./NoteCreationModal";
 import { HighlightHoverToolbar } from "./HighlightHoverToolbar";
 import { NotePreviewModal } from "./NotePreviewModal";
+import { PDFViewerQuizButton } from "./PDFViewerQuizButton";
 
 /**
  * Props interface for PDFAnnotationViewer component
@@ -61,6 +62,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [urlRefreshCount, setUrlRefreshCount] = useState(0);
   const [annotationsLoaded, setAnnotationsLoaded] = useState(false);
+  const [totalPages, setTotalPages] = useState<number>(0);
 
   // Text selection and toolbar state
   const [selectedText, setSelectedText] = useState<string>("");
@@ -380,11 +382,21 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   /**
    * Handle PDF document loading
    */
-  const handleDocumentLoad = useCallback(async () => {
+  const handleDocumentLoad = useCallback(async (args?: any) => {
     setIsLoading(false);
     setError(null);
 
-
+    // Extract total page count if available
+    if (args && pdfViewerRef.current) {
+      try {
+        const pageCount = pdfViewerRef.current.pageCount;
+        if (pageCount && pageCount > 0) {
+          setTotalPages(pageCount);
+        }
+      } catch (error) {
+        console.warn("Could not get page count:", error);
+      }
+    }
   }, []);
 
   /**
@@ -606,6 +618,18 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           isOpen={showNotePreview}
           onClose={handleCloseNotePreview}
           noteId={previewNoteId}
+        />
+
+        {/* Quiz Generation Button */}
+        <PDFViewerQuizButton
+          pdfDocument={currentPdfData}
+          currentPageNumber={currentPageNumber + 1} // Convert to 1-based page number
+          totalPages={totalPages}
+          selectedText={selectedText}
+          onQuizGenerated={(quizId) => {
+            console.log("Quiz generated:", quizId);
+            // Optional: Show success notification or handle navigation
+          }}
         />
       </div>
     </ErrorBoundary>

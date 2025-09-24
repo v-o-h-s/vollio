@@ -788,7 +788,7 @@ export interface DocumentChunk {
   documentId: string;
   chunkIndex: number;
   content: string;
-  embedding: number[];
+  embedding?: number[];
   tokenCount: number;
   pageNumber: number;
   sectionTitle?: string;
@@ -802,7 +802,7 @@ export interface DocumentChunk {
  */
 export interface ChunkMetadata {
   documentTitle: string;
-  extractionMethod: "pdfjs" | "ocr";
+  extractionMethod: "syncfusion" | "ocr" | "pdfjs";
   processingVersion: string;
   contentType: "paragraph" | "heading" | "list" | "table" | "caption";
   confidence?: number;
@@ -1089,34 +1089,7 @@ export type {
 // QUIZ PROCESSING TYPES
 // ============================================================================
 
-/**
- * Document chunk interface for RAG processing
- */
-export interface DocumentChunk {
-  id: string;
-  userId: string;
-  documentId: string;
-  chunkIndex: number;
-  content: string;
-  embedding?: number[];
-  tokenCount: number;
-  pageNumber: number;
-  sectionTitle?: string;
-  metadata: ChunkMetadata;
-  createdAt: string;
-  updatedAt: string;
-}
 
-/**
- * Chunk metadata interface
- */
-export interface ChunkMetadata {
-  documentTitle: string;
-  extractionMethod: 'syncfusion' | 'ocr';
-  processingVersion: string;
-  contentType: 'paragraph' | 'heading' | 'list' | 'table' | 'caption';
-  confidence?: number;
-}
 
 /**
  * Document processing status interface
@@ -1125,10 +1098,10 @@ export interface DocumentProcessingStatus {
   id: string;
   userId: string;
   documentId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   totalChunks: number;
   processedChunks: number;
-  extractionMethod?: 'syncfusion' | 'ocr';
+  extractionMethod?: "syncfusion" | "ocr";
   errorMessage?: string;
   processingStartedAt?: string;
   processingCompletedAt?: string;
@@ -1176,7 +1149,7 @@ export interface DocumentProcessingResponse {
   success: boolean;
   jobId: string;
   documentId: string;
-  status: 'processing' | 'queued';
+  status: "processing" | "queued";
   estimatedTime?: number;
   message: string;
 }
@@ -1189,11 +1162,11 @@ export interface ProcessingStatusResponse {
   data: {
     id: string;
     documentId: string;
-    status: 'pending' | 'processing' | 'completed' | 'failed';
+    status: "pending" | "processing" | "completed" | "failed";
     progress: number;
     totalChunks: number;
     processedChunks: number;
-    extractionMethod?: 'syncfusion' | 'ocr';
+    extractionMethod?: "syncfusion" | "ocr";
     errorMessage?: string;
     processingStartedAt?: string;
     processingCompletedAt?: string;
@@ -1213,12 +1186,12 @@ export interface Quiz {
   sourceDocumentIds: string[];
   pageRange?: { start: number; end: number };
   questionCount: number;
-  difficulty: 'easy' | 'medium' | 'hard';
-  questionTypes: ('mcq' | 'truefalse' | 'fillblank')[];
+  difficulty: "easy" | "medium" | "hard";
+  questionTypes: ("mcq" | "truefalse" | "fillblank")[];
   notes?: string;
   focusAreas?: string[];
   learningObjectives?: string[];
-  generationMethod: 'rag' | 'simple';
+  generationMethod: "rag" | "simple";
   metadata: RAGQuizMetadata;
   createdAt: string;
   updatedAt: string;
@@ -1231,7 +1204,7 @@ export interface QuizQuestion {
   id: string;
   quizId: string;
   questionText: string;
-  questionType: 'mcq' | 'truefalse' | 'fillblank';
+  questionType: "mcq" | "truefalse" | "fillblank";
   options?: string[];
   correctAnswer: string;
   explanation: string;
@@ -1251,7 +1224,7 @@ export interface QuestionChunkSource {
   questionId: string;
   chunkId: string;
   relevanceScore: number;
-  usageType: 'primary' | 'supporting' | 'context';
+  usageType: "primary" | "supporting" | "context";
   createdAt: string;
 }
 
@@ -1266,7 +1239,7 @@ export interface RAGQuizMetadata {
   aiModel: string;
   embeddingModel: string;
   searchQuery: string;
-  retrievalMethod: 'vector_similarity' | 'hybrid';
+  retrievalMethod: "vector_similarity" | "hybrid";
 }
 
 /**
@@ -1278,4 +1251,189 @@ export interface ChunkReference {
   pageNumber: number;
   relevanceScore: number;
   documentTitle: string;
+}
+
+// ============================================================================
+// ADVANCED SEARCH TYPES
+// ============================================================================
+
+/**
+ * Hybrid search configuration options
+ */
+export interface HybridSearchOptions {
+  vectorWeight?: number;
+  keywordWeight?: number;
+  similarityThreshold?: number;
+  enableFuzzyMatch?: boolean;
+  stemming?: boolean;
+  synonymExpansion?: boolean;
+  contentTypes?: ('paragraph' | 'heading' | 'list' | 'table' | 'caption')[];
+  confidenceRange?: { min: number; max: number };
+  relevanceRange?: { min: number; max: number };
+  pageRange?: { start: number; end: number };
+  documentIds?: string[];
+  limit?: number;
+  includeExplanations?: boolean;
+  enableDebugging?: boolean;
+  enableCaching?: boolean;
+  cacheTimeout?: number;
+}
+
+/**
+ * Search explanation for result transparency
+ */
+export interface SearchExplanation {
+  vectorMatches: string[];
+  keywordMatches: string[];
+  scoringBreakdown: {
+    vectorContribution: number;
+    keywordContribution: number;
+    boosts: Array<{ type: string; value: number; reason: string }>;
+    penalties: Array<{ type: string; value: number; reason: string }>;
+  };
+  relevanceFactors: string[];
+}
+
+/**
+ * Debug information for search optimization
+ */
+export interface SearchDebugInfo {
+  originalQuery: string;
+  processedQuery: string;
+  vectorEmbeddingTime: number;
+  keywordProcessingTime: number;
+  filteringTime: number;
+  rankingTime: number;
+  cacheHit: boolean;
+  indexesUsed: string[];
+  queryPlan?: any;
+}
+
+/**
+ * Search analytics and performance metrics
+ */
+export interface SearchAnalytics {
+  queryComplexity: 'simple' | 'moderate' | 'complex';
+  vectorSearchTime: number;
+  keywordSearchTime: number;
+  combinationTime: number;
+  filteringTime: number;
+  totalProcessingTime: number;
+  resultsBeforeFiltering: number;
+  resultsAfterFiltering: number;
+  cacheHitRate: number;
+  indexEfficiency: number;
+}
+
+/**
+ * Search query log entry for analytics
+ */
+export interface SearchQueryLog {
+  id: string;
+  userId: string;
+  query: string;
+  searchMethod: 'vector' | 'keyword' | 'hybrid';
+  documentIds: string[];
+  resultCount: number;
+  searchTime: number;
+  queryComplexity: 'simple' | 'moderate' | 'complex';
+  cacheHit: boolean;
+  filters: {
+    contentTypes?: string[];
+    pageRange?: { start: number; end: number };
+    confidenceRange?: { min: number; max: number };
+    relevanceRange?: { min: number; max: number };
+  };
+  performance: {
+    vectorSearchTime: number;
+    keywordSearchTime: number;
+    combinationTime: number;
+    filteringTime: number;
+    indexEfficiency: number;
+  };
+  timestamp: Date;
+}
+
+/**
+ * Search performance metrics aggregated data
+ */
+export interface SearchPerformanceMetrics {
+  totalSearches: number;
+  averageSearchTime: number;
+  averageResultCount: number;
+  cacheHitRate: number;
+  searchMethodDistribution: Record<string, number>;
+  queryComplexityDistribution: Record<string, number>;
+  popularFilters: Array<{
+    filterType: string;
+    usage: number;
+    averageImpact: number;
+  }>;
+  performanceTrends: Array<{
+    date: string;
+    averageSearchTime: number;
+    searchCount: number;
+    cacheHitRate: number;
+  }>;
+  slowQueries: Array<{
+    query: string;
+    searchTime: number;
+    resultCount: number;
+    timestamp: Date;
+  }>;
+}
+
+/**
+ * Search optimization recommendations
+ */
+export interface SearchOptimizationRecommendations {
+  queryOptimizations: Array<{
+    type: 'synonym_expansion' | 'stemming' | 'stop_word_removal' | 'fuzzy_matching';
+    description: string;
+    expectedImprovement: number;
+    confidence: number;
+  }>;
+  indexOptimizations: Array<{
+    type: 'vector_index' | 'text_index' | 'composite_index';
+    description: string;
+    expectedSpeedup: number;
+    estimatedCost: 'low' | 'medium' | 'high';
+  }>;
+  cacheOptimizations: Array<{
+    type: 'cache_size' | 'cache_ttl' | 'cache_strategy';
+    description: string;
+    expectedHitRateImprovement: number;
+  }>;
+  filterOptimizations: Array<{
+    filterType: string;
+    description: string;
+    usageFrequency: number;
+    performanceImpact: number;
+  }>;
+}
+
+/**
+ * Real-time search monitoring data
+ */
+export interface SearchMonitoringData {
+  activeSearches: number;
+  averageResponseTime: number;
+  errorRate: number;
+  cacheHitRate: number;
+  indexHealth: {
+    vectorIndex: 'healthy' | 'degraded' | 'critical';
+    textIndex: 'healthy' | 'degraded' | 'critical';
+    lastOptimized: Date;
+  };
+  resourceUsage: {
+    cpuUsage: number;
+    memoryUsage: number;
+    diskUsage: number;
+  };
+  alerts: Array<{
+    type: 'performance' | 'error' | 'resource';
+    severity: 'low' | 'medium' | 'high' | 'critical';
+    message: string;
+    timestamp: Date;
+  }>;
 }

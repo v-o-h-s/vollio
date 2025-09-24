@@ -61,6 +61,12 @@ const navigationItems = [
     description: "Create and manage rich text notes",
   },
   {
+    name: "Quiz Generator",
+    href: "/dashboard/quiz",
+    icon: HelpCircle,
+    description: "Generate AI-powered quizzes from PDFs",
+  },
+  {
     name: "Editor Test",
     href: "/dashboard/editor-test",
     icon: FileText,

@@ -21,7 +21,14 @@ import {
   SupabaseNoteResponse,
   CreateNoteRequest,
   UpdateNoteRequest,
+  DocumentProcessingRequest,
+  DocumentProcessingResponse,
+  ProcessingStatusResponse,
+  Quiz,
+  QuizQuestion,
+  QuizAttempt,
 } from "../types";
+import { QuizResults } from "../services/quiz-scoring-service";
 import { AppError, ErrorType } from "../types/errors";
 import {
   createAppError,
@@ -101,7 +108,7 @@ const baseQueryWithRetry: BaseQueryFn = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithRetry,
-  tagTypes: ["Annotation", "Highlight", "PDF", "Note"],
+  tagTypes: ["Annotation", "Highlight", "PDF", "Note", "Quiz", "ProcessingStatus"],
   endpoints: (builder) => ({
     // PDF endpoints with enhanced error handling
     uploadPDF: builder.mutation<PDFDocument, FormData>({
@@ -1107,6 +1114,826 @@ export const apiSlice = createApi({
       },
       providesTags: ["Highlight"],
     }),
+
+    // ============================================================================
+    // QUIZ ENDPOINTS - Enhanced RTK Query integration with proper types
+    // ============================================================================
+
+    // Document processing for RAG quiz generation
+    processDocument: builder.mutation<DocumentProcessingResponse, DocumentProcessingRequest>({
+      query: (requestData) => ({
+        url: "quiz/process-document",
+        method: "POST",
+        body: requestData,
+      }),
+      transformResponse: (response: DocumentProcessingResponse) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.PROCESSING_ERROR,
+            response.message || "Failed to process document",
+            { component: "QuizGenerator", action: "process" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "QuizGenerator", action: "process" };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid processing request",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: [
+        { type: "PDF", id: "LIST" },
+        { type: "ProcessingStatus", id: "LIST" }
+      ],
+    }),
+
+    // Get document processing status with polling support
+    getProcessingStatus: builder.query<ProcessingStatusResponse["data"], string>({
+      query: (statusId) => `quiz/processing-status/${statusId}`,
+      transformResponse: (response: ProcessingStatusResponse) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            "Failed to fetch processing status",
+            { component: "QuizGenerator", action: "status" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any, meta, statusId) => {
+        const context = { component: "QuizGenerator", action: "status", statusId };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Processing status not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result, error, statusId) => [
+        { type: "ProcessingStatus", id: statusId },
+        { type: "ProcessingStatus", id: "LIST" }
+      ],
+      // Enable polling for active processing status
+      pollingInterval: (result) => {
+        if (result?.status === "processing" || result?.status === "pending") {
+          return 2000; // Poll every 2 seconds for active processing
+        }
+        return 0; // Stop polling when completed or failed
+      },
+    }),
+
+    // Vector search for content retrieval
+    searchContent: builder.mutation<ContentSearchResponse, ContentSearchRequest>({
+      query: (searchData) => ({
+        url: "quiz/search-content",
+        method: "POST",
+        body: searchData,
+      }),
+      transformResponse: (response: ContentSearchResponse) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.PROCESSING_ERROR,
+            response.error || "Failed to search content",
+            { component: "QuizGenerator", action: "search" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "QuizGenerator", action: "search" };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid search request",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+    }),
+
+    // RAG-enhanced quiz generation
+    generateQuiz: builder.mutation<
+      { success: boolean; quizId: string; questions: QuizQuestion[]; metadata: RAGQuizMetadata; sourceChunks: ChunkReference[] },
+      RAGQuizGenerationRequest & { title?: string }
+    >({
+      query: (quizData) => ({
+        url: "quiz/generate-rag",
+        method: "POST",
+        body: quizData,
+      }),
+      transformResponse: (response: {
+        success: boolean;
+        quizId: string;
+        questions: QuizQuestion[];
+        metadata: RAGQuizMetadata;
+        sourceChunks: ChunkReference[];
+        error?: string;
+      }) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.PROCESSING_ERROR,
+            response.error || "Failed to generate quiz",
+            { component: "QuizGenerator", action: "generate" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "QuizGenerator", action: "generate" };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid quiz generation request",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        } else if (response.status === 429) {
+          return createAppError(
+            ErrorType.RATE_LIMIT_ERROR,
+            "Rate limit exceeded. Please try again later.",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: [
+        { type: "Quiz", id: "LIST" },
+        { type: "Quiz", id: "STATISTICS" }
+      ],
+      // Optimistic update for better UX
+      async onQueryStarted(quizData, { dispatch, queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          
+          // Optimistically add the new quiz to the list
+          dispatch(
+            apiSlice.util.updateQueryData('getQuizzes', undefined, (draft) => {
+              if (draft?.quizzes) {
+                const newQuiz: Quiz = {
+                  id: data.quizId,
+                  userId: '', // Will be populated by server
+                  title: quizData.title || `Quiz from ${data.metadata.sourceDocumentTitles.join(', ')}`,
+                  sourceDocumentIds: quizData.documentIds,
+                  pageRange: quizData.pageRange,
+                  questionCount: quizData.questionCount,
+                  difficulty: quizData.difficulty,
+                  questionTypes: quizData.questionTypes,
+                  notes: quizData.notes,
+                  focusAreas: quizData.focusAreas,
+                  learningObjectives: quizData.learningObjectives,
+                  generationMethod: 'rag',
+                  metadata: data.metadata,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                };
+                draft.quizzes.unshift(newQuiz);
+                draft.totalCount += 1;
+              }
+            })
+          );
+        } catch (error) {
+          // Optimistic update will be reverted automatically on error
+        }
+      },
+    }),
+
+    // Get all quizzes with pagination and filtering
+    getQuizzes: builder.query<
+      {
+        quizzes: Quiz[];
+        totalCount: number;
+        statistics: {
+          totalQuizzes: number;
+          totalAttempts: number;
+          averageScore: number;
+          bestScore: number;
+          mostRecentAttempt: string | null;
+          difficultyBreakdown: Record<QuizDifficulty, number>;
+          questionTypeBreakdown: Record<QuizQuestionType, number>;
+        };
+      },
+      {
+        page?: number;
+        limit?: number;
+        difficulty?: QuizDifficulty;
+        questionType?: QuizQuestionType;
+        sortBy?: 'createdAt' | 'updatedAt' | 'title' | 'difficulty';
+        sortOrder?: 'asc' | 'desc';
+      } | void
+    >({
+      query: (params = {}) => ({
+        url: "quiz",
+        params: {
+          page: params.page || 1,
+          limit: params.limit || 20,
+          ...(params.difficulty && { difficulty: params.difficulty }),
+          ...(params.questionType && { questionType: params.questionType }),
+          sortBy: params.sortBy || 'createdAt',
+          sortOrder: params.sortOrder || 'desc',
+        },
+      }),
+      transformResponse: (response: {
+        success: boolean;
+        data?: {
+          quizzes: Quiz[];
+          totalCount: number;
+          statistics: {
+            totalQuizzes: number;
+            totalAttempts: number;
+            averageScore: number;
+            bestScore: number;
+            mostRecentAttempt: string | null;
+            difficultyBreakdown: Record<QuizDifficulty, number>;
+            questionTypeBreakdown: Record<QuizQuestionType, number>;
+          };
+        };
+        error?: string;
+      }) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch quizzes",
+            { component: "QuizList", action: "fetch" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "QuizList", action: "fetch" };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result) => [
+        { type: "Quiz", id: "LIST" },
+        { type: "Quiz", id: "STATISTICS" },
+        ...(result?.quizzes.map((quiz) => ({ type: "Quiz" as const, id: quiz.id })) || []),
+      ],
+    }),
+
+    // Get single quiz with questions and attempts
+    getQuiz: builder.query<
+      {
+        quiz: Quiz;
+        questions: QuizQuestion[];
+        attempts: QuizAttempt[];
+        statistics: {
+          totalAttempts: number;
+          averageScore: number;
+          bestScore: number;
+          lastAttempt: string | null;
+        };
+      },
+      string
+    >({
+      query: (quizId) => `quiz/${quizId}`,
+      transformResponse: (response: {
+        success: boolean;
+        data?: {
+          quiz: Quiz;
+          questions: QuizQuestion[];
+          attempts: QuizAttempt[];
+          statistics: {
+            totalAttempts: number;
+            averageScore: number;
+            bestScore: number;
+            lastAttempt: string | null;
+          };
+        };
+        error?: string;
+      }) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.PROCESSING_ERROR,
+            response.error || "Failed to fetch quiz",
+            { component: "QuizPlayer", action: "fetch" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any, meta, quizId) => {
+        const context = { component: "QuizPlayer", action: "fetch", quizId };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.NOT_FOUND_ERROR,
+            "Quiz not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result, error, quizId) => [
+        { type: "Quiz", id: quizId },
+        { type: "Quiz", id: "LIST" },
+      ],
+    }),
+
+    // Update quiz metadata and configuration
+    updateQuiz: builder.mutation<
+      Quiz,
+      {
+        id: string;
+        updates: {
+          title?: string;
+          notes?: string;
+          focusAreas?: string[];
+          learningObjectives?: string[];
+        };
+      }
+    >({
+      query: ({ id, updates }) => ({
+        url: `quiz/${id}`,
+        method: "PUT",
+        body: updates,
+      }),
+      transformResponse: (response: { success: boolean; data?: Quiz; error?: string }) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to update quiz",
+            { component: "QuizEditor", action: "update" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any, meta, { id }) => {
+        const context = { component: "QuizEditor", action: "update", quizId: id };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid quiz data",
+            context
+          );
+        } else if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Quiz not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Quiz", id },
+        { type: "Quiz", id: "LIST" },
+      ],
+      // Optimistic update
+      async onQueryStarted({ id, updates }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          apiSlice.util.updateQueryData('getQuiz', id, (draft) => {
+            Object.assign(draft.quiz, updates, { updatedAt: new Date().toISOString() });
+          })
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
+
+    // Delete quiz
+    deleteQuiz: builder.mutation<{ success: boolean }, string>({
+      query: (quizId) => ({
+        url: `quiz/${quizId}`,
+        method: "DELETE",
+      }),
+      transformResponse: (response: { success: boolean; error?: string }) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to delete quiz",
+            { component: "QuizList", action: "delete" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, quizId) => {
+        const context = { component: "QuizList", action: "delete", quizId };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Quiz not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, quizId) => [
+        { type: "Quiz", id: "LIST" },
+        { type: "Quiz", id: "STATISTICS" },
+        { type: "Quiz", id: quizId },
+      ],
+      // Optimistic update
+      async onQueryStarted(quizId, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          apiSlice.util.updateQueryData('getQuizzes', undefined, (draft) => {
+            if (draft?.quizzes) {
+              const index = draft.quizzes.findIndex(quiz => quiz.id === quizId);
+              if (index !== -1) {
+                draft.quizzes.splice(index, 1);
+                draft.totalCount -= 1;
+              }
+            }
+          })
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
+
+    // Submit quiz attempt with detailed results
+    submitQuizAttempt: builder.mutation<
+      {
+        attemptId: string;
+        score: number;
+        totalQuestions: number;
+        correctAnswers: number;
+        results: Array<{
+          questionId: string;
+          correct: boolean;
+          userAnswer: string;
+          correctAnswer: string;
+          explanation: string;
+        }>;
+      },
+      {
+        quizId: string;
+        answers: Record<string, string>;
+        timeTaken?: number;
+      }
+    >({
+      query: (attemptData) => ({
+        url: "quiz/attempts",
+        method: "POST",
+        body: attemptData,
+      }),
+      transformResponse: (response: {
+        success: boolean;
+        data?: {
+          attemptId: string;
+          score: number;
+          totalQuestions: number;
+          correctAnswers: number;
+          results: Array<{
+            questionId: string;
+            correct: boolean;
+            userAnswer: string;
+            correctAnswer: string;
+            explanation: string;
+          }>;
+        };
+        error?: string;
+      }) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.PROCESSING_ERROR,
+            response.error || "Failed to submit quiz attempt",
+            { component: "QuizPlayer", action: "submit" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "QuizPlayer", action: "submit" };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid quiz attempt data",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        } else if (response.status === 404) {
+          return createAppError(
+            ErrorType.NOT_FOUND_ERROR,
+            "Quiz not found",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, { quizId }) => [
+        { type: "Quiz", id: quizId },
+        { type: "Quiz", id: "LIST" },
+        { type: "Quiz", id: "HISTORY" },
+        { type: "Quiz", id: "STATISTICS" },
+      ],
+    }),
+
+    // Get quiz history with detailed statistics
+    getQuizHistory: builder.query<
+      {
+        attempts: Array<QuizAttempt & {
+          quiz: {
+            title: string;
+            difficulty: QuizDifficulty;
+            questionCount: number;
+            questionTypes: QuizQuestionType[];
+            sourceDocumentIds: string[];
+          };
+        }>;
+        summary: {
+          totalAttempts: number;
+          averageScore: number;
+          improvementTrend: 'improving' | 'declining' | 'stable';
+          bestPerformingDifficulty: QuizDifficulty | null;
+          weakestQuestionType: QuizQuestionType | null;
+          streakData: {
+            currentStreak: number;
+            longestStreak: number;
+            streakType: 'improving' | 'declining' | 'none';
+          };
+        };
+      },
+      {
+        page?: number;
+        limit?: number;
+        quizId?: string;
+        difficulty?: QuizDifficulty;
+        dateRange?: { start: string; end: string };
+      } | void
+    >({
+      query: (params = {}) => ({
+        url: "quiz/history",
+        params: {
+          page: params.page || 1,
+          limit: params.limit || 50,
+          ...(params.quizId && { quizId: params.quizId }),
+          ...(params.difficulty && { difficulty: params.difficulty }),
+          ...(params.dateRange && { 
+            startDate: params.dateRange.start,
+            endDate: params.dateRange.end 
+          }),
+        },
+      }),
+      transformResponse: (response: {
+        success: boolean;
+        data?: {
+          attempts: Array<QuizAttempt & {
+            quiz: {
+              title: string;
+              difficulty: QuizDifficulty;
+              questionCount: number;
+              questionTypes: QuizQuestionType[];
+              sourceDocumentIds: string[];
+            };
+          }>;
+          summary: {
+            totalAttempts: number;
+            averageScore: number;
+            improvementTrend: 'improving' | 'declining' | 'stable';
+            bestPerformingDifficulty: QuizDifficulty | null;
+            weakestQuestionType: QuizQuestionType | null;
+            streakData: {
+              currentStreak: number;
+              longestStreak: number;
+              streakType: 'improving' | 'declining' | 'none';
+            };
+          };
+        };
+        error?: string;
+      }) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch quiz history",
+            { component: "QuizHistory", action: "fetch" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "QuizHistory", action: "fetch" };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: [
+        { type: "Quiz", id: "HISTORY" },
+        { type: "Quiz", id: "STATISTICS" }
+      ],
+    }),
+
+    // Get quiz generation status for long-running operations
+    getQuizGenerationStatus: builder.query<
+      {
+        id: string;
+        status: 'pending' | 'processing' | 'completed' | 'failed';
+        progress: number;
+        currentStep: string;
+        estimatedTimeRemaining?: number;
+        error?: string;
+      },
+      string
+    >({
+      query: (generationId) => `quiz/generation-status/${generationId}`,
+      transformResponse: (response: {
+        success: boolean;
+        data?: {
+          id: string;
+          status: 'pending' | 'processing' | 'completed' | 'failed';
+          progress: number;
+          currentStep: string;
+          estimatedTimeRemaining?: number;
+          error?: string;
+        };
+        error?: string;
+      }) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch generation status",
+            { component: "QuizGenerator", action: "status" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any, meta, generationId) => {
+        const context = { component: "QuizGenerator", action: "status", generationId };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Generation status not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result, error, generationId) => [
+        { type: "Quiz", id: `GENERATION_${generationId}` }
+      ],
+      // Enable polling for active generation
+      pollingInterval: (result) => {
+        if (result?.status === "processing" || result?.status === "pending") {
+          return 3000; // Poll every 3 seconds for active generation
+        }
+        return 0; // Stop polling when completed or failed
+      },
+    }),
   }),
 });
 
@@ -1132,6 +1959,18 @@ export const {
   useDeleteHighlightMutation,
   useBulkDeleteHighlightsMutation,
   useSearchHighlightsQuery,
+  // Quiz endpoints - Enhanced RTK Query hooks
+  useProcessDocumentMutation,
+  useGetProcessingStatusQuery,
+  useSearchContentMutation,
+  useGenerateQuizMutation,
+  useGetQuizzesQuery,
+  useGetQuizQuery,
+  useUpdateQuizMutation,
+  useDeleteQuizMutation,
+  useSubmitQuizAttemptMutation,
+  useGetQuizHistoryQuery,
+  useGetQuizGenerationStatusQuery,
 } = apiSlice;
 
 // Export the reducer and middleware

@@ -31,6 +31,9 @@ export { NoteCreationModal } from "./NoteCreationModal";
 export { HighlightHoverToolbar } from "./HighlightHoverToolbar";
 export { NotePreviewModal } from "./NotePreviewModal";
 
+// Quiz generation integration
+export { PDFViewerQuizButton } from "./PDFViewerQuizButton";
+
 // Overlay component for rendering annotation highlights
 
 // Mobile dialog removed - app is desktop/laptop focused

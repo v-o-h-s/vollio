@@ -1,164 +1,447 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { vectorSearchService } from '@/lib/services/vector-search-service';
-import { withErrorHandling } from '@/lib/utils/server-error-handling';
-import type { ContentSearchRequest, ContentSearchResponse } from '@/lib/types';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
+import {
+  withErrorHandling,
+  extractRequestContext,
+  createServerError,
+  ServerErrorType,
+} from "@/lib/utils/server-error-handling";
+import {
+  checkEnhancedRateLimit,
+} from "@/lib/utils/security-validation";
+import {
+  requireAuthentication,
+} from "@/lib/utils/auth-validation";
+import { vectorSearchService } from "@/lib/services/vector-search-service";
+import { hybridSearchService } from "@/lib/services/hybrid-search-service";
+import { searchAnalyticsService } from "@/lib/services/search-analytics-service";
+
+interface ContentSearchRequest {
+  query: string;
+  documentIds: string[];
+  pageRange?: { start: number; end: number };
+  limit?: number;
+  similarityThreshold?: number;
+  contentTypes?: ('paragraph' | 'heading' | 'list' | 'table' | 'caption')[];
+  minConfidence?: number;
+  rankingMethod?: 'similarity' | 'hybrid' | 'rerank';
+  diversityFactor?: number;
+  
+  // Advanced search options
+  searchMethod?: 'vector' | 'keyword' | 'hybrid';
+  vectorWeight?: number;
+  keywordWeight?: number;
+  enableFuzzyMatch?: boolean;
+  stemming?: boolean;
+  synonymExpansion?: boolean;
+  confidenceRange?: { min: number; max: number };
+  relevanceRange?: { min: number; max: number };
+  includeExplanations?: boolean;
+  enableDebugging?: boolean;
+  enableCaching?: boolean;
+}
+
+interface ContentSearchResponse {
+  success: boolean;
+  chunks: Array<{
+    id: string;
+    content: string;
+    metadata: {
+      documentTitle: string;
+      pageNumber: number;
+      sectionTitle?: string;
+      contentType: string;
+      confidence?: number;
+    };
+    similarity: number;
+    relevanceScore: number;
+    rank: number;
+    scoring?: {
+      vectorScore: number;
+      keywordScore: number;
+      combinedScore: number;
+    };
+    explanation?: {
+      vectorMatches: string[];
+      keywordMatches: string[];
+      scoringBreakdown: {
+        vectorContribution: number;
+        keywordContribution: number;
+        boosts: Array<{ type: string; value: number; reason: string }>;
+        penalties: Array<{ type: string; value: number; reason: string }>;
+      };
+      relevanceFactors: string[];
+    };
+    debugInfo?: {
+      originalQuery: string;
+      processedQuery: string;
+      vectorEmbeddingTime: number;
+      keywordProcessingTime: number;
+      filteringTime: number;
+      rankingTime: number;
+      cacheHit: boolean;
+      indexesUsed: string[];
+    };
+  }>;
+  totalResults: number;
+  searchTime: number;
+  queryEmbeddingTime: number;
+  retrievalTime: number;
+  rankingTime: number;
+  cacheHit: boolean;
+  searchMethod: string;
+  analytics?: {
+    queryComplexity: 'simple' | 'moderate' | 'complex';
+    vectorSearchTime: number;
+    keywordSearchTime: number;
+    combinationTime: number;
+    filteringTime: number;
+    totalProcessingTime: number;
+    resultsBeforeFiltering: number;
+    resultsAfterFiltering: number;
+    cacheHitRate: number;
+    indexEfficiency: number;
+  };
+  documentBreakdown?: Record<string, {
+    documentId: string;
+    documentTitle: string;
+    resultCount: number;
+    averageSimilarity: number;
+  }>;
+}
 
 /**
- * POST /api/quiz/search-content
- * Search for relevant content chunks using vector similarity
+ * Validates search request parameters
  */
-async function POST(request: NextRequest): Promise<NextResponse<ContentSearchResponse>> {
-  return withErrorHandling(async () => {
-    // Verify authentication
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, chunks: [], totalResults: 0, error: 'Authentication required' },
-        { status: 401 }
+function validateSearchRequest(request: ContentSearchRequest): void {
+  if (!request.query || typeof request.query !== 'string' || request.query.trim().length === 0) {
+    throw createServerError(
+      ServerErrorType.VALIDATION_ERROR,
+      'Query is required and must be a non-empty string'
+    );
+  }
+
+  if (!Array.isArray(request.documentIds) || request.documentIds.length === 0) {
+    throw createServerError(
+      ServerErrorType.VALIDATION_ERROR,
+      'documentIds is required and must be a non-empty array'
+    );
+  }
+
+  if (request.documentIds.length > 10) {
+    throw createServerError(
+      ServerErrorType.VALIDATION_ERROR,
+      'Maximum 10 documents can be searched at once'
+    );
+  }
+
+  // Validate document IDs format (should be UUIDs)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  for (const docId of request.documentIds) {
+    if (!uuidRegex.test(docId)) {
+      throw createServerError(
+        ServerErrorType.VALIDATION_ERROR,
+        `Invalid document ID format: ${docId}`
       );
     }
+  }
 
-    // Parse and validate request body
-    let requestData: ContentSearchRequest;
-    try {
-      requestData = await request.json();
-    } catch (error) {
-      return NextResponse.json(
-        { success: false, chunks: [], totalResults: 0, error: 'Invalid JSON in request body' },
-        { status: 400 }
+  if (request.limit && (request.limit < 1 || request.limit > 100)) {
+    throw createServerError(
+      ServerErrorType.VALIDATION_ERROR,
+      'limit must be between 1 and 100'
+    );
+  }
+
+  if (request.similarityThreshold && (request.similarityThreshold < 0 || request.similarityThreshold > 1)) {
+    throw createServerError(
+      ServerErrorType.VALIDATION_ERROR,
+      'similarityThreshold must be between 0 and 1'
+    );
+  }
+
+  if (request.pageRange) {
+    if (!request.pageRange.start || !request.pageRange.end || 
+        request.pageRange.start < 1 || request.pageRange.end < request.pageRange.start) {
+      throw createServerError(
+        ServerErrorType.VALIDATION_ERROR,
+        'pageRange must have valid start and end values (start >= 1, end >= start)'
       );
     }
+  }
 
-    // Validate required fields
-    if (!requestData.query || typeof requestData.query !== 'string') {
-      return NextResponse.json(
-        { success: false, chunks: [], totalResults: 0, error: 'Query is required and must be a string' },
-        { status: 400 }
-      );
-    }
+  if (request.diversityFactor && (request.diversityFactor < 0 || request.diversityFactor > 1)) {
+    throw createServerError(
+      ServerErrorType.VALIDATION_ERROR,
+      'diversityFactor must be between 0 and 1'
+    );
+  }
+}
 
-    if (!requestData.documentIds || !Array.isArray(requestData.documentIds) || requestData.documentIds.length === 0) {
-      return NextResponse.json(
-        { success: false, chunks: [], totalResults: 0, error: 'Document IDs are required and must be a non-empty array' },
-        { status: 400 }
-      );
-    }
+// POST handler for content search
+async function handlePOST(request: NextRequest): Promise<NextResponse<ContentSearchResponse>> {
+  const context = extractRequestContext(request, '/api/quiz/search-content');
 
-    // Validate optional fields
-    if (requestData.limit !== undefined && (typeof requestData.limit !== 'number' || requestData.limit < 1 || requestData.limit > 100)) {
-      return NextResponse.json(
-        { success: false, chunks: [], totalResults: 0, error: 'Limit must be a number between 1 and 100' },
-        { status: 400 }
-      );
-    }
+  // Authentication validation
+  const authContext = await requireAuthentication(request, ['read']);
+  const userId = authContext.userId;
 
-    if (requestData.similarityThreshold !== undefined && (typeof requestData.similarityThreshold !== 'number' || requestData.similarityThreshold < 0 || requestData.similarityThreshold > 1)) {
-      return NextResponse.json(
-        { success: false, chunks: [], totalResults: 0, error: 'Similarity threshold must be a number between 0 and 1' },
-        { status: 400 }
-      );
-    }
+  // Rate limiting for search operations
+  checkEnhancedRateLimit(userId, 'CONTENT_SEARCH', { 
+    ...context, 
+    userId,
+    limit: 100, // 100 searches per hour
+    windowMs: 60 * 60 * 1000 
+  });
 
-    if (requestData.pageRange !== undefined) {
-      if (typeof requestData.pageRange !== 'object' || 
-          typeof requestData.pageRange.start !== 'number' || 
-          typeof requestData.pageRange.end !== 'number' ||
-          requestData.pageRange.start < 1 ||
-          requestData.pageRange.end < requestData.pageRange.start) {
-        return NextResponse.json(
-          { success: false, chunks: [], totalResults: 0, error: 'Page range must have valid start and end numbers' },
-          { status: 400 }
-        );
-      }
-    }
+  // Parse and validate request body
+  let requestData: ContentSearchRequest;
+  try {
+    requestData = await request.json();
+  } catch (error) {
+    throw createServerError(
+      ServerErrorType.VALIDATION_ERROR,
+      'Invalid JSON in request body',
+      { ...context, userId }
+    );
+  }
 
-    try {
-      // Optimize the query for better search results
-      const queryOptimization = await vectorSearchService.optimizeQuery(requestData.query);
-      const searchQuery = queryOptimization.optimizedQuery || requestData.query;
+  // Validate request parameters
+  validateSearchRequest(requestData);
 
-      // Perform vector search
-      const searchResult = await vectorSearchService.searchSimilarChunks(searchQuery, {
-        similarityThreshold: requestData.similarityThreshold || 0.7,
-        limit: requestData.limit || 10,
-        pageRange: requestData.pageRange,
-        documentIds: requestData.documentIds,
-        includeMetadata: true,
-        rankingMethod: 'hybrid'
+  const {
+    query,
+    documentIds,
+    pageRange,
+    limit = 20,
+    similarityThreshold = 0.7,
+    contentTypes,
+    minConfidence,
+    rankingMethod = 'hybrid',
+    diversityFactor = 0.3,
+    
+    // Advanced search options
+    searchMethod = 'hybrid',
+    vectorWeight = 0.7,
+    keywordWeight = 0.3,
+    enableFuzzyMatch = true,
+    stemming = true,
+    synonymExpansion = false,
+    confidenceRange,
+    relevanceRange,
+    includeExplanations = false,
+    enableDebugging = false,
+    enableCaching = true
+  } = requestData;
+
+  try {
+    let searchResult;
+    let actualSearchMethod = searchMethod;
+
+    // Use advanced hybrid search if requested or if advanced options are specified
+    const useAdvancedSearch = searchMethod !== 'vector' || 
+                             includeExplanations || 
+                             enableDebugging || 
+                             confidenceRange || 
+                             relevanceRange ||
+                             enableFuzzyMatch ||
+                             stemming ||
+                             synonymExpansion;
+
+    if (useAdvancedSearch) {
+      // Use hybrid search service
+      const hybridResult = await hybridSearchService.hybridSearch(query, {
+        vectorWeight: searchMethod === 'vector' ? 1.0 : vectorWeight,
+        keywordWeight: searchMethod === 'keyword' ? 1.0 : keywordWeight,
+        similarityThreshold,
+        enableFuzzyMatch,
+        stemming,
+        synonymExpansion,
+        contentTypes,
+        confidenceRange,
+        relevanceRange,
+        pageRange,
+        documentIds,
+        limit,
+        includeExplanations,
+        enableDebugging,
+        enableCaching
       });
 
-      if (!searchResult.success) {
-        return NextResponse.json(
-          { 
-            success: false, 
-            chunks: [], 
-            totalResults: 0, 
-            error: searchResult.error || 'Search failed' 
-          },
-          { status: 500 }
+      if (!hybridResult.success) {
+        throw createServerError(
+          ServerErrorType.PROCESSING_ERROR,
+          hybridResult.error || 'Advanced search operation failed',
+          { ...context, userId, query, documentIds, searchMethod }
         );
       }
 
-      // Format results for API response
-      const formattedChunks = searchResult.results.map(result => ({
+      // Get document titles for metadata
+      const { getAuthenticatedSupabaseClient } = await import('@/lib/supabaseClient');
+      const client = await getAuthenticatedSupabaseClient();
+      const { data: documents } = await client
+        .from('pdfs')
+        .select('id, filename')
+        .in('id', documentIds);
+
+      const documentMap = new Map(
+        documents?.map(doc => [doc.id, doc.filename]) || []
+      );
+
+      // Transform hybrid results
+      const chunks = hybridResult.results.map(result => ({
         id: result.chunk.id,
         content: result.chunk.content,
         metadata: {
-          documentTitle: result.chunk.metadata.documentTitle,
-          extractionMethod: result.chunk.metadata.extractionMethod,
-          processingVersion: result.chunk.metadata.processingVersion,
-          contentType: result.chunk.metadata.contentType,
-          confidence: result.chunk.metadata.confidence,
+          documentTitle: documentMap.get(result.chunk.documentId) || 'Unknown Document',
           pageNumber: result.chunk.pageNumber,
           sectionTitle: result.chunk.sectionTitle,
-          tokenCount: result.chunk.tokenCount,
-          similarity: result.similarity,
-          relevanceScore: result.relevanceScore,
-          rank: result.rank
+          contentType: result.chunk.metadata.contentType || 'paragraph',
+          confidence: result.chunk.metadata.confidence
         },
-        similarity: result.similarity
+        similarity: result.vectorScore, // For backward compatibility
+        relevanceScore: result.combinedScore,
+        rank: result.rank,
+        scoring: {
+          vectorScore: result.vectorScore,
+          keywordScore: result.keywordScore,
+          combinedScore: result.combinedScore
+        },
+        explanation: result.explanation,
+        debugInfo: result.debugInfo
       }));
 
-      const response: ContentSearchResponse = {
+      searchResult = {
         success: true,
-        chunks: formattedChunks,
-        totalResults: searchResult.totalResults
+        results: chunks,
+        totalResults: hybridResult.totalResults,
+        searchTime: hybridResult.searchTime,
+        analytics: hybridResult.analytics,
+        documentBreakdown: {} // Would need to calculate from hybrid results
       };
+    } else {
+      // Use traditional vector search
+      const vectorResult = await vectorSearchService.searchMultipleDocuments(
+        query,
+        documentIds,
+        {
+          limit,
+          similarityThreshold,
+          pageRange,
+          contentTypes,
+          minConfidence,
+          rankingMethod,
+          diversityFactor,
+          includeMetadata: true,
+          boostRecent: true
+        }
+      );
 
-      // Add performance metrics to response headers for debugging
-      const headers = new Headers();
-      headers.set('X-Search-Time', searchResult.searchTime.toString());
-      headers.set('X-Query-Embedding-Time', searchResult.queryEmbeddingTime.toString());
-      headers.set('X-Retrieval-Time', searchResult.retrievalTime.toString());
-      headers.set('X-Ranking-Time', searchResult.rankingTime.toString());
-      headers.set('X-Cache-Hit', searchResult.cacheHit.toString());
-      
-      if (queryOptimization.optimizations.length > 0) {
-        headers.set('X-Query-Optimizations', queryOptimization.optimizations.join(', '));
-        headers.set('X-Original-Query', requestData.query);
-        headers.set('X-Optimized-Query', searchQuery);
+      if (!vectorResult.success) {
+        throw createServerError(
+          ServerErrorType.PROCESSING_ERROR,
+          vectorResult.error || 'Vector search operation failed',
+          { ...context, userId, query, documentIds }
+        );
       }
 
-      return NextResponse.json(response, { 
-        status: 200,
-        headers 
-      });
-
-    } catch (error) {
-      console.error('Vector search error:', error);
-      
-      return NextResponse.json(
-        { 
-          success: false, 
-          chunks: [], 
-          totalResults: 0, 
-          error: 'Internal server error during search' 
+      // Transform vector results
+      const chunks = vectorResult.results.map(result => ({
+        id: result.chunk.id,
+        content: result.chunk.content,
+        metadata: {
+          documentTitle: vectorResult.documentBreakdown[result.chunk.documentId]?.documentTitle || 'Unknown Document',
+          pageNumber: result.chunk.pageNumber,
+          sectionTitle: result.chunk.sectionTitle,
+          contentType: result.chunk.metadata.contentType || 'paragraph',
+          confidence: result.chunk.metadata.confidence
         },
-        { status: 500 }
-      );
+        similarity: result.similarity,
+        relevanceScore: result.relevanceScore,
+        rank: result.rank,
+        scoring: {
+          vectorScore: result.similarity,
+          keywordScore: 0,
+          combinedScore: result.similarity
+        }
+      }));
+
+      searchResult = {
+        success: true,
+        results: chunks,
+        totalResults: vectorResult.totalResults,
+        searchTime: vectorResult.searchTime,
+        documentBreakdown: vectorResult.documentBreakdown
+      };
+      actualSearchMethod = 'vector';
     }
-  });
+
+    // Log search query for analytics
+    await searchAnalyticsService.logSearchQuery({
+      userId,
+      query,
+      searchMethod: actualSearchMethod as any,
+      documentIds,
+      resultCount: searchResult.results.length,
+      searchTime: searchResult.searchTime,
+      queryComplexity: searchResult.analytics?.queryComplexity || 'simple',
+      cacheHit: searchResult.analytics?.cacheHitRate > 0 || false,
+      filters: {
+        contentTypes,
+        pageRange,
+        confidenceRange,
+        relevanceRange
+      },
+      performance: {
+        vectorSearchTime: searchResult.analytics?.vectorSearchTime || 0,
+        keywordSearchTime: searchResult.analytics?.keywordSearchTime || 0,
+        combinationTime: searchResult.analytics?.combinationTime || 0,
+        filteringTime: searchResult.analytics?.filteringTime || 0,
+        indexEfficiency: searchResult.analytics?.indexEfficiency || 1.0
+      }
+    });
+
+    const response: ContentSearchResponse = {
+      success: true,
+      chunks: searchResult.results,
+      totalResults: searchResult.totalResults,
+      searchTime: searchResult.searchTime,
+      queryEmbeddingTime: 0, // Not available from current implementations
+      retrievalTime: 0, // Not available from current implementations
+      rankingTime: 0, // Not available from current implementations
+      cacheHit: searchResult.analytics?.cacheHitRate > 0 || false,
+      searchMethod: actualSearchMethod,
+      analytics: searchResult.analytics,
+      documentBreakdown: searchResult.documentBreakdown
+    };
+
+    console.log(`🔍 Content search completed for user ${userId}:`);
+    console.log(`   - Query: "${query}"`);
+    console.log(`   - Method: ${actualSearchMethod}`);
+    console.log(`   - Documents: ${documentIds.length}`);
+    console.log(`   - Results: ${searchResult.results.length}`);
+    console.log(`   - Search time: ${searchResult.searchTime}ms`);
+    if (searchResult.analytics) {
+      console.log(`   - Query complexity: ${searchResult.analytics.queryComplexity}`);
+    }
+
+    return NextResponse.json(response, { status: 200 });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('ServerError')) {
+      throw error;
+    }
+    
+    throw createServerError(
+      ServerErrorType.PROCESSING_ERROR,
+      `Content search failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      { ...context, userId, query, documentIds },
+      error instanceof Error ? error : undefined
+    );
+  }
 }
 
-export { POST };
+// Export the wrapped handler
+export const POST = withErrorHandling(
+  handlePOST,
+  { endpoint: '/api/quiz/search-content', method: 'POST' }
+);

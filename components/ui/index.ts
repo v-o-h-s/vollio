@@ -12,6 +12,7 @@ export { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 export { Input } from './input';
 export { Label } from './label';
 export { Popover, PopoverContent, PopoverTrigger } from './popover';
+export { Progress } from './progress';
 export { Separator } from './separator';
 export { Skeleton } from './skeleton';
 export { NoteCard } from './note-card';
@@ -19,5 +20,14 @@ export { NoteSkeleton } from './note-skeleton';
 export { ErrorNotification } from './error-notification';
 export { Loading } from './loading';
 export { KeyboardShortcutsHelp } from './KeyboardShortcutsHelp';
+
+// Toast notification system
+export { 
+  ToastProvider, 
+  useToast, 
+  useToastActions,
+  type Toast,
+  type ToastType 
+} from './toast';
 export { Textarea } from './textarea';
 export { ThemeToggle } from './theme-toggle';

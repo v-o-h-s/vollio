@@ -9,6 +9,9 @@ import {
   type SyncfusionExtractionOptions,
 } from "./syncfusion-text-extractor";
 import { embeddingService, type EmbeddingOptions } from "./embedding-service";
+import { databaseOptimizationService } from "./database-optimization";
+import { textExtractionCache } from "./text-extraction-cache";
+import { chunkManagementService } from "./chunk-management-service";
 
 export interface DocumentChunk {
   id: string;
@@ -122,6 +125,46 @@ export class DocumentProcessingService {
     options: ProcessingOptions
   ): Promise<ProcessingResult> {
     try {
+      // Check cache first (unless forced reprocessing)
+      if (!options.forceReprocess) {
+        const cachedResult = await textExtractionCache.getCachedExtraction(
+          pdfBuffer,
+          'syncfusion',
+          {
+            enableTextSelection: options.enableTextSelection,
+            enableTextSearch: options.enableTextSearch,
+            extractImages: options.extractImages,
+            preserveFormatting: options.preserveFormatting,
+            timeout: options.timeout,
+          }
+        );
+
+        if (cachedResult) {
+          console.log(`🎯 Using cached Syncfusion extraction for document: ${cachedResult.pageTexts.length} pages`);
+          
+          // Preprocess and chunk the cached text
+          const processedTexts = cachedResult.pageTexts.map(({ pageNumber, text }) => ({
+            pageNumber,
+            text: this.preprocessText(text),
+          }));
+
+          const chunks = await this.createChunks(
+            processedTexts,
+            documentTitle,
+            "syncfusion",
+            options
+          );
+
+          return {
+            success: true,
+            chunks,
+            extractionMethod: "syncfusion",
+            processingTime: 0, // Cached result
+            totalPages: cachedResult.totalPages,
+          };
+        }
+      }
+
       // Use the dedicated Syncfusion text extractor
       const extractionResult = await syncfusionTextExtractor.extractText(
         pdfBuffer,
@@ -145,6 +188,21 @@ export class DocumentProcessingService {
         pageNumber: pageText.pageNumber,
         text: pageText.text,
       }));
+
+      // Cache the extraction result
+      await textExtractionCache.cacheExtraction(
+        pdfBuffer,
+        'syncfusion',
+        {
+          enableTextSelection: options.enableTextSelection,
+          enableTextSearch: options.enableTextSearch,
+          extractImages: options.extractImages,
+          preserveFormatting: options.preserveFormatting,
+          timeout: options.timeout,
+        },
+        pageTexts,
+        extractionResult.totalPages
+      );
 
       // Preprocess and chunk the text
       const processedTexts = pageTexts.map(({ pageNumber, text }) => ({
@@ -183,6 +241,50 @@ export class DocumentProcessingService {
     documentTitle: string,
     options: ProcessingOptions
   ): Promise<ProcessingResult> {
+    // Check cache first (unless forced reprocessing)
+    if (!options.forceReprocess) {
+      const cachedResult = await textExtractionCache.getCachedExtraction(
+        pdfBuffer,
+        'ocr',
+        {
+          language: options.language,
+          psmMode: options.psmMode,
+          oem: options.oem,
+          confidenceThreshold: options.confidenceThreshold,
+          dpi: options.dpi,
+          preprocessImage: options.preprocessImage,
+          documentType: options.documentType,
+          autoDetectLanguage: options.autoDetectLanguage,
+          multiLanguageSupport: options.multiLanguageSupport,
+        }
+      );
+
+      if (cachedResult) {
+        console.log(`🎯 Using cached OCR extraction for document: ${cachedResult.pageTexts.length} pages`);
+        
+        // Preprocess and chunk the cached text
+        const processedTexts = cachedResult.pageTexts.map(({ pageNumber, text }) => ({
+          pageNumber,
+          text: this.preprocessText(text),
+        }));
+
+        const chunks = await this.createChunks(
+          processedTexts,
+          documentTitle,
+          "ocr",
+          options
+        );
+
+        return {
+          success: true,
+          chunks,
+          extractionMethod: "ocr",
+          processingTime: 0, // Cached result
+          totalPages: cachedResult.totalPages,
+        };
+      }
+    }
+
     const tempDir = tmpdir();
     const tempPdfPath = join(tempDir, `${uuidv4()}.pdf`);
 
@@ -194,6 +296,25 @@ export class DocumentProcessingService {
       const pageTexts = await this.extractTextFromPdfWithTesseract(
         tempPdfPath,
         options
+      );
+
+      // Cache the extraction result
+      await textExtractionCache.cacheExtraction(
+        pdfBuffer,
+        'ocr',
+        {
+          language: options.language,
+          psmMode: options.psmMode,
+          oem: options.oem,
+          confidenceThreshold: options.confidenceThreshold,
+          dpi: options.dpi,
+          preprocessImage: options.preprocessImage,
+          documentType: options.documentType,
+          autoDetectLanguage: options.autoDetectLanguage,
+          multiLanguageSupport: options.multiLanguageSupport,
+        },
+        pageTexts,
+        pageTexts.length
       );
 
       // Preprocess and chunk the text
@@ -276,6 +397,14 @@ export class DocumentProcessingService {
       console.log(`   - Fallbacks used: ${ocrResult.fallbacksUsed.join(', ')}`);
     }
 
+    // Log text extraction cache statistics
+    const cacheStats = textExtractionCache.getCacheStats();
+    console.log(`📊 Text Extraction Cache Stats:`);
+    console.log(`   - Total entries: ${cacheStats.totalEntries}`);
+    console.log(`   - Cache hit rate: ${(cacheStats.hitRate * 100).toFixed(1)}%`);
+    console.log(`   - Total size: ${(cacheStats.totalSize / 1024 / 1024).toFixed(1)}MB`);
+    console.log(`   - Average age: ${(cacheStats.averageAge / 60).toFixed(1)} minutes`);
+
     return ocrResult.results.map((result) => ({
       pageNumber: result.pageNumber,
       text: result.text,
@@ -334,7 +463,7 @@ export class DocumentProcessingService {
 
   /**
    * Create semantic chunks from processed text using advanced chunking service
-   * Optionally generates vector embeddings for each chunk
+   * Optionally generates vector embeddings for each chunk and stores them with chunk management
    */
   private async createChunks(
     pageTexts: Array<{ pageNumber: number; text: string }>,
@@ -433,6 +562,42 @@ export class DocumentProcessingService {
     }
 
     return chunks;
+  }
+
+  /**
+   * Store chunks using the chunk management service for enhanced features
+   */
+  async storeChunksWithManagement(
+    userId: string,
+    documentId: string,
+    chunks: DocumentChunk[]
+  ): Promise<void> {
+    console.log(`Storing ${chunks.length} chunks with management features...`);
+    
+    try {
+      for (const chunk of chunks) {
+        await chunkManagementService.createChunk(
+          userId,
+          documentId,
+          chunk.content,
+          {
+            documentTitle: chunk.metadata.documentTitle,
+            extractionMethod: chunk.metadata.extractionMethod,
+            processingVersion: chunk.metadata.processingVersion,
+            contentType: chunk.metadata.contentType,
+            confidence: chunk.metadata.confidence,
+            pageNumber: chunk.pageNumber,
+            sectionTitle: chunk.sectionTitle
+          },
+          chunk.embedding
+        );
+      }
+      
+      console.log(`✅ Successfully stored ${chunks.length} chunks with management features`);
+    } catch (error) {
+      console.error('Failed to store chunks with management:', error);
+      throw error;
+    }
   }
 
   /**

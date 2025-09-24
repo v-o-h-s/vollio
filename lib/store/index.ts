@@ -53,3 +53,8 @@ export const store = configureStore({
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+// Re-export API slice and hooks for convenience
+export { apiSlice } from './apiSlice';
+export * from './hooks';
+export * from './quizHooks';
