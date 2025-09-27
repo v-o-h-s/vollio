@@ -2,7 +2,7 @@
 
 Noto is a modern, secure PDF annotation application built with Next.js 15 and React 19. It enables users to upload PDFs, select text, and create rich annotations with seamless cross-device functionality, enterprise-grade security, and comprehensive theme support.
 
-> **Status**: Production-ready with complete PDF annotation system, rich text editing with auto-save, comprehensive note management, and full dark/light theme integration. Backend fully implemented with Supabase, comprehensive error handling, mobile-responsive design, and cross-tab synchronization.
+> **Status**: Production-ready with complete PDF annotation system, rich text editing with auto-save, comprehensive note management, full dark/light theme integration, and advanced document processing with AI-powered quiz generation. Backend fully implemented with Supabase, comprehensive error handling, mobile-responsive design, and cross-tab synchronization.
 
 ## ✨ Features
 

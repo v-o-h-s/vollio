@@ -6,18 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { LoadingSpinner } from "@/components/ui/loading";
 import { ErrorNotification } from "@/components/ui/error-notification";
 import { useToastActions } from "@/components/ui/toast";
 import { useGetPDFsQuery } from "@/lib/store/apiSlice";
 import { QuizConfigurationPanel } from "./QuizConfigurationPanel";
-import { DocumentProcessingStatus } from "./DocumentProcessingStatus";
 import { MultiDocumentStatus } from "./MultiDocumentStatus";
 import { ContentPreview } from "./ContentPreview";
 import { QuizGenerationErrorBoundary } from "./QuizErrorBoundary";
 import { QuizGenerationLoading, QuizGeneratorSkeleton } from "./QuizLoadingStates";
 import { useQuizGenerationErrorHandling } from "@/hooks/use-quiz-error-handling";
-import { QuizConfiguration, PDFDocument, DocumentProcessingStatus as ProcessingStatus } from "@/lib/types";
+import { QuizConfiguration } from "@/lib/types/quiz";
+import { type DocumentProcessingStatus as DocumentProcessingStatusType } from "@/lib/types/document-processing";
+import { DocumentProcessingStatus } from "./DocumentProcessingStatus";
 import { FileText, Clock, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
 interface QuizGeneratorInterfaceProps {
@@ -42,7 +42,7 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
     difficulty: "medium",
     questionTypes: ["mcq", "truefalse"],
   });
-  const [processingStatuses, setProcessingStatuses] = useState<Record<string, ProcessingStatus>>({});
+  const [processingStatuses, setProcessingStatuses] = useState<Record<string, DocumentProcessingStatusType>>({});
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStage, setGenerationStage] = useState<'initializing' | 'searching' | 'generating' | 'validating' | 'storing' | 'complete'>('initializing');
   const [generationProgress, setGenerationProgress] = useState(0);
@@ -76,7 +76,7 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
         });
 
         const results = await Promise.all(statusPromises);
-        const statusMap: Record<string, ProcessingStatus> = {};
+        const statusMap: Record<string, DocumentProcessingStatusType> = {};
         
         results.forEach(({ docId, status }) => {
           if (status) {

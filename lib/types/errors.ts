@@ -36,6 +36,11 @@ export enum ErrorType {
   PDF_RENDERING_ERROR = "PDF_RENDERING_ERROR",
   PDF_CORRUPTED = "PDF_CORRUPTED",
   
+  // Rate limiting and external service errors
+  RATE_LIMIT_ERROR = "RATE_LIMIT_ERROR",
+  EXTERNAL_SERVICE_ERROR = "EXTERNAL_SERVICE_ERROR",
+  PROCESSING_ERROR = "PROCESSING_ERROR",
+  
   // General errors
   UNKNOWN_ERROR = "UNKNOWN_ERROR",
   INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
@@ -69,6 +74,8 @@ export interface ErrorContext {
   action?: string;
   userId?: string;
   pdfId?: string;
+  documentId?: string;
+  quizId?: string;
   fileSize?: number;
   fileName?: string;
   url?: string;
@@ -185,6 +192,9 @@ export const ERROR_SEVERITY_MAP: Record<ErrorType, ErrorSeverity> = {
   [ErrorType.PDF_LOADING_ERROR]: ErrorSeverity.MEDIUM,
   [ErrorType.PDF_RENDERING_ERROR]: ErrorSeverity.MEDIUM,
   [ErrorType.PDF_CORRUPTED]: ErrorSeverity.HIGH,
+  [ErrorType.RATE_LIMIT_ERROR]: ErrorSeverity.MEDIUM,
+  [ErrorType.EXTERNAL_SERVICE_ERROR]: ErrorSeverity.MEDIUM,
+  [ErrorType.PROCESSING_ERROR]: ErrorSeverity.MEDIUM,
   [ErrorType.UNKNOWN_ERROR]: ErrorSeverity.MEDIUM,
   [ErrorType.INTERNAL_SERVER_ERROR]: ErrorSeverity.HIGH,
   [ErrorType.SERVICE_UNAVAILABLE]: ErrorSeverity.HIGH,
@@ -291,6 +301,21 @@ export const ERROR_MESSAGES: Record<ErrorType, { title: string; message: string;
     title: "Corrupted PDF",
     message: "The PDF file appears to be corrupted and cannot be opened.",
     action: "Upload New File",
+  },
+  [ErrorType.RATE_LIMIT_ERROR]: {
+    title: "Rate Limit Exceeded",
+    message: "Too many requests. Please wait a moment before trying again.",
+    action: "Wait and Retry",
+  },
+  [ErrorType.EXTERNAL_SERVICE_ERROR]: {
+    title: "Service Error",
+    message: "An external service is temporarily unavailable.",
+    action: "Try Again",
+  },
+  [ErrorType.PROCESSING_ERROR]: {
+    title: "Processing Error",
+    message: "There was an error processing your request.",
+    action: "Try Again",
   },
   [ErrorType.UNKNOWN_ERROR]: {
     title: "Unexpected Error",

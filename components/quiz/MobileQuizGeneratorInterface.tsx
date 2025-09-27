@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ErrorNotification } from "@/components/ui/error-notification";
 import { useToastActions } from "@/components/ui/toast";
 import { useGetPDFsQuery } from "@/lib/store/apiSlice";
 import { MobileQuizConfigurationPanel } from "./MobileQuizConfigurationPanel";
@@ -41,7 +40,6 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
     handleDocumentProcessingError,
     executeWithErrorHandling,
     clearError,
-    error: errorHandlingError,
     isRetrying
   } = useQuizGenerationErrorHandling();
 
@@ -157,7 +155,7 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
           throw new Error(errorData.error || "Failed to process document");
         }
 
-        const result = await response.json();
+        await response.json();
         
         toast.update(loadingToastId, {
           type: 'success',
@@ -169,8 +167,7 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
         await checkProcessingStatuses([documentId]);
       }, {
         component: 'MobileQuizGenerator',
-        action: 'process_document',
-        documentId
+        action: 'process_document'
       });
     } catch (error) {
       toast.update(loadingToastId, {
@@ -340,11 +337,18 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
 
   if (pdfError) {
     return (
-      <ErrorNotification
-        title="Failed to load documents"
-        message="Unable to fetch your PDF documents. Please try again."
-        onRetry={refetchPDFs}
-      />
+      <div className="p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-red-700 mb-2">
+            <AlertCircle className="h-4 w-4" />
+            <span className="font-medium">Failed to load documents</span>
+          </div>
+          <p className="text-red-600 text-sm mb-3">Unable to fetch your PDF documents. Please try again.</p>
+          <Button size="sm" variant="outline" onClick={refetchPDFs}>
+            Retry
+          </Button>
+        </div>
+      </div>
     );
   }
 
@@ -366,15 +370,32 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
         {/* Error Display */}
         {generationError && (
           <div className="p-4">
-            <ErrorNotification
-              title="Quiz Generation Error"
-              message={generationError}
-              onDismiss={() => setGenerationError(null)}
-              onRetry={() => {
-                setGenerationError(null);
-                clearError();
-              }}
-            />
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-red-700 mb-2">
+                <AlertCircle className="h-4 w-4" />
+                <span className="font-medium">Quiz Generation Error</span>
+              </div>
+              <p className="text-red-600 text-sm mb-3">{generationError}</p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setGenerationError(null);
+                    clearError();
+                  }}
+                >
+                  Try Again
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setGenerationError(null)}
+                >
+                  Dismiss
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
