@@ -2,11 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { LoadingSpinner } from "@/components/ui/loading";
 import { ErrorNotification } from "@/components/ui/error-notification";
 import { useToastActions } from "@/components/ui/toast";
 import { useGetPDFsQuery } from "@/lib/store/apiSlice";
@@ -17,7 +14,7 @@ import { QuizGenerationErrorBoundary } from "./QuizErrorBoundary";
 import { QuizGenerationLoading, QuizGeneratorSkeleton } from "./QuizLoadingStates";
 import { useQuizGenerationErrorHandling } from "@/hooks/use-quiz-error-handling";
 import { useTouchGestures } from "@/hooks/use-touch-gestures";
-import { QuizConfiguration, PDFDocument, DocumentProcessingStatus as ProcessingStatus } from "@/lib/types";
+import { QuizConfiguration, DocumentProcessingStatus as ProcessingStatus } from "@/lib/types";
 import { 
   FileText, 
   Clock, 
