@@ -1,22 +1,41 @@
 /**
- * Theme system types and interfaces
+ * Theme-related types for light/dark mode system
  */
 
-export type ThemeMode = 'light' | 'dark';
+// ============================================================================
+// THEME TYPES
+// ============================================================================
 
-export interface ThemeContextValue {
-  theme: ThemeMode;
-  setTheme: (theme: ThemeMode) => void;
-  toggleTheme: () => void;
+/**
+ * Theme mode options
+ */
+export type ThemeMode = "light" | "dark" | "system";
+
+/**
+ * Theme state interface
+ */
+export interface ThemeState {
+  mode: ThemeMode;
+  resolvedTheme: "light" | "dark";
+  systemTheme: "light" | "dark";
 }
 
+/**
+ * Theme context value with state and actions
+ */
+export interface ThemeContextValue extends ThemeState {
+  setTheme: (mode: ThemeMode) => void;
+  toggleTheme: () => void;
+  isLoading: boolean;
+}
+
+/**
+ * Theme provider props
+ */
 export interface ThemeProviderProps {
   children: React.ReactNode;
   defaultTheme?: ThemeMode;
   storageKey?: string;
-}
-
-export interface ThemeState {
-  theme: ThemeMode;
-  isInitialized: boolean;
+  enableSystem?: boolean;
+  disableTransitionOnChange?: boolean;
 }

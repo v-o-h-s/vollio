@@ -14,7 +14,8 @@ import { QuizGenerationErrorBoundary } from "./QuizErrorBoundary";
 import { QuizGenerationLoading, QuizGeneratorSkeleton } from "./QuizLoadingStates";
 import { useQuizGenerationErrorHandling } from "@/hooks/use-quiz-error-handling";
 import { useTouchGestures } from "@/hooks/use-touch-gestures";
-import { QuizConfiguration, DocumentProcessingStatus as ProcessingStatus } from "@/lib/types";
+import type { DocumentProcessingStatus as ProcessingStatus } from "@/lib/types/document-processing";
+import type { QuizConfiguration } from "@/lib/types/quiz";
 import { 
   FileText, 
   Clock, 

@@ -1,4 +1,14 @@
-// Core document processing types
+/**
+ * Document processing types for text extraction, chunking, and RAG system
+ */
+
+// ============================================================================
+// DOCUMENT PROCESSING TYPES
+// ============================================================================
+
+/**
+ * Document chunk for vector storage and retrieval
+ */
 export interface DocumentChunk {
   id: string;
   userId: string;
@@ -14,25 +24,28 @@ export interface DocumentChunk {
   updatedAt: string;
 }
 
+/**
+ * Metadata for document chunks
+ */
 export interface ChunkMetadata {
   documentTitle: string;
-  extractionMethod: 'pdfjs' | 'ocr';
+  extractionMethod: "syncfusion" | "ocr" | "pdfjs";
   processingVersion: string;
-  contentType: 'paragraph' | 'heading' | 'list' | 'table' | 'caption';
+  contentType: "paragraph" | "heading" | "list" | "table" | "caption";
   confidence?: number;
-  structuralElements?: string[];
-  hasOverlap?: boolean;
-  chunkIndex?: number;
 }
 
+/**
+ * Document processing status tracking
+ */
 export interface DocumentProcessingStatus {
   id: string;
   userId: string;
   documentId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: "pending" | "processing" | "completed" | "failed";
   totalChunks: number;
   processedChunks: number;
-  extractionMethod?: 'pdfjs' | 'ocr';
+  extractionMethod?: "syncfusion" | "ocr";
   errorMessage?: string;
   processingStartedAt?: string;
   processingCompletedAt?: string;
@@ -40,219 +53,195 @@ export interface DocumentProcessingStatus {
   updatedAt: string;
 }
 
-// Processing options and configuration
-export interface ProcessingOptions {
-  // OCR options
-  useOCR?: boolean;
-  forceReprocess?: boolean;
-  language?: string;
-  psmMode?: number;
-  oem?: number;
-  confidenceThreshold?: number;
-  dpi?: number;
-  preprocessImage?: boolean;
-  
-  // Chunking options
-  chunkSize?: number;
-  chunkOverlap?: number;
-  preserveStructure?: boolean;
-  respectSentenceBoundaries?: boolean;
-  respectParagraphBoundaries?: boolean;
-}
 
-export interface ProcessingResult {
-  success: boolean;
-  chunks: DocumentChunk[];
-  extractionMethod: 'pdfjs' | 'ocr';
-  processingTime: number;
-  totalPages: number;
-  error?: string;
-  metadata?: ProcessingMetadata;
-}
-
-export interface ProcessingMetadata {
-  totalTokens: number;
-  averageChunkSize: number;
-  overlapRatio: number;
-  averageConfidence?: number;
-  languageDetected?: string;
-  contentTypes: Record<string, number>;
-}
-
-// OCR-specific types
-export interface OCROptions {
-  language?: string;
-  psmMode?: number;
-  oem?: number;
-  confidenceThreshold?: number;
-  dpi?: number;
-  preprocessImage?: boolean;
-}
-
-export interface OCRResult {
-  pageNumber: number;
-  text: string;
-  confidence: number;
-  processingTime: number;
-}
-
-export interface OCRPageResult {
-  success: boolean;
-  results: OCRResult[];
-  totalPages: number;
-  averageConfidence: number;
-  error?: string;
-}
-
-// Chunking-specific types
-export interface ChunkingOptions {
-  chunkSize?: number;
-  chunkOverlap?: number;
-  preserveStructure?: boolean;
-  respectSentenceBoundaries?: boolean;
-  respectParagraphBoundaries?: boolean;
-}
-
-export interface TextChunk {
-  id: string;
-  content: string;
-  startIndex: number;
-  endIndex: number;
-  tokenCount: number;
-  metadata: {
-    chunkIndex: number;
-    hasOverlap: boolean;
-    contentType: 'paragraph' | 'heading' | 'list' | 'table' | 'caption';
-    structuralElements: string[];
-  };
-}
-
-export interface ChunkingResult {
-  chunks: TextChunk[];
-  totalTokens: number;
-  averageChunkSize: number;
-  overlapRatio: number;
-}
-
-// Queue and job management types
-export interface ProcessingJob {
-  id: string;
-  userId: string;
-  documentId: string;
-  pdfBuffer: Buffer;
-  documentTitle: string;
-  options: ProcessingOptions;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress: number;
-  startedAt?: Date;
-  completedAt?: Date;
-  error?: string;
-  result?: ProcessingResult;
-}
-
-export interface QueueStats {
-  totalJobs: number;
-  pendingJobs: number;
-  processingJobs: number;
-  completedJobs: number;
-  failedJobs: number;
-  averageProcessingTime: number;
-}
-
-// API request/response types
+/**
+ * Document processing request interface
+ */
 export interface DocumentProcessingRequest {
   pdfId: string;
   useOCR?: boolean;
   forceReprocess?: boolean;
-  options?: ProcessingOptions;
+  generateEmbeddings?: boolean;
+  ocrOptions?: {
+    language?: string;
+    psmMode?: number;
+    confidenceThreshold?: number;
+    dpi?: number;
+    preprocessImage?: boolean;
+    autoDetectLanguage?: boolean;
+    multiLanguageSupport?: string[];
+  };
+  chunkingOptions?: {
+    chunkSize?: number;
+    chunkOverlap?: number;
+    preserveStructure?: boolean;
+    respectSentenceBoundaries?: boolean;
+    respectParagraphBoundaries?: boolean;
+  };
+  embeddingOptions?: {
+    model?: string;
+    batchSize?: number;
+    cacheEnabled?: boolean;
+    validateQuality?: boolean;
+    retryAttempts?: number;
+  };
 }
 
+/**
+ * Document processing response interface
+ */
 export interface DocumentProcessingResponse {
   success: boolean;
-  jobId?: string;
-  documentId: string;
-  totalChunks?: number;
-  processingTime?: number;
-  extractionMethod?: 'pdfjs' | 'ocr';
-  status: 'processing' | 'completed' | 'failed';
-  error?: string;
-}
-
-export interface ProcessingStatusRequest {
   jobId: string;
+  documentId: string;
+  status: "processing" | "queued";
+  estimatedTime?: number;
+  message: string;
 }
 
+/**
+ * Processing status response interface
+ */
 export interface ProcessingStatusResponse {
   success: boolean;
-  job?: ProcessingJob;
+  data: {
+    id: string;
+    documentId: string;
+    status: "pending" | "processing" | "completed" | "failed";
+    progress: number;
+    totalChunks: number;
+    processedChunks: number;
+    extractionMethod?: "syncfusion" | "ocr";
+    errorMessage?: string;
+    processingStartedAt?: string;
+    processingCompletedAt?: string;
+    estimatedTimeRemaining?: number;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+/**
+ * Text extraction request payload
+ */
+export interface TextExtractionRequest {
+  pdfId: string;
+  useOCR?: boolean;
+  extractionOptions?: {
+    pageRange?: { start: number; end: number };
+    cleanText?: boolean;
+    chunkSize?: number;
+  };
+}
+
+/**
+ * Text extraction response
+ */
+export interface TextExtractionResponse {
+  success: boolean;
+  text: string;
+  pageCount: number;
+  extractionMethod: "pdfjs" | "ocr";
+  processingTime: number;
   error?: string;
 }
 
-// Database schema types for Supabase
-export interface DocumentChunkRow {
+/**
+ * Question-chunk source mapping
+ */
+export interface QuestionChunkSource {
   id: string;
-  user_id: string;
-  document_id: string;
-  chunk_index: number;
+  questionId: string;
+  chunkId: string;
+  relevanceScore: number;
+  usageType: "primary" | "supporting" | "context";
+  createdAt: string;
+}
+
+/**
+ * Chunk reference for quiz generation
+ */
+export interface ChunkReference {
+  chunkId: string;
   content: string;
-  embedding: number[] | null;
-  token_count: number;
-  page_number: number;
-  section_title: string | null;
-  metadata: Record<string, any>;
-  created_at: string;
-  updated_at: string;
+  pageNumber: number;
+  relevanceScore: number;
+  documentTitle: string;
 }
 
-export interface DocumentProcessingStatusRow {
-  id: string;
-  user_id: string;
-  document_id: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  total_chunks: number;
-  processed_chunks: number;
-  extraction_method: 'pdfjs' | 'ocr' | null;
-  error_message: string | null;
-  processing_started_at: string | null;
-  processing_completed_at: string | null;
-  created_at: string;
-  updated_at: string;
+
+// ============================================================================
+// SEARCH TYPES
+// ============================================================================
+
+/**
+ * Content search request for vector similarity
+ */
+export interface ContentSearchRequest {
+  query: string;
+  documentIds: string[];
+  pageRange?: { start: number; end: number };
+  limit?: number;
+  similarityThreshold?: number;
 }
 
-// Utility types
-export type ExtractionMethod = 'pdfjs' | 'ocr';
-export type ProcessingStatus = 'pending' | 'processing' | 'completed' | 'failed';
-export type ContentType = 'paragraph' | 'heading' | 'list' | 'table' | 'caption';
-
-// Error types
-export class DocumentProcessingError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public details?: any
-  ) {
-    super(message);
-    this.name = 'DocumentProcessingError';
-  }
+/**
+ * Content search response with ranked chunks
+ */
+export interface ContentSearchResponse {
+  success: boolean;
+  chunks: Array<{
+    id: string;
+    content: string;
+    metadata: ChunkMetadata;
+    similarity: number;
+  }>;
+  totalResults: number;
+  error?: string;
 }
 
-export class OCRError extends DocumentProcessingError {
-  constructor(message: string, details?: any) {
-    super(message, 'OCR_ERROR', details);
-    this.name = 'OCRError';
-  }
+/**
+ * Hybrid search configuration options
+ */
+export interface HybridSearchOptions {
+  vectorWeight?: number;
+  keywordWeight?: number;
+  similarityThreshold?: number;
+  enableFuzzyMatch?: boolean;
+  stemming?: boolean;
+  synonymExpansion?: boolean;
+  contentTypes?: ('paragraph' | 'heading' | 'list' | 'table' | 'caption')[];
+  confidenceRange?: { min: number; max: number };
+  relevanceRange?: { min: number; max: number };
+  pageRange?: { start: number; end: number };
+  documentIds?: string[];
+  limit?: number;
+  includeExplanations?: boolean;
+  enableDebugging?: boolean;
+  enableCaching?: boolean;
+  cacheTimeout?: number;
 }
 
-export class ChunkingError extends DocumentProcessingError {
-  constructor(message: string, details?: any) {
-    super(message, 'CHUNKING_ERROR', details);
-    this.name = 'ChunkingError';
-  }
+/**
+ * Search explanation for result transparency
+ */
+export interface SearchExplanation {
+  vectorMatches: string[];
+  keywordMatches: string[];
+  relevanceFactors: string[];
 }
 
-export class QueueError extends DocumentProcessingError {
-  constructor(message: string, details?: any) {
-    super(message, 'QUEUE_ERROR', details);
-    this.name = 'QueueError';
-  }
+/**
+ * Debug information for search optimization
+ */
+export interface SearchDebugInfo {
+  originalQuery: string;
+  processedQuery: string;
+  vectorEmbeddingTime: number;
+  keywordProcessingTime: number;
+  filteringTime: number;
+  rankingTime: number;
+  cacheHit: boolean;
+  indexesUsed: string[];
+  queryPlan?: any;
 }

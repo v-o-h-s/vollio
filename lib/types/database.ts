@@ -506,25 +506,4 @@ export type ExtractionMethodEnum =
   Database["public"]["Enums"]["extraction_method"];
 
 // Additional types for quiz functionality
-export interface DocumentProcessingStatus {
-  id: string;
-  userId: string;
-  documentId: string;
-  status: ProcessingStatusEnum;
-  totalChunks: number;
-  processedChunks: number;
-  extractionMethod?: ExtractionMethodEnum;
-  errorMessage?: string;
-  processingStartedAt?: string;
-  processingCompletedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
-export interface ChunkReference {
-  chunkId: string;
-  content: string;
-  pageNumber: number;
-  relevanceScore: number;
-  documentTitle: string;
-}
