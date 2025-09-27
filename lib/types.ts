@@ -1004,7 +1004,7 @@ export interface QuizConfiguration {
 }
 
 /**
- * Quiz statistics and analytics
+ * Simple quiz statistics without complex analytics
  */
 export interface QuizStatistics {
   totalQuizzes: number;
@@ -1285,12 +1285,7 @@ export interface HybridSearchOptions {
 export interface SearchExplanation {
   vectorMatches: string[];
   keywordMatches: string[];
-  scoringBreakdown: {
-    vectorContribution: number;
-    keywordContribution: number;
-    boosts: Array<{ type: string; value: number; reason: string }>;
-    penalties: Array<{ type: string; value: number; reason: string }>;
-  };
+  // Removed scoring breakdown to keep it simple
   relevanceFactors: string[];
 }
 
@@ -1309,131 +1304,4 @@ export interface SearchDebugInfo {
   queryPlan?: any;
 }
 
-/**
- * Search analytics and performance metrics
- */
-export interface SearchAnalytics {
-  queryComplexity: 'simple' | 'moderate' | 'complex';
-  vectorSearchTime: number;
-  keywordSearchTime: number;
-  combinationTime: number;
-  filteringTime: number;
-  totalProcessingTime: number;
-  resultsBeforeFiltering: number;
-  resultsAfterFiltering: number;
-  cacheHitRate: number;
-  indexEfficiency: number;
-}
-
-/**
- * Search query log entry for analytics
- */
-export interface SearchQueryLog {
-  id: string;
-  userId: string;
-  query: string;
-  searchMethod: 'vector' | 'keyword' | 'hybrid';
-  documentIds: string[];
-  resultCount: number;
-  searchTime: number;
-  queryComplexity: 'simple' | 'moderate' | 'complex';
-  cacheHit: boolean;
-  filters: {
-    contentTypes?: string[];
-    pageRange?: { start: number; end: number };
-    confidenceRange?: { min: number; max: number };
-    relevanceRange?: { min: number; max: number };
-  };
-  performance: {
-    vectorSearchTime: number;
-    keywordSearchTime: number;
-    combinationTime: number;
-    filteringTime: number;
-    indexEfficiency: number;
-  };
-  timestamp: Date;
-}
-
-/**
- * Search performance metrics aggregated data
- */
-export interface SearchPerformanceMetrics {
-  totalSearches: number;
-  averageSearchTime: number;
-  averageResultCount: number;
-  cacheHitRate: number;
-  searchMethodDistribution: Record<string, number>;
-  queryComplexityDistribution: Record<string, number>;
-  popularFilters: Array<{
-    filterType: string;
-    usage: number;
-    averageImpact: number;
-  }>;
-  performanceTrends: Array<{
-    date: string;
-    averageSearchTime: number;
-    searchCount: number;
-    cacheHitRate: number;
-  }>;
-  slowQueries: Array<{
-    query: string;
-    searchTime: number;
-    resultCount: number;
-    timestamp: Date;
-  }>;
-}
-
-/**
- * Search optimization recommendations
- */
-export interface SearchOptimizationRecommendations {
-  queryOptimizations: Array<{
-    type: 'synonym_expansion' | 'stemming' | 'stop_word_removal' | 'fuzzy_matching';
-    description: string;
-    expectedImprovement: number;
-    confidence: number;
-  }>;
-  indexOptimizations: Array<{
-    type: 'vector_index' | 'text_index' | 'composite_index';
-    description: string;
-    expectedSpeedup: number;
-    estimatedCost: 'low' | 'medium' | 'high';
-  }>;
-  cacheOptimizations: Array<{
-    type: 'cache_size' | 'cache_ttl' | 'cache_strategy';
-    description: string;
-    expectedHitRateImprovement: number;
-  }>;
-  filterOptimizations: Array<{
-    filterType: string;
-    description: string;
-    usageFrequency: number;
-    performanceImpact: number;
-  }>;
-}
-
-/**
- * Real-time search monitoring data
- */
-export interface SearchMonitoringData {
-  activeSearches: number;
-  averageResponseTime: number;
-  errorRate: number;
-  cacheHitRate: number;
-  indexHealth: {
-    vectorIndex: 'healthy' | 'degraded' | 'critical';
-    textIndex: 'healthy' | 'degraded' | 'critical';
-    lastOptimized: Date;
-  };
-  resourceUsage: {
-    cpuUsage: number;
-    memoryUsage: number;
-    diskUsage: number;
-  };
-  alerts: Array<{
-    type: 'performance' | 'error' | 'resource';
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    message: string;
-    timestamp: Date;
-  }>;
-}
+// Removed complex analytics types to keep quiz generation simple

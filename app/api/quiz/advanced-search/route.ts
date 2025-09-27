@@ -88,18 +88,7 @@ interface AdvancedSearchResponse {
   }>;
   totalResults: number;
   searchTime: number;
-  analytics: {
-    queryComplexity: 'simple' | 'moderate' | 'complex';
-    vectorSearchTime: number;
-    keywordSearchTime: number;
-    combinationTime: number;
-    filteringTime: number;
-    totalProcessingTime: number;
-    resultsBeforeFiltering: number;
-    resultsAfterFiltering: number;
-    cacheHitRate: number;
-    indexEfficiency: number;
-  };
+  // Removed analytics to keep it simple
   searchMethod: string;
   optimizations?: string[];
 }
@@ -365,18 +354,7 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<AdvancedSe
         })),
         totalResults: vectorResult.totalResults,
         searchTime: vectorResult.searchTime,
-        analytics: {
-          queryComplexity: 'simple' as const,
-          vectorSearchTime: vectorResult.searchTime,
-          keywordSearchTime: 0,
-          combinationTime: 0,
-          filteringTime: 0,
-          totalProcessingTime: vectorResult.searchTime,
-          resultsBeforeFiltering: vectorResult.totalResults,
-          resultsAfterFiltering: vectorResult.totalResults,
-          cacheHitRate: 0,
-          indexEfficiency: 1.0
-        }
+        // Removed analytics to keep it simple
       };
     } else if (searchMethod === 'keyword') {
       // Use pure keyword search (implemented in hybrid service)
@@ -436,7 +414,7 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<AdvancedSe
       results,
       totalResults: searchResult.totalResults,
       searchTime: searchResult.searchTime,
-      analytics: searchResult.analytics,
+      // Removed analytics to keep it simple
       searchMethod: actualSearchMethod,
       optimizations: [] // Could be populated from query optimization
     };
@@ -447,7 +425,7 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<AdvancedSe
     console.log(`   - Documents: ${documentIds.length}`);
     console.log(`   - Results: ${results.length}`);
     console.log(`   - Search time: ${searchResult.searchTime}ms`);
-    console.log(`   - Query complexity: ${searchResult.analytics.queryComplexity}`);
+    // Removed analytics logging to keep it simple
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {

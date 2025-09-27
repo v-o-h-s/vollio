@@ -14,7 +14,7 @@ import {
 } from "@/lib/utils/auth-validation";
 import { vectorSearchService } from "@/lib/services/vector-search-service";
 import { hybridSearchService } from "@/lib/services/hybrid-search-service";
-import { searchAnalyticsService } from "@/lib/services/search-analytics-service";
+// Removed search analytics service to keep it simple
 
 interface ContentSearchRequest {
   query: string;
@@ -90,18 +90,7 @@ interface ContentSearchResponse {
   rankingTime: number;
   cacheHit: boolean;
   searchMethod: string;
-  analytics?: {
-    queryComplexity: 'simple' | 'moderate' | 'complex';
-    vectorSearchTime: number;
-    keywordSearchTime: number;
-    combinationTime: number;
-    filteringTime: number;
-    totalProcessingTime: number;
-    resultsBeforeFiltering: number;
-    resultsAfterFiltering: number;
-    cacheHitRate: number;
-    indexEfficiency: number;
-  };
+  // Removed analytics to keep it simple
   documentBreakdown?: Record<string, {
     documentId: string;
     documentTitle: string;
@@ -316,7 +305,7 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<ContentSea
         results: chunks,
         totalResults: hybridResult.totalResults,
         searchTime: hybridResult.searchTime,
-        analytics: hybridResult.analytics,
+        // Removed analytics to keep it simple
         documentBreakdown: {} // Would need to calculate from hybrid results
       };
     } else {
@@ -376,30 +365,7 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<ContentSea
       actualSearchMethod = 'vector';
     }
 
-    // Log search query for analytics
-    await searchAnalyticsService.logSearchQuery({
-      userId,
-      query,
-      searchMethod: actualSearchMethod as any,
-      documentIds,
-      resultCount: searchResult.results.length,
-      searchTime: searchResult.searchTime,
-      queryComplexity: searchResult.analytics?.queryComplexity || 'simple',
-      cacheHit: searchResult.analytics?.cacheHitRate > 0 || false,
-      filters: {
-        contentTypes,
-        pageRange,
-        confidenceRange,
-        relevanceRange
-      },
-      performance: {
-        vectorSearchTime: searchResult.analytics?.vectorSearchTime || 0,
-        keywordSearchTime: searchResult.analytics?.keywordSearchTime || 0,
-        combinationTime: searchResult.analytics?.combinationTime || 0,
-        filteringTime: searchResult.analytics?.filteringTime || 0,
-        indexEfficiency: searchResult.analytics?.indexEfficiency || 1.0
-      }
-    });
+    // Removed analytics logging to keep it simple
 
     const response: ContentSearchResponse = {
       success: true,
@@ -409,9 +375,9 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<ContentSea
       queryEmbeddingTime: 0, // Not available from current implementations
       retrievalTime: 0, // Not available from current implementations
       rankingTime: 0, // Not available from current implementations
-      cacheHit: searchResult.analytics?.cacheHitRate > 0 || false,
+      cacheHit: false, // Simplified - no cache analytics
       searchMethod: actualSearchMethod,
-      analytics: searchResult.analytics,
+      // Removed analytics to keep it simple
       documentBreakdown: searchResult.documentBreakdown
     };
 
@@ -421,9 +387,7 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<ContentSea
     console.log(`   - Documents: ${documentIds.length}`);
     console.log(`   - Results: ${searchResult.results.length}`);
     console.log(`   - Search time: ${searchResult.searchTime}ms`);
-    if (searchResult.analytics) {
-      console.log(`   - Query complexity: ${searchResult.analytics.queryComplexity}`);
-    }
+    // Removed analytics logging to keep it simple
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {

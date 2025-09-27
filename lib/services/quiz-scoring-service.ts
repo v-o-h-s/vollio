@@ -25,7 +25,7 @@ export interface QuestionResult {
 }
 
 /**
- * Comprehensive quiz results with analytics
+ * Simple quiz results without complex analytics
  */
 export interface QuizResults {
   attemptId?: string;
@@ -39,13 +39,6 @@ export interface QuizResults {
   timeTaken?: number; // in seconds
   completedAt: string;
   questionResults: QuestionResult[];
-  analytics: {
-    difficultyBreakdown: Record<string, { correct: number; total: number }>;
-    questionTypeBreakdown: Record<QuizQuestionType, { correct: number; total: number }>;
-    averageTimePerQuestion?: number;
-    strongAreas: string[];
-    weakAreas: string[];
-  };
 }
 
 /**
@@ -104,9 +97,6 @@ export class QuizScoringService {
     // Calculate percentage score
     const totalScore = maxPoints > 0 ? Math.round((totalPoints / maxPoints) * 100) : 0;
 
-    // Generate analytics
-    const analytics = this.generateAnalytics(questionResults, timeTaken);
-
     return {
       totalScore,
       totalPoints,
@@ -115,7 +105,6 @@ export class QuizScoringService {
       totalQuestions: questions.length,
       timeTaken,
       questionResults,
-      analytics,
     };
   }
 
@@ -270,77 +259,7 @@ export class QuizScoringService {
     }
   }
 
-  /**
-   * Generate analytics from question results
-   */
-  private generateAnalytics(
-    questionResults: QuestionResult[],
-    timeTaken?: number
-  ): QuizResults['analytics'] {
-    const difficultyBreakdown: Record<string, { correct: number; total: number }> = {};
-    const questionTypeBreakdown: Record<QuizQuestionType, { correct: number; total: number }> = {
-      mcq: { correct: 0, total: 0 },
-      truefalse: { correct: 0, total: 0 },
-      fillblank: { correct: 0, total: 0 },
-    };
-
-    const difficultyScores: Record<string, number[]> = {};
-
-    // Analyze results
-    for (const result of questionResults) {
-      // Difficulty breakdown
-      if (!difficultyBreakdown[result.difficulty]) {
-        difficultyBreakdown[result.difficulty] = { correct: 0, total: 0 };
-      }
-      difficultyBreakdown[result.difficulty].total++;
-      if (result.isCorrect) {
-        difficultyBreakdown[result.difficulty].correct++;
-      }
-
-      // Question type breakdown
-      questionTypeBreakdown[result.questionType].total++;
-      if (result.isCorrect) {
-        questionTypeBreakdown[result.questionType].correct++;
-      }
-
-      // Track scores by difficulty for strong/weak area analysis
-      if (!difficultyScores[result.difficulty]) {
-        difficultyScores[result.difficulty] = [];
-      }
-      difficultyScores[result.difficulty].push(result.points / result.maxPoints);
-    }
-
-    // Identify strong and weak areas
-    const strongAreas: string[] = [];
-    const weakAreas: string[] = [];
-
-    for (const [difficulty, stats] of Object.entries(difficultyBreakdown)) {
-      const accuracy = stats.correct / stats.total;
-      if (accuracy >= 0.8) {
-        strongAreas.push(difficulty);
-      } else if (accuracy < 0.5) {
-        weakAreas.push(difficulty);
-      }
-    }
-
-    // Add question type analysis
-    for (const [type, stats] of Object.entries(questionTypeBreakdown)) {
-      const accuracy = stats.correct / stats.total;
-      if (accuracy >= 0.8) {
-        strongAreas.push(`${type} questions`);
-      } else if (accuracy < 0.5) {
-        weakAreas.push(`${type} questions`);
-      }
-    }
-
-    return {
-      difficultyBreakdown,
-      questionTypeBreakdown,
-      averageTimePerQuestion: timeTaken ? Math.round(timeTaken / questionResults.length) : undefined,
-      strongAreas,
-      weakAreas,
-    };
-  }
+  // Removed complex analytics to keep scoring simple
 
   /**
    * Validate quiz attempt data

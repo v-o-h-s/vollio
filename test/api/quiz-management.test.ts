@@ -155,13 +155,7 @@ vi.mock('@/lib/services/quiz-scoring-service', () => ({
           sourcePages: [1]
         }
       ],
-      analytics: {
-        difficultyBreakdown: { medium: { correct: 1, total: 1 } },
-        questionTypeBreakdown: { mcq: { correct: 1, total: 1 }, truefalse: { correct: 0, total: 0 }, fillblank: { correct: 0, total: 0 } },
-        averageTimePerQuestion: 60,
-        strongAreas: ['medium'],
-        weakAreas: []
-      }
+      // Removed analytics to keep it simple
     })),
     validateAttempt: vi.fn(() => ({ valid: true, errors: [] })),
     createAttemptRecord: vi.fn(() => ({

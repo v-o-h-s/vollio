@@ -243,7 +243,7 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<QuizAttemp
     console.log(`   - Attempt ID: ${attemptId}`);
     console.log(`   - Score: ${completeResults.totalScore}%`);
     console.log(`   - Correct: ${completeResults.correctAnswers}/${completeResults.totalQuestions}`);
-    console.log(`   - Analytics: ${JSON.stringify(completeResults.analytics, null, 2)}`);
+    // Removed analytics logging to keep it simple
 
     const response: QuizAttemptResponse = {
       success: true,

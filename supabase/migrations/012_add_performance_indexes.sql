@@ -83,29 +83,7 @@ ON question_chunk_sources (chunk_id, relevance_score DESC);
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_question_chunk_sources_usage_type 
 ON question_chunk_sources (usage_type, relevance_score DESC);
 
--- Chunk analytics performance indexes
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_chunk_analytics_user_usage 
-ON chunk_analytics (user_id, usage_count DESC);
-
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_chunk_analytics_chunk_last_used 
-ON chunk_analytics (chunk_id, last_used DESC);
-
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_chunk_analytics_doc_relevance 
-ON chunk_analytics (document_id, total_relevance_score DESC);
-
--- Chunk quality scores performance indexes
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_chunk_quality_user_overall 
-ON chunk_quality_scores (user_id, overall_quality DESC);
-
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_chunk_quality_chunk_calculated 
-ON chunk_quality_scores (chunk_id, calculated_at DESC);
-
--- Chunk versions performance indexes
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_chunk_versions_chunk_version 
-ON chunk_versions (chunk_id, version DESC);
-
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_chunk_versions_created_desc 
-ON chunk_versions (created_at DESC);
+-- Essential indexes for quiz generation (removed complex analytics indexes)
 
 -- PDF documents performance indexes (if not already exists)
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_pdfs_user_created 
@@ -132,26 +110,9 @@ BEGIN
     END IF;
 END $$;
 
--- Partial indexes for common query patterns
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_quiz_attempts_recent_high_scores 
-ON quiz_attempts (user_id, score DESC, completed_at DESC) 
-WHERE score >= 80 AND completed_at >= NOW() - INTERVAL '30 days';
-
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_document_chunks_high_quality 
-ON document_chunks (user_id, document_id, page_number) 
-WHERE quality_score >= 0.8;
-
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_quiz_questions_high_confidence 
-ON quiz_questions (quiz_id, order_index) 
-WHERE confidence_score >= 0.8;
-
--- Composite indexes for complex queries
+-- Simple indexes for basic quiz functionality
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_quiz_attempts_user_quiz_score_date 
 ON quiz_attempts (user_id, quiz_id, score DESC, completed_at DESC);
-
-CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_document_chunks_user_page_quality 
-ON document_chunks (user_id, page_number, quality_score DESC) 
-WHERE quality_score IS NOT NULL;
 
 -- Function-based indexes for JSON operations
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_quizzes_page_range_start 
@@ -176,61 +137,8 @@ ANALYZE document_chunks;
 ANALYZE document_processing_status;
 ANALYZE quizzes;
 ANALYZE question_chunk_sources;
-ANALYZE chunk_analytics;
-ANALYZE chunk_quality_scores;
-ANALYZE chunk_versions;
 
--- Create a function to get index usage statistics
-CREATE OR REPLACE FUNCTION get_index_usage_stats()
-RETURNS TABLE (
-    schemaname text,
-    tablename text,
-    indexname text,
-    idx_scan bigint,
-    idx_tup_read bigint,
-    idx_tup_fetch bigint,
-    size_mb numeric
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        s.schemaname::text,
-        s.tablename::text,
-        s.indexname::text,
-        s.idx_scan,
-        s.idx_tup_read,
-        s.idx_tup_fetch,
-        ROUND(pg_relation_size(s.indexrelid) / 1024.0 / 1024.0, 2) as size_mb
-    FROM pg_stat_user_indexes s
-    JOIN pg_index i ON s.indexrelid = i.indexrelid
-    WHERE s.schemaname = 'public'
-    ORDER BY s.idx_scan DESC, size_mb DESC;
-END;
-$$ LANGUAGE plpgsql;
-
--- Create a function to identify unused indexes
-CREATE OR REPLACE FUNCTION get_unused_indexes()
-RETURNS TABLE (
-    schemaname text,
-    tablename text,
-    indexname text,
-    size_mb numeric
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        s.schemaname::text,
-        s.tablename::text,
-        s.indexname::text,
-        ROUND(pg_relation_size(s.indexrelid) / 1024.0 / 1024.0, 2) as size_mb
-    FROM pg_stat_user_indexes s
-    JOIN pg_index i ON s.indexrelid = i.indexrelid
-    WHERE s.schemaname = 'public'
-    AND s.idx_scan = 0
-    AND NOT i.indisunique
-    ORDER BY size_mb DESC;
-END;
-$$ LANGUAGE plpgsql;
+-- Removed complex analytics functions to keep it simple
 
 -- Create a function for vector search with performance optimization
 CREATE OR REPLACE FUNCTION match_document_chunks_optimized(
@@ -276,36 +184,8 @@ BEGIN
 END;
 $$;
 
--- Grant execute permissions on the new functions
-GRANT EXECUTE ON FUNCTION get_index_usage_stats() TO authenticated;
-GRANT EXECUTE ON FUNCTION get_unused_indexes() TO authenticated;
+-- Grant execute permissions on the vector search function
 GRANT EXECUTE ON FUNCTION match_document_chunks_optimized(vector, float, int, text, uuid[], int[]) TO authenticated;
 
 -- Add comments for documentation
-COMMENT ON FUNCTION get_index_usage_stats() IS 'Returns statistics about index usage for performance monitoring';
-COMMENT ON FUNCTION get_unused_indexes() IS 'Identifies potentially unused indexes that could be dropped';
 COMMENT ON FUNCTION match_document_chunks_optimized(vector, float, int, text, uuid[], int[]) IS 'Optimized vector search function with filtering capabilities';
-
--- Create a view for quiz performance analytics
-CREATE OR REPLACE VIEW quiz_performance_analytics AS
-SELECT 
-    q.id as quiz_id,
-    q.title,
-    q.difficulty,
-    q.question_count,
-    COUNT(qa.id) as attempt_count,
-    AVG(qa.score) as average_score,
-    MIN(qa.score) as min_score,
-    MAX(qa.score) as max_score,
-    AVG(qa.time_taken) as average_time_taken,
-    COUNT(DISTINCT qa.user_id) as unique_users,
-    q.created_at as quiz_created_at,
-    MAX(qa.completed_at) as last_attempt_at
-FROM quizzes q
-LEFT JOIN quiz_attempts qa ON q.id = qa.quiz_id
-GROUP BY q.id, q.title, q.difficulty, q.question_count, q.created_at;
-
--- Grant access to the view
-GRANT SELECT ON quiz_performance_analytics TO authenticated;
-
-COMMENT ON VIEW quiz_performance_analytics IS 'Aggregated performance analytics for quizzes';
