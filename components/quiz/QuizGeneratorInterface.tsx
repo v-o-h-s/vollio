@@ -2,7 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -13,18 +19,29 @@ import { QuizConfigurationPanel } from "./QuizConfigurationPanel";
 import { MultiDocumentStatus } from "./MultiDocumentStatus";
 import { ContentPreview } from "./ContentPreview";
 import { QuizGenerationErrorBoundary } from "./QuizErrorBoundary";
-import { QuizGenerationLoading, QuizGeneratorSkeleton } from "./QuizLoadingStates";
+import {
+  QuizGenerationLoading,
+  QuizGeneratorSkeleton,
+} from "./QuizLoadingStates";
 import { useQuizGenerationErrorHandling } from "@/hooks/use-quiz-error-handling";
 import { QuizConfiguration } from "@/lib/types/quiz";
 import { type DocumentProcessingStatus as DocumentProcessingStatusType } from "@/lib/types/document-processing";
 import { DocumentProcessingStatus } from "./DocumentProcessingStatus";
-import { FileText, Clock, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 
 interface QuizGeneratorInterfaceProps {
   className?: string;
 }
 
-export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProps) {
+export function QuizGeneratorInterface({
+  className,
+}: QuizGeneratorInterfaceProps) {
   const router = useRouter();
   const toast = useToastActions();
   const {
@@ -33,7 +50,7 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
     executeWithErrorHandling,
     clearError,
     error: errorHandlingError,
-    isRetrying
+    isRetrying,
   } = useQuizGenerationErrorHandling();
 
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
@@ -42,9 +59,18 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
     difficulty: "medium",
     questionTypes: ["mcq", "truefalse"],
   });
-  const [processingStatuses, setProcessingStatuses] = useState<Record<string, DocumentProcessingStatusType>>({});
+  const [processingStatuses, setProcessingStatuses] = useState<
+    Record<string, DocumentProcessingStatusType>
+  >({});
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationStage, setGenerationStage] = useState<'initializing' | 'searching' | 'generating' | 'validating' | 'storing' | 'complete'>('initializing');
+  const [generationStage, setGenerationStage] = useState<
+    | "initializing"
+    | "searching"
+    | "generating"
+    | "validating"
+    | "storing"
+    | "complete"
+  >("initializing");
   const [generationProgress, setGenerationProgress] = useState(0);
   const [generationError, setGenerationError] = useState<string | null>(null);
 
@@ -65,30 +91,37 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
 
   const checkProcessingStatuses = async (documentIds: string[]) => {
     try {
-      await executeWithErrorHandling(async () => {
-        const statusPromises = documentIds.map(async (docId) => {
-          const response = await fetch(`/api/quiz/processing-status/${docId}`);
-          if (!response.ok) {
-            throw new Error(`Failed to fetch status for document ${docId}: ${response.statusText}`);
-          }
-          const result = await response.json();
-          return { docId, status: result.data };
-        });
+      await executeWithErrorHandling(
+        async () => {
+          const statusPromises = documentIds.map(async (docId) => {
+            const response = await fetch(
+              `/api/quiz/processing-status/${docId}`
+            );
+            if (!response.ok) {
+              throw new Error(
+                `Failed to fetch status for document ${docId}: ${response.statusText}`
+              );
+            }
+            const result = await response.json();
+            return { docId, status: result.data };
+          });
 
-        const results = await Promise.all(statusPromises);
-        const statusMap: Record<string, DocumentProcessingStatusType> = {};
-        
-        results.forEach(({ docId, status }) => {
-          if (status) {
-            statusMap[docId] = status;
-          }
-        });
+          const results = await Promise.all(statusPromises);
+          const statusMap: Record<string, DocumentProcessingStatusType> = {};
 
-        setProcessingStatuses(statusMap);
-      }, {
-        component: 'QuizGenerator',
-        action: 'check_processing_status'
-      });
+          results.forEach(({ docId, status }) => {
+            if (status) {
+              statusMap[docId] = status;
+            }
+          });
+
+          setProcessingStatuses(statusMap);
+        },
+        {
+          component: "QuizGenerator",
+          action: "check_processing_status",
+        }
+      );
     } catch (error) {
       // Error is already handled by executeWithErrorHandling
       console.error("Failed to check processing statuses:", error);
@@ -96,9 +129,9 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
   };
 
   const handleDocumentToggle = (documentId: string) => {
-    setSelectedDocuments(prev => 
+    setSelectedDocuments((prev) =>
       prev.includes(documentId)
-        ? prev.filter(id => id !== documentId)
+        ? prev.filter((id) => id !== documentId)
         : [...prev, documentId]
     );
   };
@@ -110,44 +143,48 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
     );
 
     try {
-      await executeWithErrorHandling(async () => {
-        const response = await fetch("/api/quiz/process-document", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pdfId: documentId }),
-        });
+      await executeWithErrorHandling(
+        async () => {
+          const response = await fetch("/api/quiz/process-document", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pdfId: documentId }),
+          });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to process document");
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to process document");
+          }
+
+          const result = await response.json();
+
+          // Update toast to show success
+          toast.update(loadingToastId, {
+            type: "success",
+            title: "Processing Started",
+            description: `Document processing has been queued. Job ID: ${result.jobId}`,
+            duration: 5000,
+          });
+
+          // Refresh processing status
+          await checkProcessingStatuses([documentId]);
+        },
+        {
+          component: "QuizGenerator",
+          action: "process_document",
+          documentId,
         }
-
-        const result = await response.json();
-        
-        // Update toast to show success
-        toast.update(loadingToastId, {
-          type: 'success',
-          title: 'Processing Started',
-          description: `Document processing has been queued. Job ID: ${result.jobId}`,
-          duration: 5000
-        });
-
-        // Refresh processing status
-        await checkProcessingStatuses([documentId]);
-      }, {
-        component: 'QuizGenerator',
-        action: 'process_document',
-        documentId
-      });
+      );
     } catch (error) {
       // Update toast to show error
       toast.update(loadingToastId, {
-        type: 'error',
-        title: 'Processing Failed',
-        description: error instanceof Error ? error.message : "Failed to process document",
-        duration: 8000
+        type: "error",
+        title: "Processing Failed",
+        description:
+          error instanceof Error ? error.message : "Failed to process document",
+        duration: 8000,
       });
-      
+
       handleDocumentProcessingError(error);
     }
   };
@@ -166,90 +203,111 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
     }
 
     // Check if all selected documents are processed
-    const unprocessedDocs = selectedDocuments.filter(docId => {
+    const unprocessedDocs = selectedDocuments.filter((docId) => {
       const status = processingStatuses[docId];
       return !status || status.status !== "completed";
     });
 
     if (unprocessedDocs.length > 0) {
-      const error = "All selected documents must be processed before generating a quiz";
+      const error =
+        "All selected documents must be processed before generating a quiz";
       setGenerationError(error);
       toast.warning("Documents Not Ready", error);
       return;
     }
 
     setIsGenerating(true);
-    setGenerationStage('initializing');
+    setGenerationStage("initializing");
     setGenerationProgress(0);
 
     try {
-      await executeWithErrorHandling(async () => {
-        // Enhanced title for multi-document quizzes
-        const documentTitles = selectedDocuments.map(docId => {
-          const pdf = pdfs.find(p => p.id === docId);
-          return pdf?.filename || 'Unknown Document';
-        });
-        
-        const title = selectedDocuments.length === 1 
-          ? `Quiz: ${documentTitles[0]}`
-          : `Multi-Document Quiz: ${documentTitles.slice(0, 2).join(', ')}${documentTitles.length > 2 ? ` +${documentTitles.length - 2} more` : ''}`;
+      await executeWithErrorHandling(
+        async () => {
+          // Enhanced title for multi-document quizzes
+          const documentTitles = selectedDocuments.map((docId) => {
+            const pdf = pdfs.find((p) => p.id === docId);
+            return pdf?.filename || "Unknown Document";
+          });
 
-        // Simulate progress stages
-        const stages: Array<typeof generationStage> = ['initializing', 'searching', 'generating', 'validating', 'storing'];
-        
-        for (let i = 0; i < stages.length; i++) {
-          setGenerationStage(stages[i]);
-          setGenerationProgress((i / stages.length) * 90); // Leave 10% for final completion
-          
-          // Add small delay to show progress (remove in production if API provides real progress)
-          if (i < stages.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 500));
+          const title =
+            selectedDocuments.length === 1
+              ? `Quiz: ${documentTitles[0]}`
+              : `Multi-Document Quiz: ${documentTitles.slice(0, 2).join(", ")}${
+                  documentTitles.length > 2
+                    ? ` +${documentTitles.length - 2} more`
+                    : ""
+                }`;
+
+          // Simulate progress stages
+          const stages: Array<typeof generationStage> = [
+            "initializing",
+            "searching",
+            "generating",
+            "validating",
+            "storing",
+          ];
+
+          for (let i = 0; i < stages.length; i++) {
+            setGenerationStage(stages[i]);
+            setGenerationProgress((i / stages.length) * 90); // Leave 10% for final completion
+
+            // Add small delay to show progress (remove in production if API provides real progress)
+            if (i < stages.length - 1) {
+              await new Promise((resolve) => setTimeout(resolve, 500));
+            }
           }
+
+          const response = await fetch("/api/quiz/generate-rag", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              documentIds: selectedDocuments,
+              questionCount: quizConfig.questionCount,
+              difficulty: quizConfig.difficulty,
+              questionTypes: quizConfig.questionTypes,
+              pageRange: quizConfig.pageRange,
+              notes: quizConfig.notes,
+              focusAreas: quizConfig.focusAreas,
+              learningObjectives: quizConfig.learningObjectives,
+              title,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to generate quiz");
+          }
+
+          const result = await response.json();
+
+          // Complete progress
+          setGenerationStage("complete");
+          setGenerationProgress(100);
+
+          // Show success toast
+          toast.success(
+            "Quiz Generated Successfully!",
+            `Created ${
+              result.questions?.length || quizConfig.questionCount
+            } questions from ${selectedDocuments.length} document${
+              selectedDocuments.length !== 1 ? "s" : ""
+            }.`
+          );
+
+          // Small delay to show completion, then navigate
+          setTimeout(() => {
+            router.push(`/dashboard/quiz/${result.quizId}`);
+          }, 1000);
+        },
+        {
+          component: "QuizGenerator",
+          action: "generate_quiz",
         }
-
-        const response = await fetch("/api/quiz/generate-rag", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            documentIds: selectedDocuments,
-            questionCount: quizConfig.questionCount,
-            difficulty: quizConfig.difficulty,
-            questionTypes: quizConfig.questionTypes,
-            pageRange: quizConfig.pageRange,
-            notes: quizConfig.notes,
-            focusAreas: quizConfig.focusAreas,
-            learningObjectives: quizConfig.learningObjectives,
-            title,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to generate quiz");
-        }
-
-        const result = await response.json();
-        
-        // Complete progress
-        setGenerationStage('complete');
-        setGenerationProgress(100);
-        
-        // Show success toast
-        toast.success(
-          "Quiz Generated Successfully!",
-          `Created ${result.questions?.length || quizConfig.questionCount} questions from ${selectedDocuments.length} document${selectedDocuments.length !== 1 ? 's' : ''}.`
-        );
-
-        // Small delay to show completion, then navigate
-        setTimeout(() => {
-          router.push(`/dashboard/quiz/${result.quizId}`);
-        }, 1000);
-      }, {
-        component: 'QuizGenerator',
-        action: 'generate_quiz'
-      });
+      );
     } catch (error) {
-      setGenerationError(error instanceof Error ? error.message : "Failed to generate quiz");
+      setGenerationError(
+        error instanceof Error ? error.message : "Failed to generate quiz"
+      );
       handleQuizGenerationError(error);
     } finally {
       setIsGenerating(false);
@@ -291,8 +349,11 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
     }
   };
 
-  const canGenerateQuiz = selectedDocuments.length > 0 && 
-    selectedDocuments.every(docId => getDocumentStatus(docId) === "completed");
+  const canGenerateQuiz =
+    selectedDocuments.length > 0 &&
+    selectedDocuments.every(
+      (docId) => getDocumentStatus(docId) === "completed"
+    );
 
   // Show quiz generation loading state
   if (isGenerating) {
@@ -302,7 +363,10 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
         progress={generationProgress}
         documentCount={selectedDocuments.length}
         questionCount={quizConfig.questionCount}
-        estimatedTimeRemaining={Math.max(0, Math.ceil((100 - generationProgress) / 10) * 15)} // Rough estimate
+        estimatedTimeRemaining={Math.max(
+          0,
+          Math.ceil((100 - generationProgress) / 10) * 15
+        )} // Rough estimate
       />
     );
   }
@@ -330,7 +394,8 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Quiz Generator</h1>
           <p className="text-muted-foreground">
-            Create intelligent quizzes from your PDF documents using AI-powered content analysis
+            Create intelligent quizzes from your PDF documents using AI-powered
+            content analysis
           </p>
         </div>
 
@@ -346,7 +411,7 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
             }}
           />
         )}
-
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Document Selection */}
         <div className="lg:col-span-2 space-y-4">
@@ -357,14 +422,17 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
                 Select Documents
               </CardTitle>
               <CardDescription>
-                Choose the PDF documents you want to generate quiz questions from
+                Choose the PDF documents you want to generate quiz questions
+                from
               </CardDescription>
             </CardHeader>
             <CardContent>
               {pdfs.length === 0 ? (
                 <div className="text-center py-8">
                   <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No PDF documents found</p>
+                  <p className="text-muted-foreground">
+                    No PDF documents found
+                  </p>
                   <Button
                     variant="outline"
                     className="mt-4"
@@ -380,10 +448,14 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
                     <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                       <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
                         <FileText className="h-4 w-4" />
-                        <span className="font-medium">Multi-Document Quiz Mode</span>
+                        <span className="font-medium">
+                          Multi-Document Quiz Mode
+                        </span>
                       </div>
                       <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-                        {selectedDocuments.length} documents selected. Questions will be generated from content across all selected documents with balanced representation.
+                        {selectedDocuments.length} documents selected. Questions
+                        will be generated from content across all selected
+                        documents with balanced representation.
                       </p>
                     </div>
                   )}
@@ -392,7 +464,7 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
                     const isSelected = selectedDocuments.includes(pdf.id);
                     const status = getDocumentStatus(pdf.id);
                     const processingStatus = processingStatuses[pdf.id];
-                    
+
                     return (
                       <div
                         key={pdf.id}
@@ -411,30 +483,43 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
                             className="rounded border-border"
                           />
                           <div className="flex-1">
-                            <p className="font-medium truncate">{pdf.filename}</p>
+                            <p className="font-medium truncate">
+                              {pdf.filename}
+                            </p>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              <span>{(pdf.fileSize / 1024 / 1024).toFixed(1)} MB</span>
-                              {processingStatus && processingStatus.totalChunks > 0 && (
-                                <span>{processingStatus.totalChunks} chunks</span>
-                              )}
+                              <span>
+                                {(pdf.fileSize / 1024 / 1024).toFixed(1)} MB
+                              </span>
+                              {processingStatus &&
+                                processingStatus.totalChunks > 0 && (
+                                  <span>
+                                    {processingStatus.totalChunks} chunks
+                                  </span>
+                                )}
                               {isSelected && selectedDocuments.length > 1 && (
                                 <Badge variant="outline" className="text-xs">
-                                  Document {selectedDocuments.indexOf(pdf.id) + 1}
+                                  Document{" "}
+                                  {selectedDocuments.indexOf(pdf.id) + 1}
                                 </Badge>
                               )}
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-2">
                           {getStatusIcon(status)}
                           <Badge
-                            variant={status === "completed" ? "default" : 
-                                   status === "failed" ? "destructive" : "secondary"}
+                            variant={
+                              status === "completed"
+                                ? "default"
+                                : status === "failed"
+                                ? "destructive"
+                                : "secondary"
+                            }
                           >
                             {getStatusText(status)}
                           </Badge>
-                          
+
                           {status === "unprocessed" && (
                             <Button
                               size="sm"
@@ -471,7 +556,7 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
               documentIds={selectedDocuments}
               processingStatuses={processingStatuses}
               documentTitles={Object.fromEntries(
-                pdfs.map(pdf => [pdf.id, pdf.filename])
+                pdfs.map((pdf) => [pdf.id, pdf.filename])
               )}
               onRefresh={() => checkProcessingStatuses(selectedDocuments)}
             />
@@ -522,7 +607,8 @@ export function QuizGeneratorInterface({ className }: QuizGeneratorInterfaceProp
 
             {selectedDocuments.length > 0 && !canGenerateQuiz && (
               <p className="text-sm text-muted-foreground text-center">
-                All selected documents must be processed before generating a quiz
+                All selected documents must be processed before generating a
+                quiz
               </p>
             )}
           </div>

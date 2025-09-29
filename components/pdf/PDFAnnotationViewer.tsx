@@ -15,7 +15,7 @@ import {
   AllowedInteraction,
 } from "@syncfusion/ej2-react-pdfviewer";
 import { useGetPDFQuery, useCreateNoteMutation } from "@/lib/store/apiSlice";
-import { PDFDocument, TextBounds } from "@/lib/types";
+import { PDFDocument, TextBounds } from "@/lib/types/pdf";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PDFViewerFallback } from "@/components/pdf/FallbackUI";
 import { FileText, AlertCircle, RefreshCw } from "lucide-react";
@@ -34,28 +34,22 @@ export interface PDFAnnotationViewerProps {
   pdfDocument: PDFDocument | null;
   /** Additional CSS classes */
   className?: string;
-
 }
 
 interface TextSelectionCompleteEventArgs {
-  textContent: string;       // the actual selected text
-  pageNumber: number;        // the page where the selection happened
-  element: HTMLElement;      // the text layer element
-  textBounds: any[];             // array of bounding boxes (x, y, width, height for each fragment)
-
+  textContent: string; // the actual selected text
+  pageNumber: number; // the page where the selection happened
+  element: HTMLElement; // the text layer element
+  textBounds: any[]; // array of bounding boxes (x, y, width, height for each fragment)
 }
-
-
 
 /**
  * Main PDFAnnotationViewer Component
  */
 
-
 const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   pdfDocument,
   className = "",
-
 }) => {
   // Component state
   const [isLoading, setIsLoading] = useState(true);
@@ -66,11 +60,18 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Text selection and toolbar state
   const [selectedText, setSelectedText] = useState<string>("");
-  const [selectionBounds, setSelectionBounds] = useState<TextBounds | null>(null);
-  const [selectedTextBounds, setSelectedTextBounds] = useState<TextBounds[] | null>(null);
+  const [selectionBounds, setSelectionBounds] = useState<TextBounds | null>(
+    null
+  );
+  const [selectedTextBounds, setSelectedTextBounds] = useState<
+    TextBounds[] | null
+  >(null);
   const [showSelectionToolbar, setShowSelectionToolbar] = useState(false);
   const [showNoteModal, setShowNoteModal] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
+  const [tooltipPosition, setTooltipPosition] = useState<{
+    x: number;
+    y: number;
+  }>({ x: 0, y: 0 });
   const [currentPageNumber, setCurrentPageNumber] = useState<number>(0);
 
   // Highlight hover state
@@ -110,10 +111,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       ? `${window.location.protocol}//${window.location.host}/lib`
       : "/lib";
 
-
-
   // extracting the selection bounds
-  const extractSelectionBounds = (args: TextSelectionCompleteEventArgs): TextBounds[] => {
+  const extractSelectionBounds = (
+    args: TextSelectionCompleteEventArgs
+  ): TextBounds[] => {
     return args.textBounds.map((b) => ({
       x: b.left,
       y: b.top,
@@ -123,167 +124,156 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   };
 
   /* Text Selection Handlers */
-  const handleSelectionTextEnd = useCallback((args: any) => {
-    const textBounds = extractSelectionBounds(args)
-    setSelectedTextBounds(textBounds)
+  const handleSelectionTextEnd = useCallback(
+    (args: any) => {
+      const textBounds = extractSelectionBounds(args);
+      setSelectedTextBounds(textBounds);
 
+      // TODO use this as way to highlight text pls daddy
+      // const annotationBounds = extractSelectionBounds(args);
 
+      // // Convert textBounds to the format expected by addAnnotation
 
-    // TODO use this as way to highlight text pls daddy
-    // const annotationBounds = extractSelectionBounds(args);
-
-    // // Convert textBounds to the format expected by addAnnotation
-
-
-
-    try {
-      // Validate input parameters first before resetting any state
-      if (
-        !currentPdfData ||
-        !args ||
-        !args.textContent ||
-        !args.textContent.trim()
-      ) {
-
-        return;
-      }
-
-      // Validate textBounds array
-      if (
-        !args.textBounds ||
-        !Array.isArray(args.textBounds) ||
-        args.textBounds.length === 0
-      ) {
-        console.warn("Invalid textBounds array in text selection:", args);
-        return;
-      }
-
-      // Calculate overall selection bounds
-
-
-
-      const left = Math.min(...args.textBounds.map((b: any) => b.left));
-      const right = Math.max(...args.textBounds.map((b: any) => b.right));
-      const top = Math.min(...args.textBounds.map((b: any) => b.top));
-      const bottom = Math.max(...args.textBounds.map((b: any) => b.bottom));
-
-      const x = left;
-      const y = top;
-      const width = right - left;
-      const height = bottom - top;
-
-      // Validate page index
-      if (typeof args.pageIndex !== "number" || args.pageIndex < 0) {
-        console.warn("Invalid page index in text selection:", args.pageIndex);
-        return;
-      }
-
-      // Store selection data
-      const textContent = args.textContent.trim();
-
-
-      // Set new state (don't clear showSelectionToolbar as it causes flicker)
-      setSelectedText(textContent);
-      setCurrentPageNumber(args.pageIndex);      // Convert PDF coordinates to screen coordinates
-      let screenX = x + width / 2;
-      let screenY = y - 10;
-
-      // Convert PDF coordinates to screen coordinates using Syncfusion's coordinate system
-      if (pdfViewerRef.current) {
-        try {
-          // Use Syncfusion's built-in coordinate conversion if available
-          const viewer = pdfViewerRef.current;
-
-          // Get the PDF viewer container element
-          const viewerElement = viewer.element;
-          if (viewerElement) {
-            // Look for the page canvas or page container
-            const pageCanvas =
-              viewerElement.querySelector(
-                `canvas[id*="${args.pageIndex}"]`
-              ) ||
-              viewerElement.querySelector(".e-pv-page-canvas") ||
-              viewerElement.querySelector(`#pagecanvas_${args.pageIndex}`);
-
-            if (pageCanvas) {
-              const canvasRect = pageCanvas.getBoundingClientRect();
-
-              // Convert PDF coordinates to screen coordinates using canvas position
-              screenX = canvasRect.left + x + width / 2;
-              screenY = canvasRect.top + y - 10;
-
-
-            } else {
-              // Fallback to viewer element
-              const viewerRect = viewerElement.getBoundingClientRect();
-              screenX = viewerRect.left + x + width / 2;
-              screenY = viewerRect.top + y - 10;
-
-            }
-          }
-        } catch (error) {
-          console.warn(
-            "Could not convert PDF coordinates to screen coordinates:",
-            error
-          );
-          // Ultimate fallback to original coordinates
-          screenX = x + width / 2;
-          screenY = y - 10;
+      try {
+        // Validate input parameters first before resetting any state
+        if (
+          !currentPdfData ||
+          !args ||
+          !args.textContent ||
+          !args.textContent.trim()
+        ) {
+          return;
         }
+
+        // Validate textBounds array
+        if (
+          !args.textBounds ||
+          !Array.isArray(args.textBounds) ||
+          args.textBounds.length === 0
+        ) {
+          console.warn("Invalid textBounds array in text selection:", args);
+          return;
+        }
+
+        // Calculate overall selection bounds
+
+        const left = Math.min(...args.textBounds.map((b: any) => b.left));
+        const right = Math.max(...args.textBounds.map((b: any) => b.right));
+        const top = Math.min(...args.textBounds.map((b: any) => b.top));
+        const bottom = Math.max(...args.textBounds.map((b: any) => b.bottom));
+
+        const x = left;
+        const y = top;
+        const width = right - left;
+        const height = bottom - top;
+
+        // Validate page index
+        if (typeof args.pageIndex !== "number" || args.pageIndex < 0) {
+          console.warn("Invalid page index in text selection:", args.pageIndex);
+          return;
+        }
+
+        // Store selection data
+        const textContent = args.textContent.trim();
+
+        // Set new state (don't clear showSelectionToolbar as it causes flicker)
+        setSelectedText(textContent);
+        setCurrentPageNumber(args.pageIndex); // Convert PDF coordinates to screen coordinates
+        let screenX = x + width / 2;
+        let screenY = y - 10;
+
+        // Convert PDF coordinates to screen coordinates using Syncfusion's coordinate system
+        if (pdfViewerRef.current) {
+          try {
+            // Use Syncfusion's built-in coordinate conversion if available
+            const viewer = pdfViewerRef.current;
+
+            // Get the PDF viewer container element
+            const viewerElement = viewer.element;
+            if (viewerElement) {
+              // Look for the page canvas or page container
+              const pageCanvas =
+                viewerElement.querySelector(
+                  `canvas[id*="${args.pageIndex}"]`
+                ) ||
+                viewerElement.querySelector(".e-pv-page-canvas") ||
+                viewerElement.querySelector(`#pagecanvas_${args.pageIndex}`);
+
+              if (pageCanvas) {
+                const canvasRect = pageCanvas.getBoundingClientRect();
+
+                // Convert PDF coordinates to screen coordinates using canvas position
+                screenX = canvasRect.left + x + width / 2;
+                screenY = canvasRect.top + y - 10;
+              } else {
+                // Fallback to viewer element
+                const viewerRect = viewerElement.getBoundingClientRect();
+                screenX = viewerRect.left + x + width / 2;
+                screenY = viewerRect.top + y - 10;
+              }
+            }
+          } catch (error) {
+            console.warn(
+              "Could not convert PDF coordinates to screen coordinates:",
+              error
+            );
+            // Ultimate fallback to original coordinates
+            screenX = x + width / 2;
+            screenY = y - 10;
+          }
+        }
+
+        // Ensure tooltip stays within viewport bounds
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Adjust if tooltip would go off screen
+        if (screenX > viewportWidth - 200) {
+          screenX = viewportWidth - 200;
+        }
+        if (screenX < 10) {
+          screenX = 10;
+        }
+        if (screenY < 10) {
+          screenY = screenY + height + 20; // Position below if too close to top
+        }
+        if (screenY > viewportHeight - 100) {
+          screenY = screenY - 60; // Position above if too close to bottom
+        }
+
+        // Store selection bounds for highlight creation later
+        const selectionBounds: TextBounds = {
+          x,
+          y,
+          width,
+          height,
+        };
+
+        // Set tooltip position and show it
+        const tooltipPosition = {
+          x: screenX,
+          y: screenY,
+        };
+
+        // Update all state immediately in sync, but use a small delay to ensure clean transitions
+        setSelectionBounds(selectionBounds);
+        setTooltipPosition(tooltipPosition);
+
+        // Ensure clean state transition for subsequent selections
+        setTimeout(() => {
+          setShowSelectionToolbar(true);
+        }, 10); // Very small delay to ensure clean state update
+      } catch (error) {
+        console.error("Error handling text selection:", error);
+        // Don't throw - text selection errors shouldn't break the viewer
+        setShowSelectionToolbar(false);
       }
-
-      // Ensure tooltip stays within viewport bounds
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-
-      // Adjust if tooltip would go off screen
-      if (screenX > viewportWidth - 200) {
-        screenX = viewportWidth - 200;
-      }
-      if (screenX < 10) {
-        screenX = 10;
-      }
-      if (screenY < 10) {
-        screenY = screenY + height + 20; // Position below if too close to top
-      }
-      if (screenY > viewportHeight - 100) {
-        screenY = screenY - 60; // Position above if too close to bottom
-      }
-
-      // Store selection bounds for highlight creation later
-      const selectionBounds: TextBounds = {
-        x,
-        y,
-        width,
-        height,
-      };
-
-      // Set tooltip position and show it
-      const tooltipPosition = {
-        x: screenX,
-        y: screenY,
-      };
-
-
-
-      // Update all state immediately in sync, but use a small delay to ensure clean transitions
-      setSelectionBounds(selectionBounds);
-      setTooltipPosition(tooltipPosition);
-
-      // Ensure clean state transition for subsequent selections
-      setTimeout(() => {
-        setShowSelectionToolbar(true);
-      }, 10); // Very small delay to ensure clean state update
-    } catch (error) {
-      console.error("Error handling text selection:", error);
-      // Don't throw - text selection errors shouldn't break the viewer
-      setShowSelectionToolbar(false);
-    }
-  }, [currentPdfData]);
+    },
+    [currentPdfData]
+  );
 
   // Handle note creation from selection
   const handleCreateNoteFromSelection = useCallback(() => {
-
     setShowSelectionToolbar(false);
     setShowNoteModal(true);
   }, [selectedText, selectionBounds]);
@@ -296,48 +286,48 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   }, []);
 
   // Handle note creation completion
-  const handleNoteCreated = useCallback(async (noteId: string) => {
+  const handleNoteCreated = useCallback(
+    async (noteId: string) => {
+      // Create highlight annotation linked to the note
+      if (pdfViewerRef.current && selectionBounds && selectedText) {
+        try {
+          // Create highlight annotation using a more flexible approach
+          const annotationOptions: Partial<HighlightSettings> = {
+            bounds: selectedTextBounds as TextBounds[], // Use the extracted text bounds for accurate highlighting
+            pageNumber: currentPageNumber, // Convert to 1-based page number for Syncfusion
+            author: "User",
+            subject: "Highlight",
+            annotationSelectorSettings: {},
+            color: "#FFFF00",
+            opacity: 0.4,
+            enableMultiPageAnnotation: false,
+            enableTextMarkupResizer: true,
+            customData: { id: "highlight-123", note: "Important point" },
+            isLock: true,
+            isPrint: false,
+          };
+          // Cast to any to bypass TypeScript strictness for minimal working solution
 
+          // Cast to any to bypass TypeScript strictness for minimal working solution
+          pdfViewerRef.current?.annotation.addAnnotation(
+            "Highlight",
+            annotationOptions as HighlightSettings
+          );
 
-    // Create highlight annotation linked to the note
-    if (pdfViewerRef.current && selectionBounds && selectedText) {
-      try {
-        // Create highlight annotation using a more flexible approach
-        const annotationOptions: Partial<HighlightSettings> = {
-          bounds: selectedTextBounds as TextBounds[], // Use the extracted text bounds for accurate highlighting
-          pageNumber: currentPageNumber, // Convert to 1-based page number for Syncfusion
-          author: 'User',
-          subject: 'Highlight',
-          annotationSelectorSettings: {},
-          color: '#FFFF00',
-          opacity: 0.4,
-          enableMultiPageAnnotation: false,
-          enableTextMarkupResizer: true,
-          customData: { id: 'highlight-123', note: 'Important point' },
-          isLock: true,
-          isPrint: false,
-
-        };
-        // Cast to any to bypass TypeScript strictness for minimal working solution
-
-        // Cast to any to bypass TypeScript strictness for minimal working solution
-        pdfViewerRef.current?.annotation.addAnnotation("Highlight", annotationOptions as HighlightSettings);
-
-
-        // TODO: Create annotation record in database with note linkage
-        // This should be done via API call to store the relationship
-
-      } catch (error) {
-        console.error('Error creating highlight:', error);
+          // TODO: Create annotation record in database with note linkage
+          // This should be done via API call to store the relationship
+        } catch (error) {
+          console.error("Error creating highlight:", error);
+        }
       }
-    }
 
-    // DON'T close modal automatically - let user control when to close
-    // setShowNoteModal(false);
-    // setSelectedText("");
-    // setSelectionBounds(null);
-
-  }, [selectionBounds, selectedText, currentPageNumber]);
+      // DON'T close modal automatically - let user control when to close
+      // setShowNoteModal(false);
+      // setSelectedText("");
+      // setSelectionBounds(null);
+    },
+    [selectionBounds, selectedText, currentPageNumber]
+  );
 
   // Handle modal close without creating note
   const handleCloseNoteModal = useCallback(() => {
@@ -348,16 +338,19 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   }, []);
 
   // Handle highlight hover
-  const handleHighlightHover = useCallback((annotationId: string, position: { x: number; y: number }) => {
-    // TODO: Get note ID from annotation metadata
-    // For now, we'll use placeholder data
-    setHoveredHighlight({
-      noteId: 'note-id-placeholder',
-      position,
-      noteTitle: 'Sample Note Title',
-    });
-    setShowHoverToolbar(true);
-  }, []);
+  const handleHighlightHover = useCallback(
+    (annotationId: string, position: { x: number; y: number }) => {
+      // TODO: Get note ID from annotation metadata
+      // For now, we'll use placeholder data
+      setHoveredHighlight({
+        noteId: "note-id-placeholder",
+        position,
+        noteTitle: "Sample Note Title",
+      });
+      setShowHoverToolbar(true);
+    },
+    []
+  );
 
   // Handle highlight hover end
   const handleHighlightHoverEnd = useCallback(() => {
@@ -410,8 +403,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     console.error("PDF load failed:", args);
   }, []);
 
-
-
   /**
    * Refresh PDF URL when signed URL expires
    */
@@ -423,17 +414,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     }
   }, [pdfDocument?.id, refetchPdf]);
 
-
-
   // Handle loading states
   if (!pdfDocument) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <FileText
-            size={48}
-            className="text-muted-foreground mx-auto mb-4"
-          />
+          <FileText size={48} className="text-muted-foreground mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-foreground mb-2">
             No PDF Selected
           </h2>
@@ -526,7 +512,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           enableTextMarkupAnnotation={true} // Enable highlighting
           zoomMode="FitToWidth"
           textSelectionStart={(args) => {
-            console.log('Text selection STARTED:', args);
+            console.log("Text selection STARTED:", args);
           }}
           textSelectionEnd={(args) => handleSelectionTextEnd(args)}
           pageClick={(args) => {
@@ -562,13 +548,14 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           />
         </PdfViewerComponent>
 
-
         {/* Annotations Loaded Indicator */}
         {annotationsLoaded && (
           <div className="absolute bottom-4 right-4 z-40 bg-green-100 text-green-800 px-3 py-2 rounded-lg shadow-lg border border-green-200">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm font-medium">Saved highlights loaded</span>
+              <span className="text-sm font-medium">
+                Saved highlights loaded
+              </span>
             </div>
           </div>
         )}
@@ -602,7 +589,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           pdfTitle={currentPdfData?.filename}
           onNoteCreated={handleNoteCreated}
         />
-        
 
         {/* Highlight Hover Toolbar */}
         <HighlightHoverToolbar

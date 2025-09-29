@@ -6,11 +6,11 @@ inclusion: always
 
 ## Architecture Principles
 
-### State Management Strategy
-- **Redux Store**: Persistent application state (PDFs, annotations, user selections, preview cards)
-- **Local Component State**: Transient UI state (tooltip positioning, modal visibility, loading states)
-- **RTK Query**: All server communications, caching, and real-time updates
-- **Context Providers**: Scoped state management (AutoSaveStatusProvider, ThemeProvider)
+### State Management Strategy ✅ COMPLETED
+- **Redux Store**: Persistent application state (PDFs, annotations, notes, quiz data, user selections, preview cards)
+- **Local Component State**: Transient UI state (tooltip positioning, modal visibility, loading states, form inputs)
+- **RTK Query**: All server communications, caching, real-time updates, and API state management
+- **Context Providers**: Scoped state management (AutoSaveStatusProvider, ThemeProvider, EditorProvider, QuizAccessibilityProvider)
 
 ### Component State Guidelines
 - Use Redux for data that needs to persist across component unmounts
@@ -43,18 +43,39 @@ inclusion: always
 - **ThemeToggleDemo.tsx** - Comprehensive demo of different ThemeToggle variants and configurations
 - **README.md** - Complete documentation covering theme system features, API reference, and implementation guides
 
-##### PDF Components (`components/pdf/`)
+##### PDF Components (`components/pdf/`) ✅ COMPLETED
 - **PDFAnnotationViewer.tsx** - Main PDF viewer with Syncfusion integration, enhanced coordinate conversion, and complete annotation workflow
+- **PDFDirectoryView.tsx** - Comprehensive file system-style PDF management interface with drag & drop support and visual file management
 - **AnnotationTooltip.tsx** - Enhanced text selection UI with sophisticated PDF-to-screen coordinate conversion and viewport boundary detection
 - **NoteCreationModal.tsx** - Large modal for note creation with NotionEditor integration, auto-save, and enhanced layout with selected text reference
 - **HighlightHoverToolbar.tsx** - Mini toolbar for existing highlights with "View Note" and "Open" buttons, router navigation integration
 - **NotePreviewModal.tsx** - Read-only note preview modal with TipTap editor for quick viewing without leaving PDF
-- **FloatingSelectionToolbar.tsx** - Alternative floating toolbar with React Portal rendering and smart positioning (maintained as option)
-- **AnnotationOverlay.tsx** - Interactive annotation highlights over PDF pages with zoom-aware positioning
-- **MobileAnnotationDialog.tsx** - Mobile-optimized full-screen annotation creation dialog
+- **PDFUploadZone.tsx** - Drag and drop upload interface with visual feedback and folder context
+- **PDFThumbnail.tsx** - PDF thumbnail generation and display with caching
+- **PDFContextMenu.tsx** - Right-click context menu with file operations
+- **PDFBreadcrumb.tsx** - Breadcrumb navigation for folder hierarchy
+- **PDFSearchBar.tsx** - Search input with real-time filtering
+- **PDFSortOptions.tsx** - Dropdown for sorting options
+- **PDFViewToggle.tsx** - Toggle between grid and list views
+- **PDFFolder.tsx** - Individual folder display component
 - **AnnotationPreviewCard.tsx** - Hover preview of annotation content with edit functionality
-- **PDFListDisplay.tsx** - PDF list component with recent activity and file operations
 - **FallbackUI.tsx** - Error state components for PDF operations (TextSelectionFallback, PDFViewerFallback, etc.)
+
+##### Quiz Components (`components/quiz/`) ✅ COMPLETED
+- **QuizGeneratorInterface.tsx** - Main quiz generation interface with document selection and configuration
+- **ResponsiveQuizInterface.tsx** - Responsive wrapper for desktop/mobile quiz interfaces
+- **MobileQuizGeneratorInterface.tsx** - Mobile-optimized quiz generation interface
+- **InteractiveQuizPlayer.tsx** - Complete quiz-taking interface with progress tracking and scoring
+- **QuizResultsDisplay.tsx** - Quiz results and performance analytics display
+- **QuizHistoryList.tsx** - Quiz attempt history and retake functionality
+- **QuizConfigurationPanel.tsx** - Quiz settings and configuration options
+- **DocumentProcessingStatus.tsx** - Document processing progress and status display
+- **MultiDocumentStatus.tsx** - Status display for multi-document quiz generation
+- **ContentPreview.tsx** - Preview of document content for quiz generation
+- **QuizErrorBoundary.tsx** - Error handling components for quiz functionality
+- **QuizLoadingStates.tsx** - Loading state components for quiz operations
+- **ChunkManagementPanel.tsx** - Document chunk management and optimization
+- **QuizAccessibilityProvider.tsx** - Accessibility context and utilities for quiz components
 
 ##### Editor Components (`components/editor/`)
 - **Core Editor Components**:

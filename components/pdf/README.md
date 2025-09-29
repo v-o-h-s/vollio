@@ -1,426 +1,363 @@
-# PDF Components
+# PDF Directory View
 
-This folder contains all PDF-related components for the Noto application. These components work together to provide a complete PDF annotation experience with text selection, highlighting, and note creation capabilities.
+A comprehensive file system-style PDF management interface with drag & drop support, visual file management, and seamless Supabase integration.
 
-## 📁 File Overview
+## Features
+
+### 🗂️ File System Navigation
+- **Folder Structure**: Organize PDFs in a hierarchical folder system
+- **Breadcrumb Navigation**: Easy navigation with clickable breadcrumb trail
+- **Folder Management**: Create, rename, and delete folders
+- **Nested Organization**: Support for unlimited folder depth
+
+### 📤 Drag & Drop Upload
+- **Intuitive Upload**: Drag and drop PDFs directly into folders
+- **Visual Feedback**: Clear visual indicators during drag operations
+- **Batch Upload**: Upload multiple files simultaneously
+- **Folder Context**: Files uploaded to current folder automatically
+
+### 👁️ Visual File Management
+- **Dual View Modes**: Switch between grid and list views
+- **PDF Thumbnails**: Auto-generated thumbnails for visual identification
+- **File Metadata**: Display file size, upload date, and other details
+- **Quick Actions**: Context menus with common file operations
+
+### 🔍 Advanced Search & Sort
+- **Real-time Search**: Instant filtering by filename
+- **Multiple Sort Options**: Sort by name, date, size, or type
+- **Sort Direction**: Ascending or descending order
+- **Filter by Folder**: Search within specific folders
+
+### 🔐 Secure Integration
+- **Supabase Storage**: Secure file storage with signed URLs
+- **Row Level Security**: Automatic user data isolation
+- **Authentication**: Clerk-based user authentication
+- **Activity Tracking**: Log all file operations
+
+## Components
 
 ### Core Components
 
-#### `PDFAnnotationViewer.tsx` - Main PDF Viewer
-
-**Purpose**: The primary PDF viewer component that integrates Syncfusion PDF Viewer with annotation functionality and Supabase backend.
-
-**Key Responsibilities**:
-
-- PDF document loading from Supabase signed URLs with automatic refresh
-- Text selection detection and coordinate calculation
-- Activity tracking for PDF access with real-time updates
-- Mobile/desktop responsive annotation creation workflow
-- Error handling, loading states, and URL expiration management
-- Integration with Redux store and RTK Query for state management
-
-**Key Features**:
-
-- Full Syncfusion PDF Viewer integration (zoom, search, navigation, print, etc.)
-- Supabase signed URL handling with automatic 30-minute refresh
-- Real-time text selection with precise coordinate mapping
-- Activity tracking with debounced API calls and cache invalidation
-- Mobile-first responsive design with touch-friendly interactions
-- Comprehensive error boundaries and graceful fallbacks
-- URL expiration handling with retry mechanisms
-- Cross-tab communication support for navigation
-
-**Usage**:
+#### `PDFDirectoryView`
+Main container component that orchestrates the entire file management interface.
 
 ```tsx
-<PDFAnnotationViewer
-  pdfDocument={pdfDocument} // PDFDocument with Supabase signed URL
-  onAnnotationCreate={handleAnnotationCreate}
-  onAnnotationUpdate={handleAnnotationUpdate}
-  onAnnotationDelete={handleAnnotationDelete}
-  className="w-full h-full"
+<PDFDirectoryView
+  className="custom-styles"
+  onPDFSelect={(pdf) => console.log('Selected:', pdf)}
+  selectionMode={false}
+  selectedPDFs={[]}
+  onSelectionChange={(ids) => console.log('Selection changed:', ids)}
 />
 ```
 
----
+**Props:**
+- `className?: string` - Additional CSS classes
+- `onPDFSelect?: (pdf: PDFDocument) => void` - Callback when PDF is selected
+- `selectionMode?: boolean` - Enable multi-selection mode
+- `selectedPDFs?: string[]` - Currently selected PDF IDs
+- `onSelectionChange?: (selectedIds: string[]) => void` - Selection change callback
 
-#### `AnnotationOverlay.tsx` - Annotation Highlights
-
-**Purpose**: Renders interactive annotation highlights over PDF pages.
-
-**Key Responsibilities**:
-
-- Positioning annotation highlights over PDF text
-- Zoom-aware coordinate transformation
-- Mouse/touch interaction handling for existing annotations
-- Real-time overlay positioning updates as user scrolls/zooms
-
-**Key Features**:
-
-- RTK Query integration for fetching annotation data
-- Dynamic positioning based on PDF viewer zoom and scroll state
-- Touch-friendly interaction targets on mobile devices
-- Hover effects and visual feedback
-- Keyboard shortcut support
-
-**Usage**:
+#### `PDFUploadZone`
+Drag and drop upload interface with visual feedback.
 
 ```tsx
-<AnnotationOverlay
-  pageNumber={currentPage}
-  pdfViewerRef={pdfViewerRef}
-  onAnnotationHover={handleAnnotationHover}
-  onAnnotationClick={handleAnnotationClick}
+<PDFUploadZone
+  onDrop={handleDrop}
+  onDragOver={handleDragOver}
+  onDragLeave={handleDragLeave}
+  isDragOver={isDragOver}
+  currentFolder={folderId}
 />
 ```
 
----
-
-#### `AnnotationTooltip.tsx` - Desktop Text Selection UI
-
-**Purpose**: Displays a floating tooltip with "Create note" button when text is selected on desktop.
-
-**Key Responsibilities**:
-
-- Viewport edge detection and automatic repositioning
-- Smooth fade-in/fade-out animations with delays
-- Click-outside-to-close functionality
-- Desktop-only display (hidden on mobile)
-
-**Key Features**:
-
-- Smart positioning to stay within viewport bounds
-- 200ms delay on hide for better user experience
-- Blue accent styling consistent with app theme (#3B82F6)
-- Semantic HTML structure
-
-**Usage**:
+#### `PDFThumbnail`
+Generates and displays PDF thumbnails with caching.
 
 ```tsx
-<AnnotationTooltip
-  position={{ x: 100, y: 200 }}
-  visible={showTooltip}
-  onCreateNote={handleCreateNote}
-  onClose={handleCloseTooltip}
+<PDFThumbnail
+  pdfId="pdf-id"
+  className="w-full h-full object-cover"
+  fallbackIcon={<FileText />}
 />
 ```
 
----
-
-#### Responsive Design
-
-The PDF annotation system uses responsive design to adapt to different screen sizes without requiring separate mobile components.
-
-**Key Responsibilities**:
-
-- Mobile-optimized annotation creation interface
-- Touch-friendly button sizing and interactions
-- Selected text preview with smart truncation
-- Radix UI Dialog integration
-
-**Key Features**:
-
-- Full-screen modal optimized for mobile viewports
-- Touch-friendly button sizing (44px minimum height)
-- Auto-focus on primary action button
-- Responsive layout that adapts to screen size
-
-**Usage**:
-
-The annotation system automatically adapts to different screen sizes using responsive CSS.
-
----
-
-#### `AnnotationPreviewCard.tsx` - Annotation Hover Preview
-
-**Purpose**: Displays a preview card showing annotation content when hovering over highlights.
-
-**Key Responsibilities**:
-
-- Content truncation with smart word boundary detection
-- Viewport boundary detection and automatic repositioning
-- Click-to-edit functionality for annotation management
-- Mobile-responsive sizing and interactions
-
-**Key Features**:
-
-- Smart text truncation (~100 characters with word boundaries)
-- Automatic collision detection and repositioning
-- Smooth enter/exit animations via Radix UI Popover
-- Touch-friendly button sizing on mobile devices
-
-**Usage**:
+#### `PDFContextMenu`
+Right-click context menu with file operations.
 
 ```tsx
-<AnnotationPreviewCard
-  annotation={annotationData}
-  position={{ x: 150, y: 250 }}
-  visible={showPreview}
-  onEdit={handleEditAnnotation}
-  onClose={handleClosePreview}
+<PDFContextMenu
+  x={mouseX}
+  y={mouseY}
+  pdfId="pdf-id"
+  onClose={() => setContextMenu(null)}
+  onDelete={handleDelete}
+  onRename={handleRename}
 />
 ```
 
----
+### Navigation Components
 
-### Utility Components
-
-#### `FallbackUI.tsx` - Error State Components
-
-**Purpose**: Collection of fallback UI components for error states and empty states.
-
-**Components Included**:
-
-- `TextSelectionFallback`: When text selection fails
-- `AnnotationCreationFallback`: When annotation creation fails
-- `PDFViewerFallback`: When PDF loading/viewing fails
-- `NetworkErrorFallback`: When network requests fail
-- `EmptyStateFallback`: Generic empty state component
-
-**Key Features**:
-
-- Consistent visual design with appropriate icons
-- Helpful error messages and troubleshooting tips
-- Action buttons for recovery (retry, cancel, help)
-- Responsive design
-
-**Usage**:
+#### `PDFBreadcrumb`
+Breadcrumb navigation for folder hierarchy.
 
 ```tsx
-<PDFViewerFallback
-  error="Failed to load PDF document"
-  onRetry={handleRetry}
-  onUploadNew={handleUploadNew}
-  fileName="document.pdf"
+<PDFBreadcrumb
+  path={folderPath}
+  onNavigate={(folderId) => setCurrentFolder(folderId)}
 />
 ```
 
----
-
-#### `index.ts` - Module Exports
-
-**Purpose**: Centralized exports for all PDF components.
-
-**Exports**:
-
-- All main components for external use
-- Fallback UI components
-- Type definitions and interfaces
-
-## 🏗️ Component Architecture
-
-### Component Hierarchy
-
-```
-PDFAnnotationViewer (main container)
-├── AnnotationOverlay (highlights existing annotations)
-├── AnnotationTooltip (text selection UI)
-├── AnnotationPreviewCard (hover preview of annotations)
-└── FallbackUI components (error states)
-```
-
-### Data Flow
-
-1. **PDF Loading**: PDFAnnotationViewer loads PDF using Syncfusion
-2. **Text Selection**: User selects text, coordinates are calculated
-3. **Annotation Creation**: Tooltip (desktop) or Dialog (mobile) appears
-4. **State Management**: Redux store manages annotation state
-5. **Overlay Rendering**: AnnotationOverlay renders highlights for existing annotations
-6. **Preview on Hover**: AnnotationPreviewCard shows annotation details
-
-### State Management
-
-- **Redux Store**: Central state management for annotations
-- **RTK Query**: API calls for CRUD operations
-- **Local State**: Component-specific UI state (tooltips, dialogs, etc.)
-
-## 🎨 Design System
-
-### Color Scheme
-
-- **Primary Blue**: `#3B82F6` (blue-600) - Used for buttons and highlights
-- **Hover Blue**: `#2563EB` (blue-700) - Used for hover states
-- **Background Blue**: `rgba(59, 130, 246, 0.2)` - Used for annotation highlights
-- **Error Red**: `#EF4444` (red-500) - Used for error states
-- **Warning Yellow**: `#F59E0B` (amber-500) - Used for warning states
-
-### Typography
-
-- **Font Family**: System font stack (Inter, system-ui, sans-serif)
-- **Font Sizes**: Tailwind CSS scale (text-xs, text-sm, text-base, etc.)
-- **Font Weights**: 400 (normal), 500 (medium), 600 (semibold)
-
-### Spacing
-
-- **Component Padding**: 12px (p-3), 16px (p-4)
-- **Button Padding**: 6px 12px (px-3 py-1.5)
-- **Mobile Touch Targets**: Minimum 44px height
-- **Border Radius**: 6px (rounded-lg), 8px (rounded-xl)
-
-## 📱 Responsive Design
-
-### Breakpoints
-
-- **Mobile**: < 768px - Uses dialog-based annotation creation
-- **Desktop**: ≥ 768px - Uses tooltip-based annotation creation
-
-### Mobile Optimizations
-
-- Touch-friendly button sizing (minimum 44px height)
-- Full-screen dialogs instead of tooltips
-- Larger touch targets for annotation highlights
-- Simplified interactions and gestures
-
-### Desktop Features
-
-- Hover states and tooltips
-- Keyboard shortcuts and navigation
-- Precise mouse interactions
-- Multi-window support
-
-## 🔧 Technical Implementation
-
-### Dependencies
-
-- **Syncfusion PDF Viewer**: `@syncfusion/ej2-react-pdfviewer` - Licensed PDF viewer component
-- **Redux Toolkit**: State management and RTK Query for API calls
-- **Radix UI**: Accessible UI primitives (Dialog, Popover)
-- **Tailwind CSS**: Utility-first styling
-- **Lucide React**: Icon library
-- **Next.js**: App Router for navigation and API routes
-- **Supabase**: Backend database and storage integration
-
-### Key Utilities
-
-- **Activity Tracking**: `lib/utils/activity-tracking.ts` - User activity monitoring
-- **Activity Tracking Hook**: `hooks/use-activity-tracking.ts` - React hook for activity tracking
-- **Responsive Design**: CSS-based responsive design for different screen sizes
-- **Supabase Helpers**: `lib/utils/supabase-helpers.ts` - Database and storage utilities
-- **Error Boundaries**: `components/ErrorBoundary.tsx` - Error handling components
-
-### Performance Considerations
-
-- **Lazy Loading**: Components load only when needed
-- **Memoization**: React.memo and useMemo for expensive calculations
-- **Debouncing**: Scroll and resize event handlers
-- **Virtualization**: Large annotation lists (future enhancement)
-
-## 🧪 Testing Strategy
-
-### Unit Tests
-
-- Component rendering and props handling
-- Event handler functionality
-- Coordinate calculation accuracy
-- Error state handling
-
-### Integration Tests
-
-- PDF loading and text selection workflow
-- Annotation creation and editing flow
-- Mobile/desktop responsive behavior
-- Keyboard shortcuts and workflow
-
-### E2E Tests
-
-- Complete annotation workflow
-- Cross-browser compatibility
-- Mobile device testing
-- Performance benchmarks
-
-## 🚀 Usage Examples
-
-### Basic PDF Viewer
+#### `PDFSearchBar`
+Search input with clear functionality.
 
 ```tsx
-import { PDFAnnotationViewer } from "@/components/pdf";
+<PDFSearchBar
+  value={searchQuery}
+  onChange={setSearchQuery}
+  placeholder="Search PDFs..."
+/>
+```
 
-function PDFPage() {
-  const handleAnnotationCreate = (selection) => {
-    // Handle new annotation creation
-  };
+#### `PDFSortOptions`
+Dropdown for sorting options.
 
-  return <PDFAnnotationViewer onAnnotationCreate={handleAnnotationCreate} />;
+```tsx
+<PDFSortOptions
+  sortBy={sortBy}
+  sortOrder={sortOrder}
+  onSortChange={(by, order) => {
+    setSortBy(by);
+    setSortOrder(order);
+  }}
+/>
+```
+
+#### `PDFViewToggle`
+Toggle between grid and list views.
+
+```tsx
+<PDFViewToggle
+  viewMode={viewMode}
+  onViewModeChange={setViewMode}
+/>
+```
+
+### Folder Components
+
+#### `PDFFolder`
+Individual folder display component.
+
+```tsx
+<PDFFolder
+  folder={folderData}
+  viewMode="grid"
+  onOpen={() => navigateToFolder(folder.id)}
+  onRename={handleRename}
+  onDelete={handleDelete}
+/>
+```
+
+#### `CreateFolder`
+Inline folder creation component.
+
+```tsx
+<CreateFolder
+  onCreateFolder={handleCreateFolder}
+  onCancel={() => setIsCreatingFolder(false)}
+  viewMode="grid"
+/>
+```
+
+## API Integration
+
+### RTK Query Hooks
+
+The PDF Directory View integrates with RTK Query for all API operations:
+
+```tsx
+// Fetch PDFs
+const { data: pdfData, isLoading, error, refetch } = useGetPDFsQuery();
+
+// Delete PDF
+const [deletePDF, { isLoading: isDeleting }] = useDeletePDFMutation();
+
+// Rename PDF
+const [renamePDF, { isLoading: isRenaming }] = useRenamePDFMutation();
+```
+
+### API Endpoints
+
+#### PDF Thumbnail Generation
+```
+GET /api/pdfs/[id]/thumbnail
+```
+Generates and returns PDF thumbnails with caching.
+
+#### PDF Rename
+```
+PUT /api/pdfs/[id]/rename
+Body: { filename: string }
+```
+Renames a PDF with validation and duplicate checking.
+
+## Usage Examples
+
+### Basic Implementation
+
+```tsx
+import { PDFDirectoryView } from '@/components/pdf';
+
+export default function PDFsPage() {
+  return (
+    <div className="container mx-auto py-6">
+      <h1 className="text-3xl font-bold mb-6">PDF Library</h1>
+      <PDFDirectoryView />
+    </div>
+  );
 }
 ```
 
-### With Existing Annotations
+### With Selection Mode
 
 ```tsx
-import { PDFAnnotationViewer } from "@/components/pdf";
-import { useGetAnnotationsQuery } from "@/lib/store/apiSlice";
+import { PDFDirectoryView } from '@/components/pdf';
+import { useState } from 'react';
 
-function PDFPageWithAnnotations() {
-  const { data: annotations } = useGetAnnotationsQuery({ pdfId: "pdf-123" });
+export default function PDFSelector() {
+  const [selectedPDFs, setSelectedPDFs] = useState<string[]>([]);
 
   return (
-    <PDFAnnotationViewer
-      annotations={annotations}
-      onAnnotationCreate={handleCreate}
-      onAnnotationClick={handleClick}
+    <PDFDirectoryView
+      selectionMode={true}
+      selectedPDFs={selectedPDFs}
+      onSelectionChange={setSelectedPDFs}
+      onPDFSelect={(pdf) => {
+        console.log('Selected PDF:', pdf);
+      }}
     />
   );
 }
 ```
 
-### Error Handling
+### Custom Styling
 
 ```tsx
-import { PDFViewerFallback } from "@/components/pdf";
+<PDFDirectoryView
+  className="custom-pdf-directory"
+  // ... other props
+/>
+```
 
-function PDFPageWithErrorHandling() {
-  const [error, setError] = useState(null);
-
-  if (error) {
-    return (
-      <PDFViewerFallback
-        error={error}
-        onRetry={() => setError(null)}
-        onUploadNew={handleUploadNew}
-      />
-    );
-  }
-
-  return <PDFAnnotationViewer />;
+```css
+.custom-pdf-directory {
+  /* Custom styles */
+  --pdf-grid-columns: 6;
+  --pdf-thumbnail-aspect: 3/4;
 }
 ```
 
-## 🔮 Future Enhancements
+## Styling & Theming
+
+The PDF Directory View supports both light and dark themes through Tailwind CSS classes:
+
+- Uses semantic color tokens (`bg-muted`, `text-foreground`, `border-border`)
+- Responsive design with mobile-first approach
+- Consistent with shadcn/ui design system
+- Theme-aware hover states and transitions
+
+## Performance Considerations
+
+### Thumbnail Caching
+- Thumbnails are cached in localStorage with expiration
+- Automatic cleanup of expired cache entries
+- Lazy loading of thumbnails as needed
+
+### Virtual Scrolling
+For large PDF collections, consider implementing virtual scrolling:
+
+```tsx
+// Future enhancement
+<VirtualizedPDFGrid
+  items={filteredPDFs}
+  itemHeight={200}
+  containerHeight={600}
+/>
+```
+
+### Search Optimization
+- Debounced search input to reduce API calls
+- Client-side filtering for better performance
+- Indexed search for large collections
+
+## Accessibility
+
+- Full keyboard navigation support
+- Screen reader compatible
+- Focus management for modals and dropdowns
+- ARIA labels and descriptions
+- High contrast theme support
+
+## Browser Support
+
+- Modern browsers with ES2020 support
+- Drag & drop API support required
+- File API for upload functionality
+- Local storage for caching
+
+## Future Enhancements
 
 ### Planned Features
-
-- **Collaborative Annotations**: Real-time multi-user annotation editing
-- **Annotation Types**: Support for different annotation types (highlight, note, drawing)
-- **Export Functionality**: Export annotations to various formats
-- **Search in Annotations**: Full-text search across annotation content
-- **Annotation Threading**: Reply to annotations and create discussions
+- [ ] Bulk operations (select multiple files)
+- [ ] Advanced filtering (by date range, size, etc.)
+- [ ] File preview without opening
+- [ ] Folder sharing and permissions
+- [ ] Integration with cloud storage providers
+- [ ] Advanced search with content indexing
+- [ ] File versioning and history
+- [ ] Collaborative folder management
 
 ### Performance Improvements
+- [ ] Virtual scrolling for large collections
+- [ ] Progressive loading of thumbnails
+- [ ] Background thumbnail generation
+- [ ] Optimized caching strategies
 
-- **Virtual Scrolling**: For documents with many annotations
-- **Web Workers**: Offload coordinate calculations
-- **Caching**: Intelligent caching of PDF pages and annotations
-- **Progressive Loading**: Load annotations as user scrolls
+## Contributing
 
-### Future Enhancements
+When contributing to the PDF Directory View:
 
-- **Enhanced User Experience**: Improved interaction patterns
-- **High Contrast Mode**: Support for high contrast themes
-- **Keyboard Shortcuts**: Complete keyboard shortcut support
-- **Voice Commands**: Voice-controlled annotation creation
+1. Follow the established component patterns
+2. Maintain TypeScript strict mode compliance
+3. Add proper error handling and loading states
+4. Include accessibility features
+5. Write comprehensive tests
+6. Update documentation
 
----
+## Dependencies
 
-## 📞 Support
+### Required Packages
+```json
+{
+  "pdf-lib": "^1.17.1",
+  "sharp": "^0.32.6",
+  "@reduxjs/toolkit": "^1.9.7",
+  "react-hot-toast": "^2.4.1",
+  "date-fns": "^2.30.0",
+  "lucide-react": "^0.294.0"
+}
+```
 
-For questions about these components or contributions, please refer to:
+### Peer Dependencies
+```json
+{
+  "react": "^18.0.0",
+  "next": "^14.0.0",
+  "@clerk/nextjs": "^4.0.0",
+  "@supabase/supabase-js": "^2.0.0"
+}
+```
 
-- **Documentation**: `/docs/pdf-components.md`
-- **API Reference**: `/docs/api/pdf-components.md`
-- **Issue Tracker**: GitHub Issues
-- **Team Contact**: Noto Development Team
+## License
 
----
-
-_Last Updated: January 2025_
-_Version: 1.0.0_
+This component is part of the Noto PDF Annotation App and follows the same licensing terms.

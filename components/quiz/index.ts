@@ -23,12 +23,12 @@ export { ResponsiveQuizInterface } from "./ResponsiveQuizInterface";
 export { ResponsiveQuizPlayer } from "./ResponsiveQuizPlayer";
 
 // Error handling components
-export { 
+export {
   QuizErrorBoundary,
   QuizGenerationErrorBoundary,
   QuizPlayerErrorBoundary,
   QuizResultsErrorBoundary,
-  DocumentProcessingErrorBoundary
+  DocumentProcessingErrorBoundary,
 } from "./QuizErrorBoundary";
 
 // Loading state components
@@ -37,16 +37,17 @@ export {
   DocumentProcessingLoading,
   QuizGeneratorSkeleton,
   QuizPlayerSkeleton,
-  QuizResultsSkeleton
+  QuizResultsSkeleton,
 } from "./QuizLoadingStates";
 
 // Chunk management components
 export { ChunkManagementPanel } from "./ChunkManagementPanel";
 
 // Accessibility components
-export { QuizAccessibilityProvider, useQuizAccessibility } from "./QuizAccessibilityProvider";
+export {
+  QuizAccessibilityProvider,
+  useQuizAccessibility,
+} from "./QuizAccessibilityProvider";
 export { QuizKeyboardShortcutsDialog } from "./QuizKeyboardShortcutsDialog";
 export { QuizAccessibilitySettings } from "./QuizAccessibilitySettings";
 
-// Advanced search components
-export { SearchDebugPanel } from "./SearchDebugPanel";

@@ -1,24 +1,30 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import { 
-  BarChart3, 
-  Database, 
-  Trash2, 
-  RefreshCw, 
-  TrendingUp, 
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import {
+  BarChart3,
+  Database,
+  Trash2,
+  RefreshCw,
+  TrendingUp,
   AlertTriangle,
   CheckCircle,
   Clock,
   FileText,
-  Zap
-} from 'lucide-react';
-import { toast } from 'sonner';
+  Zap,
+} from "lucide-react";
+import { useToastActions } from "@/components/ui/toast";
 
 interface ChunkPerformanceMetrics {
   totalChunks: number;
@@ -67,9 +73,9 @@ interface ChunkManagementPanelProps {
   onMetricsUpdate?: (metrics: ChunkPerformanceMetrics) => void;
 }
 
-export function ChunkManagementPanel({ 
-  documentIds, 
-  onMetricsUpdate 
+export function ChunkManagementPanel({
+  documentIds,
+  onMetricsUpdate,
 }: ChunkManagementPanelProps) {
   const [metrics, setMetrics] = useState<ChunkPerformanceMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,13 +83,15 @@ export function ChunkManagementPanel({
   const [isCleaning, setIsCleaning] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
+  const toast = useToastActions();
+
   // Load performance metrics
   const loadMetrics = async () => {
     setIsLoading(true);
     try {
-      const params = new URLSearchParams({ action: 'metrics' });
+      const params = new URLSearchParams({ action: "metrics" });
       if (documentIds && documentIds.length > 0) {
-        params.append('documentIds', documentIds.join(','));
+        params.append("documentIds", documentIds.join(","));
       }
 
       const response = await fetch(`/api/chunks/management?${params}`);
@@ -94,11 +102,17 @@ export function ChunkManagementPanel({
         setLastUpdate(new Date());
         onMetricsUpdate?.(data.data);
       } else {
-        toast.error('Failed to load chunk metrics');
+        toast.error(
+          "Failed to load chunk metrics",
+          "Unable to fetch chunk performance data"
+        );
       }
     } catch (error) {
-      console.error('Error loading metrics:', error);
-      toast.error('Failed to load chunk metrics');
+      console.error("Error loading metrics:", error);
+      toast.error(
+        "Failed to load chunk metrics",
+        "Unable to fetch chunk performance data"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -108,29 +122,35 @@ export function ChunkManagementPanel({
   const handleDeduplication = async () => {
     setIsDeduplicating(true);
     try {
-      const response = await fetch('/api/chunks/management', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/chunks/management", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: 'deduplicate',
-          documentIds
-        })
+          action: "deduplicate",
+          documentIds,
+        }),
       });
 
       const data = await response.json();
 
       if (data.success) {
         const result: DeduplicationResult = data.data;
-        toast.success(data.message);
-        
+        toast.success("Deduplication Complete", data.message);
+
         // Reload metrics after deduplication
         await loadMetrics();
       } else {
-        toast.error(data.error || 'Deduplication failed');
+        toast.error(
+          "Deduplication Failed",
+          data.error || "Deduplication failed"
+        );
       }
     } catch (error) {
-      console.error('Error during deduplication:', error);
-      toast.error('Deduplication failed');
+      console.error("Error during deduplication:", error);
+      toast.error(
+        "Deduplication Failed",
+        "An error occurred during deduplication"
+      );
     } finally {
       setIsDeduplicating(false);
     }
@@ -140,33 +160,33 @@ export function ChunkManagementPanel({
   const handleCleanup = async () => {
     setIsCleaning(true);
     try {
-      const response = await fetch('/api/chunks/management', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/chunks/management", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: 'cleanup',
+          action: "cleanup",
           removeOrphanedChunks: true,
           removeOldVersions: true,
           updateQualityScores: true,
           removeUnusedChunks: false,
-          maxAge: 30
-        })
+          maxAge: 30,
+        }),
       });
 
       const data = await response.json();
 
       if (data.success) {
         const result: CleanupResult = data.data;
-        toast.success(data.message);
-        
+        toast.success("Cleanup Complete", data.message);
+
         // Reload metrics after cleanup
         await loadMetrics();
       } else {
-        toast.error(data.error || 'Cleanup failed');
+        toast.error("Cleanup Failed", data.error || "Cleanup failed");
       }
     } catch (error) {
-      console.error('Error during cleanup:', error);
-      toast.error('Cleanup failed');
+      console.error("Error during cleanup:", error);
+      toast.error("Cleanup Failed", "An error occurred during cleanup");
     } finally {
       setIsCleaning(false);
     }
@@ -176,26 +196,32 @@ export function ChunkManagementPanel({
   const handleQualityUpdate = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/chunks/usage', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/chunks/usage", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: 'recalculate-quality',
-          documentIds
-        })
+          action: "recalculate-quality",
+          documentIds,
+        }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        toast.success(data.message);
+        toast.success("Quality Update Complete", data.message);
         await loadMetrics();
       } else {
-        toast.error(data.error || 'Quality update failed');
+        toast.error(
+          "Quality Update Failed",
+          data.error || "Quality update failed"
+        );
       }
     } catch (error) {
-      console.error('Error updating quality scores:', error);
-      toast.error('Quality update failed');
+      console.error("Error updating quality scores:", error);
+      toast.error(
+        "Quality Update Failed",
+        "An error occurred while updating quality scores"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -207,25 +233,25 @@ export function ChunkManagementPanel({
   }, [documentIds]);
 
   const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const getQualityColor = (quality: number): string => {
-    if (quality >= 0.8) return 'bg-green-500';
-    if (quality >= 0.6) return 'bg-yellow-500';
-    if (quality >= 0.4) return 'bg-orange-500';
-    return 'bg-red-500';
+    if (quality >= 0.8) return "bg-green-500";
+    if (quality >= 0.6) return "bg-yellow-500";
+    if (quality >= 0.4) return "bg-orange-500";
+    return "bg-red-500";
   };
 
   const getQualityLabel = (quality: number): string => {
-    if (quality >= 0.9) return 'Excellent';
-    if (quality >= 0.7) return 'Good';
-    if (quality >= 0.5) return 'Fair';
-    return 'Poor';
+    if (quality >= 0.9) return "Excellent";
+    if (quality >= 0.7) return "Good";
+    if (quality >= 0.5) return "Fair";
+    return "Poor";
   };
 
   return (
@@ -251,7 +277,9 @@ export function ChunkManagementPanel({
             onClick={loadMetrics}
             disabled={isLoading}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
         </div>
@@ -262,20 +290,26 @@ export function ChunkManagementPanel({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Chunks</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Total Chunks
+              </CardTitle>
               <Database className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{metrics.totalChunks.toLocaleString()}</div>
+              <div className="text-2xl font-bold">
+                {metrics.totalChunks.toLocaleString()}
+              </div>
               <p className="text-xs text-muted-foreground">
-                Across {documentIds?.length || 'all'} documents
+                Across {documentIds?.length || "all"} documents
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Average Quality</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Average Quality
+              </CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -283,7 +317,11 @@ export function ChunkManagementPanel({
                 {(metrics.averageQuality * 100).toFixed(1)}%
               </div>
               <div className="flex items-center gap-2 mt-1">
-                <div className={`h-2 w-16 rounded-full ${getQualityColor(metrics.averageQuality)}`} />
+                <div
+                  className={`h-2 w-16 rounded-full ${getQualityColor(
+                    metrics.averageQuality
+                  )}`}
+                />
                 <span className="text-xs text-muted-foreground">
                   {getQualityLabel(metrics.averageQuality)}
                 </span>
@@ -293,7 +331,9 @@ export function ChunkManagementPanel({
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">High Quality</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                High Quality
+              </CardTitle>
               <CheckCircle className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
@@ -301,7 +341,11 @@ export function ChunkManagementPanel({
                 {metrics.highQualityChunks}
               </div>
               <p className="text-xs text-muted-foreground">
-                {((metrics.highQualityChunks / metrics.totalChunks) * 100).toFixed(1)}% of total
+                {(
+                  (metrics.highQualityChunks / metrics.totalChunks) *
+                  100
+                ).toFixed(1)}
+                % of total
               </p>
             </CardContent>
           </Card>
@@ -316,7 +360,11 @@ export function ChunkManagementPanel({
                 {metrics.lowQualityChunks}
               </div>
               <p className="text-xs text-muted-foreground">
-                {((metrics.lowQualityChunks / metrics.totalChunks) * 100).toFixed(1)}% of total
+                {(
+                  (metrics.lowQualityChunks / metrics.totalChunks) *
+                  100
+                ).toFixed(1)}
+                % of total
               </p>
             </CardContent>
           </Card>
@@ -337,30 +385,38 @@ export function ChunkManagementPanel({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {Object.entries(metrics.qualityDistribution).map(([level, count]) => {
-                const percentage = (count / metrics.totalChunks) * 100;
-                const colors = {
-                  excellent: 'bg-green-500',
-                  good: 'bg-blue-500',
-                  fair: 'bg-yellow-500',
-                  poor: 'bg-red-500'
-                };
+              {Object.entries(metrics.qualityDistribution).map(
+                ([level, count]) => {
+                  const percentage = (count / metrics.totalChunks) * 100;
+                  const colors = {
+                    excellent: "bg-green-500",
+                    good: "bg-blue-500",
+                    fair: "bg-yellow-500",
+                    poor: "bg-red-500",
+                  };
 
-                return (
-                  <div key={level} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={`h-3 w-3 rounded-full ${colors[level as keyof typeof colors]}`} />
-                        <span className="text-sm font-medium capitalize">{level}</span>
+                  return (
+                    <div key={level} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`h-3 w-3 rounded-full ${
+                              colors[level as keyof typeof colors]
+                            }`}
+                          />
+                          <span className="text-sm font-medium capitalize">
+                            {level}
+                          </span>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {count} ({percentage.toFixed(1)}%)
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        {count} ({percentage.toFixed(1)}%)
-                      </div>
+                      <Progress value={percentage} className="h-2" />
                     </div>
-                    <Progress value={percentage} className="h-2" />
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
             </div>
           </CardContent>
         </Card>
@@ -407,7 +463,10 @@ export function ChunkManagementPanel({
                   <h4 className="text-sm font-medium mb-3">Most Used Chunks</h4>
                   <div className="space-y-2">
                     {metrics.mostUsedChunks.slice(0, 5).map((chunk, index) => (
-                      <div key={chunk.chunkId} className="flex items-center justify-between p-2 bg-muted rounded-lg">
+                      <div
+                        key={chunk.chunkId}
+                        className="flex items-center justify-between p-2 bg-muted rounded-lg"
+                      >
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">#{index + 1}</Badge>
                           <span className="text-sm font-mono">
@@ -417,7 +476,8 @@ export function ChunkManagementPanel({
                         <div className="flex items-center gap-4 text-sm">
                           <span>{chunk.usageCount} uses</span>
                           <span className="text-muted-foreground">
-                            {(chunk.averageRelevance * 100).toFixed(1)}% relevance
+                            {(chunk.averageRelevance * 100).toFixed(1)}%
+                            relevance
                           </span>
                         </div>
                       </div>
@@ -446,7 +506,9 @@ export function ChunkManagementPanel({
               disabled={isDeduplicating || isLoading}
               className="h-auto p-4 flex flex-col items-center gap-2"
             >
-              <Trash2 className={`h-5 w-5 ${isDeduplicating ? 'animate-pulse' : ''}`} />
+              <Trash2
+                className={`h-5 w-5 ${isDeduplicating ? "animate-pulse" : ""}`}
+              />
               <div className="text-center">
                 <div className="font-medium">Deduplicate</div>
                 <div className="text-xs text-muted-foreground">
@@ -461,7 +523,9 @@ export function ChunkManagementPanel({
               disabled={isCleaning || isLoading}
               className="h-auto p-4 flex flex-col items-center gap-2"
             >
-              <RefreshCw className={`h-5 w-5 ${isCleaning ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-5 w-5 ${isCleaning ? "animate-spin" : ""}`}
+              />
               <div className="text-center">
                 <div className="font-medium">Cleanup</div>
                 <div className="text-xs text-muted-foreground">
@@ -476,7 +540,9 @@ export function ChunkManagementPanel({
               disabled={isLoading}
               className="h-auto p-4 flex flex-col items-center gap-2"
             >
-              <TrendingUp className={`h-5 w-5 ${isLoading ? 'animate-pulse' : ''}`} />
+              <TrendingUp
+                className={`h-5 w-5 ${isLoading ? "animate-pulse" : ""}`}
+              />
               <div className="text-center">
                 <div className="font-medium">Update Quality</div>
                 <div className="text-xs text-muted-foreground">
@@ -491,7 +557,9 @@ export function ChunkManagementPanel({
               disabled={isLoading}
               className="h-auto p-4 flex flex-col items-center gap-2"
             >
-              <BarChart3 className={`h-5 w-5 ${isLoading ? 'animate-pulse' : ''}`} />
+              <BarChart3
+                className={`h-5 w-5 ${isLoading ? "animate-pulse" : ""}`}
+              />
               <div className="text-center">
                 <div className="font-medium">Analyze</div>
                 <div className="text-xs text-muted-foreground">

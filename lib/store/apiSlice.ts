@@ -395,6 +395,81 @@ export const apiSlice = createApi({
       },
     }),
 
+    // Rename PDF endpoint with error handling
+    renamePDF: builder.mutation<{ success: boolean; pdf: PDFDocument }, { id: string; filename: string }>({
+      query: ({ id, filename }) => ({
+        url: `pdfs/${id}/rename`,
+        method: "PUT",
+        body: { filename },
+      }),
+      transformResponse: (response: any) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to rename PDF",
+            { component: "PDFList", action: "rename" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, { id }) => {
+        const context = { component: "PDFList", action: "rename", pdfId: id };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "PDF not found",
+            context
+          );
+        } else if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid filename",
+            context
+          );
+        } else if (response.status === 409) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "A PDF with this filename already exists",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "PDF", id: "LIST" },
+        { type: "PDF", id },
+      ],
+      async onQueryStarted(_args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          pdfNotifications.renameSuccess();
+        } catch (error: any) {
+          const appError = error.error as AppError;
+          const message =
+            appError?.userMessage ||
+            appError?.message ||
+            "Failed to rename PDF";
+          pdfNotifications.renameError(message);
+
+          logError(appError || mapErrorToAppError(error));
+        }
+      },
+    }),
+
     // Notes endpoints with error handling
     getNotes: builder.query<Note[], { pdfAnnotationId?: string; highlightId?: string }>({
       query: ({ pdfAnnotationId, highlightId } = {}) => ({
@@ -1943,6 +2018,7 @@ export const {
   useGetPDFsQuery,
   useGetPDFQuery,
   useDeletePDFMutation,
+  useRenamePDFMutation,
   useGetNotesQuery,
   useGetNoteQuery,
   useCreateNoteMutation,

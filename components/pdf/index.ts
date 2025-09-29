@@ -1,45 +1,25 @@
-/**
- * PDF Annotation Components Module
- *
- * This module exports all PDF-related components for the Noto application.
- * These components work together to provide a complete PDF annotation experience.
- *
- * Component Hierarchy:
- * PDFAnnotationViewer (main container)
- * ├── AnnotationOverlay (highlights existing annotations)
- * ├── AnnotationTooltip (text selection UI)
- * └── AnnotationPreviewCard (hover preview of annotations)
- *
- * Usage:
- * import { PDFAnnotationViewer } from '@/components/pdf'
- *
- * @author Noto Team
- * @version 1.0.0
- */
+// PDF Directory and File Management Components
+export { PDFDirectoryView } from "./PDFDirectoryView";
+export { PDFUploadZone } from "./PDFUploadZone";
+export { PDFThumbnail } from "./PDFThumbnail";
+export { PDFContextMenu } from "./PDFContextMenu";
+export { PDFBreadcrumb } from "./PDFBreadcrumb";
+export { PDFViewToggle } from "./PDFViewToggle";
+export { PDFSearchBar } from "./PDFSearchBar";
+export { PDFSortOptions } from "./PDFSortOptions";
+export { PDFFolder, CreateFolder } from "./PDFFolder";
 
-// Main PDF viewer component with annotation capabilities
-export { default as PDFAnnotationViewer } from "./PDFAnnotationViewer";
-
-// Desktop tooltip for text selection
-export { default as AnnotationTooltip } from "./AnnotationTooltip";
-
-// Preview card for annotation hover states
-export { default as AnnotationPreviewCard } from "./AnnotationPreviewCard";
-
-// Text selection and note creation workflow
+// Existing PDF Components
+export { PDFAnnotationViewer } from "./PDFAnnotationViewer";
+export { AnnotationTooltip } from "./AnnotationTooltip";
 export { NoteCreationModal } from "./NoteCreationModal";
 export { HighlightHoverToolbar } from "./HighlightHoverToolbar";
 export { NotePreviewModal } from "./NotePreviewModal";
+export { FloatingSelectionToolbar } from "./FloatingSelectionToolbar";
+export { AnnotationOverlay } from "./AnnotationOverlay";
+export { MobileAnnotationDialog } from "./MobileAnnotationDialog";
+export { AnnotationPreviewCard } from "./AnnotationPreviewCard";
+export { PDFListDisplay } from "./PDFListDisplay";
 
-// Quiz generation integration
-export { PDFViewerQuizButton } from "./PDFViewerQuizButton";
-
-// Overlay component for rendering annotation highlights
-
-// Mobile dialog removed - app is desktop/laptop focused
-
-// Fallback UI components for error states
-export * from "./FallbackUI";
-
-// Modern PDF list display component
-export { default as PDFListDisplay } from "./PDFListDisplay";
+// Types
+export type { ViewMode, SortBy, SortOrder } from "./PDFDirectoryView";

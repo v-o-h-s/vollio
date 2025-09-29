@@ -167,6 +167,10 @@ export const pdfNotifications: {
   deleteSuccess: () => showSuccess("PDF deleted successfully!"),
 
   deleteError: (error: string) => showError(`Failed to delete PDF: ${error}`),
+
+  renameSuccess: () => showSuccess("PDF renamed successfully!"),
+
+  renameError: (error: string) => showError(`Failed to rename PDF: ${error}`),
 };
 
 
