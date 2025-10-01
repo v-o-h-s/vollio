@@ -14,7 +14,7 @@ import {
   Plus,
   FolderPlus
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { safeFormatDistanceToNow } from "@/lib/utils/dates";
 
 interface Folder {
   id: string;
@@ -106,7 +106,7 @@ export function PDFFolder({
               <Badge variant="secondary" className="text-xs">
                 {folder.pdfCount} PDFs
               </Badge>
-              <span>{formatDistanceToNow(new Date(folder.createdAt), { addSuffix: true })}</span>
+              <span>{safeFormatDistanceToNow(folder.createdAt)}</span>
             </div>
           </div>
         </CardContent>
@@ -151,7 +151,7 @@ export function PDFFolder({
           <Badge variant="secondary" className="text-xs">
             {folder.pdfCount} PDFs
           </Badge>
-          <span>{formatDistanceToNow(new Date(folder.createdAt), { addSuffix: true })}</span>
+          <span>{safeFormatDistanceToNow(folder.createdAt)}</span>
         </div>
       </div>
       <Button

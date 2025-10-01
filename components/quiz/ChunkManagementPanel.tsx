@@ -24,7 +24,7 @@ import {
   FileText,
   Zap,
 } from "lucide-react";
-import { useToastActions } from "@/components/ui/toast";
+import toast from "react-hot-toast";
 
 interface ChunkPerformanceMetrics {
   totalChunks: number;
@@ -83,8 +83,6 @@ export function ChunkManagementPanel({
   const [isCleaning, setIsCleaning] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-  const toast = useToastActions();
-
   // Load performance metrics
   const loadMetrics = async () => {
     setIsLoading(true);
@@ -102,17 +100,11 @@ export function ChunkManagementPanel({
         setLastUpdate(new Date());
         onMetricsUpdate?.(data.data);
       } else {
-        toast.error(
-          "Failed to load chunk metrics",
-          "Unable to fetch chunk performance data"
-        );
+        toast.error("Failed to load chunk metrics");
       }
     } catch (error) {
       console.error("Error loading metrics:", error);
-      toast.error(
-        "Failed to load chunk metrics",
-        "Unable to fetch chunk performance data"
-      );
+      toast.error("Failed to load chunk metrics");
     } finally {
       setIsLoading(false);
     }
@@ -135,22 +127,16 @@ export function ChunkManagementPanel({
 
       if (data.success) {
         const result: DeduplicationResult = data.data;
-        toast.success("Deduplication Complete", data.message);
+        toast.success(data.message || "Deduplication completed successfully");
 
         // Reload metrics after deduplication
         await loadMetrics();
       } else {
-        toast.error(
-          "Deduplication Failed",
-          data.error || "Deduplication failed"
-        );
+        toast.error(data.error || "Deduplication failed");
       }
     } catch (error) {
       console.error("Error during deduplication:", error);
-      toast.error(
-        "Deduplication Failed",
-        "An error occurred during deduplication"
-      );
+      toast.error("An error occurred during deduplication");
     } finally {
       setIsDeduplicating(false);
     }
@@ -177,16 +163,16 @@ export function ChunkManagementPanel({
 
       if (data.success) {
         const result: CleanupResult = data.data;
-        toast.success("Cleanup Complete", data.message);
+        toast.success(data.message || "Cleanup completed successfully");
 
         // Reload metrics after cleanup
         await loadMetrics();
       } else {
-        toast.error("Cleanup Failed", data.error || "Cleanup failed");
+        toast.error(data.error || "Cleanup failed");
       }
     } catch (error) {
       console.error("Error during cleanup:", error);
-      toast.error("Cleanup Failed", "An error occurred during cleanup");
+      toast.error("An error occurred during cleanup");
     } finally {
       setIsCleaning(false);
     }
@@ -208,20 +194,14 @@ export function ChunkManagementPanel({
       const data = await response.json();
 
       if (data.success) {
-        toast.success("Quality Update Complete", data.message);
+        toast.success(data.message || "Quality scores updated successfully");
         await loadMetrics();
       } else {
-        toast.error(
-          "Quality Update Failed",
-          data.error || "Quality update failed"
-        );
+        toast.error(data.error || "Quality update failed");
       }
     } catch (error) {
       console.error("Error updating quality scores:", error);
-      toast.error(
-        "Quality Update Failed",
-        "An error occurred while updating quality scores"
-      );
+      toast.error("An error occurred while updating quality scores");
     } finally {
       setIsLoading(false);
     }

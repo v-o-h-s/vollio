@@ -1,85 +1,92 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/utils/supabase-helpers";
+import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import { withErrorHandling } from "@/lib/utils/server-error-handling";
 import { PDFDocument } from "pdf-lib";
 import sharp from "sharp";
 
-export const GET = withErrorHandling(async (
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) => {
-  const { userId } = auth();
-  
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+export const GET = withErrorHandling(
+  async (request: NextRequest, { params }: { params: { id: string } }) => {
+    const { userId } = await auth();
 
-  const pdfId = params.id;
-  
-  if (!pdfId) {
-    return NextResponse.json({ error: "PDF ID is required" }, { status: 400 });
-  }
-
-  try {
-    const supabase = getAuthenticatedSupabaseClient();
-
-    // Get PDF metadata
-    const { data: pdfData, error: pdfError } = await supabase
-      .from("pdfs")
-      .select("*")
-      .eq("id", pdfId)
-      .eq("user_id", userId)
-      .single();
-
-    if (pdfError || !pdfData) {
-      return NextResponse.json({ error: "PDF not found" }, { status: 404 });
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get signed URL for the PDF file
-    const { data: signedUrlData, error: urlError } = await supabase.storage
-      .from("pdfs")
-      .createSignedUrl(pdfData.storage_path, 3600); // 1 hour expiry
+    const pdfId = params.id;
 
-    if (urlError || !signedUrlData?.signedUrl) {
-      return NextResponse.json({ error: "Failed to access PDF file" }, { status: 500 });
+    if (!pdfId) {
+      return NextResponse.json(
+        { error: "PDF ID is required" },
+        { status: 400 }
+      );
     }
 
-    // Fetch the PDF file
-    const pdfResponse = await fetch(signedUrlData.signedUrl);
-    if (!pdfResponse.ok) {
-      return NextResponse.json({ error: "Failed to fetch PDF file" }, { status: 500 });
-    }
+    try {
+      const supabase = await getAuthenticatedSupabaseClient();
 
-    const pdfBuffer = await pdfResponse.arrayBuffer();
-    
-    // Generate thumbnail using pdf-lib and sharp
-    const thumbnail = await generatePDFThumbnail(new Uint8Array(pdfBuffer));
+      // Get PDF metadata
+      const { data: pdfData, error: pdfError } = await supabase
+        .from("pdfs")
+        .select("*")
+        .eq("id", pdfId)
+        .eq("user_id", userId)
+        .single();
 
-    return new NextResponse(thumbnail, {
-      status: 200,
-      headers: {
-        "Content-Type": "image/jpeg",
-        "Cache-Control": "public, max-age=86400", // Cache for 24 hours
-        "Content-Disposition": `inline; filename="thumbnail-${pdfId}.jpg"`
+      if (pdfError || !pdfData) {
+        return NextResponse.json({ error: "PDF not found" }, { status: 404 });
       }
-    });
 
-  } catch (error) {
-    console.error("Error generating PDF thumbnail:", error);
-    return NextResponse.json(
-      { error: "Failed to generate thumbnail" },
-      { status: 500 }
-    );
+      // Get signed URL for the PDF file
+      const { data: signedUrlData, error: urlError } = await supabase.storage
+        .from("pdfs")
+        .createSignedUrl(pdfData.storage_path, 3600); // 1 hour expiry
+
+      if (urlError || !signedUrlData?.signedUrl) {
+        return NextResponse.json(
+          { error: "Failed to access PDF file" },
+          { status: 500 }
+        );
+      }
+
+      // Fetch the PDF file
+      const pdfResponse = await fetch(signedUrlData.signedUrl);
+      if (!pdfResponse.ok) {
+        return NextResponse.json(
+          { error: "Failed to fetch PDF file" },
+          { status: 500 }
+        );
+      }
+
+      const pdfBuffer = await pdfResponse.arrayBuffer();
+
+      // Generate thumbnail using pdf-lib and sharp
+      const thumbnail = await generatePDFThumbnail(new Uint8Array(pdfBuffer));
+
+      return new NextResponse(thumbnail, {
+        status: 200,
+        headers: {
+          "Content-Type": "image/jpeg",
+          "Cache-Control": "public, max-age=86400", // Cache for 24 hours
+          "Content-Disposition": `inline; filename="thumbnail-${pdfId}.jpg"`,
+        },
+      });
+    } catch (error) {
+      console.error("Error generating PDF thumbnail:", error);
+      return NextResponse.json(
+        { error: "Failed to generate thumbnail" },
+        { status: 500 }
+      );
+    }
   }
-});
+);
 
 async function generatePDFThumbnail(pdfBuffer: Uint8Array): Promise<Buffer> {
   try {
     // Load PDF document
     const pdfDoc = await PDFDocument.load(pdfBuffer);
     const pages = pdfDoc.getPages();
-    
+
     if (pages.length === 0) {
       throw new Error("PDF has no pages");
     }
@@ -100,7 +107,7 @@ async function generatePDFThumbnail(pdfBuffer: Uint8Array): Promise<Buffer> {
     // In a production environment, you'd want to use a proper PDF-to-image library
     // like pdf2pic, pdf-poppler, or similar
     const thumbnailBuffer = await createPlaceholderThumbnail(width, height);
-    
+
     return thumbnailBuffer;
   } catch (error) {
     console.error("Error in generatePDFThumbnail:", error);
@@ -109,7 +116,10 @@ async function generatePDFThumbnail(pdfBuffer: Uint8Array): Promise<Buffer> {
   }
 }
 
-async function createPlaceholderThumbnail(width: number, height: number): Promise<Buffer> {
+async function createPlaceholderThumbnail(
+  width: number,
+  height: number
+): Promise<Buffer> {
   // Create a simple placeholder thumbnail using Sharp
   const aspectRatio = width / height;
   const thumbnailWidth = 200;
@@ -128,9 +138,7 @@ async function createPlaceholderThumbnail(width: number, height: number): Promis
     </svg>
   `;
 
-  return sharp(Buffer.from(svg))
-    .jpeg({ quality: 80 })
-    .toBuffer();
+  return sharp(Buffer.from(svg)).jpeg({ quality: 80 }).toBuffer();
 }
 
 async function createDefaultThumbnail(): Promise<Buffer> {
@@ -145,7 +153,5 @@ async function createDefaultThumbnail(): Promise<Buffer> {
     </svg>
   `;
 
-  return sharp(Buffer.from(svg))
-    .jpeg({ quality: 80 })
-    .toBuffer();
+  return sharp(Buffer.from(svg)).jpeg({ quality: 80 }).toBuffer();
 }
