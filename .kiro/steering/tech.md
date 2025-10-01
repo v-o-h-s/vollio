@@ -33,12 +33,16 @@ inclusion: always
 - **Metadata Preservation**: Complete extraction of document metadata, page numbers, structural information, and processing statistics
 
 ### AI-Powered Quiz Generation System ✅ COMPLETED
-- **RAG-Based Generation**: Advanced retrieval-augmented generation using vector search for intelligent quiz creation
+- **RAG-Based Generation**: Advanced retrieval-augmented generation using vector search for intelligent quiz creation with `/api/quiz/generate-rag` endpoint
 - **Vector Search Integration**: Semantic search across document chunks using embedding models for relevant content identification
-- **Multiple Question Types**: Support for multiple choice, true/false, and short answer questions with configurable difficulty
-- **Multi-Document Support**: Generate quizzes from multiple PDF sources with balanced content representation
+- **Multiple Question Types**: Support for multiple choice, true/false, and short answer questions with configurable difficulty levels
+- **Multi-Document Support**: Generate quizzes from multiple PDF sources with balanced content representation and cross-document analysis
 - **Interactive Quiz Player**: Complete quiz-taking interface with progress tracking, scoring, review modes, and retake functionality
-- **Performance Monitoring**: Comprehensive quiz analytics, attempt tracking, and performance insights
+- **Performance Monitoring**: Comprehensive quiz analytics, attempt tracking, performance insights, and improvement trend analysis
+- **Advanced Search**: Sophisticated content filtering with `/api/quiz/advanced-search` for targeted quiz generation
+- **Quiz History**: Complete attempt tracking with `/api/quiz/history` and statistical analysis
+- **Mobile Optimization**: Responsive quiz interfaces with `MobileQuizGeneratorInterface` and touch-friendly interactions
+- **Feedback System**: User feedback collection with `SimpleFeedbackForm` and RAG monitoring for continuous improvement
 
 ### PDF Annotation Architecture
 - **AnnotationTooltip Integration**: Sophisticated PDF-to-screen coordinate conversion with canvas detection  

@@ -46,15 +46,43 @@ interface AnnotationState {
 
 ### PDF Operations
 
-- `uploadPDF(formData)` - Upload PDF to Supabase Storage
-- `getPDFs()` - Fetch user's PDFs with signed URLs and recent activity
-- `getPDF(id)` - Get individual PDF with fresh signed URL
+- `uploadPDF(formData)` - Upload PDF to Supabase Storage with comprehensive validation
+- `getPDFs()` - Fetch user's PDFs with signed URLs and recent activity tracking
+- `getPDF(id)` - Get individual PDF with fresh signed URL and activity logging
+- `deletePDF(id)` - Delete PDF from storage and database with cleanup
+- `renamePDF({id, filename})` - Rename PDF with validation and duplicate checking
+
+### Note Operations
+
+- `createNote(noteData)` - Create new note with rich text content
+- `updateNote({id, updates})` - Update existing note with auto-save integration
+- `deleteNote(id)` - Delete note with confirmation and cleanup
+- `getNotes()` - Fetch user's notes with filtering and sorting
+- `getNote(id)` - Get individual note with content and metadata
+
+### Quiz Operations
+
+- `generateQuiz(config)` - Generate AI-powered quiz from documents using RAG
+- `getQuizzes()` - Fetch user's quiz history with analytics
+- `getQuiz(id)` - Get individual quiz with questions and metadata
+- `submitQuizAttempt(attempt)` - Submit quiz attempt with scoring
+- `getQuizHistory()` - Get detailed quiz attempt history and analytics
+
+### Annotation Operations
+
+- `createAnnotation(annotation)` - Create PDF annotation with coordinates
+- `updateAnnotation({id, updates})` - Update annotation content and styling
+- `deleteAnnotation(id)` - Delete annotation with highlight cleanup
+- `getAnnotations(pdfId)` - Get annotations for specific PDF
 
 ### Response Types
 
 - **SupabaseUploadResponse** - PDF upload with metadata and signed URL
 - **SupabasePDFListResponse** - PDF list with recent activity and total count
 - **SupabasePDFAccessResponse** - Individual PDF access with fresh signed URL
+- **NoteResponse** - Note data with rich text content and metadata
+- **QuizResponse** - Quiz data with questions, configuration, and analytics
+- **AnnotationResponse** - Annotation data with coordinates and styling
 
 ## Usage
 

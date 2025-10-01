@@ -44,9 +44,16 @@ function NotionEditor({ initialNoteId, onSaveSuccess }: NotionEditorProps) {
     enabled: true,
   });
 
-  // Editor handles all auto-save internally
-}
+  // Editor handles all auto-save internally with RTK Query mutations
+  // Parent components no longer need to manage save operations
+  
+  return (
+    <div className="notion-editor">
+      <TipTapEditor 
+        content={content}
+        onChange={updateContent}
       />
+      <AutoSaveStatus status={status} lastSaved={lastSaved} error={error} />
     </div>
   );
 }

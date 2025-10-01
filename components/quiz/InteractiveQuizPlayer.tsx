@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { ErrorNotification } from "@/components/ui/error-notification";
-import { useToastActions } from "@/components/ui/toast";
+import toast from "react-hot-toast";
 import { QuizPlayerErrorBoundary } from "./QuizErrorBoundary";
 import { QuizPlayerSkeleton } from "./QuizLoadingStates";
 import { QuizAccessibilityProvider, useQuizAccessibility } from "./QuizAccessibilityProvider";
@@ -72,7 +72,7 @@ function InteractiveQuizPlayerInner({
   onExit,
   className 
 }: InteractiveQuizPlayerProps) {
-  const toast = useToastActions();
+
   const {
     handleQuizSubmissionError,
     executeWithErrorHandling,

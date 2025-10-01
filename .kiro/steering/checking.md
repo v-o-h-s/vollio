@@ -187,3 +187,18 @@ When implementing or debugging document processing:
 - ❌ Avoid blocking UI during document processing operations
 - ❌ Don't skip OCR fallback validation for scanned documents
 - ❌ Avoid processing documents without proper user authentication
+
+## RAG System Implementation Checklist
+
+When implementing or debugging RAG-based quiz generation:
+- ✅ Use `/api/quiz/generate-rag` for RAG-based quiz generation with proper authentication
+- ✅ Implement `/api/quiz/advanced-search` for sophisticated content filtering and semantic search
+- ✅ Use `SimpleFeedbackForm` component for user feedback collection and system improvement
+- ✅ Leverage vector search integration for relevant content identification across document chunks
+- ✅ Implement proper error handling for RAG service failures and fallback mechanisms
+- ✅ Use `MobileQuizGeneratorInterface` for mobile-optimized RAG quiz generation
+- ✅ Store RAG performance metrics and user feedback in Supabase with RLS policies
+- ✅ Implement proper rate limiting and quota management for RAG API calls
+- ❌ Avoid blocking UI during RAG processing operations - use background processing
+- ❌ Don't skip validation of document processing status before RAG generation
+- ❌ Avoid RAG operations without proper user authentication and document access verification

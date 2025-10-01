@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { QuizGenerationErrorBoundary, QuizPlayerErrorBoundary } from '../QuizErrorBoundary';
-import { ToastProvider } from '../../ui/toast';
+
 
 // Mock the error handling utilities
 vi.mock('@/lib/utils/error-handling', () => ({
@@ -42,11 +42,9 @@ describe('Quiz Error Handling', () => {
 
   it('should catch and display quiz generation errors', async () => {
     render(
-      <ToastProvider>
-        <QuizGenerationErrorBoundary>
-          <ErrorThrowingComponent shouldThrow={true} />
-        </QuizGenerationErrorBoundary>
-      </ToastProvider>
+      <QuizGenerationErrorBoundary>
+        <ErrorThrowingComponent shouldThrow={true} />
+      </QuizGenerationErrorBoundary>
     );
 
     // Should display error boundary fallback
@@ -65,11 +63,9 @@ describe('Quiz Error Handling', () => {
 
   it('should catch and display quiz player errors', async () => {
     render(
-      <ToastProvider>
-        <QuizPlayerErrorBoundary>
-          <ErrorThrowingComponent shouldThrow={true} />
-        </QuizPlayerErrorBoundary>
-      </ToastProvider>
+      <QuizPlayerErrorBoundary>
+        <ErrorThrowingComponent shouldThrow={true} />
+      </QuizPlayerErrorBoundary>
     );
 
     // Should display error boundary fallback
@@ -83,11 +79,9 @@ describe('Quiz Error Handling', () => {
 
   it('should allow retry functionality', async () => {
     const { rerender } = render(
-      <ToastProvider>
-        <QuizGenerationErrorBoundary>
-          <ErrorThrowingComponent shouldThrow={true} />
-        </QuizGenerationErrorBoundary>
-      </ToastProvider>
+      <QuizGenerationErrorBoundary>
+        <ErrorThrowingComponent shouldThrow={true} />
+      </QuizGenerationErrorBoundary>
     );
 
     // Error should be displayed
@@ -99,11 +93,9 @@ describe('Quiz Error Handling', () => {
 
     // Rerender with working component
     rerender(
-      <ToastProvider>
-        <QuizGenerationErrorBoundary>
-          <ErrorThrowingComponent shouldThrow={false} />
-        </QuizGenerationErrorBoundary>
-      </ToastProvider>
+      <QuizGenerationErrorBoundary>
+        <ErrorThrowingComponent shouldThrow={false} />
+      </QuizGenerationErrorBoundary>
     );
 
     // Should show working component
@@ -117,11 +109,9 @@ describe('Quiz Error Handling', () => {
     process.env.NODE_ENV = 'development';
 
     render(
-      <ToastProvider>
-        <QuizGenerationErrorBoundary>
-          <ErrorThrowingComponent shouldThrow={true} />
-        </QuizGenerationErrorBoundary>
-      </ToastProvider>
+      <QuizGenerationErrorBoundary>
+        <ErrorThrowingComponent shouldThrow={true} />
+      </QuizGenerationErrorBoundary>
     );
 
     // Should show technical details section
@@ -139,11 +129,9 @@ describe('Quiz Error Handling', () => {
 
     contexts.forEach(({ Component, title }) => {
       const { unmount } = render(
-        <ToastProvider>
-          <Component>
-            <ErrorThrowingComponent shouldThrow={true} />
-          </Component>
-        </ToastProvider>
+        <Component>
+          <ErrorThrowingComponent shouldThrow={true} />
+        </Component>
       );
 
       expect(screen.getByText(title)).toBeInTheDocument();

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { ErrorNotification } from "@/components/ui/error-notification";
-import { useToastActions } from "@/components/ui/toast";
+import toast from "react-hot-toast";
 import { QuizPlayerErrorBoundary } from "./QuizErrorBoundary";
 import { useQuizPlayerErrorHandling } from "@/hooks/use-quiz-error-handling";
 import { useTouchGestures } from "@/hooks/use-touch-gestures";
@@ -59,7 +59,7 @@ export function MobileQuizPlayer({
   onExit,
   className 
 }: MobileQuizPlayerProps) {
-  const toast = useToastActions();
+
   const containerRef = useRef<HTMLDivElement>(null);
   const {
     handleQuizSubmissionError,

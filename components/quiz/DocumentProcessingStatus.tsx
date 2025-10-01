@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useToastActions } from "@/components/ui/toast";
+import toast from "react-hot-toast";
 import { DocumentProcessingErrorBoundary } from "./QuizErrorBoundary";
 import { DocumentProcessingLoading } from "./QuizLoadingStates";
 import { useDocumentProcessingErrorHandling } from "@/hooks/use-quiz-error-handling";
@@ -39,7 +39,7 @@ export function DocumentProcessingStatus({
   onRefresh,
   className,
 }: DocumentProcessingStatusProps) {
-  const toast = useToastActions();
+
   const { handleError, executeWithErrorHandling } =
     useDocumentProcessingErrorHandling();
 

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useToastActions } from "@/components/ui/toast";
+import toast from "react-hot-toast";
 import { useGetPDFsQuery } from "@/lib/store/apiSlice";
 import { MobileQuizConfigurationPanel } from "./MobileQuizConfigurationPanel";
 import { DocumentProcessingStatus } from "./DocumentProcessingStatus";
@@ -34,7 +34,7 @@ interface MobileQuizGeneratorInterfaceProps {
 
 export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorInterfaceProps) {
   const router = useRouter();
-  const toast = useToastActions();
+
   const {
     handleQuizGenerationError,
     handleDocumentProcessingError,
@@ -137,10 +137,7 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
   };
 
   const handleProcessDocument = async (documentId: string) => {
-    const loadingToastId = toast.loading(
-      "Processing Document",
-      "Starting document processing..."
-    );
+    const loadingToastId = toast.loading("Starting document processing...");
 
     try {
       await executeWithErrorHandling(async () => {
@@ -157,12 +154,7 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
 
         await response.json();
         
-        toast.update(loadingToastId, {
-          type: 'success',
-          title: 'Processing Started',
-          description: `Document processing has been queued.`,
-          duration: 3000
-        });
+        toast.success("Document processing has been queued.", { id: loadingToastId });
 
         await checkProcessingStatuses([documentId]);
       }, {
@@ -170,12 +162,7 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
         action: 'process_document'
       });
     } catch (error) {
-      toast.update(loadingToastId, {
-        type: 'error',
-        title: 'Processing Failed',
-        description: error instanceof Error ? error.message : "Failed to process document",
-        duration: 5000
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to process document", { id: loadingToastId });
       
       handleDocumentProcessingError(error);
     }
@@ -188,7 +175,7 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
     if (selectedDocuments.length === 0) {
       const error = "Please select at least one document";
       setGenerationError(error);
-      toast.warning("No Documents Selected", error);
+      toast.error(error);
       return;
     }
 
@@ -200,7 +187,7 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
     if (unprocessedDocs.length > 0) {
       const error = "All selected documents must be processed before generating a quiz";
       setGenerationError(error);
-      toast.warning("Documents Not Ready", error);
+      toast.error(error);
       return;
     }
 

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ErrorNotification } from "@/components/ui/error-notification";
-import { useToastActions } from "@/components/ui/toast";
+import toast from "react-hot-toast";
 import { useGetPDFsQuery } from "@/lib/store/apiSlice";
 import { QuizConfigurationPanel } from "./QuizConfigurationPanel";
 import { MultiDocumentStatus } from "./MultiDocumentStatus";
@@ -43,7 +43,7 @@ export function QuizGeneratorInterface({
   className,
 }: QuizGeneratorInterfaceProps) {
   const router = useRouter();
-  const toast = useToastActions();
+
   const {
     handleQuizGenerationError,
     handleDocumentProcessingError,

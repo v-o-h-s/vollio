@@ -64,18 +64,30 @@ inclusion: always
 ##### Quiz Components (`components/quiz/`) ✅ COMPLETED
 - **QuizGeneratorInterface.tsx** - Main quiz generation interface with document selection and configuration
 - **ResponsiveQuizInterface.tsx** - Responsive wrapper for desktop/mobile quiz interfaces
-- **MobileQuizGeneratorInterface.tsx** - Mobile-optimized quiz generation interface
-- **InteractiveQuizPlayer.tsx** - Complete quiz-taking interface with progress tracking and scoring
-- **QuizResultsDisplay.tsx** - Quiz results and performance analytics display
-- **QuizHistoryList.tsx** - Quiz attempt history and retake functionality
-- **QuizConfigurationPanel.tsx** - Quiz settings and configuration options
-- **DocumentProcessingStatus.tsx** - Document processing progress and status display
-- **MultiDocumentStatus.tsx** - Status display for multi-document quiz generation
-- **ContentPreview.tsx** - Preview of document content for quiz generation
-- **QuizErrorBoundary.tsx** - Error handling components for quiz functionality
-- **QuizLoadingStates.tsx** - Loading state components for quiz operations
-- **ChunkManagementPanel.tsx** - Document chunk management and optimization
-- **QuizAccessibilityProvider.tsx** - Accessibility context and utilities for quiz components
+- **MobileQuizGeneratorInterface.tsx** - Mobile-optimized quiz generation interface with RAG integration and touch-friendly interactions
+- **InteractiveQuizPlayer.tsx** - Complete quiz-taking interface with progress tracking, scoring, and mobile optimization
+- **QuizResultsDisplay.tsx** - Quiz results and performance analytics display with detailed feedback
+- **QuizHistoryList.tsx** - Quiz attempt history and retake functionality with performance tracking
+- **QuizConfigurationPanel.tsx** - Quiz settings and configuration options with advanced customization
+- **DocumentProcessingStatus.tsx** - Document processing progress and status display with real-time updates
+- **MultiDocumentStatus.tsx** - Status display for multi-document quiz generation with balanced processing
+- **ContentPreview.tsx** - Preview of document content for quiz generation with content analysis
+- **QuizErrorBoundary.tsx** - Error handling components for quiz functionality with recovery mechanisms
+- **QuizLoadingStates.tsx** - Loading state components for quiz operations with skeleton UI
+- **ChunkManagementPanel.tsx** - Document chunk management and optimization for improved quiz generation
+- **QuizAccessibilityProvider.tsx** - Accessibility context and utilities for quiz components with WCAG compliance
+
+##### RAG Components (`components/rag/`) ✅ COMPLETED
+- **SimpleFeedbackForm.tsx** - User feedback collection for RAG system performance monitoring and improvement
+- **RAGSearchInterface.tsx** - Advanced search interface for RAG-based content discovery
+- **RAGResultsDisplay.tsx** - Display component for RAG search results with relevance scoring
+- **RAGMonitoringDashboard.tsx** - Performance monitoring and analytics for RAG operations
+
+##### RAG Components (`components/rag/`) ✅ COMPLETED
+- **SimpleFeedbackForm.tsx** - User feedback collection for RAG system performance monitoring and improvement
+- **RAGSearchInterface.tsx** - Advanced search interface for RAG-based content discovery
+- **RAGResultsDisplay.tsx** - Display component for RAG search results with relevance scoring
+- **RAGMonitoringDashboard.tsx** - Performance monitoring and analytics for RAG operations
 
 ##### Editor Components (`components/editor/`)
 - **Core Editor Components**:

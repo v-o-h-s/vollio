@@ -6,16 +6,16 @@ This directory contains a complete Notion-like block-based rich text editor syst
 
 All editor components have been successfully implemented and integrated into the Noto application with comprehensive features including:
 
-- ✅ Complete TipTap-based block editor with custom extensions
+- ✅ Complete TipTap-based block editor with custom extensions and internal auto-save functionality
 - ✅ Floating toolbars with intelligent positioning and mobile responsiveness  
 - ✅ Slash command system for quick block creation and formatting
 - ✅ Cross-tab synchronization using BroadcastChannel and PostMessage APIs
 - ✅ Performance optimizations with lazy loading and memoization
 - ✅ Comprehensive error handling and recovery mechanisms
-- ✅ Basic keyboard shortcuts for essential editor functions
-- ✅ Mobile-first responsive design with touch-friendly interactions
-- ✅ Complete theme system integration with dark/light mode support
-- ✅ Theme-aware loading states and skeleton components
+- ✅ Essential keyboard shortcuts for efficient text editing and navigation
+- ✅ Mobile-first responsive design with touch-friendly interactions and gesture support
+- ✅ Complete theme system integration with dark/light mode support and theme-aware components
+- ✅ Theme-aware loading states and skeleton components with smooth animations
 
 ## 🧩 Core Components
 

@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useToastActions } from "@/components/ui/toast";
+import toast from "react-hot-toast";
 import {
   mapErrorToAppError,
   withRetry,
@@ -37,7 +37,7 @@ export function useQuizErrorHandling(options: QuizErrorHandlingOptions = {}) {
     retryCount: 0,
   });
 
-  const toast = useToastActions();
+
 
   // Handle different types of quiz errors
   const handleError = useCallback(
@@ -58,187 +58,69 @@ export function useQuizErrorHandling(options: QuizErrorHandlingOptions = {}) {
         // Show appropriate toast based on error type
         switch (appError.type) {
           case ErrorType.NETWORK_ERROR:
-            toast.error(
-              "Connection Error",
-              "Please check your internet connection and try again.",
-              {
-                label: "Retry",
-                onClick: () => window.location.reload(),
-              }
-            );
+            toast.error("Connection Error: Please check your internet connection and try again.");
             break;
 
           case ErrorType.TIMEOUT_ERROR:
-            toast.error(
-              "Request Timeout",
-              "The operation took too long. Please try again with simpler parameters.",
-              retryable
-                ? {
-                    label: "Try Again",
-                    onClick: () =>
-                      setErrorState((prev) => ({ ...prev, error: null })),
-                  }
-                : undefined
-            );
+            toast.error("Request Timeout: The operation took too long. Please try again with simpler parameters.");
             break;
 
           case ErrorType.RATE_LIMIT_ERROR:
-            toast.warning(
-              "Rate Limit Exceeded",
-              "Please wait a moment before trying again.",
-              {
-                label: "Understood",
-                onClick: () => {},
-              }
-            );
+            toast.error("Rate Limit Exceeded: Please wait a moment before trying again.");
             break;
 
           case ErrorType.VALIDATION_ERROR:
-            toast.warning("Invalid Input", appError.userMessage, {
-              label: "Fix Input",
-              onClick: () =>
-                setErrorState((prev) => ({ ...prev, error: null })),
-            });
+            toast.error(`Invalid Input: ${appError.userMessage}`);
             break;
 
           case ErrorType.AUTHENTICATION_ERROR:
-            toast.error(
-              "Authentication Required",
-              "Please sign in to continue.",
-              {
-                label: "Sign In",
-                onClick: () => (window.location.href = "/sign-in"),
-              }
-            );
+            toast.error("Authentication Required: Please sign in to continue.");
             break;
 
           case ErrorType.AUTHORIZATION_ERROR:
-            toast.error(
-              "Access Denied",
-              "You don't have permission to perform this action.",
-              {
-                label: "Go Back",
-                onClick: () => window.history.back(),
-              }
-            );
+            toast.error("Access Denied: You don't have permission to perform this action.");
             break;
 
           case ErrorType.STORAGE_QUOTA_EXCEEDED:
-            toast.error(
-              "Storage Limit Reached",
-              "Please delete some files or upgrade your plan.",
-              {
-                label: "Manage Files",
-                onClick: () => (window.location.href = "/dashboard/pdfs"),
-              }
-            );
+            toast.error("Storage Limit Reached: Please delete some files or upgrade your plan.");
             break;
 
           case ErrorType.FILE_TOO_LARGE:
-            toast.error(
-              "File Too Large",
-              "Please select a smaller PDF file (max 50MB).",
-              {
-                label: "Choose File",
-                onClick: () =>
-                  setErrorState((prev) => ({ ...prev, error: null })),
-              }
-            );
+            toast.error("File Too Large: Please select a smaller PDF file (max 50MB).");
             break;
 
           case ErrorType.INVALID_FILE_TYPE:
-            toast.error(
-              "Invalid File Type",
-              "Please select a valid PDF file.",
-              {
-                label: "Choose PDF",
-                onClick: () =>
-                  setErrorState((prev) => ({ ...prev, error: null })),
-              }
-            );
+            toast.error("Invalid File Type: Please select a valid PDF file.");
             break;
 
           case ErrorType.EXTERNAL_SERVICE_ERROR:
             if (appError.message.includes("AI service")) {
-              toast.error(
-                "AI Service Error",
-                "The AI service is temporarily unavailable. Please try again later.",
-                {
-                  label: "Try Later",
-                  onClick: () =>
-                    setErrorState((prev) => ({ ...prev, error: null })),
-                }
-              );
+              toast.error("AI Service Error: The AI service is temporarily unavailable. Please try again later.");
             } else {
-              toast.error(
-                "Service Error",
-                "An external service is temporarily unavailable.",
-                retryable
-                  ? {
-                      label: "Retry",
-                      onClick: () =>
-                        setErrorState((prev) => ({ ...prev, error: null })),
-                    }
-                  : undefined
-              );
+              toast.error("Service Error: An external service is temporarily unavailable.");
             }
             break;
 
           case ErrorType.PROCESSING_ERROR:
             if (appError.message.includes("document")) {
-              toast.error(
-                "Document Processing Failed",
-                "Unable to process the document. Please try with a different file or contact support.",
-                {
-                  label: "Try Different File",
-                  onClick: () =>
-                    setErrorState((prev) => ({ ...prev, error: null })),
-                }
-              );
+              toast.error("Document Processing Failed: Unable to process the document. Please try with a different file or contact support.");
             } else {
-              toast.error(
-                "Processing Error",
-                appError.userMessage,
-                retryable
-                  ? {
-                      label: "Try Again",
-                      onClick: () =>
-                        setErrorState((prev) => ({ ...prev, error: null })),
-                    }
-                  : undefined
-              );
+              toast.error(`Processing Error: ${appError.userMessage}`);
             }
             break;
 
           case ErrorType.DATABASE_ERROR:
-            toast.error(
-              "Database Error",
-              "Unable to save your data. Please try again.",
-              {
-                label: "Retry",
-                onClick: () => window.location.reload(),
-              }
-            );
+            toast.error("Database Error: Unable to save your data. Please try again.");
             break;
 
           default:
-            toast.error(
-              "Unexpected Error",
-              appError.userMessage || "Something went wrong. Please try again.",
-              retryable
-                ? {
-                    label: "Try Again",
-                    onClick: () =>
-                      setErrorState((prev) => ({ ...prev, error: null })),
-                  }
-                : undefined
-            );
+            toast.error(`Unexpected Error: ${appError.userMessage || "Something went wrong. Please try again."}`);
         }
       }
 
       return appError;
     },
-    [context, showToast, retryable, toast]
+    [context, showToast, retryable]
   );
 
   // Execute operation with error handling and retry logic
@@ -288,7 +170,7 @@ export function useQuizErrorHandling(options: QuizErrorHandlingOptions = {}) {
         }));
 
         if (showToast) {
-          toast.success("Success", "Operation completed successfully.");
+          toast.success("Operation completed successfully.");
         }
 
         return result;
@@ -307,7 +189,6 @@ export function useQuizErrorHandling(options: QuizErrorHandlingOptions = {}) {
       errorState.retryCount,
       showToast,
       handleError,
-      toast,
     ]
   );
 

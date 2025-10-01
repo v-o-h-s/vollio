@@ -76,6 +76,27 @@ This document provides a comprehensive index of all documentation resources for 
   - RecentActivityDisplay - User activity tracking and display
   - Theme-integrated navigation and responsive design
 
+### Quiz System Components ✅ COMPLETED
+- **[Quiz Components Overview](./components/quiz/README.md)** - Complete AI-powered quiz generation system with RAG integration and mobile optimization
+  - QuizGeneratorInterface - Main quiz generation interface with document selection and configuration
+  - ResponsiveQuizInterface - Responsive wrapper that automatically switches between desktop/mobile interfaces
+  - MobileQuizGeneratorInterface - Mobile-optimized quiz generation with touch interactions and gesture support
+  - InteractiveQuizPlayer - Complete quiz-taking interface with progress tracking, scoring, and review modes
+  - QuizResultsDisplay - Quiz results and performance analytics display with detailed feedback
+  - QuizHistoryList - Quiz attempt history, analytics, and retake functionality with performance tracking
+  - QuizConfigurationPanel - Advanced quiz settings with difficulty levels, question types, and customization options
+  - DocumentProcessingStatus - Real-time document processing progress and status tracking with visual indicators
+  - MultiDocumentStatus - Status display for multi-document quiz generation with balanced processing
+  - QuizAccessibilityProvider - WCAG-compliant accessibility features and utilities for quiz components
+  - QuizErrorBoundary - Comprehensive error handling components with recovery mechanisms and user feedback
+
+### RAG System Components ✅ COMPLETED
+- **[RAG Components Overview](./components/rag/README.md)** - Advanced retrieval-augmented generation system
+  - SimpleFeedbackForm - User feedback collection for RAG performance monitoring
+  - RAGSearchInterface - Advanced search interface for content discovery
+  - RAGResultsDisplay - Display component for search results with relevance scoring
+  - RAGMonitoringDashboard - Performance monitoring and analytics for RAG operations
+
 ## 🔧 Development Resources
 
 ### State Management

@@ -612,6 +612,161 @@ const handleUpdateNote = async (id: string, title: string, content: any) => {
 };
 ```
 
+## RAG System API
+
+### POST /api/quiz/generate-rag
+
+Generate quizzes using RAG-based content analysis from processed documents.
+
+**Request Body:**
+```json
+{
+  "documentIds": ["doc_123", "doc_456"],
+  "questionCount": 10,
+  "difficulty": "medium",
+  "questionTypes": ["multiple_choice", "true_false"],
+  "pageRange": { "start": 1, "end": 10 },
+  "focusAreas": ["key concepts", "definitions"],
+  "learningObjectives": ["understand main concepts"]
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "quizId": "quiz_789",
+  "message": "Quiz generated successfully",
+  "metadata": {
+    "questionsGenerated": 10,
+    "sourceDocumentTitles": ["Document 1", "Document 2"],
+    "totalChunksSearched": 45,
+    "averageRelevanceScore": 0.87,
+    "generationTime": 23.5,
+    "aiModel": "gpt-4"
+  }
+}
+```
+
+### POST /api/quiz/advanced-search
+
+Advanced semantic search across document chunks for targeted content discovery.
+
+**Request Body:**
+```json
+{
+  "query": "machine learning algorithms",
+  "documentIds": ["doc_123"],
+  "contentTypes": ["paragraph", "heading"],
+  "confidenceRange": { "min": 0.7, "max": 1.0 },
+  "relevanceRange": { "min": 0.8, "max": 1.0 },
+  "maxResults": 20
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "results": [
+    {
+      "chunkId": "chunk_123",
+      "content": "Machine learning algorithms...",
+      "relevanceScore": 0.92,
+      "metadata": {
+        "documentId": "doc_123",
+        "pageNumber": 5,
+        "contentType": "paragraph",
+        "confidence": 0.89
+      }
+    }
+  ],
+  "totalResults": 15,
+  "searchTime": 1.2
+}
+```
+
+### GET /api/quiz/history
+
+Retrieve quiz attempt history and performance analytics for the authenticated user.
+
+**Query Parameters:**
+- `limit` (optional): Maximum number of attempts to return (default: 20)
+- `offset` (optional): Number of attempts to skip for pagination (default: 0)
+
+**Response:**
+```json
+{
+  "success": true,
+  "attempts": [
+    {
+      "id": "attempt_123",
+      "quizId": "quiz_789",
+      "score": 85,
+      "totalQuestions": 10,
+      "completedAt": "2025-01-15T10:30:00Z",
+      "timeSpent": 300
+    }
+  ],
+  "summary": {
+    "totalAttempts": 25,
+    "averageScore": 78,
+    "bestScore": 95,
+    "improvementTrend": "improving"
+  }
+}
+```
+
+### POST /api/rag/monitoring
+
+Submit user feedback and performance metrics for RAG system monitoring.
+
+**Request Body:**
+```json
+{
+  "type": "feedback",
+  "data": {
+    "feedbackType": "quiz",
+    "targetId": "quiz_123",
+    "rating": 4,
+    "feedback": "Great quiz quality, relevant questions"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Feedback submitted successfully",
+  "feedbackId": "feedback_456"
+}
+```
+
+## RTK Query Integration
+
+All RAG endpoints are integrated with RTK Query for consistent state management:
+
+```typescript
+// RAG Quiz Generation
+const [generateRAGQuiz] = useGenerateRAGQuizMutation();
+const handleGenerateQuiz = async (params) => {
+  const result = await generateRAGQuiz(params).unwrap();
+  return result;
+};
+
+// Advanced Search
+const [performAdvancedSearch] = useAdvancedSearchMutation();
+const searchResults = await performAdvancedSearch(searchParams).unwrap();
+
+// Quiz History
+const { data: quizHistory } = useGetQuizHistoryQuery();
+
+// Feedback Submission
+const [submitFeedback] = useSubmitFeedbackMutation();
+await submitFeedback(feedbackData).unwrap();
+```
+
 ### Error Handling:
 
 All API endpoints return consistent error responses with user-friendly messages and technical details for debugging. The frontend automatically handles common errors like authentication failures, rate limiting, and network issues.
