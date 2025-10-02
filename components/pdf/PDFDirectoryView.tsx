@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { ErrorNotification } from "@/components/ui/error-notification";
 import toast from "react-hot-toast";
 import {
@@ -16,7 +15,6 @@ import {
 } from "@/lib/store/apiSlice";
 import { ErrorType, ErrorSeverity, AppError } from "@/lib/types/errors";
 import { PDFUploadZone } from "./PDFUploadZone";
-import { PDFThumbnail } from "./PDFThumbnail";
 import { PDFContextMenu } from "./PDFContextMenu";
 import { PDFBreadcrumb } from "./PDFBreadcrumb";
 import { PDFViewToggle } from "./PDFViewToggle";
@@ -51,7 +49,7 @@ interface PDFDirectoryViewProps {
   onSelectionChange?: (selectedIds: string[]) => void;
 }
 
-export type ViewMode = "grid" | "list";
+export type ViewMode = "grid" | "list" | "compact" | "details";
 export type SortBy = "name" | "date" | "size" | "type";
 export type SortOrder = "asc" | "desc";
 
@@ -102,6 +100,11 @@ export function PDFDirectoryView({
   });
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [draggedItem, setDraggedItem] = useState<{
+    type: "pdf" | "folder";
+    id: string;
+  } | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
 
   // API hooks
   const { data: pdfData, isLoading, error, refetch } = useGetPDFsQuery();
@@ -201,6 +204,66 @@ export function PDFDirectoryView({
     }
 
     refetch();
+  };
+
+  // Drag and drop handlers for moving files/folders
+  const handleDragStart = (
+    e: React.DragEvent,
+    type: "pdf" | "folder",
+    id: string
+  ) => {
+    setDraggedItem({ type, id });
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDropTarget(null);
+  };
+
+  const handleDragEnterFolder = (folderId: string) => {
+    if (draggedItem && draggedItem.id !== folderId) {
+      setDropTarget(folderId);
+    }
+  };
+
+  const handleDragLeaveFolder = () => {
+    setDropTarget(null);
+  };
+
+  const handleDropOnFolder = async (targetFolderId: string) => {
+    if (!draggedItem) return;
+
+    try {
+      if (draggedItem.type === "pdf") {
+        // Move PDF to folder
+        const response = await fetch(`/api/pdfs/${draggedItem.id}/move`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ folderId: targetFolderId }),
+        });
+
+        if (!response.ok) throw new Error("Failed to move PDF");
+
+        toast.success("PDF moved successfully");
+        refetch();
+      } else if (draggedItem.type === "folder") {
+        // Move folder (update parent)
+        setFolders((prev) =>
+          prev.map((folder) =>
+            folder.id === draggedItem.id
+              ? { ...folder, parentId: targetFolderId }
+              : folder
+          )
+        );
+        toast.success("Folder moved successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to move item");
+    }
+
+    setDraggedItem(null);
+    setDropTarget(null);
   };
 
   // Selection handlers
@@ -319,12 +382,7 @@ export function PDFDirectoryView({
       },
     };
 
-    return (
-      <ErrorNotification
-        error={appError}
-        onRetry={refetch}
-      />
-    );
+    return <ErrorNotification error={appError} onRetry={refetch} />;
   }
 
   return (
@@ -407,50 +465,70 @@ export function PDFDirectoryView({
             </div>
           </div>
         ) : (
-          <div
-            className={
-              viewMode === "grid"
-                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-                : "space-y-2"
-            }
-          >
-            {/* Folder creation */}
-            {isCreatingFolder && (
-              <CreateFolder
-                onCreateFolder={handleCreateFolder}
-                onCancel={() => setIsCreatingFolder(false)}
-                viewMode={viewMode}
-              />
+          <>
+            {/* Details view header */}
+            {viewMode === "details" && (
+              <div className="flex items-center gap-3 p-2 border-b bg-muted/30 rounded-t-lg text-sm font-medium text-muted-foreground">
+                <div className="w-5 h-5 flex-shrink-0" />
+                <div className="flex-1 min-w-0 grid grid-cols-4 gap-4">
+                  <span>Name</span>
+                  <span>Size</span>
+                  <span>Type</span>
+                  <span>Modified</span>
+                </div>
+                <div className="w-8 h-8 flex-shrink-0" />
+              </div>
             )}
 
-            {/* Folders */}
-            {folders
-              .filter((folder) => folder.parentId === currentFolder)
-              .map((folder) => (
-                <PDFFolder
-                  key={folder.id}
-                  folder={folder}
+            <div className={getViewModeClasses(viewMode)}>
+              {/* Folder creation */}
+              {isCreatingFolder && (
+                <CreateFolder
+                  onCreateFolder={handleCreateFolder}
+                  onCancel={() => setIsCreatingFolder(false)}
                   viewMode={viewMode}
-                  onOpen={() => handleFolderNavigation(folder.id)}
-                  onSelect={() => {}} // TODO: Implement folder selection
+                />
+              )}
+
+              {/* Folders */}
+              {folders
+                .filter((folder) => folder.parentId === currentFolder)
+                .map((folder) => (
+                  <PDFFolder
+                    key={folder.id}
+                    folder={folder}
+                    viewMode={viewMode}
+                    onOpen={() => handleFolderNavigation(folder.id)}
+                    onSelect={() => {}} // TODO: Implement folder selection
+                    onDragStart={(e) => handleDragStart(e, "folder", folder.id)}
+                    onDragEnd={handleDragEnd}
+                    onDragEnter={() => handleDragEnterFolder(folder.id)}
+                    onDragLeave={handleDragLeaveFolder}
+                    onDrop={() => handleDropOnFolder(folder.id)}
+                    isDropTarget={dropTarget === folder.id}
+                    isDragging={draggedItem?.id === folder.id}
+                  />
+                ))}
+
+              {/* PDFs */}
+              {filteredAndSortedPDFs.map((pdf) => (
+                <PDFItem
+                  key={pdf.id}
+                  pdf={pdf}
+                  viewMode={viewMode}
+                  isSelected={selectedItems.includes(pdf.id)}
+                  onSelect={(isCtrlClick) =>
+                    handleItemSelect(pdf.id, isCtrlClick)
+                  }
+                  onContextMenu={(e) => handleContextMenu(e, pdf.id)}
+                  onOpen={() => router.push(`/dashboard/pdfs/${pdf.id}`)}
+                  onDragStart={(e) => handleDragStart(e, "pdf", pdf.id)}
+                  onDragEnd={handleDragEnd}
+                  isDragging={draggedItem?.id === pdf.id}
                 />
               ))}
-
-            {/* PDFs */}
-            {filteredAndSortedPDFs.map((pdf) => (
-              <PDFItem
-                key={pdf.id}
-                pdf={pdf}
-                viewMode={viewMode}
-                isSelected={selectedItems.includes(pdf.id)}
-                onSelect={(isCtrlClick) =>
-                  handleItemSelect(pdf.id, isCtrlClick)
-                }
-                onContextMenu={(e) => handleContextMenu(e, pdf.id)}
-                onOpen={() => router.push(`/dashboard/pdfs/${pdf.id}`)}
-              />
-            ))}
-          </div>
+            </div>
+          </>
         )}
       </div>
 
@@ -513,6 +591,22 @@ export function PDFDirectoryView({
   );
 }
 
+// Helper function to get view mode classes
+function getViewModeClasses(viewMode: ViewMode): string {
+  switch (viewMode) {
+    case "grid":
+      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4";
+    case "list":
+      return "space-y-2";
+    case "compact":
+      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2";
+    case "details":
+      return "space-y-1";
+    default:
+      return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4";
+  }
+}
+
 // PDF Item Component
 interface PDFItemProps {
   pdf: PDFDocument;
@@ -521,6 +615,9 @@ interface PDFItemProps {
   onSelect: (isCtrlClick: boolean) => void;
   onContextMenu: (e: React.MouseEvent) => void;
   onOpen: () => void;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: () => void;
+  isDragging?: boolean;
 }
 
 function PDFItem({
@@ -530,33 +627,47 @@ function PDFItem({
   onSelect,
   onContextMenu,
   onOpen,
+  onDragStart,
+  onDragEnd,
+  isDragging = false,
 }: PDFItemProps) {
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  };
+
+  const getFileExtension = (filename: string) => {
+    return filename.split(".").pop()?.toUpperCase() || "PDF";
+  };
+
   if (viewMode === "grid") {
     return (
       <Card
+        draggable
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
         className={`cursor-pointer transition-all hover:shadow-md ${
           isSelected ? "ring-2 ring-primary" : ""
-        }`}
+        } ${isDragging ? "opacity-50" : ""}`}
         onClick={(e) => onSelect(e.ctrlKey || e.metaKey)}
         onContextMenu={onContextMenu}
         onDoubleClick={onOpen}
       >
         <CardContent className="p-4">
-          <div className="aspect-[3/4] mb-3 bg-muted rounded-lg flex items-center justify-center">
-            <PDFThumbnail
-              pdfId={pdf.id}
-              className="w-full h-full object-cover rounded-lg"
-            />
+          <div className="aspect-square mb-3 bg-muted rounded-lg flex flex-col items-center justify-center">
+            <FileText className="h-12 w-12 text-muted-foreground mb-2" />
+            <Badge variant="secondary" className="text-xs">
+              {getFileExtension(pdf.filename)}
+            </Badge>
           </div>
           <div className="space-y-1">
             <p className="font-medium text-sm truncate" title={pdf.filename}>
               {pdf.filename}
             </p>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{(pdf.fileSize / 1024 / 1024).toFixed(1)} MB</span>
-              <span>
-                {safeFormatDistanceToNow(pdf.createdAt)}
-              </span>
+              <span>{formatFileSize(pdf.fileSize)}</span>
+              <span>{safeFormatDistanceToNow(pdf.createdAt)}</span>
             </div>
           </div>
         </CardContent>
@@ -564,11 +675,84 @@ function PDFItem({
     );
   }
 
+  if (viewMode === "compact") {
+    return (
+      <div
+        draggable
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        className={`p-2 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+          isSelected ? "bg-primary/10" : ""
+        } ${isDragging ? "opacity-50" : ""}`}
+        onClick={(e) => onSelect(e.ctrlKey || e.metaKey)}
+        onContextMenu={onContextMenu}
+        onDoubleClick={onOpen}
+      >
+        <div className="flex flex-col items-center text-center">
+          <FileText className="h-8 w-8 text-muted-foreground mb-1" />
+          <p
+            className="text-xs font-medium truncate w-full"
+            title={pdf.filename}
+          >
+            {pdf.filename}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {formatFileSize(pdf.fileSize)}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (viewMode === "details") {
+    return (
+      <div
+        draggable
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+          isSelected ? "bg-primary/10" : ""
+        } ${isDragging ? "opacity-50" : ""}`}
+        onClick={(e) => onSelect(e.ctrlKey || e.metaKey)}
+        onContextMenu={onContextMenu}
+        onDoubleClick={onOpen}
+      >
+        <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+        <div className="flex-1 min-w-0 grid grid-cols-4 gap-4">
+          <p className="font-medium truncate">{pdf.filename}</p>
+          <p className="text-sm text-muted-foreground">
+            {formatFileSize(pdf.fileSize)}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {getFileExtension(pdf.filename)}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {safeFormatDistanceToNow(pdf.createdAt)}
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onContextMenu(e);
+          }}
+        >
+          <MoreVertical className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
+  // Default list view
   return (
     <div
+      draggable
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
       className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
         isSelected ? "bg-primary/10" : ""
-      }`}
+      } ${isDragging ? "opacity-50" : ""}`}
       onClick={(e) => onSelect(e.ctrlKey || e.metaKey)}
       onContextMenu={onContextMenu}
       onDoubleClick={onOpen}
@@ -579,10 +763,8 @@ function PDFItem({
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate">{pdf.filename}</p>
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>{(pdf.fileSize / 1024 / 1024).toFixed(1)} MB</span>
-          <span>
-            {safeFormatDistanceToNow(pdf.createdAt)}
-          </span>
+          <span>{formatFileSize(pdf.fileSize)}</span>
+          <span>{safeFormatDistanceToNow(pdf.createdAt)}</span>
         </div>
       </div>
       <Button
