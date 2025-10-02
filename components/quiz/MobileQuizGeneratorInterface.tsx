@@ -243,10 +243,9 @@ export function MobileQuizGeneratorInterface({ className }: MobileQuizGeneratorI
         setGenerationStage('complete');
         setGenerationProgress(100);
         
-        toast.success(
-          "Quiz Generated!",
-          `Created ${result.questions?.length || quizConfig.questionCount} questions.`
-        );
+        toast.success("Quiz Generated!", {
+          description: `Created ${result.questions?.length || quizConfig.questionCount} questions.`
+        });
 
         // Haptic feedback for success
         if ('vibrate' in navigator) {

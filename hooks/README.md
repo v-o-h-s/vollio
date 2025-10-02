@@ -12,13 +12,15 @@ The `useAutoSave` hook provides intelligent debounced auto-save functionality an
 
 #### Features
 
-- **Editor-Internal Integration**: Used internally by NotionEditor components, not directly by parent components
-- **RTK Query Integration**: Uses RTK Query mutations for all save operations
-- **Debounced Saving**: Prevents excessive API calls by debouncing save operations
-- **Status Tracking**: Real-time status updates (idle, typing, saving, saved, error)
-- **Error Recovery**: Handles save failures with retry mechanisms
-- **Automatic Note Creation**: Seamlessly creates new notes when content is added
-- **Title Extraction**: Automatically extracts titles from editor content
+- **Editor-Internal Integration**: Used internally by NotionEditor components with simplified architecture, not directly by parent components
+- **RTK Query Integration**: Uses RTK Query mutations for all save operations with automatic caching and synchronization
+- **Debounced Saving**: Prevents excessive API calls by debouncing save operations with intelligent timing
+- **Status Tracking**: Real-time status updates (idle, typing, saving, saved, error) with visual feedback
+- **Error Recovery**: Handles save failures with retry mechanisms and user-friendly error messages
+- **Automatic Note Creation**: Seamlessly creates new notes when content is added without manual intervention
+- **Title Extraction**: Automatically extracts titles from editor content with intelligent parsing
+- **Cross-tab Synchronization**: Real-time updates across browser tabs using RTK Query cache invalidation
+- **Content Preservation**: Automatic content preservation during network issues and editor errors
 
 #### Internal Usage (within NotionEditor)
 

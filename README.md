@@ -2,7 +2,7 @@
 
 Noto is a modern, secure PDF annotation application built with Next.js 15 and React 19. It enables users to upload PDFs, select text, and create rich annotations with seamless cross-device functionality, enterprise-grade security, and comprehensive theme support.
 
-> **Status**: Production-ready with complete PDF annotation system, rich text editing with auto-save, comprehensive note management, full dark/light theme integration, advanced document processing with AI-powered quiz generation, and RAG-based intelligent content analysis. Backend fully implemented with Supabase, comprehensive error handling, mobile-responsive design, cross-tab synchronization, and real-time feedback collection.
+> **Status**: Production-ready with complete PDF annotation system, rich text editing with auto-save, comprehensive note management, full dark/light theme integration, advanced document processing with AI-powered quiz generation, RAG-based intelligent content analysis, and real-time performance monitoring. Backend fully implemented with Supabase, comprehensive error handling, mobile-responsive design, cross-tab synchronization, and intelligent feedback collection systems.
 
 ## ✨ Features
 
@@ -70,12 +70,13 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 ### Advanced Document Processing Architecture ✅ IMPLEMENTED
 - **Syncfusion Primary Extraction**: Enterprise-grade text extraction using Syncfusion PDF Viewer for superior accuracy and layout preservation
-- **Advanced Layout Detection**: Intelligent recognition of document structure, tables, headings, lists, and formatting preservation
-- **OCR Fallback System**: Automatic fallback to node-tesseract-ocr for scanned documents and extraction failures with confidence thresholds
-- **Background Processing Queue**: Asynchronous document processing with progress tracking, timeout management, and job status monitoring
-- **Semantic Chunking**: Intelligent text segmentation with configurable overlap, content type detection, and boundary respect
-- **Multi-Language Support**: Comprehensive language detection and processing for international documents with OCR language packs
-- **Metadata Preservation**: Complete extraction of document metadata, page numbers, structural information, and processing statistics
+- **Advanced Layout Detection**: Intelligent recognition of document structure, tables, headings, lists, and formatting preservation with semantic understanding
+- **OCR Fallback System**: Automatic fallback to node-tesseract-ocr for scanned documents and extraction failures with confidence thresholds and quality assessment
+- **Background Processing Queue**: Asynchronous document processing with progress tracking, timeout management, job status monitoring, and performance optimization
+- **Semantic Chunking**: Intelligent text segmentation with configurable overlap, content type detection, boundary respect, and contextual understanding
+- **Multi-Language Support**: Comprehensive language detection and processing for international documents with OCR language packs and cultural adaptations
+- **Metadata Preservation**: Complete extraction of document metadata, page numbers, structural information, processing statistics, and content quality metrics
+- **Intelligent Content Analysis**: Advanced content type detection, semantic understanding, and automated quality assessment for optimal quiz generation
 
 ### AI-Powered Quiz Generation System ✅ IMPLEMENTED
 - **RAG-Based Generation**: Advanced retrieval-augmented generation using vector search for intelligent quiz creation with `/api/quiz/generate-rag` endpoint
@@ -84,10 +85,11 @@ For comprehensive documentation covering all aspects of the Noto application, se
 - **Multi-Document Support**: Generate quizzes from multiple PDF sources with balanced content representation, cross-document analysis, and intelligent deduplication
 - **Interactive Quiz Player**: Complete quiz-taking interface with progress tracking, scoring, review modes, retake functionality, and mobile optimization
 - **Performance Monitoring**: Comprehensive quiz analytics, attempt tracking, performance insights, improvement trend analysis, and real-time feedback collection
-- **Advanced Search Capabilities**: Sophisticated content filtering with semantic search, relevance scoring, and targeted quiz generation for specific topics
-- **Quiz History & Analytics**: Complete attempt tracking with detailed performance analytics, learning progress insights, and personalized recommendations
+- **Advanced Search Capabilities**: Sophisticated content filtering with semantic search, relevance scoring, and targeted quiz generation for specific topics via `/api/quiz/advanced-search`
+- **Quiz History & Analytics**: Complete attempt tracking with detailed performance analytics, learning progress insights, and personalized recommendations via `/api/quiz/history`
 - **Mobile-First Design**: Responsive quiz interfaces optimized for touch interactions with `MobileQuizGeneratorInterface` and gesture-based navigation
-- **RAG System Monitoring**: Real-time performance monitoring with user feedback collection for continuous improvement and quality assurance
+- **RAG System Monitoring**: Real-time performance monitoring with user feedback collection via `SimpleFeedbackForm` and `/api/rag/monitoring` for continuous improvement and quality assurance
+- **Intelligent Content Analysis**: Advanced document processing with content type detection, semantic understanding, and automated quality assessment
 
 ### Complete Auto-Save Architecture
 - **Editor-Internal Auto-Save**: Auto-save functionality built into NotionEditor components using RTK Query
