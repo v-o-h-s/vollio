@@ -1,15 +1,23 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { X, AlertTriangle, AlertCircle, Info, CheckCircle, RefreshCw, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { 
-  AppError, 
-  ErrorSeverity, 
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  X,
+  AlertTriangle,
+  AlertCircle,
+  Info,
+  CheckCircle,
+  RefreshCw,
+  ExternalLink,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  AppError,
+  ErrorSeverity,
   ErrorNotificationOptions,
-  ErrorRecoveryAction 
-} from '@/lib/types/errors';
-import { formatErrorForDisplay } from '@/lib/utils/error-handling';
+  ErrorRecoveryAction,
+} from "@/lib/types/errors";
+import { formatErrorForDisplay } from "@/lib/utils/error-handling";
 
 interface ErrorNotificationProps {
   error: AppError;
@@ -34,7 +42,7 @@ export function ErrorNotification({
     duration = 5000,
     persistent = false,
     showDetails: showDetailsOption = false,
-    position = 'top-right',
+    position = "top-right",
   } = options;
 
   const displayError = formatErrorForDisplay(error);
@@ -63,7 +71,7 @@ export function ErrorNotification({
       await onRetry();
       handleDismiss();
     } catch (retryError) {
-      console.error('Retry failed:', retryError);
+      console.error("Retry failed:", retryError);
     } finally {
       setIsRetrying(false);
     }
@@ -88,13 +96,13 @@ export function ErrorNotification({
     switch (error.severity) {
       case ErrorSeverity.CRITICAL:
       case ErrorSeverity.HIGH:
-        return 'border-red-200';
+        return "border-red-200";
       case ErrorSeverity.MEDIUM:
-        return 'border-orange-200';
+        return "border-orange-200";
       case ErrorSeverity.LOW:
-        return 'border-blue-200';
+        return "border-blue-200";
       default:
-        return 'border-gray-200';
+        return "border-gray-200";
     }
   };
 
@@ -102,30 +110,30 @@ export function ErrorNotification({
     switch (error.severity) {
       case ErrorSeverity.CRITICAL:
       case ErrorSeverity.HIGH:
-        return 'bg-red-50';
+        return "bg-red-50";
       case ErrorSeverity.MEDIUM:
-        return 'bg-orange-50';
+        return "bg-orange-50";
       case ErrorSeverity.LOW:
-        return 'bg-blue-50';
+        return "bg-blue-50";
       default:
-        return 'bg-gray-50';
+        return "bg-gray-50";
     }
   };
 
   const getPositionClasses = () => {
-    const baseClasses = 'fixed z-50';
+    const baseClasses = "fixed z-50";
     switch (position) {
-      case 'top-right':
+      case "top-right":
         return `${baseClasses} top-4 right-4`;
-      case 'top-left':
+      case "top-left":
         return `${baseClasses} top-4 left-4`;
-      case 'bottom-right':
+      case "bottom-right":
         return `${baseClasses} bottom-4 right-4`;
-      case 'bottom-left':
+      case "bottom-left":
         return `${baseClasses} bottom-4 left-4`;
-      case 'top-center':
+      case "top-center":
         return `${baseClasses} top-4 left-1/2 transform -translate-x-1/2`;
-      case 'bottom-center':
+      case "bottom-center":
         return `${baseClasses} bottom-4 left-1/2 transform -translate-x-1/2`;
       default:
         return `${baseClasses} top-4 right-4`;
@@ -140,7 +148,7 @@ export function ErrorNotification({
         ${getPositionClasses()}
         max-w-md w-full
         transition-all duration-300 ease-in-out
-        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}
+        ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"}
       `}
     >
       <div
@@ -163,7 +171,7 @@ export function ErrorNotification({
               </p>
             </div>
           </div>
-          
+
           <button
             onClick={handleDismiss}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -178,9 +186,7 @@ export function ErrorNotification({
             {error.context.component && (
               <div>Component: {error.context.component}</div>
             )}
-            {error.context.action && (
-              <div>Action: {error.context.action}</div>
-            )}
+            {error.context.action && <div>Action: {error.context.action}</div>}
             {error.context.fileName && (
               <div>File: {error.context.fileName}</div>
             )}
@@ -199,8 +205,11 @@ export function ErrorNotification({
                 variant="outline"
                 className="text-xs"
               >
-                <RefreshCw size={12} className={isRetrying ? 'animate-spin' : ''} />
-                {isRetrying ? 'Retrying...' : 'Retry'}
+                <RefreshCw
+                  size={12}
+                  className={isRetrying ? "animate-spin" : ""}
+                />
+                {isRetrying ? "Retrying..." : "Retry"}
               </Button>
             )}
 
@@ -218,9 +227,15 @@ export function ErrorNotification({
             ))}
 
             {/* Contact Support */}
-            {error.severity === ErrorSeverity.HIGH || error.severity === ErrorSeverity.CRITICAL ? (
+            {error.severity === ErrorSeverity.HIGH ||
+            error.severity === ErrorSeverity.CRITICAL ? (
               <Button
-                onClick={() => window.open('mailto:support@noto.app?subject=Error Report', '_blank')}
+                onClick={() =>
+                  window.open(
+                    "mailto:support@noto.app?subject=Error Report",
+                    "_blank"
+                  )
+                }
                 size="sm"
                 variant="outline"
                 className="text-xs"
@@ -237,28 +252,34 @@ export function ErrorNotification({
               onClick={() => setShowDetails(!showDetails)}
               className="text-xs text-gray-500 hover:text-gray-700"
             >
-              {showDetails ? 'Hide' : 'Details'}
+              {showDetails ? "Hide" : "Details"}
             </button>
           )}
         </div>
 
         {/* Progress Bar for Auto-dismiss */}
-        {!persistent && duration > 0 && error.severity === ErrorSeverity.LOW && (
-          <div className="mt-3 h-1 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-blue-500 transition-all ease-linear"
-              style={{
-                animation: `shrink ${duration}ms linear`,
-              }}
-            />
-          </div>
-        )}
+        {!persistent &&
+          duration > 0 &&
+          error.severity === ErrorSeverity.LOW && (
+            <div className="mt-3 h-1 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-blue-500 transition-all ease-linear"
+                style={{
+                  animation: `shrink ${duration}ms linear`,
+                }}
+              />
+            </div>
+          )}
       </div>
 
       <style jsx>{`
         @keyframes shrink {
-          from { width: 100%; }
-          to { width: 0%; }
+          from {
+            width: 100%;
+          }
+          to {
+            width: 0%;
+          }
         }
       `}</style>
     </div>
@@ -267,35 +288,47 @@ export function ErrorNotification({
 
 // Error notification manager hook
 export function useErrorNotification() {
-  const [notifications, setNotifications] = useState<Array<{
-    id: string;
-    error: AppError;
-    options?: ErrorNotificationOptions;
-    onRetry?: () => void;
-    recoveryActions?: ErrorRecoveryAction[];
-  }>>([]);
+  const [notifications, setNotifications] = useState<
+    Array<{
+      id: string;
+      error: AppError;
+      options?: ErrorNotificationOptions;
+      onRetry?: () => void;
+      recoveryActions?: ErrorRecoveryAction[];
+    }>
+  >([]);
 
-  const showError = useCallback((
-    error: AppError,
-    options?: ErrorNotificationOptions,
-    onRetry?: () => void,
-    recoveryActions?: ErrorRecoveryAction[]
-  ) => {
-    const id = `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    setNotifications(prev => [...prev, {
-      id,
-      error,
-      options,
-      onRetry,
-      recoveryActions,
-    }]);
+  const showError = useCallback(
+    (
+      error: AppError,
+      options?: ErrorNotificationOptions,
+      onRetry?: () => void,
+      recoveryActions?: ErrorRecoveryAction[]
+    ) => {
+      const id = `error-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
 
-    return id;
-  }, []);
+      setNotifications((prev) => [
+        ...prev,
+        {
+          id,
+          error,
+          options,
+          onRetry,
+          recoveryActions,
+        },
+      ]);
+
+      return id;
+    },
+    []
+  );
 
   const dismissError = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    setNotifications((prev) =>
+      prev.filter((notification) => notification.id !== id)
+    );
   }, []);
 
   const dismissAll = useCallback(() => {

@@ -14,6 +14,7 @@ import {
   useDeletePDFMutation,
   useRenamePDFMutation,
 } from "@/lib/store/apiSlice";
+import { ErrorType, ErrorSeverity, AppError } from "@/lib/types/errors";
 import { PDFUploadZone } from "./PDFUploadZone";
 import { PDFThumbnail } from "./PDFThumbnail";
 import { PDFContextMenu } from "./PDFContextMenu";
@@ -305,10 +306,22 @@ export function PDFDirectoryView({
   }
 
   if (error) {
+    const appError: AppError = {
+      type: ErrorType.DATABASE_ERROR,
+      message: "Unable to fetch your PDF documents. Please try again.",
+      severity: ErrorSeverity.MEDIUM,
+      retryable: true,
+      userMessage: "Failed to load PDFs",
+      timestamp: new Date(),
+      context: {
+        component: "PDFDirectoryView",
+        action: "fetch_pdfs",
+      },
+    };
+
     return (
       <ErrorNotification
-        title="Failed to load PDFs"
-        message="Unable to fetch your PDF documents. Please try again."
+        error={appError}
         onRetry={refetch}
       />
     );
