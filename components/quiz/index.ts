@@ -9,9 +9,7 @@ export { MultiDocumentStatus } from "./MultiDocumentStatus";
 export { ContentPreview } from "./ContentPreview";
 export { InteractiveQuizPlayer } from "./InteractiveQuizPlayer";
 export { QuizResultsDisplay } from "./QuizResultsDisplay";
-export { QuizHistoryList } from "./QuizHistoryList";
 export { QuizReviewMode } from "./QuizReviewMode";
-export { QuizRetakeInterface } from "./QuizRetakeInterface";
 
 // Mobile-optimized components
 export { MobileQuizGeneratorInterface } from "./MobileQuizGeneratorInterface";

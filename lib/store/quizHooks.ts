@@ -11,7 +11,6 @@ import {
   useUpdateQuizMutation,
   useDeleteQuizMutation,
   useSubmitQuizAttemptMutation,
-  useGetQuizHistoryQuery,
   useProcessDocumentMutation,
   useGetProcessingStatusQuery,
   useSearchContentMutation,
@@ -351,7 +350,7 @@ export function useQuizAttempts() {
 }
 
 /**
- * Enhanced hook for quiz history with analytics
+ * Simplified hook for quiz history (analytics removed)
  */
 export function useQuizHistory(options?: {
   page?: number;
@@ -360,64 +359,15 @@ export function useQuizHistory(options?: {
   difficulty?: QuizDifficulty;
   dateRange?: { start: string; end: string };
 }) {
-  const { 
-    data, 
-    isLoading, 
-    error, 
-    refetch 
-  } = useGetQuizHistoryQuery(options);
-
-  const attempts = useMemo(() => data?.attempts || [], [data?.attempts]);
-  const summary = useMemo(() => data?.summary, [data?.summary]);
-
-  // Enhanced analytics
-  const analytics = useMemo(() => {
-    if (!attempts.length || !summary) return null;
-
-    const scoreDistribution = attempts.reduce((acc, attempt) => {
-      const scoreRange = Math.floor(attempt.score / 10) * 10;
-      const key = `${scoreRange}-${scoreRange + 9}`;
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const difficultyPerformance = attempts.reduce((acc, attempt) => {
-      const difficulty = attempt.quiz.difficulty;
-      if (!acc[difficulty]) {
-        acc[difficulty] = { total: 0, sum: 0, count: 0 };
-      }
-      acc[difficulty].sum += attempt.score;
-      acc[difficulty].count += 1;
-      acc[difficulty].total = acc[difficulty].sum / acc[difficulty].count;
-      return acc;
-    }, {} as Record<QuizDifficulty, { total: number; sum: number; count: number }>);
-
-    const recentTrend = attempts.slice(0, 5).map(a => a.score);
-    const isImproving = recentTrend.length > 1 && 
-      recentTrend[0] > recentTrend[recentTrend.length - 1];
-
-    return {
-      scoreDistribution,
-      difficultyPerformance: Object.fromEntries(
-        Object.entries(difficultyPerformance).map(([k, v]) => [k, v.total])
-      ) as Record<QuizDifficulty, number>,
-      recentTrend,
-      isImproving,
-      totalTimeSpent: attempts.reduce((sum, a) => sum + (a.timeTaken || 0), 0),
-      averageTimePerQuestion: attempts.length > 0 
-        ? attempts.reduce((sum, a) => sum + (a.timeTaken || 0), 0) / 
-          attempts.reduce((sum, a) => sum + a.totalQuestions, 0)
-        : 0,
-    };
-  }, [attempts, summary]);
-
+  // Analytics functionality has been removed
+  // Return empty data structure for compatibility
   return {
-    attempts,
-    summary,
-    analytics,
-    isLoading,
-    error,
-    refetch,
+    attempts: [],
+    summary: null,
+    analytics: null,
+    isLoading: false,
+    error: null,
+    refetch: () => Promise.resolve(),
   };
 }
 

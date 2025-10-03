@@ -111,18 +111,7 @@ export interface QuizConfiguration {
   excludeTopics?: string[];
 }
 
-/**
- * Simple quiz statistics without complex analytics
- */
-export interface QuizStatistics {
-  totalQuizzes: number;
-  totalAttempts: number;
-  averageScore: number;
-  bestScore: number;
-  mostRecentAttempt: string | null;
-  difficultyBreakdown: Record<QuizDifficulty, number>;
-  questionTypeBreakdown: Record<QuizQuestionType, number>;
-}
+
 
 // ============================================================================
 // QUIZ API TYPES
@@ -202,7 +191,6 @@ export interface QuizListResponse {
   data?: {
     quizzes: Quiz[];
     totalCount: number;
-    statistics: QuizStatistics;
   };
   error?: string;
 }
@@ -215,37 +203,7 @@ export interface QuizDetailsResponse {
   data?: {
     quiz: Quiz;
     questions: QuizQuestion[];
-    attempts: QuizAttempt[];
-    statistics: {
-      totalAttempts: number;
-      averageScore: number;
-      bestScore: number;
-      lastAttempt: string | null;
-    };
   };
   error?: string;
 }
 
-/**
- * Quiz history response
- */
-export interface QuizHistoryResponse {
-  success: boolean;
-  data?: {
-    attempts: Array<
-      QuizAttempt & {
-        quiz: {
-          title: string;
-          difficulty: QuizDifficulty;
-          questionCount: number;
-        };
-      }
-    >;
-    summary: {
-      totalAttempts: number;
-      averageScore: number;
-      improvementTrend: "improving" | "declining" | "stable";
-    };
-  };
-  error?: string;
-}

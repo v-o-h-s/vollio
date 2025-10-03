@@ -1396,8 +1396,7 @@ export const apiSlice = createApi({
         return mapErrorToAppError(response, context);
       },
       invalidatesTags: [
-        { type: "Quiz", id: "LIST" },
-        { type: "Quiz", id: "STATISTICS" }
+        { type: "Quiz", id: "LIST" }
       ],
       // Optimistic update for better UX
       async onQueryStarted(quizData, { dispatch, queryFulfilled }) {
@@ -1518,7 +1517,6 @@ export const apiSlice = createApi({
       },
       providesTags: (result) => [
         { type: "Quiz", id: "LIST" },
-        { type: "Quiz", id: "STATISTICS" },
         ...(result?.quizzes.map((quiz) => ({ type: "Quiz" as const, id: quiz.id })) || []),
       ],
     }),
@@ -1827,117 +1825,10 @@ export const apiSlice = createApi({
       invalidatesTags: (result, error, { quizId }) => [
         { type: "Quiz", id: quizId },
         { type: "Quiz", id: "LIST" },
-        { type: "Quiz", id: "HISTORY" },
-        { type: "Quiz", id: "STATISTICS" },
       ],
     }),
 
-    // Get quiz history with detailed statistics
-    getQuizHistory: builder.query<
-      {
-        attempts: Array<QuizAttempt & {
-          quiz: {
-            title: string;
-            difficulty: QuizDifficulty;
-            questionCount: number;
-            questionTypes: QuizQuestionType[];
-            sourceDocumentIds: string[];
-          };
-        }>;
-        summary: {
-          totalAttempts: number;
-          averageScore: number;
-          improvementTrend: 'improving' | 'declining' | 'stable';
-          bestPerformingDifficulty: QuizDifficulty | null;
-          weakestQuestionType: QuizQuestionType | null;
-          streakData: {
-            currentStreak: number;
-            longestStreak: number;
-            streakType: 'improving' | 'declining' | 'none';
-          };
-        };
-      },
-      {
-        page?: number;
-        limit?: number;
-        quizId?: string;
-        difficulty?: QuizDifficulty;
-        dateRange?: { start: string; end: string };
-      } | void
-    >({
-      query: (params = {}) => ({
-        url: "quiz/history",
-        params: {
-          page: params.page || 1,
-          limit: params.limit || 50,
-          ...(params.quizId && { quizId: params.quizId }),
-          ...(params.difficulty && { difficulty: params.difficulty }),
-          ...(params.dateRange && { 
-            startDate: params.dateRange.start,
-            endDate: params.dateRange.end 
-          }),
-        },
-      }),
-      transformResponse: (response: {
-        success: boolean;
-        data?: {
-          attempts: Array<QuizAttempt & {
-            quiz: {
-              title: string;
-              difficulty: QuizDifficulty;
-              questionCount: number;
-              questionTypes: QuizQuestionType[];
-              sourceDocumentIds: string[];
-            };
-          }>;
-          summary: {
-            totalAttempts: number;
-            averageScore: number;
-            improvementTrend: 'improving' | 'declining' | 'stable';
-            bestPerformingDifficulty: QuizDifficulty | null;
-            weakestQuestionType: QuizQuestionType | null;
-            streakData: {
-              currentStreak: number;
-              longestStreak: number;
-              streakType: 'improving' | 'declining' | 'none';
-            };
-          };
-        };
-        error?: string;
-      }) => {
-        if (!response.success || !response.data) {
-          throw createAppError(
-            ErrorType.DATABASE_ERROR,
-            response.error || "Failed to fetch quiz history",
-            { component: "QuizHistory", action: "fetch" }
-          );
-        }
-        return response.data;
-      },
-      transformErrorResponse: (response: any) => {
-        const context = { component: "QuizHistory", action: "fetch" };
 
-        if (response.status === 401) {
-          return createAppError(
-            ErrorType.AUTHENTICATION_ERROR,
-            "Authentication required",
-            context
-          );
-        } else if (response.status === 403) {
-          return createAppError(
-            ErrorType.AUTHORIZATION_ERROR,
-            "Access denied",
-            context
-          );
-        }
-
-        return mapErrorToAppError(response, context);
-      },
-      providesTags: [
-        { type: "Quiz", id: "HISTORY" },
-        { type: "Quiz", id: "STATISTICS" }
-      ],
-    }),
 
     // Get quiz generation status for long-running operations
     getQuizGenerationStatus: builder.query<
@@ -2045,7 +1936,6 @@ export const {
   useUpdateQuizMutation,
   useDeleteQuizMutation,
   useSubmitQuizAttemptMutation,
-  useGetQuizHistoryQuery,
   useGetQuizGenerationStatusQuery,
 } = apiSlice;
 

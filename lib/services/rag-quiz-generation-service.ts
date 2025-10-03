@@ -147,8 +147,7 @@ export class RAGQuizGenerationService {
         };
       }
 
-      // Record chunk usage for analytics
-      await this.recordChunkUsage(searchResult.results, 'quiz_generation');
+
 
       // Step 3: Synthesize content across multiple documents
       const synthesizedChunks = await this.synthesizeMultiDocumentContent(
