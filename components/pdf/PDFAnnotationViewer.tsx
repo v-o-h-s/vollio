@@ -24,7 +24,6 @@ import AnnotationTooltip from "./AnnotationTooltip";
 import { NoteCreationModal } from "./NoteCreationModal";
 import { HighlightHoverToolbar } from "./HighlightHoverToolbar";
 import { NotePreviewModal } from "./NotePreviewModal";
-import { PDFViewerQuizButton } from "./PDFViewerQuizButton";
 
 /**
  * Props interface for PDFAnnotationViewer component
@@ -606,17 +605,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           noteId={previewNoteId}
         />
 
-        {/* Quiz Generation Button */}
-        <PDFViewerQuizButton
-          pdfDocument={currentPdfData}
-          currentPageNumber={currentPageNumber + 1} // Convert to 1-based page number
-          totalPages={totalPages}
-          selectedText={selectedText}
-          onQuizGenerated={(quizId) => {
-            console.log("Quiz generated:", quizId);
-            // Optional: Show success notification or handle navigation
-          }}
-        />
+
       </div>
     </ErrorBoundary>
   );
