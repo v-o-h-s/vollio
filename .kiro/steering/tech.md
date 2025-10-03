@@ -37,13 +37,12 @@ inclusion: always
 - **Vector Search Integration**: Semantic search across document chunks using embedding models for relevant content identification and advanced filtering
 - **Multiple Question Types**: Support for multiple choice, true/false, and short answer questions with configurable difficulty levels and adaptive complexity
 - **Multi-Document Support**: Generate quizzes from multiple PDF sources with balanced content representation, cross-document analysis, and intelligent deduplication
-- **Interactive Quiz Player**: Complete quiz-taking interface with progress tracking, scoring, review modes, retake functionality, and mobile optimization
-- **Performance Monitoring**: Comprehensive quiz analytics, attempt tracking, performance insights, improvement trend analysis, and real-time feedback collection
+- **Interactive Quiz Player**: Complete quiz-taking interface with progress tracking, scoring, review modes, and mobile optimization
 - **Advanced Search**: Sophisticated content filtering with `/api/quiz/advanced-search` for targeted quiz generation with semantic search and relevance scoring
-- **Quiz History**: Complete attempt tracking with `/api/quiz/history` and statistical analysis with learning insights and personalized recommendations
 - **Mobile Optimization**: Responsive quiz interfaces with `MobileQuizGeneratorInterface` and touch-friendly interactions with gesture-based navigation
 - **Feedback System**: User feedback collection with `SimpleFeedbackForm` and RAG monitoring via `/api/rag/monitoring` for continuous improvement and quality assurance
 - **Intelligent Content Analysis**: Advanced document processing with content type detection, semantic understanding, and automated quality assessment
+- **Modular Architecture**: Standalone quiz system separated from PDF components for better maintainability and clean architecture
 
 ### PDF Annotation Architecture
 - **AnnotationTooltip Integration**: Sophisticated PDF-to-screen coordinate conversion with canvas detection  

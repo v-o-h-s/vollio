@@ -686,11 +686,13 @@ Advanced semantic search across document chunks for targeted content discovery.
 }
 ```
 
-### GET /api/quiz/history
+### ~~GET /api/quiz/history~~ [REMOVED]
 
-Retrieve quiz attempt history and performance analytics for the authenticated user.
+~~Retrieve quiz attempt history and performance analytics for the authenticated user.~~ 
 
-**Query Parameters:**
+**Status**: Removed - Analytics functionality has been removed from the quiz system.
+
+**~~Query Parameters:~~**
 - `limit` (optional): Maximum number of attempts to return (default: 20)
 - `offset` (optional): Number of attempts to skip for pagination (default: 0)
 
@@ -719,7 +721,7 @@ Retrieve quiz attempt history and performance analytics for the authenticated us
 
 ### POST /api/rag/monitoring
 
-Submit user feedback and performance metrics for RAG system monitoring.
+Submit user feedback and system metrics for RAG system monitoring.
 
 **Request Body:**
 ```json
@@ -759,8 +761,8 @@ const handleGenerateQuiz = async (params) => {
 const [performAdvancedSearch] = useAdvancedSearchMutation();
 const searchResults = await performAdvancedSearch(searchParams).unwrap();
 
-// Quiz History
-const { data: quizHistory } = useGetQuizHistoryQuery();
+// Quiz History (Removed)
+// const { data: quizHistory } = useGetQuizHistoryQuery(); // Analytics removed
 
 // Feedback Submission
 const [submitFeedback] = useSubmitFeedbackMutation();

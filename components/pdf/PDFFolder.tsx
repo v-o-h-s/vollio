@@ -7,11 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
   Folder, 
-  FolderOpen, 
   MoreVertical, 
-  Edit, 
-  Trash2, 
-  Plus,
   FolderPlus
 } from "lucide-react";
 import { safeFormatDistanceToNow } from "@/lib/utils/dates";
@@ -32,7 +28,7 @@ interface PDFFolderProps {
   onSelect?: () => void;
   onOpen: () => void;
   onRename?: (folderId: string, newName: string) => void;
-  onDelete?: (folderId: string) => void;
+
   onContextMenu?: (e: React.MouseEvent) => void;
   viewMode?: ViewMode;
   className?: string;
@@ -46,7 +42,7 @@ export function PDFFolder({
   onSelect,
   onOpen,
   onRename,
-  onDelete,
+
   onContextMenu,
   viewMode = "grid",
   className,

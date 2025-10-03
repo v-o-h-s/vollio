@@ -66,8 +66,7 @@ inclusion: always
 - **ResponsiveQuizInterface.tsx** - Responsive wrapper for desktop/mobile quiz interfaces
 - **MobileQuizGeneratorInterface.tsx** - Mobile-optimized quiz generation interface with RAG integration and touch-friendly interactions
 - **InteractiveQuizPlayer.tsx** - Complete quiz-taking interface with progress tracking, scoring, and mobile optimization
-- **QuizResultsDisplay.tsx** - Quiz results and performance analytics display with detailed feedback
-- **QuizHistoryList.tsx** - Quiz attempt history and retake functionality with performance tracking
+- **QuizResultsDisplay.tsx** - Quiz results display with detailed feedback (analytics removed)
 - **QuizConfigurationPanel.tsx** - Quiz settings and configuration options with advanced customization
 - **DocumentProcessingStatus.tsx** - Document processing progress and status display with real-time updates
 - **MultiDocumentStatus.tsx** - Status display for multi-document quiz generation with balanced processing

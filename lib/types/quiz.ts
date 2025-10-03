@@ -111,8 +111,6 @@ export interface QuizConfiguration {
   excludeTopics?: string[];
 }
 
-
-
 // ============================================================================
 // QUIZ API TYPES
 // ============================================================================
@@ -206,4 +204,3 @@ export interface QuizDetailsResponse {
   };
   error?: string;
 }
-

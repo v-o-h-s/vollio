@@ -234,12 +234,12 @@ noto-pdf-annotation/
 - **Prettier Integration**: Automated code formatting
 - **Git Hooks**: Pre-commit validation and testing
 
-### Performance Monitoring
+### System Monitoring
 
 - **Bundle Analysis**: Regular bundle size monitoring and optimization
 - **Performance Metrics**: Core Web Vitals tracking and improvement
 - **Error Tracking**: Comprehensive error logging and monitoring
-- **User Analytics**: Usage patterns and performance insights
+- **System Insights**: Usage patterns and system performance tracking
 
 ## 📈 Development Roadmap
 
@@ -289,7 +289,7 @@ SYNCFUSION_LICENSE_KEY=your-license-key
 
 # Optional Services
 VERCEL_URL=your-deployment-url
-ANALYTICS_ID=your-analytics-id
+MONITORING_ID=your-monitoring-id
 ```
 
 ## 📚 Documentation Ecosystem

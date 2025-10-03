@@ -1,363 +1,611 @@
-# Custom Hooks Documentation
+# Custom Hooks - React Hooks Library
 
-This directory contains custom React hooks that provide reusable functionality across the Noto PDF annotation application. These hooks handle common patterns like auto-save, error handling, activity tracking, and mobile interactions.
+This directory contains a comprehensive collection of custom React hooks that provide reusable functionality across the Noto application, including auto-save, error handling, mobile optimization, and cross-tab synchronization.
 
-## 🔄 Auto-Save Architecture
+## 🎯 Hook Categories
 
-### useAutoSave Hook ✅ INTEGRATED
+### Core Functionality Hooks
 
-**File**: `hooks/use-auto-save.ts`
+#### `use-auto-save.ts` ✅
+Debounced auto-save functionality with comprehensive status tracking and error recovery.
 
-The `useAutoSave` hook provides intelligent debounced auto-save functionality and is now integrated directly within NotionEditor components for simplified architecture.
+**Features:**
+- **Debounced Saving**: Configurable debounce delay to prevent excessive API calls
+- **Status Tracking**: Real-time status (idle, typing, saving, saved, error) with visual feedback
+- **Error Recovery**: Automatic retry mechanisms with exponential backoff
+- **Content Preservation**: Prevents data loss during network issues and failures
+- **Performance Optimization**: Efficient saving with minimal resource usage
 
-#### Features
-
-- **Editor-Internal Integration**: Used internally by NotionEditor components with simplified architecture, not directly by parent components
-- **RTK Query Integration**: Uses RTK Query mutations for all save operations with automatic caching and synchronization
-- **Debounced Saving**: Prevents excessive API calls by debouncing save operations with intelligent timing
-- **Status Tracking**: Real-time status updates (idle, typing, saving, saved, error) with visual feedback
-- **Error Recovery**: Handles save failures with retry mechanisms and user-friendly error messages
-- **Automatic Note Creation**: Seamlessly creates new notes when content is added without manual intervention
-- **Title Extraction**: Automatically extracts titles from editor content with intelligent parsing
-- **Cross-tab Synchronization**: Real-time updates across browser tabs using RTK Query cache invalidation
-- **Content Preservation**: Automatic content preservation during network issues and editor errors
-
-#### Internal Usage (within NotionEditor)
-
+**Usage:**
 ```typescript
 import { useAutoSave } from '@/hooks/use-auto-save';
-import { useCreateNoteMutation, useUpdateNoteMutation } from '@/lib/store/apiSlice';
 
-function NotionEditor({ initialNoteId, onSaveSuccess }: NotionEditorProps) {
-  const [createNote] = useCreateNoteMutation();
-  const [updateNote] = useUpdateNoteMutation();
+function NoteEditor({ noteId, initialContent }) {
+  const [content, setContent] = useState(initialContent);
   
-  const { status, lastSaved, error, updateContent } = useAutoSave({
-    onSave: async (content) => {
-      if (currentNoteId) {
-        await updateNote({ id: currentNoteId, content }).unwrap();
-      } else {
-        const newNote = await createNote({ content }).unwrap();
-        setCurrentNoteId(newNote.id);
-      }
-      onSaveSuccess?.();
+  const { saveStatus, error, retry } = useAutoSave({
+    data: content,
+    saveFunction: async (data) => {
+      const response = await updateNote(noteId, { content: data });
+      return response;
     },
-    delay: 500,
-    enabled: true,
+    delay: 1000, // 1 second debounce
+    enabled: !!noteId
   });
 
-  // Editor handles all auto-save internally with RTK Query mutations
-  // Parent components no longer need to manage save operations
-  
   return (
-    <div className="notion-editor">
-      <TipTapEditor 
-        content={content}
-        onChange={updateContent}
+    <div>
+      <textarea 
+        value={content} 
+        onChange={(e) => setContent(e.target.value)}
       />
-      <AutoSaveStatus status={status} lastSaved={lastSaved} error={error} />
+      <div>Status: {saveStatus}</div>
+      {error && <button onClick={retry}>Retry</button>}
     </div>
   );
 }
 ```
 
-#### API Reference
+**Return Values:**
+- `saveStatus: 'idle' | 'typing' | 'saving' | 'saved' | 'error'` - Current save status
+- `error: Error | null` - Last error that occurred during saving
+- `retry: () => void` - Function to retry failed save operation
+- `forceSave: () => Promise<void>` - Function to force immediate save
 
+#### `use-retry.ts` ✅
+Retry logic with exponential backoff for failed operations and network resilience.
+
+**Features:**
+- **Exponential Backoff**: Intelligent retry timing with increasing delays
+- **Configurable Attempts**: Customizable maximum retry attempts
+- **Error Classification**: Different retry strategies based on error types
+- **Circuit Breaker**: Automatic failure detection and recovery
+- **Performance Monitoring**: Retry success rates and performance metrics
+
+**Usage:**
 ```typescript
-interface UseAutoSaveOptions {
-  onSave: (content: any) => Promise<void>;
-  delay?: number; // Default: 500ms
-  enabled?: boolean; // Default: true
-}
+import { useRetry } from '@/hooks/use-retry';
 
-interface UseAutoSaveReturn {
-  status: "idle" | "typing" | "saving" | "saved" | "error";
-  lastSaved: Date | null;
-  error: string | null;
-  updateContent: (content: any) => void;
+function DataFetcher() {
+  const { execute, isLoading, error, retryCount } = useRetry({
+    maxAttempts: 3,
+    baseDelay: 1000,
+    maxDelay: 10000,
+    backoffFactor: 2
+  });
+
+  const fetchData = () => {
+    execute(async () => {
+      const response = await fetch('/api/data');
+      if (!response.ok) throw new Error('Fetch failed');
+      return response.json();
+    });
+  };
+
+  return (
+    <div>
+      <button onClick={fetchData} disabled={isLoading}>
+        Fetch Data {retryCount > 0 && `(Retry ${retryCount})`}
+      </button>
+      {error && <div>Error: {error.message}</div>}
+    </div>
+  );
 }
 ```
 
-#### Status Flow
+### Error Handling Hooks
 
-1. **idle**: Initial state, no recent activity
-2. **typing**: User is actively editing content
-3. **saving**: Auto-save operation in progress
-4. **saved**: Content successfully saved (shows for 2 seconds)
-5. **error**: Save operation failed, error message available
+#### `use-error-handling.ts` ✅
+Comprehensive error management with user-friendly messaging and recovery actions.
 
-#### Implementation Details
+**Features:**
+- **Error Classification**: Automatic error type detection and categorization
+- **User-Friendly Messages**: Conversion of technical errors to user-friendly messages
+- **Recovery Actions**: Suggested recovery actions and retry mechanisms
+- **Error Reporting**: Automatic error logging and reporting
+- **Context Preservation**: Maintains application context during error recovery
 
-- **Debouncing**: Uses lodash.debounce to prevent excessive API calls
-- **Ref Usage**: Content stored in ref to avoid unnecessary re-renders
-- **Cleanup**: Automatically cancels pending saves on unmount
-- **Error Handling**: Comprehensive error catching and user feedback
+**Usage:**
+```typescript
+import { useErrorHandling } from '@/hooks/use-error-handling';
 
-## 📱 Mobile & Device Detection
+function ApiComponent() {
+  const { handleError, clearError, error, isRecovering } = useErrorHandling({
+    onError: (error) => console.log('Error logged:', error),
+    enableRetry: true,
+    enableReporting: true
+  });
 
-### useMobile Hook
+  const performAction = async () => {
+    try {
+      await riskyApiCall();
+    } catch (err) {
+      handleError(err, {
+        context: 'API call',
+        recoveryActions: ['retry', 'refresh']
+      });
+    }
+  };
 
-**File**: `hooks/use-mobile.ts`
+  return (
+    <div>
+      <button onClick={performAction}>Perform Action</button>
+      {error && (
+        <div>
+          <p>{error.userMessage}</p>
+          <button onClick={clearError}>Dismiss</button>
+          {isRecovering && <span>Recovering...</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+```
 
-Provides device detection and responsive behavior utilities.
+#### `use-network-status.ts` ✅
+Network connectivity monitoring with offline/online state management.
 
-#### Features
+**Features:**
+- **Connection Monitoring**: Real-time network connectivity detection
+- **Offline Handling**: Graceful degradation during offline periods
+- **Reconnection Logic**: Automatic reconnection and state recovery
+- **Bandwidth Detection**: Network quality and speed assessment
+- **Sync Management**: Automatic data synchronization when connection is restored
 
-- **Device Detection**: Identifies mobile, tablet, and desktop devices
-- **Touch Support**: Detects touch capability
-- **Orientation**: Monitors device orientation changes
-- **Responsive Behavior**: Adapts UI based on device characteristics
+### User Interface Hooks
 
-#### Usage
+#### `use-mobile.ts` ✅
+Mobile device detection and responsive design utilities with comprehensive device information.
 
+**Features:**
+- **Device Detection**: Accurate mobile, tablet, and desktop detection
+- **Touch Capability**: Touch screen detection and interaction support
+- **Orientation Tracking**: Device orientation changes and responsive adaptation
+- **Screen Size Monitoring**: Real-time screen size and viewport tracking
+- **Performance Optimization**: Device-specific performance optimizations
+
+**Usage:**
 ```typescript
 import { useMobile } from '@/hooks/use-mobile';
 
 function ResponsiveComponent() {
-  const { isMobile, isTablet, hasTouch, orientation } = useMobile();
+  const { 
+    isMobile, 
+    isTablet, 
+    isDesktop, 
+    hasTouch, 
+    orientation, 
+    screenSize 
+  } = useMobile();
 
   return (
-    <div className={`${isMobile ? 'mobile-layout' : 'desktop-layout'}`}>
-      {hasTouch ? <TouchInterface /> : <MouseInterface />}
+    <div className={`
+      ${isMobile ? 'mobile-layout' : 'desktop-layout'}
+      ${orientation === 'landscape' ? 'landscape' : 'portrait'}
+    `}>
+      <h1>Device: {isMobile ? 'Mobile' : isTablet ? 'Tablet' : 'Desktop'}</h1>
+      <p>Touch Support: {hasTouch ? 'Yes' : 'No'}</p>
+      <p>Screen: {screenSize.width}x{screenSize.height}</p>
     </div>
   );
 }
 ```
 
-## 🎯 Activity Tracking
+**Return Values:**
+- `isMobile: boolean` - True if device is mobile phone
+- `isTablet: boolean` - True if device is tablet
+- `isDesktop: boolean` - True if device is desktop/laptop
+- `hasTouch: boolean` - True if device supports touch input
+- `orientation: 'portrait' | 'landscape'` - Current device orientation
+- `screenSize: { width: number; height: number }` - Current screen dimensions
 
-### useActivityTracking Hook
+#### `use-touch-gestures.ts` ✅
+Touch gesture recognition for mobile interactions with comprehensive gesture support.
 
-**File**: `hooks/use-activity-tracking.ts`
+**Features:**
+- **Gesture Recognition**: Swipe, pinch, tap, long press, and custom gestures
+- **Multi-Touch Support**: Multiple simultaneous touch point handling
+- **Gesture Customization**: Configurable gesture thresholds and parameters
+- **Performance Optimization**: Efficient touch event handling and processing
+- **Cross-Platform Compatibility**: Consistent behavior across different devices
 
-Monitors user activity and provides real-time activity updates.
-
-#### Features
-
-- **Debounced Tracking**: Prevents excessive activity logging
-- **Cache Invalidation**: Automatically updates activity cache
-- **Real-time Updates**: Provides live activity information
-- **Non-blocking**: Activity tracking doesn't block main operations
-
-#### Usage
-
+**Usage:**
 ```typescript
-import { useActivityTracking } from '@/hooks/use-activity-tracking';
+import { useTouchGestures } from '@/hooks/use-touch-gestures';
 
-function PDFViewer({ pdfId }: { pdfId: string }) {
-  const { trackActivity, recentActivity } = useActivityTracking();
-
-  useEffect(() => {
-    trackActivity('view', pdfId);
-  }, [pdfId, trackActivity]);
+function TouchInterface() {
+  const { bind, gestures } = useTouchGestures({
+    onSwipe: (direction) => console.log('Swiped:', direction),
+    onPinch: (scale) => console.log('Pinched:', scale),
+    onTap: (position) => console.log('Tapped:', position),
+    onLongPress: (position) => console.log('Long pressed:', position),
+    swipeThreshold: 50,
+    pinchThreshold: 0.1
+  });
 
   return (
-    <div>
-      <PDFContent />
-      <RecentActivityDisplay activities={recentActivity} />
+    <div {...bind} className="touch-area">
+      <p>Current gesture: {gestures.current}</p>
+      <p>Touch points: {gestures.touchCount}</p>
     </div>
   );
 }
 ```
 
-## ⌨️ Keyboard Shortcuts
+#### `use-keyboard-shortcuts.ts` ✅
+Keyboard shortcut handling for accessibility and power user features.
 
-### useKeyboardShortcuts Hook
+**Features:**
+- **Shortcut Registration**: Easy registration of keyboard shortcuts with conflict detection
+- **Context Awareness**: Context-specific shortcuts with priority management
+- **Accessibility Compliance**: WCAG-compliant keyboard navigation support
+- **Cross-Platform Support**: Consistent shortcuts across different operating systems
+- **Help Integration**: Automatic help documentation generation
 
-**File**: `hooks/use-keyboard-shortcuts.ts`
-
-Provides keyboard shortcut handling for accessibility and power user features.
-
-#### Features
-
-- **Cross-platform**: Handles Ctrl/Cmd key differences
-- **Accessibility**: WCAG compliant keyboard navigation
-- **Customizable**: Configurable shortcut mappings
-- **Context-aware**: Different shortcuts for different contexts
-
-#### Usage
-
+**Usage:**
 ```typescript
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
 
-function Editor() {
+function EditorComponent() {
   useKeyboardShortcuts({
     'Ctrl+S': () => saveDocument(),
-    'Ctrl+B': () => toggleBold(),
+    'Ctrl+Z': () => undo(),
+    'Ctrl+Y': () => redo(),
     'Escape': () => exitFullscreen(),
+    'Ctrl+/': () => showHelp()
+  }, {
+    enabled: true,
+    preventDefault: true,
+    context: 'editor'
   });
 
-  return <EditorContent />;
+  return <div>Editor with keyboard shortcuts</div>;
 }
 ```
 
-## 🔧 Error Handling
+### Activity and Sync Hooks
 
-### useErrorHandling Hook
+#### `use-activity-tracking.ts` ✅
+User activity monitoring with debounced API calls and real-time cache updates.
 
-**File**: `hooks/use-error-handling.ts`
+**Features:**
+- **Activity Recording**: Automatic tracking of user interactions and behaviors
+- **Debounced API Calls**: Efficient API usage with configurable debounce delays
+- **Cache Integration**: Real-time cache invalidation and updates
+- **Privacy Compliance**: GDPR-compliant activity tracking with user consent
+- **Performance Analytics**: User behavior analytics and performance insights
 
-Provides comprehensive error management with user-friendly messaging and recovery actions.
-
-#### Features
-
-- **Error Boundaries**: Integrates with React error boundaries
-- **Recovery Actions**: Provides retry and recovery mechanisms
-- **User-friendly Messages**: Converts technical errors to user-friendly messages
-- **Logging**: Comprehensive error logging for debugging
-
-#### Usage
-
+**Usage:**
 ```typescript
-import { useErrorHandling } from '@/hooks/use-error-handling';
+import { useActivityTracking } from '@/hooks/use-activity-tracking';
 
-function DataComponent() {
-  const { handleError, clearError, error, retry } = useErrorHandling();
+function PDFViewer({ pdfId }) {
+  const { trackActivity, recentActivity } = useActivityTracking({
+    userId: 'user123',
+    debounceDelay: 2000,
+    enableAnalytics: true
+  });
 
-  const fetchData = async () => {
-    try {
-      const data = await api.getData();
-      return data;
-    } catch (err) {
-      handleError(err, 'Failed to load data');
-    }
-  };
-
-  if (error) {
-    return <ErrorDisplay error={error} onRetry={retry} />;
-  }
-
-  return <DataDisplay />;
-}
-```
-
-## 🔄 Cross-tab Synchronization
-
-### useNoteSync Hook
-
-**File**: `hooks/use-note-sync.ts`
-
-Provides real-time note synchronization across browser tabs using BroadcastChannel and PostMessage APIs.
-
-#### Features
-
-- **Real-time Updates**: Instant synchronization across tabs
-- **Conflict Resolution**: Handles concurrent edits gracefully
-- **Fallback Support**: PostMessage fallback for older browsers
-- **Auto-Save Integration**: Works seamlessly with auto-save system
-
-#### Usage
-
-```typescript
-import { useNoteSync } from '@/hooks/use-note-sync';
-
-function NoteEditor({ noteId }: { noteId: string }) {
-  const { syncNote, onNoteUpdate } = useNoteSync();
-
-  const handleContentChange = (content: any) => {
-    syncNote(noteId, content);
+  const handlePDFView = () => {
+    trackActivity({
+      type: 'pdf_view',
+      resourceId: pdfId,
+      metadata: { timestamp: Date.now() }
+    });
   };
 
   useEffect(() => {
-    return onNoteUpdate(noteId, (updatedContent) => {
-      // Update editor with content from other tabs
-      editor.commands.setContent(updatedContent);
-    });
-  }, [noteId, onNoteUpdate]);
+    handlePDFView();
+  }, [pdfId]);
 
-  return <Editor onChange={handleContentChange} />;
+  return (
+    <div>
+      <PDFComponent onView={handlePDFView} />
+      <RecentActivity activities={recentActivity} />
+    </div>
+  );
 }
 ```
 
-## 🎨 Focus Management
+#### `use-note-sync.ts` ✅
+Cross-tab note synchronization using BroadcastChannel and PostMessage APIs.
 
-### useFocusManagement Hook
+**Features:**
+- **Real-time Synchronization**: Instant updates across all open browser tabs
+- **Conflict Resolution**: Intelligent conflict resolution with last-write-wins strategy
+- **Cross-Origin Support**: PostMessage fallback for cross-origin communication
+- **Performance Optimization**: Efficient synchronization with minimal overhead
+- **Error Recovery**: Robust error handling and automatic recovery mechanisms
 
-**File**: `hooks/use-focus-management.ts`
+**Usage:**
+```typescript
+import { useNoteSync } from '@/hooks/use-note-sync';
 
-Provides focus management for accessibility compliance and keyboard navigation.
+function NoteEditor({ noteId }) {
+  const [content, setContent] = useState('');
+  
+  const { broadcastUpdate, broadcastCreate, broadcastDelete } = useNoteSync({
+    enableAutoNavigation: true,
+    enableAutoUpdate: true,
+    onUpdate: (noteId, updates) => {
+      // Handle incoming updates from other tabs
+      setContent(updates.content);
+    }
+  });
 
-#### Features
+  const handleSave = async (newContent) => {
+    await saveNote(noteId, { content: newContent });
+    broadcastUpdate(noteId, { content: newContent });
+  };
 
-- **Accessibility**: WCAG compliant focus management
-- **Keyboard Navigation**: Proper tab order and focus trapping
-- **Focus Restoration**: Restores focus after modal interactions
-- **Screen Reader Support**: Announces focus changes to screen readers
+  return (
+    <textarea 
+      value={content}
+      onChange={(e) => setContent(e.target.value)}
+      onBlur={() => handleSave(content)}
+    />
+  );
+}
+```
 
-## 🔄 Network Status
+### Editor-Specific Hooks
 
-### useNetworkStatus Hook
+#### `use-editor-error-recovery.ts` ✅
+Editor-specific error recovery with content preservation and state restoration.
 
-**File**: `hooks/use-network-status.ts`
+**Features:**
+- **Content Preservation**: Automatic content backup and recovery during errors
+- **State Restoration**: Complete editor state recovery including cursor position
+- **Error Classification**: Editor-specific error handling and recovery strategies
+- **Performance Monitoring**: Editor performance metrics and optimization
+- **User Notification**: User-friendly error messages and recovery guidance
 
-Monitors network connectivity and provides offline/online state management.
+#### `use-editor-keyboard-shortcuts.ts` ✅
+Editor-specific keyboard shortcuts for formatting and navigation.
 
-#### Features
+**Features:**
+- **Rich Text Shortcuts**: Standard rich text formatting shortcuts (Bold, Italic, etc.)
+- **Navigation Shortcuts**: Efficient text navigation and selection shortcuts
+- **Custom Commands**: Editor-specific commands and actions
+- **Context Awareness**: Different shortcuts for different editor modes
+- **Help Integration**: Built-in help system for shortcut discovery
 
-- **Connection Monitoring**: Real-time network status updates
-- **Offline Handling**: Graceful degradation during network issues
-- **Retry Logic**: Automatic retry when connection is restored
-- **User Feedback**: Visual indicators for network status
+## 🏗️ Hook Architecture
 
-## 📱 Touch Gestures
+### Design Principles
+- **Reusability**: Hooks designed for maximum reusability across components
+- **Performance**: Optimized for minimal re-renders and efficient resource usage
+- **Type Safety**: Full TypeScript support with comprehensive type definitions
+- **Error Handling**: Robust error handling with graceful degradation
+- **Testing**: Comprehensive test coverage with mock dependencies
 
-### useTouchGestures Hook
+### Common Patterns
 
-**File**: `hooks/use-touch-gestures.ts`
+#### Hook Configuration
+```typescript
+interface HookConfig {
+  enabled?: boolean;
+  debounceDelay?: number;
+  retryAttempts?: number;
+  onError?: (error: Error) => void;
+  onSuccess?: (result: any) => void;
+}
+```
 
-Provides touch gesture recognition for mobile interactions.
+#### Return Value Patterns
+```typescript
+interface HookReturn {
+  // State
+  isLoading: boolean;
+  error: Error | null;
+  data: any;
+  
+  // Actions
+  execute: (...args: any[]) => Promise<any>;
+  reset: () => void;
+  retry: () => void;
+  
+  // Status
+  status: 'idle' | 'loading' | 'success' | 'error';
+}
+```
 
-#### Features
+### Performance Optimization
 
-- **Gesture Recognition**: Swipe, pinch, tap, long press detection
-- **Mobile Optimization**: Optimized for touch devices
-- **Customizable**: Configurable gesture thresholds
-- **Performance**: Efficient event handling and cleanup
+#### Memoization
+- **useMemo**: Expensive calculations cached with proper dependencies
+- **useCallback**: Event handlers and functions memoized to prevent re-renders
+- **React.memo**: Component memoization for expensive child components
+- **Dependency Arrays**: Carefully managed dependencies to prevent unnecessary updates
 
-## 🧪 Testing
+#### Resource Management
+- **Cleanup**: Proper cleanup of event listeners, timers, and subscriptions
+- **Memory Management**: Efficient memory usage with garbage collection awareness
+- **Debouncing**: Debounced operations to reduce API calls and improve performance
+- **Lazy Loading**: On-demand loading of resources and data
 
-All hooks include comprehensive unit tests with:
+## 🧪 Testing Strategy
 
-- **Mock Dependencies**: Proper mocking of external dependencies
-- **Edge Cases**: Testing of error conditions and edge cases
-- **Performance**: Testing of debouncing and optimization features
-- **Accessibility**: Testing of keyboard and screen reader interactions
+### Test Coverage
+- **Unit Tests**: Individual hook logic and functionality testing
+- **Integration Tests**: Hook interaction with components and APIs
+- **Performance Tests**: Performance benchmarking and optimization validation
+- **Edge Case Tests**: Comprehensive edge case and error scenario testing
 
-### Test Files
+### Testing Utilities
+```typescript
+import { renderHook, act } from '@testing-library/react';
+import { useAutoSave } from '@/hooks/use-auto-save';
 
-- `test/hooks/use-auto-save.test.ts` - Auto-save functionality tests
-- `test/hooks/use-mobile.test.ts` - Mobile detection tests
-- `test/hooks/use-activity-tracking.test.ts` - Activity tracking tests
-- `test/hooks/use-keyboard-shortcuts.test.ts` - Keyboard shortcut tests
-- `test/hooks/use-error-handling.test.ts` - Error handling tests
+describe('useAutoSave', () => {
+  it('should debounce save operations', async () => {
+    const mockSave = jest.fn();
+    const { result } = renderHook(() => 
+      useAutoSave({ 
+        data: 'test', 
+        saveFunction: mockSave,
+        delay: 100 
+      })
+    );
 
-## 🔧 Development Guidelines
+    act(() => {
+      result.current.forceSave();
+    });
 
-### Hook Creation Standards
+    expect(mockSave).toHaveBeenCalledWith('test');
+  });
+});
+```
 
-1. **TypeScript**: Use strict TypeScript with proper interfaces
-2. **Error Handling**: Include comprehensive error handling
-3. **Cleanup**: Implement proper cleanup in useEffect
-4. **Performance**: Use useMemo and useCallback appropriately
-5. **Testing**: Write comprehensive unit tests
+## 📚 Usage Examples
 
-### Naming Conventions
+### Auto-Save Implementation
+```typescript
+import { useAutoSave } from '@/hooks/use-auto-save';
+import { useUpdateNoteMutation } from '@/lib/store/apiSlice';
 
-- Use `use-kebab-case.ts` for hook files
-- Export hook function with `use` prefix
-- Include TypeScript interfaces for options and return values
-- Document all public APIs with JSDoc comments
+function AutoSaveEditor({ noteId, initialContent }) {
+  const [content, setContent] = useState(initialContent);
+  const [updateNote] = useUpdateNoteMutation();
+  
+  const { saveStatus, error } = useAutoSave({
+    data: content,
+    saveFunction: async (data) => {
+      return updateNote({ id: noteId, content: data }).unwrap();
+    },
+    delay: 1000,
+    enabled: !!noteId && content !== initialContent
+  });
 
-### Integration Patterns
+  return (
+    <div>
+      <textarea 
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="Start typing..."
+      />
+      <div className="save-status">
+        Status: {saveStatus}
+        {error && <span className="error">Save failed</span>}
+      </div>
+    </div>
+  );
+}
+```
 
-- Hooks should be composable and reusable
-- Avoid tight coupling to specific components
-- Provide sensible defaults for all options
-- Include error boundaries and fallback behavior
+### Mobile-Responsive Component
+```typescript
+import { useMobile } from '@/hooks/use-mobile';
+import { useTouchGestures } from '@/hooks/use-touch-gestures';
+
+function ResponsiveGallery({ images }) {
+  const { isMobile, hasTouch } = useMobile();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const { bind } = useTouchGestures({
+    onSwipe: (direction) => {
+      if (direction === 'left') setCurrentIndex(i => Math.min(i + 1, images.length - 1));
+      if (direction === 'right') setCurrentIndex(i => Math.max(i - 1, 0));
+    },
+    enabled: hasTouch
+  });
+
+  return (
+    <div className={isMobile ? 'mobile-gallery' : 'desktop-gallery'}>
+      <div {...(hasTouch ? bind : {})} className="image-container">
+        <img src={images[currentIndex]} alt="Gallery image" />
+      </div>
+      {!isMobile && (
+        <div className="navigation-buttons">
+          <button onClick={() => setCurrentIndex(i => Math.max(i - 1, 0))}>
+            Previous
+          </button>
+          <button onClick={() => setCurrentIndex(i => Math.min(i + 1, images.length - 1))}>
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Error Handling with Recovery
+```typescript
+import { useErrorHandling } from '@/hooks/use-error-handling';
+import { useRetry } from '@/hooks/use-retry';
+
+function RobustDataFetcher({ url }) {
+  const [data, setData] = useState(null);
+  const { handleError, error, clearError } = useErrorHandling();
+  const { execute, isLoading, retryCount } = useRetry({ maxAttempts: 3 });
+
+  const fetchData = () => {
+    execute(async () => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+      setData(result);
+      clearError(); // Clear any previous errors
+    }).catch(handleError);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [url]);
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <p>Failed to load data: {error.userMessage}</p>
+        <button onClick={fetchData}>
+          Retry {retryCount > 0 && `(Attempt ${retryCount + 1})`}
+        </button>
+      </div>
+    );
+  }
+
+  if (isLoading) return <div>Loading...</div>;
+  if (!data) return <div>No data available</div>;
+
+  return <div>{JSON.stringify(data, null, 2)}</div>;
+}
+```
+
+## 🔮 Future Enhancements
+
+### Planned Features
+- **Advanced Analytics**: Machine learning-powered usage analytics and optimization
+- **Real-time Collaboration**: Enhanced real-time collaboration hooks and utilities
+- **Offline Support**: Comprehensive offline functionality with sync capabilities
+- **Performance Monitoring**: Advanced performance monitoring and optimization hooks
+
+### Performance Improvements
+- **Web Workers**: Background processing hooks for CPU-intensive operations
+- **Service Workers**: Enhanced offline capabilities and caching strategies
+- **Streaming**: Real-time data streaming and processing hooks
+- **Edge Computing**: Edge-based processing and optimization hooks
+
+## 🤝 Contributing
+
+### Development Guidelines
+- Follow established hook patterns and naming conventions
+- Maintain comprehensive TypeScript type definitions
+- Include thorough error handling and edge case coverage
+- Write comprehensive tests with high coverage
+- Update documentation with changes and improvements
+
+### Code Standards
+- Use TypeScript strict mode for type safety
+- Implement proper cleanup and resource management
+- Follow React hooks rules and best practices
+- Use semantic naming and clear interfaces
+- Optimize for performance and memory usage
 
 ---
 
+**Status**: ✅ Production Ready  
 **Last Updated**: January 2025  
-**Hook System Version**: 1.0.0
+**Version**: 1.2.0
 
-For questions about hooks or to suggest improvements, please refer to the main project documentation or contact the development team.
+The hooks library is fully implemented and production-ready, providing comprehensive reusable functionality for auto-save, error handling, mobile optimization, cross-tab synchronization, and user interface enhancements.

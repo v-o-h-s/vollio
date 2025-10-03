@@ -1,5 +1,5 @@
 // TODO pls update the any types to proper types from Syncfusion if possible
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   PdfViewerComponent,
@@ -12,9 +12,9 @@ import {
   ThumbnailView,
   Print,
   Annotation,
-  AllowedInteraction,
+
 } from "@syncfusion/ej2-react-pdfviewer";
-import { useGetPDFQuery, useCreateNoteMutation } from "@/lib/store/apiSlice";
+import { useGetPDFQuery } from "@/lib/store/apiSlice";
 import { PDFDocument, TextBounds } from "@/lib/types/pdf";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PDFViewerFallback } from "@/components/pdf/FallbackUI";
@@ -52,10 +52,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 }) => {
   // Component state
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [urlRefreshCount, setUrlRefreshCount] = useState(0);
   const [annotationsLoaded, setAnnotationsLoaded] = useState(false);
-  const [totalPages, setTotalPages] = useState<number>(0);
 
   // Text selection and toolbar state
   const [selectedText, setSelectedText] = useState<string>("");
@@ -286,7 +283,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Handle note creation completion
   const handleNoteCreated = useCallback(
-    async (noteId: string) => {
+    async (_noteId: string) => {
       // Create highlight annotation linked to the note
       if (pdfViewerRef.current && selectionBounds && selectedText) {
         try {
@@ -325,7 +322,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       // setSelectedText("");
       // setSelectionBounds(null);
     },
-    [selectionBounds, selectedText, currentPageNumber]
+    [selectionBounds, selectedText, currentPageNumber, selectedTextBounds]
   );
 
   // Handle modal close without creating note
@@ -338,7 +335,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Handle highlight hover
   const handleHighlightHover = useCallback(
-    (annotationId: string, position: { x: number; y: number }) => {
+    (_annotationId: string, position: { x: number; y: number }) => {
       // TODO: Get note ID from annotation metadata
       // For now, we'll use placeholder data
       setHoveredHighlight({
@@ -374,32 +371,16 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   /**
    * Handle PDF document loading
    */
-  const handleDocumentLoad = useCallback(async (args?: any) => {
+  const handleDocumentLoad = useCallback(async (_args?: any) => {
     setIsLoading(false);
-    setError(null);
-
-    // Extract total page count if available
-    if (args && pdfViewerRef.current) {
-      try {
-        const pageCount = pdfViewerRef.current.pageCount;
-        if (pageCount && pageCount > 0) {
-          setTotalPages(pageCount);
-        }
-      } catch (error) {
-        console.warn("Could not get page count:", error);
-      }
-    }
   }, []);
 
   /**
    * Handle PDF loading errors
    */
-  const handleDocumentLoadFailed = useCallback((args: any) => {
+  const handleDocumentLoadFailed = useCallback((_args: any) => {
     setIsLoading(false);
-    setError(
-      "Failed to load PDF document. The file may be corrupted or the URL has expired."
-    );
-    console.error("PDF load failed:", args);
+    console.error("PDF load failed");
   }, []);
 
   /**
@@ -407,7 +388,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    */
   const handleRefreshUrl = useCallback(async () => {
     if (pdfDocument?.id) {
-      setUrlRefreshCount((prev) => prev + 1);
       setAnnotationsLoaded(false); // Reset annotations loaded state for new URL
       await refetchPdf();
     }

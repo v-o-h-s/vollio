@@ -22,7 +22,7 @@ The `apiSlice.ts` has been updated with comprehensive quiz endpoints:
 
 #### Quiz Attempts
 - `submitQuizAttempt` - Submit quiz attempt with detailed results
-- `getQuizHistory` - Get quiz history with analytics
+- ~~`getQuizHistory`~~ - [Removed] Quiz history functionality removed
 
 #### Status Tracking
 - `getQuizGenerationStatus` - Track quiz generation progress with polling
@@ -38,12 +38,12 @@ Enhanced hooks providing better developer experience:
 
 #### Management Hooks
 - `useQuizList(options)` - Quiz list with filtering and computed statistics
-- `useQuizDetails(quizId)` - Quiz details with analytics
+- `useQuizDetails(quizId)` - Quiz details with metadata
 - `useQuizOperations()` - Quiz operations with optimistic updates
 
 #### Attempt Hooks
 - `useQuizAttempts()` - Quiz attempts with detailed results
-- `useQuizHistory(options)` - Quiz history with enhanced analytics
+- ~~`useQuizHistory(options)`~~ - [Removed] Analytics functionality removed
 
 #### Status Hooks
 - `useProcessingStatus(statusId)` - Processing status with automatic polling
@@ -51,7 +51,7 @@ Enhanced hooks providing better developer experience:
 
 #### Utility Hooks
 - `useQuizUtils()` - Quiz validation and scoring utilities
-- `useQuizAnalytics(quizzes, attempts)` - Performance analytics
+- `useQuizAnalytics(quizzes, attempts)` - Basic quiz utilities
 
 ## Key Features
 
@@ -197,7 +197,7 @@ function QuizList() {
 }
 ```
 
-### Quiz Details with Analytics
+### Quiz Details with Metadata
 
 ```typescript
 import { useQuizDetails } from '@/lib/store/hooks';
@@ -207,7 +207,6 @@ function QuizDetails({ quizId }: { quizId: string }) {
     quiz, 
     questions, 
     attempts, 
-    analytics, 
     isLoading 
   } = useQuizDetails(quizId);
 
@@ -219,12 +218,8 @@ function QuizDetails({ quizId }: { quizId: string }) {
       <h1>{quiz.title}</h1>
       <p>Questions: {questions.length}</p>
       <p>Attempts: {attempts.length}</p>
-      {analytics && (
-        <div>
-          <p>Average Confidence: {analytics.averageConfidence?.toFixed(2)}</p>
-          <p>Improvement Rate: {analytics.improvementRate?.toFixed(1)}%</p>
-        </div>
-      )}
+      <p>Difficulty: {quiz.difficulty}</p>
+      <p>Question Types: {quiz.questionTypes.join(', ')}</p>
     </div>
   );
 }
@@ -355,6 +350,6 @@ function GenerationTracker({ generationId }: { generationId: string }) {
 
 - ✅ **1.1** - Quiz generation interface with document selection
 - ✅ **6.1** - Quiz result persistence and retrieval
-- ✅ **6.2** - Quiz history and review functionality
+- ✅ **6.2** - Quiz system modularization (analytics removed)
 
 The implementation provides a complete RTK Query integration for quiz data management with enhanced developer experience, better performance, and comprehensive error handling.

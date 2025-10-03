@@ -254,7 +254,7 @@ CREATE TABLE notes (
 - **RAG-Based Quiz Generation**: Complete implementation with vector search and semantic analysis
 - **Advanced Document Processing**: Syncfusion extraction with OCR fallback and semantic chunking
 - **Mobile-Optimized Interfaces**: Touch-friendly RAG quiz generation and feedback collection
-- **Performance Monitoring**: Real-time feedback collection and system performance analytics
+- **System Monitoring**: Real-time feedback collection and system performance tracking
 - **API Integration**: Complete RAG endpoint suite with RTK Query integration
 - **Component Architecture**: Comprehensive RAG component library with mobile responsiveness
 

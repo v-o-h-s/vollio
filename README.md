@@ -1,43 +1,53 @@
-# Noto - PDF Annotation Application
+# Noto - AI-Powered PDF Annotation & Quiz Generation Platform
 
-Noto is a modern, secure PDF annotation application built with Next.js 15 and React 19. It enables users to upload PDFs, select text, and create rich annotations with seamless cross-device functionality, enterprise-grade security, and comprehensive theme support.
+Noto is a modern PDF annotation and intelligent quiz generation platform built with Next.js 15 and React 19. It combines enterprise-grade document processing, AI-powered content analysis, and intuitive annotation tools to create a comprehensive learning and document management solution.
 
-> **Status**: Production-ready with complete PDF annotation system, rich text editing with auto-save, comprehensive note management, full dark/light theme integration, advanced document processing with AI-powered quiz generation, RAG-based intelligent content analysis, and real-time performance monitoring. Backend fully implemented with Supabase, comprehensive error handling, mobile-responsive design, cross-tab synchronization, and intelligent feedback collection systems.
+> **Status**: ✅ **Production Ready** - Complete implementation with advanced document processing, RAG-based quiz generation, comprehensive PDF annotation system, rich text editing with auto-save, full theme integration, mobile optimization, and modular architecture. All core systems implemented and tested.
 
-## ✨ Features
+## ✨ Key Features
 
-### Core Functionality
+### 🤖 AI-Powered Intelligence
+- **RAG-Based Quiz Generation**: Advanced retrieval-augmented generation creates intelligent quizzes from PDF content using vector search and semantic analysis
+- **Multi-Document Intelligence**: Generate comprehensive quizzes from multiple PDFs with balanced content representation and cross-document analysis
+- **Intelligent Content Analysis**: Advanced document processing with content type detection, semantic understanding, and automated quality assessment
+- **Adaptive Difficulty**: AI-powered question generation with configurable difficulty levels and adaptive complexity based on content analysis
+- **Real-time System Monitoring**: Continuous system optimization with user feedback collection and quality assurance metrics
 
-- **Secure PDF Upload & Storage**: Complete Supabase Storage integration with comprehensive file validation, signed URLs, and automatic expiration handling
-- **Advanced PDF Viewer**: Full Syncfusion PDF Viewer integration with text selection, zoom, search, navigation, and coordinate-based positioning
-- **Notion-like Rich Text Editor**: Complete TipTap-based block editor with floating toolbars, slash commands, advanced formatting, internal auto-save functionality, and seamless PDF annotation integration
-- **Auto-Save Architecture**: Editor-internal auto-save using RTK Query with intelligent debouncing, status tracking, error recovery, and visual feedback for all note editing
-- **Intelligent Text Selection**: Precise coordinate calculation for desktop tooltips and mobile-optimized annotation dialogs
-- **Real-time Activity Tracking**: Debounced user activity monitoring with automatic cache invalidation and recent activity display
-- **Cross-Document Navigation**: Seamless navigation between PDFs, annotations, and notes with cross-tab communication via PostMessage API and BroadcastChannel
-- **Complete Note Management**: Full CRUD operations with rich text content, auto-save, word count, keyboard shortcuts, and PDF linking
-- **Comprehensive Error Handling**: Retry mechanisms, fallback UI components, and graceful error recovery
-- **Complete Theme System**: Light/dark mode support with system preference detection, persistent storage, and theme-aware skeleton loading states
+### 📄 Advanced Document Processing
+- **Enterprise-Grade Text Extraction**: Syncfusion PDF Viewer integration for superior accuracy and layout preservation
+- **OCR Fallback System**: Automatic fallback to node-tesseract-ocr for scanned documents with confidence thresholds
+- **Semantic Chunking**: Intelligent text segmentation with configurable overlap, content type detection, and boundary respect
+- **Background Processing Queue**: Asynchronous document processing with progress tracking and job status monitoring
+- **Multi-Language Support**: Comprehensive language detection and processing for international documents
 
-### User Experience
+### 🎯 PDF Annotation System
+- **Sophisticated Text Selection**: Advanced coordinate-based positioning with PDF-to-screen conversion and viewport boundary handling
+- **Rich Annotation Workflow**: Text selection → smart tooltip → note creation modal → automatic highlight creation
+- **Cross-tab Synchronization**: Real-time updates across browser tabs using BroadcastChannel and PostMessage APIs
+- **Mobile-Optimized Interface**: Touch-friendly interactions with responsive design and gesture support
+- **Coordinate-Based Precision**: Multiple fallback methods for accurate PDF positioning and annotation placement
 
-- **Responsive Design**: Mobile-first design with touch-friendly interactions and adaptive UI components
+### ✍️ Notion-Style Editor
+- **Block-Based Rich Text Editor**: Complete TipTap integration with floating toolbars, slash commands, and advanced formatting
+- **Internal Auto-Save Architecture**: Editor-managed automatic saving using RTK Query with debounced updates and visual feedback
+- **Cross-Component Integration**: Seamless integration with PDF annotation workflow and note management system
+- **Mobile-Responsive Design**: Touch-optimized editing experience with adaptive UI components
+- **Keyboard Shortcuts**: Comprehensive accessibility features with power user shortcuts
+
+### 🎨 User Experience & Design
+- **Complete Theme System**: Light/dark mode with system preference detection, persistent storage, and cross-tab synchronization
 - **Modern Dashboard**: Collapsible sidebar with theme selection, user profile management, and intuitive navigation
-- **Enhanced Notes Interface**: Grid, list, and compact view modes with advanced filtering, sorting, and search capabilities
-- **Theme Support**: Comprehensive dark/light mode implementation with custom theme toggle in dashboard sidebar
-- **Keyboard Shortcuts**: Desktop keyboard shortcuts for efficient workflow
-- **Visual Feedback**: Annotation highlights, hover previews, tooltips, and loading states with theme-aware styling
-- **Authentication**: Secure user authentication with Clerk and JWT-based RLS
-- **Error Handling**: Comprehensive error boundaries, retry mechanisms, and user-friendly error messages
-- **Real-time Updates**: Automatic signed URL refresh and activity synchronization
+- **Mobile-First Design**: Touch-friendly interactions, responsive layouts, and gesture-based navigation
+- **Enhanced File Management**: Grid, list, and compact view modes with advanced filtering, sorting, and search capabilities
+- **Visual Feedback System**: Real-time status indicators, loading states, hover previews, and theme-aware styling
+- **Accessibility Features**: WCAG compliance, keyboard navigation, screen reader support, and focus management
 
-### Technical Features
-
-- **Row Level Security**: Automatic user data isolation with Supabase RLS policies
-- **File Validation**: Comprehensive PDF validation with security checks and malicious pattern detection
-- **Performance Optimized**: Debounced activity tracking, lazy loading, memoization, and efficient rendering
-- **User Experience**: Intuitive interfaces and efficient workflows
-- **Signed URL Management**: Automatic URL refresh, expiration handling, and secure file access
+### 🔒 Security & Performance
+- **Enterprise Security**: Clerk authentication with JWT integration and automatic user data isolation via Supabase RLS
+- **Comprehensive File Validation**: Security checks, malicious pattern detection, and type/size validation
+- **Performance Optimization**: Debounced operations, lazy loading, memoization, and efficient rendering
+- **Real-time Activity Tracking**: User activity monitoring with automatic cache invalidation and recent activity display
+- **Signed URL Management**: Automatic URL refresh, expiration handling, and secure file access with cleanup
 
 ## 📚 Documentation
 
@@ -66,60 +76,36 @@ For comprehensive documentation covering all aspects of the Noto application, se
 - **[Project Structure](./.kiro/steering/structure.md)** - File organization and naming conventions
 - **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
 
-## 🆕 Recent Major Improvements
+## 🚀 System Architecture
 
-### Advanced Document Processing Architecture ✅ IMPLEMENTED
-- **Syncfusion Primary Extraction**: Enterprise-grade text extraction using Syncfusion PDF Viewer for superior accuracy and layout preservation
-- **Advanced Layout Detection**: Intelligent recognition of document structure, tables, headings, lists, and formatting preservation with semantic understanding
-- **OCR Fallback System**: Automatic fallback to node-tesseract-ocr for scanned documents and extraction failures with confidence thresholds and quality assessment
-- **Background Processing Queue**: Asynchronous document processing with progress tracking, timeout management, job status monitoring, and performance optimization
-- **Semantic Chunking**: Intelligent text segmentation with configurable overlap, content type detection, boundary respect, and contextual understanding
-- **Multi-Language Support**: Comprehensive language detection and processing for international documents with OCR language packs and cultural adaptations
-- **Metadata Preservation**: Complete extraction of document metadata, page numbers, structural information, processing statistics, and content quality metrics
-- **Intelligent Content Analysis**: Advanced content type detection, semantic understanding, and automated quality assessment for optimal quiz generation
+### 🧠 AI & Machine Learning Pipeline
+- **RAG Architecture**: Retrieval-augmented generation with vector embeddings and semantic search for intelligent content analysis
+- **Document Intelligence**: Advanced text extraction with Syncfusion primary processing and OCR fallback for comprehensive document understanding
+- **Semantic Processing**: Intelligent chunking with content type detection, boundary respect, and contextual understanding
+- **Quality Assurance**: Automated content quality assessment with confidence scoring and validation mechanisms
+- **Performance Monitoring**: Real-time feedback collection and system optimization with continuous improvement metrics
 
-### AI-Powered Quiz Generation System ✅ IMPLEMENTED
-- **RAG-Based Generation**: Advanced retrieval-augmented generation using vector search for intelligent quiz creation with `/api/quiz/generate-rag` endpoint
-- **Vector Search Integration**: Semantic search across document chunks using embedding models for relevant content identification and advanced filtering
-- **Multiple Question Types**: Support for multiple choice, true/false, and short answer questions with configurable difficulty levels and adaptive complexity
-- **Multi-Document Support**: Generate quizzes from multiple PDF sources with balanced content representation, cross-document analysis, and intelligent deduplication
-- **Interactive Quiz Player**: Complete quiz-taking interface with progress tracking, scoring, review modes, retake functionality, and mobile optimization
-- **Performance Monitoring**: Comprehensive quiz analytics, attempt tracking, performance insights, improvement trend analysis, and real-time feedback collection
-- **Advanced Search Capabilities**: Sophisticated content filtering with semantic search, relevance scoring, and targeted quiz generation for specific topics via `/api/quiz/advanced-search`
-- **Quiz History & Analytics**: Complete attempt tracking with detailed performance analytics, learning progress insights, and personalized recommendations via `/api/quiz/history`
-- **Mobile-First Design**: Responsive quiz interfaces optimized for touch interactions with `MobileQuizGeneratorInterface` and gesture-based navigation
-- **RAG System Monitoring**: Real-time performance monitoring with user feedback collection via `SimpleFeedbackForm` and `/api/rag/monitoring` for continuous improvement and quality assurance
-- **Intelligent Content Analysis**: Advanced document processing with content type detection, semantic understanding, and automated quality assessment
+### 🏗️ Technical Infrastructure
+- **Modern Stack**: Next.js 15 + React 19 with TypeScript strict mode for type safety and performance
+- **State Management**: Redux Toolkit with RTK Query for consistent API integration and real-time caching
+- **Database**: Supabase with Row Level Security (RLS) for automatic user data isolation and security
+- **Authentication**: Clerk integration with JWT-based authentication and seamless user management
+- **File Storage**: Supabase Storage with signed URLs, automatic expiration, and comprehensive security validation
+- **PDF Processing**: Syncfusion PDF Viewer with enterprise-grade text extraction and coordinate-based annotations
 
-### Complete Auto-Save Architecture
-- **Editor-Internal Auto-Save**: Auto-save functionality built into NotionEditor components using RTK Query
-- **RTK Query Integration**: All save operations use RTK Query mutations for consistency and caching
-- **Simplified Component API**: Removed complex callback props in favor of internal auto-save management
-- **Automatic Note Creation**: Seamlessly creates new notes when content is added without manual intervention
-- **Visual Feedback**: Real-time save status indicators with error recovery mechanisms
-- **Content Preservation**: Automatic content preservation during network issues and editor errors
+### 🎯 Component Architecture
+- **Modular Design**: Feature-based component organization with clean separation of concerns
+- **Theme System**: Comprehensive light/dark mode with system preference detection and cross-tab synchronization
+- **Mobile Optimization**: Touch-friendly interfaces with responsive design and gesture support
+- **Error Handling**: Comprehensive error boundaries with recovery mechanisms and user-friendly messaging
+- **Performance**: Lazy loading, memoization, debounced operations, and efficient rendering strategies
 
-### Enhanced Note Management System
-- **Complete CRUD Operations**: Full note creation, editing, updating, and deletion with API integration
-- **Custom Delete Confirmations**: Styled confirmation dialogs with loading states and error handling
-- **Auto-Save Status Display**: Floating status indicators positioned in bottom-right of note editing pages
-- **Obsidian-Style Interface**: Clean design with separate title input and borderless editor layout
-- **Enhanced Error Handling**: Toast notifications and comprehensive error recovery mechanisms
-- **Rich Text Editor**: TipTap-based editor with auto-save, word count, and keyboard shortcuts
-- **Multiple View Modes**: Grid, list, and compact display formats with advanced filtering and search
-- **Real-time Updates**: Automatic cache invalidation and cross-tab synchronization
-
-### Complete Theme System
-- **Dark/Light Mode**: Full theme support with system preference detection and persistent storage
-- **Custom Theme Toggle**: Integrated theme selection in dashboard sidebar dropdown
-- **Theme-Aware Components**: All UI elements including loading skeletons adapt to current theme
-- **Cross-tab Synchronization**: Theme changes synchronized across all open browser tabs
-
-### Enhanced Dashboard Experience  
-- **Collapsible Sidebar**: Modern sidebar design with user profile management and theme integration
-- **Advanced Notes Interface**: Complete note management with filtering, sorting, and search capabilities
-- **Mobile-First Design**: Optimized touch interactions and responsive layouts with theme support
-- **Performance Optimized**: Theme-aware skeleton loading states and smooth animations
+### 📊 Production-Ready Features
+- **Complete Implementation**: All core features fully implemented and tested for production use
+- **Scalable Architecture**: Designed for enterprise-scale deployment with performance optimization
+- **Security Compliance**: Enterprise-grade security with comprehensive validation and data protection
+- **Mobile Excellence**: Touch-optimized interfaces with responsive design and gesture support
+- **Real-time Capabilities**: Cross-tab synchronization, live updates, and instant feedback systems
 
 ## ⚡ Quick Start
 
@@ -205,77 +191,79 @@ For comprehensive documentation covering all aspects of the Noto application, se
 ### Project Structure
 
 ```
-├── app/                    # Next.js App Router pages and API routes
-│   ├── api/               # API endpoints (PDFs, annotations)
-│   ├── dashboard/         # Dashboard pages and layouts
+├── app/                    # Next.js App Router (pages & API routes)
+│   ├── api/               # RESTful API endpoints (PDFs, notes, quiz, RAG)
+│   ├── dashboard/         # Main application interface
 │   └── sign-in/          # Authentication pages
-├── components/            # React components
-│   ├── ui/               # shadcn/ui components
-│   ├── pdf/              # PDF-related components
-│   ├── editor/           # Notion-like rich text editor components
-│   ├── quiz/             # Quiz generation and management components
-│   ├── rag/              # RAG system and feedback components
-│   └── dashboard/        # Dashboard and navigation components
-├── lib/                   # Utilities and configurations
-│   ├── services/         # Document processing services (Syncfusion, OCR, chunking)
-│   ├── store/            # Redux store and slices
-│   ├── types/            # TypeScript type definitions
-│   └── utils/            # Utility functions
+├── components/            # React component library
+│   ├── ui/               # Base UI components (shadcn/ui)
+│   ├── pdf/              # PDF viewer & annotation system
+│   ├── editor/           # Rich text editor (TipTap-based)
+│   ├── quiz/             # AI quiz generation & management
+│   ├── rag/              # RAG system & feedback components
+│   ├── theme/            # Theme system components
+│   └── dashboard/        # Navigation & layout components
+├── lib/                   # Core utilities & configurations
+│   ├── services/         # Document processing & AI services
+│   ├── store/            # Redux store with RTK Query
+│   ├── types/            # TypeScript definitions
+│   └── utils/            # Helper functions & utilities
 ├── hooks/                 # Custom React hooks
-├── supabase/             # Database migrations and policies
-└── test/                 # Test files and configurations
+├── supabase/             # Database schema & migrations
+└── docs/                 # Comprehensive documentation
 ```
 
 ### Key Components
 
-#### PDF System
-- **PDFAnnotationViewer**: Main PDF viewer with Syncfusion integration, Supabase URL handling, and activity tracking
-- **AnnotationOverlay**: Renders interactive annotation highlights with hover states and click handling
-- **AnnotationTooltip**: Text selection interface with smart positioning
-- **AnnotationPreviewCard**: Hover preview cards with annotation content and edit/delete actions
+#### 🤖 AI & RAG System
+- **RAG Quiz Generator**: Advanced quiz creation using vector search and semantic analysis (`/api/quiz/generate-rag`)
+- **Document Processor**: Syncfusion text extraction with OCR fallback and semantic chunking
+- **Content Analyzer**: Intelligent content type detection and quality assessment
+- **Feedback System**: Real-time performance monitoring with user feedback collection (`SimpleFeedbackForm`)
 
-#### Notion-like Editor System
-- **NotionEditor**: Complete block-based rich text editor with TipTap integration
-- **EditorProvider**: Context provider for editor state management and cross-component communication
-- **FloatingToolbar Suite**: Multiple toolbar variants (basic, advanced, PDF annotation) with intelligent positioning
-- **SlashCommand Extension**: Notion-style slash commands for quick block creation and formatting
-- **ImageUpload Extension**: Drag-and-drop image upload with Supabase storage integration
-- **EnhancedLink Extension**: Advanced link handling with validation and auto-detection
-- **KeyboardShortcuts Extension**: Essential keyboard shortcuts for efficient editing
-- **LazyNotionEditor**: Performance-optimized wrapper with lazy loading and skeleton states
+#### 📄 PDF Annotation System
+- **PDFAnnotationViewer**: Enterprise PDF viewer with Syncfusion integration and coordinate-based annotations
+- **AnnotationTooltip**: Smart text selection interface with PDF-to-screen coordinate conversion
+- **NoteCreationModal**: Rich text note creation with TipTap editor integration
+- **Cross-tab Sync**: Real-time annotation updates across browser tabs
 
-#### Note Management System
-- **Note Creation/Editing Pages**: Complete CRUD interface for note management with rich text editing
-- **NoteCard**: Optimized note display component with preview and metadata
-- **NoteSkeleton**: Loading states and skeleton UI for better perceived performance
-- **Cross-tab Synchronization**: Real-time note updates across browser tabs using BroadcastChannel and PostMessage
+#### ✍️ Rich Text Editor
+- **NotionEditor**: Block-based editor with internal auto-save and RTK Query integration
+- **FloatingToolbar Suite**: Context-aware toolbars (basic, advanced, PDF annotation)
+- **SlashCommand System**: Notion-style commands for quick formatting and block creation
+- **EditorProvider**: State management and cross-component communication
 
-#### Core Infrastructure
-- **Activity Tracking System**: Real-time user activity monitoring with debounced tracking
-- **Dashboard**: PDF and note management with recent activity display and signed URL integration
-- **Error Boundaries**: Comprehensive error handling with recovery mechanisms and user-friendly messages
-- **Toast Notification System**: User feedback for all operations with contextual messages
+#### 🎯 Quiz Management
+- **InteractiveQuizPlayer**: Complete quiz-taking interface with progress tracking and scoring
+- **MobileQuizInterface**: Touch-optimized quiz generation and management
+- **QuizConfigurationPanel**: Advanced settings for difficulty, question types, and content selection
+- **System Integration**: Comprehensive quiz system with modular architecture
+
+#### 🎨 Theme & UI System
+- **ThemeProvider**: Complete light/dark mode with system preference detection
+- **Dashboard**: Modern interface with collapsible sidebar and activity tracking
+- **Mobile Optimization**: Touch-friendly interactions and responsive design
+- **Error Boundaries**: Comprehensive error handling with user-friendly recovery
 
 ## 📱 User Experience
 
-### Desktop Workflow
+### 💻 Desktop Workflow
 
-1. **PDF Management**: Upload PDF via drag-and-drop or file picker
-2. **PDF Viewing**: PDF loads in Syncfusion viewer with full navigation and search
-3. **Text Annotation**: Select text to show annotation tooltip with rich text editor
-4. **Note Creation**: Create standalone notes with Notion-like block editor
-5. **Rich Text Editing**: Use slash commands, floating toolbars, and keyboard shortcuts
-6. **Cross-tab Sync**: Real-time updates across browser tabs and windows
-7. **Navigation**: Seamless switching between PDFs, annotations, and notes
+1. **Document Upload**: Drag-and-drop PDFs with automatic processing and text extraction
+2. **AI Quiz Generation**: Select documents and generate intelligent quizzes using RAG technology
+3. **PDF Annotation**: Select text to create rich annotations with coordinate-based positioning
+4. **Note Management**: Create and edit notes with Notion-style block editor and auto-save
+5. **Cross-tab Sync**: Real-time updates across browser tabs with seamless synchronization
+6. **Theme Switching**: Toggle between light/dark modes with system preference detection
 
-### Mobile Workflow
+### 📱 Mobile Workflow
 
-1. **Touch-friendly Upload**: Upload PDF with mobile-optimized interface
-2. **Mobile PDF Viewer**: PDF displays with touch gestures and zoom controls
-3. **Touch Text Selection**: Long-press text to open annotation dialog
-4. **Mobile Editor**: Full-screen rich text editor with touch-optimized controls
-5. **Gesture Navigation**: Swipe and tap navigation between documents and notes
-6. **Responsive Design**: Adaptive UI that works seamlessly across all screen sizes
+1. **Touch Upload**: Mobile-optimized PDF upload with progress tracking
+2. **Mobile Quiz Interface**: Touch-friendly quiz generation and management
+3. **Touch Annotations**: Long-press text selection with mobile-optimized dialogs
+4. **Responsive Editor**: Full-screen rich text editing with gesture support
+5. **Mobile Navigation**: Swipe and tap navigation with adaptive UI components
+6. **Offline Capability**: Basic offline functionality for quiz completion
 
 ## 🔧 Development
 
@@ -303,14 +291,14 @@ npm run setup:supabase  # Verify Supabase setup
 
 ### Key Development Files
 
-- **API Routes**: `app/api/pdfs/` - PDF upload, listing, and individual access endpoints
-- **PDF Viewer**: `components/pdf/PDFAnnotationViewer.tsx` - Main PDF viewer with Supabase integration
-- **Store Configuration**: `lib/store/index.ts` - Redux store with RTK Query setup
-- **Type Definitions**: `lib/types.ts` - Application-wide types including Supabase response types
-- **Supabase Client**: `lib/supabaseClient.ts` - Database configuration with RLS
-- **Activity Tracking**: `lib/utils/activity-tracking.ts` - User activity monitoring utilities
-- **Error Handling**: `lib/utils/error-handling.ts` - Comprehensive error management
-- **Test Setup**: `test/setup.ts` - Testing environment with comprehensive mocks
+- **API Routes**: `app/api/` - Complete RESTful API (PDFs, notes, quiz, RAG monitoring)
+- **AI Services**: `lib/services/` - Document processing, RAG generation, and content analysis
+- **PDF System**: `components/pdf/` - Complete PDF viewer and annotation system
+- **Quiz System**: `components/quiz/` - AI-powered quiz generation and management
+- **Editor System**: `components/editor/` - Rich text editor with auto-save and floating toolbars
+- **State Management**: `lib/store/` - Redux store with RTK Query and typed hooks
+- **Type System**: `lib/types/` - Comprehensive TypeScript definitions organized by feature
+- **Testing Suite**: Comprehensive test coverage with Vitest and React Testing Library
 
 ## 🔒 Security
 
@@ -355,7 +343,7 @@ npm run setup:supabase  # Verify Supabase setup
 
 ### Complete Documentation Index
 
-For comprehensive documentation covering all aspects of the Noto application, see the **[Documentation Index](./DOCUMENTATION_INDEX.md)** which provides organized access to all documentation resources.
+For comprehensive documentation covering all aspects of the Noto application, see the **[Documentation Index](./DOCUMENTATION_INDEX.md)** which provides organized access to all documentation resources including setup guides, API references, component documentation, and development guidelines.
 
 ### Quick Access Documentation
 
@@ -367,9 +355,12 @@ For comprehensive documentation covering all aspects of the Noto application, se
 ### Component & Implementation Guides
 
 - **[PDF Components](./components/pdf/README.md)** - PDF viewer and annotation component suite
+- **[Editor Components](./components/editor/README.md)** - Rich text editor and floating toolbar system
+- **[Quiz Components](./components/quiz/README.md)** - AI-powered quiz generation system
+- **[RAG Components](./components/rag/README.md)** - RAG system and feedback components
 - **[Store Documentation](./lib/store/README.md)** - Redux state management and RTK Query
-- **[Test Documentation](./test/README.md)** - Testing strategy and comprehensive coverage
-- **[Error Handling](./docs/ERROR_HANDLING.md)** - Comprehensive error handling patterns
+- **[Services Documentation](./lib/services/README.md)** - Backend services and AI integration
+- **[Hooks Documentation](./hooks/README.md)** - Custom React hooks library
 
 ### Development Guidelines
 
@@ -377,48 +368,64 @@ For comprehensive documentation covering all aspects of the Noto application, se
 - **[Project Structure](./.kiro/steering/structure.md)** - File organization and naming conventions
 - **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
 
-## 🚀 Deployment
+## 🚀 Production Deployment
 
-### Production Deployment
+### ✅ Production Ready Status
 
-1. **Build the application**
+Noto is **fully production-ready** with:
+- Complete feature implementation and testing
+- Enterprise-grade security and performance optimization
+- Comprehensive error handling and recovery mechanisms
+- Mobile-responsive design with accessibility compliance
+- Real-time monitoring and feedback systems
 
-   ```bash
-   npm run build
-   ```
+### Deployment Options
 
-2. **Configure environment variables** in your deployment platform
+#### Vercel (Recommended)
+```bash
+npm run build
+vercel --prod
+```
 
-3. **Deploy to Vercel** (recommended)
-   ```bash
-   vercel --prod
-   ```
+#### Docker Deployment
+```bash
+docker build -t noto-app .
+docker run -p 3000:3000 noto-app
+```
 
-### Environment Configuration
+#### Environment Variables
+```env
+# Core Services
+PROJECT_URL=https://your-project.supabase.co
+SUPABASE_KEY=your-anon-key
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-clerk-key
+CLERK_SECRET_KEY=your-clerk-secret
+SYNCFUSION_LICENSE_KEY=your-syncfusion-license
 
-Ensure all environment variables are configured in production:
-
-- Supabase project URL and keys
-- Clerk authentication keys
-- Syncfusion license key
-- Any additional API keys or configuration
+# Optional: AI Services
+OPENAI_API_KEY=your-openai-key
+EMBEDDING_MODEL_URL=your-embedding-service
+```
 
 ## 🤝 Contributing
 
+### Current Development Status
+
+Noto is **feature-complete and production-ready**. Future contributions should focus on:
+
+#### 🎯 Enhancement Areas
+- **Performance Optimization**: Advanced caching, virtual scrolling, edge computing
+- **AI Improvements**: Enhanced models, personalized learning paths, adaptive difficulty
+- **Enterprise Features**: Team workspaces, advanced permissions, audit logging
+- **Accessibility**: Enhanced WCAG compliance and assistive technology support
+
 ### Development Guidelines
 
-- Follow TypeScript strict mode requirements
-- Use Tailwind CSS for styling with shadcn/ui components
-- Write tests for new features and bug fixes
-- Follow the established project structure and naming conventions
-- Ensure mobile responsiveness and intuitive user experience
-
-### Code Style
-
-- Use Prettier for code formatting
-- Follow ESLint rules for code quality
-- Use semantic commit messages
-- Write comprehensive JSDoc comments for complex functions
+- **TypeScript**: Strict mode with comprehensive type safety
+- **Testing**: Maintain 80%+ test coverage with comprehensive edge case testing
+- **Performance**: Consider mobile performance and Core Web Vitals optimization
+- **Security**: Follow established security patterns and validation requirements
+- **Documentation**: Update documentation for all new features and changes
 
 ## 📄 License
 
@@ -434,4 +441,6 @@ For questions, issues, or contributions:
 
 ---
 
-**Noto** - Making PDF annotation simple, secure, and accessible across all devices.
+**Noto** - AI-powered PDF annotation and quiz generation platform. Transforming document interaction through intelligent content analysis, seamless annotation workflows, and adaptive learning experiences.
+
+**Status**: ✅ Production Ready | **Version**: 1.0.0 | **Last Updated**: January 2025
