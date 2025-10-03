@@ -1,6 +1,6 @@
-import { getAuthenticatedSupabaseClient } from '@/lib/utils/supabase-helpers';
-import { DocumentChunk, ChunkMetadata } from '@/lib/types';
-import { v4 as uuidv4 } from 'uuid';
+import { DocumentChunk, ChunkMetadata } from "./document-processing";
+import { v4 as uuidv4 } from "uuid";
+import { getAuthenticatedSupabaseClient } from "../supabaseClient";
 
 /**
  * Chunk versioning interface
@@ -30,7 +30,7 @@ export interface ChunkAnalytics {
   usageCount: number;
   totalRelevanceScore: number;
   lastUsed?: string;
-  usageType: 'quiz_generation' | 'content_search' | 'similarity_search';
+  usageType: "quiz_generation" | "content_search" | "similarity_search";
   successCount: number;
   userFeedback: number;
   createdAt: string;
@@ -153,7 +153,7 @@ export class ChunkManagementService {
     enableQualityScoring: true,
     qualityThreshold: 0.6,
     deduplicationThreshold: 0.95,
-    maxVersionsPerChunk: 10
+    maxVersionsPerChunk: 10,
   };
 
   private options: Required<ChunkManagementOptions>;
@@ -179,23 +179,26 @@ export class ChunkManagementService {
     }
   ): Promise<DocumentChunk> {
     const { client } = await getAuthenticatedSupabaseClient();
-    
+
     const chunkId = uuidv4();
     const now = new Date().toISOString();
 
     // Calculate quality score if enabled
     let qualityScore: number | null = null;
     if (this.options.enableQualityScoring) {
-      const qualityMetrics = await this.calculateQualityMetrics(chunkData.content, chunkData.metadata);
+      const qualityMetrics = await this.calculateQualityMetrics(
+        chunkData.content,
+        chunkData.metadata
+      );
       qualityScore = qualityMetrics.overallQuality;
-      
+
       // Store quality score
       await this.storeQualityScore(userId, chunkId, qualityMetrics);
     }
 
     // Create the chunk
     const { data: chunk, error } = await client
-      .from('document_chunks')
+      .from("document_chunks")
       .insert({
         id: chunkId,
         user_id: userId,
@@ -210,7 +213,7 @@ export class ChunkManagementService {
         quality_score: qualityScore,
         last_quality_check: qualityScore ? now : null,
         created_at: now,
-        updated_at: now
+        updated_at: now,
       })
       .select()
       .single();
@@ -226,8 +229,10 @@ export class ChunkManagementService {
         embedding: chunkData.embedding,
         tokenCount: chunkData.tokenCount,
         metadata: chunkData.metadata,
-        qualityMetrics: qualityScore ? await this.getQualityMetrics(chunkId) : {} as ChunkQualityMetrics,
-        changeReason: 'Initial creation'
+        qualityMetrics: qualityScore
+          ? await this.getQualityMetrics(chunkId)
+          : ({} as ChunkQualityMetrics),
+        changeReason: "Initial creation",
       });
     }
 
@@ -247,16 +252,18 @@ export class ChunkManagementService {
     updateData: ChunkUpdateRequest
   ): Promise<DocumentChunk> {
     const { client } = await getAuthenticatedSupabaseClient();
-    
+
     // Get current chunk
     const { data: currentChunk, error: fetchError } = await client
-      .from('document_chunks')
-      .select('*')
-      .eq('id', chunkId)
+      .from("document_chunks")
+      .select("*")
+      .eq("id", chunkId)
       .single();
 
     if (fetchError || !currentChunk) {
-      throw new Error(`Failed to fetch chunk: ${fetchError?.message || 'Chunk not found'}`);
+      throw new Error(
+        `Failed to fetch chunk: ${fetchError?.message || "Chunk not found"}`
+      );
     }
 
     const now = new Date().toISOString();
@@ -275,7 +282,10 @@ export class ChunkManagementService {
 
     // Update metadata if provided
     if (updateData.metadata !== undefined) {
-      updateFields.metadata = { ...currentChunk.metadata, ...updateData.metadata };
+      updateFields.metadata = {
+        ...currentChunk.metadata,
+        ...updateData.metadata,
+      };
     }
 
     // Recalculate quality score if content changed
@@ -286,16 +296,20 @@ export class ChunkManagementService {
       );
       updateFields.quality_score = qualityMetrics.overallQuality;
       updateFields.last_quality_check = now;
-      
+
       // Update quality score record
-      await this.storeQualityScore(currentChunk.user_id, chunkId, qualityMetrics);
+      await this.storeQualityScore(
+        currentChunk.user_id,
+        chunkId,
+        qualityMetrics
+      );
     }
 
     // Update the chunk
     const { data: updatedChunk, error: updateError } = await client
-      .from('document_chunks')
+      .from("document_chunks")
       .update(updateFields)
-      .eq('id', chunkId)
+      .eq("id", chunkId)
       .select()
       .single();
 
@@ -310,8 +324,10 @@ export class ChunkManagementService {
         embedding: updateData.embedding || currentChunk.embedding,
         tokenCount: updateFields.token_count || currentChunk.token_count,
         metadata: updateFields.metadata || currentChunk.metadata,
-        qualityMetrics: updateFields.quality_score ? await this.getQualityMetrics(chunkId) : {} as ChunkQualityMetrics,
-        changeReason: updateData.changeReason
+        qualityMetrics: updateFields.quality_score
+          ? await this.getQualityMetrics(chunkId)
+          : ({} as ChunkQualityMetrics),
+        changeReason: updateData.changeReason,
       });
     }
 
@@ -331,26 +347,28 @@ export class ChunkManagementService {
 
     // Get chunk
     const { data: chunk, error: chunkError } = await client
-      .from('document_chunks')
-      .select('*')
-      .eq('id', chunkId)
+      .from("document_chunks")
+      .select("*")
+      .eq("id", chunkId)
       .single();
 
     if (chunkError || !chunk) {
-      throw new Error(`Failed to fetch chunk: ${chunkError?.message || 'Chunk not found'}`);
+      throw new Error(
+        `Failed to fetch chunk: ${chunkError?.message || "Chunk not found"}`
+      );
     }
 
     const result: any = {
-      chunk: this.mapChunkFromDatabase(chunk)
+      chunk: this.mapChunkFromDatabase(chunk),
     };
 
     // Get versions if versioning is enabled
     if (this.options.enableVersioning) {
       const { data: versions } = await client
-        .from('chunk_versions')
-        .select('*')
-        .eq('chunk_id', chunkId)
-        .order('version', { ascending: false });
+        .from("chunk_versions")
+        .select("*")
+        .eq("chunk_id", chunkId)
+        .order("version", { ascending: false });
 
       result.versions = versions?.map(this.mapVersionFromDatabase) || [];
     } else {
@@ -360,9 +378,9 @@ export class ChunkManagementService {
     // Get analytics if enabled
     if (this.options.enableAnalytics) {
       const { data: analytics } = await client
-        .from('chunk_analytics')
-        .select('*')
-        .eq('chunk_id', chunkId)
+        .from("chunk_analytics")
+        .select("*")
+        .eq("chunk_id", chunkId)
         .single();
 
       if (analytics) {
@@ -373,9 +391,9 @@ export class ChunkManagementService {
     // Get quality score if enabled
     if (this.options.enableQualityScoring) {
       const { data: qualityScore } = await client
-        .from('chunk_quality_scores')
-        .select('*')
-        .eq('chunk_id', chunkId)
+        .from("chunk_quality_scores")
+        .select("*")
+        .eq("chunk_id", chunkId)
         .single();
 
       if (qualityScore) {
@@ -391,7 +409,7 @@ export class ChunkManagementService {
    */
   async recordUsage(
     chunkId: string,
-    usageType: 'quiz_generation' | 'content_search' | 'similarity_search',
+    usageType: "quiz_generation" | "content_search" | "similarity_search",
     relevanceScore: number,
     success: boolean = true
   ): Promise<void> {
@@ -401,49 +419,55 @@ export class ChunkManagementService {
     const now = new Date().toISOString();
 
     // Update or create analytics record
-    const { error } = await client
-      .from('chunk_analytics')
-      .upsert({
+    const { error } = await client.from("chunk_analytics").upsert(
+      {
         chunk_id: chunkId,
         usage_count: 1,
         total_relevance_score: relevanceScore,
         last_used: now,
         usage_type: usageType,
         success_count: success ? 1 : 0,
-        updated_at: now
-      }, {
-        onConflict: 'chunk_id,user_id',
-        ignoreDuplicates: false
-      });
+        updated_at: now,
+      },
+      {
+        onConflict: "chunk_id,user_id",
+        ignoreDuplicates: false,
+      }
+    );
 
     if (error) {
-      console.error('Failed to record chunk usage:', error);
+      console.error("Failed to record chunk usage:", error);
     }
   }
 
   /**
    * Calculate and store quality metrics for a chunk
    */
-  async calculateQualityMetrics(content: string, metadata: ChunkMetadata): Promise<ChunkQualityMetrics> {
+  async calculateQualityMetrics(
+    content: string,
+    metadata: ChunkMetadata
+  ): Promise<ChunkQualityMetrics> {
     const contentLength = content.length;
     const tokenCount = this.estimateTokenCount(content);
-    
+
     // Calculate various quality metrics
     const tokenDensity = tokenCount / Math.max(contentLength, 1);
-    const structuralCoherence = this.calculateStructuralCoherence(content, metadata);
+    const structuralCoherence = this.calculateStructuralCoherence(
+      content,
+      metadata
+    );
     const semanticCoherence = this.calculateSemanticCoherence(content);
     const informationDensity = this.calculateInformationDensity(content);
     const readability = this.calculateReadability(content);
     const duplicateScore = 0; // Will be calculated during deduplication
-    
+
     // Calculate overall quality as weighted average
-    const overallQuality = (
+    const overallQuality =
       structuralCoherence * 0.2 +
       semanticCoherence * 0.25 +
       informationDensity * 0.2 +
       readability * 0.15 +
-      (1 - duplicateScore) * 0.2 // Lower duplicate score = higher quality
-    );
+      (1 - duplicateScore) * 0.2; // Lower duplicate score = higher quality
 
     return {
       contentLength,
@@ -453,7 +477,7 @@ export class ChunkManagementService {
       informationDensity,
       readability,
       duplicateScore,
-      overallQuality: Math.max(0, Math.min(1, overallQuality))
+      overallQuality: Math.max(0, Math.min(1, overallQuality)),
     };
   }
 
@@ -465,21 +489,23 @@ export class ChunkManagementService {
     documentIds?: string[]
   ): Promise<DeduplicationResult> {
     const { client } = await getAuthenticatedSupabaseClient();
-    
+
     // Build query for chunks to deduplicate
     let query = client
-      .from('document_chunks')
-      .select('id, content, document_id, embedding')
-      .eq('user_id', userId);
+      .from("document_chunks")
+      .select("id, content, document_id, embedding")
+      .eq("user_id", userId);
 
     if (documentIds && documentIds.length > 0) {
-      query = query.in('document_id', documentIds);
+      query = query.in("document_id", documentIds);
     }
 
     const { data: chunks, error } = await query;
 
     if (error || !chunks) {
-      throw new Error(`Failed to fetch chunks for deduplication: ${error?.message}`);
+      throw new Error(
+        `Failed to fetch chunks for deduplication: ${error?.message}`
+      );
     }
 
     const duplicateGroups: Array<{
@@ -519,14 +545,14 @@ export class ChunkManagementService {
         duplicateGroups.push({
           representativeChunk: currentChunk.id,
           duplicates,
-          similarity: this.options.deduplicationThreshold
+          similarity: this.options.deduplicationThreshold,
         });
 
         // Remove duplicate chunks
         const { error: deleteError } = await client
-          .from('document_chunks')
+          .from("document_chunks")
           .delete()
-          .in('id', duplicates);
+          .in("id", duplicates);
 
         if (!deleteError) {
           duplicatesRemoved += duplicates.length;
@@ -537,10 +563,13 @@ export class ChunkManagementService {
     }
 
     return {
-      duplicatesFound: duplicateGroups.reduce((sum, group) => sum + group.duplicates.length, 0),
+      duplicatesFound: duplicateGroups.reduce(
+        (sum, group) => sum + group.duplicates.length,
+        0
+      ),
       duplicatesRemoved,
       spaceFreed,
-      duplicateGroups
+      duplicateGroups,
     };
   }
 
@@ -558,7 +587,7 @@ export class ChunkManagementService {
     } = {}
   ): Promise<CleanupResult> {
     const { client } = await getAuthenticatedSupabaseClient();
-    
+
     let chunksProcessed = 0;
     let chunksRemoved = 0;
     let versionsRemoved = 0;
@@ -568,19 +597,26 @@ export class ChunkManagementService {
     // Remove orphaned chunks (chunks without valid document references)
     if (options.removeOrphanedChunks) {
       const { data: orphanedChunks } = await client
-        .from('document_chunks')
-        .select('id, content')
-        .eq('user_id', userId)
-        .not('document_id', 'in', `(SELECT id FROM pdfs WHERE user_id = '${userId}')`);
+        .from("document_chunks")
+        .select("id, content")
+        .eq("user_id", userId)
+        .not(
+          "document_id",
+          "in",
+          `(SELECT id FROM pdfs WHERE user_id = '${userId}')`
+        );
 
       if (orphanedChunks && orphanedChunks.length > 0) {
-        const orphanedIds = orphanedChunks.map(c => c.id);
-        spaceFreed += orphanedChunks.reduce((sum, c) => sum + c.content.length, 0);
+        const orphanedIds = orphanedChunks.map((c) => c.id);
+        spaceFreed += orphanedChunks.reduce(
+          (sum, c) => sum + c.content.length,
+          0
+        );
 
         const { error } = await client
-          .from('document_chunks')
+          .from("document_chunks")
           .delete()
-          .in('id', orphanedIds);
+          .in("id", orphanedIds);
 
         if (!error) {
           chunksRemoved += orphanedChunks.length;
@@ -591,24 +627,27 @@ export class ChunkManagementService {
     // Remove old versions beyond the limit
     if (options.removeOldVersions && this.options.enableVersioning) {
       const { data: chunks } = await client
-        .from('document_chunks')
-        .select('id')
-        .eq('user_id', userId);
+        .from("document_chunks")
+        .select("id")
+        .eq("user_id", userId);
 
       if (chunks) {
         for (const chunk of chunks) {
           const { data: versions } = await client
-            .from('chunk_versions')
-            .select('id')
-            .eq('chunk_id', chunk.id)
-            .order('version', { ascending: false })
+            .from("chunk_versions")
+            .select("id")
+            .eq("chunk_id", chunk.id)
+            .order("version", { ascending: false })
             .range(this.options.maxVersionsPerChunk, 1000);
 
           if (versions && versions.length > 0) {
             const { error } = await client
-              .from('chunk_versions')
+              .from("chunk_versions")
               .delete()
-              .in('id', versions.map(v => v.id));
+              .in(
+                "id",
+                versions.map((v) => v.id)
+              );
 
             if (!error) {
               versionsRemoved += versions.length;
@@ -624,10 +663,12 @@ export class ChunkManagementService {
       cutoffDate.setDate(cutoffDate.getDate() - (options.maxAge || 30));
 
       const { data: chunksToUpdate } = await client
-        .from('document_chunks')
-        .select('id, content, metadata')
-        .eq('user_id', userId)
-        .or(`last_quality_check.is.null,last_quality_check.lt.${cutoffDate.toISOString()}`);
+        .from("document_chunks")
+        .select("id, content, metadata")
+        .eq("user_id", userId)
+        .or(
+          `last_quality_check.is.null,last_quality_check.lt.${cutoffDate.toISOString()}`
+        );
 
       if (chunksToUpdate) {
         for (const chunk of chunksToUpdate) {
@@ -638,17 +679,20 @@ export class ChunkManagementService {
             );
 
             await client
-              .from('document_chunks')
+              .from("document_chunks")
               .update({
                 quality_score: qualityMetrics.overallQuality,
-                last_quality_check: new Date().toISOString()
+                last_quality_check: new Date().toISOString(),
               })
-              .eq('id', chunk.id);
+              .eq("id", chunk.id);
 
             await this.storeQualityScore(userId, chunk.id, qualityMetrics);
             analyticsUpdated++;
           } catch (error) {
-            console.error(`Failed to update quality score for chunk ${chunk.id}:`, error);
+            console.error(
+              `Failed to update quality score for chunk ${chunk.id}:`,
+              error
+            );
           }
         }
       }
@@ -657,20 +701,23 @@ export class ChunkManagementService {
     // Remove unused chunks (chunks with very low usage and quality)
     if (options.removeUnusedChunks && this.options.enableAnalytics) {
       const { data: unusedChunks } = await client
-        .from('document_chunks')
-        .select('id, content, chunk_analytics(usage_count)')
-        .eq('user_id', userId)
-        .lt('quality_score', 0.3)
-        .filter('chunk_analytics.usage_count', 'lt', 2);
+        .from("document_chunks")
+        .select("id, content, chunk_analytics(usage_count)")
+        .eq("user_id", userId)
+        .lt("quality_score", 0.3)
+        .filter("chunk_analytics.usage_count", "lt", 2);
 
       if (unusedChunks && unusedChunks.length > 0) {
-        const unusedIds = unusedChunks.map(c => c.id);
-        spaceFreed += unusedChunks.reduce((sum, c) => sum + c.content.length, 0);
+        const unusedIds = unusedChunks.map((c) => c.id);
+        spaceFreed += unusedChunks.reduce(
+          (sum, c) => sum + c.content.length,
+          0
+        );
 
         const { error } = await client
-          .from('document_chunks')
+          .from("document_chunks")
           .delete()
-          .in('id', unusedIds);
+          .in("id", unusedIds);
 
         if (!error) {
           chunksRemoved += unusedChunks.length;
@@ -685,7 +732,7 @@ export class ChunkManagementService {
       chunksRemoved,
       versionsRemoved,
       analyticsUpdated,
-      spaceFreed
+      spaceFreed,
     };
   }
 
@@ -700,12 +747,14 @@ export class ChunkManagementService {
 
     // Build base query
     let chunkQuery = client
-      .from('document_chunks')
-      .select('id, quality_score, chunk_analytics(usage_count, total_relevance_score)')
-      .eq('user_id', userId);
+      .from("document_chunks")
+      .select(
+        "id, quality_score, chunk_analytics(usage_count, total_relevance_score)"
+      )
+      .eq("user_id", userId);
 
     if (documentIds && documentIds.length > 0) {
-      chunkQuery = chunkQuery.in('document_id', documentIds);
+      chunkQuery = chunkQuery.in("document_id", documentIds);
     }
 
     const { data: chunks, error } = await chunkQuery;
@@ -716,39 +765,48 @@ export class ChunkManagementService {
 
     const totalChunks = chunks.length;
     const qualityScores = chunks
-      .map(c => c.quality_score)
-      .filter(score => score !== null) as number[];
-    
-    const averageQuality = qualityScores.length > 0 
-      ? qualityScores.reduce((sum, score) => sum + score, 0) / qualityScores.length 
-      : 0;
+      .map((c) => c.quality_score)
+      .filter((score) => score !== null) as number[];
 
-    const highQualityChunks = qualityScores.filter(score => score >= 0.8).length;
-    const lowQualityChunks = qualityScores.filter(score => score < 0.4).length;
+    const averageQuality =
+      qualityScores.length > 0
+        ? qualityScores.reduce((sum, score) => sum + score, 0) /
+          qualityScores.length
+        : 0;
+
+    const highQualityChunks = qualityScores.filter(
+      (score) => score >= 0.8
+    ).length;
+    const lowQualityChunks = qualityScores.filter(
+      (score) => score < 0.4
+    ).length;
 
     // Get most used chunks
     const chunksWithAnalytics = chunks
-      .filter(c => c.chunk_analytics && c.chunk_analytics.length > 0)
-      .map(c => ({
+      .filter((c) => c.chunk_analytics && c.chunk_analytics.length > 0)
+      .map((c) => ({
         chunkId: c.id,
         usageCount: c.chunk_analytics[0].usage_count,
-        averageRelevance: c.chunk_analytics[0].total_relevance_score / Math.max(c.chunk_analytics[0].usage_count, 1)
+        averageRelevance:
+          c.chunk_analytics[0].total_relevance_score /
+          Math.max(c.chunk_analytics[0].usage_count, 1),
       }))
       .sort((a, b) => b.usageCount - a.usageCount)
       .slice(0, 10);
 
     // Quality distribution
     const qualityDistribution = {
-      excellent: qualityScores.filter(score => score >= 0.9).length,
-      good: qualityScores.filter(score => score >= 0.7 && score < 0.9).length,
-      fair: qualityScores.filter(score => score >= 0.5 && score < 0.7).length,
-      poor: qualityScores.filter(score => score < 0.5).length
+      excellent: qualityScores.filter((score) => score >= 0.9).length,
+      good: qualityScores.filter((score) => score >= 0.7 && score < 0.9).length,
+      fair: qualityScores.filter((score) => score >= 0.5 && score < 0.7).length,
+      poor: qualityScores.filter((score) => score < 0.5).length,
     };
 
     // Usage statistics
-    const usageCounts = chunksWithAnalytics.map(c => c.usageCount);
+    const usageCounts = chunksWithAnalytics.map((c) => c.usageCount);
     const totalUsage = usageCounts.reduce((sum, count) => sum + count, 0);
-    const averageUsage = usageCounts.length > 0 ? totalUsage / usageCounts.length : 0;
+    const averageUsage =
+      usageCounts.length > 0 ? totalUsage / usageCounts.length : 0;
     const peakUsage = usageCounts.length > 0 ? Math.max(...usageCounts) : 0;
 
     return {
@@ -761,8 +819,8 @@ export class ChunkManagementService {
       usageStatistics: {
         totalUsage,
         averageUsage,
-        peakUsage
-      }
+        peakUsage,
+      },
     };
   }
 
@@ -777,16 +835,18 @@ export class ChunkManagementService {
     const { client } = await getAuthenticatedSupabaseClient();
 
     let query = client
-      .from('document_chunks')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('quality_score', minQuality);
+      .from("document_chunks")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("quality_score", minQuality);
 
     if (documentIds && documentIds.length > 0) {
-      query = query.in('document_id', documentIds);
+      query = query.in("document_id", documentIds);
     }
 
-    const { data: chunks, error } = await query.order('quality_score', { ascending: false });
+    const { data: chunks, error } = await query.order("quality_score", {
+      ascending: false,
+    });
 
     if (error) {
       throw new Error(`Failed to filter chunks by quality: ${error.message}`);
@@ -812,30 +872,28 @@ export class ChunkManagementService {
 
     // Get current version number
     const { data: latestVersion } = await client
-      .from('chunk_versions')
-      .select('version')
-      .eq('chunk_id', chunkId)
-      .order('version', { ascending: false })
+      .from("chunk_versions")
+      .select("version")
+      .eq("chunk_id", chunkId)
+      .order("version", { ascending: false })
       .limit(1)
       .single();
 
     const nextVersion = latestVersion ? latestVersion.version + 1 : 1;
 
-    const { error } = await client
-      .from('chunk_versions')
-      .insert({
-        chunk_id: chunkId,
-        version: nextVersion,
-        content: versionData.content,
-        embedding: versionData.embedding,
-        token_count: versionData.tokenCount,
-        metadata: versionData.metadata,
-        quality_metrics: versionData.qualityMetrics,
-        change_reason: versionData.changeReason
-      });
+    const { error } = await client.from("chunk_versions").insert({
+      chunk_id: chunkId,
+      version: nextVersion,
+      content: versionData.content,
+      embedding: versionData.embedding,
+      token_count: versionData.tokenCount,
+      metadata: versionData.metadata,
+      quality_metrics: versionData.qualityMetrics,
+      change_reason: versionData.changeReason,
+    });
 
     if (error) {
-      console.error('Failed to create chunk version:', error);
+      console.error("Failed to create chunk version:", error);
     }
   }
 
@@ -846,20 +904,18 @@ export class ChunkManagementService {
   ): Promise<void> {
     const { client } = await getAuthenticatedSupabaseClient();
 
-    const { error } = await client
-      .from('chunk_analytics')
-      .insert({
-        chunk_id: chunkId,
-        user_id: userId,
-        document_id: documentId,
-        usage_count: 0,
-        total_relevance_score: 0,
-        success_count: 0,
-        user_feedback: 0
-      });
+    const { error } = await client.from("chunk_analytics").insert({
+      chunk_id: chunkId,
+      user_id: userId,
+      document_id: documentId,
+      usage_count: 0,
+      total_relevance_score: 0,
+      success_count: 0,
+      user_feedback: 0,
+    });
 
     if (error) {
-      console.error('Failed to initialize chunk analytics:', error);
+      console.error("Failed to initialize chunk analytics:", error);
     }
   }
 
@@ -870,9 +926,8 @@ export class ChunkManagementService {
   ): Promise<void> {
     const { client } = await getAuthenticatedSupabaseClient();
 
-    const { error } = await client
-      .from('chunk_quality_scores')
-      .upsert({
+    const { error } = await client.from("chunk_quality_scores").upsert(
+      {
         chunk_id: chunkId,
         user_id: userId,
         content_length: qualityMetrics.contentLength,
@@ -883,23 +938,27 @@ export class ChunkManagementService {
         readability: qualityMetrics.readability,
         duplicate_score: qualityMetrics.duplicateScore,
         overall_quality: qualityMetrics.overallQuality,
-        calculated_at: new Date().toISOString()
-      }, {
-        onConflict: 'chunk_id,user_id'
-      });
+        calculated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "chunk_id,user_id",
+      }
+    );
 
     if (error) {
-      console.error('Failed to store quality score:', error);
+      console.error("Failed to store quality score:", error);
     }
   }
 
-  private async getQualityMetrics(chunkId: string): Promise<ChunkQualityMetrics> {
+  private async getQualityMetrics(
+    chunkId: string
+  ): Promise<ChunkQualityMetrics> {
     const { client } = await getAuthenticatedSupabaseClient();
 
     const { data: qualityScore } = await client
-      .from('chunk_quality_scores')
-      .select('*')
-      .eq('chunk_id', chunkId)
+      .from("chunk_quality_scores")
+      .select("*")
+      .eq("chunk_id", chunkId)
       .single();
 
     if (qualityScore) {
@@ -911,29 +970,32 @@ export class ChunkManagementService {
         informationDensity: qualityScore.information_density,
         readability: qualityScore.readability,
         duplicateScore: qualityScore.duplicate_score,
-        overallQuality: qualityScore.overall_quality
+        overallQuality: qualityScore.overall_quality,
       };
     }
 
     return {} as ChunkQualityMetrics;
   }
 
-  private calculateStructuralCoherence(content: string, metadata: ChunkMetadata): number {
+  private calculateStructuralCoherence(
+    content: string,
+    metadata: ChunkMetadata
+  ): number {
     // Score based on content type and structure
     let score = 0.5; // Base score
 
     // Bonus for structured content types
     switch (metadata.contentType) {
-      case 'heading':
+      case "heading":
         score += 0.3;
         break;
-      case 'table':
+      case "table":
         score += 0.2;
         break;
-      case 'list':
+      case "list":
         score += 0.15;
         break;
-      case 'caption':
+      case "caption":
         score += 0.1;
         break;
     }
@@ -952,28 +1014,38 @@ export class ChunkManagementService {
 
   private calculateSemanticCoherence(content: string): number {
     // Simple semantic coherence based on sentence structure and vocabulary
-    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const sentences = content
+      .split(/[.!?]+/)
+      .filter((s) => s.trim().length > 0);
     if (sentences.length === 0) return 0;
 
     let coherenceScore = 0.5; // Base score
 
     // Check average sentence length (optimal range: 15-25 words)
-    const avgSentenceLength = sentences.reduce((sum, s) => sum + s.split(/\s+/).length, 0) / sentences.length;
+    const avgSentenceLength =
+      sentences.reduce((sum, s) => sum + s.split(/\s+/).length, 0) /
+      sentences.length;
     if (avgSentenceLength >= 10 && avgSentenceLength <= 30) {
       coherenceScore += 0.2;
     }
 
     // Check for transition words and connectors
-    const transitionWords = /\b(however|therefore|furthermore|moreover|additionally|consequently|meanwhile|nevertheless)\b/gi;
+    const transitionWords =
+      /\b(however|therefore|furthermore|moreover|additionally|consequently|meanwhile|nevertheless)\b/gi;
     const transitionCount = (content.match(transitionWords) || []).length;
     coherenceScore += Math.min(0.2, transitionCount * 0.05);
 
     // Check for repeated key terms (indicates topic consistency)
-    const words = content.toLowerCase().split(/\s+/).filter(w => w.length > 4);
+    const words = content
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 4);
     const wordFreq = new Map<string, number>();
-    words.forEach(word => wordFreq.set(word, (wordFreq.get(word) || 0) + 1));
-    
-    const repeatedWords = Array.from(wordFreq.values()).filter(count => count > 1).length;
+    words.forEach((word) => wordFreq.set(word, (wordFreq.get(word) || 0) + 1));
+
+    const repeatedWords = Array.from(wordFreq.values()).filter(
+      (count) => count > 1
+    ).length;
     coherenceScore += Math.min(0.1, repeatedWords * 0.02);
 
     return Math.min(1, coherenceScore);
@@ -981,69 +1053,81 @@ export class ChunkManagementService {
 
   private calculateInformationDensity(content: string): number {
     // Measure information density based on unique concepts and technical terms
-    const words = content.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+    const words = content
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 0);
     const uniqueWords = new Set(words);
-    
+
     // Basic density ratio
     const uniqueRatio = uniqueWords.size / Math.max(words.length, 1);
-    
+
     // Bonus for technical terms and proper nouns
-    const technicalTerms = content.match(/[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*/g) || [];
+    const technicalTerms =
+      content.match(/[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*/g) || [];
     const numbers = content.match(/\d+(?:\.\d+)?/g) || [];
     const acronyms = content.match(/\b[A-Z]{2,}\b/g) || [];
-    
+
     let density = uniqueRatio * 0.6;
     density += Math.min(0.2, technicalTerms.length * 0.02);
     density += Math.min(0.1, numbers.length * 0.01);
     density += Math.min(0.1, acronyms.length * 0.02);
-    
+
     return Math.min(1, density);
   }
 
   private calculateReadability(content: string): number {
     // Simple readability score based on sentence and word complexity
-    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    const words = content.split(/\s+/).filter(w => w.length > 0);
-    
+    const sentences = content
+      .split(/[.!?]+/)
+      .filter((s) => s.trim().length > 0);
+    const words = content.split(/\s+/).filter((w) => w.length > 0);
+
     if (sentences.length === 0 || words.length === 0) return 0;
-    
+
     const avgWordsPerSentence = words.length / sentences.length;
-    const avgCharsPerWord = words.reduce((sum, word) => sum + word.length, 0) / words.length;
-    
+    const avgCharsPerWord =
+      words.reduce((sum, word) => sum + word.length, 0) / words.length;
+
     // Optimal ranges for readability
     let readabilityScore = 0.5;
-    
+
     // Sentence length (optimal: 15-20 words)
     if (avgWordsPerSentence >= 10 && avgWordsPerSentence <= 25) {
       readabilityScore += 0.25;
     } else if (avgWordsPerSentence > 25) {
       readabilityScore -= 0.1;
     }
-    
+
     // Word length (optimal: 4-6 characters)
     if (avgCharsPerWord >= 4 && avgCharsPerWord <= 7) {
       readabilityScore += 0.25;
     } else if (avgCharsPerWord > 8) {
       readabilityScore -= 0.1;
     }
-    
+
     return Math.max(0, Math.min(1, readabilityScore));
   }
 
-  private calculateContentSimilarity(content1: string, content2: string): number {
+  private calculateContentSimilarity(
+    content1: string,
+    content2: string
+  ): number {
     // Simple Jaccard similarity for content comparison
     const words1 = new Set(content1.toLowerCase().split(/\s+/));
     const words2 = new Set(content2.toLowerCase().split(/\s+/));
-    
-    const intersection = new Set([...words1].filter(word => words2.has(word)));
+
+    const intersection = new Set(
+      [...words1].filter((word) => words2.has(word))
+    );
     const union = new Set([...words1, ...words2]);
-    
+
     return intersection.size / Math.max(union.size, 1);
   }
 
   private estimateTokenCount(text: string): number {
     // Rough token estimation
-    const words = text.split(/\s+/).filter(w => w.length > 0);
+    const words = text.split(/\s+/).filter((w) => w.length > 0);
     const punctuation = (text.match(/[.,!?;:()[\]{}'"]/g) || []).length;
     return Math.ceil(words.length * 1.3 + punctuation * 0.5);
   }
@@ -1061,7 +1145,7 @@ export class ChunkManagementService {
       sectionTitle: chunk.section_title,
       metadata: chunk.metadata,
       createdAt: chunk.created_at,
-      updatedAt: chunk.updated_at
+      updatedAt: chunk.updated_at,
     };
   }
 
@@ -1077,7 +1161,7 @@ export class ChunkManagementService {
       qualityMetrics: version.quality_metrics,
       parentVersion: version.parent_version,
       changeReason: version.change_reason,
-      createdAt: version.created_at
+      createdAt: version.created_at,
     };
   }
 
@@ -1094,7 +1178,7 @@ export class ChunkManagementService {
       successCount: analytics.success_count,
       userFeedback: analytics.user_feedback,
       createdAt: analytics.created_at,
-      updatedAt: analytics.updated_at
+      updatedAt: analytics.updated_at,
     };
   }
 
@@ -1111,7 +1195,7 @@ export class ChunkManagementService {
       readability: qualityScore.readability,
       duplicateScore: qualityScore.duplicate_score,
       overallQuality: qualityScore.overall_quality,
-      calculatedAt: qualityScore.calculated_at
+      calculatedAt: qualityScore.calculated_at,
     };
   }
 }

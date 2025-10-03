@@ -131,7 +131,7 @@ export function PDFContextMenu({
       icon: Copy,
       label: "Copy Link",
       onClick: () => {
-        navigator.clipboard.writeText(`${window.location.origin}/dashboard/pdfs/${pdfId}`);
+        navigator.clipboard.writeText(`${window.location.origin}/dashboard/pdf/${pdfId}`);
         onClose();
       },
       shortcut: "Ctrl+C"

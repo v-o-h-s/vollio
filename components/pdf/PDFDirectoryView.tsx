@@ -229,7 +229,7 @@ export function PDFDirectoryView({
     setActiveId(event.active.id as string);
   };
 
-  const handleDndDragOver = (event: DragOverEvent) => {
+  const handleDndDragOver = (_event: DragOverEvent) => {
     // Handle drag over logic if needed
   };
 
@@ -548,7 +548,7 @@ export function PDFDirectoryView({
                     onItemSelect={handleItemSelect}
                     onContextMenu={handleContextMenu}
                     onPDFOpen={(pdf) =>
-                      router.push(`/dashboard/pdfs/${pdf.id}`)
+                      router.push(`/dashboard/pdf/${pdf.id}`)
                     }
                     onCreateFolder={handleCreateFolder}
                     onCancelCreateFolder={() => setIsCreatingFolder(false)}
@@ -586,7 +586,7 @@ export function PDFDirectoryView({
                           handleItemSelect(pdf.id, isCtrlClick)
                         }
                         onContextMenu={(e) => handleContextMenu(e, pdf.id)}
-                        onOpen={() => router.push(`/dashboard/pdfs/${pdf.id}`)}
+                        onOpen={() => router.push(`/dashboard/pdf/${pdf.id}`)}
                         isDragging={activeId === pdf.id}
                       />
                     ))}
@@ -633,7 +633,8 @@ export function PDFDirectoryView({
           onConfirm={() =>
             deleteDialog.pdfId && handleDeletePDF(deleteDialog.pdfId)
           }
-          isLoading={isDeleting}
+          noteTitle={pdfs.find(p => p.id === deleteDialog.pdfId)?.filename || "PDF"}
+          isDeleting={isDeleting}
         />
 
         {/* Rename dialog */}
