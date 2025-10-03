@@ -36,14 +36,8 @@ interface PDFFolderProps {
   onContextMenu?: (e: React.MouseEvent) => void;
   viewMode?: ViewMode;
   className?: string;
-  // Drag and drop props
-  onDragStart?: (e: React.DragEvent) => void;
-  onDragEnd?: () => void;
-  onDragEnter?: () => void;
-  onDragLeave?: () => void;
-  onDrop?: () => void;
-  isDropTarget?: boolean;
   isDragging?: boolean;
+  dragHandleProps?: any;
 }
 
 export function PDFFolder({
@@ -56,13 +50,8 @@ export function PDFFolder({
   onContextMenu,
   viewMode = "grid",
   className,
-  onDragStart,
-  onDragEnd,
-  onDragEnter,
-  onDragLeave,
-  onDrop,
-  isDropTarget = false,
   isDragging = false,
+  dragHandleProps,
 }: PDFFolderProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(folder.name);
@@ -83,31 +72,15 @@ export function PDFFolder({
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    onDragEnter?.();
-  };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    onDrop?.();
-  };
 
   if (viewMode === "grid") {
     return (
       <Card 
-        draggable
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onDragOver={handleDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={handleDrop}
+        {...dragHandleProps}
         className={`cursor-pointer transition-all hover:shadow-md ${
           isSelected ? 'ring-2 ring-primary' : ''
-        } ${isDropTarget ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950' : ''} ${
-          isDragging ? 'opacity-50' : ''
-        } ${className}`}
+        } ${isDragging ? 'opacity-50' : ''} ${className}`}
         onClick={onSelect}
         onDoubleClick={onOpen}
         onContextMenu={onContextMenu}
@@ -153,17 +126,10 @@ export function PDFFolder({
   if (viewMode === "compact") {
     return (
       <div
-        draggable
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onDragOver={handleDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={handleDrop}
+        {...dragHandleProps}
         className={`p-2 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
           isSelected ? 'bg-primary/10' : ''
-        } ${isDropTarget ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950' : ''} ${
-          isDragging ? 'opacity-50' : ''
-        } ${className}`}
+        } ${isDragging ? 'opacity-50' : ''} ${className}`}
         onClick={onSelect}
         onDoubleClick={onOpen}
         onContextMenu={onContextMenu}
@@ -202,17 +168,10 @@ export function PDFFolder({
   if (viewMode === "details") {
     return (
       <div 
-        draggable
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onDragOver={handleDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={handleDrop}
+        {...dragHandleProps}
         className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
           isSelected ? 'bg-primary/10' : ''
-        } ${isDropTarget ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950' : ''} ${
-          isDragging ? 'opacity-50' : ''
-        } ${className}`}
+        } ${isDragging ? 'opacity-50' : ''} ${className}`}
         onClick={onSelect}
         onDoubleClick={onOpen}
         onContextMenu={onContextMenu}
@@ -262,17 +221,10 @@ export function PDFFolder({
   // Default list view
   return (
     <div 
-      draggable
-      onDragStart={onDragStart}
-      onDragEnd={onDragEnd}
-      onDragOver={handleDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={handleDrop}
+      {...dragHandleProps}
       className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
         isSelected ? 'bg-primary/10' : ''
-      } ${isDropTarget ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950' : ''} ${
-        isDragging ? 'opacity-50' : ''
-      } ${className}`}
+      } ${isDragging ? 'opacity-50' : ''} ${className}`}
       onClick={onSelect}
       onDoubleClick={onOpen}
       onContextMenu={onContextMenu}
