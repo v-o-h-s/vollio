@@ -12,7 +12,6 @@ import {
   ThumbnailView,
   Print,
   Annotation,
-
 } from "@syncfusion/ej2-react-pdfviewer";
 import { useGetPDFQuery } from "@/lib/store/apiSlice";
 import { PDFDocument, TextBounds } from "@/lib/types/pdf";
@@ -272,6 +271,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   const handleCreateNoteFromSelection = useCallback(() => {
     setShowSelectionToolbar(false);
     setShowNoteModal(true);
+    console.log({ "the visibility of the note modal": showNoteModal });
   }, [selectedText, selectionBounds]);
 
   // Handle closing selection toolbar
@@ -490,9 +490,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           enableNavigationToolbar={true}
           enableTextMarkupAnnotation={true} // Enable highlighting
           zoomMode="FitToWidth"
-          textSelectionStart={(args) => {
-            console.log("Text selection STARTED:", args);
-          }}
+          textSelectionStart={(args) => {}}
           textSelectionEnd={(args) => handleSelectionTextEnd(args)}
           pageClick={(args) => {
             // Close tooltip when clicking on empty page area (not during text selection)
@@ -501,17 +499,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               setSelectionBounds(null);
             }
           }}
-          annotationMouseover={(args) => {
-            console.log("Hovered annotation:", args);
-            // You can show your custom toolbar here
-          }}
-          annotationMouseLeave={(args) => {
-            // console.log("Mouse left annotation:", args);
-          }}
-          annotationDoubleClick={(args) => {
-            console.log("Clicked annotation:", args);
-            // You can show your custom toolbar here
-          }}
+          annotationMouseover={(args) => {}}
+          annotationMouseLeave={(args) => {}}
+          annotationDoubleClick={(args) => {}}
         >
           <Inject
             services={[
@@ -584,8 +574,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           onClose={handleCloseNotePreview}
           noteId={previewNoteId}
         />
-
-
       </div>
     </ErrorBoundary>
   );

@@ -66,7 +66,7 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
     let timeoutId: NodeJS.Timeout | undefined;
 
     if (visible) {
-      // Show immediately 
+      // Show immediately
       setIsDelayedVisible(true);
     } else {
       // Delayed hide (200ms as per requirements)
@@ -98,14 +98,15 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
           (adjustPosition as any).retryCount = retryCount + 1;
           setTimeout(adjustPosition, 10);
         } else {
-          console.warn("Could not adjust tooltip position - DOM element not found");
+          console.warn(
+            "Could not adjust tooltip position - DOM element not found"
+          );
         }
         return;
       }
 
       const tooltip = tooltipRef.current;
       const rect = tooltip.getBoundingClientRect();
-      console.log("the tooltip coordinates :", rect);
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
@@ -132,13 +133,6 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
         adjustedY = 16;
       }
 
-      console.log("Position adjustment:", {
-        original: position,
-        adjusted: { x: adjustedX, y: adjustedY },
-        viewportWidth,
-        viewportHeight,
-        tooltipRect: { width: rect.width, height: rect.height },
-      });
       setAdjustedPosition({ x: adjustedX, y: adjustedY });
     };
 
@@ -173,13 +167,11 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
     return null;
   }
 
-
-  
   return (
     <div
       ref={tooltipRef}
       className={`
-                fixed z-50 
+                fixed z-[9999] 
                 transition-opacity duration-200 ease-in-out
                 annotation-tooltip
                 ${visible ? "opacity-100 tooltip-enter" : "opacity-0"}
@@ -204,7 +196,7 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
         {/* shadcn-style menu item */}
         <div
           onClick={(e) => {
-            console.log('Create note button clicked');
+            console.log("Create note button clicked");
             e.preventDefault();
             e.stopPropagation();
             onCreateNote();
@@ -231,8 +223,6 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
           <PlusIcon className="text-muted-foreground" />
           <span className="font-medium">Create note</span>
         </div>
-
-       
       </div>
     </div>
   );

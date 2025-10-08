@@ -160,7 +160,7 @@ const AnnotationPreviewCard: React.FC<AnnotationPreviewCardProps> = ({
                 <Popover.Content
                     ref={contentRef}
                     className="
-                        z-50 
+                        z-[9999] 
                         max-w-xs 
                         bg-white 
                         border 

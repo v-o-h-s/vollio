@@ -255,7 +255,7 @@ export default function PDFViewerPage() {
           className={`transition-all duration-300 ease-in-out fixed z-0`}
           style={{
             top: 0,
-            bottom: 0,
+            bottom: 0,  
             left: isFocusMode ? 0 : 256, // px - leave room for sidebar when not focused
             width: isFocusMode ? "100vw" : "calc(100vw - 256px)",
             overflow: "hidden",

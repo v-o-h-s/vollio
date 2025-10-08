@@ -42,7 +42,7 @@ interface TextSelectionFallbackProps {
 
 export function TextSelectionFallback({ onRetry, onHelp }: TextSelectionFallbackProps) {
     return (
-        <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
+        <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center z-[9999]">
             <div className="text-center max-w-md p-6 bg-white rounded-xl border border-gray-200 shadow-lg">
                 <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <MousePointer size={28} className="text-yellow-600" />
@@ -102,7 +102,7 @@ export function AnnotationCreationFallback({
     selectedText
 }: AnnotationCreationFallbackProps) {
     return (
-        <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center z-50">
+        <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center z-[9999]">
             <div className="text-center max-w-md p-6 bg-white rounded-xl border border-red-200 shadow-lg">
                 <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <AlertTriangle size={28} className="text-red-500" />

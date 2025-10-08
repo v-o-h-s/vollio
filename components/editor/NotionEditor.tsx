@@ -41,9 +41,13 @@ import { cn } from "@/lib/utils";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useAutoSaveStatus } from "@/components/dashboard/AutoSaveStatusProvider";
-import { useCreateNoteMutation, useUpdateNoteMutation } from "@/lib/store/apiSlice";
-import type { NotionEditorProps } from "./types";
-import type { JSONContent, NoteContent } from "@/lib/types";
+import {
+  useCreateNoteMutation,
+  useUpdateNoteMutation,
+} from "@/lib/store/apiSlice";
+import type { NotionEditorProps } from "@/lib/types/editor";
+import type { JSONContent } from "@tiptap/react";
+import type { NoteContent } from "@/lib/types/editor";
 
 function NotionEditorInner({
   content,
@@ -65,9 +69,11 @@ function NotionEditorInner({
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState(content?.title || "Untitled Note");
-  
+
   // Auto-save functionality
-  const [currentNoteId, setCurrentNoteId] = useState<string | undefined>(noteId);
+  const [currentNoteId, setCurrentNoteId] = useState<string | undefined>(
+    noteId
+  );
 
   // RTK Query mutations for note operations
   const [createNote] = useCreateNoteMutation();
@@ -97,7 +103,7 @@ function NotionEditorInner({
         const newNoteId = newNote.id;
 
         setCurrentNoteId(newNoteId);
-        
+
         // Call the onNoteCreated callback if provided
         if (onNoteCreated) {
           onNoteCreated(newNoteId);
@@ -106,7 +112,7 @@ function NotionEditorInner({
         // Update existing note using RTK Query
         await updateNote({
           id: currentNoteId,
-          updates: { title, content }
+          updates: { title, content },
         }).unwrap();
       }
     },
@@ -127,8 +133,6 @@ function NotionEditorInner({
   // Global auto-save status context
   const { updateStatus: updateGlobalAutoSaveStatus } = useAutoSaveStatus();
 
- 
-
   // Notify parent of auto-save status changes
   useEffect(() => {
     if (onAutoSaveStatusChange) {
@@ -148,7 +152,13 @@ function NotionEditorInner({
       autoSaveError,
       !currentNoteId // isCreating is true when we don't have a noteId yet
     );
-  }, [autoSaveStatus, lastSaved, autoSaveError, currentNoteId, updateGlobalAutoSaveStatus]);
+  }, [
+    autoSaveStatus,
+    lastSaved,
+    autoSaveError,
+    currentNoteId,
+    updateGlobalAutoSaveStatus,
+  ]);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -306,20 +316,23 @@ function NotionEditorInner({
 
       // Trigger auto-save if enabled
       if (autoSave && editable) {
-        updateContent({title: noteTitle, content: json});
+        updateContent({ title: noteTitle, content: json });
       }
     },
   });
- // Handle title change
-  const handleTitleChange = useCallback((newTitle: string) => {
-    setNoteTitle(newTitle);
-    
-    // Trigger auto-save when title changes
-    if (autoSave && editable && editor) {
-      const currentContent = { title: newTitle, content: editor.getJSON() };
-      updateContent(currentContent);
-    }
-  }, [autoSave, editable, editor, updateContent]);
+  // Handle title change
+  const handleTitleChange = useCallback(
+    (newTitle: string) => {
+      setNoteTitle(newTitle);
+
+      // Trigger auto-save when title changes
+      if (autoSave && editable && editor) {
+        const currentContent = { title: newTitle, content: editor.getJSON() };
+        updateContent(currentContent);
+      }
+    },
+    [autoSave, editable, editor, updateContent]
+  );
   // Handle content updates when prop changes
   useEffect(() => {
     if (editor && content?.content !== undefined) {
@@ -397,7 +410,7 @@ function NotionEditorInner({
             "focus:outline-none focus:ring-0 placeholder:text-muted-foreground",
             "resize-none overflow-hidden"
           )}
-          style={{ fontSize: '1.5rem', lineHeight: '2rem' }}
+          style={{ fontSize: "1.5rem", lineHeight: "2rem" }}
         />
         <hr className="border-border" />
       </div>
