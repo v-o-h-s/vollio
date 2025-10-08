@@ -778,7 +778,7 @@
 /* Enhanced focus mode styles */
 .pdf-focus-mode .e-pv-viewer-container {
   width: 100vw !important;
-  height: calc(100vh - 57px) !important;
+  height: calc(100vh) !important;
   max-width: 100vw !important;
   margin: 0 !important;
   padding: 0 !important;
