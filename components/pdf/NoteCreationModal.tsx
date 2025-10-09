@@ -1,5 +1,11 @@
 /*
 this component provides a modal dialog for creating a note
+
+TODO changes : i think we should not use auto saving here , like the user write the note he wants , and he finnaly done 
+he close the note , and just then we send request to the database 
+## props : 
+    less pressure on server 
+    usefull if in the future we implement ai integration for creating the note
 */
 import React, { useState, useCallback } from "react";
 import {
@@ -17,8 +23,7 @@ import { NotionEditor } from "@/components/editor/NotionEditor";
 import { AutoSaveStatusProvider } from "@/components/dashboard/AutoSaveStatusProvider";
 import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveStatus";
 import { cn } from "@/lib/utils";
-import type { NoteContent } from "@/lib/types/editor";
-import type { JSONContent } from "@tiptap/core";
+
 
 interface NoteCreationModalProps {
   isOpen: boolean;

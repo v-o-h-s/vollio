@@ -271,9 +271,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   const handleCreateNoteFromSelection = useCallback(() => {
     setShowSelectionToolbar(false);
     setShowNoteModal(true);
-    console.log({ "the visibility of the note modal": showNoteModal });
   }, [selectedText, selectionBounds]);
-
   // Handle closing selection toolbar
   const handleCloseSelectionToolbar = useCallback(() => {
     setShowSelectionToolbar(false);

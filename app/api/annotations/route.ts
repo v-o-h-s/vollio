@@ -6,7 +6,7 @@ import { z } from "zod";
 import { Content } from "next/font/google";
 
 // Validation schema for annotation creation
-const createAnnotationSchema = z.object({
+const createAnnotationSchema = z.object({  
   pdfId: z.string().uuid("Invalid PDF ID format"),
   noteId: z.string().uuid("Invalid note ID format"),
   selectedText: z

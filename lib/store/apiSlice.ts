@@ -27,8 +27,7 @@ import {
   Quiz,
   QuizQuestion,
   QuizAttempt,
-} from "../types";
-import { QuizResults } from "../services/quiz-scoring-service";
+} from "../types/";
 import { AppError, ErrorType } from "../types/errors";
 import {
   createAppError,
@@ -39,6 +38,7 @@ import {
   logError,
 } from "../utils/error-handling";
 import { pdfNotifications } from "../utils/notifications";
+import { RAGQuizGenerationRequest } from "../services/rag-quiz-generation-service";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -108,7 +108,14 @@ const baseQueryWithRetry: BaseQueryFn = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithRetry,
-  tagTypes: ["Annotation", "Highlight", "PDF", "Note", "Quiz", "ProcessingStatus"],
+  tagTypes: [
+    "Annotation",
+    "Highlight",
+    "PDF",
+    "Note",
+    "Quiz",
+    "ProcessingStatus",
+  ],
   endpoints: (builder) => ({
     // PDF endpoints with enhanced error handling
     uploadPDF: builder.mutation<PDFDocument, FormData>({
@@ -396,7 +403,10 @@ export const apiSlice = createApi({
     }),
 
     // Rename PDF endpoint with error handling
-    renamePDF: builder.mutation<{ success: boolean; pdf: PDFDocument }, { id: string; filename: string }>({
+    renamePDF: builder.mutation<
+      { success: boolean; pdf: PDFDocument },
+      { id: string; filename: string }
+    >({
       query: ({ id, filename }) => ({
         url: `pdfs/${id}/rename`,
         method: "PUT",
@@ -471,12 +481,15 @@ export const apiSlice = createApi({
     }),
 
     // Notes endpoints with error handling
-    getNotes: builder.query<Note[], { pdfAnnotationId?: string; highlightId?: string }>({
+    getNotes: builder.query<
+      Note[],
+      { pdfAnnotationId?: string; highlightId?: string }
+    >({
       query: ({ pdfAnnotationId, highlightId } = {}) => ({
         url: "notes",
-        params: { 
+        params: {
           ...(pdfAnnotationId && { pdfAnnotationId }),
-          ...(highlightId && { highlightId })
+          ...(highlightId && { highlightId }),
         },
       }),
       transformResponse: (response: SupabaseNotesResponse) => {
@@ -742,18 +755,24 @@ export const apiSlice = createApi({
       },
       providesTags: (result) => [
         { type: "Annotation", id: "LIST" },
-        ...(result?.map((annotation) => ({ type: "Annotation" as const, id: annotation.id })) || []),
+        ...(result?.map((annotation) => ({
+          type: "Annotation" as const,
+          id: annotation.id,
+        })) || []),
       ],
     }),
 
-    createAnnotation: builder.mutation<Annotation, {
-      pdfId: string;
-      noteId: string;
-      selectedText: string;
-      pageNumber: number;
-      coordinates: { x: number; y: number; width: number; height: number };
-      noteContent?: string;
-    }>({
+    createAnnotation: builder.mutation<
+      Annotation,
+      {
+        pdfId: string;
+        noteId: string;
+        selectedText: string;
+        pageNumber: number;
+        coordinates: { x: number; y: number; width: number; height: number };
+        noteContent?: string;
+      }
+    >({
       query: (annotationData) => ({
         url: "annotations",
         method: "POST",
@@ -807,17 +826,22 @@ export const apiSlice = createApi({
     }),
 
     // Highlights endpoints - new system replacing annotations
-    getHighlights: builder.query<Highlight[], { pdfId?: string; noteId?: string; page?: number; limit?: number }>({
+    getHighlights: builder.query<
+      Highlight[],
+      { pdfId?: string; noteId?: string; page?: number; limit?: number }
+    >({
       query: ({ pdfId, noteId, page = 1, limit = 50 } = {}) => ({
         url: "highlights",
-        params: { 
+        params: {
           ...(pdfId && { pdfId }),
           ...(noteId && { noteId }),
-          page, 
-          limit 
+          page,
+          limit,
         },
       }),
-      transformResponse: (response: ApiResponse<{ highlights: Highlight[]; total: number }>) => {
+      transformResponse: (
+        response: ApiResponse<{ highlights: Highlight[]; total: number }>
+      ) => {
         if (!response.success || !response.data) {
           throw createAppError(
             ErrorType.DATABASE_ERROR,
@@ -848,7 +872,10 @@ export const apiSlice = createApi({
       },
       providesTags: (result) => [
         { type: "Highlight", id: "LIST" },
-        ...(result?.map((highlight) => ({ type: "Highlight" as const, id: highlight.id })) || []),
+        ...(result?.map((highlight) => ({
+          type: "Highlight" as const,
+          id: highlight.id,
+        })) || []),
       ],
     }),
 
@@ -858,14 +885,20 @@ export const apiSlice = createApi({
     >({
       query: ({ pdfId, noteId, page = 1, limit = 50 } = {}) => ({
         url: "highlights",
-        params: { 
+        params: {
           ...(pdfId && { pdfId }),
           ...(noteId && { noteId }),
-          page, 
-          limit 
+          page,
+          limit,
         },
       }),
-      transformResponse: (response: ApiResponse<{ highlights: Highlight[]; total: number; pagination: any }>) => {
+      transformResponse: (
+        response: ApiResponse<{
+          highlights: Highlight[];
+          total: number;
+          pagination: any;
+        }>
+      ) => {
         if (!response.success || !response.data) {
           throw createAppError(
             ErrorType.DATABASE_ERROR,
@@ -896,7 +929,10 @@ export const apiSlice = createApi({
       },
       providesTags: (result) => [
         { type: "Highlight", id: "LIST" },
-        ...(result?.highlights?.map((highlight) => ({ type: "Highlight" as const, id: highlight.id })) || []),
+        ...(result?.highlights?.map((highlight) => ({
+          type: "Highlight" as const,
+          id: highlight.id,
+        })) || []),
       ],
     }),
 
@@ -913,7 +949,11 @@ export const apiSlice = createApi({
         return response.data.highlight;
       },
       transformErrorResponse: (response: any, meta, highlightId) => {
-        const context = { component: "PDFAnnotationViewer", action: "fetch", highlightId };
+        const context = {
+          component: "PDFAnnotationViewer",
+          action: "fetch",
+          highlightId,
+        };
 
         if (response.status === 404) {
           return createAppError(
@@ -937,19 +977,24 @@ export const apiSlice = createApi({
 
         return mapErrorToAppError(response, context);
       },
-      providesTags: (result, error, highlightId) => [{ type: "Highlight", id: highlightId }],
+      providesTags: (result, error, highlightId) => [
+        { type: "Highlight", id: highlightId },
+      ],
     }),
 
-    createHighlight: builder.mutation<Highlight, {
-      pdfId: string;
-      noteId?: string;
-      content: string;
-      title?: string;
-      color?: string;
-      opacity?: number;
-      pageNumber: number;
-      textbounds: TextBounds[];
-    }>({
+    createHighlight: builder.mutation<
+      Highlight,
+      {
+        pdfId: string;
+        noteId?: string;
+        content: string;
+        title?: string;
+        color?: string;
+        opacity?: number;
+        pageNumber: number;
+        textbounds: TextBounds[];
+      }
+    >({
       query: (highlightData) => ({
         url: "highlights",
         method: "POST",
@@ -1002,17 +1047,20 @@ export const apiSlice = createApi({
       ],
     }),
 
-    updateHighlight: builder.mutation<Highlight, {
-      id: string;
-      updates: {
-        textbounds?: TextBounds[];
-        content?: string;
-        title?: string;
-        color?: string;
-        opacity?: number;
-        noteId?: string;
-      };
-    }>({
+    updateHighlight: builder.mutation<
+      Highlight,
+      {
+        id: string;
+        updates: {
+          textbounds?: TextBounds[];
+          content?: string;
+          title?: string;
+          color?: string;
+          opacity?: number;
+          noteId?: string;
+        };
+      }
+    >({
       query: ({ id, updates }) => ({
         url: `highlights/${id}`,
         method: "PUT",
@@ -1029,7 +1077,11 @@ export const apiSlice = createApi({
         return response.data.highlight;
       },
       transformErrorResponse: (response: any, meta, { id }) => {
-        const context = { component: "PDFAnnotationViewer", action: "update", highlightId: id };
+        const context = {
+          component: "PDFAnnotationViewer",
+          action: "update",
+          highlightId: id,
+        };
 
         if (response.status === 400) {
           return createAppError(
@@ -1081,7 +1133,11 @@ export const apiSlice = createApi({
         return response;
       },
       transformErrorResponse: (response: any, meta, highlightId) => {
-        const context = { component: "PDFAnnotationViewer", action: "delete", highlightId };
+        const context = {
+          component: "PDFAnnotationViewer",
+          action: "delete",
+          highlightId,
+        };
 
         if (response.status === 404) {
           return createAppError(
@@ -1111,7 +1167,10 @@ export const apiSlice = createApi({
       ],
     }),
 
-    bulkDeleteHighlights: builder.mutation<{ success: boolean; deletedCount: number }, string[]>({
+    bulkDeleteHighlights: builder.mutation<
+      { success: boolean; deletedCount: number },
+      string[]
+    >({
       query: (highlightIds) => ({
         url: "highlights/bulk-delete",
         method: "DELETE",
@@ -1128,7 +1187,10 @@ export const apiSlice = createApi({
         return response;
       },
       transformErrorResponse: (response: any) => {
-        const context = { component: "PDFAnnotationViewer", action: "bulkDelete" };
+        const context = {
+          component: "PDFAnnotationViewer",
+          action: "bulkDelete",
+        };
 
         if (response.status === 401) {
           return createAppError(
@@ -1149,16 +1211,21 @@ export const apiSlice = createApi({
       invalidatesTags: [{ type: "Highlight", id: "LIST" }],
     }),
 
-    searchHighlights: builder.query<Highlight[], { query: string; pdfId?: string; limit?: number }>({
+    searchHighlights: builder.query<
+      Highlight[],
+      { query: string; pdfId?: string; limit?: number }
+    >({
       query: ({ query, pdfId, limit = 20 }) => ({
         url: "highlights/search",
-        params: { 
+        params: {
           q: query,
           ...(pdfId && { pdfId }),
-          limit
+          limit,
         },
       }),
-      transformResponse: (response: ApiResponse<{ highlights: Highlight[] }>) => {
+      transformResponse: (
+        response: ApiResponse<{ highlights: Highlight[] }>
+      ) => {
         if (!response.success || !response.data) {
           throw createAppError(
             ErrorType.DATABASE_ERROR,
@@ -1195,7 +1262,10 @@ export const apiSlice = createApi({
     // ============================================================================
 
     // Document processing for RAG quiz generation
-    processDocument: builder.mutation<DocumentProcessingResponse, DocumentProcessingRequest>({
+    processDocument: builder.mutation<
+      DocumentProcessingResponse,
+      DocumentProcessingRequest
+    >({
       query: (requestData) => ({
         url: "quiz/process-document",
         method: "POST",
@@ -1238,12 +1308,15 @@ export const apiSlice = createApi({
       },
       invalidatesTags: [
         { type: "PDF", id: "LIST" },
-        { type: "ProcessingStatus", id: "LIST" }
+        { type: "ProcessingStatus", id: "LIST" },
       ],
     }),
 
     // Get document processing status with polling support
-    getProcessingStatus: builder.query<ProcessingStatusResponse["data"], string>({
+    getProcessingStatus: builder.query<
+      ProcessingStatusResponse["data"],
+      string
+    >({
       query: (statusId) => `quiz/processing-status/${statusId}`,
       transformResponse: (response: ProcessingStatusResponse) => {
         if (!response.success || !response.data) {
@@ -1256,7 +1329,11 @@ export const apiSlice = createApi({
         return response.data;
       },
       transformErrorResponse: (response: any, meta, statusId) => {
-        const context = { component: "QuizGenerator", action: "status", statusId };
+        const context = {
+          component: "QuizGenerator",
+          action: "status",
+          statusId,
+        };
 
         if (response.status === 404) {
           return createAppError(
@@ -1282,7 +1359,7 @@ export const apiSlice = createApi({
       },
       providesTags: (result, error, statusId) => [
         { type: "ProcessingStatus", id: statusId },
-        { type: "ProcessingStatus", id: "LIST" }
+        { type: "ProcessingStatus", id: "LIST" },
       ],
       // Enable polling for active processing status
       pollingInterval: (result) => {
@@ -1294,7 +1371,10 @@ export const apiSlice = createApi({
     }),
 
     // Vector search for content retrieval
-    searchContent: builder.mutation<ContentSearchResponse, ContentSearchRequest>({
+    searchContent: builder.mutation<
+      ContentSearchResponse,
+      ContentSearchRequest
+    >({
       query: (searchData) => ({
         url: "quiz/search-content",
         method: "POST",
@@ -1339,7 +1419,13 @@ export const apiSlice = createApi({
 
     // RAG-enhanced quiz generation
     generateQuiz: builder.mutation<
-      { success: boolean; quizId: string; questions: QuizQuestion[]; metadata: RAGQuizMetadata; sourceChunks: ChunkReference[] },
+      {
+        success: boolean;
+        quizId: string;
+        questions: QuizQuestion[];
+        metadata: RAGQuizMetadata;
+        sourceChunks: ChunkReference[];
+      },
       RAGQuizGenerationRequest & { title?: string }
     >({
       query: (quizData) => ({
@@ -1395,22 +1481,24 @@ export const apiSlice = createApi({
 
         return mapErrorToAppError(response, context);
       },
-      invalidatesTags: [
-        { type: "Quiz", id: "LIST" }
-      ],
+      invalidatesTags: [{ type: "Quiz", id: "LIST" }],
       // Optimistic update for better UX
       async onQueryStarted(quizData, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          
+
           // Optimistically add the new quiz to the list
           dispatch(
-            apiSlice.util.updateQueryData('getQuizzes', undefined, (draft) => {
+            apiSlice.util.updateQueryData("getQuizzes", undefined, (draft) => {
               if (draft?.quizzes) {
                 const newQuiz: Quiz = {
                   id: data.quizId,
-                  userId: '', // Will be populated by server
-                  title: quizData.title || `Quiz from ${data.metadata.sourceDocumentTitles.join(', ')}`,
+                  userId: "", // Will be populated by server
+                  title:
+                    quizData.title ||
+                    `Quiz from ${data.metadata.sourceDocumentTitles.join(
+                      ", "
+                    )}`,
                   sourceDocumentIds: quizData.documentIds,
                   pageRange: quizData.pageRange,
                   questionCount: quizData.questionCount,
@@ -1419,7 +1507,7 @@ export const apiSlice = createApi({
                   notes: quizData.notes,
                   focusAreas: quizData.focusAreas,
                   learningObjectives: quizData.learningObjectives,
-                  generationMethod: 'rag',
+                  generationMethod: "rag",
                   metadata: data.metadata,
                   createdAt: new Date().toISOString(),
                   updatedAt: new Date().toISOString(),
@@ -1455,8 +1543,8 @@ export const apiSlice = createApi({
         limit?: number;
         difficulty?: QuizDifficulty;
         questionType?: QuizQuestionType;
-        sortBy?: 'createdAt' | 'updatedAt' | 'title' | 'difficulty';
-        sortOrder?: 'asc' | 'desc';
+        sortBy?: "createdAt" | "updatedAt" | "title" | "difficulty";
+        sortOrder?: "asc" | "desc";
       } | void
     >({
       query: (params = {}) => ({
@@ -1466,8 +1554,8 @@ export const apiSlice = createApi({
           limit: params.limit || 20,
           ...(params.difficulty && { difficulty: params.difficulty }),
           ...(params.questionType && { questionType: params.questionType }),
-          sortBy: params.sortBy || 'createdAt',
-          sortOrder: params.sortOrder || 'desc',
+          sortBy: params.sortBy || "createdAt",
+          sortOrder: params.sortOrder || "desc",
         },
       }),
       transformResponse: (response: {
@@ -1517,7 +1605,10 @@ export const apiSlice = createApi({
       },
       providesTags: (result) => [
         { type: "Quiz", id: "LIST" },
-        ...(result?.quizzes.map((quiz) => ({ type: "Quiz" as const, id: quiz.id })) || []),
+        ...(result?.quizzes.map((quiz) => ({
+          type: "Quiz" as const,
+          id: quiz.id,
+        })) || []),
       ],
     }),
 
@@ -1610,7 +1701,11 @@ export const apiSlice = createApi({
         method: "PUT",
         body: updates,
       }),
-      transformResponse: (response: { success: boolean; data?: Quiz; error?: string }) => {
+      transformResponse: (response: {
+        success: boolean;
+        data?: Quiz;
+        error?: string;
+      }) => {
         if (!response.success || !response.data) {
           throw createAppError(
             ErrorType.DATABASE_ERROR,
@@ -1621,7 +1716,11 @@ export const apiSlice = createApi({
         return response.data;
       },
       transformErrorResponse: (response: any, meta, { id }) => {
-        const context = { component: "QuizEditor", action: "update", quizId: id };
+        const context = {
+          component: "QuizEditor",
+          action: "update",
+          quizId: id,
+        };
 
         if (response.status === 400) {
           return createAppError(
@@ -1658,8 +1757,10 @@ export const apiSlice = createApi({
       // Optimistic update
       async onQueryStarted({ id, updates }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          apiSlice.util.updateQueryData('getQuiz', id, (draft) => {
-            Object.assign(draft.quiz, updates, { updatedAt: new Date().toISOString() });
+          apiSlice.util.updateQueryData("getQuiz", id, (draft) => {
+            Object.assign(draft.quiz, updates, {
+              updatedAt: new Date().toISOString(),
+            });
           })
         );
 
@@ -1720,9 +1821,11 @@ export const apiSlice = createApi({
       // Optimistic update
       async onQueryStarted(quizId, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          apiSlice.util.updateQueryData('getQuizzes', undefined, (draft) => {
+          apiSlice.util.updateQueryData("getQuizzes", undefined, (draft) => {
             if (draft?.quizzes) {
-              const index = draft.quizzes.findIndex(quiz => quiz.id === quizId);
+              const index = draft.quizzes.findIndex(
+                (quiz) => quiz.id === quizId
+              );
               if (index !== -1) {
                 draft.quizzes.splice(index, 1);
                 draft.totalCount -= 1;
@@ -1828,13 +1931,11 @@ export const apiSlice = createApi({
       ],
     }),
 
-
-
     // Get quiz generation status for long-running operations
     getQuizGenerationStatus: builder.query<
       {
         id: string;
-        status: 'pending' | 'processing' | 'completed' | 'failed';
+        status: "pending" | "processing" | "completed" | "failed";
         progress: number;
         currentStep: string;
         estimatedTimeRemaining?: number;
@@ -1847,7 +1948,7 @@ export const apiSlice = createApi({
         success: boolean;
         data?: {
           id: string;
-          status: 'pending' | 'processing' | 'completed' | 'failed';
+          status: "pending" | "processing" | "completed" | "failed";
           progress: number;
           currentStep: string;
           estimatedTimeRemaining?: number;
@@ -1865,7 +1966,11 @@ export const apiSlice = createApi({
         return response.data;
       },
       transformErrorResponse: (response: any, meta, generationId) => {
-        const context = { component: "QuizGenerator", action: "status", generationId };
+        const context = {
+          component: "QuizGenerator",
+          action: "status",
+          generationId,
+        };
 
         if (response.status === 404) {
           return createAppError(
@@ -1890,7 +1995,7 @@ export const apiSlice = createApi({
         return mapErrorToAppError(response, context);
       },
       providesTags: (result, error, generationId) => [
-        { type: "Quiz", id: `GENERATION_${generationId}` }
+        { type: "Quiz", id: `GENERATION_${generationId}` },
       ],
       // Enable polling for active generation
       pollingInterval: (result) => {

@@ -163,6 +163,7 @@ export default function PDFViewerPage() {
               : "translate-y-0 opacity-100"
           }`}
         >
+          /* the header for pdf viewing */
           <div className="bg-card/90 backdrop-blur-md border border-border/50 rounded-xl shadow-lg">
             <div className="flex items-center justify-between px-3 sm:px-4 py-2">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
