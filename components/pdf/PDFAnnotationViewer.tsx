@@ -50,7 +50,7 @@ export interface PDFAnnotationViewerProps {
 
 interface TextSelectionCompleteEventArgs {
   textContent: string; // the actual selected text
-  pageNumber: number; // the page where the selection happened
+  pageIndex: number; // the page where the selection happened
   element: HTMLElement; // the text layer element
   textBounds: any[]; // array of bounding boxes (x, y, width, height for each fragment)
 }
@@ -155,7 +155,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       // Extract text bounds from the selection event
       const textBounds = extractSelectionBounds(args);
       const selectedTextContent = args.textContent.trim();
-      const pageNumber = args.pageNumber || 0;
+      const pageNumber = args.pageIndex
 
       // Store selection data
       setSelectedText(selectedTextContent);
@@ -166,9 +166,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         switch (highlightMode) {
           case "quick":
             try {
+              console.log(pageNumber);
               const annotationOptions: Partial<HighlightSettings> = {
                 bounds: textBounds,
-                pageNumber: pageNumber + 1, // Syncfusion uses 1-based page numbers
+                pageNumber: pageNumber, // Syncfusion uses 1-based page numbers
                 author: "User",
                 subject: "Quick Highlight",
                 annotationSelectorSettings: {},

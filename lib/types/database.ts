@@ -125,6 +125,7 @@ export interface Database {
           color: string;
           opacity: number;
           page_number: number;
+          type: "quick" | "comment" | "note";
           textbounds: Array<{
             x: number;
             y: number;
@@ -144,6 +145,7 @@ export interface Database {
           color?: string;
           opacity?: number;
           page_number: number;
+          type?: "quick" | "comment" | "note";
           textbounds: Array<{
             x: number;
             y: number;
@@ -163,6 +165,7 @@ export interface Database {
           color?: string;
           opacity?: number;
           page_number?: number;
+          type?: "quick" | "comment" | "note";
           textbounds?: Array<{
             x: number;
             y: number;
@@ -430,6 +433,7 @@ export interface Database {
       generation_method: "simple" | "rag";
       processing_status: "pending" | "processing" | "completed" | "failed";
       extraction_method: "pdfjs" | "ocr";
+      highlight_type: "quick" | "comment" | "note";
     };
   };
 }
@@ -504,6 +508,7 @@ export type ProcessingStatusEnum =
   Database["public"]["Enums"]["processing_status"];
 export type ExtractionMethodEnum =
   Database["public"]["Enums"]["extraction_method"];
+export type HighlightTypeEnum = Database["public"]["Enums"]["highlight_type"];
 
 // Additional types for quiz functionality
 

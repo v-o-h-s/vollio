@@ -6,6 +6,7 @@
 import type {
   PDFDocument,
   UserActivity,
+  Highlight,
   PDFRow,
   UserActivityRow,
   FileValidationResult,
@@ -84,6 +85,25 @@ export const isUserActivityRow = (
     typeof row.user_id === "string" &&
     typeof row.pdf_id === "string" &&
     typeof row.activity_type === "string"
+  );
+};
+
+/**
+ * Type guard for highlight row types
+ */
+export const isHighlightRow = (
+  row: any
+): row is Database["public"]["Tables"]["highlights"]["Row"] => {
+  return (
+    row &&
+    typeof row.id === "string" &&
+    typeof row.user_id === "string" &&
+    typeof row.pdf_id === "string" &&
+    typeof row.content === "string" &&
+    typeof row.page_number === "number" &&
+    typeof row.type === "string" &&
+    ["quick", "comment", "note"].includes(row.type) &&
+    Array.isArray(row.textbounds)
   );
 };
 
@@ -230,6 +250,25 @@ export function mapActivityRowToActivity(row: UserActivityRow): UserActivity {
     pdfId: row.pdf_id,
     activityType: row.activity_type as "view" | "upload" | "delete",
     accessedAt: new Date(row.accessed_at),
+  };
+}
+
+// Helper function to convert database row to Highlight
+export function mapHighlightRowToHighlight(row: Database["public"]["Tables"]["highlights"]["Row"]): Highlight {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    pdfId: row.pdf_id,
+    noteId: row.note_id,
+    content: row.content,
+    title: row.title,
+    color: row.color,
+    opacity: row.opacity,
+    pageNumber: row.page_number,
+    type: row.type,
+    textbounds: row.textbounds,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 

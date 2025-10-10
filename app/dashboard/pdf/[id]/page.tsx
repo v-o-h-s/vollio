@@ -61,7 +61,6 @@ export default function PDFViewerPage() {
       highlightMode
     );
   }, [selectedTool, highlightMode]);
-  console.log("header Visibility", isHeaderVisible);
   // Keyboard shortcut for focus mode (F)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -237,7 +236,6 @@ export default function PDFViewerPage() {
                         variant="ghost"
                         size="sm"
                         className="flex items-center gap-2 flex-shrink-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 h-7 px-2 rounded-lg backdrop-blur-sm"
-                        onClick={() => console.log("Tools button clicked")}
                       >
                         <Palette size={14} />
                         <span className="hidden sm:inline text-xs font-medium">

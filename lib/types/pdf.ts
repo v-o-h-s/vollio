@@ -67,6 +67,7 @@ export interface Highlight {
   color: string;
   opacity: number;
   pageNumber: number;
+  type: "quick" | "comment" | "note";
   textbounds: TextBounds[];
   createdAt: string;
   updatedAt: string;
