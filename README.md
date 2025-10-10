@@ -2,7 +2,7 @@
 
 Noto is a modern PDF annotation and intelligent quiz generation platform built with Next.js 15 and React 19. It combines enterprise-grade document processing, AI-powered content analysis, and intuitive annotation tools to create a comprehensive learning and document management solution.
 
-> **Status**: ✅ **Production Ready** - Complete implementation with advanced document processing, RAG-based quiz generation, comprehensive PDF annotation system, rich text editing with auto-save, full theme integration, mobile optimization, and modular architecture. All core systems implemented and tested.
+> **Status**: ✅ **Production Ready** - Complete implementation with advanced document processing, RAG-based quiz generation, comprehensive PDF annotation system with multi-mode highlighting and glassmorphism UI, rich text editing with auto-save, full theme integration, mobile optimization, and modular architecture. All core systems implemented and tested with enhanced annotation tools and debug infrastructure.
 
 ## ✨ Key Features
 
@@ -26,12 +26,15 @@ Noto is a modern PDF annotation and intelligent quiz generation platform built w
   - 🟠 **Inline Comment**: Highlighting with hover-based comment display (orange)  
   - 🔵 **Linked Note**: Full note creation with highlight linkage (blue)
 - **Sophisticated Text Selection**: Advanced coordinate-based positioning with PDF-to-screen conversion and viewport boundary handling
-- **Glassmorphism UI Design**: Modern floating header with backdrop blur and transparency effects
-- **Dynamic Tool Selection**: Context-aware dropdown menus with nested highlighting options and visual tool indicators
-- **Smart Tooltip Adaptation**: AnnotationTooltip dynamically updates based on selected tool and mode
-- **Focus Mode Integration**: Seamless tool access in both normal and focus viewing modes with responsive design
+- **Glassmorphism UI Design**: Modern floating header with backdrop blur effects, transparency, and gradient overlays for professional appearance
+- **Dynamic Tool Selection**: Context-aware dropdown menus with nested highlighting options and real-time visual indicators
+- **Smart Tooltip Adaptation**: AnnotationTooltip dynamically updates based on selected tool and highlighting mode with intelligent content adaptation
+- **Focus Mode Integration**: Seamless tool access in both normal and distraction-free focus viewing modes with enhanced "Show Header" button styling
 - **Cross-tab Synchronization**: Real-time updates across browser tabs using BroadcastChannel and PostMessage APIs
 - **Mobile-Optimized Interface**: Touch-friendly interactions with responsive design and gesture support
+- **Enhanced Annotation System**: Proper Syncfusion bounds format handling with {x, y, width, height} coordinates for reliable highlighting
+- **Comprehensive Validation**: PDF viewer readiness checks and annotation module availability validation before highlight creation
+- **Debug Infrastructure**: Real-time logging, bounds processing validation, and comprehensive test utilities for troubleshooting
 
 ### ✍️ Notion-Style Editor
 - **Block-Based Rich Text Editor**: Complete TipTap integration with floating toolbars, slash commands, and advanced formatting

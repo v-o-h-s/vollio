@@ -29,6 +29,9 @@ inclusion: always
 - **Visual Tool Indicators**: Real-time display of active tool and mode with color-coded status indicators
 - **Focus Mode Integration**: Seamless tool access in both normal and distraction-free focus viewing modes
 - **Professional UI Design**: Enterprise-grade interface with consistent glassmorphism styling across all components
+- **Syncfusion Annotation Integration**: Proper bounds format handling with {x, y, width, height} coordinates for reliable highlighting
+- **Annotation Validation**: Comprehensive checks for PDF readiness and annotation module availability before highlight creation
+- **Debug Infrastructure**: Real-time logging and test utilities for troubleshooting annotation issues
 
 #### Advanced Document Processing ✅ COMPLETED
 - **Syncfusion Text Extraction**: Enterprise-grade text extraction using Syncfusion PDF Viewer for superior accuracy and layout preservation

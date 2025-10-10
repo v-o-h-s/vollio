@@ -75,8 +75,20 @@ When text extraction fails:
 - **State Flicker**: Avoid rapid state changes (false→true) that confuse visibility logic
 - **Event Handler Conflicts**: Check for pageClick events interfering with text selection
 - **Debug Patterns**: Use development-only debug panels to track state changes in real-time
+- **Syncfusion Bounds Format**: CRITICAL - Use {x, y, width, height} format, NOT {left, top, width, height}
+- **Annotation Module Readiness**: Always validate pdfViewerRef.current?.annotation exists before calling addAnnotation
+- **Document Loading State**: Check isLoading state before attempting to create annotations
 
 #### PDF Annotation Debugging Checklist
+When highlighting doesn't work:
+1. **Check bounds format**: Ensure using {x, y, width, height} not {left, top, width, height}
+2. **Verify PDF viewer readiness**: Check pdfViewerRef.current?.annotation is available
+3. **Check document loading**: Ensure isLoading is false before creating annotations
+4. **Test with fixed coordinates**: Use test button with known good coordinates
+5. **Console logging**: Check for bounds processing and API call errors
+6. **Page number conversion**: Ensure 0-based pageIndex is converted to 1-based pageNumber
+7. **Annotation module injection**: Verify Annotation service is included in Inject services array
+
 When tooltip doesn't appear on subsequent selections:
 1. Check if showSelectionToolbar state is being cleared unnecessarily
 2. Verify setTimeout delays aren't causing race conditions  
@@ -152,6 +164,48 @@ After any changes, verify these core flows work:
 - **PDF Tooltip State Management**: Avoid clearing showSelectionToolbar state unnecessarily - causes race conditions
 - **React State Race Conditions**: Don't clear state immediately before setting it - use validation first approach
 - **Tooltip Visibility Logic**: Implement proper delayed hide (200ms) but immediate show for floating components
+
+## Syncfusion PDF Annotation Debugging Checklist
+
+When implementing or debugging Syncfusion PDF annotations:
+- ✅ Use correct bounds format: `{x, y, width, height}` NOT `{left, top, width, height}`
+- ✅ Convert 0-based pageIndex to 1-based pageNumber: `pageNumber: pageIndex + 1`
+- ✅ Validate PDF viewer reference exists: `pdfViewerRef.current?.annotation`
+- ✅ Check document loading state: `!isLoading` before creating annotations
+- ✅ Include Annotation service in Inject: `<Inject services={[..., Annotation]} />`
+- ✅ Use simplified annotation settings matching Syncfusion documentation
+- ✅ Add comprehensive logging for bounds processing and API calls
+- ✅ Test with fixed coordinates first using debug test button
+- ❌ Don't use {left, top} format - causes annotation creation failures
+- ❌ Don't attempt annotation creation while PDF is still loading
+- ❌ Don't skip validation of annotation module availability
+
+### Syncfusion Annotation Creation Pattern
+```typescript
+// Correct bounds processing
+const extractSelectionBounds = (args) => {
+  return args.textBounds.map((b) => ({
+    x: b.left || b.x || 0,        // Use x, not left
+    y: b.top || b.y || 0,         // Use y, not top  
+    width: b.width || 0,
+    height: b.height || 0,
+  }));
+};
+
+// Correct annotation creation
+const createHighlight = () => {
+  if (!pdfViewerRef.current?.annotation || isLoading) return;
+  
+  const settings = {
+    bounds: processedBounds,
+    pageNumber: pageIndex + 1,    // Convert to 1-based
+    color: "#FFFF00",
+    opacity: 0.4,
+  };
+  
+  pdfViewerRef.current.annotation.addAnnotation("Highlight", settings);
+};
+```
 
 ## RTK Query Implementation Checklist
 

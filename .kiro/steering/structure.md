@@ -44,7 +44,7 @@ inclusion: always
 - **README.md** - Complete documentation covering theme system features, API reference, and implementation guides
 
 ##### PDF Components (`components/pdf/`) ✅ COMPLETED
-- **PDFAnnotationViewer.tsx** - Main PDF viewer with Syncfusion integration, enhanced coordinate conversion, complete annotation workflow, multi-mode highlighting system, and glassmorphism UI design
+- **PDFAnnotationViewer.tsx** - Main PDF viewer with Syncfusion integration, enhanced coordinate conversion, complete annotation workflow, multi-mode highlighting system, glassmorphism UI design, and proper bounds format handling for reliable highlighting
 - **PDFDirectoryView.tsx** - Comprehensive file system-style PDF management interface with drag & drop support and visual file management
 - **AnnotationTooltip.tsx** - Enhanced text selection UI with sophisticated PDF-to-screen coordinate conversion, viewport boundary detection, dynamic tool adaptation, and smart content updates
 - **NoteCreationModal.tsx** - Large modal for note creation with NotionEditor integration, auto-save, and enhanced layout with selected text reference

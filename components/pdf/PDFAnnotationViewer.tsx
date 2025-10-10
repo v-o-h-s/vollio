@@ -127,8 +127,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   ): any[] => {
     // Syncfusion expects bounds as an array of objects with left, top, width, height
     return args.textBounds.map((b: any) => ({
-      left: b.left || b.x || 0,
-      top: b.top || b.y || 0,
+      x: b.left || b.x || 0,
+      y: b.top || b.y || 0,
       width: b.width || b.right - b.left || 0,
       height: b.height || b.bottom - b.top || 0,
     }));
@@ -162,11 +162,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       setSelectedTextBounds(textBounds as any);
       setCurrentPageNumber(pageNumber);
 
-      console.log("Text selected:", selectedTextContent);
-      console.log("Selected tool:", selectedTool);
-      console.log("Highlight mode:", highlightMode);
-      console.log("Text bounds:", textBounds);
-
       if (selectedTool === "highlight") {
         switch (highlightMode) {
           case "quick":
@@ -190,11 +185,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 isPrint: true,
               };
 
-              console.log(
-                "Creating highlight with options:",
-                annotationOptions
-              );
-
               pdfViewerRef.current?.annotation.addAnnotation(
                 "Highlight",
                 annotationOptions as HighlightSettings
@@ -211,7 +201,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
           case "comment":
             // TODO: Implement comment mode
-            console.log("Comment mode not yet implemented");
+
             break;
 
           case "note":
@@ -353,6 +343,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       // }
     },
     [
+      selectedTool,
+      highlightMode,
       currentPdfData,
       selectionBounds,
       selectedText,

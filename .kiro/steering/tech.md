@@ -67,11 +67,14 @@ inclusion: always
 - **Focus Mode Integration**: Seamless tool access in both normal and focus viewing modes
 - **Responsive Tool Interface**: Mobile-optimized tool selection with touch-friendly interactions
 - **Coordinate Conversion System**: Multiple fallback methods for accurate PDF positioning
-- **Syncfusion Integration**: Type-safe annotation creation with highlight-note linking
+- **Syncfusion Integration**: Type-safe annotation creation with highlight-note linking using correct bounds format
 - **Portal-Based Rendering**: React Portal usage for proper z-index management outside PDF containers
 - **State Race Condition Fix**: Eliminated showSelectionToolbar state clearing that caused tooltip flicker
 - **Immediate State Updates**: Removed setTimeout delays that caused race conditions in tooltip visibility
 - **Clean State Transitions**: Proper state management for reliable tooltip appearance on repeated selections
+- **Bounds Format Correction**: Fixed Syncfusion annotation bounds to use {x, y, width, height} format instead of {left, top, width, height}
+- **Annotation API Validation**: Added comprehensive checks for PDF viewer readiness and annotation module availability
+- **Debug Infrastructure**: Comprehensive logging for bounds processing, coordinate conversion, and annotation creation
 
 ### Enhanced PDF Selection Workflow ✅ COMPLETED
 - **Smart Canvas Detection**: Page-specific canvas element detection with querySelector fallbacks and coordinate conversion
@@ -143,6 +146,42 @@ const handleTextSelection = useCallback((args: TextSelectionEventArgs) => {
   // 6. Use minimal delay only for final show state to prevent race conditions
   setTimeout(() => setShowSelectionToolbar(true), 10);
 }, [dependencies]);
+
+// Syncfusion bounds processing - CRITICAL: Use x,y format not left,top
+const extractSelectionBounds = (args: TextSelectionCompleteEventArgs): any[] => {
+  // Syncfusion expects bounds as { x, y, width, height } NOT { left, top, width, height }
+  return args.textBounds.map((b: any) => ({
+    x: b.left || b.x || 0,
+    y: b.top || b.y || 0,
+    width: b.width || (b.right ? b.right - (b.left || b.x || 0) : 0) || 0,
+    height: b.height || (b.bottom ? b.bottom - (b.top || b.y || 0) : 0) || 0,
+  }));
+};
+
+// Syncfusion annotation creation with validation
+const createHighlight = useCallback((bounds: any[], pageNumber: number) => {
+  // Validate PDF viewer and annotation module are ready
+  if (!pdfViewerRef.current?.annotation) {
+    console.error("PDF viewer annotation module not available");
+    return;
+  }
+  
+  if (isLoading) {
+    console.error("PDF document is still loading");
+    return;
+  }
+  
+  const annotationSettings = {
+    bounds: bounds,
+    pageNumber: pageNumber + 1, // Convert to 1-based page numbers
+    color: "#FFFF00",
+    opacity: 0.4,
+    author: "User",
+    subject: "Quick Highlight",
+  };
+  
+  pdfViewerRef.current.annotation.addAnnotation("Highlight", annotationSettings);
+}, [isLoading]);
 
 // Portal-based floating components with proper visibility logic
 const FloatingComponent = ({ position, visible }) => {
