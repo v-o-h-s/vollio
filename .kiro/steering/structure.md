@@ -44,9 +44,9 @@ inclusion: always
 - **README.md** - Complete documentation covering theme system features, API reference, and implementation guides
 
 ##### PDF Components (`components/pdf/`) ✅ COMPLETED
-- **PDFAnnotationViewer.tsx** - Main PDF viewer with Syncfusion integration, enhanced coordinate conversion, and complete annotation workflow
+- **PDFAnnotationViewer.tsx** - Main PDF viewer with Syncfusion integration, enhanced coordinate conversion, complete annotation workflow, multi-mode highlighting system, and glassmorphism UI design
 - **PDFDirectoryView.tsx** - Comprehensive file system-style PDF management interface with drag & drop support and visual file management
-- **AnnotationTooltip.tsx** - Enhanced text selection UI with sophisticated PDF-to-screen coordinate conversion and viewport boundary detection
+- **AnnotationTooltip.tsx** - Enhanced text selection UI with sophisticated PDF-to-screen coordinate conversion, viewport boundary detection, dynamic tool adaptation, and smart content updates
 - **NoteCreationModal.tsx** - Large modal for note creation with NotionEditor integration, auto-save, and enhanced layout with selected text reference
 - **HighlightHoverToolbar.tsx** - Mini toolbar for existing highlights with "View Note" and "Open" buttons, router navigation integration
 - **NotePreviewModal.tsx** - Read-only note preview modal with TipTap editor for quick viewing without leaving PDF
@@ -60,6 +60,14 @@ inclusion: always
 - **PDFFolder.tsx** - Individual folder display component
 - **AnnotationPreviewCard.tsx** - Hover preview of annotation content with edit functionality
 - **FallbackUI.tsx** - Error state components for PDF operations (TextSelectionFallback, PDFViewerFallback, etc.)
+
+##### PDF Annotation Tools Architecture ✅ COMPLETED
+- **Multi-Mode Highlighting**: Three distinct highlighting modes with color-coded visual feedback and different annotation behaviors
+- **Glassmorphism UI**: Modern floating header with backdrop blur effects, transparency, and gradient overlays for professional appearance
+- **Dynamic Tool Selection**: Context-aware dropdown menus with nested highlighting options and real-time visual indicators
+- **Smart Tooltip System**: AnnotationTooltip component that dynamically adapts content based on selected tool and highlighting mode
+- **Focus Mode Integration**: Seamless tool access in both normal and distraction-free viewing modes with enhanced "Show Header" button styling
+- **State Management**: Proper tool and mode state management with props passing to PDF annotation components
 
 ##### Quiz Components (`components/quiz/`) ✅ COMPLETED
 - **QuizGeneratorInterface.tsx** - Main quiz generation interface with document selection and configuration

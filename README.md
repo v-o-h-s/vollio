@@ -20,12 +20,18 @@ Noto is a modern PDF annotation and intelligent quiz generation platform built w
 - **Background Processing Queue**: Asynchronous document processing with progress tracking and job status monitoring
 - **Multi-Language Support**: Comprehensive language detection and processing for international documents
 
-### 🎯 PDF Annotation System
+### 🎯 Enhanced PDF Annotation System
+- **Multi-Mode Highlighting**: Three distinct highlighting modes with color-coded visual feedback
+  - 🟡 **Quick Highlight**: Instant highlighting without note creation (yellow)
+  - 🟠 **Inline Comment**: Highlighting with hover-based comment display (orange)  
+  - 🔵 **Linked Note**: Full note creation with highlight linkage (blue)
 - **Sophisticated Text Selection**: Advanced coordinate-based positioning with PDF-to-screen conversion and viewport boundary handling
-- **Rich Annotation Workflow**: Text selection → smart tooltip → note creation modal → automatic highlight creation
+- **Glassmorphism UI Design**: Modern floating header with backdrop blur and transparency effects
+- **Dynamic Tool Selection**: Context-aware dropdown menus with nested highlighting options and visual tool indicators
+- **Smart Tooltip Adaptation**: AnnotationTooltip dynamically updates based on selected tool and mode
+- **Focus Mode Integration**: Seamless tool access in both normal and focus viewing modes with responsive design
 - **Cross-tab Synchronization**: Real-time updates across browser tabs using BroadcastChannel and PostMessage APIs
 - **Mobile-Optimized Interface**: Touch-friendly interactions with responsive design and gesture support
-- **Coordinate-Based Precision**: Multiple fallback methods for accurate PDF positioning and annotation placement
 
 ### ✍️ Notion-Style Editor
 - **Block-Based Rich Text Editor**: Complete TipTap integration with floating toolbars, slash commands, and advanced formatting

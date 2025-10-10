@@ -18,6 +18,18 @@ inclusion: always
 - **Coordinate-Based Positioning**: Advanced PDF-to-screen coordinate conversion with canvas detection and viewport boundary handling
 - **Annotation CRUD**: Complete annotation storage in Supabase with automatic RLS protection and note-highlight linking
 
+#### Advanced PDF Annotation Tools ✅ COMPLETED
+- **Multi-Mode Highlighting System**: Professional annotation toolkit with three distinct highlighting modes
+  - 🟡 **Quick Highlight**: Instant text highlighting without note creation for rapid document review
+  - 🟠 **Inline Comment**: Highlighting with contextual comment display on hover for detailed annotations
+  - 🔵 **Linked Note**: Full note creation with highlight linkage for comprehensive document analysis
+- **Glassmorphism Interface**: Modern floating header with backdrop blur effects and transparency for immersive PDF viewing
+- **Dynamic Tool Selection**: Intelligent dropdown menus with nested tool options and visual feedback
+- **Context-Aware Tooltips**: Smart annotation tooltips that adapt based on selected tool and highlighting mode
+- **Visual Tool Indicators**: Real-time display of active tool and mode with color-coded status indicators
+- **Focus Mode Integration**: Seamless tool access in both normal and distraction-free focus viewing modes
+- **Professional UI Design**: Enterprise-grade interface with consistent glassmorphism styling across all components
+
 #### Advanced Document Processing ✅ COMPLETED
 - **Syncfusion Text Extraction**: Enterprise-grade text extraction using Syncfusion PDF Viewer for superior accuracy and layout preservation
 - **OCR Fallback System**: Automatic fallback to node-tesseract-ocr for scanned documents and extraction failures

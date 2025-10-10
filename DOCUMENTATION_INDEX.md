@@ -90,9 +90,10 @@ This document provides organized access to all documentation resources for the N
 
 #### 📄 PDF Management
 - PDF upload and storage system
-- Syncfusion viewer integration
-- Coordinate-based annotation system
-- Text selection and highlighting
+- Syncfusion viewer integration with multi-mode highlighting
+- Coordinate-based annotation system with glassmorphism UI
+- Advanced text selection with dynamic tool adaptation
+- Focus mode integration with enhanced user experience
 - Cross-tab synchronization
 
 #### ✍️ Rich Text Editing

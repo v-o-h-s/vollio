@@ -32,6 +32,10 @@ export interface PDFAnnotationViewerProps {
   pdfDocument: PDFDocument | null;
   /** Additional CSS classes */
   className?: string;
+  /** Currently selected annotation tool */
+  selectedTool: "highlight" | "nothing" | "comment" | "note";
+  /** Current highlight mode when highlight tool is selected */
+  highlightMode?: "quick" | "comment" | "note";
 }
 
 interface TextSelectionCompleteEventArgs {
@@ -48,6 +52,8 @@ interface TextSelectionCompleteEventArgs {
 const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   pdfDocument,
   className = "",
+  selectedTool = "highlight",
+  highlightMode = "quick",
 }) => {
   // Component state
   const [isLoading, setIsLoading] = useState(true);
@@ -270,8 +276,31 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Handle note creation from selection
   const handleCreateNoteFromSelection = useCallback(() => {
     setShowSelectionToolbar(false);
-    setShowNoteModal(true);
-  }, [selectedText, selectionBounds]);
+
+    // Handle different highlight modes
+    if (selectedTool === "highlight") {
+      switch (highlightMode) {
+        case "quick":
+          // Just create a highlight without opening modal
+          handleQuickHighlight();
+          break;
+        case "comment":
+          // Create highlight with inline comment (future implementation)
+          console.log("Inline comment mode - to be implemented");
+          setShowNoteModal(true);
+          break;
+        case "note":
+          // Create highlight with full note
+          setShowNoteModal(true);
+          break;
+        default:
+          setShowNoteModal(true);
+      }
+    } else {
+      // For other tools, open the note modal
+      setShowNoteModal(true);
+    }
+  }, [selectedText, selectionBounds, selectedTool, highlightMode]);
   // Handle closing selection toolbar
   const handleCloseSelectionToolbar = useCallback(() => {
     setShowSelectionToolbar(false);
@@ -279,26 +308,85 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     setSelectionBounds(null);
   }, []);
 
+  // Handle quick highlight (no note modal)
+  const handleQuickHighlight = useCallback(() => {
+    if (pdfViewerRef.current && selectionBounds && selectedText) {
+      try {
+        // Create highlight annotation for quick highlighting
+        const annotationOptions: Partial<HighlightSettings> = {
+          bounds: selectedTextBounds as TextBounds[],
+          pageNumber: currentPageNumber,
+          author: "User",
+          subject: "Quick Highlight",
+          annotationSelectorSettings: {},
+          color: "#FFFF00", // Yellow for quick highlights
+          opacity: 0.4,
+          enableMultiPageAnnotation: false,
+          enableTextMarkupResizer: true,
+          customData: {
+            id: `quick-highlight-${Date.now()}`,
+            type: "quick",
+            text: selectedText,
+          },
+          isLock: false,
+          isPrint: true,
+        };
+
+        pdfViewerRef.current?.annotation.addAnnotation(
+          "Highlight",
+          annotationOptions as HighlightSettings
+        );
+
+        // Clear selection after quick highlight
+        setSelectedText("");
+        setSelectionBounds(null);
+        setSelectedTextBounds(null);
+
+        console.log("Quick highlight created");
+      } catch (error) {
+        console.error("Error creating quick highlight:", error);
+      }
+    }
+  }, [selectionBounds, selectedText, currentPageNumber, selectedTextBounds]);
+
   // Handle note creation completion
   const handleNoteCreated = useCallback(
     async (_noteId: string) => {
       // Create highlight annotation linked to the note
       if (pdfViewerRef.current && selectionBounds && selectedText) {
         try {
-          // Create highlight annotation using a more flexible approach
+          // Determine highlight color based on mode
+          const getHighlightColor = () => {
+            switch (highlightMode) {
+              case "quick":
+                return "#FFFF00"; // Yellow
+              case "comment":
+                return "#FFA500"; // Orange
+              case "note":
+                return "#4A90E2"; // Blue
+              default:
+                return "#FFFF00";
+            }
+          };
+
           const annotationOptions: Partial<HighlightSettings> = {
-            bounds: selectedTextBounds as TextBounds[], // Use the extracted text bounds for accurate highlighting
-            pageNumber: currentPageNumber, // Convert to 1-based page number for Syncfusion
+            bounds: selectedTextBounds as TextBounds[],
+            pageNumber: currentPageNumber,
             author: "User",
-            subject: "Highlight",
+            subject: `${highlightMode} Highlight`,
             annotationSelectorSettings: {},
-            color: "#FFFF00",
+            color: getHighlightColor(),
             opacity: 0.4,
             enableMultiPageAnnotation: false,
             enableTextMarkupResizer: true,
-            customData: { id: "highlight-123", note: "Important point" },
-            isLock: true,
-            isPrint: false,
+            customData: {
+              id: `highlight-${_noteId}`,
+              noteId: _noteId,
+              type: highlightMode,
+              text: selectedText,
+            },
+            isLock: false,
+            isPrint: true,
           };
           // Cast to any to bypass TypeScript strictness for minimal working solution
 
@@ -320,7 +408,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       // setSelectedText("");
       // setSelectionBounds(null);
     },
-    [selectionBounds, selectedText, currentPageNumber, selectedTextBounds]
+    [
+      selectionBounds,
+      selectedText,
+      currentPageNumber,
+      selectedTextBounds,
+      highlightMode,
+    ]
   );
 
   // Handle modal close without creating note
@@ -546,6 +640,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           position={tooltipPosition}
           onCreateNote={handleCreateNoteFromSelection}
           onClose={handleCloseSelectionToolbar}
+          selectedTool={selectedTool}
+          highlightMode={highlightMode}
         />
 
         {/* Note Creation Modal */}

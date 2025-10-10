@@ -24,7 +24,7 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, Highlighter, MessageSquare, FileEdit } from "lucide-react";
 
 /**
  * Props interface for AnnotationTooltip component
@@ -38,6 +38,10 @@ interface AnnotationTooltipProps {
   onCreateNote: () => void;
   /** Callback fired when tooltip should be closed */
   onClose: () => void;
+  /** Currently selected tool */
+  selectedTool?: string;
+  /** Current highlight mode when highlight tool is selected */
+  highlightMode?: "quick" | "comment" | "note";
 }
 
 /**
@@ -49,10 +53,55 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
   visible,
   onCreateNote,
   onClose,
+  selectedTool = "highlight",
+  highlightMode = "quick",
 }) => {
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [adjustedPosition, setAdjustedPosition] = useState(position);
   const [isDelayedVisible, setIsDelayedVisible] = useState(false);
+
+  // Helper functions to determine action based on selected tool and mode
+  const getActionIcon = () => {
+    if (selectedTool === "highlight") {
+      const colorClass = 
+        highlightMode === "quick" ? "text-yellow-500" :
+        highlightMode === "comment" ? "text-orange-500" : "text-blue-500";
+      return <Highlighter className={colorClass} />;
+    } else if (selectedTool === "comment") {
+      return <MessageSquare className="text-green-500" />;
+    } else if (selectedTool === "note") {
+      return <FileEdit className="text-purple-500" />;
+    }
+    return <PlusIcon className="text-muted-foreground" />;
+  };
+
+  const getActionText = () => {
+    if (selectedTool === "highlight") {
+      switch (highlightMode) {
+        case "quick": return "Quick Highlight";
+        case "comment": return "Add Comment";
+        case "note": return "Create Note";
+        default: return "Highlight";
+      }
+    } else if (selectedTool === "comment") {
+      return "Add Comment";
+    } else if (selectedTool === "note") {
+      return "Create Note";
+    }
+    return "Create Note";
+  };
+
+  const getActionDescription = () => {
+    if (selectedTool === "highlight") {
+      switch (highlightMode) {
+        case "quick": return "Just highlight, no note";
+        case "comment": return "Add inline comment";
+        case "note": return "Create full note";
+        default: return null;
+      }
+    }
+    return null;
+  };
 
   // Reset adjusted position when position prop changes
   useEffect(() => {
@@ -193,10 +242,10 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
                     relative
                 "
       >
-        {/* shadcn-style menu item */}
+        {/* Dynamic menu item based on selected tool and mode */}
         <div
           onClick={(e) => {
-            console.log("Create note button clicked");
+            console.log(`${getActionText()} button clicked`);
             e.preventDefault();
             e.stopPropagation();
             onCreateNote();
@@ -212,7 +261,7 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
                     "
           role="menuitem"
           tabIndex={0}
-          aria-label="Create annotation note from selected text"
+          aria-label={`${getActionText()} from selected text`}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
@@ -220,8 +269,13 @@ const AnnotationTooltip: React.FC<AnnotationTooltipProps> = ({
             }
           }}
         >
-          <PlusIcon className="text-muted-foreground" />
-          <span className="font-medium">Create note</span>
+          {getActionIcon()}
+          <div className="flex flex-col">
+            <span className="font-medium">{getActionText()}</span>
+            {getActionDescription() && (
+              <span className="text-xs text-muted-foreground">{getActionDescription()}</span>
+            )}
+          </div>
         </div>
       </div>
     </div>
