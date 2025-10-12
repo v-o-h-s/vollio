@@ -13,7 +13,12 @@ import {
   Print,
   Annotation,
 } from "@syncfusion/ej2-react-pdfviewer";
-import { useGetPDFQuery } from "@/lib/store/apiSlice";
+import {
+  useGetPDFQuery,
+  useCreateHighlightMutation,
+  useGetPDFHighlightsQuery,
+} from "@/lib/store/apiSlice";
+import toast from "react-hot-toast";
 import { PDFDocument, TextBounds } from "@/lib/types/pdf";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PDFViewerFallback } from "@/components/pdf/FallbackUI";
@@ -68,6 +73,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Component state
   const [isLoading, setIsLoading] = useState(true);
   const [annotationsLoaded, setAnnotationsLoaded] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   // Text selection and toolbar state
   const [selectedText, setSelectedText] = useState<string>("");
@@ -115,6 +121,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Use fresh PDF data if available, otherwise use prop data
   const currentPdfData = freshPdfData || pdfDocument;
 
+  // Highlight API hooks
+  const [createHighlight] = useCreateHighlightMutation();
+  const { data: highlightsData } = useGetPDFHighlightsQuery(
+    { pdfId: pdfDocument?.id || "" },
+    { skip: !pdfDocument?.id }
+  );
+
   // Configure resource URL for Syncfusion PDF Viewer
   const resourceUrl =
     typeof window !== "undefined"
@@ -125,18 +138,18 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   const extractSelectionBounds = (
     args: TextSelectionCompleteEventArgs
   ): any[] => {
-    // Syncfusion expects bounds as an array of objects with left, top, width, height
+    // Syncfusion expects bounds as an array of objects with x, y, width, height
     return args.textBounds.map((b: any) => ({
       x: b.left || b.x || 0,
       y: b.top || b.y || 0,
-      width: b.width || b.right - b.left || 0,
-      height: b.height || b.bottom - b.top || 0,
+      width: b.width || (b.right ? b.right - (b.left || b.x || 0) : 0) || 0,
+      height: b.height || (b.bottom ? b.bottom - (b.top || b.y || 0) : 0) || 0,
     }));
   };
 
   /* Text Selection Handlers */
   const handleSelectionTextEnd = useCallback(
-    (args: TextSelectionCompleteEventArgs) => {
+    async (args: TextSelectionCompleteEventArgs) => {
       // Validate input parameters first
       if (!args || !args.textContent || !args.textContent.trim()) {
         return;
@@ -155,41 +168,55 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       // Extract text bounds from the selection event
       const textBounds = extractSelectionBounds(args);
       const selectedTextContent = args.textContent.trim();
-      const pageNumber = args.pageIndex
+      const pageNumber = args.pageIndex;
 
       // Store selection data
       setSelectedText(selectedTextContent);
-      setSelectedTextBounds(textBounds as any);
+      setSelectedTextBounds(textBounds);
       setCurrentPageNumber(pageNumber);
 
       if (selectedTool === "highlight") {
         switch (highlightMode) {
           case "quick":
             try {
-              console.log(pageNumber);
+              console.log("Creating quick highlight on page:", pageNumber);
+
+              // Create Syncfusion annotation first
               const annotationOptions: Partial<HighlightSettings> = {
                 bounds: textBounds,
                 pageNumber: pageNumber, // Syncfusion uses 1-based page numbers
                 author: "User",
                 subject: "Quick Highlight",
-                annotationSelectorSettings: {},
                 color: "#FFFF00", // Yellow for quick highlights
                 opacity: 0.4,
-                enableMultiPageAnnotation: false,
-                enableTextMarkupResizer: true,
                 customData: {
                   id: `quick-highlight-${Date.now()}`,
                   type: "quick",
                   text: selectedTextContent,
                 },
-                isLock: false,
-                isPrint: true,
               };
 
-              pdfViewerRef.current?.annotation.addAnnotation(
-                "Highlight",
-                annotationOptions as HighlightSettings
-              );
+              if (pdfViewerRef.current?.annotation) {
+                pdfViewerRef.current?.annotation.addAnnotation(
+                  "Highlight",
+                  annotationOptions as HighlightSettings
+                );
+
+                console.log("Syncfusion highlight created successfully");
+              }
+
+              // Save to database
+              if (currentPdfData?.id) {
+                await createHighlight({
+                  pdfId: currentPdfData.id,
+                  content: selectedTextContent,
+                  color: "#FFFF00",
+                  opacity: 0.4,
+                  pageNumber: pageNumber + 1,
+                  type: "quick",
+                  textbounds: textBounds,
+                }).unwrap();
+              }
 
               // Clear selection after quick highlight
               setSelectedText("");
@@ -201,12 +228,59 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             break;
 
           case "comment":
-            // TODO: Implement comment mode
+            try {
+              console.log("Creating comment highlight on page:", pageNumber);
 
+              // Create Syncfusion annotation
+              const annotationOptions: Partial<HighlightSettings> = {
+                bounds: textBounds,
+                pageNumber: pageNumber + 1,
+                author: "User",
+                subject: "Comment Highlight",
+                color: "#FFA500", // Orange for comments
+                opacity: 0.4,
+                customData: {
+                  id: `comment-highlight-${Date.now()}`,
+                  type: "comment",
+                  text: selectedTextContent,
+                },
+              };
+
+              if (pdfViewerRef.current?.annotation) {
+                pdfViewerRef.current.annotation.addAnnotation(
+                  "Highlight",
+                  annotationOptions as HighlightSettings
+                );
+                console.log(
+                  "Syncfusion comment highlight created successfully"
+                );
+              }
+
+              // Save to database
+              if (currentPdfData?.id) {
+                await createHighlight({
+                  pdfId: currentPdfData.id,
+                  content: selectedTextContent,
+                  color: "#FFA500",
+                  opacity: 0.4,
+                  pageNumber: pageNumber + 1,
+                  type: "comment",
+                  textbounds: textBounds,
+                }).unwrap();
+                console.log("Comment highlight saved to database successfully");
+              }
+
+              // Clear selection after comment highlight
+              setSelectedText("");
+              setSelectionBounds(null);
+              setSelectedTextBounds(null);
+            } catch (error) {
+              console.error("Error creating comment highlight:", error);
+            }
             break;
 
           case "note":
-            // Store selection data for note creation
+            // Store selection data for note creation modal
             setShowNoteModal(true);
             break;
 
@@ -356,69 +430,66 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Handle note creation completion
   const handleNoteCreated = useCallback(
-    async (_noteId: string) => {
+    async (noteId: string) => {
       // Create highlight annotation linked to the note
-      if (pdfViewerRef.current && selectionBounds && selectedText) {
+      if (
+        pdfViewerRef.current &&
+        selectedTextBounds &&
+        selectedText &&
+        currentPdfData?.id
+      ) {
         try {
-          // Determine highlight color based on mode
-          const getHighlightColor = () => {
-            switch (highlightMode) {
-              case "quick":
-                return "#FFFF00"; // Yellow
-              case "comment":
-                return "#FFA500"; // Orange
-              case "note":
-                return "#4A90E2"; // Blue
-              default:
-                return "#FFFF00";
-            }
-          };
-
+          // Create Syncfusion annotation
           const annotationOptions: Partial<HighlightSettings> = {
-            bounds: selectedTextBounds as TextBounds[],
-            pageNumber: currentPageNumber,
+            bounds: selectedTextBounds,
+            pageNumber: currentPageNumber + 1, // Syncfusion uses 1-based page numbers
             author: "User",
-            subject: `${highlightMode} Highlight`,
-            annotationSelectorSettings: {},
-            color: getHighlightColor(),
+            subject: "Note Highlight",
+            color: "#4A90E2", // Blue for note highlights
             opacity: 0.4,
-            enableMultiPageAnnotation: false,
-            enableTextMarkupResizer: true,
             customData: {
-              id: `highlight-${_noteId}`,
-              noteId: _noteId,
-              type: highlightMode,
+              id: `note-highlight-${noteId}`,
+              noteId: noteId,
+              type: "note",
               text: selectedText,
             },
-            isLock: false,
-            isPrint: true,
           };
-          // Cast to any to bypass TypeScript strictness for minimal working solution
 
-          // Cast to any to bypass TypeScript strictness for minimal working solution
-          pdfViewerRef.current?.annotation.addAnnotation(
+          pdfViewerRef.current.annotation.addAnnotation(
             "Highlight",
             annotationOptions as HighlightSettings
           );
+          console.log("Syncfusion note highlight created successfully");
 
-          // TODO: Create annotation record in database with note linkage
-          // This should be done via API call to store the relationship
+          // Save highlight to database with note linkage
+          await createHighlight({
+            pdfId: currentPdfData.id,
+            content: selectedText,
+            color: "#4A90E2",
+            opacity: 0.4,
+            pageNumber: currentPageNumber + 1,
+            type: "note",
+            textbounds: selectedTextBounds,
+            noteId: noteId, // Link to the created note
+          }).unwrap();
+          console.log("Note highlight saved to database successfully");
+
+          // Clear selection after creating note highlight
+          setSelectedText("");
+          setSelectionBounds(null);
+          setSelectedTextBounds(null);
+          setShowNoteModal(false);
         } catch (error) {
-          console.error("Error creating highlight:", error);
+          console.error("Error creating note highlight:", error);
         }
       }
-
-      // DON'T close modal automatically - let user control when to close
-      // setShowNoteModal(false);
-      // setSelectedText("");
-      // setSelectionBounds(null);
     },
     [
-      selectionBounds,
       selectedText,
       currentPageNumber,
       selectedTextBounds,
-      highlightMode,
+      currentPdfData?.id,
+      createHighlight,
     ]
   );
 
@@ -466,11 +537,62 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     setPreviewNoteId(null);
   }, []);
   /**
+   * Load existing highlights from database
+   */
+  const loadExistingHighlights = useCallback(async () => {
+    if (!pdfViewerRef.current?.annotation || !highlightsData?.highlights) {
+      return;
+    }
+
+    try {
+      console.log(
+        "Loading existing highlights:",
+        highlightsData.highlights.length
+      );
+
+      for (const highlight of highlightsData.highlights) {
+        const annotationOptions: Partial<HighlightSettings> = {
+          bounds: highlight.textbounds,
+          pageNumber: highlight.pageNumber,
+          author: "User",
+          subject: `${highlight.type} Highlight`,
+          color: highlight.color,
+          opacity: highlight.opacity,
+          customData: {
+            id: `existing-highlight-${highlight.id}`,
+            highlightId: highlight.id,
+            noteId: highlight.noteId,
+            type: highlight.type,
+            text: highlight.content,
+          },
+        };
+
+        pdfViewerRef.current.annotation.addAnnotation(
+          "Highlight",
+          annotationOptions as HighlightSettings
+        );
+      }
+
+      setAnnotationsLoaded(true);
+      console.log("All existing highlights loaded successfully");
+    } catch (error) {
+      console.error("Error loading existiing highlights:", error);
+    }
+  }, [highlightsData]);
+
+  /**
    * Handle PDF document loading
    */
-  const handleDocumentLoad = useCallback(async (_args?: any) => {
-    setIsLoading(false);
-  }, []);
+  const handleDocumentLoad = useCallback(
+    async (_args?: any) => {
+      setIsLoading(false);
+      // Load existing highlights after PDF is loaded
+      setTimeout(() => {
+        loadExistingHighlights();
+      }, 1000); // Small delay to ensure PDF is fully rendered
+    },
+    [loadExistingHighlights]
+  );
 
   /**
    * Handle PDF loading errors
@@ -613,18 +735,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             ]}
           />
         </PdfViewerComponent>
-
-        {/* Annotations Loaded Indicator */}
-        {annotationsLoaded && (
-          <div className="absolute bottom-4 right-4 z-40 bg-green-100 text-green-800 px-3 py-2 rounded-lg shadow-lg border border-green-200">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm font-medium">
-                Saved highlights loaded
-              </span>
-            </div>
-          </div>
-        )}
 
         {/* Loading Overlay */}
         {isLoading && (

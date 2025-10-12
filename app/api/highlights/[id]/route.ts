@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import { z } from "zod";
-import type { TextBounds } from "@/lib/types";
 
 // Route parameter types
 interface RouteParams {
@@ -20,7 +19,22 @@ const updateHighlightSchema = z.object({
   title: z.string().optional(),
   color: z.string().optional(),
   opacity: z.number().min(0).max(1).optional(),
+  type: z.enum(["quick", "comment", "note"]).optional(),
   noteId: z.string().uuid().optional()
+}).refine((data) => {
+  // Only validate noteId constraint if type is being updated
+  if (data.type) {
+    if (data.type === "note" && !data.noteId) {
+      return false;
+    }
+    if ((data.type === "quick" || data.type === "comment") && data.noteId) {
+      return false;
+    }
+  }
+  return true;
+}, {
+  message: "Note type highlights require noteId, quick and comment types should not have noteId",
+  path: ["noteId"]
 });
 
 // GET /api/highlights/[id] - Get specific highlight

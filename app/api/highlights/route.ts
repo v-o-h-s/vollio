@@ -22,25 +22,34 @@ const createHighlightSchema = z.object({
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default("#FFFF00"),
   opacity: z.number().min(0.1).max(1.0).default(0.4),
   pageNumber: z.number().int().min(1),
+  type: z.enum(["quick", "comment", "note"]).default("quick"),
   textbounds: z.array(z.object({
     x: z.number(),
     y: z.number(),
     width: z.number(),
     height: z.number()
   })).min(1)
+}).refine((data) => {
+  // Only "note" type requires noteId
+  if (data.type === "note" && !data.noteId) {
+    return false;
+  }
+  // "quick" and "comment" types should not have noteId
+  if ((data.type === "quick" || data.type === "comment") && data.noteId) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Note type highlights require noteId, quick and comment types should not have noteId",
+  path: ["noteId"]
 });
-
-// Validation schema for highlight updates
-const updateHighlightSchema = createHighlightSchema.partial().omit({
-  pdfId: true, // PDF ID cannot be changed
-});
-
 /**
  * GET /api/highlights
  * Retrieves highlights for the authenticated user
  * Query parameters:
  * - pdfId: Filter by PDF ID (optional)
  * - noteId: Filter by note ID (optional)
+ * - type: Filter by highlight type - 'quick', 'comment', or 'note' (optional)
  * - page: Page number for pagination (optional)
  * - limit: Number of highlights per page (optional, max 100)
  */
@@ -57,6 +66,7 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
   const pdfId = searchParams.get("pdfId");
   const noteId = searchParams.get("noteId");
+  const type = searchParams.get("type");
   const page = parseInt(searchParams.get("page") || "1");
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
   const offset = (page - 1) * limit;
@@ -93,6 +103,17 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
     query = query.eq("note_id", noteId);
   }
 
+  if (type) {
+    // Validate type format
+    if (!z.enum(["quick", "comment", "note"]).safeParse(type).success) {
+      return NextResponse.json(
+        { error: "Invalid type. Must be 'quick', 'comment', or 'note'" },
+        { status: 400 }
+      );
+    }
+    query = query.eq("type", type);
+  }
+
   const { data: highlights, error } = await query;
 
   if (error) {
@@ -114,6 +135,9 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
   }
   if (noteId) {
     countQuery = countQuery.eq("note_id", noteId);
+  }
+  if (type) {
+    countQuery = countQuery.eq("type", type);
   }
 
   const { count, error: countError } = await countQuery;
@@ -232,6 +256,7 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       color: validatedData.color,
       opacity: validatedData.opacity,
       page_number: validatedData.pageNumber,
+      type: validatedData.type,
       textbounds: validatedData.textbounds,
     })
     .select()
