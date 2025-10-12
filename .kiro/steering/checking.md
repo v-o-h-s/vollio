@@ -78,6 +78,9 @@ When text extraction fails:
 - **Syncfusion Bounds Format**: CRITICAL - Use {x, y, width, height} format, NOT {left, top, width, height}
 - **Annotation Module Readiness**: Always validate pdfViewerRef.current?.annotation exists before calling addAnnotation
 - **Document Loading State**: Check isLoading state before attempting to create annotations
+- **Highlight Context Menu**: Ensure HighlightContextMenu and HighlightHoverTrigger are properly positioned using React Portals
+- **RTK Query Mutations**: Use proper error handling for highlight update/delete operations with toast notifications
+- **Color/Opacity Updates**: Validate color hex codes and opacity ranges (0.1-1.0) before API calls
 
 #### PDF Annotation Debugging Checklist
 When highlighting doesn't work:
@@ -256,3 +259,18 @@ When implementing or debugging RAG-based quiz generation:
 - ❌ Avoid blocking UI during RAG processing operations - use background processing
 - ❌ Don't skip validation of document processing status before RAG generation
 - ❌ Avoid RAG operations without proper user authentication and document access verification
+
+## Highlight Management Implementation Checklist
+
+When implementing or debugging highlight management features:
+- ✅ Use `HighlightHoverTrigger` component for hover-based context menu activation
+- ✅ Implement `HighlightContextMenu` with proper color picker and opacity slider
+- ✅ Use RTK Query mutations (`useUpdateHighlightMutation`, `useDeleteHighlightMutation`) for all operations
+- ✅ Validate color values as hex codes and opacity as decimal (0.1-1.0)
+- ✅ Use React Portals for proper z-index management of floating menus
+- ✅ Implement proper error handling with toast notifications for user feedback
+- ✅ Position floating components using transform: translate for precise placement
+- ✅ Handle loading states during highlight operations with disabled UI elements
+- ❌ Avoid direct DOM manipulation - use React state and props for all interactions
+- ❌ Don't skip validation of highlight existence before showing context menus
+- ❌ Avoid hardcoded positioning - use dynamic calculation based on highlight bounds

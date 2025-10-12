@@ -49,6 +49,8 @@ inclusion: always
 - **AnnotationTooltip.tsx** - Enhanced text selection UI with sophisticated PDF-to-screen coordinate conversion, viewport boundary detection, dynamic tool adaptation, and smart content updates
 - **NoteCreationModal.tsx** - Large modal for note creation with NotionEditor integration, auto-save, and enhanced layout with selected text reference
 - **HighlightHoverToolbar.tsx** - Mini toolbar for existing highlights with "View Note" and "Open" buttons, router navigation integration
+- **HighlightHoverTrigger.tsx** - Small trigger button that appears when hovering over highlighted text, initiating context menu interactions
+- **HighlightContextMenu.tsx** - Advanced dropdown menu for highlight management with color picker, opacity slider, and deletion options
 - **NotePreviewModal.tsx** - Read-only note preview modal with TipTap editor for quick viewing without leaving PDF
 - **PDFUploadZone.tsx** - Drag and drop upload interface with visual feedback and folder context
 - **PDFThumbnail.tsx** - PDF thumbnail generation and display with caching

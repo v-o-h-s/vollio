@@ -60,6 +60,12 @@ inclusion: always
   - 🟡 **Quick Highlight**: Instant highlighting without note creation (yellow)
   - 🟠 **Inline Comment**: Highlighting with hover-based comment display (orange)
   - 🔵 **Linked Note**: Full note creation with highlight linkage (blue)
+- **Advanced Highlight Management**: Complete highlight lifecycle with interactive management tools
+  - **HighlightHoverTrigger**: Small trigger button appearing on highlight hover for context menu access
+  - **HighlightContextMenu**: Comprehensive dropdown menu with color picker, opacity slider, and deletion
+  - **Color Customization**: 8 predefined colors (Yellow, Orange, Pink, Green, Blue, Purple, Red, Cyan)
+  - **Opacity Control**: Real-time opacity adjustment from 10% to 100% with visual feedback
+  - **RTK Query Integration**: All highlight operations use proper API mutations with error handling
 - **Glassmorphism UI Design**: Modern floating header with backdrop blur and transparency effects
 - **Dynamic Tool Selection**: Context-aware dropdown menus with nested highlighting options
 - **Visual Tool Indicators**: Real-time display of selected tool and mode with color-coded status

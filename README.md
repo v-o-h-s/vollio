@@ -25,6 +25,11 @@ Noto is a modern PDF annotation and intelligent quiz generation platform built w
   - 🟡 **Quick Highlight**: Instant highlighting without note creation (yellow)
   - 🟠 **Inline Comment**: Highlighting with hover-based comment display (orange)  
   - 🔵 **Linked Note**: Full note creation with highlight linkage (blue)
+- **Advanced Highlight Management**: Complete highlight lifecycle management with HighlightContextMenu and HighlightHoverTrigger
+  - **Color Customization**: 8 predefined colors with visual color picker interface
+  - **Opacity Control**: Adjustable opacity from 10% to 100% with real-time slider feedback
+  - **Highlight Deletion**: Safe highlight removal with confirmation and proper cleanup
+  - **Hover Interactions**: Smart hover triggers that appear on highlight mouseover
 - **Sophisticated Text Selection**: Advanced coordinate-based positioning with PDF-to-screen conversion and viewport boundary handling
 - **Glassmorphism UI Design**: Modern floating header with backdrop blur effects, transparency, and gradient overlays for professional appearance
 - **Dynamic Tool Selection**: Context-aware dropdown menus with nested highlighting options and real-time visual indicators
@@ -35,6 +40,7 @@ Noto is a modern PDF annotation and intelligent quiz generation platform built w
 - **Enhanced Annotation System**: Proper Syncfusion bounds format handling with {x, y, width, height} coordinates for reliable highlighting
 - **Comprehensive Validation**: PDF viewer readiness checks and annotation module availability validation before highlight creation
 - **Debug Infrastructure**: Real-time logging, bounds processing validation, and comprehensive test utilities for troubleshooting
+- **Portal-Based Rendering**: React Portal usage for proper z-index management and floating component positioning
 
 ### ✍️ Notion-Style Editor
 - **Block-Based Rich Text Editor**: Complete TipTap integration with floating toolbars, slash commands, and advanced formatting

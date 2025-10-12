@@ -63,6 +63,7 @@ The main PDF viewer component with complete Syncfusion integration and advanced 
 
 **Enhanced Features:**
 - **Multi-Mode Highlighting**: Support for all three highlighting modes with visual feedback
+- **Advanced Highlight Management**: Complete highlight lifecycle with HighlightContextMenu and HighlightHoverTrigger
 - **Coordinate Conversion**: Sophisticated PDF-to-screen coordinate mapping with canvas detection
 - **Smart Text Selection**: Advanced text selection handling with viewport boundary detection
 - **Tool Integration**: Seamless integration with dynamic tool selection and mode switching
@@ -70,6 +71,7 @@ The main PDF viewer component with complete Syncfusion integration and advanced 
 - **Cross-tab Sync**: Real-time annotation synchronization across browser tabs
 - **Syncfusion Integration**: Proper bounds format handling with {x, y, width, height} coordinates
 - **Annotation Validation**: Comprehensive checks for PDF readiness and annotation module availability
+- **Portal-Based Rendering**: React Portal usage for proper z-index management and floating component positioning
 
 **Usage:**
 ```tsx

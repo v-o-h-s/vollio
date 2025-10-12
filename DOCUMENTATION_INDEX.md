@@ -178,6 +178,10 @@ Welcome to the comprehensive documentation for Noto, the AI-powered PDF annotati
 - ✅ **User Guides**: Complete user workflows and feature documentation
 
 ### Recent Updates
+- **December 2025**: Comprehensive steering files and documentation update
+  - **Advanced Highlight Management**: HighlightContextMenu and HighlightHoverTrigger integration
+  - **Supabase Helpers**: Complete documentation of database utility functions
+  - **Technical Guidelines**: Updated with latest highlight management patterns
 - **January 2025**: Complete documentation refresh and reorganization
 - **Component READMEs**: Updated all component documentation with current features
 - **API Reference**: Enhanced API documentation with comprehensive examples

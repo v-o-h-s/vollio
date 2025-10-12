@@ -23,6 +23,11 @@ inclusion: always
   - 🟡 **Quick Highlight**: Instant text highlighting without note creation for rapid document review
   - 🟠 **Inline Comment**: Highlighting with contextual comment display on hover for detailed annotations
   - 🔵 **Linked Note**: Full note creation with highlight linkage for comprehensive document analysis
+- **Advanced Highlight Management**: Complete highlight lifecycle management with HighlightContextMenu and HighlightHoverTrigger
+  - **Color Customization**: 8 predefined colors with visual color picker interface
+  - **Opacity Control**: Adjustable opacity from 10% to 100% with real-time slider feedback
+  - **Highlight Deletion**: Safe highlight removal with confirmation and proper cleanup
+  - **Hover Interactions**: Smart hover triggers that appear on highlight mouseover
 - **Glassmorphism Interface**: Modern floating header with backdrop blur effects and transparency for immersive PDF viewing
 - **Dynamic Tool Selection**: Intelligent dropdown menus with nested tool options and visual feedback
 - **Context-Aware Tooltips**: Smart annotation tooltips that adapt based on selected tool and highlighting mode
@@ -32,6 +37,7 @@ inclusion: always
 - **Syncfusion Annotation Integration**: Proper bounds format handling with {x, y, width, height} coordinates for reliable highlighting
 - **Annotation Validation**: Comprehensive checks for PDF readiness and annotation module availability before highlight creation
 - **Debug Infrastructure**: Real-time logging and test utilities for troubleshooting annotation issues
+- **Portal-Based Rendering**: React Portal usage for proper z-index management and floating component positioning
 
 #### Advanced Document Processing ✅ COMPLETED
 - **Syncfusion Text Extraction**: Enterprise-grade text extraction using Syncfusion PDF Viewer for superior accuracy and layout preservation
