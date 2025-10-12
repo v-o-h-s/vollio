@@ -73,7 +73,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Component state
   const [isLoading, setIsLoading] = useState(true);
   const [annotationsLoaded, setAnnotationsLoaded] = useState(false);
-  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   // Text selection and toolbar state
   const [selectedText, setSelectedText] = useState<string>("");
@@ -84,10 +83,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     null
   );
   const [showNoteModal, setShowNoteModal] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState<{
-    x: number;
-    y: number;
-  }>({ x: 0, y: 0 });
   const [currentPageNumber, setCurrentPageNumber] = useState<number>(0);
 
   // Highlight hover state
@@ -147,6 +142,40 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     }));
   };
 
+  /**
+   * Check if PDF viewer is fully initialized and ready for annotations
+   */
+  const isPdfViewerReady = useCallback((): boolean => {
+    // pls consider adding condition in the future if you add more features to the pdf like zooming or anything
+    if (!pdfViewerRef.current) return false;
+
+    try {
+      // Check if the viewer has essential properties initialized
+      const viewer = pdfViewerRef.current;
+      const viewerBase = (viewer as any).pdfViewerBase;
+
+      // Check if viewer base exists and has essential properties
+      if (!viewerBase) return false;
+
+      // Check if zoom factor is initialized (this is what was causing the error)
+      if (typeof viewerBase.getZoomFactor !== "function") return false;
+
+      // Try to get zoom factor - if it throws, viewer isn't ready
+      const zoomFactor = viewerBase.getZoomFactor();
+      if (typeof zoomFactor !== "number" || zoomFactor <= 0) return false;
+
+      // Check if annotation module is available
+      if (!viewer.annotation) return false;
+
+      return true;
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log("PDF viewer not ready yet:", error.message);
+      }
+      return false;
+    }
+  }, []);
+
   /* Text Selection Handlers */
   const handleSelectionTextEnd = useCallback(
     async (args: TextSelectionCompleteEventArgs) => {
@@ -181,10 +210,19 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             try {
               console.log("Creating quick highlight on page:", pageNumber);
 
+              // Check if PDF viewer is ready before creating annotation
+              if (!isPdfViewerReady()) {
+                console.error("PDF viewer not ready for annotation creation");
+                toast.error(
+                  "PDF viewer is still loading. Please try again in a moment."
+                );
+                return;
+              }
+
               // Create Syncfusion annotation first
               const annotationOptions: Partial<HighlightSettings> = {
                 bounds: textBounds,
-                pageNumber: pageNumber, // Syncfusion uses 1-based page numbers
+                pageNumber: pageNumber + 1, // Syncfusion uses 1-based page numbers
                 author: "User",
                 subject: "Quick Highlight",
                 color: "#FFFF00", // Yellow for quick highlights
@@ -196,14 +234,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 },
               };
 
-              if (pdfViewerRef.current?.annotation) {
-                pdfViewerRef.current?.annotation.addAnnotation(
-                  "Highlight",
-                  annotationOptions as HighlightSettings
-                );
+              pdfViewerRef.current!.annotation.addAnnotation(
+                "Highlight",
+                annotationOptions as HighlightSettings
+              );
 
-                console.log("Syncfusion highlight created successfully");
-              }
+              console.log("Syncfusion highlight created successfully");
 
               // Save to database
               if (currentPdfData?.id) {
@@ -216,6 +252,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                   type: "quick",
                   textbounds: textBounds,
                 }).unwrap();
+
+                toast.success("Quick highlight created");
               }
 
               // Clear selection after quick highlight
@@ -224,12 +262,22 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               setSelectedTextBounds(null);
             } catch (error) {
               console.error("Error creating quick highlight:", error);
+              toast.error("Failed to create highlight. Please try again.");
             }
             break;
 
           case "comment":
             try {
               console.log("Creating comment highlight on page:", pageNumber);
+
+              // Check if PDF viewer is ready before creating annotation
+              if (!isPdfViewerReady()) {
+                console.error("PDF viewer not ready for annotation creation");
+                toast.error(
+                  "PDF viewer is still loading. Please try again in a moment."
+                );
+                return;
+              }
 
               // Create Syncfusion annotation
               const annotationOptions: Partial<HighlightSettings> = {
@@ -246,15 +294,11 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 },
               };
 
-              if (pdfViewerRef.current?.annotation) {
-                pdfViewerRef.current.annotation.addAnnotation(
-                  "Highlight",
-                  annotationOptions as HighlightSettings
-                );
-                console.log(
-                  "Syncfusion comment highlight created successfully"
-                );
-              }
+              pdfViewerRef.current!.annotation.addAnnotation(
+                "Highlight",
+                annotationOptions as HighlightSettings
+              );
+              console.log("Syncfusion comment highlight created successfully");
 
               // Save to database
               if (currentPdfData?.id) {
@@ -268,6 +312,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                   textbounds: textBounds,
                 }).unwrap();
                 console.log("Comment highlight saved to database successfully");
+                toast.success("Comment highlight created");
               }
 
               // Clear selection after comment highlight
@@ -276,6 +321,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               setSelectedTextBounds(null);
             } catch (error) {
               console.error("Error creating comment highlight:", error);
+              toast.error(
+                "Failed to create comment highlight. Please try again."
+              );
             }
             break;
 
@@ -288,134 +336,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             console.warn("Unknown highlight mode:", highlightMode);
         }
       }
-
-      // try {
-      //   // Validate input parameters first before resetting any state
-      //   if (
-      //     !currentPdfData ||
-      //     !args ||
-      //     !args.textContent ||
-      //     !args.textContent.trim()
-      //   ) {
-      //     return;
-      //   }
-
-      //   // Validate textBounds array
-      //   if (
-      //     !args.textBounds ||
-      //     !Array.isArray(args.textBounds) ||
-      //     args.textBounds.length === 0
-      //   ) {
-      //     console.warn("Invalid textBounds array in text selection:", args);
-      //     return;
-      //   }
-
-      //   // Calculate overall selection bounds
-
-      //   const left = Math.min(...args.textBounds.map((b: any) => b.left));
-      //   const right = Math.max(...args.textBounds.map((b: any) => b.right));
-      //   const top = Math.min(...args.textBounds.map((b: any) => b.top));
-      //   const bottom = Math.max(...args.textBounds.map((b: any) => b.bottom));
-
-      //   const x = left;
-      //   const y = top;
-      //   const width = right - left;
-      //   const height = bottom - top;
-
-      //   // Validate page index
-      //   if (typeof args.pageIndex !== "number" || args.pageIndex < 0) {
-      //     console.warn("Invalid page index in text selection:", args.pageIndex);
-      //     return;
-      //   }
-
-      //   // Store selection data
-      //   const textContent = args.textContent.trim();
-
-      //   // Set new state (don't clear showSelectionToolbar as it causes flicker)
-      //   setSelectedText(textContent);
-      //   setCurrentPageNumber(args.pageIndex); // Convert PDF coordinates to screen coordinates
-      //   let screenX = x + width / 2;
-      //   let screenY = y - 10;
-
-      //   // Convert PDF coordinates to screen coordinates using Syncfusion's coordinate system
-      //   if (pdfViewerRef.current) {
-      //     try {
-      //       // Use Syncfusion's built-in coordinate conversion if available
-      //       const viewer = pdfViewerRef.current;
-
-      //       // Get the PDF viewer container element
-      //       const viewerElement = viewer.element;
-      //       if (viewerElement) {
-      //         // Look for the page canvas or page container
-      //         const pageCanvas =
-      //           viewerElement.querySelector(
-      //             `canvas[id*="${args.pageIndex}"]`
-      //           ) ||
-      //           viewerElement.querySelector(".e-pv-page-canvas") ||
-      //           viewerElement.querySelector(`#pagecanvas_${args.pageIndex}`);
-
-      //         if (pageCanvas) {
-      //           const canvasRect = pageCanvas.getBoundingClientRect();
-
-      //           // Convert PDF coordinates to screen coordinates using canvas position
-      //           screenX = canvasRect.left + x + width / 2;
-      //           screenY = canvasRect.top + y - 10;
-      //         } else {
-      //           // Fallback to viewer element
-      //           const viewerRect = viewerElement.getBoundingClientRect();
-      //           screenX = viewerRect.left + x + width / 2;
-      //           screenY = viewerRect.top + y - 10;
-      //         }
-      //       }
-      //     } catch (error) {
-      //       console.warn(
-      //         "Could not convert PDF coordinates to screen coordinates:",
-      //         error
-      //       );
-      //       // Ultimate fallback to original coordinates
-      //       screenX = x + width / 2;
-      //       screenY = y - 10;
-      //     }
-      //   }
-
-      //   // Ensure tooltip stays within viewport bounds
-      //   const viewportWidth = window.innerWidth;
-      //   const viewportHeight = window.innerHeight;
-
-      //   // Adjust if tooltip would go off screen
-      //   if (screenX > viewportWidth - 200) {
-      //     screenX = viewportWidth - 200;
-      //   }
-      //   if (screenX < 10) {
-      //     screenX = 10;
-      //   }
-      //   if (screenY < 10) {
-      //     screenY = screenY + height + 20; // Position below if too close to top
-      //   }
-      //   if (screenY > viewportHeight - 100) {
-      //     screenY = screenY - 60; // Position above if too close to bottom
-      //   }
-
-      //   // Store selection bounds for highlight creation later
-      //   const selectionBounds: TextBounds = {
-      //     x,
-      //     y,
-      //     width,
-      //     height,
-      //   };
-
-      //   // Set tooltip position and show it
-      //   const tooltipPosition = {
-      //     x: screenX,
-      //     y: screenY,
-      //   };
-
-      //   // Update all state immediately in sync, but use a small delay to ensure clean transitions
-      //   setSelectionBounds(selectionBounds);
-      //   setTooltipPosition(tooltipPosition);
-      // } catch (error) {
-      //   console.error("Error handling text selection:", error);
-      // }
     },
     [
       selectedTool,
@@ -425,6 +345,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       selectedText,
       currentPageNumber,
       selectedTextBounds,
+      isPdfViewerReady,
     ]
   );
 
@@ -439,6 +360,15 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         currentPdfData?.id
       ) {
         try {
+          // Check if PDF viewer is ready before creating annotation
+          if (!isPdfViewerReady()) {
+            console.error("PDF viewer not ready for annotation creation");
+            toast.error(
+              "PDF viewer is still loading. Please try again in a moment."
+            );
+            return;
+          }
+
           // Create Syncfusion annotation
           const annotationOptions: Partial<HighlightSettings> = {
             bounds: selectedTextBounds,
@@ -473,6 +403,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             noteId: noteId, // Link to the created note
           }).unwrap();
           console.log("Note highlight saved to database successfully");
+          toast.success("Note and highlight created successfully");
 
           // Clear selection after creating note highlight
           setSelectedText("");
@@ -481,6 +412,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           setShowNoteModal(false);
         } catch (error) {
           console.error("Error creating note highlight:", error);
+          toast.error("Failed to create note highlight. Please try again.");
         }
       }
     },
@@ -490,6 +422,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       selectedTextBounds,
       currentPdfData?.id,
       createHighlight,
+      isPdfViewerReady,
     ]
   );
 
@@ -536,11 +469,27 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     setShowNotePreview(false);
     setPreviewNoteId(null);
   }, []);
+
   /**
-   * Load existing highlights from database
+   * Load existing highlights from database with proper initialization checks
    */
   const loadExistingHighlights = useCallback(async () => {
-    if (!pdfViewerRef.current?.annotation || !highlightsData?.highlights) {
+    // Don't load if already loaded
+    if (annotationsLoaded) {
+      console.log("Annotations already loaded, skipping...");
+      return;
+    }
+
+    if (!highlightsData?.highlights || highlightsData.highlights.length === 0) {
+      console.log("No highlights to load");
+      setAnnotationsLoaded(true);
+      return;
+    }
+
+    // Check if PDF viewer is ready
+    if (!isPdfViewerReady()) {
+      console.log("PDF viewer not ready, retrying in 500ms...");
+      setTimeout(() => loadExistingHighlights(), 500);
       return;
     }
 
@@ -551,45 +500,63 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       );
 
       for (const highlight of highlightsData.highlights) {
-        const annotationOptions: Partial<HighlightSettings> = {
-          bounds: highlight.textbounds,
-          pageNumber: highlight.pageNumber,
-          author: "User",
-          subject: `${highlight.type} Highlight`,
-          color: highlight.color,
-          opacity: highlight.opacity,
-          customData: {
-            id: `existing-highlight-${highlight.id}`,
-            highlightId: highlight.id,
-            noteId: highlight.noteId,
-            type: highlight.type,
-            text: highlight.content,
-          },
-        };
+        try {
+          const annotationOptions: Partial<HighlightSettings> = {
+            bounds: highlight.textbounds,
+            pageNumber: highlight.pageNumber,
+            author: "User",
+            subject: `${highlight.type} Highlight`,
+            color: highlight.color,
+            opacity: highlight.opacity,
+            customData: {
+              id: `existing-highlight-${highlight.id}`,
+              highlightId: highlight.id,
+              noteId: highlight.noteId,
+              type: highlight.type,
+              text: highlight.content,
+            },
+          };
 
-        pdfViewerRef.current.annotation.addAnnotation(
-          "Highlight",
-          annotationOptions as HighlightSettings
-        );
+          pdfViewerRef.current!.annotation.addAnnotation(
+            "Highlight",
+            annotationOptions as HighlightSettings
+          );
+
+          console.log(
+            `Loaded highlight ${highlight.id} on page ${highlight.pageNumber}`
+          );
+        } catch (highlightError) {
+          console.error(
+            `Error loading highlight ${highlight.id}:`,
+            highlightError
+          );
+          // Continue loading other highlights even if one fails
+        }
       }
 
       setAnnotationsLoaded(true);
       console.log("All existing highlights loaded successfully");
     } catch (error) {
-      console.error("Error loading existiing highlights:", error);
+      console.error("Error loading existing highlights:", error);
+      // Retry after a longer delay if there's a general error
+      setTimeout(() => loadExistingHighlights(), 2000);
     }
-  }, [highlightsData]);
+  }, [highlightsData, isPdfViewerReady, annotationsLoaded]);
 
   /**
    * Handle PDF document loading
    */
   const handleDocumentLoad = useCallback(
     async (_args?: any) => {
+      console.log("PDF document loaded, initializing...");
       setIsLoading(false);
-      // Load existing highlights after PDF is loaded
+
+      // Load existing highlights after PDF is loaded with a longer delay
+      // to ensure Syncfusion viewer is fully initialized
       setTimeout(() => {
+        console.log("Starting highlight loading process...");
         loadExistingHighlights();
-      }, 1000); // Small delay to ensure PDF is fully rendered
+      }, 2000); // Increased delay to ensure full initialization
     },
     [loadExistingHighlights]
   );
@@ -597,9 +564,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   /**
    * Handle PDF loading errors
    */
-  const handleDocumentLoadFailed = useCallback((_args: any) => {
+  const handleDocumentLoadFailed = useCallback(() => {
     setIsLoading(false);
     console.error("PDF load failed");
+    toast.error("Failed to load PDF document");
   }, []);
 
   /**
@@ -607,7 +575,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    */
   const handleRefreshUrl = useCallback(async () => {
     if (pdfDocument?.id) {
+      console.log("Refreshing PDF URL and resetting annotations...");
       setAnnotationsLoaded(false); // Reset annotations loaded state for new URL
+      setIsLoading(true); // Show loading state during refresh
       await refetchPdf();
     }
   }, [pdfDocument?.id, refetchPdf]);
@@ -710,17 +680,17 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           enableTextMarkupAnnotation={true} // Enable highlighting
           zoomMode="FitToWidth"
           enableAnnotation={true}
-          textSelectionStart={(args) => {}}
+          textSelectionStart={() => {}}
           textSelectionEnd={(args) => handleSelectionTextEnd(args)}
-          pageClick={(args) => {
+          pageClick={() => {
             // Close tooltip when clicking on empty page area (not during text selection)
             if (!selectedText) {
               setSelectionBounds(null);
             }
           }}
-          annotationMouseover={(args) => {}}
-          annotationMouseLeave={(args) => {}}
-          annotationDoubleClick={(args) => {}}
+          annotationMouseover={() => {}}
+          annotationMouseLeave={() => {}}
+          annotationDoubleClick={() => {}}
         >
           <Inject
             services={[
