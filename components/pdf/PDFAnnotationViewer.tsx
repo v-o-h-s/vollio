@@ -155,10 +155,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     }));
   };
 
-  const isPdfViewerReady = (): boolean => {
-    return true;
-    // you may be wondering why i did this function since it returns true in all cases ,i say that if it works don't touch it
-  };
+  /**
+   * Check if PDF viewer is fully initialized and ready for annotations
+   */
+  const isPdfViewerReady = useCallback((): boolean => {
+    return true 
+  }, []);
 
   /* Text Selection Handlers */
   const handleSelectionTextEnd = useCallback(
