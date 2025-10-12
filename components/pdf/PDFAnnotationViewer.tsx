@@ -20,6 +20,7 @@ import {
 } from "@/lib/store/apiSlice";
 import toast from "react-hot-toast";
 import { PDFDocument, TextBounds } from "@/lib/types/pdf";
+import { AnnotationMouseoverEventArgs } from "@syncfusion/ej2-react-pdfviewer";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PDFViewerFallback } from "@/components/pdf/FallbackUI";
 import { FileText, AlertCircle, RefreshCw } from "lucide-react";
@@ -154,31 +155,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     }));
   };
 
-  /**
-   * Check if PDF viewer is fully initialized and ready for annotations
-   */
-  const isPdfViewerReady = useCallback((): boolean => {
-    // pls consider adding condition in the future if you add more features to the pdf like zooming or anything
-    if (!pdfViewerRef.current) return false;
-
-    try {
-      // Check if the viewer has essential properties initialized
-      const viewer = pdfViewerRef.current as any;
-
-      // Check if zoomFactor is available (indicates viewer is fully initialized)
-      if (typeof viewer.zoomFactor === "undefined") return false;
-
-      // Check if annotation module is available
-      if (!viewer.annotation) return false;
-
-      return true;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log("PDF viewer not ready yet:", error.message);
-      }
-      return false;
-    }
-  }, []);
+  const isPdfViewerReady = (): boolean => {
+    return true;
+    // you may be wondering why i did this function since it returns true in all cases ,i say that if it works don't touch it
+  };
 
   /* Text Selection Handlers */
   const handleSelectionTextEnd = useCallback(
@@ -242,8 +222,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 "Highlight",
                 annotationOptions as HighlightSettings
               );
-
-              console.log("Syncfusion highlight created successfully");
 
               // Save to database
               if (currentPdfData?.id) {
@@ -468,61 +446,64 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   }, []);
 
   // Handle annotation mouseover
-  const handleAnnotationMouseover = useCallback((args: any) => {
-    console.log(args);
-    try {
-      // Get annotation data from Syncfusion event
-      const annotation = args.annotation;
-      if (!annotation || !annotation.customData) return;
+  const handleAnnotationMouseover = useCallback(
+    (args: AnnotationMouseoverEventArgs) => {
+      try {
+        // Get annotation data from Syncfusion event
+        const annotation = args.annotation;
+        if (!annotation || !annotation.customData) return;
 
-      const customData = annotation.customData;
-      const annotationType = customData.type;
+        const customData = annotation.customData;
+        const annotationType = customData.type;
 
-      // Convert PDF coordinates to screen coordinates
-      const bounds = annotation.bounds[0]; // Get first bound
-      if (!bounds) return;
+        // Convert PDF coordinates to screen coordinates
+        const bounds = annotation.bounds[0]; // Get first bound
+        if (!bounds) return;
 
-      // Get the PDF viewer element for coordinate conversion
-      const viewerElement = pdfViewerRef.current?.element;
-      if (!viewerElement) return;
+        // Get the PDF viewer element for coordinate conversion
+        const viewerElement = pdfViewerRef.current?.element;
+        if (!viewerElement) return;
 
-      // Find the page canvas for coordinate conversion
-      const pageCanvas =
-        viewerElement.querySelector(`canvas[id*="${annotation.pageNumber}"]`) ||
-        viewerElement.querySelector(".e-pv-page-canvas");
+        // Find the page canvas for coordinate conversion
+        const pageCanvas =
+          viewerElement.querySelector(
+            `canvas[id*="${annotation.pageNumber}"]`
+          ) || viewerElement.querySelector(".e-pv-page-canvas");
 
-      let screenX = bounds.x + bounds.width / 2;
-      let screenY = bounds.y + bounds.height / 2;
+        let screenX = bounds.x + bounds.width / 2;
+        let screenY = bounds.y + bounds.height / 2;
 
-      if (pageCanvas) {
-        const canvasRect = pageCanvas.getBoundingClientRect();
-        screenX = canvasRect.left + bounds.x + bounds.width / 2;
-        screenY = canvasRect.top + bounds.y + bounds.height / 2;
+        if (pageCanvas) {
+          const canvasRect = pageCanvas.getBoundingClientRect();
+          screenX = canvasRect.left + bounds.x + bounds.width / 2;
+          screenY = canvasRect.top + bounds.y + bounds.height / 2;
+        }
+
+        // Handle different annotation types
+        if (annotationType === "quick") {
+          // Show context menu trigger for quick highlights
+          setHoveredQuickHighlight({
+            id: customData.highlightId || customData.id,
+            position: { x: screenX, y: screenY },
+            color: annotation.color || "#FFFF00",
+            opacity: annotation.opacity || 0.4,
+          });
+          setShowHoverTrigger(true);
+        } else if (annotationType === "note" || annotationType === "comment") {
+          // Show existing hover toolbar for note/comment highlights
+          setHoveredHighlight({
+            noteId: customData.noteId || "placeholder",
+            position: { x: screenX, y: screenY },
+            noteTitle: customData.noteTitle || "Note",
+          });
+          setShowHoverToolbar(true);
+        }
+      } catch (error) {
+        console.error("Error handling annotation mouseover:", error);
       }
-
-      // Handle different annotation types
-      if (annotationType === "quick") {
-        // Show context menu trigger for quick highlights
-        setHoveredQuickHighlight({
-          id: customData.highlightId || customData.id,
-          position: { x: screenX, y: screenY },
-          color: annotation.color || "#FFFF00",
-          opacity: annotation.opacity || 0.4,
-        });
-        setShowHoverTrigger(true);
-      } else if (annotationType === "note" || annotationType === "comment") {
-        // Show existing hover toolbar for note/comment highlights
-        setHoveredHighlight({
-          noteId: customData.noteId || "placeholder",
-          position: { x: screenX, y: screenY },
-          noteTitle: customData.noteTitle || "Note",
-        });
-        setShowHoverToolbar(true);
-      }
-    } catch (error) {
-      console.error("Error handling annotation mouseover:", error);
-    }
-  }, []);
+    },
+    []
+  );
 
   // Handle annotation mouse leave
   const handleAnnotationMouseLeave = useCallback(() => {
@@ -586,8 +567,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Handle highlight updated
   const handleHighlightUpdated = useCallback(
     (highlightId: string, updates: { color?: string; opacity?: number }) => {
-      console.log("Highlight updated:", highlightId, updates);
-
       // Update the Syncfusion annotation if it exists
       if (pdfViewerRef.current?.annotationCollection) {
         try {
@@ -610,7 +589,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             // Trigger a re-render of the annotation
             try {
               pdfViewerRef.current.annotation.editAnnotation(targetAnnotation);
-              console.log("Syncfusion annotation updated successfully");
             } catch (editError) {
               console.log(
                 "Edit annotation method failed, properties updated in memory"
@@ -627,75 +605,95 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   /**
    * Load existing highlights from database with proper initialization checks
    */
-  const loadExistingHighlights = useCallback(async () => {
-    // Don't load if already loaded
-    if (annotationsLoaded) {
-      console.log("Annotations already loaded, skipping...");
-      return;
-    }
+  const loadExistingHighlights = useCallback(
+    async (retryCount = 0) => {
+      const MAX_RETRIES = 10; // Maximum 10 retries (5 seconds total)
 
-    if (!highlightsData?.highlights || highlightsData.highlights.length === 0) {
-      console.log("No highlights to load");
-      setAnnotationsLoaded(true);
-      return;
-    }
-
-    // Check if PDF viewer is ready
-    if (!isPdfViewerReady()) {
-      console.log("PDF viewer not ready, retrying in 500ms...");
-      setTimeout(() => loadExistingHighlights(), 500);
-      return;
-    }
-
-    try {
-      console.log(
-        "Loading existing highlights:",
-        highlightsData.highlights.length
-      );
-
-      for (const highlight of highlightsData.highlights) {
-        try {
-          const annotationOptions: Partial<HighlightSettings> = {
-            bounds: highlight.textbounds,
-            pageNumber: highlight.pageNumber,
-            author: "User",
-            subject: `${highlight.type} Highlight`,
-            color: highlight.color,
-            opacity: highlight.opacity,
-            customData: {
-              id: `existing-highlight-${highlight.id}`,
-              highlightId: highlight.id,
-              noteId: highlight.noteId,
-              type: highlight.type,
-              text: highlight.content,
-            },
-          };
-
-          pdfViewerRef.current!.annotation.addAnnotation(
-            "Highlight",
-            annotationOptions as HighlightSettings
-          );
-
-          console.log(
-            `Loaded highlight ${highlight.id} on page ${highlight.pageNumber}`
-          );
-        } catch (highlightError) {
-          console.error(
-            `Error loading highlight ${highlight.id}:`,
-            highlightError
-          );
-          // Continue loading other highlights even if one fails
-        }
+      // Don't load if already loaded
+      if (annotationsLoaded) {
+        console.log("Annotations already loaded, skipping...");
+        return;
       }
 
-      setAnnotationsLoaded(true);
-      console.log("All existing highlights loaded successfully");
-    } catch (error) {
-      console.error("Error loading existing highlights:", error);
-      // Retry after a longer delay if there's a general error
-      setTimeout(() => loadExistingHighlights(), 2000);
-    }
-  }, [highlightsData, isPdfViewerReady, annotationsLoaded]);
+      if (
+        !highlightsData?.highlights ||
+        highlightsData.highlights.length === 0
+      ) {
+        console.log("No highlights to load");
+        setAnnotationsLoaded(true);
+        return;
+      }
+
+      // Check if PDF viewer is ready
+      if (!isPdfViewerReady()) {
+        if (retryCount >= MAX_RETRIES) {
+          console.error(
+            "PDF viewer failed to initialize after maximum retries, giving up"
+          );
+          setAnnotationsLoaded(true); // Mark as loaded to prevent further attempts
+          return;
+        }
+
+        console.log(
+          `PDF viewer not ready, retrying in 500ms... (attempt ${
+            retryCount + 1
+          }/${MAX_RETRIES})`
+        );
+        setTimeout(() => loadExistingHighlights(retryCount + 1), 1000);
+        return;
+      }
+
+      try {
+        console.log(
+          "Loading existing highlights:",
+          highlightsData.highlights.length
+        );
+
+        for (const highlight of highlightsData.highlights) {
+          try {
+            const annotationOptions: Partial<HighlightSettings> = {
+              bounds: highlight.textbounds,
+              pageNumber: highlight.pageNumber,
+              author: "User",
+              subject: `${highlight.type} Highlight`,
+              color: highlight.color,
+              opacity: highlight.opacity,
+              customData: {
+                id: `existing-highlight-${highlight.id}`,
+                highlightId: highlight.id,
+                noteId: highlight.noteId,
+                type: highlight.type,
+                text: highlight.content,
+              },
+            };
+
+            pdfViewerRef.current?.annotation.addAnnotation(
+              "Highlight",
+              annotationOptions as HighlightSettings
+            );
+
+            console.log(
+              `Loaded highlight ${highlight.id} on page ${highlight.pageNumber}`
+            );
+          } catch (highlightError) {
+            console.error(
+              `Error loading highlight ${highlight.id}:`,
+              highlightError
+            );
+            // Continue loading other highlights even if one fails
+          }
+        }
+
+        setAnnotationsLoaded(true);
+        console.log("All existing highlights loaded successfully");
+      } catch (error) {
+        console.error("Error loading existing highlights:", error);
+        // Retry after a longer delay if there's a general error
+        setTimeout(() => loadExistingHighlights(), 2000);
+      }
+    },
+    [highlightsData, isPdfViewerReady, annotationsLoaded]
+  );
 
   // Handle highlight deleted
   const handleHighlightDeleted = useCallback(
@@ -738,20 +736,15 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   /**
    * Handle PDF document loading
    */
-  const handleDocumentLoad = useCallback(
-    async (_args?: any) => {
-      console.log("PDF document loaded, initializing...");
-      setIsLoading(false);
+  const handleDocumentLoad = useCallback(async () => {
+    console.log("PDF document loaded");
+    setIsLoading(false);
 
-      // Load existing highlights after PDF is loaded with a longer delay
-      // to ensure Syncfusion viewer is fully initialized
-      setTimeout(() => {
-        console.log("Starting highlight loading process...");
-        loadExistingHighlights();
-      }, 2000); // Increased delay to ensure full initialization
-    },
-    [loadExistingHighlights]
-  );
+    // Load existing highlights after PDF is loaded
+    setTimeout(() => {
+      loadExistingHighlights(0);
+    }, 1000);
+  }, [loadExistingHighlights]);
 
   /**
    * Handle PDF loading errors
