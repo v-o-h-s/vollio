@@ -1309,6 +1309,41 @@ html {
   background: linear-gradient(45deg, rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.8));
 }
 
+/* Toast solid background overrides - Light mode */
+.toast-solid-bg,
+[data-sonner-toast],
+[data-hot-toast] {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #e5e7eb !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  opacity: 1 !important;
+}
+
+/* Dark mode toast overrides */
+.dark .toast-solid-bg,
+.dark [data-sonner-toast],
+.dark [data-hot-toast] {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #374151 !important;
+}
+
+/* Success toasts */
+.toast-solid-bg[data-type="success"],
+[data-hot-toast][data-type="success"] {
+  background: #22c55e !important;
+  color: #ffffff !important;
+}
+
+/* Error toasts */
+.toast-solid-bg[data-type="error"],
+[data-hot-toast][data-type="error"] {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+}
+
 /* Smooth scrolling behavior */
 html {
   scroll-behavior: smooth;

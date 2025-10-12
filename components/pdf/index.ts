@@ -11,5 +11,9 @@ export { PDFContextMenu } from "./PDFContextMenu";
 export { PDFBreadcrumb } from "./PDFBreadcrumb";
 export { PDFSearchBar } from "./PDFSearchBar";
 export { PDFSortOptions } from "./PDFSortOptions";
+export { default as HighlightContextMenu } from "./HighlightContextMenu";
+export { default as HighlightHoverTrigger } from "./HighlightHoverTrigger";
 
 export type { ViewMode, SortBy, SortOrder } from "./PDFDirectoryView";
+export type { HighlightContextMenuProps } from "./HighlightContextMenu";
+export type { HighlightHoverTriggerProps } from "./HighlightHoverTrigger";

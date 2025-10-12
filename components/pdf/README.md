@@ -22,6 +22,7 @@ Professional annotation toolkit with three distinct highlighting modes:
 - **Behavior**: Instant text highlighting without note creation
 - **Visual**: Yellow highlight color for quick identification
 - **Use Case**: Speed reading, document scanning, initial review
+- **Context Menu**: HighlightContextMenu for color/opacity changes and deletion
 
 #### 🟠 Inline Comment Mode  
 - **Purpose**: Contextual annotations with hover-based display
@@ -67,6 +68,8 @@ The main PDF viewer component with complete Syncfusion integration and advanced 
 - **Tool Integration**: Seamless integration with dynamic tool selection and mode switching
 - **Focus Mode Support**: Distraction-free viewing with enhanced user experience
 - **Cross-tab Sync**: Real-time annotation synchronization across browser tabs
+- **Syncfusion Integration**: Proper bounds format handling with {x, y, width, height} coordinates
+- **Annotation Validation**: Comprehensive checks for PDF readiness and annotation module availability
 
 **Usage:**
 ```tsx
@@ -86,29 +89,43 @@ import PDFAnnotationViewer from '@/components/pdf/PDFAnnotationViewer';
 - `highlightMode?: 'quick' | 'comment' | 'note'` - Active highlighting mode
 - `className?: string` - Additional CSS classes
 
-#### `AnnotationTooltip.tsx` ✅
-Smart annotation tooltip that adapts based on selected tool and highlighting mode.
+#### `HighlightContextMenu.tsx` ✅
+Dropdown menu component for managing highlight properties and actions.
 
-**Enhanced Features:**
-- **Dynamic Content**: Tooltip content changes based on active tool and mode
-- **Smart Positioning**: Intelligent positioning with viewport boundary detection
-- **Visual Adaptation**: Icons and descriptions adapt to selected highlighting mode
-- **Mobile Optimization**: Touch-friendly interactions with responsive design
-- **Theme Integration**: Consistent styling with glassmorphism effects
+**Features:**
+- **Color Selection**: 8 predefined highlight colors with visual preview
+- **Opacity Control**: Slider-based opacity adjustment (10-100%)
+- **Delete Action**: Safe highlight removal with confirmation
+- **RTK Query Integration**: Uses mutations for database operations
+- **Portal Rendering**: Proper z-index management above PDF viewer
+- **Theme Support**: Adapts to light/dark mode with glassmorphism effects
 
-**Usage:**
-```tsx
-import AnnotationTooltip from '@/components/pdf/AnnotationTooltip';
+**Props:**
+- `isVisible: boolean` - Controls menu visibility
+- `position: {x: number, y: number} | null` - Screen coordinates for positioning
+- `highlightId: string | null` - Database ID for API operations
+- `currentColor?: string` - Current highlight color (defaults to yellow)
+- `currentOpacity?: number` - Current opacity value (0-1 range)
+- `onHighlightUpdated?: (id: string, updates: object) => void` - Update callback
+- `onHighlightDeleted?: (id: string) => void` - Delete callback
+- `onClose?: () => void` - Close callback
 
-<AnnotationTooltip
-  visible={showTooltip}
-  position={{ x: 100, y: 200 }}
-  selectedTool="highlight"
-  highlightMode="note"
-  onCreateNote={handleCreateNote}
-  onClose={handleClose}
-/>
-```
+#### `HighlightHoverTrigger.tsx` ✅
+Small trigger button that appears when hovering over highlighted text.
+
+**Features:**
+- **Smart Positioning**: Appears near highlighted text with viewport boundary detection
+- **Delayed Visibility**: Configurable show/hide delays to prevent flickering
+- **Touch Support**: Works on both desktop and mobile devices
+- **Glassmorphism Styling**: Semi-transparent with backdrop blur effects
+
+**Props:**
+- `isVisible: boolean` - Controls trigger visibility
+- `position: {x: number, y: number} | null` - Screen coordinates for positioning
+- `onTriggerClick: () => void` - Click handler to open context menu
+- `onHoverEnd: () => void` - Hover end callback
+- `showDelay?: number` - Delay before showing (default: 300ms)
+- `hideDelay?: number` - Delay before hiding (default: 200ms)
 
 #### `NoteCreationModal.tsx` ✅
 Large modal for comprehensive note creation with NotionEditor integration.
@@ -119,6 +136,15 @@ Large modal for comprehensive note creation with NotionEditor integration.
 - **Auto-Save Integration**: Internal auto-save with visual status indicators
 - **Responsive Design**: Mobile-optimized modal with touch-friendly interactions
 - **Theme Support**: Consistent styling with light/dark mode adaptation
+
+#### `NotePreviewModal.tsx` ✅
+Read-only note preview modal for quick viewing without leaving PDF context.
+
+**Features:**
+- **TipTap Display**: Read-only rich text rendering
+- **Quick Access**: View notes without navigation
+- **Responsive Design**: Mobile-optimized preview interface
+- **Theme Integration**: Consistent styling with current theme
 
 ### PDF Management Components
 
@@ -246,10 +272,11 @@ const { data: pdfData, refetch } = useGetPDFQuery(pdfId);
 const [uploadPDF, { isLoading: isUploading }] = useUploadPDFMutation();
 const [deletePDF] = useDeletePDFMutation();
 
-// Annotation operations
-const [createAnnotation] = useCreateAnnotationMutation();
-const [updateAnnotation] = useUpdateAnnotationMutation();
-const { data: annotations } = useGetAnnotationsQuery(pdfId);
+// Highlight operations
+const [createHighlight] = useCreateHighlightMutation();
+const [updateHighlight] = useUpdateHighlightMutation();
+const [deleteHighlight] = useDeleteHighlightMutation();
+const { data: highlights } = useGetPDFHighlightsQuery({ pdfId });
 
 // Note operations
 const [createNote] = useCreateNoteMutation();
@@ -266,6 +293,10 @@ Complete REST API coverage:
 - `DELETE /api/pdfs/[id]` - Delete PDF with cleanup
 - `PUT /api/pdfs/[id]/rename` - Rename PDF with validation
 - `GET /api/pdfs/[id]/thumbnail` - Generate and serve PDF thumbnails
+- `GET /api/highlights` - List highlights with filtering
+- `POST /api/highlights` - Create new highlight
+- `PUT /api/highlights/[id]` - Update highlight properties
+- `DELETE /api/highlights/[id]` - Delete highlight
 
 ## 📱 Mobile Optimization
 
@@ -367,30 +398,37 @@ function PDFLibrary() {
 }
 ```
 
-### Multi-Mode Annotation
+### Highlight Context Menu Integration
 ```tsx
-function AnnotationInterface() {
-  const [tool, setTool] = useState('highlight');
-  const [mode, setMode] = useState('quick');
+import { HighlightContextMenu, HighlightHoverTrigger } from '@/components/pdf';
 
-  const handleToolChange = (newTool, newMode) => {
-    setTool(newTool);
-    setMode(newMode);
-  };
+function HighlightManager() {
+  const [showTrigger, setShowTrigger] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [position, setPosition] = useState(null);
+  const [highlightId, setHighlightId] = useState(null);
 
   return (
-    <div className="annotation-interface">
-      <ToolSelector
-        selectedTool={tool}
-        highlightMode={mode}
-        onToolChange={handleToolChange}
+    <>
+      <HighlightHoverTrigger
+        isVisible={showTrigger}
+        position={position}
+        onTriggerClick={() => setShowMenu(true)}
+        onHoverEnd={() => setShowTrigger(false)}
       />
-      <PDFAnnotationViewer
-        pdfDocument={pdfData}
-        selectedTool={tool}
-        highlightMode={mode}
+      <HighlightContextMenu
+        isVisible={showMenu}
+        position={position}
+        highlightId={highlightId}
+        onClose={() => setShowMenu(false)}
+        onHighlightUpdated={(id, updates) => {
+          console.log('Highlight updated:', id, updates);
+        }}
+        onHighlightDeleted={(id) => {
+          console.log('Highlight deleted:', id);
+        }}
       />
-    </div>
+    </>
   );
 }
 ```
@@ -402,6 +440,10 @@ function AnnotationInterface() {
 - **Collaborative Annotations**: Real-time collaborative annotation editing
 - **AI-Powered Insights**: Intelligent content analysis and suggestions
 - **Advanced Export**: Export annotations in multiple formats
+- **Custom Color Picker**: Unlimited color options for highlights
+- **Highlight Grouping**: Batch operations and organization
+- **Keyboard Shortcuts**: Quick actions for power users
+- **Annotation Templates**: Predefined annotation styles and presets
 
 ### Performance Improvements
 - **WebAssembly**: WASM-based PDF processing for improved performance

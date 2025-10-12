@@ -2034,7 +2034,7 @@ export const apiSlice = createApi({
         if (type) params.append("type", type);
         params.append("page", page.toString());
         params.append("limit", limit.toString());
-        
+
         return `highlights?${params.toString()}`;
       },
       transformResponse: (response: any) => {
@@ -2080,7 +2080,7 @@ export const apiSlice = createApi({
         if (type) params.append("type", type);
         params.append("page", page.toString());
         params.append("limit", limit.toString());
-        
+
         return `pdfs/${pdfId}/highlights?${params.toString()}`;
       },
       transformResponse: (response: any) => {
