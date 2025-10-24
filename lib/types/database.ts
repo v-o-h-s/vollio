@@ -205,129 +205,7 @@ export interface Database {
           is_deleted?: boolean;
         };
       };
-      quizzes: {
-        Row: {
-          id: string;
-          user_id: string;
-          title: string;
-          source_pdf_ids: string[];
-          question_count: number;
-          difficulty: string;
-          question_types: string[];
-          notes: string | null;
-          generation_method: string;
-          metadata: any; // QuizMetadata JSON
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          title: string;
-          source_pdf_ids: string[];
-          question_count: number;
-          difficulty: string;
-          question_types: string[];
-          notes?: string | null;
-          generation_method?: string;
-          metadata?: any; // QuizMetadata JSON
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          title?: string;
-          source_pdf_ids?: string[];
-          question_count?: number;
-          difficulty?: string;
-          question_types?: string[];
-          notes?: string | null;
-          generation_method?: string;
-          metadata?: any; // QuizMetadata JSON
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      quiz_questions: {
-        Row: {
-          id: string;
-          quiz_id: string;
-          question_text: string;
-          question_type: string;
-          options: any; // string[] JSON for MCQ
-          correct_answer: string;
-          explanation: string;
-          difficulty: string;
-          order_index: number;
-          source_chunks: string[];
-          source_pages: number[];
-          confidence_score: number | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          quiz_id: string;
-          question_text: string;
-          question_type: string;
-          options?: any; // string[] JSON for MCQ
-          correct_answer: string;
-          explanation: string;
-          difficulty: string;
-          order_index: number;
-          source_chunks?: string[];
-          source_pages?: number[];
-          confidence_score?: number | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          quiz_id?: string;
-          question_text?: string;
-          question_type?: string;
-          options?: any; // string[] JSON for MCQ
-          correct_answer?: string;
-          explanation?: string;
-          difficulty?: string;
-          order_index?: number;
-          source_chunks?: string[];
-          source_pages?: number[];
-          confidence_score?: number | null;
-          created_at?: string;
-        };
-      };
-      quiz_attempts: {
-        Row: {
-          id: string;
-          quiz_id: string;
-          user_id: string;
-          answers: any; // Record<string, string> JSON
-          score: number;
-          total_questions: number;
-          time_taken: number | null;
-          completed_at: string;
-        };
-        Insert: {
-          id?: string;
-          quiz_id: string;
-          user_id: string;
-          answers: any; // Record<string, string> JSON
-          score: number;
-          total_questions: number;
-          time_taken?: number | null;
-          completed_at?: string;
-        };
-        Update: {
-          id?: string;
-          quiz_id?: string;
-          user_id?: string;
-          answers?: any; // Record<string, string> JSON
-          score?: number;
-          total_questions?: number;
-          time_taken?: number | null;
-          completed_at?: string;
-        };
-      };
+
       document_chunks: {
         Row: {
           id: string;
@@ -428,8 +306,7 @@ export interface Database {
     };
     Enums: {
       activity_type: "view" | "upload" | "delete";
-      quiz_difficulty: "easy" | "medium" | "hard";
-      quiz_question_type: "mcq" | "truefalse" | "fillblank";
+
       generation_method: "simple" | "rag";
       processing_status: "pending" | "processing" | "completed" | "failed";
       extraction_method: "pdfjs" | "ocr";
@@ -466,23 +343,7 @@ export type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
 export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
 export type NoteUpdate = Database["public"]["Tables"]["notes"]["Update"];
 
-export type QuizRow = Database["public"]["Tables"]["quizzes"]["Row"];
-export type QuizInsert = Database["public"]["Tables"]["quizzes"]["Insert"];
-export type QuizUpdate = Database["public"]["Tables"]["quizzes"]["Update"];
 
-export type QuizQuestionRow =
-  Database["public"]["Tables"]["quiz_questions"]["Row"];
-export type QuizQuestionInsert =
-  Database["public"]["Tables"]["quiz_questions"]["Insert"];
-export type QuizQuestionUpdate =
-  Database["public"]["Tables"]["quiz_questions"]["Update"];
-
-export type QuizAttemptRow =
-  Database["public"]["Tables"]["quiz_attempts"]["Row"];
-export type QuizAttemptInsert =
-  Database["public"]["Tables"]["quiz_attempts"]["Insert"];
-export type QuizAttemptUpdate =
-  Database["public"]["Tables"]["quiz_attempts"]["Update"];
 
 export type DocumentChunkRow =
   Database["public"]["Tables"]["document_chunks"]["Row"];
@@ -499,9 +360,7 @@ export type DocumentProcessingStatusUpdate =
   Database["public"]["Tables"]["document_processing_status"]["Update"];
 
 export type ActivityType = Database["public"]["Enums"]["activity_type"];
-export type QuizDifficultyEnum = Database["public"]["Enums"]["quiz_difficulty"];
-export type QuizQuestionTypeEnum =
-  Database["public"]["Enums"]["quiz_question_type"];
+
 export type GenerationMethodEnum =
   Database["public"]["Enums"]["generation_method"];
 export type ProcessingStatusEnum =
@@ -510,5 +369,5 @@ export type ExtractionMethodEnum =
   Database["public"]["Enums"]["extraction_method"];
 export type HighlightTypeEnum = Database["public"]["Enums"]["highlight_type"];
 
-// Additional types for quiz functionality
+
 

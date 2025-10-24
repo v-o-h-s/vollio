@@ -24,14 +24,12 @@ export function RobustNotionEditor({
   className,
 }: RobustNotionEditorProps) {
   const [editorKey, setEditorKey] = useState(0);
-  const [lastValidContent, setLastValidContent] = useState(content);
   const contentRef = useRef(content);
 
   // Update content ref when content changes
   useEffect(() => {
     if (content !== undefined) {
       contentRef.current = content;
-      setLastValidContent(content);
     }
   }, [content]);
 

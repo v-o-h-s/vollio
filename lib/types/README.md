@@ -16,7 +16,7 @@ lib/types/
 ├── editor.ts                    # TipTap editor and note types
 ├── errors.ts                    # Comprehensive error handling types
 ├── pdf.ts                       # PDF document and annotation types
-├── quiz.ts                      # Quiz generation and management types
+
 └── theme.ts                     # Theme system types
 ```
 
@@ -33,7 +33,7 @@ import { PDFDocument, Note } from "@/lib/types";
 // Import from specific type modules (recommended for new code)
 import { PDFDocument, Annotation } from "@/lib/types/pdf";
 import { Note, NotionEditorProps } from "@/lib/types/editor";
-// Quiz types have been removed
+
 
 // Import from index file (alternative approach)
 import { PDFDocument, Note } from "@/lib/types/index";
@@ -60,12 +60,7 @@ The main `lib/types.ts` file re-exports all types from the organized modules, en
 - Rich text editing interfaces
 - Auto-save functionality types
 
-### Quiz Types (`quiz.ts`)
 
-- Quiz generation and configuration
-- Question types and difficulty levels
-- Quiz attempts and scoring
-- RAG-enhanced quiz metadata
 
 ### Document Processing Types (`document-processing.ts`)
 
@@ -129,8 +124,8 @@ The main `lib/types.ts` file re-exports all types from the organized modules, en
 
 ### Type Naming Conventions
 
-- **Interfaces**: Use PascalCase (e.g., `PDFDocument`, `QuizQuestion`)
-- **Types**: Use PascalCase for type aliases (e.g., `QuizDifficulty`)
+- **Interfaces**: Use PascalCase (e.g., `PDFDocument`, `Annotation`)
+- **Types**: Use PascalCase for type aliases (e.g., `HighlightType`)
 - **Enums**: Use PascalCase with descriptive names (e.g., `ErrorType`, `ErrorSeverity`)
 - **Generic Types**: Use descriptive names (e.g., `APIResponse<T>`, `DatabaseOperationResult<T>`)
 

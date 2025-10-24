@@ -36,7 +36,6 @@ import { BubbleMenu } from "./BubbleMenu";
 import { TableBubbleMenu } from "./TableBubbleMenu";
 import { FloatingToolbar } from "./FloatingToolbar";
 
-import { useEditorKeyboardShortcuts } from "@/hooks/use-editor-keyboard-shortcuts";
 import { cn } from "@/lib/utils";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { useAutoSave } from "@/hooks/use-auto-save";
@@ -364,12 +363,6 @@ function NotionEditorInner({
     return { wordCount, readingTime };
   }, [editor, content?.content]);
 
-  // Set up keyboard shortcuts
-  useEditorKeyboardShortcuts({
-    editor,
-    enabled: editable,
-    onOpenLinkDialog: () => setIsLinkDialogOpen(true),
-  });
 
   // Handle dialog keyboard shortcuts
   useEffect(() => {

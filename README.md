@@ -1,22 +1,22 @@
 # Noto - AI-Powered PDF Annotation Platform
 
-Noto is a modern PDF annotation platform built with Next.js 15 and React 19. It combines enterprise-grade document processing and intuitive annotation tools to create a comprehensive document management solution.
+Noto is a modern PDF annotation platform built with Next.js 15 and React 19. It combines enterprise-grade document processing, intelligent PDF annotation tools, and rich text editing to create a comprehensive document management solution.
 
-> **Status**: ✅ **Production Ready** - Complete implementation with advanced document processing, comprehensive PDF annotation system with multi-mode highlighting and glassmorphism UI, rich text editing with auto-save, full theme integration, mobile optimization, and modular architecture. All core systems implemented and tested with enhanced annotation tools and debug infrastructure.
+> **Status**: ✅ **Production Ready** - Complete implementation with advanced PDF annotation system featuring multi-mode highlighting, glassmorphism UI, rich text editing with auto-save, comprehensive theme integration, mobile optimization, and robust error handling. All core systems implemented and tested with enhanced annotation tools and debug infrastructure.
 
 ## ✨ Key Features
 
 ### 🤖 AI-Powered Intelligence
 
-- **Intelligent Content Analysis**: Advanced document processing with content type detection, semantic understanding, and automated quality assessment
-- **Real-time System Monitoring**: Continuous system optimization with user feedback collection and quality assurance metrics
+- **Intelligent Content Analysis**: Advanced document processing with OCR fallback system and semantic text extraction
+- **Smart Annotation System**: Context-aware highlighting with coordinate-based positioning and cross-tab synchronization
 
 ### 📄 Advanced Document Processing
-- **Enterprise-Grade Text Extraction**: Syncfusion PDF Viewer integration for superior accuracy and layout preservation
+- **Enterprise-Grade PDF Viewing**: Syncfusion PDF Viewer integration for superior rendering and text extraction
 - **OCR Fallback System**: Automatic fallback to node-tesseract-ocr for scanned documents with confidence thresholds
-- **Semantic Chunking**: Intelligent text segmentation with configurable overlap, content type detection, and boundary respect
-- **Background Processing Queue**: Asynchronous document processing with progress tracking and job status monitoring
+- **Intelligent Text Processing**: Advanced text extraction with layout preservation and metadata retention
 - **Multi-Language Support**: Comprehensive language detection and processing for international documents
+- **Secure File Management**: Supabase Storage integration with signed URLs and automatic cleanup
 
 ### 🎯 Enhanced PDF Annotation System
 - **Multi-Mode Highlighting**: Three distinct highlighting modes with color-coded visual feedback
@@ -79,10 +79,8 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 - **[PDF Components](./components/pdf/README.md)** - PDF viewer and annotation component suite
 - **[Editor Components](./components/editor/README.md)** - Rich text editor and floating toolbar system
-- **[Quiz Components](./components/quiz/README.md)** - AI-powered quiz generation system
-- **[RAG Components](./components/rag/README.md)** - RAG system and feedback components
+- **[Theme Components](./components/theme/README.md)** - Complete theme management system
 - **[Store Documentation](./lib/store/README.md)** - Redux state management and RTK Query
-- **[Test Documentation](./test/README.md)** - Testing strategy and comprehensive coverage
 - **[Error Handling](./docs/ERROR_HANDLING.md)** - Comprehensive error handling patterns
 
 ### Development Guidelines
@@ -93,12 +91,12 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 ## 🚀 System Architecture
 
-### 🧠 AI & Machine Learning Pipeline
-- **RAG Architecture**: Retrieval-augmented generation with vector embeddings and semantic search for intelligent content analysis
-- **Document Intelligence**: Advanced text extraction with Syncfusion primary processing and OCR fallback for comprehensive document understanding
-- **Semantic Processing**: Intelligent chunking with content type detection, boundary respect, and contextual understanding
-- **Quality Assurance**: Automated content quality assessment with confidence scoring and validation mechanisms
-- **Performance Monitoring**: Real-time feedback collection and system optimization with continuous improvement metrics
+### 🧠 Document Processing Pipeline
+- **Advanced Text Extraction**: Syncfusion PDF Viewer integration with OCR fallback for comprehensive document processing
+- **Intelligent Annotation System**: Coordinate-based highlighting with real-time synchronization and cross-tab updates
+- **Smart Content Analysis**: Automated text processing with layout preservation and metadata extraction
+- **Quality Assurance**: Comprehensive validation and error handling with user-friendly recovery mechanisms
+- **Performance Optimization**: Efficient rendering, caching, and real-time updates for optimal user experience
 
 ### 🏗️ Technical Infrastructure
 - **Modern Stack**: Next.js 15 + React 19 with TypeScript strict mode for type safety and performance
@@ -116,7 +114,7 @@ For comprehensive documentation covering all aspects of the Noto application, se
 - **Performance**: Lazy loading, memoization, debounced operations, and efficient rendering strategies
 
 ### 📊 Production-Ready Features
-- **Complete Implementation**: All core features fully implemented and tested for production use
+- **Complete Implementation**: All core PDF annotation and note-taking features fully implemented and tested
 - **Scalable Architecture**: Designed for enterprise-scale deployment with performance optimization
 - **Security Compliance**: Enterprise-grade security with comprehensive validation and data protection
 - **Mobile Excellence**: Touch-optimized interfaces with responsive design and gesture support
@@ -197,9 +195,7 @@ For comprehensive documentation covering all aspects of the Noto application, se
 - **Database**: Supabase with Row Level Security (RLS)
 - **File Storage**: Supabase Storage with signed URLs
 - **PDF Rendering**: Syncfusion PDF Viewer (licensed)
-- **Document Processing**: Advanced text extraction with Syncfusion primary extraction and OCR fallback
-- **Text Processing**: Semantic chunking service with intelligent content type detection
-- **Background Processing**: Asynchronous processing queue with progress tracking
+- **Document Processing**: Advanced text extraction with OCR fallback system
 - **Rich Text Editor**: TipTap with custom extensions for block-based editing
 - **Testing**: Vitest with React Testing Library
 
@@ -230,9 +226,9 @@ For comprehensive documentation covering all aspects of the Noto application, se
 ### Key Components
 
 #### 🤖 Document Processing
-- **Document Processor**: Syncfusion text extraction with OCR fallback and semantic chunking
-- **Content Analyzer**: Intelligent content type detection and quality assessment
-- **Feedback System**: Real-time performance monitoring with user feedback collection (`SimpleFeedbackForm`)
+- **Document Processor**: Syncfusion text extraction with OCR fallback for comprehensive document support
+- **Content Analyzer**: Intelligent text processing with layout preservation and metadata extraction
+- **File Management**: Secure upload, storage, and retrieval with automatic cleanup and validation
 
 #### 📄 PDF Annotation System
 - **PDFAnnotationViewer**: Enterprise PDF viewer with Syncfusion integration and coordinate-based annotations
@@ -360,10 +356,8 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 - **[PDF Components](./components/pdf/README.md)** - PDF viewer and annotation component suite
 - **[Editor Components](./components/editor/README.md)** - Rich text editor and floating toolbar system
-- **[Quiz Components](./components/quiz/README.md)** - AI-powered quiz generation system
-- **[RAG Components](./components/rag/README.md)** - RAG system and feedback components
+- **[Theme Components](./components/theme/README.md)** - Complete theme management system
 - **[Store Documentation](./lib/store/README.md)** - Redux state management and RTK Query
-- **[Services Documentation](./lib/services/README.md)** - Backend services and AI integration
 - **[Hooks Documentation](./hooks/README.md)** - Custom React hooks library
 
 ### Development Guidelines
@@ -377,11 +371,11 @@ For comprehensive documentation covering all aspects of the Noto application, se
 ### ✅ Production Ready Status
 
 Noto is **fully production-ready** with:
-- Complete feature implementation and testing
+- Complete PDF annotation and note-taking implementation
 - Enterprise-grade security and performance optimization
 - Comprehensive error handling and recovery mechanisms
 - Mobile-responsive design with accessibility compliance
-- Real-time monitoring and feedback systems
+- Real-time synchronization and cross-tab updates
 
 ### Deployment Options
 
@@ -419,7 +413,7 @@ Noto is **feature-complete and production-ready**. Future contributions should f
 
 #### 🎯 Enhancement Areas
 - **Performance Optimization**: Advanced caching, virtual scrolling, edge computing
-- **AI Improvements**: Enhanced models, personalized learning paths, adaptive difficulty
+- **Collaboration Features**: Real-time collaborative editing, shared workspaces
 - **Enterprise Features**: Team workspaces, advanced permissions, audit logging
 - **Accessibility**: Enhanced WCAG compliance and assistive technology support
 
@@ -445,6 +439,6 @@ For questions, issues, or contributions:
 
 ---
 
-**Noto** - AI-powered PDF annotation platform. Transforming document interaction through intelligent content analysis and seamless annotation workflows.
+**Noto** - AI-powered PDF annotation platform. Transforming document interaction through intelligent annotation tools and seamless note-taking workflows.
 
 **Status**: ✅ Production Ready | **Version**: 1.0.0 | **Last Updated**: January 2025

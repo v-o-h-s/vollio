@@ -75,7 +75,7 @@ export interface ErrorContext {
   userId?: string;
   pdfId?: string;
   documentId?: string;
-  quizId?: string;
+
   fileSize?: number;
   fileName?: string;
   url?: string;

@@ -7,10 +7,10 @@ inclusion: always
 ## Architecture Principles
 
 ### State Management Strategy ✅ COMPLETED
-- **Redux Store**: Persistent application state (PDFs, annotations, notes, quiz data, user selections, preview cards)
+- **Redux Store**: Persistent application state (PDFs, annotations, notes, highlights, user selections, preview cards)
 - **Local Component State**: Transient UI state (tooltip positioning, modal visibility, loading states, form inputs)
 - **RTK Query**: All server communications, caching, real-time updates, and API state management
-- **Context Providers**: Scoped state management (AutoSaveStatusProvider, ThemeProvider, EditorProvider, QuizAccessibilityProvider)
+- **Context Providers**: Scoped state management (AutoSaveStatusProvider, ThemeProvider, EditorProvider)
 
 ### Component State Guidelines
 - Use Redux for data that needs to persist across component unmounts
@@ -71,32 +71,9 @@ inclusion: always
 - **Focus Mode Integration**: Seamless tool access in both normal and distraction-free viewing modes with enhanced "Show Header" button styling
 - **State Management**: Proper tool and mode state management with props passing to PDF annotation components
 
-##### Quiz Components (`components/quiz/`) ✅ COMPLETED
-- **QuizGeneratorInterface.tsx** - Main quiz generation interface with document selection and configuration
-- **ResponsiveQuizInterface.tsx** - Responsive wrapper for desktop/mobile quiz interfaces
-- **MobileQuizGeneratorInterface.tsx** - Mobile-optimized quiz generation interface with RAG integration and touch-friendly interactions
-- **InteractiveQuizPlayer.tsx** - Complete quiz-taking interface with progress tracking, scoring, and mobile optimization
-- **QuizResultsDisplay.tsx** - Quiz results display with detailed feedback (analytics removed)
-- **QuizConfigurationPanel.tsx** - Quiz settings and configuration options with advanced customization
-- **DocumentProcessingStatus.tsx** - Document processing progress and status display with real-time updates
-- **MultiDocumentStatus.tsx** - Status display for multi-document quiz generation with balanced processing
-- **ContentPreview.tsx** - Preview of document content for quiz generation with content analysis
-- **QuizErrorBoundary.tsx** - Error handling components for quiz functionality with recovery mechanisms
-- **QuizLoadingStates.tsx** - Loading state components for quiz operations with skeleton UI
-- **ChunkManagementPanel.tsx** - Document chunk management and optimization for improved quiz generation
-- **QuizAccessibilityProvider.tsx** - Accessibility context and utilities for quiz components with WCAG compliance
 
-##### RAG Components (`components/rag/`) ✅ COMPLETED
-- **SimpleFeedbackForm.tsx** - User feedback collection for RAG system performance monitoring and improvement
-- **RAGSearchInterface.tsx** - Advanced search interface for RAG-based content discovery
-- **RAGResultsDisplay.tsx** - Display component for RAG search results with relevance scoring
-- **RAGMonitoringDashboard.tsx** - Performance monitoring and analytics for RAG operations
 
-##### RAG Components (`components/rag/`) ✅ COMPLETED
-- **SimpleFeedbackForm.tsx** - User feedback collection for RAG system performance monitoring and improvement
-- **RAGSearchInterface.tsx** - Advanced search interface for RAG-based content discovery
-- **RAGResultsDisplay.tsx** - Display component for RAG search results with relevance scoring
-- **RAGMonitoringDashboard.tsx** - Performance monitoring and analytics for RAG operations
+
 
 ##### Editor Components (`components/editor/`)
 - **Core Editor Components**:

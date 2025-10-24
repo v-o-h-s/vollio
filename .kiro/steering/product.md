@@ -6,7 +6,7 @@ inclusion: always
 
 ## Core Product Requirements
 
-**Noto** is a modern, secure PDF annotation and note-taking application built with Next.js 15 and React 19. It provides enterprise-grade document processing, AI-powered quiz generation, and comprehensive theme support. When implementing features, always consider these essential capabilities:
+**Noto** is a modern, secure PDF annotation and note-taking application built with Next.js 15 and React 19. It provides enterprise-grade document processing, intelligent PDF annotation tools, and comprehensive theme support. When implementing features, always consider these essential capabilities:
 
 ### Primary Features
 
@@ -39,24 +39,14 @@ inclusion: always
 - **Debug Infrastructure**: Real-time logging and test utilities for troubleshooting annotation issues
 - **Portal-Based Rendering**: React Portal usage for proper z-index management and floating component positioning
 
+
+
 #### Advanced Document Processing ✅ COMPLETED
 - **Syncfusion Text Extraction**: Enterprise-grade text extraction using Syncfusion PDF Viewer for superior accuracy and layout preservation
 - **OCR Fallback System**: Automatic fallback to node-tesseract-ocr for scanned documents and extraction failures
-- **Background Processing Queue**: Asynchronous document processing with progress tracking, timeout management, and job status monitoring
-- **Semantic Chunking**: Intelligent text segmentation with configurable overlap, content type detection, and boundary respect
+- **Intelligent Text Processing**: Advanced text processing with layout preservation and metadata extraction
 - **Multi-Language Support**: Comprehensive language detection and processing for international documents
-- **Metadata Preservation**: Complete extraction of document metadata, page numbers, and structural information
-
-#### AI-Powered Quiz Generation ✅ COMPLETED
-- **RAG-Based Quiz Generation**: Advanced retrieval-augmented generation for intelligent quiz creation from PDF content with `/api/quiz/generate-rag` endpoint
-- **Vector Search Integration**: Semantic search across document chunks using embedding models for relevant content identification and advanced filtering
-- **Multiple Question Types**: Support for multiple choice, true/false, and short answer questions with configurable difficulty levels and adaptive complexity
-- **Multi-Document Support**: Generate quizzes from multiple PDF sources with balanced content representation, cross-document analysis, and intelligent deduplication
-- **Interactive Quiz Player**: Complete quiz-taking interface with progress tracking, scoring, review modes, and mobile optimization
-- **Advanced Search Capabilities**: Sophisticated content filtering with semantic search, relevance scoring, and targeted quiz generation for specific topics
-- **Mobile-First Design**: Responsive quiz interfaces optimized for touch interactions with `MobileQuizGeneratorInterface` and gesture-based navigation
-- **RAG System Monitoring**: Real-time performance monitoring with user feedback collection for continuous improvement and quality assurance
-- **Standalone Quiz System**: Quiz functionality separated from PDF components for better modularity and maintainability
+- **Secure File Management**: Comprehensive file validation, storage organization, and automatic cleanup
 
 #### Rich Text Editor System ✅ COMPLETED
 - **Notion-like Block Editor**: Complete TipTap-based block editor with internal auto-save, RTK Query integration, and simplified API
@@ -155,25 +145,23 @@ When building features, leverage these completed and tested systems:
 The Noto PDF annotation application is fully implemented and production-ready:
 
 1. **Complete Backend Integration**: Supabase backend with RLS, file storage, comprehensive error handling, and activity tracking
-2. **Full API Coverage**: All core API endpoints (PDFs, notes, annotations) are complete and tested
+2. **Full API Coverage**: All core API endpoints (PDFs, notes, annotations, highlights) are complete and tested
 3. **Frontend Integration**: RTK Query API calls integrated throughout with real data flow and comprehensive error handling
-4. **Document Processing**: Advanced text extraction with Syncfusion primary extraction and OCR fallback system with semantic chunking
-5. **AI Quiz Generation**: Complete RAG-based quiz generation with vector search, multi-document support, and intelligent content analysis
+4. **Document Processing**: Advanced text extraction with Syncfusion primary extraction and OCR fallback system
+5. **PDF Annotation System**: Complete multi-mode highlighting with advanced management tools and glassmorphism UI
 6. **Rich Text Editor**: Full Notion-like editor with auto-save, floating toolbars, and cross-tab synchronization
 7. **Theme System**: Complete dark/light mode implementation with system preference detection and cross-tab synchronization
 8. **Mobile Optimization**: Touch-friendly interfaces with responsive design, mobile-specific interactions, and gesture support
 9. **Error Handling**: Comprehensive error boundaries, recovery mechanisms, and user-friendly error messages
 10. **Testing Coverage**: Comprehensive test coverage for core functionality and edge cases
-11. **RAG System Monitoring**: Real-time performance monitoring with user feedback collection and quality assurance metrics
-12. **Modular Quiz System**: Standalone quiz system separated from PDF components with clean architecture
 
 ### Current Development Focus
 The application is feature-complete and production-ready. Future enhancements should focus on:
 1. **Performance Optimization**: Virtual scrolling for large document collections, advanced caching strategies, edge computing integration
-2. **AI Enhancement**: Advanced AI models, personalized learning paths, adaptive difficulty, intelligent content recommendations
+2. **Collaboration Features**: Real-time collaborative editing, shared workspaces, team annotation management
 3. **Enterprise Features**: Team workspaces, advanced permissions, audit logging, compliance features
-4. **Advanced Analytics**: User behavior analytics, learning progress insights, predictive recommendations
-5. **Collaboration**: Real-time collaborative editing, shared workspaces, team quiz management
+4. **Advanced Analytics**: User behavior analytics, annotation insights, usage patterns
+5. **AI Enhancement**: Intelligent content suggestions, automated tagging, smart search capabilities
 6. **Accessibility**: Enhanced WCAG compliance, assistive technology support, inclusive design improvements
 7. **Scalability**: Database optimization, CDN integration, microservices architecture, global deployment
 

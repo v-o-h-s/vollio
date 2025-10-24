@@ -433,37 +433,7 @@ Editor-specific keyboard shortcuts for formatting and navigation.
 - Custom editor command integration
 - Context-aware shortcut activation
 
-### Quiz System Hooks
 
-#### `use-quiz-error-handling.ts` ✅
-Quiz-specific error handling with recovery mechanisms.
-
-**Features:**
-- Quiz generation error handling
-- Question validation error management
-- Submission failure recovery
-- Progress preservation during errors
-- User-friendly error messaging
-
-#### `use-quiz-keyboard-shortcuts.ts` ✅
-Keyboard shortcuts for quiz navigation and interaction.
-
-**Features:**
-- Question navigation (Next, Previous, Jump to question)
-- Answer selection shortcuts
-- Quiz submission shortcuts
-- Review mode navigation
-- Accessibility compliance
-
-#### `use-offline-quiz.ts` ✅
-Offline quiz functionality for mobile and unreliable connections.
-
-**Features:**
-- Offline quiz storage and retrieval
-- Progress synchronization when online
-- Offline answer validation
-- Queue management for submissions
-- Conflict resolution for offline changes
 
 #### `use-rag-monitoring.ts` ✅
 RAG system monitoring and performance tracking.

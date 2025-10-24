@@ -60,13 +60,8 @@ interface AnnotationState {
 - `getNotes()` - Fetch user's notes with filtering and sorting
 - `getNote(id)` - Get individual note with content and metadata
 
-### Quiz Operations
 
-- `generateQuiz(config)` - Generate AI-powered quiz from documents using RAG
-- `getQuizzes()` - Fetch user's quiz list with filtering and sorting options
-- `getQuiz(id)` - Get individual quiz with questions and metadata
-- `submitQuizAttempt(attempt)` - Submit quiz attempt with scoring and detailed results
-- `processDocument(request)` - Process documents for RAG-based quiz generation
+- `processDocument(request)` - Process documents for content analysis
 - `searchContent(request)` - Advanced content search with semantic filtering
 
 ### Annotation Operations
@@ -82,8 +77,7 @@ interface AnnotationState {
 - **SupabasePDFListResponse** - PDF list with recent activity and total count
 - **SupabasePDFAccessResponse** - Individual PDF access with fresh signed URL
 - **NoteResponse** - Note data with rich text content and metadata
-- **QuizResponse** - Quiz data with questions, configuration, and metadata
-- **QuizGenerationResponse** - RAG-based quiz generation results with source chunks
+
 - **DocumentProcessingResponse** - Document processing status and job information
 - **ContentSearchResponse** - Search results with relevance scoring and chunks
 - **AnnotationResponse** - Annotation data with coordinates and styling

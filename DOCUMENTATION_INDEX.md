@@ -1,6 +1,6 @@
 # Noto Documentation Index 📚
 
-Welcome to the comprehensive documentation for Noto, the AI-powered PDF annotation and quiz generation platform. This index provides organized access to all documentation resources, from quick start guides to detailed technical references.
+Welcome to the comprehensive documentation for Noto, the AI-powered PDF annotation platform. This index provides organized access to all documentation resources, from quick start guides to detailed technical references.
 
 ## 🚀 Quick Start
 
@@ -44,18 +44,9 @@ Welcome to the comprehensive documentation for Noto, the AI-powered PDF annotati
   - Cross-tab synchronization and mobile optimization
   - PDF annotation integration
 
-### AI Quiz Generation System
-- **[Quiz Components](./components/quiz/README.md)** - AI-powered quiz generation system
-  - RAG-based intelligent quiz creation
-  - Multi-document support and content analysis
-  - Interactive quiz player with mobile optimization
-  - Performance monitoring and quality assurance
 
-### RAG & AI System
-- **[RAG Components](./components/rag/README.md)** - Retrieval-augmented generation system
-  - Intelligent content retrieval and semantic search
-  - Performance monitoring and user feedback collection
-  - Advanced search capabilities with relevance scoring
+
+
 
 ### Theme & UI System
 - **[Theme Components](./components/theme/README.md)** - Complete theme management system
@@ -67,13 +58,13 @@ Welcome to the comprehensive documentation for Noto, the AI-powered PDF annotati
 
 ### State Management & API Integration
 - **[Store Documentation](./lib/store/README.md)** - Redux store and RTK Query integration
-- **[Quiz Hooks Documentation](./lib/store/README-quiz-hooks.md)** - Quiz-specific state management
+
 
 ### Backend Services
-- **[Services Documentation](./lib/services/README.md)** - Backend services and AI integration
-- **[Document Processing](./lib/services/README-chunk-management.md)** - Document processing and chunking
-- **[Embedding Service](./lib/services/README-embedding.md)** - Vector embeddings and semantic search
-- **[RAG Quiz Generation](./lib/services/README-rag-quiz-generation.md)** - AI-powered quiz generation
+- **[Library Documentation](./lib/README.md)** - Core utilities and configurations
+- **[Supabase Client](./lib/supabaseClient.ts)** - Database and storage integration
+- **[Utilities](./lib/utils/)** - Helper functions and error handling
+
 - **[Vector Search](./lib/services/README-vector-search.md)** - Advanced vector search capabilities
 
 ### Utilities & Helpers
@@ -97,7 +88,7 @@ Welcome to the comprehensive documentation for Noto, the AI-powered PDF annotati
 
 ### User Workflows
 1. **PDF Annotation Workflow**: Upload → View → Annotate → Save → Cross-tab sync
-2. **AI Quiz Generation**: Document selection → Processing → Quiz creation → Interactive player
+
 3. **Note Management**: Create → Edit → Auto-save → Cross-component integration
 4. **Mobile Experience**: Touch selection → Mobile dialogs → Gesture navigation
 
@@ -194,7 +185,7 @@ Welcome to the comprehensive documentation for Noto, the AI-powered PDF annotati
 
 ### By Feature
 - **PDF Annotation**: [PDF Components](./components/pdf/README.md) → [Editor Components](./components/editor/README.md)
-- **AI Quiz Generation**: [Quiz Components](./components/quiz/README.md) → [RAG Components](./components/rag/README.md) → [Services](./lib/services/README.md)
+
 - **Theme System**: [Theme Components](./components/theme/README.md) → [Hooks](./hooks/README.md)
 - **State Management**: [Store Documentation](./lib/store/README.md) → [API Integration](./docs/API_DOCUMENTATION.md)
 
