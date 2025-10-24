@@ -47,30 +47,32 @@ const navigationItems = [
     href: "/dashboard",
     icon: Home,
     description: "Overview and analytics",
+    gradient: "from-blue-500 to-cyan-500",
+    hoverColor: "hover:bg-blue-500/10 hover:border-blue-500/20",
   },
   {
     name: "My PDFs",
     href: "/dashboard/pdfs",
     icon: FileText,
     description: "View and manage all your PDFs",
+    gradient: "from-emerald-500 to-teal-500",
+    hoverColor: "hover:bg-emerald-500/10 hover:border-emerald-500/20",
   },
   {
     name: "Notes",
     href: "/dashboard/notes",
     icon: NotebookPen,
     description: "Create and manage rich text notes",
-  },
-  {
-    name: "Quiz Generator",
-    href: "/dashboard/quiz",
-    icon: HelpCircle,
-    description: "Generate AI-powered quizzes from PDFs",
+    gradient: "from-purple-500 to-pink-500",
+    hoverColor: "hover:bg-purple-500/10 hover:border-purple-500/20",
   },
   {
     name: "Editor Test",
     href: "/dashboard/editor-test",
     icon: FileText,
     description: "Test the Notion-like editor",
+    gradient: "from-indigo-500 to-purple-500",
+    hoverColor: "hover:bg-indigo-500/10 hover:border-indigo-500/20",
   },
 ];
 

@@ -296,9 +296,7 @@ async function handlePOST(
       logServerError(activityServerError);
     }
 
-    // Trigger automatic document processing for quiz generation (non-critical)
-    try {
-      const { processingQueue } = await import("@/lib/services/processing-queue");
+    // Document uploaded successfully
       
       // Download the file buffer for processing
       const { data: fileData, error: downloadError } = await supabaseClient.storage
