@@ -38,7 +38,7 @@ import {
   logError,
 } from "../utils/error-handling";
 import { pdfNotifications } from "../utils/notifications";
-import { RAGQuizGenerationRequest } from "../services/rag-quiz-generation-service";
+
 
 export interface ApiResponse<T> {
   success: boolean;

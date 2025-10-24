@@ -103,11 +103,6 @@ Welcome to the comprehensive documentation for Noto, the AI-powered PDF annotati
 
 ## 🧪 Testing & Quality Assurance
 
-### Testing Documentation
-- **Unit Tests**: Component logic and utility functions with comprehensive coverage
-- **Integration Tests**: API integration and data flow validation
-- **E2E Tests**: Complete user workflows and cross-browser compatibility
-- **Performance Tests**: Load testing and optimization validation
 
 ### Quality Standards
 - **Code Coverage**: 80%+ test coverage for critical functionality
@@ -206,7 +201,7 @@ Welcome to the comprehensive documentation for Noto, the AI-powered PDF annotati
 ### By Development Phase
 - **Setup**: [README](./README.md) → [Supabase Setup](./docs/SUPABASE_SETUP.md) → [Tech Guidelines](./.kiro/steering/tech.md)
 - **Development**: [Structure Guidelines](./.kiro/steering/structure.md) → [Component Docs](./components/) → [Hooks](./hooks/README.md)
-- **Testing**: [Error Handling](./docs/ERROR_HANDLING.md) → [Testing Guidelines](./.kiro/steering/tech.md#testing-standards)
+- **Testing**: [Test Documentation](./test/README.md) → [Error Handling](./docs/ERROR_HANDLING.md) → [Testing Guidelines](./.kiro/steering/tech.md#testing-standards)
 - **Deployment**: [API Documentation](./docs/API_DOCUMENTATION.md) → [Production Guidelines](./README.md#production-deployment)
 
 ---

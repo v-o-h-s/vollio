@@ -28,15 +28,15 @@ You can import types in several ways:
 
 ```typescript
 // Import from main types file (recommended for backward compatibility)
-import { PDFDocument, Note, Quiz } from "@/lib/types";
+import { PDFDocument, Note } from "@/lib/types";
 
 // Import from specific type modules (recommended for new code)
 import { PDFDocument, Annotation } from "@/lib/types/pdf";
 import { Note, NotionEditorProps } from "@/lib/types/editor";
-import { Quiz, QuizQuestion } from "@/lib/types/quiz";
+// Quiz types have been removed
 
 // Import from index file (alternative approach)
-import { PDFDocument, Note, Quiz } from "@/lib/types/index";
+import { PDFDocument, Note } from "@/lib/types/index";
 ```
 
 ### Backward Compatibility

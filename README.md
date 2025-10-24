@@ -1,16 +1,14 @@
-# Noto - AI-Powered PDF Annotation & Quiz Generation Platform
+# Noto - AI-Powered PDF Annotation Platform
 
-Noto is a modern PDF annotation and intelligent quiz generation platform built with Next.js 15 and React 19. It combines enterprise-grade document processing, AI-powered content analysis, and intuitive annotation tools to create a comprehensive learning and document management solution.
+Noto is a modern PDF annotation platform built with Next.js 15 and React 19. It combines enterprise-grade document processing and intuitive annotation tools to create a comprehensive document management solution.
 
-> **Status**: ✅ **Production Ready** - Complete implementation with advanced document processing, RAG-based quiz generation, comprehensive PDF annotation system with multi-mode highlighting and glassmorphism UI, rich text editing with auto-save, full theme integration, mobile optimization, and modular architecture. All core systems implemented and tested with enhanced annotation tools and debug infrastructure.
+> **Status**: ✅ **Production Ready** - Complete implementation with advanced document processing, comprehensive PDF annotation system with multi-mode highlighting and glassmorphism UI, rich text editing with auto-save, full theme integration, mobile optimization, and modular architecture. All core systems implemented and tested with enhanced annotation tools and debug infrastructure.
 
 ## ✨ Key Features
 
 ### 🤖 AI-Powered Intelligence
-- **RAG-Based Quiz Generation**: Advanced retrieval-augmented generation creates intelligent quizzes from PDF content using vector search and semantic analysis
-- **Multi-Document Intelligence**: Generate comprehensive quizzes from multiple PDFs with balanced content representation and cross-document analysis
+
 - **Intelligent Content Analysis**: Advanced document processing with content type detection, semantic understanding, and automated quality assessment
-- **Adaptive Difficulty**: AI-powered question generation with configurable difficulty levels and adaptive complexity based on content analysis
 - **Real-time System Monitoring**: Continuous system optimization with user feedback collection and quality assurance metrics
 
 ### 📄 Advanced Document Processing
@@ -81,6 +79,8 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 - **[PDF Components](./components/pdf/README.md)** - PDF viewer and annotation component suite
 - **[Editor Components](./components/editor/README.md)** - Rich text editor and floating toolbar system
+- **[Quiz Components](./components/quiz/README.md)** - AI-powered quiz generation system
+- **[RAG Components](./components/rag/README.md)** - RAG system and feedback components
 - **[Store Documentation](./lib/store/README.md)** - Redux state management and RTK Query
 - **[Test Documentation](./test/README.md)** - Testing strategy and comprehensive coverage
 - **[Error Handling](./docs/ERROR_HANDLING.md)** - Comprehensive error handling patterns
@@ -207,15 +207,14 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 ```
 ├── app/                    # Next.js App Router (pages & API routes)
-│   ├── api/               # RESTful API endpoints (PDFs, notes, quiz, RAG)
+│   ├── api/               # RESTful API endpoints (PDFs, notes)
 │   ├── dashboard/         # Main application interface
 │   └── sign-in/          # Authentication pages
 ├── components/            # React component library
 │   ├── ui/               # Base UI components (shadcn/ui)
 │   ├── pdf/              # PDF viewer & annotation system
 │   ├── editor/           # Rich text editor (TipTap-based)
-│   ├── quiz/             # AI quiz generation & management
-│   ├── rag/              # RAG system & feedback components
+
 │   ├── theme/            # Theme system components
 │   └── dashboard/        # Navigation & layout components
 ├── lib/                   # Core utilities & configurations
@@ -230,8 +229,7 @@ For comprehensive documentation covering all aspects of the Noto application, se
 
 ### Key Components
 
-#### 🤖 AI & RAG System
-- **RAG Quiz Generator**: Advanced quiz creation using vector search and semantic analysis (`/api/quiz/generate-rag`)
+#### 🤖 Document Processing
 - **Document Processor**: Syncfusion text extraction with OCR fallback and semantic chunking
 - **Content Analyzer**: Intelligent content type detection and quality assessment
 - **Feedback System**: Real-time performance monitoring with user feedback collection (`SimpleFeedbackForm`)
@@ -248,11 +246,7 @@ For comprehensive documentation covering all aspects of the Noto application, se
 - **SlashCommand System**: Notion-style commands for quick formatting and block creation
 - **EditorProvider**: State management and cross-component communication
 
-#### 🎯 Quiz Management
-- **InteractiveQuizPlayer**: Complete quiz-taking interface with progress tracking and scoring
-- **MobileQuizInterface**: Touch-optimized quiz generation and management
-- **QuizConfigurationPanel**: Advanced settings for difficulty, question types, and content selection
-- **System Integration**: Comprehensive quiz system with modular architecture
+
 
 #### 🎨 Theme & UI System
 - **ThemeProvider**: Complete light/dark mode with system preference detection
@@ -265,20 +259,17 @@ For comprehensive documentation covering all aspects of the Noto application, se
 ### 💻 Desktop Workflow
 
 1. **Document Upload**: Drag-and-drop PDFs with automatic processing and text extraction
-2. **AI Quiz Generation**: Select documents and generate intelligent quizzes using RAG technology
-3. **PDF Annotation**: Select text to create rich annotations with coordinate-based positioning
-4. **Note Management**: Create and edit notes with Notion-style block editor and auto-save
+2. **PDF Annotation**: Select text to create rich annotations with coordinate-based positioning
+3. **Note Management**: Create and edit notes with Notion-style block editor and auto-save
 5. **Cross-tab Sync**: Real-time updates across browser tabs with seamless synchronization
 6. **Theme Switching**: Toggle between light/dark modes with system preference detection
 
 ### 📱 Mobile Workflow
 
 1. **Touch Upload**: Mobile-optimized PDF upload with progress tracking
-2. **Mobile Quiz Interface**: Touch-friendly quiz generation and management
-3. **Touch Annotations**: Long-press text selection with mobile-optimized dialogs
-4. **Responsive Editor**: Full-screen rich text editing with gesture support
-5. **Mobile Navigation**: Swipe and tap navigation with adaptive UI components
-6. **Offline Capability**: Basic offline functionality for quiz completion
+2. **Touch Annotations**: Long-press text selection with mobile-optimized dialogs
+3. **Responsive Editor**: Full-screen rich text editing with gesture support
+4. **Mobile Navigation**: Swipe and tap navigation with adaptive UI components
 
 ## 🔧 Development
 
@@ -306,10 +297,8 @@ npm run setup:supabase  # Verify Supabase setup
 
 ### Key Development Files
 
-- **API Routes**: `app/api/` - Complete RESTful API (PDFs, notes, quiz, RAG monitoring)
-- **AI Services**: `lib/services/` - Document processing, RAG generation, and content analysis
+- **API Routes**: `app/api/` - Complete RESTful API (PDFs, notes)
 - **PDF System**: `components/pdf/` - Complete PDF viewer and annotation system
-- **Quiz System**: `components/quiz/` - AI-powered quiz generation and management
 - **Editor System**: `components/editor/` - Rich text editor with auto-save and floating toolbars
 - **State Management**: `lib/store/` - Redux store with RTK Query and typed hooks
 - **Type System**: `lib/types/` - Comprehensive TypeScript definitions organized by feature
@@ -456,6 +445,6 @@ For questions, issues, or contributions:
 
 ---
 
-**Noto** - AI-powered PDF annotation and quiz generation platform. Transforming document interaction through intelligent content analysis, seamless annotation workflows, and adaptive learning experiences.
+**Noto** - AI-powered PDF annotation platform. Transforming document interaction through intelligent content analysis and seamless annotation workflows.
 
 **Status**: ✅ Production Ready | **Version**: 1.0.0 | **Last Updated**: January 2025

@@ -614,9 +614,9 @@ const handleUpdateNote = async (id: string, title: string, content: any) => {
 
 ## RAG System API
 
-### POST /api/quiz/generate-rag
+### ~~POST /api/quiz/generate-rag~~ [REMOVED]
 
-Generate quizzes using RAG-based content analysis from processed documents.
+**Status**: Removed - Quiz functionality has been completely removed from the application.
 
 **Request Body:**
 ```json
@@ -648,9 +648,9 @@ Generate quizzes using RAG-based content analysis from processed documents.
 }
 ```
 
-### POST /api/quiz/advanced-search
+### ~~POST /api/quiz/advanced-search~~ [REMOVED]
 
-Advanced semantic search across document chunks for targeted content discovery.
+**Status**: Removed - Quiz functionality has been completely removed from the application.
 
 **Request Body:**
 ```json
@@ -688,9 +688,7 @@ Advanced semantic search across document chunks for targeted content discovery.
 
 ### ~~GET /api/quiz/history~~ [REMOVED]
 
-~~Retrieve quiz attempt history and performance analytics for the authenticated user.~~ 
-
-**Status**: Removed - Analytics functionality has been removed from the quiz system.
+**Status**: Removed - Quiz functionality has been completely removed from the application.
 
 **~~Query Parameters:~~**
 - `limit` (optional): Maximum number of attempts to return (default: 20)
