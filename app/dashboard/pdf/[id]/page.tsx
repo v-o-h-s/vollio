@@ -543,17 +543,14 @@ export default function PDFViewerPage() {
 
         {/* Show Header Button (appears when header is hidden in focus mode) */}
         {isFocusMode && !isHeaderVisible && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-30">
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-30 cursor-pointer">
             <Button
               onClick={() => setIsHeaderVisible(true)}
               size="sm"
-              className="bg-gradient-to-r from-blue-500/20 to-purple-600/20 dark:from-blue-400/20 dark:to-purple-500/20 backdrop-blur-xl border border-blue-300/30 dark:border-blue-400/30 hover:from-blue-500/30 hover:to-purple-600/30 dark:hover:from-blue-400/30 dark:hover:to-purple-500/30 text-foreground shadow-2xl shadow-blue-500/20 dark:shadow-blue-400/20 rounded-full px-4 py-2 animate-fade-in transition-all duration-300 hover:scale-105"
+              className="bg-white/90 dark:bg-background/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-full px-4 py-2 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white dark:hover:bg-background shadow-lg"
             >
-              <ArrowLeft
-                size={16}
-                className="rotate-90 text-blue-600 dark:text-blue-400"
-              />
-              <span className="ml-2 text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+              <ArrowLeft size={16} className="rotate-90 text-gray-700 dark:text-gray-300" />
+              <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 Show Header
               </span>
             </Button>
@@ -587,7 +584,7 @@ export default function PDFViewerPage() {
             <Button
               onClick={() => setIsFocusMode(true)}
               size="sm"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-2xl shadow-blue-500/25 rounded-full px-4 py-2 hover:from-blue-600 hover:to-purple-700 transition-all duration-200 backdrop-blur-sm border border-white/20"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 text-white shadow-2xl shadow-blue-500/25 dark:shadow-blue-600/20 rounded-full px-4 py-2 hover:from-blue-600 hover:to-purple-700 dark:hover:from-blue-700 dark:hover:to-purple-800 transition-all duration-200 backdrop-blur-sm border border-white/20 dark:border-gray-700/30"
             >
               <Maximize size={16} className="mr-2" />
               <span className="font-medium">Focus Mode</span>

@@ -13,9 +13,7 @@ export { TableBubbleMenu } from './TableBubbleMenu';
 
 // Enhanced editor variants
 export { ResponsiveNotionEditor } from './ResponsiveNotionEditor';
-export { NotionEditorWithAutoSave } from './NotionEditorWithAutoSave';
 export { RobustNotionEditor } from './RobustNotionEditor';
-export { LazyNotionEditor } from './LazyNotionEditor';
 
 // Auto-save and status components
 export { AutoSaveStatus } from './AutoSaveStatus';
@@ -23,12 +21,9 @@ export { AutoSaveStatus } from './AutoSaveStatus';
 // Dialog components
 export { LinkDialog } from './LinkDialog';
 
-// Demo components
-export { FloatingToolbarDemo } from './FloatingToolbarDemo';
-export { AutoSaveDemo } from './AutoSaveDemo';
 
 // Extensions
 export * from './extensions';
 
 // Types
-export type { NotionEditorProps, JSONContent, EditorState, EditorContextValue } from '@/lib/types';
+export type { NotionEditorProps, JSONContent, EditorState, EditorContextValue } from '@/lib/types/editor';

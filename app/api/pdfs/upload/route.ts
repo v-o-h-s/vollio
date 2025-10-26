@@ -4,7 +4,7 @@ import {
   getAuthenticatedSupabaseClient,
   STORAGE_CONFIG,
 } from "@/lib/supabaseClient";
-import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types";
+import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types/pdf";
 import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
 import {
   withErrorHandling,
@@ -219,7 +219,7 @@ async function handlePOST(
   const context = extractRequestContext(request, "/api/pdfs/upload");
 
   // Enhanced authentication validation
-  const authContext = await requireAuthentication(request, ['upload', 'write']);
+  const authContext = await requireAuthentication(request, ["upload", "write"]);
   const userId = authContext.userId;
 
   // Additional validation check
@@ -229,7 +229,7 @@ async function handlePOST(
   }
 
   // Enhanced rate limiting with multiple violation tracking
-  checkEnhancedRateLimit(userId, 'UPLOAD', { ...context, userId });
+  checkEnhancedRateLimit(userId, "UPLOAD", { ...context, userId });
 
   // Parse form data
   const formData = await request.formData();
@@ -242,19 +242,24 @@ async function handlePOST(
   const securityValidation = await validateFileUploadSecurity(file);
   if (!securityValidation.valid) {
     throw createServerError(
-      securityValidation.severity === 'critical' ? ServerErrorType.VALIDATION_ERROR : ServerErrorType.VALIDATION_ERROR,
-      securityValidation.error || 'File validation failed',
+      securityValidation.severity === "critical"
+        ? ServerErrorType.VALIDATION_ERROR
+        : ServerErrorType.VALIDATION_ERROR,
+      securityValidation.error || "File validation failed",
       { ...context, userId, fileName: file?.name, fileSize: file?.size },
       securityValidation.details
     );
   }
 
   // Check user quota limits
-  const quotaInfo = await checkUserQuota(supabaseClient || await getAuthenticatedSupabaseClient(), userId);
+  const quotaInfo = await checkUserQuota(
+    supabaseClient || (await getAuthenticatedSupabaseClient()),
+    userId
+  );
   if (!quotaInfo.canUpload) {
     throw createServerError(
       ServerErrorType.VALIDATION_ERROR,
-      `Upload quota exceeded: ${quotaInfo.quotaExceeded.join(', ')}`,
+      `Upload quota exceeded: ${quotaInfo.quotaExceeded.join(", ")}`,
       { ...context, userId, fileName: file?.name, fileSize: file?.size },
       { quotaInfo }
     );
@@ -297,43 +302,6 @@ async function handlePOST(
     }
 
     // Document uploaded successfully
-      
-      // Download the file buffer for processing
-      const { data: fileData, error: downloadError } = await supabaseClient.storage
-        .from(STORAGE_CONFIG.BUCKET_NAME)
-        .download(uploadResult.path);
-
-      if (!downloadError && fileData) {
-        const fileBuffer = Buffer.from(await fileData.arrayBuffer());
-        
-        // Add to processing queue with default options
-        const jobId = processingQueue.addJob(
-          userId,
-          pdfId,
-          fileBuffer,
-          file.name,
-          {
-            useOCR: false, // Start with Syncfusion, fallback to OCR if needed
-            generateEmbeddings: true, // Generate embeddings for RAG
-            chunkSize: 400,
-            chunkOverlap: 50,
-            preserveStructure: true,
-            respectSentenceBoundaries: true,
-          }
-        );
-
-        console.log(`🚀 Automatic document processing queued: Job ID ${jobId} for PDF ${pdfId}`);
-      }
-    } catch (processingError) {
-      // Log but don't fail the upload
-      const processingServerError = createServerError(
-        ServerErrorType.PROCESSING_ERROR,
-        "Failed to trigger automatic document processing",
-        { ...context, userId, operation: "auto_processing", pdfId },
-        processingError
-      );
-      logServerError(processingServerError);
-    }
 
     // Log successful upload
     console.log(

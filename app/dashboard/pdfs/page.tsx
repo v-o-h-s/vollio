@@ -7,12 +7,12 @@ import { FileText, FolderOpen, Upload, Search } from "lucide-react";
 
 export default function PDFsPage() {
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto  space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">PDF Library</h1>
-          <p className="text-muted-foreground">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-bold tracking-tight">PDF Library</h1>
+          <p className="text-muted-foreground text-sm">
             Manage your PDF documents with file system-style navigation
           </p>
         </div>

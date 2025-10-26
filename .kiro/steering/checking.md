@@ -3,8 +3,8 @@ inclusion: always
 ---
 
 ---
-inclusion: always
----
+
+## inclusion: always
 
 # Error Handling and Problem Resolution
 
@@ -20,16 +20,19 @@ When encountering errors or implementation challenges:
 ## Framework-Specific Issues
 
 ### Next.js 15 + App Router
+
 - Import resolution: Use `@/` prefix consistently, check `tsconfig.json` paths
 - Route handlers: Export named functions (GET, POST) in `route.ts` files
 - Client/Server boundaries: Use `"use client"` directive for interactive components
 
 ### React 19 + TypeScript
+
 - Strict mode: Define proper interfaces for all props and API responses
 - Hook dependencies: Include all dependencies in useEffect/useMemo arrays
 - Type imports: Use `import type` for TypeScript-only imports
 
 ### Authentication (Clerk)
+
 - Protected routes: Use `auth()` in server components, `useAuth()` in client components
 - JWT integration: Ensure Supabase RLS policies match Clerk JWT structure
 - Redirect handling: Use `redirect()` from `next/navigation` for unauthenticated users
@@ -37,22 +40,26 @@ When encountering errors or implementation challenges:
 ## Common Error Patterns
 
 ### Theme System Issues
+
 - **Theme not persisting**: Check localStorage permissions and ensure ThemeProvider is not remounting
 - **Theme flashing**: Verify theme script runs before React hydration and CSS includes both theme variants
 - **Components not theme-aware**: Ensure components use theme tokens (`bg-muted`, `text-foreground`) instead of hardcoded colors
 - **Skeleton loading issues**: Verify skeleton components use `bg-muted` and loading-shimmer uses theme-aware CSS custom properties
 
 ### Database Operations
+
 - **RLS violations**: Check user authentication and policy configuration
 - **Type mismatches**: Validate database row structure with type guards
 - **Connection issues**: Use `getAuthenticatedSupabaseClient()` consistently
 
 ### RTK Query Issues
+
 - **Cache invalidation**: Use proper tag invalidation after mutations
 - **Loading states**: Handle isLoading, isError states in components
 - **Type safety**: Define proper TypeScript interfaces for API responses
 
 ### Document Processing Issues
+
 - **Syncfusion License Errors**: Verify Syncfusion license is properly configured and not expired
 - **Text Extraction Failures**: Check fallback from Syncfusion to OCR is working correctly
 - **OCR Processing Errors**: Validate node-tesseract-ocr installation and language packs
@@ -61,7 +68,9 @@ When encountering errors or implementation challenges:
 - **Memory Leaks**: Verify proper cleanup of temporary files and child processes
 
 #### Document Processing Debugging Checklist
+
 When text extraction fails:
+
 1. Check Syncfusion license status and component initialization
 2. Verify PDF buffer is valid and not corrupted
 3. Test OCR fallback with known scanned documents
@@ -70,6 +79,7 @@ When text extraction fails:
 6. Validate chunking output for proper content segmentation
 
 ### PDF Annotation Issues
+
 - **Tooltip Race Conditions**: Don't clear showSelectionToolbar state at start of selection handler
 - **Coordinate Conversion**: Ensure proper PDF-to-screen coordinate mapping with canvas detection
 - **State Flicker**: Avoid rapid state changes (false→true) that confuse visibility logic
@@ -83,7 +93,9 @@ When text extraction fails:
 - **Color/Opacity Updates**: Validate color hex codes and opacity ranges (0.1-1.0) before API calls
 
 #### PDF Annotation Debugging Checklist
+
 When highlighting doesn't work:
+
 1. **Check bounds format**: Ensure using {x, y, width, height} not {left, top, width, height}
 2. **Verify PDF viewer readiness**: Check pdfViewerRef.current?.annotation is available
 3. **Check document loading**: Ensure isLoading is false before creating annotations
@@ -93,25 +105,29 @@ When highlighting doesn't work:
 7. **Annotation module injection**: Verify Annotation service is included in Inject services array
 
 When tooltip doesn't appear on subsequent selections:
+
 1. Check if showSelectionToolbar state is being cleared unnecessarily
-2. Verify setTimeout delays aren't causing race conditions  
+2. Verify setTimeout delays aren't causing race conditions
 3. Ensure validation happens before any state changes
 4. Check console for coordinate conversion errors
 5. Verify tooltip position is within viewport bounds
 6. Test with debug panel showing real-time state values
 
 ### UI Component Issues
+
 - **Confirmation Dialogs**: Use custom `DeleteConfirmationDialog` instead of browser `window.confirm()`
 - **Auto-Save Status**: Ensure `AutoSaveStatusProvider` is wrapped around components that need status
 - **Context Errors**: Check that context hooks are used within their respective providers
 - **Loading States**: Always show loading spinners during async operations
 
 ### File Operations
+
 - **Upload failures**: Implement cleanup in catch blocks to prevent orphaned files
 - **Storage access**: Generate fresh signed URLs, don't cache expired ones
 - **File validation**: Check size, type, and content before processing
 
 ### State Management
+
 - **RTK Query errors**: Handle loading/error states in components
 - **Cross-tab sync**: Use PostMessage API for real-time updates
 - **Stale data**: Implement proper cache invalidation strategies
@@ -119,20 +135,23 @@ When tooltip doesn't appear on subsequent selections:
 ## Error Handling Standards
 
 ### User-Facing Errors
+
 - Use `@/components/ui/error-notification.tsx` for consistent error display
 - Provide actionable error messages with retry options
 - Log detailed errors server-side while showing simplified messages to users
 
 ### API Error Responses
+
 ```typescript
 // Standard error response format
 return NextResponse.json(
-  { error: 'User-friendly message', details: 'Technical details' },
+  { error: "User-friendly message", details: "Technical details" },
   { status: 400 }
 );
 ```
 
 ### Component Error Boundaries
+
 - Wrap feature components with `<ErrorBoundary>`
 - Implement fallback UI for graceful degradation
 - Use `useErrorHandling()` hook for consistent error state management
@@ -140,6 +159,7 @@ return NextResponse.json(
 ## Critical Verification Points
 
 After any changes, verify these core flows work:
+
 - **Authentication**: Sign-in → Dashboard access → Protected API calls
 - **PDF workflow**: Upload → View → Annotate → Save → Cross-tab sync
 - **Document processing**: PDF upload → Syncfusion extraction → OCR fallback → Chunking → Storage
@@ -152,11 +172,13 @@ After any changes, verify these core flows work:
 ## Current Development Context
 
 ### Active Features
+
 - **Note System**: Complete frontend with auto-save, needs API endpoints and database schema
 - **Rich Text Editor**: Full TipTap integration with NotionEditor, auto-save, and keyboard shortcuts
 - **Auto-Save Hook**: `useAutoSave` with debounced saves, status tracking, and error handling
 
 ### Common Issues to Check
+
 - **Import Paths**: Ensure all `@/` imports are correct and components exist
 - **TypeScript Errors**: Fix implicit `any` types and deprecated API usage
 - **RTK Query Usage**: Verify all server communication uses RTK Query mutations/queries instead of direct fetch
@@ -171,6 +193,7 @@ After any changes, verify these core flows work:
 ## Syncfusion PDF Annotation Debugging Checklist
 
 When implementing or debugging Syncfusion PDF annotations:
+
 - ✅ Use correct bounds format: `{x, y, width, height}` NOT `{left, top, width, height}`
 - ✅ Convert 0-based pageIndex to 1-based pageNumber: `pageNumber: pageIndex + 1`
 - ✅ Validate PDF viewer reference exists: `pdfViewerRef.current?.annotation`
@@ -184,12 +207,13 @@ When implementing or debugging Syncfusion PDF annotations:
 - ❌ Don't skip validation of annotation module availability
 
 ### Syncfusion Annotation Creation Pattern
+
 ```typescript
 // Correct bounds processing
 const extractSelectionBounds = (args) => {
   return args.textBounds.map((b) => ({
-    x: b.left || b.x || 0,        // Use x, not left
-    y: b.top || b.y || 0,         // Use y, not top  
+    x: b.left || b.x || 0, // Use x, not left
+    y: b.top || b.y || 0, // Use y, not top
     width: b.width || 0,
     height: b.height || 0,
   }));
@@ -198,14 +222,14 @@ const extractSelectionBounds = (args) => {
 // Correct annotation creation
 const createHighlight = () => {
   if (!pdfViewerRef.current?.annotation || isLoading) return;
-  
+
   const settings = {
     bounds: processedBounds,
-    pageNumber: pageIndex + 1,    // Convert to 1-based
+    pageNumber: pageIndex + 1, // Convert to 1-based
     color: "#FFFF00",
     opacity: 0.4,
   };
-  
+
   pdfViewerRef.current.annotation.addAnnotation("Highlight", settings);
 };
 ```
@@ -213,6 +237,7 @@ const createHighlight = () => {
 ## RTK Query Implementation Checklist
 
 When implementing or refactoring API calls:
+
 - ✅ Use `useCreateNoteMutation` instead of direct fetch to `/api/notes`
 - ✅ Use `useUpdateNoteMutation` instead of manual PUT requests
 - ✅ Use `useGetNotesQuery` for fetching note lists with automatic caching
@@ -223,6 +248,7 @@ When implementing or refactoring API calls:
 ## Auto-Save Architecture Checklist
 
 When working with editor components:
+
 - ✅ Auto-save should be handled internally by NotionEditor components
 - ✅ Use RTK Query mutations for create/update operations in auto-save
 - ✅ Provide simple `onSaveSuccess` callbacks for parent notifications if needed
@@ -234,6 +260,7 @@ When working with editor components:
 ## Document Processing Implementation Checklist
 
 When implementing or debugging document processing:
+
 - ✅ Use `DocumentProcessingService` with Syncfusion as primary extraction method
 - ✅ Implement proper fallback to `OCRService` with node-tesseract-ocr
 - ✅ Use `ChunkingService` for semantic text segmentation with content type detection
@@ -248,6 +275,7 @@ When implementing or debugging document processing:
 ## RAG System Implementation Checklist
 
 When implementing or debugging RAG-based quiz generation:
+
 - ✅ Use `/api/quiz/generate-rag` for RAG-based quiz generation with proper authentication
 - ✅ Implement `/api/quiz/advanced-search` for sophisticated content filtering and semantic search
 - ✅ Use `SimpleFeedbackForm` component for user feedback collection and system improvement
@@ -263,6 +291,7 @@ When implementing or debugging RAG-based quiz generation:
 ## Highlight Management Implementation Checklist
 
 When implementing or debugging highlight management features:
+
 - ✅ Use `HighlightHoverTrigger` component for hover-based context menu activation
 - ✅ Implement `HighlightContextMenu` with proper color picker and opacity slider
 - ✅ Use RTK Query mutations (`useUpdateHighlightMutation`, `useDeleteHighlightMutation`) for all operations
