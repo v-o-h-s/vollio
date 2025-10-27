@@ -103,7 +103,7 @@ function NotionEditorInner({
 
         setCurrentNoteId(newNoteId);
 
-        // Call the onNoteCreated callback if provided
+        // Call the onNoteCreated callback only once when note is first created
         if (onNoteCreated) {
           onNoteCreated(newNoteId);
         }

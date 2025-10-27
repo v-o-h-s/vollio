@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/utils/supabase-helpers";
+import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient"; 
 import { withErrorHandling } from "@/lib/utils/server-error-handling";
 
 interface RenameRequest {
@@ -11,7 +11,7 @@ export const PUT = withErrorHandling(async (
   request: NextRequest,
   { params }: { params: { id: string } }
 ) => {
-  const { userId } = auth();
+  const { userId } =await auth();
   
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -45,7 +45,7 @@ export const PUT = withErrorHandling(async (
       }, { status: 400 });
     }
 
-    const supabase = getAuthenticatedSupabaseClient();
+    const supabase =await getAuthenticatedSupabaseClient();
 
     // Check if PDF exists and belongs to user
     const { data: existingPdf, error: fetchError } = await supabase

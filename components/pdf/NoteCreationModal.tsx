@@ -10,11 +10,8 @@ he close the note , and just then we send request to the database
 import React, { useState, useCallback } from "react";
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogPortal,
-  DialogOverlay,
 } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
@@ -23,6 +20,7 @@ import { NotionEditor } from "@/components/editor/NotionEditor";
 import { AutoSaveStatusProvider } from "@/components/dashboard/AutoSaveStatusProvider";
 import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveStatus";
 import { cn } from "@/lib/utils";
+import { DialogPortal } from "@radix-ui/react-dialog";
 
 
 interface NoteCreationModalProps {
@@ -40,24 +38,15 @@ export const NoteCreationModal: React.FC<NoteCreationModalProps> = ({
   pdfTitle,
   onNoteCreated,
 }) => {
-  const [isClosing, setIsClosing] = useState(false);
-
   const handleClose = useCallback(() => {
-    setIsClosing(true);
-    setTimeout(() => {
-      onClose();
-      setIsClosing(false);
-    }, 150); // Small delay for smooth animation
+    onClose();
   }, [onClose]);
 
   const handleNoteCreated = useCallback(
     (noteId: string) => {
       console.log("Note created in modal:", noteId);
-      // Don't auto-close the modal when note is created/auto-saved
-      // onNoteCreated(noteId);
-      // handleClose();
-
-      // Just notify parent about the note creation without closing
+      // Only notify parent about the note creation, don't close modal
+      // The modal should only close when user explicitly closes it
       onNoteCreated(noteId);
     },
     [onNoteCreated]
@@ -65,14 +54,11 @@ export const NoteCreationModal: React.FC<NoteCreationModalProps> = ({
 
   // Handle manual save button click
   const handleSaveClick = useCallback(() => {
-    // For now, we'll create a temporary note ID
-    // In a real implementation, this would trigger the editor's save function
-    const tempNoteId = `note_${Date.now()}`;
-    console.log("Manual save triggered:", tempNoteId);
-    // Don't close the modal on manual save either - let user decide when to close
-    onNoteCreated(tempNoteId);
-    // handleClose(); // Removed - don't auto-close on manual save
-  }, [onNoteCreated]);
+    // Close the modal when user explicitly clicks save
+    // The note should already be auto-saved by this point
+    console.log("Manual save clicked - closing modal");
+    handleClose();
+  }, [handleClose]);
 
   return (
     <AutoSaveStatusProvider>
@@ -85,7 +71,7 @@ export const NoteCreationModal: React.FC<NoteCreationModalProps> = ({
             className={cn(
               "fixed left-[50%] top-[50%] z-[9999] grid w-[90vw] h-[90vh] max-h-[800px] translate-x-[-50%] translate-y-[-50%] border bg-background shadow-lg sm:rounded-lg p-0 overflow-hidden"
             )}
-            onPointerDownOutside={(e) => {
+            onPointerDownOutside={() => {
               // Allow manual closing by clicking outside
             }}
           >

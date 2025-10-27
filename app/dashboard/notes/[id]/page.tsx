@@ -15,7 +15,6 @@ import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
 import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveStatus";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
-import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useNoteSync } from "@/hooks/use-note-sync";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
@@ -102,18 +101,7 @@ export default function NoteEditPage() {
     setShowDeleteDialog(false);
   }, []);
 
-  // Keyboard shortcuts
-  useKeyboardShortcuts({
-    escape: (event) => {
-      event.preventDefault();
-      if (
-        !hasUnsavedChanges ||
-        confirm("You have unsaved changes. Are you sure you want to leave?")
-      ) {
-        handleGoBack();
-      }
-    },
-  });
+
 
   // Warn user before leaving if there are unsaved changes
   useEffect(() => {
