@@ -197,7 +197,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               // Create Syncfusion annotation first
               const annotationOptions: Partial<HighlightSettings> = {
                 bounds: textBounds,
-                pageNumber: pageNumber, // Syncfusion uses (page 1 is 1 not 0)
+                pageNumber: pageNumber ,
                 author: "User",
                 subject: "Quick Highlight",
                 color: "#FFFF00", // Yellow for quick highlights
@@ -278,7 +278,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               // Create Syncfusion annotation
               const annotationOptions: Partial<HighlightSettings> = {
                 bounds: textBounds,
-                pageNumber: pageNumber,
+                pageNumber: pageNumber, // Convert to 1-based page numbers for Syncfusion
                 author: "User",
                 subject: "Comment Highlight",
                 color: "#FFA500", // Orange for comments
@@ -358,9 +358,17 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Handle note creation completion
   const handleNoteCreated = useCallback(
     async (noteId: string) => {
-      // Only create highlight annotation once when note is first created
+      console.log("📝 Note created with ID:", noteId);
+      console.log("📍 Current selection state:", {
+        selectedText,
+        selectedTextBounds,
+        currentPageNumber,
+        isViewerReady,
+        pdfId: currentPdfData?.id,
+      });
+
+      // Create highlight annotation when note is created
       if (
-        !highlightCreated &&
         pdfViewerRef.current &&
         selectedTextBounds &&
         selectedText &&
@@ -376,10 +384,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             return;
           }
 
+          console.log("🎯 Creating Syncfusion annotation with bounds:", selectedTextBounds);
+
           // Create Syncfusion annotation
           const annotationOptions: Partial<HighlightSettings> = {
             bounds: selectedTextBounds,
-            pageNumber: currentPageNumber, // Syncfusion uses 1-based page numbers
+            pageNumber: currentPageNumber , // Convert to 1-based page numbers for Syncfusion
             author: "User",
             subject: "Note Highlight",
             color: "#4A90E2", // Blue for note highlights
@@ -397,8 +407,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             annotationOptions as HighlightSettings
           );
 
+          console.log("✅ Syncfusion annotation created");
+
           // Save highlight to database with note linkage
-          await createHighlight({
+          const savedHighlight = await createHighlight({
             pdfId: currentPdfData.id,
             content: selectedText,
             color: "#4A90E2",
@@ -408,18 +420,30 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             textbounds: selectedTextBounds,
             noteId: noteId, // Link to the created note
           }).unwrap();
+
+          console.log("💾 Highlight saved to database:", savedHighlight);
           toast.success("Note and highlight created successfully");
 
-          // Mark highlight as created to prevent duplicate creation
-          setHighlightCreated(true);
+          // Close the modal and clear selection
+          setShowNoteModal(false);
+          setSelectedText("");
+          setSelectionBounds(null);
+          setSelectedTextBounds(null);
+          setHighlightCreated(false); // Reset for next selection
         } catch (error) {
           console.error("Error creating note highlight:", error);
           toast.error("Failed to create note highlight. Please try again.");
         }
+      } else {
+        console.error("❌ Missing required data for highlight creation:", {
+          hasPdfViewer: !!pdfViewerRef.current,
+          hasTextBounds: !!selectedTextBounds,
+          hasSelectedText: !!selectedText,
+          hasPdfId: !!currentPdfData?.id,
+        });
       }
     },
     [
-      highlightCreated,
       selectedText,
       currentPageNumber,
       selectedTextBounds,
@@ -1012,6 +1036,17 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               <p className="text-foreground font-medium">Loading PDF...</p>
             </div>
           </div>
+        )}
+
+        {/* Note Creation Modal */}
+        {showNoteModal && (
+          <UnifiedNoteModal
+            onClose={handleCloseNoteModal}
+            selectedText={selectedText}
+            pdfTitle={currentPdfData?.filename}
+            onNoteCreated={handleNoteCreated}
+            mode="create"
+          />
         )}
 
         {/* Note Preview Modal */}

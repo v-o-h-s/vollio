@@ -10,7 +10,6 @@ import { AutoSaveStatus } from "@/components/editor/AutoSaveStatus";
 import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveStatus";
 
 import { useAutoSave } from "@/hooks/use-auto-save";
-import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Rectangle } from "@/lib/types";
 import {
@@ -202,22 +201,7 @@ export default function NewNotePage() {
     }
   }, [autoSaveStatus, noteContent.content]);
 
-  // Keyboard shortcuts
-  useKeyboardShortcuts({
-    "mod+s": (event) => {
-      event.preventDefault();
-      handleManualSave();
-    },
-    escape: (event) => {
-      event.preventDefault();
-      if (
-        !hasUnsavedChanges ||
-        confirm("You have unsaved changes. Are you sure you want to leave?")
-      ) {
-        handleGoBack();
-      }
-    },
-  });
+
 
   // Warn user before leaving if there are unsaved changes
   useEffect(() => {
