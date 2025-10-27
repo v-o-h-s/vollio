@@ -131,7 +131,7 @@ export function TableBubbleMenu({ editor, className }: TableBubbleMenuProps) {
     <div
       ref={menuRef}
       className={cn(
-        'fixed z-50 flex items-center gap-1 rounded-lg border border-border bg-background p-1 shadow-lg',
+        'fixed z-[55] flex items-center gap-1 rounded-lg border border-border bg-background p-1 shadow-lg bubble-menu',
         className
       )}
       style={{ position: 'fixed' }}

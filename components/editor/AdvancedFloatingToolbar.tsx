@@ -183,7 +183,7 @@ export function AdvancedFloatingToolbar({
     <div
       ref={toolbarRef}
       className={cn(
-        "fixed z-50 flex items-center gap-1 rounded-lg border bg-background/95 backdrop-blur-sm shadow-lg p-1 floating-toolbar",
+        "fixed z-[55] flex items-center gap-1 rounded-lg border bg-background/95 backdrop-blur-sm shadow-lg p-1 floating-toolbar",
         "animate-in fade-in-0 zoom-in-95 duration-200",
         className
       )}

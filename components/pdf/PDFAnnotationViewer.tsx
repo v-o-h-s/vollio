@@ -12,6 +12,7 @@ import {
   ThumbnailView,
   Print,
   Annotation,
+  AnnotationSelectEventArgs,
 } from "@syncfusion/ej2-react-pdfviewer";
 import {
   useGetPDFQuery,
@@ -26,21 +27,9 @@ import { PDFViewerFallback } from "@/components/pdf/FallbackUI";
 import { FileText, AlertCircle, RefreshCw } from "lucide-react";
 
 import { HighlightSettings } from "@syncfusion/ej2-react-pdfviewer";
-import { NoteCreationModal } from "./NoteCreationModal";
+import { UnifiedNoteModal } from "./UnifiedNoteModal";
 import { HighlightHoverToolbar } from "./HighlightHoverToolbar";
-import { NotePreviewModal } from "./NotePreviewModal";
-import HighlightHoverTrigger from "./HighlightHoverTrigger";
-import HighlightContextMenu from "./HighlightContextMenu";
 
-/**
- * this is the options we need most <3I
-{
-  bounds: Bounds[];
-  pageNumber: number;
-  opacity: number;
-  color: string;
-}
- */
 
 /**
  * Props interface for PDFAnnotationViewer component
@@ -94,9 +83,11 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     position: { x: number; y: number };
     noteTitle?: string;
   } | null>(null);
-  const [showHoverToolbar, setShowHoverToolbar] = useState(false);
+
+  // Note preview modal state
   const [showNotePreview, setShowNotePreview] = useState(false);
   const [previewNoteId, setPreviewNoteId] = useState<string | null>(null);
+  
 
   // Quick highlight context menu state
   const [hoveredQuickHighlight, setHoveredQuickHighlight] = useState<{
@@ -447,6 +438,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         if (!annotation || !annotation.customData) return;
 
         const customData = annotation.customData;
+        console.log(customData);
         const annotationType = customData.type;
 
         // Convert PDF coordinates to screen coordinates
@@ -489,7 +481,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             position: { x: screenX, y: screenY },
             noteTitle: customData.noteTitle || "Note",
           });
-          setShowHoverToolbar(true);
         }
       } catch (error) {
         console.error("Error handling annotation mouseover:", error);
@@ -504,46 +495,68 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     setTimeout(() => {
       setShowHoverTrigger(false);
       setHoveredQuickHighlight(null);
-      setShowHoverToolbar(false);
       setHoveredHighlight(null);
     }, 100);
   }, []);
 
-  // Handle highlight hover (legacy - keeping for compatibility)
-  const handleHighlightHover = useCallback(
-    (_annotationId: string, position: { x: number; y: number }) => {
-      // TODO: Get note ID from annotation metadata
-      // For now, we'll use placeholder data
-      setHoveredHighlight({
-        noteId: "note-id-placeholder",
-        position,
-        noteTitle: "Sample Note Title",
-      });
-      setShowHoverToolbar(true);
+  // handle annotation click
+  const handleAnnotationClick = useCallback(
+    (args: AnnotationSelectEventArgs) => {
+      try {
+        const annotation = args.annotation;
+
+        if (!annotation) {
+          console.log("No annotation found in args");
+          return;
+        }
+
+        if (!annotation.customData) {
+          console.log("No customData found in annotation:", annotation);
+          return;
+        }
+
+        const customData = annotation.customData;
+        console.log("📋 Annotation customData:", customData);
+
+        // Check if this is a linked note highlight
+        if (customData.type === "note" && customData.noteId) {
+          console.log(
+            "✅ Found note annotation with noteId:",
+            customData.noteId
+          );
+
+          // Open note preview modal
+          console.log("🔄 Setting preview state:", {
+            noteId: customData.noteId,
+            showNotePreview: true
+          });
+          
+          setPreviewNoteId(customData.noteId);
+          setShowNotePreview(true);
+          
+          console.log("📊 Modal state after setting:", {
+            previewNoteId: customData.noteId,
+            showNotePreview: true
+          });
+          
+          toast.success("Opening note preview");
+        } else {
+          console.log("❌ Annotation conditions not met:", {
+            type: customData.type,
+            noteId: customData.noteId,
+            hasNoteId: !!customData.noteId,
+            isNoteType: customData.type === "note",
+          });
+        }
+      } catch (error) {
+        console.error("Error handling annotation click:", error);
+      }
     },
     []
   );
 
-  // Handle highlight hover end (legacy - keeping for compatibility)
-  const handleHighlightHoverEnd = useCallback(() => {
-    setShowHoverToolbar(false);
-    setHoveredHighlight(null);
-  }, []);
+ 
 
-  // Handle view note in preview
-  const handleViewNote = useCallback(() => {
-    if (hoveredHighlight?.noteId) {
-      setPreviewNoteId(hoveredHighlight.noteId);
-      setShowNotePreview(true);
-      setShowHoverToolbar(false);
-    }
-  }, [hoveredHighlight]);
-
-  // Handle close note preview
-  const handleCloseNotePreview = useCallback(() => {
-    setShowNotePreview(false);
-    setPreviewNoteId(null);
-  }, []);
 
   // Handle context menu trigger click
   const handleContextMenuTriggerClick = useCallback(() => {
@@ -701,6 +714,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   const handleHoverTriggerEnd = useCallback(() => {
     setShowHoverTrigger(false);
     setHoveredQuickHighlight(null);
+  }, []);
+
+  // Handle note preview modal close
+  const handleCloseNotePreview = useCallback(() => {
+    setShowNotePreview(false);
+    setPreviewNoteId(null);
   }, []);
 
   // Effect to load highlights when viewer is ready and we have data
@@ -883,7 +902,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           }}
           annotationMouseover={(args) => handleAnnotationMouseover(args)}
           annotationMouseLeave={() => handleAnnotationMouseLeave()}
-          annotationDoubleClick={() => {}}
+          annotationSelect={(args) => handleAnnotationClick(args)}
         >
           <Inject
             services={[
@@ -912,50 +931,15 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           </div>
         )}
 
-        {/* Note Creation Modal */}
-        <NoteCreationModal
-          isOpen={showNoteModal}
-          onClose={handleCloseNoteModal}
-          selectedText={selectedText}
-          pdfTitle={currentPdfData?.filename}
-          onNoteCreated={handleNoteCreated}
-        />
-
-        {/* Highlight Hover Toolbar */}
-        <HighlightHoverToolbar
-          isVisible={showHoverToolbar}
-          position={hoveredHighlight?.position || null}
-          noteId={hoveredHighlight?.noteId || null}
-          noteTitle={hoveredHighlight?.noteTitle}
-          onViewNote={handleViewNote}
-        />
 
         {/* Note Preview Modal */}
-        <NotePreviewModal
+        <UnifiedNoteModal
           isOpen={showNotePreview}
           onClose={handleCloseNotePreview}
           noteId={previewNoteId}
+          mode="preview"
         />
 
-        {/* Quick Highlight Hover Trigger */}
-        <HighlightHoverTrigger
-          isVisible={showHoverTrigger}
-          position={hoveredQuickHighlight?.position || null}
-          onTriggerClick={handleContextMenuTriggerClick}
-          onHoverEnd={handleHoverTriggerEnd}
-        />
-
-        {/* Quick Highlight Context Menu */}
-        <HighlightContextMenu
-          isVisible={showContextMenu}
-          position={hoveredQuickHighlight?.position || null}
-          highlightId={hoveredQuickHighlight?.id || null}
-          currentColor={hoveredQuickHighlight?.color}
-          currentOpacity={hoveredQuickHighlight?.opacity}
-          onHighlightUpdated={handleHighlightUpdated}
-          onHighlightDeleted={handleHighlightDeleted}
-          onClose={handleContextMenuClose}
-        />
       </div>
     </ErrorBoundary>
   );

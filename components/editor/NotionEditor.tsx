@@ -363,7 +363,6 @@ function NotionEditorInner({
     return { wordCount, readingTime };
   }, [editor, content?.content]);
 
-
   // Handle dialog keyboard shortcuts
   useEffect(() => {
     const handleOpenLinkDialog = () => {

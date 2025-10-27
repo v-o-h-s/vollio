@@ -136,7 +136,7 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
       role="toolbar"
       aria-label="Text formatting toolbar"
       className={cn(
-        "fixed z-50 flex items-center gap-1 rounded-lg border bg-background/95 backdrop-blur-sm shadow-lg p-1",
+        "fixed z-[55] flex items-center gap-1 rounded-lg border bg-background/95 backdrop-blur-sm shadow-lg p-1",
         "animate-in fade-in-0 zoom-in-95 duration-200 floating-toolbar",
         className
       )}

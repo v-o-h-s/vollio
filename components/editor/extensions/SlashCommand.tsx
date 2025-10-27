@@ -216,14 +216,14 @@ interface SlashCommandListProps {
 
 function SlashCommandList({ items, command, selectedIndex }: SlashCommandListProps) {
   return (
-    <div className="z-50 h-auto max-h-[330px] w-72 overflow-y-auto rounded-md border border-border bg-background p-1 shadow-md">
+    <div className="slash-command-menu z-[60] h-auto max-h-[330px] w-72 overflow-y-auto rounded-md border border-border bg-background/95 backdrop-blur-sm p-1 shadow-xl">
       {items.length > 0 ? (
         items.map((item, index) => {
           const Icon = item.icon;
           return (
             <button
               key={index}
-              className={`flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm hover:bg-accent hover:text-accent-foreground ${
+              className={`flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors ${
                 index === selectedIndex ? 'bg-accent text-accent-foreground' : ''
               }`}
               onClick={() => command(item)}
@@ -315,7 +315,8 @@ export const slashCommandSuggestion = {
         // Create a simple popup without tippy.js
         popup = document.createElement('div');
         popup.style.position = 'absolute';
-        popup.style.zIndex = '50';
+        popup.style.zIndex = '60';
+        popup.className = 'slash-command-popup';
         popup.appendChild(component.element);
         document.body.appendChild(popup);
 
