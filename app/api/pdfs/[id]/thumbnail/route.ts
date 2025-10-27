@@ -6,14 +6,15 @@ import { PDFDocument } from "pdf-lib";
 import sharp from "sharp";
 
 export const GET = withErrorHandling(
-  async (request: NextRequest, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
     const { userId } = await auth();
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const pdfId = params.id;
+    const resolvedParams = await params;
+    const pdfId = resolvedParams.id;
 
     if (!pdfId) {
       return NextResponse.json(

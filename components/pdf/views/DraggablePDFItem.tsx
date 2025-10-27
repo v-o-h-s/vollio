@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { FileText, MoreVertical } from "lucide-react";
 import { safeFormatDistanceToNow } from "@/lib/utils/dates";
 import { PDFDocument } from "@/lib/types/pdf";
-import { ViewMode } from "./PDFDirectoryView";
+import { ViewMode } from "./views/PDFDirectoryView";
 
 interface DraggablePDFItemProps {
   pdf: PDFDocument;

@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import {
-  FileText,
-  FolderOpen,
-  MoreVertical,
-  ChevronRight,
-  ChevronDown,
+import { 
+  FileText, 
+  FolderOpen, 
+  MoreVertical, 
+  ChevronRight, 
+  ChevronDown 
 } from "lucide-react";
 import { safeFormatDistanceToNow } from "@/lib/utils/dates";
 import { PDFDocument, Folder } from "@/lib/types/pdf";
-import { CreateFolder } from "./views/PDFFolder";
-import { ViewMode } from "./views/PDFDirectoryView";
+import { CreateFolder } from "./PDFFolder";
+import { ViewMode } from "./PDFDirectoryView";
 
 interface TreeViewProps {
   folders: Folder[];
@@ -109,7 +109,7 @@ export function TreeView({
   };
 
   const rootFolders = folders.filter((f) => f.parent_id === currentFolder);
-  const rootPDFs = pdfs.filter((pdf) =>
+  const rootPDFs = pdfs.filter((pdf) => 
     currentFolder ? pdf.folderId === currentFolder : !pdf.folderId
   );
 
@@ -173,8 +173,13 @@ function TreeNodeFolder({
   onSelect,
   onContextMenu,
 }: TreeNodeFolderProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: folder.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: folder.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -218,9 +223,7 @@ function TreeNodeFolder({
           </div>
           <div className="flex-1 min-w-0 grid grid-cols-4 gap-4">
             <p className="font-medium truncate">{folder.name}</p>
-            <p className="text-sm text-muted-foreground">
-              {folder.pdf_count || 0} PDFs
-            </p>
+            <p className="text-sm text-muted-foreground">{folder.pdf_count || 0} PDFs</p>
             <p className="text-sm text-muted-foreground">Folder</p>
             <p className="text-sm text-muted-foreground">
               {safeFormatDistanceToNow(folder.created_at)}
@@ -319,8 +322,13 @@ function TreeNodePDF({
   onContextMenu,
   onOpen,
 }: TreeNodePDFProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id: pdf.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: pdf.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),

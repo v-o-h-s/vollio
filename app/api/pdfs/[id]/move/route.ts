@@ -95,10 +95,11 @@ async function movePDF(
 // PATCH handler - Move PDF to folder
 async function handlePATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<MovePDFResponse>> {
-  const context = extractRequestContext(request, `/api/pdfs/${params.id}/move`);
-  const pdfId = params.id;
+  const resolvedParams = await params;
+  const pdfId = resolvedParams.id;
+  const context = extractRequestContext(request, `/api/pdfs/${pdfId}/move`);
 
   // Enhanced authentication validation
   const authContext = await requireAuthentication(request, ['write']);

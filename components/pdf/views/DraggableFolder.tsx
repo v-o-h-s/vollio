@@ -3,7 +3,7 @@
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { PDFFolder } from "./PDFFolder";
+import { PDFFolder } from "./PDFFolder"; 
 import { ViewMode } from "./PDFDirectoryView";
 import { Folder } from "@/lib/types/pdf";
 
@@ -24,13 +24,8 @@ export function DraggableFolder({
   onContextMenu,
   isDragging = false,
 }: DraggableFolderProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id: folder.id });
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: folder.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),

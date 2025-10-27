@@ -9,7 +9,7 @@ interface RenameRequest {
 
 export const PUT = withErrorHandling(async (
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   const { userId } =await auth();
   
@@ -17,7 +17,8 @@ export const PUT = withErrorHandling(async (
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const pdfId = params.id;
+  const resolvedParams = await params;
+  const pdfId = resolvedParams.id;
   
   if (!pdfId) {
     return NextResponse.json({ error: "PDF ID is required" }, { status: 400 });

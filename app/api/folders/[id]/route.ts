@@ -235,14 +235,24 @@ async function deleteFolder(
 // PUT handler - Update folder
 async function handlePUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<FolderResponse>> {
-  const context = extractRequestContext(request, `/api/folders/${params.id}`);
-  const folderId = params.id;
+  const resolvedParams = await params;
+  const folderId = resolvedParams.id;
+  const context = extractRequestContext(request, `/api/folders/${folderId}`);
 
   // Enhanced authentication validation
   const authContext = await requireAuthentication(request, ['write']);
   const userId = authContext.userId;
+
+  // Validate folder ID
+  if (!folderId || folderId === 'undefined' || folderId === 'null') {
+    throw createServerError(
+      ServerErrorType.VALIDATION_ERROR,
+      "Invalid folder ID provided",
+      { ...context, userId, folderId }
+    );
+  }
 
   // Enhanced rate limiting for API calls
   checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });
@@ -300,14 +310,27 @@ async function handlePUT(
 // DELETE handler - Delete folder
 async function handleDELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<FolderResponse>> {
-  const context = extractRequestContext(request, `/api/folders/${params.id}`);
-  const folderId = params.id;
+  const resolvedParams = await params;
+  const folderId = resolvedParams.id;
+  const context = extractRequestContext(request, `/api/folders/${folderId}`);
 
   // Enhanced authentication validation
   const authContext = await requireAuthentication(request, ['delete']);
   const userId = authContext.userId;
+
+  // Validate folder ID
+  if (!folderId || folderId === 'undefined' || folderId === 'null') {
+    throw createServerError(
+      ServerErrorType.VALIDATION_ERROR,
+      "Invalid folder ID provided",
+      { ...context, userId, folderId }
+    );
+  }
+
+  // Log the deletion attempt
+  console.log(`🗑️ Attempting to delete folder: ${folderId} for user: ${userId}`);
 
   // Enhanced rate limiting for API calls
   checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });

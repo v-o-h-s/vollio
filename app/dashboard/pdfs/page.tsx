@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { PDFDirectoryView } from "@/components/pdf/PDFDirectoryView";
+import { PDFDirectoryView } from "@/components/pdf/views/PDFDirectoryView";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, FolderOpen, Upload, Search } from "lucide-react";
 
