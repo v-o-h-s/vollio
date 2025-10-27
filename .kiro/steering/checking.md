@@ -306,3 +306,38 @@ When implementing or debugging highlight management features:
 - ❌ Avoid direct DOM manipulation - use React state and props for all interactions
 - ❌ Don't skip validation of highlight existence before showing context menus
 - ❌ Avoid hardcoded positioning - use dynamic calculation based on highlight bounds
+
+## Quiz System Implementation Checklist
+
+When implementing or debugging quiz management features:
+
+- ✅ Use proper filtering logic for category, difficulty, and search queries
+- ✅ Implement responsive grid layouts that adapt to different screen sizes
+- ✅ Use theme-aware styling with proper dark/light mode support
+- ✅ Validate quiz data structure and ensure proper TypeScript interfaces
+- ✅ Implement proper loading states and skeleton components for quiz cards
+- ✅ Use consistent badge styling for categories and difficulty levels
+- ✅ Implement proper progress tracking with visual progress bars
+- ✅ Handle empty states gracefully with appropriate messaging and actions
+- ✅ Use proper gradient styling for visual appeal and brand consistency
+- ✅ Implement bookmark functionality with proper state management
+- ❌ Avoid hardcoded quiz data in production - use proper API integration
+- ❌ Don't skip mobile responsiveness testing for quiz interfaces
+- ❌ Avoid inconsistent styling between quiz cards and other UI components
+
+## Production Maintenance Checklist
+
+When maintaining the production application:
+
+- **API Consistency**: Ensure all new endpoints follow established RTK Query patterns
+- **Database Migrations**: Update database.ts types when schema changes occur
+- **Error Handling**: Maintain comprehensive error boundaries for all new features
+- **Documentation Updates**: Keep documentation current with any new implementations
+- **Type Safety**: Maintain strict TypeScript compliance across all components
+- **Mobile Responsiveness**: Test all new features on mobile devices
+- **Cross-tab Synchronization**: Ensure new features work across browser tabs
+- **Performance**: Monitor and optimize any performance-critical operations
+- **Security**: Validate all user inputs and maintain RLS policy compliance
+- **Testing**: Maintain test coverage for all critical functionality
+- **Quiz System**: Ensure quiz filtering, progress tracking, and responsive design work correctly
+- **Theme Integration**: Verify all new components support light/dark mode switching
