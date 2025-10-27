@@ -14,6 +14,7 @@ export interface Database {
           file_size: number;
           storage_path: string;
           mime_type: string;
+          folder_id: string | null;
           uploaded_at: string;
           updated_at: string;
         };
@@ -24,6 +25,7 @@ export interface Database {
           file_size: number;
           storage_path: string;
           mime_type?: string;
+          folder_id?: string | null;
           uploaded_at?: string;
           updated_at?: string;
         };
@@ -34,7 +36,34 @@ export interface Database {
           file_size?: number;
           storage_path?: string;
           mime_type?: string;
+          folder_id?: string | null;
           uploaded_at?: string;
+          updated_at?: string;
+        };
+      };
+      folders: {
+        Row: {
+          id: string;
+          user_id: string;
+          name: string;
+          parent_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          name: string;
+          parent_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          name?: string;
+          parent_id?: string | null;
+          created_at?: string;
           updated_at?: string;
         };
       };
@@ -320,6 +349,10 @@ export type PDFRow = Database["public"]["Tables"]["pdfs"]["Row"];
 export type PDFInsert = Database["public"]["Tables"]["pdfs"]["Insert"];
 export type PDFUpdate = Database["public"]["Tables"]["pdfs"]["Update"];
 
+export type FolderRow = Database["public"]["Tables"]["folders"]["Row"];
+export type FolderInsert = Database["public"]["Tables"]["folders"]["Insert"];
+export type FolderUpdate = Database["public"]["Tables"]["folders"]["Update"];
+
 export type UserActivityRow =
   Database["public"]["Tables"]["user_activity"]["Row"];
 export type UserActivityInsert =
@@ -342,8 +375,6 @@ export type HighlightUpdate =
 export type NoteRow = Database["public"]["Tables"]["notes"]["Row"];
 export type NoteInsert = Database["public"]["Tables"]["notes"]["Insert"];
 export type NoteUpdate = Database["public"]["Tables"]["notes"]["Update"];
-
-
 
 export type DocumentChunkRow =
   Database["public"]["Tables"]["document_chunks"]["Row"];
@@ -368,6 +399,3 @@ export type ProcessingStatusEnum =
 export type ExtractionMethodEnum =
   Database["public"]["Enums"]["extraction_method"];
 export type HighlightTypeEnum = Database["public"]["Enums"]["highlight_type"];
-
-
-

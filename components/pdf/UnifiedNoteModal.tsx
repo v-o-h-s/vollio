@@ -86,7 +86,8 @@ export function UnifiedNoteModal({
     if (mode === "create") return "Create Note from Selection";
     if (isTestMode) return "Test Note Preview";
     if (isLoadingNote) return "Loading...";
-    return note?.title || "Untitled Note";
+    // Don't use fallback for existing notes - let the editor handle the title
+    return note?.title || (mode === "preview" ? "Note Preview" : "New Note");
   };
 
   // Determine modal subtitle
@@ -326,8 +327,37 @@ export function UnifiedNoteModal({
                     content={
                       mode === "preview"
                         ? {
-                            title: note?.title || "Untitled Note",
+                            title: note?.title || "",
                             content: note?.content || null,
+                          }
+                        : mode === "create" && selectedText
+                        ? {
+                            title: selectedText.length > 60 
+                              ? selectedText.substring(0, 60).trim() + "..." 
+                              : selectedText.trim(), // Use selected text as title
+                            content: {
+                              type: "doc",
+                              content: [
+                                {
+                                  type: "paragraph",
+                                  content: [
+                                    {
+                                      type: "text",
+                                      text: selectedText,
+                                    },
+                                  ],
+                                },
+                                {
+                                  type: "paragraph",
+                                  content: [],
+                                },
+                              ],
+                            },
+                          }
+                        : mode === "create"
+                        ? {
+                            title: "", // Empty title for create mode without selected text
+                            content: null,
                           }
                         : undefined
                     }

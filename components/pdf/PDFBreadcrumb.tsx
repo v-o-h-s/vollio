@@ -7,7 +7,7 @@ import { ChevronRight, Home, Folder } from "lucide-react";
 interface Folder {
   id: string;
   name: string;
-  parentId: string | null;
+  parent_id: string | null;
 }
 
 interface PDFBreadcrumbProps {

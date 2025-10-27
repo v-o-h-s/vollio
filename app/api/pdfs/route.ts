@@ -30,7 +30,14 @@ import {
 async function fetchUserPDFs(supabaseClient: any, userId: string) {
   const { data, error, count } = await supabaseClient
     .from("pdfs")
-    .select("*", { count: "exact" })
+    .select(`
+      *,
+      folders (
+        id,
+        name,
+        parent_id
+      )
+    `, { count: "exact" })
     .order("uploaded_at", { ascending: false })
     .limit(50);
 
@@ -131,6 +138,8 @@ async function handleGET(request: NextRequest): Promise<NextResponse<SupabasePDF
           uploadedAt: pdfRow.uploaded_at,
           fileUrl: signedUrl,
           mimeType: pdfRow.mime_type,
+          folderId: pdfRow.folder_id,
+          folder: pdfRow.folders,
         };
       } catch (error) {
         // Log the error but don't fail the entire request
@@ -150,6 +159,8 @@ async function handleGET(request: NextRequest): Promise<NextResponse<SupabasePDF
           uploadedAt: pdfRow.uploaded_at,
           fileUrl: "", // Empty URL indicates error
           mimeType: pdfRow.mime_type,
+          folderId: pdfRow.folder_id,
+          folder: pdfRow.folders,
         };
       }
     })

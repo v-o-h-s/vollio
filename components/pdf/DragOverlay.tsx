@@ -9,9 +9,9 @@ import { PDFDocument } from "@/lib/types/pdf";
 interface Folder {
   id: string;
   name: string;
-  parentId: string | null;
-  createdAt: string;
-  pdfCount: number;
+  parent_id: string | null;
+  created_at: string;
+  pdf_count: number;
 }
 
 interface DragOverlayContentProps {

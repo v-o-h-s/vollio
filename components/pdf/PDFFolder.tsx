@@ -6,19 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Folder, 
+  Folder as FolderIcon, 
   MoreVertical, 
   FolderPlus
 } from "lucide-react";
 import { safeFormatDistanceToNow } from "@/lib/utils/dates";
-
-interface Folder {
-  id: string;
-  name: string;
-  parentId: string | null;
-  createdAt: string;
-  pdfCount: number;
-}
+import { Folder } from "@/lib/types/pdf";
 
 type ViewMode = "grid" | "list" | "compact" | "details";
 
@@ -83,7 +76,7 @@ export function PDFFolder({
       >
         <CardContent className="p-4">
           <div className="aspect-square mb-3 bg-muted/30 rounded-lg flex items-center justify-center">
-            <Folder className="h-12 w-12 text-primary" />
+            <FolderIcon className="h-12 w-12 text-primary" />
           </div>
           <div className="space-y-1">
             {isRenaming ? (
@@ -109,9 +102,9 @@ export function PDFFolder({
             )}
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <Badge variant="secondary" className="text-xs">
-                {folder.pdfCount} PDFs
+                {folder.pdf_count || 0} PDFs
               </Badge>
-              <span>{safeFormatDistanceToNow(folder.createdAt)}</span>
+              <span>{safeFormatDistanceToNow(folder.created_at)}</span>
             </div>
           </div>
         </CardContent>
@@ -131,7 +124,7 @@ export function PDFFolder({
         onContextMenu={onContextMenu}
       >
         <div className="flex flex-col items-center text-center">
-          <Folder className="h-8 w-8 text-primary mb-1" />
+          <FolderIcon className="h-8 w-8 text-primary mb-1" />
           {isRenaming ? (
             <Input
               value={newName}
@@ -154,7 +147,7 @@ export function PDFFolder({
             </p>
           )}
           <p className="text-xs text-muted-foreground">
-            {folder.pdfCount} PDFs
+            {folder.pdf_count || 0} PDFs
           </p>
         </div>
       </div>
@@ -172,7 +165,7 @@ export function PDFFolder({
         onDoubleClick={onOpen}
         onContextMenu={onContextMenu}
       >
-        <Folder className="h-5 w-5 text-primary flex-shrink-0" />
+        <FolderIcon className="h-5 w-5 text-primary flex-shrink-0" />
         <div className="flex-1 min-w-0 grid grid-cols-4 gap-4">
           {isRenaming ? (
             <Input
@@ -194,10 +187,10 @@ export function PDFFolder({
               {folder.name}
             </p>
           )}
-          <p className="text-sm text-muted-foreground">{folder.pdfCount} PDFs</p>
+          <p className="text-sm text-muted-foreground">{folder.pdf_count || 0} PDFs</p>
           <p className="text-sm text-muted-foreground">Folder</p>
           <p className="text-sm text-muted-foreground">
-            {safeFormatDistanceToNow(folder.createdAt)}
+            {safeFormatDistanceToNow(folder.created_at)}
           </p>
         </div>
         <Button
@@ -226,7 +219,7 @@ export function PDFFolder({
       onContextMenu={onContextMenu}
     >
       <div className="w-10 h-12 bg-muted/30 rounded flex items-center justify-center flex-shrink-0">
-        <Folder className="h-6 w-6 text-primary" />
+        <FolderIcon className="h-6 w-6 text-primary" />
       </div>
       <div className="flex-1 min-w-0">
         {isRenaming ? (
@@ -251,9 +244,9 @@ export function PDFFolder({
         )}
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <Badge variant="secondary" className="text-xs">
-            {folder.pdfCount} PDFs
+            {folder.pdf_count || 0} PDFs
           </Badge>
-          <span>{safeFormatDistanceToNow(folder.createdAt)}</span>
+          <span>{safeFormatDistanceToNow(folder.created_at)}</span>
         </div>
       </div>
       <Button

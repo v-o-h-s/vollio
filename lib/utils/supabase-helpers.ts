@@ -4,24 +4,23 @@
  * the hight number of lines in the file (chill bruh <3) )
  */
 import type {
-  PDFDocument,
   UserActivity,
   Highlight,
-  PDFRow,
-  UserActivityRow,
   FileValidationResult,
-} from "../types";
+  PDFDocument,
+} from "../types/pdf";
+import type { PDFRow, UserActivityRow, FolderRow } from "../types/database";
 import {
   getAuthenticatedSupabaseClient,
   STORAGE_CONFIG,
 } from "../supabaseClient";
 import type { Database } from "../types/database";
-import { APIError } from "../types";
+import { AppError } from "../types/errors";
 
 /**
  * Maps Supabase errors to our application error types
  */
-export const mapSupabaseError = (error: any): APIError => {
+export const mapSupabaseError = (error: any): AppError => {
   let type: string;
   let message: string;
   let retryable = false;
@@ -50,10 +49,17 @@ export const mapSupabaseError = (error: any): APIError => {
   }
 
   return {
-    type,
+    type: type as any,
     message,
-    details: error,
+    severity: "medium" as any,
     retryable,
+    userMessage: message,
+    timestamp: new Date(),
+    context: {
+      component: "supabase-helpers",
+      action: "database_operation",
+      details: error,
+    },
   };
 };
 
@@ -104,6 +110,23 @@ export const isHighlightRow = (
     typeof row.type === "string" &&
     ["quick", "comment", "note"].includes(row.type) &&
     Array.isArray(row.textbounds)
+  );
+};
+
+/**
+ * Type guard for folder row types
+ */
+export const isFolderRow = (
+  row: any
+): row is Database["public"]["Tables"]["folders"]["Row"] => {
+  return (
+    row &&
+    typeof row.id === "string" &&
+    typeof row.user_id === "string" &&
+    typeof row.name === "string" &&
+    (row.parent_id === null || typeof row.parent_id === "string") &&
+    typeof row.created_at === "string" &&
+    typeof row.updated_at === "string"
   );
 };
 
@@ -237,8 +260,11 @@ export function mapPDFRowToDocument(row: PDFRow): PDFDocument {
     fileSize: row.file_size,
     storagePath: row.storage_path,
     mimeType: row.mime_type,
-    uploadedAt: row.uploaded_at ? new Date(row.uploaded_at) : new Date(),
-    updatedAt: row.updated_at ? new Date(row.updated_at) : new Date(),
+    folderId: row.folder_id,
+    uploadedAt: row.uploaded_at
+      ? new Date(row.uploaded_at).toISOString()
+      : new Date().toISOString(),
+    updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
   };
 }
 
@@ -249,12 +275,14 @@ export function mapActivityRowToActivity(row: UserActivityRow): UserActivity {
     userId: row.user_id,
     pdfId: row.pdf_id,
     activityType: row.activity_type as "view" | "upload" | "delete",
-    accessedAt: new Date(row.accessed_at),
+    accessedAt: new Date(row.accessed_at).toISOString(),
   };
 }
 
 // Helper function to convert database row to Highlight
-export function mapHighlightRowToHighlight(row: Database["public"]["Tables"]["highlights"]["Row"]): Highlight {
+export function mapHighlightRowToHighlight(
+  row: Database["public"]["Tables"]["highlights"]["Row"]
+): Highlight {
   return {
     id: row.id,
     user_id: row.user_id,
@@ -269,6 +297,18 @@ export function mapHighlightRowToHighlight(row: Database["public"]["Tables"]["hi
     textbounds: row.textbounds,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+  };
+}
+
+// Helper function to convert database row to Folder
+export function mapFolderRowToFolder(row: FolderRow) {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    name: row.name,
+    parent_id: row.parent_id,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
   };
 }
 

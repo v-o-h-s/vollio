@@ -1,6 +1,15 @@
 # Noto PDF Annotation API Documentation
 
-This document describes the API endpoints for the Noto PDF annotation application with Supabase backend integration. All API interactions should use RTK Query mutations and queries for consistency, caching, and automatic error handling.
+This document describes the comprehensive API endpoints for the Noto PDF annotation application with complete Supabase backend integration. All API interactions use RTK Query mutations and queries for consistency, caching, and automatic error handling.
+
+## 🚀 Current Status: Production Ready ✅
+
+The Noto API is fully implemented and production-ready with:
+- **Complete CRUD Operations**: All core endpoints (PDFs, Notes, Annotations, Highlights, Folders)
+- **Advanced Features**: Document processing, vector search, highlight management
+- **Security**: JWT authentication, RLS policies, comprehensive validation
+- **Performance**: Rate limiting, caching, optimized queries
+- **Error Handling**: Comprehensive error boundaries and recovery mechanisms
 
 ## Authentication
 
@@ -21,9 +30,120 @@ const [createNote] = useCreateNoteMutation();
 // const response = await fetch('/api/notes');
 ```
 
-## Endpoints
+## Core API Endpoints
 
-### Notes API
+### Folders API ✅ IMPLEMENTED
+
+#### GET /api/folders
+Get all folders for the authenticated user with hierarchical structure.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "folder_uuid",
+      "userId": "user_123",
+      "name": "Research Papers",
+      "parentId": null,
+      "createdAt": "2025-01-08T10:00:00.000Z",
+      "updatedAt": "2025-01-08T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### POST /api/folders
+Create a new folder with optional parent folder.
+
+**Request Body:**
+```json
+{
+  "name": "New Folder",
+  "parentId": "parent_folder_uuid" // optional
+}
+```
+
+#### PUT /api/folders/[id]
+Update folder name or move to different parent.
+
+#### DELETE /api/folders/[id]
+Delete folder and optionally move contents to parent or root.
+
+### Highlights API ✅ IMPLEMENTED
+
+#### GET /api/highlights
+Get all highlights for the authenticated user with filtering options.
+
+**Query Parameters:**
+- `pdfId` (optional): Filter highlights by PDF ID
+- `type` (optional): Filter by highlight type (quick, comment, note)
+- `page` (optional): Filter by page number
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "highlight_uuid",
+      "userId": "user_123",
+      "pdfId": "pdf_uuid",
+      "noteId": "note_uuid",
+      "content": "Selected text content",
+      "title": "Highlight title",
+      "color": "#FFFF00",
+      "opacity": 0.4,
+      "pageNumber": 1,
+      "type": "quick",
+      "textbounds": [
+        {
+          "x": 100,
+          "y": 200,
+          "width": 150,
+          "height": 20
+        }
+      ],
+      "createdAt": "2025-01-08T10:00:00.000Z",
+      "updatedAt": "2025-01-08T10:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### POST /api/highlights
+Create a new highlight with multi-mode support.
+
+**Request Body:**
+```json
+{
+  "pdfId": "pdf_uuid",
+  "noteId": "note_uuid", // optional for quick highlights
+  "content": "Selected text content",
+  "title": "Highlight title", // optional
+  "color": "#FFFF00",
+  "opacity": 0.4,
+  "pageNumber": 1,
+  "type": "quick", // "quick" | "comment" | "note"
+  "textbounds": [
+    {
+      "x": 100,
+      "y": 200,
+      "width": 150,
+      "height": 20
+    }
+  ]
+}
+```
+
+#### PUT /api/highlights/[id]
+Update highlight properties (color, opacity, content).
+
+#### DELETE /api/highlights/[id]
+Delete a specific highlight by ID.
+
+### Notes API ✅ IMPLEMENTED
 
 #### GET /api/notes
 
@@ -120,16 +240,14 @@ Create a new note.
 }
 ```
 
-#### PUT /api/notes/[id]
+#### PUT /api/notes/[id] ✅ IMPLEMENTED
 
-Update an existing note.
+Update an existing note with enhanced auto-save integration.
 
 **Path Parameters:**
-
 - `id`: The note ID
 
 **Request Body:**
-
 ```json
 {
   "title": "Updated Note Title",
@@ -150,83 +268,49 @@ Update an existing note.
 }
 ```
 
-**Response:**
+**Features:**
+- Auto-save integration with RTK Query
+- Real-time status tracking
+- Cross-tab synchronization
+- Comprehensive error handling
 
-```json
-{
-  "success": true,
-  "data": {
-    "id": "note_1234567890_abc123",
-    "userId": "user_123",
-    "title": "Updated Note Title",
-    "content": {
-      "type": "doc",
-      "content": [
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "Updated note content..."
-            }
-          ]
-        }
-      ]
-    },
-    "createdAt": "2025-01-08T10:00:00.000Z",
-    "updatedAt": "2025-01-08T10:05:00.000Z"
-  }
-}
-```
+#### DELETE /api/notes/[id] ✅ IMPLEMENTED
 
-#### DELETE /api/notes/[id]
-
-Delete a note.
+Delete a note with enhanced confirmation and cleanup.
 
 **Path Parameters:**
-
 - `id`: The note ID to delete
 
-**Response:**
+**Features:**
+- Custom styled confirmation dialogs
+- Loading states during deletion
+- Automatic cleanup of related data
+- Toast notifications for feedback
+- Comprehensive error handling
 
-```json
-{
-  "success": true,
-  "data": {
-    "id": "note_1234567890_abc123",
-    "userId": "user_123",
-    "title": "Deleted Note Title",
-    "content": {...},
-    "createdAt": "2025-01-08T10:00:00.000Z",
-    "updatedAt": "2025-01-08T10:00:00.000Z"
-  }
-}
-```
-
-### Annotations API
+### Annotations API ✅ IMPLEMENTED
 
 #### GET /api/annotations
-
-Get annotations for the authenticated user.
+Get annotations for the authenticated user with enhanced filtering.
 
 **Query Parameters:**
-
 - `pdfId` (optional): Filter annotations by PDF ID
 - `page` (optional): Filter annotations by page number
+- `noteId` (optional): Filter annotations by linked note
 
 **Response:**
-
 ```json
 {
   "success": true,
   "data": [
     {
-      "id": "annotation_1234567890_abc123",
+      "id": "annotation_uuid",
       "userId": "user_123",
-      "pdfId": "pdf_1234567890_def456",
+      "pdfId": "pdf_uuid",
+      "noteId": "note_uuid",
       "pageNumber": 1,
       "selectedText": "Selected text from PDF",
-      "noteContent": "User's note content",
+      "content": "User's annotation content",
       "coordinates": {
         "x": 100,
         "y": 200,
@@ -241,17 +325,16 @@ Get annotations for the authenticated user.
 ```
 
 #### POST /api/annotations
-
-Create a new annotation.
+Create a new annotation with enhanced coordinate handling.
 
 **Request Body:**
-
 ```json
 {
-  "pdfId": "pdf_1234567890_def456",
+  "pdfId": "pdf_uuid",
+  "noteId": "note_uuid",
   "pageNumber": 1,
   "selectedText": "Selected text from PDF",
-  "noteContent": "User's note content",
+  "content": "User's annotation content",
   "coordinates": {
     "x": 100,
     "y": 200,
@@ -261,98 +344,17 @@ Create a new annotation.
 }
 ```
 
-**Response:**
+**Features:**
+- Automatic coordinate validation
+- PDF-to-screen coordinate conversion
+- Integration with highlight system
+- Real-time cross-tab synchronization
 
-```json
-{
-  "success": true,
-  "data": {
-    "id": "annotation_1234567890_abc123",
-    "userId": "user_123",
-    "pdfId": "pdf_1234567890_def456",
-    "pageNumber": 1,
-    "selectedText": "Selected text from PDF",
-    "noteContent": "User's note content",
-    "coordinates": {
-      "x": 100,
-      "y": 200,
-      "width": 150,
-      "height": 20
-    },
-    "createdAt": "2025-01-08T10:00:00.000Z",
-    "updatedAt": "2025-01-08T10:00:00.000Z"
-  }
-}
-```
+#### PUT /api/annotations/[id]
+Update annotation content with enhanced validation.
 
-#### PUT /api/annotations
-
-Update an existing annotation.
-
-**Request Body:**
-
-```json
-{
-  "id": "annotation_1234567890_abc123",
-  "noteContent": "Updated note content"
-}
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": "annotation_1234567890_abc123",
-    "userId": "user_123",
-    "pdfId": "pdf_1234567890_def456",
-    "pageNumber": 1,
-    "selectedText": "Selected text from PDF",
-    "noteContent": "Updated note content",
-    "coordinates": {
-      "x": 100,
-      "y": 200,
-      "width": 150,
-      "height": 20
-    },
-    "createdAt": "2025-01-08T10:00:00.000Z",
-    "updatedAt": "2025-01-08T10:05:00.000Z"
-  }
-}
-```
-
-#### DELETE /api/annotations
-
-Delete an annotation.
-
-**Query Parameters:**
-
-- `id` (required): The annotation ID to delete
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "data": {
-    "id": "annotation_1234567890_abc123",
-    "userId": "user_123",
-    "pdfId": "pdf_1234567890_def456",
-    "pageNumber": 1,
-    "selectedText": "Selected text from PDF",
-    "noteContent": "User's note content",
-    "coordinates": {
-      "x": 100,
-      "y": 200,
-      "width": 150,
-      "height": 20
-    },
-    "createdAt": "2025-01-08T10:00:00.000Z",
-    "updatedAt": "2025-01-08T10:00:00.000Z"
-  }
-}
-```
+#### DELETE /api/annotations/[id]
+Delete annotation with automatic cleanup of related highlights.
 
 ### PDF Management API
 
@@ -479,28 +481,64 @@ Get a specific PDF by ID with fresh signed URL and activity tracking.
 - `429` - Rate limit exceeded
 - `500` - Storage or database error
 
-#### DELETE /api/pdfs/[id]
+#### DELETE /api/pdfs/[id] ✅ IMPLEMENTED
 
-Delete a specific PDF by ID.
+Delete a specific PDF by ID with comprehensive cleanup.
 
 **Path Parameters:**
+- `id`: The PDF UUID
 
-- `id`: The PDF ID
+**Features:**
+- Automatic cleanup of related annotations and highlights
+- Storage file deletion with error handling
+- Activity tracking for delete operations
+- Comprehensive error handling and rollback
+- Rate limiting: 30 deletions per hour per user
 
 **Response:**
-
 ```json
 {
   "success": true,
   "data": {
-    "id": "pdf_1234567890_def456",
+    "id": "pdf_uuid",
     "userId": "user_123",
     "filename": "document.pdf",
     "uploadedAt": "2025-01-08T10:00:00.000Z",
-    "fileUrl": "blob:pdf_1234567890_def456"
+    "deletedAt": "2025-01-08T11:00:00.000Z"
   }
 }
 ```
+
+## Advanced API Endpoints
+
+### Document Processing API ✅ IMPLEMENTED
+
+#### POST /api/documents/process
+Process uploaded PDF with advanced text extraction.
+
+**Features:**
+- Syncfusion primary text extraction
+- OCR fallback for scanned documents
+- Semantic chunking with overlap
+- Multi-language support
+- Background processing queue
+
+#### GET /api/documents/[id]/status
+Get document processing status and progress.
+
+#### GET /api/documents/[id]/chunks
+Retrieve processed document chunks for search and analysis.
+
+### Image Upload API ✅ IMPLEMENTED
+
+#### POST /api/images/upload
+Upload images for rich text editor integration.
+
+**Features:**
+- Secure image validation
+- Automatic resizing and optimization
+- Supabase Storage integration
+- Signed URL generation
 
 ## Error Responses
 

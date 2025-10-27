@@ -19,6 +19,7 @@ import {
   Home,
   FileText,
   NotebookPen,
+  Brain,
   PanelLeftClose,
   PanelLeftOpen,
   Menu,
@@ -51,7 +52,7 @@ const navigationItems = [
     hoverColor: "hover:bg-blue-500/10 hover:border-blue-500/20",
   },
   {
-    name: "My PDFs",
+    name: "My files",
     href: "/dashboard/pdfs",
     icon: FileText,
     description: "View and manage all your PDFs",
@@ -67,12 +68,12 @@ const navigationItems = [
     hoverColor: "hover:bg-purple-500/10 hover:border-purple-500/20",
   },
   {
-    name: "Editor Test",
-    href: "/dashboard/editor-test",
-    icon: FileText,
-    description: "Test the Notion-like editor",
-    gradient: "from-indigo-500 to-purple-500",
-    hoverColor: "hover:bg-indigo-500/10 hover:border-indigo-500/20",
+    name: "Quizzes",
+    href: "/dashboard/quizzes",
+    icon: Brain,
+    description: "Test your knowledge with interactive quizzes",
+    gradient: "from-orange-500 to-red-500",
+    hoverColor: "hover:bg-orange-500/10 hover:border-orange-500/20",
   },
 ];
 

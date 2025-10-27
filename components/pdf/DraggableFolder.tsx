@@ -5,20 +5,14 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { PDFFolder } from "./PDFFolder";
 import { ViewMode } from "./PDFDirectoryView";
-
-interface Folder {
-  id: string;
-  name: string;
-  parentId: string | null;
-  createdAt: string;
-  pdfCount: number;
-}
+import { Folder } from "@/lib/types/pdf";
 
 interface DraggableFolderProps {
   folder: Folder;
   viewMode: ViewMode;
   onOpen: () => void;
   onSelect: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
   isDragging?: boolean;
 }
 
@@ -27,6 +21,7 @@ export function DraggableFolder({
   viewMode,
   onOpen,
   onSelect,
+  onContextMenu,
   isDragging = false,
 }: DraggableFolderProps) {
   const {
@@ -49,6 +44,7 @@ export function DraggableFolder({
         viewMode={viewMode}
         onOpen={onOpen}
         onSelect={onSelect}
+        onContextMenu={onContextMenu}
         isDragging={isDragging}
         dragHandleProps={listeners}
       />

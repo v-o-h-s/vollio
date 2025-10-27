@@ -117,18 +117,26 @@ async function storePDFMetadata(
   supabaseClient: any,
   userId: string,
   file: File,
-  storagePath: string
+  storagePath: string,
+  folderId?: string | null
 ): Promise<string> {
   try {
+    const insertData: any = {
+      user_id: userId,
+      filename: file.name,
+      file_size: file.size,
+      storage_path: storagePath,
+      mime_type: file.type,
+    };
+
+    // Add folder_id if provided
+    if (folderId) {
+      insertData.folder_id = folderId;
+    }
+
     const { data, error } = await supabaseClient
       .from("pdfs")
-      .insert({
-        user_id: userId,
-        filename: file.name,
-        file_size: file.size,
-        storage_path: storagePath,
-        mime_type: file.type,
-      })
+      .insert(insertData)
       .select("id")
       .single();
 
@@ -234,6 +242,7 @@ async function handlePOST(
   // Parse form data
   const formData = await request.formData();
   const file = formData.get("file") as File;
+  const folderId = formData.get("folderId") as string | null;
 
   // Basic validation
   validateRequired(file, "file", { ...context, userId });
@@ -269,6 +278,24 @@ async function handlePOST(
     // Get authenticated Supabase client
     supabaseClient = await getAuthenticatedSupabaseClient();
 
+    // Validate folder exists and belongs to user if folderId is provided
+    if (folderId) {
+      const { data: folder, error: folderError } = await supabaseClient
+        .from("folders")
+        .select("id")
+        .eq("id", folderId)
+        .eq("user_id", userId)
+        .single();
+
+      if (folderError || !folder) {
+        throw createServerError(
+          ServerErrorType.VALIDATION_ERROR,
+          "Folder not found or access denied",
+          { ...context, userId, folderId }
+        );
+      }
+    }
+
     // Upload file to storage
     const uploadResult = await uploadToStorage(supabaseClient, file, userId);
     uploadedStoragePath = uploadResult.path;
@@ -284,7 +311,8 @@ async function handlePOST(
       supabaseClient,
       userId,
       file,
-      uploadResult.path
+      uploadResult.path,
+      folderId
     );
 
     // Record upload activity (non-critical, don't fail if this fails)

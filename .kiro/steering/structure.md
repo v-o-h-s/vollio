@@ -167,6 +167,7 @@ inclusion: always
 - **Dynamic Routes**: Use `[id]` for single params, `[[...rest]]` for catch-all
 - **Layouts**: Place `layout.tsx` at appropriate directory levels for shared UI
 - **Note Routes**: `app/dashboard/notes/` for note management, `app/dashboard/notes/new/` for note creation, `app/dashboard/notes/[id]/` for note editing
+- **Quiz Routes**: `app/dashboard/quizzes/` for quiz center, `app/dashboard/quizzes/create/` for quiz creation, `app/dashboard/quizzes/[id]/` for individual quiz management
 
 ### State & Logic
 
@@ -258,8 +259,9 @@ export function ComponentName({ prop }: ComponentProps) {
 - **Selectors**: Memoized in `lib/store/selectors.ts`
 - **Hooks**: Use typed hooks from `lib/store/hooks.ts`
 
-### API Routes
+### API Routes ✅ FULLY IMPLEMENTED
 
+- **Complete API Coverage**: All core endpoints (PDFs, Notes, Annotations, Highlights, Folders) fully implemented
 - **Pattern**: Export named functions for HTTP methods (GET, POST, PUT, DELETE) - implemented in all routes
 - **Error Handling**: Use `withErrorHandling` wrapper for all API routes - implemented with comprehensive error logging
 - **Validation**: Use TypeScript interfaces for request/response validation - implemented with server-side validation
@@ -268,6 +270,7 @@ export function ComponentName({ prop }: ComponentProps) {
 - **File Operations**: Implement proper cleanup on failures - implemented in upload route
 - **Activity Tracking**: Record user activities for all operations - implemented for view, upload, delete
 - **Rate Limiting**: Implement rate limiting for API endpoints - implemented with `checkRateLimit`
+- **Advanced Features**: Document processing, image upload, vector search - all implemented
 
 ## Critical Rules
 

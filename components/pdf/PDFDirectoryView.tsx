@@ -24,11 +24,17 @@ import {
   useGetPDFsQuery,
   useDeletePDFMutation,
   useRenamePDFMutation,
+  useGetFoldersQuery,
+  useCreateFolderMutation,
+  useUpdateFolderMutation,
+  useDeleteFolderMutation,
+  useMovePDFMutation,
 } from "@/lib/store/apiSlice";
 import { ErrorType, ErrorSeverity, AppError } from "@/lib/types/errors";
-import { PDFDocument } from "@/lib/types/pdf";
+import { PDFDocument, Folder } from "@/lib/types/pdf";
 import { PDFUploadZone } from "./PDFUploadZone";
 import { PDFContextMenu } from "./PDFContextMenu";
+import { FolderContextMenu } from "./FolderContextMenu";
 import { PDFBreadcrumb } from "./PDFBreadcrumb";
 import { PDFViewToggle } from "./PDFViewToggle";
 import { PDFSearchBar } from "./PDFSearchBar";
@@ -46,13 +52,7 @@ export type ViewMode = "grid" | "list" | "compact" | "details";
 export type SortBy = "name" | "date" | "size" | "type";
 export type SortOrder = "asc" | "desc";
 
-interface Folder {
-  id: string;
-  name: string;
-  parentId: string | null;
-  createdAt: string;
-  pdfCount: number;
-}
+
 
 interface PDFDirectoryViewProps {
   className?: string;
@@ -86,6 +86,12 @@ export function PDFDirectoryView({
     y: number;
     pdfId: string;
   } | null>(null);
+  const [folderContextMenu, setFolderContextMenu] = useState<{
+    x: number;
+    y: number;
+    folderId: string;
+    folderName: string;
+  } | null>(null);
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
     pdfId: string | null;
@@ -99,8 +105,20 @@ export function PDFDirectoryView({
     pdfId: null,
     currentName: "",
   });
+  const [folderDeleteDialog, setFolderDeleteDialog] = useState<{
+    isOpen: boolean;
+    folderId: string | null;
+  }>({ isOpen: false, folderId: null });
+  const [folderRenameDialog, setFolderRenameDialog] = useState<{
+    isOpen: boolean;
+    folderId: string | null;
+    currentName: string;
+  }>({
+    isOpen: false,
+    folderId: null,
+    currentName: "",
+  });
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
-  const [folders, setFolders] = useState<Folder[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set()
@@ -117,10 +135,16 @@ export function PDFDirectoryView({
 
   // API hooks
   const { data: pdfData, isLoading, error, refetch } = useGetPDFsQuery();
+  const { data: folderData, isLoading: isFoldersLoading, refetch: refetchFolders } = useGetFoldersQuery();
   const [deletePDF, { isLoading: isDeleting }] = useDeletePDFMutation();
   const [renamePDF, { isLoading: isRenaming }] = useRenamePDFMutation();
+  const [createFolderMutation, { isLoading: isCreatingFolderMutation }] = useCreateFolderMutation();
+  const [updateFolderMutation, { isLoading: isUpdatingFolder }] = useUpdateFolderMutation();
+  const [deleteFolderMutation, { isLoading: isDeletingFolder }] = useDeleteFolderMutation();
+  const [movePDFMutation, { isLoading: isMovingPDF }] = useMovePDFMutation();
 
   const pdfs = pdfData?.pdfs || [];
+  const folders = folderData?.folders || [];
 
   // Filter and sort PDFs
   const filteredAndSortedPDFs = React.useMemo(() => {
@@ -222,6 +246,7 @@ export function PDFDirectoryView({
       }
     }
     refetch();
+    refetchFolders();
   };
 
   // DnD Kit handlers
@@ -250,23 +275,22 @@ export function PDFDirectoryView({
 
     try {
       if (draggedPDF && targetFolder) {
-        const response = await fetch(`/api/pdfs/${activeId}/move`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ folderId: overId }),
-        });
-
-        if (!response.ok) throw new Error("Failed to move PDF");
+        await movePDFMutation({
+          id: activeId,
+          folderId: overId,
+        }).unwrap();
 
         toast.success("PDF moved successfully");
         refetch();
+        refetchFolders();
       } else if (draggedFolder && targetFolder) {
-        setFolders((prev) =>
-          prev.map((folder) =>
-            folder.id === activeId ? { ...folder, parentId: overId } : folder
-          )
-        );
+        await updateFolderMutation({
+          id: activeId,
+          updates: { parent_id: overId },
+        }).unwrap();
+        
         toast.success("Folder moved successfully");
+        refetchFolders();
       }
     } catch (error) {
       toast.error("Failed to move item");
@@ -318,6 +342,17 @@ export function PDFDirectoryView({
     setContextMenu({ x: e.clientX, y: e.clientY, pdfId });
   };
 
+  const handleFolderContextMenu = (e: React.MouseEvent, folderId: string) => {
+    e.preventDefault();
+    const folder = folders.find(f => f.id === folderId);
+    setFolderContextMenu({ 
+      x: e.clientX, 
+      y: e.clientY, 
+      folderId,
+      folderName: folder?.name || ""
+    });
+  };
+
   const handleDeletePDF = async (pdfId: string) => {
     try {
       await deletePDF(pdfId).unwrap();
@@ -340,20 +375,47 @@ export function PDFDirectoryView({
 
   const handleCreateFolder = async (folderName: string) => {
     try {
-      const newFolder: Folder = {
-        id: `folder-${Date.now()}`,
+      await createFolderMutation({
         name: folderName,
-        parentId: currentFolder,
-        createdAt: new Date().toISOString(),
-        pdfCount: 0,
-      };
-
-      setFolders((prev) => [...prev, newFolder]);
+        parent_id: currentFolder,
+      }).unwrap();
+      
       setIsCreatingFolder(false);
+      refetchFolders();
       toast.success(`Folder "${folderName}" has been created successfully.`);
     } catch (error) {
       toast.error("Failed to create folder.");
     }
+  };
+
+  const handleDeleteFolder = async (folderId: string) => {
+    try {
+      await deleteFolderMutation(folderId).unwrap();
+      toast.success("The folder has been deleted successfully.");
+      setFolderDeleteDialog({ isOpen: false, folderId: null });
+      refetchFolders();
+    } catch (error) {
+      toast.error("Failed to delete the folder.");
+    }
+  };
+
+  const handleRenameFolder = async (folderId: string, newName: string) => {
+    try {
+      await updateFolderMutation({
+        id: folderId,
+        updates: { name: newName },
+      }).unwrap();
+      toast.success("The folder has been renamed successfully.");
+      setFolderRenameDialog({ isOpen: false, folderId: null, currentName: "" });
+      refetchFolders();
+    } catch (error) {
+      toast.error("Failed to rename the folder.");
+    }
+  };
+
+  const handleCreateSubfolder = (parentId: string) => {
+    setCurrentFolder(parentId);
+    setIsCreatingFolder(true);
   };
 
   const handleFolderNavigation = (folderId: string | null) => {
@@ -363,13 +425,13 @@ export function PDFDirectoryView({
       const folder = folders.find((f) => f.id === folderId);
       if (folder) {
         const path: Folder[] = [folder];
-        let currentParent = folder.parentId;
+        let currentParent = folder.parent_id;
 
         while (currentParent) {
           const parentFolder = folders.find((f) => f.id === currentParent);
           if (parentFolder) {
             path.unshift(parentFolder);
-            currentParent = parentFolder.parentId;
+            currentParent = parentFolder.parent_id;
           } else {
             break;
           }
@@ -397,7 +459,7 @@ export function PDFDirectoryView({
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isFoldersLoading) {
     return <div>Loading...</div>;
   }
 
@@ -489,7 +551,7 @@ export function PDFDirectoryView({
           onDrop={handleFileDrop}
         >
           {filteredAndSortedPDFs.length === 0 &&
-          folders.filter((f) => f.parentId === currentFolder).length === 0 &&
+          folders.filter((f) => f.parent_id === currentFolder).length === 0 &&
           !isCreatingFolder ? (
             <div className="flex flex-col items-center justify-center py-12">
               <FileText className="h-16 w-16 text-muted-foreground mb-4" />
@@ -547,6 +609,7 @@ export function PDFDirectoryView({
                     onFolderNavigation={handleFolderNavigation}
                     onItemSelect={handleItemSelect}
                     onContextMenu={handleContextMenu}
+                    onFolderContextMenu={handleFolderContextMenu}
                     onPDFOpen={(pdf) =>
                       router.push(`/dashboard/pdf/${pdf.id}`)
                     }
@@ -564,7 +627,7 @@ export function PDFDirectoryView({
                     )}
 
                     {folders
-                      .filter((folder) => folder.parentId === currentFolder)
+                      .filter((folder) => folder.parent_id === currentFolder)
                       .map((folder) => (
                         <DraggableFolder
                           key={folder.id}
@@ -572,6 +635,7 @@ export function PDFDirectoryView({
                           viewMode={viewMode}
                           onOpen={() => handleFolderNavigation(folder.id)}
                           onSelect={() => {}}
+                          onContextMenu={(e) => handleFolderContextMenu(e, folder.id)}
                           isDragging={activeId === folder.id}
                         />
                       ))}
@@ -626,6 +690,23 @@ export function PDFDirectoryView({
           />
         )}
 
+        {/* Folder context menu */}
+        {folderContextMenu && (
+          <FolderContextMenu
+            x={folderContextMenu.x}
+            y={folderContextMenu.y}
+            folderId={folderContextMenu.folderId}
+            currentName={folderContextMenu.folderName}
+            onClose={() => setFolderContextMenu(null)}
+            onDelete={(folderId) => setFolderDeleteDialog({ isOpen: true, folderId })}
+            onRename={(folderId, currentName) =>
+              setFolderRenameDialog({ isOpen: true, folderId, currentName })
+            }
+            onOpen={(folderId) => handleFolderNavigation(folderId)}
+            onCreateSubfolder={handleCreateSubfolder}
+          />
+        )}
+
         {/* Delete confirmation dialog */}
         <DeleteConfirmationDialog
           isOpen={deleteDialog.isOpen}
@@ -648,6 +729,30 @@ export function PDFDirectoryView({
             renameDialog.pdfId && handleRenamePDF(renameDialog.pdfId, newName)
           }
           isLoading={isRenaming}
+        />
+
+        {/* Folder delete confirmation dialog */}
+        <DeleteConfirmationDialog
+          isOpen={folderDeleteDialog.isOpen}
+          onClose={() => setFolderDeleteDialog({ isOpen: false, folderId: null })}
+          onConfirm={() =>
+            folderDeleteDialog.folderId && handleDeleteFolder(folderDeleteDialog.folderId)
+          }
+          noteTitle={folders.find(f => f.id === folderDeleteDialog.folderId)?.name || "Folder"}
+          isDeleting={isDeletingFolder}
+        />
+
+        {/* Folder rename dialog */}
+        <RenameDialog
+          isOpen={folderRenameDialog.isOpen}
+          currentName={folderRenameDialog.currentName}
+          onClose={() =>
+            setFolderRenameDialog({ isOpen: false, folderId: null, currentName: "" })
+          }
+          onConfirm={(newName) =>
+            folderRenameDialog.folderId && handleRenameFolder(folderRenameDialog.folderId, newName)
+          }
+          isLoading={isUpdatingFolder}
         />
 
         {/* Drag Overlay */}

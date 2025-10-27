@@ -1,7 +1,7 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { History } from "@tiptap/extension-history";
 import TextAlign from "@tiptap/extension-text-align";
 import { Document } from "@tiptap/extension-document";
@@ -67,7 +67,7 @@ function NotionEditorInner({
   onNoteCreated,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
-  const [noteTitle, setNoteTitle] = useState(content?.title || "Untitled Note");
+  const [noteTitle, setNoteTitle] = useState(content?.title || "");
 
   // Auto-save functionality
   const [currentNoteId, setCurrentNoteId] = useState<string | undefined>(
@@ -78,18 +78,32 @@ function NotionEditorInner({
   const [createNote] = useCreateNoteMutation();
   const [updateNote] = useUpdateNoteMutation();
 
-  // Update title when content prop changes
+  // Update title when content prop changes (only on initial load)
+  const hasInitialized = useRef(false);
+  
   useEffect(() => {
-    if (content?.title && content.title !== noteTitle) {
+    // Only update title from props on initial load, not during user editing
+    if (content?.title !== undefined && !hasInitialized.current) {
+      console.log("🔄 Initial load, setting title from props:", content.title);
       setNoteTitle(content.title);
+      hasInitialized.current = true;
     }
-  }, [content?.title, noteTitle]);
+  }, [content?.title]);
 
   // Internal auto-save handler
   const handleAutoSave = useCallback(
     async (noteContent: NoteContent) => {
-      const title = noteContent.title || noteTitle.trim() || "Untitled Note";
+      // Use the title from noteContent first, then fallback to current noteTitle state
+      // Only use "Untitled Note" if both are truly empty
+      const title = (noteContent.title?.trim() || noteTitle.trim() || "Untitled Note");
       const content = noteContent.content;
+
+      console.log("🔄 Auto-save triggered:", {
+        noteContentTitle: noteContent.title,
+        noteTitleState: noteTitle,
+        finalTitle: title,
+        currentNoteId,
+      });
 
       if (!content) {
         console.warn("Auto-save called with empty content");
@@ -98,6 +112,7 @@ function NotionEditorInner({
 
       if (!currentNoteId) {
         // Create new note using RTK Query
+        console.log("📝 Creating new note with title:", title);
         const newNote = await createNote({ title, content }).unwrap();
         const newNoteId = newNote.id;
 
@@ -109,6 +124,7 @@ function NotionEditorInner({
         }
       } else {
         // Update existing note using RTK Query
+        console.log("💾 Updating existing note with title:", title);
         await updateNote({
           id: currentNoteId,
           updates: { title, content },
@@ -322,16 +338,29 @@ function NotionEditorInner({
   // Handle title change
   const handleTitleChange = useCallback(
     (newTitle: string) => {
+      console.log("📝 Title changed:", { oldTitle: noteTitle, newTitle });
       setNoteTitle(newTitle);
 
       // Trigger auto-save when title changes
       if (autoSave && editable && editor) {
         const currentContent = { title: newTitle, content: editor.getJSON() };
+        console.log("🔄 Triggering auto-save with content:", currentContent);
         updateContent(currentContent);
       }
     },
-    [autoSave, editable, editor, updateContent]
+    [autoSave, editable, editor, updateContent, noteTitle]
   );
+
+  // Focus title input for new notes
+  useEffect(() => {
+    if (autoFocus && !noteId && !content?.title) {
+      // Focus the title input for new notes
+      const titleInput = document.querySelector('input[placeholder="Enter note title..."]') as HTMLInputElement;
+      if (titleInput) {
+        setTimeout(() => titleInput.focus(), 100);
+      }
+    }
+  }, [autoFocus, noteId, content?.title]);
   // Handle content updates when prop changes
   useEffect(() => {
     if (editor && content?.content !== undefined) {
@@ -395,7 +424,7 @@ function NotionEditorInner({
           type="text"
           value={noteTitle}
           onChange={(e) => handleTitleChange(e.target.value)}
-          placeholder="Untitled Note"
+          placeholder="Enter note title..."
           disabled={!editable}
           className={cn(
             "w-full px-4 py-3 text-xl font-semibold bg-transparent border-0",

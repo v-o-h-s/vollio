@@ -101,7 +101,7 @@ const baseQueryWithRetry: BaseQueryFn = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithRetry,
-  tagTypes: ["Annotation", "Highlight", "PDF", "Note"],
+  tagTypes: ["Annotation", "Highlight", "PDF", "Note", "Folder"],
   endpoints: (builder) => ({
     // PDF endpoints with enhanced error handling
     uploadPDF: builder.mutation<PDFDocument, FormData>({
@@ -223,6 +223,8 @@ export const apiSlice = createApi({
           uploadedAt: pdf.uploadedAt, // Keep as ISO string
           updatedAt: pdf.uploadedAt, // Keep as ISO string
           fileUrl: pdf.fileUrl,
+          folderId: pdf.folderId,
+          folder: pdf.folder,
         }));
 
         // Transform recent activity if present
@@ -1436,6 +1438,267 @@ export const apiSlice = createApi({
         { type: "Highlight", id: "LIST" },
       ],
     }),
+
+    // Folder endpoints
+    getFolders: builder.query<
+      { folders: any[]; totalCount: number },
+      void
+    >({
+      query: () => "folders",
+      transformResponse: (response: any) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch folders",
+            { component: "PDFDirectoryView", action: "fetch" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any) => {
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            { component: "PDFDirectoryView", action: "fetch" }
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            { component: "PDFDirectoryView", action: "fetch" }
+          );
+        }
+        return mapErrorToAppError(response, {
+          component: "PDFDirectoryView",
+          action: "fetch",
+        });
+      },
+      providesTags: (result) => [
+        { type: "Folder", id: "LIST" },
+        ...(result?.folders.map((folder) => ({ type: "Folder" as const, id: folder.id })) ||
+          []),
+      ],
+    }),
+
+    createFolder: builder.mutation<
+      any,
+      { name: string; parentId?: string | null }
+    >({
+      query: (folderData) => ({
+        url: "folders",
+        method: "POST",
+        body: folderData,
+      }),
+      transformResponse: (response: any) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to create folder",
+            { component: "PDFDirectoryView", action: "create" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "PDFDirectoryView", action: "create" };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid folder data",
+            context
+          );
+        } else if (response.status === 409) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "A folder with this name already exists",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: [{ type: "Folder", id: "LIST" }],
+    }),
+
+    updateFolder: builder.mutation<
+      any,
+      { id: string; updates: { name?: string; parentId?: string | null } }
+    >({
+      query: ({ id, updates }) => ({
+        url: `folders/${id}`,
+        method: "PUT",
+        body: updates,
+      }),
+      transformResponse: (response: any) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to update folder",
+            { component: "PDFDirectoryView", action: "update" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any, meta, { id }) => {
+        const context = {
+          component: "PDFDirectoryView",
+          action: "update",
+          folderId: id,
+        };
+
+        if (response.status === 400) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            response.data?.error || "Invalid folder data",
+            context
+          );
+        } else if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Folder not found",
+            context
+          );
+        } else if (response.status === 409) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "A folder with this name already exists",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Folder", id: "LIST" },
+        { type: "Folder", id },
+      ],
+    }),
+
+    deleteFolder: builder.mutation<
+      void,
+      { id: string; moveContentsTo?: string | null }
+    >({
+      query: ({ id, moveContentsTo }) => ({
+        url: `folders/${id}${moveContentsTo ? `?moveContentsTo=${moveContentsTo}` : ''}`,
+        method: "DELETE",
+      }),
+      transformResponse: (response: any) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to delete folder",
+            { component: "PDFDirectoryView", action: "delete" }
+          );
+        }
+      },
+      transformErrorResponse: (response: any, meta, { id }) => {
+        const context = { component: "PDFDirectoryView", action: "delete", folderId: id };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Folder not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Folder", id: "LIST" },
+        { type: "Folder", id },
+        { type: "PDF", id: "LIST" }, // Invalidate PDFs as they might have moved
+      ],
+    }),
+
+    movePDF: builder.mutation<
+      any,
+      { id: string; folderId: string | null }
+    >({
+      query: ({ id, folderId }) => ({
+        url: `pdfs/${id}/move`,
+        method: "PATCH",
+        body: { folderId },
+      }),
+      transformResponse: (response: any) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to move PDF",
+            { component: "PDFDirectoryView", action: "move" }
+          );
+        }
+        return response.data;
+      },
+      transformErrorResponse: (response: any, meta, { id }) => {
+        const context = { component: "PDFDirectoryView", action: "move", pdfId: id };
+
+        if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "PDF or folder not found",
+            context
+          );
+        } else if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, { id }) => [
+        { type: "PDF", id: "LIST" },
+        { type: "PDF", id },
+        { type: "Folder", id: "LIST" }, // Invalidate folders as PDF counts might change
+      ],
+    }),
   }),
 });
 
@@ -1459,6 +1722,12 @@ export const {
   useCreateHighlightMutation,
   useUpdateHighlightMutation,
   useDeleteHighlightMutation,
+  // Folder hooks
+  useGetFoldersQuery,
+  useCreateFolderMutation,
+  useUpdateFolderMutation,
+  useDeleteFolderMutation,
+  useMovePDFMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

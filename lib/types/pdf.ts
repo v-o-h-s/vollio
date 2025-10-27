@@ -86,6 +86,12 @@ export interface PDFDocument {
   uploadedAt: string; // ISO string for Redux serialization
   updatedAt: string; // ISO string for Redux serialization
   fileUrl?: string; // Signed URL for frontend use
+  folderId?: string | null; // Folder association
+  folder?: {
+    id: string;
+    name: string;
+    parent_id: string | null;
+  } | null; // Folder details from join
 }
 
 /**
@@ -97,6 +103,19 @@ export interface UserActivity {
   pdfId: string;
   activityType: "view" | "upload" | "delete";
   accessedAt: string; // ISO string for Redux serialization
+}
+
+/**
+ * Folder structure for organizing PDFs
+ */
+export interface Folder {
+  id: string;
+  user_id: string;
+  name: string;
+  parent_id: string | null;
+  created_at: string;
+  updated_at: string;
+  pdf_count?: number; // Computed field for UI
 }
 
 /**
@@ -193,6 +212,12 @@ export interface SupabasePDFListResponse {
       uploadedAt: string;
       fileUrl: string;
       mimeType: string;
+      folderId?: string | null;
+      folder?: {
+        id: string;
+        name: string;
+        parent_id: string | null;
+      } | null;
     }>;
     recentActivity?: {
       pdfId: string;

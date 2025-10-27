@@ -13,17 +13,9 @@ import {
   ChevronDown 
 } from "lucide-react";
 import { safeFormatDistanceToNow } from "@/lib/utils/dates";
-import { PDFDocument } from "@/lib/types/pdf";
+import { PDFDocument, Folder } from "@/lib/types/pdf";
 import { CreateFolder } from "./PDFFolder";
 import { ViewMode } from "./PDFDirectoryView";
-
-interface Folder {
-  id: string;
-  name: string;
-  parentId: string | null;
-  createdAt: string;
-  pdfCount: number;
-}
 
 interface TreeViewProps {
   folders: Folder[];
@@ -38,6 +30,7 @@ interface TreeViewProps {
   onFolderNavigation: (folderId: string | null) => void;
   onItemSelect: (id: string, isCtrlClick?: boolean) => void;
   onContextMenu: (e: React.MouseEvent, pdfId: string) => void;
+  onFolderContextMenu: (e: React.MouseEvent, folderId: string) => void;
   onPDFOpen: (pdf: PDFDocument) => void;
   onCreateFolder: (name: string) => void;
   onCancelCreateFolder: () => void;
@@ -56,6 +49,7 @@ export function TreeView({
   onFolderNavigation,
   onItemSelect,
   onContextMenu,
+  onFolderContextMenu,
   onPDFOpen,
   onCreateFolder,
   onCancelCreateFolder,
@@ -65,7 +59,7 @@ export function TreeView({
     level: number = 0
   ): React.ReactNode => {
     const isExpanded = expandedFolders.has(folder.id);
-    const childFolders = folders.filter((f) => f.parentId === folder.id);
+    const childFolders = folders.filter((f) => f.parent_id === folder.id);
     const folderPDFs = pdfs.filter((pdf) => pdf.folderId === folder.id);
     const hasChildren = childFolders.length > 0 || folderPDFs.length > 0;
 
@@ -83,6 +77,7 @@ export function TreeView({
           onToggleExpansion={() => onToggleExpansion(folder.id)}
           onOpen={() => onFolderNavigation(folder.id)}
           onSelect={() => onItemSelect(folder.id)}
+          onContextMenu={(e) => onFolderContextMenu(e, folder.id)}
         />
 
         {/* Children (if expanded) */}
@@ -113,7 +108,7 @@ export function TreeView({
     );
   };
 
-  const rootFolders = folders.filter((f) => f.parentId === currentFolder);
+  const rootFolders = folders.filter((f) => f.parent_id === currentFolder);
   const rootPDFs = pdfs.filter((pdf) => 
     currentFolder ? pdf.folderId === currentFolder : !pdf.folderId
   );
@@ -162,6 +157,7 @@ interface TreeNodeFolderProps {
   onToggleExpansion: () => void;
   onOpen: () => void;
   onSelect: () => void;
+  onContextMenu: (e: React.MouseEvent) => void;
 }
 
 function TreeNodeFolder({
@@ -175,6 +171,7 @@ function TreeNodeFolder({
   onToggleExpansion,
   onOpen,
   onSelect,
+  onContextMenu,
 }: TreeNodeFolderProps) {
   const {
     attributes,
@@ -202,6 +199,7 @@ function TreeNodeFolder({
           style={{ paddingLeft: `${paddingLeft + 8}px` }}
           onClick={onSelect}
           onDoubleClick={onOpen}
+          onContextMenu={onContextMenu}
         >
           <div className="flex items-center gap-1">
             {hasChildren && (
@@ -225,10 +223,10 @@ function TreeNodeFolder({
           </div>
           <div className="flex-1 min-w-0 grid grid-cols-4 gap-4">
             <p className="font-medium truncate">{folder.name}</p>
-            <p className="text-sm text-muted-foreground">{folder.pdfCount} PDFs</p>
+            <p className="text-sm text-muted-foreground">{folder.pdf_count || 0} PDFs</p>
             <p className="text-sm text-muted-foreground">Folder</p>
             <p className="text-sm text-muted-foreground">
-              {safeFormatDistanceToNow(folder.createdAt)}
+              {safeFormatDistanceToNow(folder.created_at)}
             </p>
           </div>
           <Button
@@ -256,6 +254,7 @@ function TreeNodeFolder({
         style={{ paddingLeft: `${paddingLeft + 12}px` }}
         onClick={onSelect}
         onDoubleClick={onOpen}
+        onContextMenu={onContextMenu}
       >
         <div className="flex items-center gap-1">
           {hasChildren && (
@@ -283,9 +282,9 @@ function TreeNodeFolder({
           <p className="font-medium truncate">{folder.name}</p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <Badge variant="secondary" className="text-xs">
-              {folder.pdfCount} PDFs
+              {folder.pdf_count || 0} PDFs
             </Badge>
-            <span>{safeFormatDistanceToNow(folder.createdAt)}</span>
+            <span>{safeFormatDistanceToNow(folder.created_at)}</span>
           </div>
         </div>
         <Button
