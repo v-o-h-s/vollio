@@ -627,157 +627,94 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     []
   );
   /**
-   * Load existing highlights from database with proper initialization checks
+   * Load existing highlights from database
    */
-  const loadExistingHighlights = useCallback(
-    async (retryCount = 0, forceLoad = false) => {
-      const MAX_RETRIES = 10; // Maximum 10 retries (10 seconds total)
+  const loadExistingHighlights = useCallback(async () => {
+    console.log("loadExistingHighlights called");
+    console.log("Annotations loaded state:", annotationsLoaded);
+    console.log("Highlights data:", highlightsData);
 
-      console.log(
-        `loadExistingHighlights called - attempt ${
-          retryCount + 1
-        }/${MAX_RETRIES}, forceLoad: ${forceLoad}`
-      );
-      console.log("Annotations loaded state:", annotationsLoaded);
-      console.log("Highlights data:", highlightsData);
+    // Don't load if already loaded
+    if (annotationsLoaded) {
+      console.log("Annotations already loaded, skipping...");
+      return;
+    }
 
-      // Don't load if already loaded
-      if (annotationsLoaded) {
-        console.log("Annotations already loaded, skipping...");
-        return;
-      }
+    // Check if we have highlights to load
+    if (!highlightsData?.highlights || highlightsData.highlights.length === 0) {
+      console.log("No highlights to load - setting annotations as loaded");
+      setAnnotationsLoaded(true);
+      return;
+    }
 
-      if (
-        !highlightsData?.highlights ||
-        highlightsData.highlights.length === 0
-      ) {
-        console.log("No highlights to load - setting annotations as loaded");
-        setAnnotationsLoaded(true);
-        return;
-      } 
+    // Check if PDF viewer and annotation module are ready
+    if (!pdfViewerRef.current?.annotation) {
+      console.log("PDF viewer or annotation module not ready yet");
+      return;
+    }
 
-      // Check if PDF viewer is ready (skip check if forceLoad is true)
-      if (!forceLoad && !isViewerReady) {
-        if (retryCount >= MAX_RETRIES) {
-          console.error(
-            "PDF viewer failed to initialize after maximum retries, giving up"
-          );
-          setAnnotationsLoaded(true); // Mark as loaded to prevent further attempts
-          return;
-        }
+    try {
+      console.log("Loading existing highlights:", highlightsData.highlights.length);
 
-        console.log(
-          `PDF viewer not ready, retrying in 1000ms... (attempt ${
-            retryCount + 1
-          }/${MAX_RETRIES})`
-        );
-        setTimeout(() => loadExistingHighlights(retryCount + 1, false), 1000);
-        return;
-      }
+      let successCount = 0;
+      let errorCount = 0;
 
-      // Additional check for PDF viewer ref when forceLoad is true
-      if (forceLoad && !pdfViewerRef.current) {
-        console.log("PDF viewer ref not available, retrying...");
-        if (retryCount < MAX_RETRIES) {
-          setTimeout(() => loadExistingHighlights(retryCount + 1, true), 500);
-        }
-        return;
-      }
+      for (const highlight of highlightsData.highlights) {
+        try {
+          console.log(`Loading highlight ${highlight.id}:`, {
+            pageNumber: highlight.pageNumber,
+            color: highlight.color,
+            type: highlight.type,
+            textbounds: highlight.textbounds,
+          });
 
-      // Verify annotation module is available
-      if (!pdfViewerRef.current?.annotation) {
-        console.error("PDF viewer annotation module not available");
-        if (retryCount < MAX_RETRIES) {
-          console.log("Retrying in 1000ms...");
-          setTimeout(() => loadExistingHighlights(retryCount + 1, forceLoad), 1000);
-        } else {
-          console.error("Max retries reached, annotation module still not available");
-          setAnnotationsLoaded(true);
-        }
-        return;
-      }
+          // Ensure page number is 1-based for Syncfusion (convert from 0-based if needed)
+          const syncfusionPageNumber =
+            highlight.pageNumber >= 1 ? highlight.pageNumber : highlight.pageNumber + 1;
 
-      try {
-        console.log(
-          "PDF viewer is ready! Loading existing highlights:",
-          highlightsData.highlights.length
-        );
-
-        let successCount = 0;
-        let errorCount = 0;
-
-        for (const highlight of highlightsData.highlights) {
-          try {
-            console.log(`Loading highlight ${highlight.id}:`, {
-              pageNumber: highlight.pageNumber,
-              color: highlight.color,
+          const annotationOptions: Partial<HighlightSettings> = {
+            bounds: highlight.textbounds,
+            pageNumber: syncfusionPageNumber,
+            author: "User",
+            subject: `${highlight.type} Highlight`,
+            color: highlight.color,
+            opacity: highlight.opacity,
+            customData: {
+              id: `existing-highlight-${highlight.id}`,
+              highlightId: highlight.id,
+              noteId: highlight.noteId,
               type: highlight.type,
-              textbounds: highlight.textbounds,
-            });
+              text: highlight.content,
+            },
+          };
 
-            // Ensure page number is 1-based for Syncfusion (convert from 0-based if needed)
-            const syncfusionPageNumber =
-              highlight.pageNumber >= 1
-                ? highlight.pageNumber
-                : highlight.pageNumber + 1;
+          pdfViewerRef.current.annotation.addAnnotation(
+            "Highlight",
+            annotationOptions as HighlightSettings
+          );
 
-            const annotationOptions: Partial<HighlightSettings> = {
-              bounds: highlight.textbounds,
-              pageNumber: syncfusionPageNumber,
-              author: "User",
-              subject: `${highlight.type} Highlight`,
-              color: highlight.color,
-              opacity: highlight.opacity,
-              customData: {
-                id: `existing-highlight-${highlight.id}`,
-                highlightId: highlight.id,
-                noteId: highlight.noteId,
-                type: highlight.type,
-                text: highlight.content,
-              },
-            };
-
-            pdfViewerRef.current?.annotation.addAnnotation(
-              "Highlight",
-              annotationOptions as HighlightSettings
-            );
-
-            successCount++;
-            console.log(
-              `✅ Successfully loaded highlight ${highlight.id} on page ${highlight.pageNumber}`
-            );
-          } catch (highlightError) {
-            errorCount++;
-            console.error(
-              `❌ Error loading highlight ${highlight.id}:`,
-              highlightError
-            );
-            // Continue loading other highlights even if one fails
-          }
-        }
-
-        setAnnotationsLoaded(true);
-        console.log(
-          `Highlight loading complete: ${successCount} success, ${errorCount} errors`
-        );
-
-        if (successCount > 0) {
-          toast.success(`Loaded ${successCount} existing highlights`);
-        }
-      } catch (error) {
-        console.error("Error loading existing highlights:", error);
-        // Retry after a longer delay if there's a general error
-        if (retryCount < MAX_RETRIES) {
-          console.log("Retrying highlight loading in 2 seconds...");
-          setTimeout(() => loadExistingHighlights(retryCount + 1), 2000);
-        } else {
-          console.error("Max retries reached, giving up on loading highlights");
-          setAnnotationsLoaded(true);
+          successCount++;
+          console.log(
+            `✅ Successfully loaded highlight ${highlight.id} on page ${highlight.pageNumber}`
+          );
+        } catch (highlightError) {
+          errorCount++;
+          console.error(`❌ Error loading highlight ${highlight.id}:`, highlightError);
+          // Continue loading other highlights even if one fails
         }
       }
-    },
-    [highlightsData, isViewerReady, annotationsLoaded]
-  );
+
+      setAnnotationsLoaded(true);
+      console.log(`Highlight loading complete: ${successCount} success, ${errorCount} errors`);
+
+      if (successCount > 0) {
+        toast.success(`Loaded ${successCount} existing highlights`);
+      }
+    } catch (error) {
+      console.error("Error loading existing highlights:", error);
+      setAnnotationsLoaded(true); // Mark as loaded to prevent infinite retries
+    }
+  }, [highlightsData, annotationsLoaded]);
 
   // Handle highlight deleted
   const handleHighlightDeleted = useCallback(
@@ -803,7 +740,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           // Fallback: reload highlights from database
           setAnnotationsLoaded(false);
           setTimeout(() => {
-            loadExistingHighlights(0, false);
+            loadExistingHighlights();
           }, 100);
         }
       }
@@ -817,15 +754,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     setHoveredQuickHighlight(null);
   }, []);
 
-  // Effect to load highlights when data becomes available
+  // Effect to load highlights when viewer is ready and we have data
   useEffect(() => {
-    if (!isLoading && highlightsData && !annotationsLoaded) {
-      console.log("Highlights data available, triggering load...");
-      setTimeout(() => {
-        loadExistingHighlights(0, false);
-      }, 500);
+    if (isViewerReady && highlightsData && !annotationsLoaded && pdfViewerRef.current?.annotation) {
+      console.log("PDF viewer ready and highlights data available, loading highlights...");
+      loadExistingHighlights();
     }
-  }, [highlightsData, isLoading, annotationsLoaded, loadExistingHighlights]);
+  }, [isViewerReady, highlightsData, annotationsLoaded, loadExistingHighlights]);
 
   // Effect to handle initial loading state
   useEffect(() => {
@@ -967,10 +902,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             console.log("PDF document loaded successfully");
             setIsLoading(false);
             setIsViewerReady(true);
-            // Force load highlights since we know the viewer is ready
-            setTimeout(() => {
-              loadExistingHighlights(0, true);
-            }, 100);
           }}
           documentLoadFailed={handleDocumentLoadFailed}
           created={() => {
