@@ -140,25 +140,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     { skip: !pdfDocument?.id }
   );
 
-  // Debug highlights data
-  console.log("Highlights query state:", {
-    data: highlightsData,
-    error: highlightsError,
-    isLoading: highlightsLoading,
-    pdfId: pdfDocument?.id,
-  });
-
-  // Debug loading states
-  console.log("PDF Loading States:", {
-    isLoading,
-    isPdfLoading,
-    isViewerReady,
-    annotationsLoaded,
-    hasPdfData: !!currentPdfData,
-    hasFileUrl: !!currentPdfData?.fileUrl,
-    pdfError: !!pdfError,
-  });
-
   // Configure resource URL for Syncfusion PDF Viewer
   const resourceUrl =
     typeof window !== "undefined"
@@ -210,8 +191,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         switch (highlightMode) {
           case "quick":
             try {
-              console.log("Creating quick highlight on page:", pageNumber);
-
               // Check if PDF viewer is ready before creating annotation
               if (!isViewerReady) {
                 console.error("PDF viewer not ready for annotation creation");
@@ -269,10 +248,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                     ) {
                       lastAnnotation.customData.highlightId =
                         savedHighlight.highlight.id;
-                      console.log(
-                        "Updated annotation with highlight ID:",
-                        savedHighlight.highlight.id
-                      );
                     }
                   } catch (error) {
                     console.error(
@@ -297,8 +272,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
           case "comment":
             try {
-              console.log("Creating comment highlight on page:", pageNumber);
-
               // Check if PDF viewer is ready before creating annotation
               if (!isViewerReady) {
                 console.error("PDF viewer not ready for annotation creation");
@@ -327,7 +300,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 "Highlight",
                 annotationOptions as HighlightSettings
               );
-              console.log("Syncfusion comment highlight created successfully");
 
               // Save to database
               if (currentPdfData?.id) {
@@ -340,7 +312,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                   type: "comment",
                   textbounds: textBounds,
                 }).unwrap();
-                console.log("Comment highlight saved to database successfully");
                 toast.success("Comment highlight created");
               }
 
@@ -423,7 +394,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             "Highlight",
             annotationOptions as HighlightSettings
           );
-          console.log("Syncfusion note highlight created successfully");
 
           // Save highlight to database with note linkage
           await createHighlight({
@@ -436,7 +406,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             textbounds: selectedTextBounds,
             noteId: noteId, // Link to the created note
           }).unwrap();
-          console.log("Note highlight saved to database successfully");
           toast.success("Note and highlight created successfully");
 
           // Mark highlight as created to prevent duplicate creation
@@ -614,9 +583,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             try {
               pdfViewerRef.current.annotation.editAnnotation(targetAnnotation);
             } catch (editError) {
-              console.log(
-                "Edit annotation method failed, properties updated in memory"
-              );
+              // Edit annotation method failed, properties updated in memory
             }
           }
         } catch (error) {
@@ -630,47 +597,33 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    * Load existing highlights from database
    */
   const loadExistingHighlights = useCallback(async () => {
-    console.log("loadExistingHighlights called");
-    console.log("Annotations loaded state:", annotationsLoaded);
-    console.log("Highlights data:", highlightsData);
-
     // Don't load if already loaded
     if (annotationsLoaded) {
-      console.log("Annotations already loaded, skipping...");
       return;
     }
 
     // Check if we have highlights to load
     if (!highlightsData?.highlights || highlightsData.highlights.length === 0) {
-      console.log("No highlights to load - setting annotations as loaded");
       setAnnotationsLoaded(true);
       return;
     }
 
     // Check if PDF viewer and annotation module are ready
     if (!pdfViewerRef.current?.annotation) {
-      console.log("PDF viewer or annotation module not ready yet");
       return;
     }
 
     try {
-      console.log("Loading existing highlights:", highlightsData.highlights.length);
-
       let successCount = 0;
       let errorCount = 0;
 
       for (const highlight of highlightsData.highlights) {
         try {
-          console.log(`Loading highlight ${highlight.id}:`, {
-            pageNumber: highlight.pageNumber,
-            color: highlight.color,
-            type: highlight.type,
-            textbounds: highlight.textbounds,
-          });
-
           // Ensure page number is 1-based for Syncfusion (convert from 0-based if needed)
           const syncfusionPageNumber =
-            highlight.pageNumber >= 1 ? highlight.pageNumber : highlight.pageNumber + 1;
+            highlight.pageNumber >= 1
+              ? highlight.pageNumber
+              : highlight.pageNumber + 1;
 
           const annotationOptions: Partial<HighlightSettings> = {
             bounds: highlight.textbounds,
@@ -694,18 +647,17 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           );
 
           successCount++;
-          console.log(
-            `✅ Successfully loaded highlight ${highlight.id} on page ${highlight.pageNumber}`
-          );
         } catch (highlightError) {
           errorCount++;
-          console.error(`❌ Error loading highlight ${highlight.id}:`, highlightError);
+          console.error(
+            `❌ Error loading highlight ${highlight.id}:`,
+            highlightError
+          );
           // Continue loading other highlights even if one fails
         }
       }
 
       setAnnotationsLoaded(true);
-      console.log(`Highlight loading complete: ${successCount} success, ${errorCount} errors`);
 
       if (successCount > 0) {
         toast.success(`Loaded ${successCount} existing highlights`);
@@ -719,8 +671,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Handle highlight deleted
   const handleHighlightDeleted = useCallback(
     (highlightId: string) => {
-      console.log("Highlight deleted:", highlightId);
-
       // Remove the annotation from Syncfusion viewer
       if (pdfViewerRef.current?.annotationCollection) {
         try {
@@ -733,7 +683,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
           if (targetAnnotation) {
             //pdfViewerRef.current.annotation.deleteAnnotation(targetAnnotation);
-            console.log("Syncfusion annotation deleted successfully");
           }
         } catch (error) {
           console.error("Error deleting Syncfusion annotation:", error);
@@ -756,16 +705,24 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Effect to load highlights when viewer is ready and we have data
   useEffect(() => {
-    if (isViewerReady && highlightsData && !annotationsLoaded && pdfViewerRef.current?.annotation) {
-      console.log("PDF viewer ready and highlights data available, loading highlights...");
+    if (
+      isViewerReady &&
+      highlightsData &&
+      !annotationsLoaded &&
+      pdfViewerRef.current?.annotation
+    ) {
       loadExistingHighlights();
     }
-  }, [isViewerReady, highlightsData, annotationsLoaded, loadExistingHighlights]);
+  }, [
+    isViewerReady,
+    highlightsData,
+    annotationsLoaded,
+    loadExistingHighlights,
+  ]);
 
   // Effect to handle initial loading state
   useEffect(() => {
     if (currentPdfData?.fileUrl && !isPdfLoading) {
-      console.log("PDF data available, initializing viewer");
       // Keep isLoading true until documentLoad event fires
     } else if (!currentPdfData && !isPdfLoading && !pdfError) {
       // If no PDF data and not loading, something went wrong
@@ -776,8 +733,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Effect to reset loading state when fresh PDF data is available
   useEffect(() => {
     if (currentPdfData?.fileUrl && isLoading && !isPdfLoading) {
-      console.log("Fresh PDF data available, ready to load document");
-
       // Fallback timeout to prevent infinite loading
       const loadingTimeout = setTimeout(() => {
         if (isLoading) {
@@ -807,7 +762,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    */
   const handleRefreshUrl = useCallback(async () => {
     if (pdfDocument?.id) {
-      console.log("Refreshing PDF URL and resetting annotations...");
       setAnnotationsLoaded(false); // Reset annotations loaded state for new URL
       setIsLoading(true); // Show loading state during refresh
       setIsViewerReady(false); // Reset viewer ready state
@@ -899,15 +853,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           resourceUrl={resourceUrl}
           style={{ height: "100%", width: "100%" }}
           documentLoad={() => {
-            console.log("PDF document loaded successfully");
             setIsLoading(false);
             setIsViewerReady(true);
           }}
           documentLoadFailed={handleDocumentLoadFailed}
           created={() => {
-            console.log("PDF viewer created event fired");
-            console.log("PDF viewer ref available:", !!pdfViewerRef.current);
-            console.log("PDF viewer annotation module:", !!pdfViewerRef.current?.annotation);
+            // PDF viewer created
           }}
           enableTextSelection={true}
           enableTextSearch={true}
