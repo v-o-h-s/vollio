@@ -2424,3 +2424,160 @@ body.modal-open {
 [data-state="open"][data-radix-dialog-content] {
   z-index: 999999 !important;
 }
+/* Floating Navigation Animations */
+@keyframes float-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes float-down {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+}
+
+.floating-nav-enter {
+  animation: float-up 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-nav-exit {
+  animation: float-down 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced glassmorphism for floating navigation */
+.floating-nav-glass {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.dark .floating-nav-glass {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Floating navigation item hover effects */
+.floating-nav-item {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-nav-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.floating-nav-item:hover::before {
+  left: 100%;
+}
+
+/* Pulse animation for active indicators */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    opacity: 0.8;
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Smooth scale animations for navigation icons */
+.nav-icon-scale {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-icon-scale:hover {
+  transform: scale(1.1);
+}
+
+.nav-icon-scale:active {
+  transform: scale(0.95);
+}
+
+/* Enhanced focus states for accessibility */
+.floating-nav-focus:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Smooth transitions for theme switching */
+.theme-transition {
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Mobile-specific floating navigation styles */
+@media (max-width: 768px) {
+  .floating-nav-mobile {
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+    width: calc(100% - 2rem);
+  }
+
+  .floating-nav-expanded-mobile {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+/* Backdrop blur support detection */
+@supports not (backdrop-filter: blur(20px)) {
+  .floating-nav-glass {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  .dark .floating-nav-glass {
+    background: rgba(0, 0, 0, 0.95);
+  }
+}
+
+/* Enhanced scroll behavior for floating navigation */
+.floating-nav-scroll-hide {
+  transform: translateY(100px);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.floating-nav-scroll-show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}

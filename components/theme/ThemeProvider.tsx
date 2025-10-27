@@ -1,12 +1,25 @@
 'use client';
 
 import React, { createContext, useEffect, useState, useCallback } from 'react';
-import type { 
-  ThemeContextValue, 
-  ThemeProviderProps, 
-  ThemeState, 
-  ThemeMode 
-} from '@/lib/types/theme';
+// Simple theme types for working implementation
+type ThemeMode = 'light' | 'dark';
+
+interface ThemeState {
+  theme: ThemeMode;
+  isInitialized: boolean;
+}
+
+interface ThemeContextValue {
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
+  toggleTheme: () => void;
+}
+
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  defaultTheme?: ThemeMode;
+  storageKey?: string;
+}
 import {
   getInitialTheme,
   setStoredTheme,
