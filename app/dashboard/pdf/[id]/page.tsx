@@ -7,7 +7,7 @@
  * Uses the PDFAnnotationViewer component to handle PDF display and interactions.
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useGetPDFQuery } from "@/lib/store/apiSlice";
 import { PDFAnnotationViewer, PDFViewerHeader } from "@/components/pdf";
@@ -27,6 +27,10 @@ export default function PDFViewerPage() {
   const [highlightMode, setHighlightMode] = useState<
     "quick" | "comment" | "note"
   >("quick"); // Default highlight mode
+  const [highlightColor, setHighlightColor] = useState("#FFFF00"); // Default yellow color
+
+  // PDF viewer ref for controlling zoom and navigation
+  const pdfViewerRef = useRef<any>(null);
 
   // Debug logging for tool state changes
   useEffect(() => {
@@ -34,9 +38,11 @@ export default function PDFViewerPage() {
       "Tool state changed - selectedTool:",
       selectedTool,
       "highlightMode:",
-      highlightMode
+      highlightMode,
+      "highlightColor:",
+      highlightColor
     );
-  }, [selectedTool, highlightMode]);
+  }, [selectedTool, highlightMode, highlightColor]);
   // Keyboard shortcut for focus mode (F)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -174,6 +180,9 @@ export default function PDFViewerPage() {
           setSelectedTool={setSelectedTool}
           highlightMode={highlightMode}
           setHighlightMode={setHighlightMode}
+          highlightColor={highlightColor}
+          setHighlightColor={setHighlightColor}
+          pdfViewerRef={pdfViewerRef}
         />
 
         {/* Show Header Button (appears when header is hidden in focus mode) */}
@@ -212,6 +221,8 @@ export default function PDFViewerPage() {
               className="w-full h-full"
               selectedTool={selectedTool}
               highlightMode={highlightMode}
+              highlightColor={highlightColor}
+              externalRef={pdfViewerRef}
             />
           </div>
         </div>

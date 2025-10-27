@@ -1,21 +1,23 @@
 "use client";
 
-import React from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   ArrowLeft,
   FileText,
   Palette,
   ChevronDown,
   Highlighter,
-  MessageSquare,
-  FileEdit,
   Circle,
   CircleSlash2,
   Maximize,
   Minimize,
   Trash2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -43,11 +45,19 @@ export interface PDFViewerHeaderProps {
   /** Currently selected tool */
   selectedTool: "highlight" | "nothing" | "comment" | "note" | "delete";
   /** Function to set selected tool */
-  setSelectedTool: (tool: "highlight" | "nothing" | "comment" | "note" | "delete") => void;
+  setSelectedTool: (
+    tool: "highlight" | "nothing" | "comment" | "note" | "delete"
+  ) => void;
   /** Current highlight mode */
   highlightMode: "quick" | "comment" | "note";
   /** Function to set highlight mode */
   setHighlightMode: (mode: "quick" | "comment" | "note") => void;
+  /** Current highlight color */
+  highlightColor: string;
+  /** Function to set highlight color */
+  setHighlightColor: (color: string) => void;
+  /** PDF viewer reference for controlling zoom and navigation */
+  pdfViewerRef?: React.RefObject<any>;
 }
 
 export function PDFViewerHeader({
@@ -60,8 +70,29 @@ export function PDFViewerHeader({
   setSelectedTool,
   highlightMode,
   setHighlightMode,
+  highlightColor,
+  setHighlightColor,
+  pdfViewerRef,
 }: PDFViewerHeaderProps) {
   const router = useRouter();
+
+  // Predefined color options
+  const colorOptions = [
+    { name: "Yellow", value: "#FFFF00", bg: "bg-yellow-400" },
+    { name: "Orange", value: "#FFA500", bg: "bg-orange-400" },
+    { name: "Pink", value: "#FF69B4", bg: "bg-pink-400" },
+    { name: "Green", value: "#00FF00", bg: "bg-green-400" },
+    { name: "Blue", value: "#0080FF", bg: "bg-blue-400" },
+    { name: "Purple", value: "#8A2BE2", bg: "bg-purple-400" },
+    { name: "Red", value: "#FF0000", bg: "bg-red-400" },
+    { name: "Cyan", value: "#00FFFF", bg: "bg-cyan-400" },
+  ];
+
+  // Get current color info
+  const getCurrentColorInfo = () => {
+    const colorInfo = colorOptions.find(c => c.value === highlightColor);
+    return colorInfo || { name: "Custom", value: highlightColor, bg: "" };
+  };
 
   return (
     <div
@@ -72,26 +103,10 @@ export function PDFViewerHeader({
       }`}
     >
       {/* Enhanced stylish header with glassmorphism effect */}
-      <div className="bg-white dark:bg-black backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/30">
+      <div className="bg-white dark:bg-background backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/30">
         <div className="bg-gradient-to-r from-white/5 to-transparent dark:from-white/5 dark:to-transparent rounded-2xl">
           <div className="flex items-center justify-between px-4 sm:px-6 py-2">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-              {/* Back Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.push("/dashboard")}
-                className="flex items-center gap-2 flex-shrink-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 h-7 px-2 rounded-lg backdrop-blur-sm"
-              >
-                <ArrowLeft size={14} />
-                <span className="hidden sm:inline text-xs font-medium">
-                  Back
-                </span>
-              </Button>
-
-              {/* Separator */}
-              <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
-
               {/* PDF Info */}
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <div className="w-7 h-7 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
@@ -104,6 +119,20 @@ export function PDFViewerHeader({
 
               {/* Separator */}
               <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
+
+              {/* Page Navigation */}
+              <PageNavigation pdfViewerRef={pdfViewerRef} />
+
+              {/* Separator */}
+              <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
+
+              {/* Zoom Controls */}
+              <ZoomControls pdfViewerRef={pdfViewerRef} />
+
+              {/* Separator */}
+              <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
+
+
 
               {/* Tools Section */}
               <DropdownMenu>
@@ -121,20 +150,9 @@ export function PDFViewerHeader({
                       <div className="flex items-center gap-1">
                         {selectedTool === "highlight" && (
                           <div
-                            className={`w-2 h-2 rounded-full ${
-                              highlightMode === "quick"
-                                ? "bg-yellow-400"
-                                : highlightMode === "comment"
-                                ? "bg-orange-400"
-                                : "bg-blue-400"
-                            }`}
+                            className="w-2 h-2 rounded-full border border-white/30"
+                            style={{ backgroundColor: highlightColor }}
                           />
-                        )}
-                        {selectedTool === "comment" && (
-                          <div className="w-2 h-2 rounded-full bg-green-400" />
-                        )}
-                        {selectedTool === "note" && (
-                          <div className="w-2 h-2 rounded-full bg-purple-400" />
                         )}
                         {selectedTool === "delete" && (
                           <div className="w-2 h-2 rounded-full bg-red-400" />
@@ -181,7 +199,10 @@ export function PDFViewerHeader({
                         }}
                         className="flex items-center gap-3 cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 focus:bg-black/10 dark:focus:bg-white/10 transition-colors duration-200"
                       >
-                        <div className="w-4 h-4 bg-yellow-400 rounded-full shadow-sm" />
+                        <div 
+                          className="w-4 h-4 rounded-full shadow-sm border border-white/30"
+                          style={{ backgroundColor: highlightColor }}
+                        />
                         <div className="flex-1">
                           <div className="font-medium text-sm">
                             Quick Highlight
@@ -211,7 +232,10 @@ export function PDFViewerHeader({
                         }}
                         className="flex items-center gap-3 cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 focus:bg-black/10 dark:focus:bg-white/10 transition-colors duration-200"
                       >
-                        <div className="w-4 h-4 bg-orange-400 rounded-full shadow-sm" />
+                        <div 
+                          className="w-4 h-4 rounded-full shadow-sm border border-white/30"
+                          style={{ backgroundColor: highlightColor }}
+                        />
                         <div className="flex-1">
                           <div className="font-medium text-sm">
                             Inline Comment
@@ -241,11 +265,12 @@ export function PDFViewerHeader({
                         }}
                         className="flex items-center gap-3 cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 focus:bg-black/10 dark:focus:bg-white/10 transition-colors duration-200"
                       >
-                        <div className="w-4 h-4 bg-blue-400 rounded-full shadow-sm" />
+                        <div 
+                          className="w-4 h-4 rounded-full shadow-sm border border-white/30"
+                          style={{ backgroundColor: highlightColor }}
+                        />
                         <div className="flex-1">
-                          <div className="font-medium text-sm">
-                            Linked Note
-                          </div>
+                          <div className="font-medium text-sm">Linked Note</div>
                           <div className="text-xs text-muted-foreground">
                             Expands to full note
                           </div>
@@ -263,49 +288,15 @@ export function PDFViewerHeader({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => {
-                      setSelectedTool("comment");
-                      console.log(
-                        "Comment tool selected - Tool:",
-                        "comment"
-                      );
-                    }}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 focus:bg-black/10 dark:focus:bg-white/10 transition-colors duration-200"
-                  >
-                    <MessageSquare size={16} className="text-green-500" />
-                    <span className="font-medium">Comments</span>
-                    {selectedTool === "comment" && (
-                      <Circle
-                        size={6}
-                        className="ml-auto text-blue-500 fill-current"
-                      />
-                    )}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      setSelectedTool("note");
-                      console.log("Note tool selected - Tool:", "note");
-                    }}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 focus:bg-black/10 dark:focus:bg-white/10 transition-colors duration-200"
-                  >
-                    <FileEdit size={16} className="text-purple-500" />
-                    <span className="font-medium">Notes</span>
-                    {selectedTool === "note" && (
-                      <Circle
-                        size={6}
-                        className="ml-auto text-blue-500 fill-current"
-                      />
-                    )}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => {
                       setSelectedTool("delete");
                       console.log("Delete tool selected - Tool:", "delete");
                     }}
                     className="flex items-center gap-3 cursor-pointer hover:bg-red-50 dark:hover:bg-red-950/20 focus:bg-red-50 dark:focus:bg-red-950/20 transition-colors duration-200"
                   >
                     <Trash2 size={16} className="text-red-500" />
-                    <span className="font-medium text-red-600 dark:text-red-400">Delete Highlights</span>
+                    <span className="font-medium text-red-600 dark:text-red-400">
+                      Delete Highlights
+                    </span>
                     {selectedTool === "delete" && (
                       <Circle
                         size={6}
@@ -317,10 +308,7 @@ export function PDFViewerHeader({
                   <DropdownMenuItem
                     onClick={() => {
                       setSelectedTool("nothing");
-                      console.log(
-                        "Nothing tool selected - Tool:",
-                        "nothing"
-                      );
+                      console.log("Nothing tool selected - Tool:", "nothing");
                     }}
                     className="flex items-center gap-3 cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 focus:bg-black/10 dark:focus:bg-white/10 transition-colors duration-200"
                   >
@@ -341,13 +329,8 @@ export function PDFViewerHeader({
                 {selectedTool === "highlight" && (
                   <>
                     <div
-                      className={`w-2.5 h-2.5 rounded-full shadow-sm ${
-                        highlightMode === "quick"
-                          ? "bg-yellow-400"
-                          : highlightMode === "comment"
-                          ? "bg-orange-400"
-                          : "bg-blue-400"
-                      }`}
+                      className="w-2.5 h-2.5 rounded-full shadow-sm border border-white/30"
+                      style={{ backgroundColor: highlightColor }}
                     />
                     <span className="text-xs font-medium text-foreground/80">
                       {highlightMode === "quick"
@@ -355,22 +338,6 @@ export function PDFViewerHeader({
                         : highlightMode === "comment"
                         ? "Comment"
                         : "Note"}
-                    </span>
-                  </>
-                )}
-                {selectedTool === "comment" && (
-                  <>
-                    <MessageSquare size={10} className="text-green-500" />
-                    <span className="text-xs font-medium text-foreground/80">
-                      Comment
-                    </span>
-                  </>
-                )}
-                {selectedTool === "note" && (
-                  <>
-                    <FileEdit size={10} className="text-purple-500" />
-                    <span className="text-xs font-medium text-foreground/80">
-                      Note
                     </span>
                   </>
                 )}
@@ -405,9 +372,7 @@ export function PDFViewerHeader({
                 }}
                 className="flex items-center gap-2 flex-shrink-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 h-7 px-2 rounded-lg backdrop-blur-sm"
                 title={
-                  isFocusMode
-                    ? "Exit Focus Mode (Esc)"
-                    : "Enter Focus Mode (F)"
+                  isFocusMode ? "Exit Focus Mode (Esc)" : "Enter Focus Mode (F)"
                 }
               >
                 {isFocusMode ? (
@@ -449,6 +414,256 @@ export function PDFViewerHeader({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Page Navigation Component
+function PageNavigation({ pdfViewerRef }: { pdfViewerRef?: React.RefObject<any> }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState("1");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Update page info from PDF viewer
+  React.useEffect(() => {
+    if (pdfViewerRef?.current) {
+      const viewer = pdfViewerRef.current;
+      
+      // Get current page and total pages from Syncfusion PDF Viewer
+      const updatePageInfo = () => {
+        try {
+          const current = viewer.currentPageNumber || 1;
+          const total = viewer.pageCount || 1;
+          setCurrentPage(current);
+          setTotalPages(total);
+        } catch (error) {
+          console.warn("Could not get page info from PDF viewer:", error);
+        }
+      };
+
+      // Update immediately
+      updatePageInfo();
+
+      // Set up interval to keep page info updated
+      const interval = setInterval(updatePageInfo, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [pdfViewerRef]);
+
+  const handlePageClick = () => {
+    setIsEditing(true);
+    setInputValue(currentPage.toString());
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const handleInputSubmit = () => {
+    const pageNum = parseInt(inputValue);
+    if (pageNum >= 1 && pageNum <= totalPages && pdfViewerRef?.current) {
+      try {
+        // Use Syncfusion's navigation API to go to page
+        if (pdfViewerRef.current.navigation) {
+          pdfViewerRef.current.navigation.goToPage(pageNum);
+        } else {
+          // Fallback method
+          pdfViewerRef.current.goToPage(pageNum);
+        }
+        setCurrentPage(pageNum);
+      } catch (error) {
+        console.error("Error navigating to page:", error);
+      }
+    }
+    setIsEditing(false);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleInputSubmit();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
+      setInputValue(currentPage.toString());
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      {isEditing ? (
+        <Input
+          ref={inputRef}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onBlur={handleInputSubmit}
+          onKeyDown={handleInputKeyDown}
+          className="w-12 h-6 text-xs text-center bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 rounded px-1"
+        />
+      ) : (
+        <button
+          onClick={handlePageClick}
+          className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-1 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5"
+        >
+          {currentPage}
+        </button>
+      )}
+      <span className="text-xs text-foreground/60">/</span>
+      <span className="text-xs font-medium text-foreground/80">
+        {totalPages}
+      </span>
+    </div>
+  );
+}
+
+// Zoom Controls Component
+function ZoomControls({ pdfViewerRef }: { pdfViewerRef?: React.RefObject<any> }) {
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputValue, setInputValue] = useState("100");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Update zoom level from PDF viewer
+  React.useEffect(() => {
+    if (pdfViewerRef?.current) {
+      const viewer = pdfViewerRef.current;
+      
+      const updateZoomLevel = () => {
+        try {
+          const currentZoom = viewer.zoomPercentage || 100;
+          setZoomLevel(Math.round(currentZoom));
+        } catch (error) {
+          console.warn("Could not get zoom level from PDF viewer:", error);
+        }
+      };
+
+      // Update immediately
+      updateZoomLevel();
+
+      // Set up interval to keep zoom level updated
+      const interval = setInterval(updateZoomLevel, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [pdfViewerRef]);
+
+  const handleZoomIn = () => {
+    if (pdfViewerRef?.current) {
+      try {
+        if (pdfViewerRef.current.magnification) {
+          pdfViewerRef.current.magnification.zoomIn();
+        } else {
+          // Fallback method
+          pdfViewerRef.current.zoomIn();
+        }
+      } catch (error) {
+        console.error("Error zooming in:", error);
+      }
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (pdfViewerRef?.current) {
+      try {
+        if (pdfViewerRef.current.magnification) {
+          pdfViewerRef.current.magnification.zoomOut();
+        } else {
+          // Fallback method
+          pdfViewerRef.current.zoomOut();
+        }
+      } catch (error) {
+        console.error("Error zooming out:", error);
+      }
+    }
+  };
+
+  const handleResetZoom = () => {
+    if (pdfViewerRef?.current) {
+      try {
+        if (pdfViewerRef.current.magnification) {
+          pdfViewerRef.current.magnification.fitToPage();
+        } else {
+          // Fallback method
+          pdfViewerRef.current.fitToPage();
+        }
+      } catch (error) {
+        console.error("Error resetting zoom:", error);
+      }
+    }
+  };
+
+  const handleZoomClick = () => {
+    setIsEditing(true);
+    setInputValue(zoomLevel.toString());
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const handleZoomInputSubmit = () => {
+    const zoomValue = parseInt(inputValue);
+    if (zoomValue >= 10 && zoomValue <= 400 && pdfViewerRef?.current) {
+      try {
+        // Use Syncfusion's magnification API to set custom zoom
+        if (pdfViewerRef.current.magnification) {
+          pdfViewerRef.current.magnification.zoomTo(zoomValue);
+        } else {
+          // Fallback method
+          pdfViewerRef.current.zoomTo(zoomValue);
+        }
+        setZoomLevel(zoomValue);
+      } catch (error) {
+        console.error("Error setting custom zoom:", error);
+      }
+    }
+    setIsEditing(false);
+  };
+
+  const handleZoomInputKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleZoomInputSubmit();
+    } else if (e.key === "Escape") {
+      setIsEditing(false);
+      setInputValue(zoomLevel.toString());
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleZoomOut}
+        className="h-6 w-6 p-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded"
+        title="Zoom Out"
+      >
+        <ZoomOut size={12} />
+      </Button>
+
+      {isEditing ? (
+        <Input
+          ref={inputRef}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onBlur={handleZoomInputSubmit}
+          onKeyDown={handleZoomInputKeyDown}
+          className="w-14 h-6 text-xs text-center bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 rounded px-1"
+          placeholder="10-400"
+        />
+      ) : (
+        <button
+          onClick={handleZoomClick}
+          onDoubleClick={handleResetZoom}
+          className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-2 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5 min-w-[3rem] text-center"
+          title="Click to edit zoom (10-400%), Double-click to reset"
+        >
+          {zoomLevel}%
+        </button>
+      )}
+
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleZoomIn}
+        className="h-6 w-6 p-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded"
+        title="Zoom In"
+      >
+        <ZoomIn size={12} />
+      </Button>
     </div>
   );
 }

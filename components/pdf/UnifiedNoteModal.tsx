@@ -28,6 +28,7 @@ interface UnifiedNoteModalProps {
   selectedText?: string;
   pdfTitle?: string;
   onNoteCreated?: (noteId: string) => void;
+  onNoteSaved?: () => void; // Called when user explicitly saves the note
 
   // Modal configuration
   mode?: "preview" | "create";
@@ -40,6 +41,7 @@ export function UnifiedNoteModal({
   selectedText,
   pdfTitle,
   onNoteCreated,
+  onNoteSaved,
   mode = noteId ? "preview" : "create",
   title,
 }: UnifiedNoteModalProps) {
@@ -107,7 +109,9 @@ export function UnifiedNoteModal({
 
   const handleNoteCreated = useCallback(
     (createdNoteId: string) => {
-      console.log("Note created in modal:", createdNoteId);
+      console.log("📝 Note created in modal:", createdNoteId, "- keeping modal open for continued editing");
+      // Don't close the modal when note is created - let user continue editing
+      // Only notify parent for highlight creation, but don't trigger modal close
       if (onNoteCreated) {
         onNoteCreated(createdNoteId);
       }
@@ -117,9 +121,15 @@ export function UnifiedNoteModal({
 
   const handleSaveClick = useCallback(() => {
     // Close the modal when user explicitly clicks save
-    console.log("Manual save clicked - closing modal");
+    console.log("💾 Manual save clicked - closing modal and cleaning up selection");
+    
+    // Call the onNoteSaved callback to clean up selection state
+    if (onNoteSaved) {
+      onNoteSaved();
+    }
+    
     handleClose();
-  }, [handleClose]);
+  }, [handleClose, onNoteSaved]);
 
   // Handle backdrop click
   const handleBackdropClick = useCallback(

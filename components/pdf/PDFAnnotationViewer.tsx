@@ -7,6 +7,7 @@ import {
   TextSelection,
   TextSearch,
   Navigation,
+  Magnification,
   LinkAnnotation,
   BookmarkView,
   ThumbnailView,
@@ -45,6 +46,10 @@ export interface PDFAnnotationViewerProps {
   selectedTool: "highlight" | "nothing" | "comment" | "note" | "delete";
   /** Current highlight mode when highlight tool is selected */
   highlightMode?: "quick" | "comment" | "note";
+  /** Current highlight color */
+  highlightColor?: string;
+  /** External ref to access PDF viewer instance */
+  externalRef?: React.RefObject<any>;
 }
 
 interface TextSelectionCompleteEventArgs {
@@ -63,6 +68,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   className = "",
   selectedTool = "highlight",
   highlightMode = "quick",
+  highlightColor = "#FFFF00",
+  externalRef,
 }) => {
   // Component state
   const [isLoading, setIsLoading] = useState(true);
@@ -102,6 +109,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Component refs
   const pdfViewerRef = useRef<PdfViewerComponent>(null);
+
+  // Sync external ref with internal ref
+  useEffect(() => {
+    if (externalRef && pdfViewerRef.current) {
+      externalRef.current = pdfViewerRef.current;
+    }
+  }, [externalRef, isViewerReady]);
 
   // Hooks
   const router = useRouter();
@@ -200,7 +214,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 pageNumber: pageNumber ,
                 author: "User",
                 subject: "Quick Highlight",
-                color: "#FFFF00", // Yellow for quick highlights
+                color: highlightColor, // Use selected highlight color
                 opacity: 0.4,
                 customData: {
                   id: `quick-highlight-${Date.now()}`,
@@ -219,7 +233,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 const savedHighlight = await createHighlight({
                   pdfId: currentPdfData.id,
                   content: selectedTextContent,
-                  color: "#FFFF00",
+                  color: highlightColor,
                   opacity: 0.4,
                   pageNumber: pageNumber,
                   type: "quick",
@@ -281,7 +295,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 pageNumber: pageNumber, // Convert to 1-based page numbers for Syncfusion
                 author: "User",
                 subject: "Comment Highlight",
-                color: "#FFA500", // Orange for comments
+                color: highlightColor, // Use selected highlight color
                 opacity: 0.4,
                 customData: {
                   id: `comment-highlight-${Date.now()}`,
@@ -300,7 +314,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 await createHighlight({
                   pdfId: currentPdfData.id,
                   content: selectedTextContent,
-                  color: "#FFA500",
+                  color: highlightColor,
                   opacity: 0.4,
                   pageNumber: pageNumber,
                   type: "comment",
@@ -392,7 +406,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             pageNumber: currentPageNumber , // Convert to 1-based page numbers for Syncfusion
             author: "User",
             subject: "Note Highlight",
-            color: "#4A90E2", // Blue for note highlights
+            color: highlightColor, // Use selected highlight color
             opacity: 0.4,
             customData: {
               id: `note-highlight-${noteId}`,
@@ -413,7 +427,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           const savedHighlight = await createHighlight({
             pdfId: currentPdfData.id,
             content: selectedText,
-            color: "#4A90E2",
+            color: highlightColor,
             opacity: 0.4,
             pageNumber: currentPageNumber,
             type: "note",
@@ -424,11 +438,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           console.log("💾 Highlight saved to database:", savedHighlight);
           toast.success("Note and highlight created successfully");
 
-          // Close the modal and clear selection
-          setShowNoteModal(false);
-          setSelectedText("");
-          setSelectionBounds(null);
-          setSelectedTextBounds(null);
+          // Don't automatically close the modal - let user continue editing
+          // The modal will close when user clicks "Save Note" or close button
+          // Just reset the highlight creation flag
           setHighlightCreated(false); // Reset for next selection
         } catch (error) {
           console.error("Error creating note highlight:", error);
@@ -453,16 +465,24 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     ]
   );
 
-  // Handle modal close without creating note
-  const handleCloseNoteModal = useCallback(() => {
-    setShowNoteModal(false);
-    // Clear selection state when modal is manually closed
+  // Clear selection state helper
+  const clearSelectionState = useCallback(() => {
     setSelectedText("");
     setSelectionBounds(null);
     setSelectedTextBounds(null);
-    // Reset highlight creation flag
     setHighlightCreated(false);
   }, []);
+
+  // Handle modal close without creating note
+  const handleCloseNoteModal = useCallback(() => {
+    setShowNoteModal(false);
+    clearSelectionState();
+  }, [clearSelectionState]);
+
+  // Handle note saved (when user clicks "Save Note" button)
+  const handleNoteSaved = useCallback(() => {
+    clearSelectionState();
+  }, [clearSelectionState]);
 
   // Handle annotation mouseover
   const handleAnnotationMouseover = useCallback(
@@ -1016,6 +1036,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               TextSelection,
               TextSearch,
               Navigation,
+              Magnification,
               LinkAnnotation,
               BookmarkView,
               ThumbnailView,
@@ -1045,6 +1066,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             selectedText={selectedText}
             pdfTitle={currentPdfData?.filename}
             onNoteCreated={handleNoteCreated}
+            onNoteSaved={handleNoteSaved}
             mode="create"
           />
         )}
