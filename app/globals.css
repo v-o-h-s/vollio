@@ -2397,3 +2397,30 @@ body.modal-open {
   position: fixed !important;
   width: 100% !important;
 }
+
+/* Ensure dialogs appear above PDF viewers and other high z-index elements */
+[data-radix-popper-content-wrapper],
+[data-radix-dialog-overlay],
+[data-radix-dialog-content] {
+  z-index: 999999 !important;
+}
+
+/* Specific override for dialog overlays */
+.fixed.inset-0[data-radix-dialog-overlay] {
+  z-index: 999998 !important;
+}
+
+/* Ensure dialog content is above overlay */
+[data-radix-dialog-content] {
+  z-index: 999999 !important;
+}
+
+/* Force dialog visibility above Syncfusion PDF viewer */
+[data-state="open"][data-radix-dialog-overlay] {
+  z-index: 999998 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-state="open"][data-radix-dialog-content] {
+  z-index: 999999 !important;
+}

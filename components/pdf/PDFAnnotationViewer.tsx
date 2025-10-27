@@ -18,6 +18,8 @@ import {
   useGetPDFQuery,
   useCreateHighlightMutation,
   useGetPDFHighlightsQuery,
+  useDeleteHighlightMutation,
+  useDeleteNoteMutation,
 } from "@/lib/store/apiSlice";
 import toast from "react-hot-toast";
 import { PDFDocument, TextBounds } from "@/lib/types/pdf";
@@ -29,7 +31,7 @@ import { FileText, AlertCircle, RefreshCw } from "lucide-react";
 import { HighlightSettings } from "@syncfusion/ej2-react-pdfviewer";
 import { UnifiedNoteModal } from "./UnifiedNoteModal";
 import { HighlightHoverToolbar } from "./HighlightHoverToolbar";
-
+import { DeleteHighlightDialog } from "@/components/ui/delete-highlight-dialog";
 
 /**
  * Props interface for PDFAnnotationViewer component
@@ -40,7 +42,7 @@ export interface PDFAnnotationViewerProps {
   /** Additional CSS classes */
   className?: string;
   /** Currently selected annotation tool */
-  selectedTool: "highlight" | "nothing" | "comment" | "note";
+  selectedTool: "highlight" | "nothing" | "comment" | "note" | "delete";
   /** Current highlight mode when highlight tool is selected */
   highlightMode?: "quick" | "comment" | "note";
 }
@@ -87,7 +89,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Note preview modal state
   const [showNotePreview, setShowNotePreview] = useState(false);
   const [previewNoteId, setPreviewNoteId] = useState<string | null>(null);
-  
 
   // Quick highlight context menu state
   const [hoveredQuickHighlight, setHoveredQuickHighlight] = useState<{
@@ -122,6 +123,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Highlight API hooks
   const [createHighlight] = useCreateHighlightMutation();
+  const [deleteHighlight] = useDeleteHighlightMutation();
+  const [deleteNote] = useDeleteNoteMutation();
   const {
     data: highlightsData,
     error: highlightsError,
@@ -344,6 +347,14 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   // Track if highlight has been created for the current note
   const [highlightCreated, setHighlightCreated] = useState(false);
 
+  // Delete dialog state
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    annotation: any;
+    customData: any;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Handle note creation completion
   const handleNoteCreated = useCallback(
     async (noteId: string) => {
@@ -518,6 +529,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         const customData = annotation.customData;
         console.log("📋 Annotation customData:", customData);
 
+        // Handle delete mode
+        if (selectedTool === "delete") {
+          handleDeleteHighlight(annotation, customData);
+          return;
+        }
+
         // Check if this is a linked note highlight
         if (customData.type === "note" && customData.noteId) {
           console.log(
@@ -528,17 +545,17 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           // Open note preview modal
           console.log("🔄 Setting preview state:", {
             noteId: customData.noteId,
-            showNotePreview: true
+            showNotePreview: true,
           });
-          
+
           setPreviewNoteId(customData.noteId);
           setShowNotePreview(true);
-          
+
           console.log("📊 Modal state after setting:", {
             previewNoteId: customData.noteId,
-            showNotePreview: true
+            showNotePreview: true,
           });
-          
+
           toast.success("Opening note preview");
         } else {
           console.log("❌ Annotation conditions not met:", {
@@ -552,11 +569,69 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         console.error("Error handling annotation click:", error);
       }
     },
+    [selectedTool]
+  );
+
+  // Handle delete highlight
+  const handleDeleteHighlight = useCallback(
+    (annotation: any, customData: any) => {
+      setDeleteTarget({ annotation, customData });
+      setShowDeleteDialog(true);
+    },
     []
   );
 
- 
+  // Handle delete confirmation
+  const handleDeleteConfirm = useCallback(
+    async (shouldDeleteNote: boolean) => {
+      if (!deleteTarget) return;
 
+      setIsDeleting(true);
+      try {
+        const { annotation, customData } = deleteTarget;
+        const highlightId = customData.highlightId;
+        const noteId = customData.noteId;
+
+        // Delete the highlight from Syncfusion viewer
+        if (pdfViewerRef.current?.annotation && annotation.annotationId) {
+          // First select the annotation, then delete it
+          pdfViewerRef.current.annotation.selectAnnotation(
+            annotation.annotationId
+          );
+          pdfViewerRef.current.annotation.deleteAnnotation();
+        }
+
+        // Delete from database
+        if (highlightId) {
+          await deleteHighlight(highlightId).unwrap();
+          toast.success("Highlight deleted successfully");
+        }
+
+        // Delete the note if requested
+        if (shouldDeleteNote && noteId) {
+          await deleteNote(noteId).unwrap();
+          toast.success("Note deleted successfully");
+        }
+
+        setShowDeleteDialog(false);
+        setDeleteTarget(null);
+      } catch (error) {
+        console.error("Error deleting highlight:", error);
+        toast.error("Failed to delete highlight");
+      } finally {
+        setIsDeleting(false);
+      }
+    },
+    [deleteTarget, deleteHighlight, deleteNote]
+  );
+
+  // Handle delete dialog close
+  const handleDeleteDialogClose = useCallback(() => {
+    if (!isDeleting) {
+      setShowDeleteDialog(false);
+      setDeleteTarget(null);
+    }
+  }, [isDeleting]);
 
   // Handle context menu trigger click
   const handleContextMenuTriggerClick = useCallback(() => {
@@ -694,8 +769,12 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               ann.customData?.id === highlightId
           );
 
-          if (targetAnnotation) {
-            //pdfViewerRef.current.annotation.deleteAnnotation(targetAnnotation);
+          if (targetAnnotation && targetAnnotation.annotationId) {
+            // First select the annotation, then delete it
+            pdfViewerRef.current.annotation.selectAnnotation(
+              targetAnnotation.annotationId
+            );
+            pdfViewerRef.current.annotation.deleteAnnotation();
           }
         } catch (error) {
           console.error("Error deleting Syncfusion annotation:", error);
@@ -862,7 +941,11 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         console.error("PDFAnnotationViewer error:", error, errorInfo);
       }}
     >
-      <div className={`relative w-full h-full overflow-hidden ${className}`}>
+      <div
+        className={`relative w-full h-full overflow-hidden ${className} ${
+          selectedTool === "delete" ? "cursor-crosshair" : ""
+        }`}
+      >
         {/* Syncfusion PDF Viewer */}
         <PdfViewerComponent
           ref={pdfViewerRef}
@@ -931,7 +1014,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           </div>
         )}
 
-
         {/* Note Preview Modal */}
         {showNotePreview && (
           <UnifiedNoteModal
@@ -941,6 +1023,17 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           />
         )}
 
+        {/* Delete Highlight Dialog */}
+        <DeleteHighlightDialog
+          open={showDeleteDialog}
+          onClose={handleDeleteDialogClose}
+          onConfirm={handleDeleteConfirm}
+          hasLinkedNote={
+            deleteTarget?.customData?.type === "note" &&
+            !!deleteTarget?.customData?.noteId
+          }
+          isDeleting={isDeleting}
+        />
       </div>
     </ErrorBoundary>
   );
