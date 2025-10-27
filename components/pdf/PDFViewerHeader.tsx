@@ -132,7 +132,55 @@ export function PDFViewerHeader({
               {/* Separator */}
               <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
 
+              {/* Color Picker Section */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2 flex-shrink-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 h-7 px-2 rounded-lg backdrop-blur-sm"
+                  >
+                    <div 
+                      className="w-4 h-4 rounded-full border-2 border-white/30 shadow-sm"
+                      style={{ backgroundColor: highlightColor }}
+                    />
+                    <span className="hidden sm:inline text-xs font-medium">
+                      {getCurrentColorInfo().name}
+                    </span>
+                    <ChevronDown size={14} className="opacity-60" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="center"
+                  side="bottom"
+                  sideOffset={8}
+                  className="w-64 dark:bg-black bg-white mt-1 border border-white/20 dark:border-white/10 rounded-lg z-[9999]"
+                >
+                  <div className="p-3">
+                    <div className="text-xs font-medium text-foreground/80 mb-3">
+                      Choose Highlight Color
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {colorOptions.map((color) => (
+                        <button
+                          key={color.value}
+                          onClick={() => setHighlightColor(color.value)}
+                          className={`w-12 h-8 rounded-lg border-2 transition-all duration-200 hover:scale-105 ${
+                            highlightColor === color.value
+                              ? "border-foreground shadow-lg"
+                              : "border-white/30 dark:border-white/20 hover:border-foreground/50"
+                          }`}
+                          style={{ backgroundColor: color.value }}
+                          title={color.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
+              {/* Separator */}
+              <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
 
               {/* Tools Section */}
               <DropdownMenu>
