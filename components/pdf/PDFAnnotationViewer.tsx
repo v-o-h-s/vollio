@@ -630,13 +630,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    * Load existing highlights from database with proper initialization checks
    */
   const loadExistingHighlights = useCallback(
-    async (retryCount = 0) => {
+    async (retryCount = 0, forceLoad = false) => {
       const MAX_RETRIES = 10; // Maximum 10 retries (10 seconds total)
 
       console.log(
         `loadExistingHighlights called - attempt ${
           retryCount + 1
-        }/${MAX_RETRIES}`
+        }/${MAX_RETRIES}, forceLoad: ${forceLoad}`
       );
       console.log("Annotations loaded state:", annotationsLoaded);
       console.log("Highlights data:", highlightsData);
@@ -656,8 +656,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         return;
       } 
 
-      // Check if PDF viewer is ready
-      if (!isViewerReady) {
+      // Check if PDF viewer is ready (skip check if forceLoad is true)
+      if (!forceLoad && !isViewerReady) {
         if (retryCount >= MAX_RETRIES) {
           console.error(
             "PDF viewer failed to initialize after maximum retries, giving up"
@@ -671,7 +671,29 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             retryCount + 1
           }/${MAX_RETRIES})`
         );
-        setTimeout(() => loadExistingHighlights(retryCount + 1), 1000);
+        setTimeout(() => loadExistingHighlights(retryCount + 1, false), 1000);
+        return;
+      }
+
+      // Additional check for PDF viewer ref when forceLoad is true
+      if (forceLoad && !pdfViewerRef.current) {
+        console.log("PDF viewer ref not available, retrying...");
+        if (retryCount < MAX_RETRIES) {
+          setTimeout(() => loadExistingHighlights(retryCount + 1, true), 500);
+        }
+        return;
+      }
+
+      // Verify annotation module is available
+      if (!pdfViewerRef.current?.annotation) {
+        console.error("PDF viewer annotation module not available");
+        if (retryCount < MAX_RETRIES) {
+          console.log("Retrying in 1000ms...");
+          setTimeout(() => loadExistingHighlights(retryCount + 1, forceLoad), 1000);
+        } else {
+          console.error("Max retries reached, annotation module still not available");
+          setAnnotationsLoaded(true);
+        }
         return;
       }
 
@@ -781,7 +803,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           // Fallback: reload highlights from database
           setAnnotationsLoaded(false);
           setTimeout(() => {
-            loadExistingHighlights();
+            loadExistingHighlights(0, false);
           }, 100);
         }
       }
@@ -800,7 +822,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     if (!isLoading && highlightsData && !annotationsLoaded) {
       console.log("Highlights data available, triggering load...");
       setTimeout(() => {
-        loadExistingHighlights(0);
+        loadExistingHighlights(0, false);
       }, 500);
     }
   }, [highlightsData, isLoading, annotationsLoaded, loadExistingHighlights]);
@@ -945,16 +967,16 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             console.log("PDF document loaded successfully");
             setIsLoading(false);
             setIsViewerReady(true);
-            loadExistingHighlights();
+            // Force load highlights since we know the viewer is ready
+            setTimeout(() => {
+              loadExistingHighlights(0, true);
+            }, 100);
           }}
           documentLoadFailed={handleDocumentLoadFailed}
-          pageRenderComplete={() => {
-            console.log("Page render complete event fired");
-            // This event fires when pages are actually rendered
-            // Use this as an additional signal that the PDF is ready
-          }}
           created={() => {
             console.log("PDF viewer created event fired");
+            console.log("PDF viewer ref available:", !!pdfViewerRef.current);
+            console.log("PDF viewer annotation module:", !!pdfViewerRef.current?.annotation);
           }}
           enableTextSelection={true}
           enableTextSearch={true}
