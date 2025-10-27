@@ -19,7 +19,6 @@ import { createPortal } from "react-dom";
 
 interface UnifiedNoteModalProps {
   // Common props
-  isOpen: boolean;
   onClose: () => void;
 
   // For existing note preview
@@ -36,7 +35,6 @@ interface UnifiedNoteModalProps {
 }
 
 export function UnifiedNoteModal({
-  isOpen,
   onClose,
   noteId,
   selectedText,
@@ -45,6 +43,7 @@ export function UnifiedNoteModal({
   mode = noteId ? "preview" : "create",
   title,
 }: UnifiedNoteModalProps) {
+  console.log(noteId);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Fetch note data for preview mode - always call the hook to maintain hook order
@@ -56,36 +55,25 @@ export function UnifiedNoteModal({
     skip: !noteId || mode !== "preview",
   });
 
-  // Handle escape key and body scroll - MUST be called before any conditional returns
+  // Handle escape key and body scroll - modal is always open when component exists
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape") {
         onClose();
       }
     };
 
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-      // Prevent body scroll when modal is open
-      document.body.classList.add("modal-open");
-      document.body.style.overflow = "hidden";
-    }
+    document.addEventListener("keydown", handleEscape);
+    // Prevent body scroll when modal is open
+    document.body.classList.add("modal-open");
+    document.body.style.overflow = "hidden";
 
     return () => {
       document.removeEventListener("keydown", handleEscape);
       document.body.classList.remove("modal-open");
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, onClose]);
-
-  // Add debugging for modal visibility - MUST be called before any conditional returns
-  useEffect(() => {
-    console.log("UnifiedNoteModal visibility changed:", {
-      isOpen,
-      mode,
-      noteId,
-    });
-  }, [isOpen, mode, noteId]);
+  }, [onClose]);
 
   // Determine if this is a test mode
   const isTestMode = noteId === "test-note-id";
@@ -143,19 +131,7 @@ export function UnifiedNoteModal({
     [handleClose]
   );
 
-  console.log("🔍 UnifiedNoteModal Debug:", {
-    isOpen,
-    mode,
-    noteId,
-    selectedText,
-    note,
-    isLoadingNote,
-    error,
-    modalShouldShow: isOpen && (mode === "create" || noteId),
-  });
-
-  // Early returns AFTER all hooks have been called
-  if (!isOpen) return null;
+  // Component is only rendered when it should be visible
 
   if (mode === "preview" && !noteId) {
     console.log("UnifiedNoteModal: No noteId provided for preview mode");
@@ -169,15 +145,15 @@ export function UnifiedNoteModal({
         onClick={handleBackdropClick}
       >
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/50 dark:bg-black/70" />
+        <div className="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm" />
 
         {/* Modal Container */}
         <div
           className={cn(
             "relative z-10 bg-background border border-border shadow-2xl rounded-lg overflow-hidden flex flex-col",
             "animate-in fade-in-0 zoom-in-95 duration-200",
-            isFullscreen 
-              ? "w-[calc(100vw-2rem)] h-[calc(100vh-2rem)] max-w-none max-h-none" 
+            isFullscreen
+              ? "w-[calc(100vw-2rem)] h-[calc(100vh-2rem)] max-w-none max-h-none"
               : "w-[90vw] max-w-4xl h-[85vh] max-h-[800px]"
           )}
           onClick={(e) => e.stopPropagation()}
@@ -295,9 +271,7 @@ export function UnifiedNoteModal({
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="text-muted-foreground">Open:</span>
-                          <span className="ml-2 font-mono">
-                            {isOpen.toString()}
-                          </span>
+                          <span className="ml-2 font-mono">true</span>
                         </div>
                         <div>
                           <span className="text-muted-foreground">Mode:</span>

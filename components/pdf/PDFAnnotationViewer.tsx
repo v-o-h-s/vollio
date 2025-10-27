@@ -933,12 +933,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
 
         {/* Note Preview Modal */}
-        <UnifiedNoteModal
-          isOpen={showNotePreview}
-          onClose={handleCloseNotePreview}
-          noteId={previewNoteId}
-          mode="preview"
-        />
+        {showNotePreview && (
+          <UnifiedNoteModal
+            onClose={handleCloseNotePreview}
+            noteId={previewNoteId}
+            mode="preview"
+          />
+        )}
 
       </div>
     </ErrorBoundary>
