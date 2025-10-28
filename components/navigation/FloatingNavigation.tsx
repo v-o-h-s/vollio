@@ -149,7 +149,9 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10">
               <div className="w-6 h-6 bg-muted rounded-lg animate-pulse" />
-              <span className="font-semibold text-sm text-foreground">Noto</span>
+              <span className="font-semibold text-sm text-foreground">
+                Noto
+              </span>
             </div>
             <div className="flex items-center gap-1">
               {navigationItems.map((item, index) => (
@@ -264,71 +266,84 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 mb-2" align="end">
-                <DropdownMenuLabel className="font-normal">
+              <DropdownMenuContent
+                className="w-56 mb-2 floating-nav-glass border-0 shadow-2xl"
+                align="end"
+              >
+                <DropdownMenuLabel className="font-normal p-4 border-b border-white/10">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">
-                      {!isMounted || !isLoaded ? "Loading..." : user?.fullName || "User"}
+                    <p className="text-sm font-medium text-foreground">
+                      {!isMounted || !isLoaded
+                        ? "Loading..."
+                        : user?.fullName || "User"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {!isMounted || !isLoaded ? "" : user?.emailAddresses[0]?.emailAddress || ""}
+                      {!isMounted || !isLoaded
+                        ? ""
+                        : user?.emailAddresses[0]?.emailAddress || ""}
                     </p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
+                <DropdownMenuGroup className="p-2">
+                  <DropdownMenuItem className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3">
+                    <User className="mr-3 h-4 w-4 text-blue-400" />
+                    <span className="text-foreground">Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
+                  <DropdownMenuItem className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3">
+                    <Settings className="mr-3 h-4 w-4 text-emerald-400" />
+                    <span className="text-foreground">Settings</span>
                   </DropdownMenuItem>
                   <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
+                    <DropdownMenuSubTrigger className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3">
                       {theme === "dark" ? (
-                        <Moon className="mr-2 h-4 w-4" />
+                        <Moon className="mr-3 h-4 w-4 text-purple-400" />
                       ) : (
-                        <Sun className="mr-2 h-4 w-4" />
+                        <Sun className="mr-3 h-4 w-4 text-yellow-400" />
                       )}
-                      Theme
+                      <span className="text-foreground">Theme</span>
                     </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent>
-                      <DropdownMenuItem onClick={() => setTheme("light")}>
-                        <Sun className="mr-2 h-4 w-4" />
-                        Light
+                    <DropdownMenuSubContent className="floating-nav-glass border-0 shadow-2xl ml-2">
+                      <DropdownMenuItem
+                        onClick={() => setTheme("light")}
+                        className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3"
+                      >
+                        <Sun className="mr-3 h-4 w-4 text-yellow-400" />
+                        <span className="text-foreground">Light</span>
                         {theme === "light" && (
-                          <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />
+                          <div className="ml-auto w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
                         )}
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setTheme("dark")}>
-                        <Moon className="mr-2 h-4 w-4" />
-                        Dark
+                      <DropdownMenuItem
+                        onClick={() => setTheme("dark")}
+                        className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3"
+                      >
+                        <Moon className="mr-3 h-4 w-4 text-purple-400" />
+                        <span className="text-foreground">Dark</span>
                         {theme === "dark" && (
-                          <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />
+                          <div className="ml-auto w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
                         )}
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
-                  <DropdownMenuItem>
-                    <Bell className="mr-2 h-4 w-4" />
-                    Notifications
+                  <DropdownMenuItem className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3">
+                    <Bell className="mr-3 h-4 w-4 text-orange-400" />
+                    <span className="text-foreground">Notifications</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <HelpCircle className="mr-2 h-4 w-4" />
-                    Help & Support
+                  <DropdownMenuItem className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3">
+                    <HelpCircle className="mr-3 h-4 w-4 text-indigo-400" />
+                    <span className="text-foreground">Help & Support</span>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <SignOutButton redirectUrl="/">
-                    <div className="flex items-center text-red-600 dark:text-red-400 cursor-pointer">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Log out
-                    </div>
-                  </SignOutButton>
-                </DropdownMenuItem>
+                <div className="border-t border-white/10 p-2">
+                  <DropdownMenuItem asChild>
+                    <SignOutButton redirectUrl="/">
+                      <div className="flex items-center text-red-400 hover:text-red-300 cursor-pointer rounded-lg hover:bg-red-500/10 focus:bg-red-500/10 transition-all duration-200 p-3 w-full">
+                        <LogOut className="mr-3 h-4 w-4" />
+                        <span>Log out</span>
+                      </div>
+                    </SignOutButton>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -450,10 +465,14 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground truncate">
-                    {!isMounted || !isLoaded ? "Loading..." : user?.fullName || "User"}
+                    {!isMounted || !isLoaded
+                      ? "Loading..."
+                      : user?.fullName || "User"}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {!isMounted || !isLoaded ? "" : user?.emailAddresses[0]?.emailAddress || ""}
+                    {!isMounted || !isLoaded
+                      ? ""
+                      : user?.emailAddresses[0]?.emailAddress || ""}
                   </p>
                 </div>
                 <DropdownMenu>
@@ -462,60 +481,70 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                       <Settings className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 mb-2" align="end">
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem>
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
+                  <DropdownMenuContent
+                    className="w-56 mb-2 floating-nav-glass border-0 shadow-2xl"
+                    align="end"
+                  >
+                    <DropdownMenuGroup className="p-2">
+                      <DropdownMenuItem className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3">
+                        <User className="mr-3 h-4 w-4 text-blue-400" />
+                        <span className="text-foreground">Profile</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
+                      <DropdownMenuItem className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3">
+                        <Settings className="mr-3 h-4 w-4 text-emerald-400" />
+                        <span className="text-foreground">Settings</span>
                       </DropdownMenuItem>
                       <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
+                        <DropdownMenuSubTrigger className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3">
                           {theme === "dark" ? (
-                            <Moon className="mr-2 h-4 w-4" />
+                            <Moon className="mr-3 h-4 w-4 text-purple-400" />
                           ) : (
-                            <Sun className="mr-2 h-4 w-4" />
+                            <Sun className="mr-3 h-4 w-4 text-yellow-400" />
                           )}
-                          Theme
+                          <span className="text-foreground">Theme</span>
                         </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent>
-                          <DropdownMenuItem onClick={() => setTheme("light")}>
-                            <Sun className="mr-2 h-4 w-4" />
-                            Light
+                        <DropdownMenuSubContent className="floating-nav-glass border-0 shadow-2xl ml-2">
+                          <DropdownMenuItem
+                            onClick={() => setTheme("light")}
+                            className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3"
+                          >
+                            <Sun className="mr-3 h-4 w-4 text-yellow-400" />
+                            <span className="text-foreground">Light</span>
                             {theme === "light" && (
-                              <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />
+                              <div className="ml-auto w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
                             )}
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setTheme("dark")}>
-                            <Moon className="mr-2 h-4 w-4" />
-                            Dark
+                          <DropdownMenuItem
+                            onClick={() => setTheme("dark")}
+                            className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3"
+                          >
+                            <Moon className="mr-3 h-4 w-4 text-purple-400" />
+                            <span className="text-foreground">Dark</span>
                             {theme === "dark" && (
-                              <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />
+                              <div className="ml-auto w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
                             )}
                           </DropdownMenuItem>
                         </DropdownMenuSubContent>
                       </DropdownMenuSub>
-                      <DropdownMenuItem>
-                        <Bell className="mr-2 h-4 w-4" />
-                        Notifications
+                      <DropdownMenuItem className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3">
+                        <Bell className="mr-3 h-4 w-4 text-orange-400" />
+                        <span className="text-foreground">Notifications</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <HelpCircle className="mr-2 h-4 w-4" />
-                        Help & Support
+                      <DropdownMenuItem className="rounded-lg hover:bg-white/10 focus:bg-white/10 transition-all duration-200 p-3">
+                        <HelpCircle className="mr-3 h-4 w-4 text-indigo-400" />
+                        <span className="text-foreground">Help & Support</span>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <SignOutButton redirectUrl="/">
-                        <div className="flex items-center text-red-600 dark:text-red-400 cursor-pointer">
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Log out
-                        </div>
-                      </SignOutButton>
-                    </DropdownMenuItem>
+                    <div className="border-t border-white/10 p-2">
+                      <DropdownMenuItem asChild>
+                        <SignOutButton redirectUrl="/">
+                          <div className="flex items-center text-red-400 hover:text-red-300 cursor-pointer rounded-lg hover:bg-red-500/10 focus:bg-red-500/10 transition-all duration-200 p-3 w-full">
+                            <LogOut className="mr-3 h-4 w-4" />
+                            <span>Log out</span>
+                          </div>
+                        </SignOutButton>
+                      </DropdownMenuItem>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -523,8 +552,6 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
           </div>
         )}
       </div>
-
-   
     </div>
   );
 }

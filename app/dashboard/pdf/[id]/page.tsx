@@ -163,19 +163,26 @@ export default function PDFViewerPage() {
 
         {/* Show Header Button (appears when header is hidden in focus mode) */}
         {isFocusMode && !isHeaderVisible && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-30 cursor-pointer">
+          <div className="fixed top-4 left-1/2 transform  z-30 cursor-pointer">
             <Button
               onClick={() => setIsHeaderVisible(true)}
               size="sm"
-              className="bg-white/90 dark:bg-background/90 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-full px-4 py-2 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white dark:hover:bg-background shadow-lg"
+              className="bg-white/80 dark:bg-background/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl px-4 py-2 animate-fade-in transition-all duration-300 hover:scale-105 hover:bg-white/90 dark:hover:bg-background/90 shadow-2xl shadow-black/10 dark:shadow-black/30"
             >
-              <ArrowLeft
-                size={16}
-                className="rotate-90 text-gray-700 dark:text-gray-300"
-              />
-              <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                Show Header
-              </span>
+              <div className="bg-gradient-to-r from-white/5 to-transparent dark:from-white/5 dark:to-transparent rounded-2xl -m-2 p-2">
+                <div className="flex items-center gap-2">
+                  <ArrowLeft
+                    size={16}
+                    className="rotate-90 text-foreground/80"
+                  />
+                  <span className="text-sm font-medium text-foreground">
+                    Show Header
+                  </span>
+                  <kbd className="ml-1 px-1.5 py-0.5 text-xs font-mono bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded text-foreground/60">
+                    Alt+H
+                  </kbd>
+                </div>
+              </div>
             </Button>
           </div>
         )}
@@ -209,10 +216,13 @@ export default function PDFViewerPage() {
             <Button
               onClick={() => setIsFocusMode(true)}
               size="sm"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 text-white shadow-2xl shadow-blue-500/25 dark:shadow-blue-600/20 rounded-full px-4 py-2 hover:from-blue-600 hover:to-purple-700 dark:hover:from-blue-700 dark:hover:to-purple-800 transition-all duration-200 backdrop-blur-sm border border-white/20 dark:border-gray-700/30"
+              className="dark:text-white dark:bg-background bg-white text-black shadow-2xl shadow-blue-500/25 dark:shadow-blue-600/20 rounded-full px-4 py-2 transition-all duration-200 backdrop-blur-sm border border-gray-200 hover:bg-gray-100 cursor-pointer dark:hover:bg-gray-800 dark:border-gray-700/30"
             >
               <Maximize size={16} className="mr-2" />
               <span className="font-medium">Focus Mode</span>
+              <div className="ml-2 px-2 py-1 bg-gray-100 dark:bg-background rounded text-xs font-mono text-gray-600 dark:text-gray-300">
+                Ctrl+F
+              </div>
             </Button>
           </div>
         )}

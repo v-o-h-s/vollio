@@ -16,6 +16,7 @@ import {
   Headphones,
   FileText,
   Brain,
+  AlertCircle,
 } from "lucide-react";
 
 export default function PremiumDemoPage() {

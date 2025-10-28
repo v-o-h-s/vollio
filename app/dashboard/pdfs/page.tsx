@@ -2,7 +2,13 @@
 
 import React, { useRef, useEffect } from "react";
 import { PDFDirectoryView } from "@/components/pdf/views/PDFDirectoryView";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { FileText, FolderOpen, Upload, Search } from "lucide-react";
 import { useFloatingSidebarIntegration } from "@/hooks/use-floating-sidebar";
 
@@ -15,29 +21,32 @@ export default function PDFsPage() {
   useFloatingSidebarIntegration({
     uploadPDF: () => {
       // Trigger upload dialog - this would need to be implemented in PDFDirectoryView
-      const uploadEvent = new CustomEvent('pdf-upload-trigger');
+      const uploadEvent = new CustomEvent("pdf-upload-trigger");
       document.dispatchEvent(uploadEvent);
     },
     createFolder: () => {
       // Trigger folder creation - this would need to be implemented in PDFDirectoryView
-      const folderEvent = new CustomEvent('pdf-folder-create');
+      const folderEvent = new CustomEvent("pdf-folder-create");
       document.dispatchEvent(folderEvent);
     },
     searchFiles: () => {
       // Focus search input
       if (searchInputRef.current) {
         searchInputRef.current.focus();
-        searchInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        searchInputRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
       }
     },
     filterFiles: () => {
       // Trigger filter panel - this would need to be implemented
-      const filterEvent = new CustomEvent('pdf-filter-toggle');
+      const filterEvent = new CustomEvent("pdf-filter-toggle");
       document.dispatchEvent(filterEvent);
     },
     toggleView: () => {
       // Trigger view mode toggle - this would need to be implemented in PDFDirectoryView
-      const viewEvent = new CustomEvent('pdf-view-toggle');
+      const viewEvent = new CustomEvent("pdf-view-toggle");
       document.dispatchEvent(viewEvent);
     },
   });
@@ -52,7 +61,7 @@ export default function PDFsPage() {
             Manage your documents with file system-style navigation
           </p>
         </div>
-        
+
         {/* Quick Search */}
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -81,7 +90,7 @@ export default function PDFsPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Folders</CardTitle>
@@ -89,25 +98,23 @@ export default function PDFsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">-</div>
-            <p className="text-xs text-muted-foreground">
-              Organized folders
-            </p>
+            <p className="text-xs text-muted-foreground">Organized folders</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Uploads</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Recent Uploads
+            </CardTitle>
             <Upload className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">-</div>
-            <p className="text-xs text-muted-foreground">
-              This week
-            </p>
+            <p className="text-xs text-muted-foreground">This week</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Storage Used</CardTitle>
@@ -115,9 +122,7 @@ export default function PDFsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">-</div>
-            <p className="text-xs text-muted-foreground">
-              Of available space
-            </p>
+            <p className="text-xs text-muted-foreground">Of available space</p>
           </CardContent>
         </Card>
       </div>

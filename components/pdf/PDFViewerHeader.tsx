@@ -216,11 +216,12 @@ export function PDFViewerHeader({
 
   return (
     <div
-      className={`fixed top-4 left-4 right-4 z-20 transition-all duration-500 ease-in-out ${
+      className={`fixed top-4 left-1/2 z-20 transition-all duration-500 ease-in-out ${
         !isHeaderVisible
-          ? "-translate-y-full opacity-0"
-          : "translate-y-0 opacity-100"
+          ? "-translate-y-full -translate-x-1/2 opacity-0"
+          : "-translate-x-1/2 translate-y-0 opacity-100"
       }`}
+      style={{ width: 'calc(100% - 2rem)' }}
     >
       {/* Enhanced stylish header with glassmorphism effect */}
       <div className="bg-white dark:bg-background backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/30">
