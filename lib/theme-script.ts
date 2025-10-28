@@ -46,7 +46,7 @@ export function getThemeScript(): string {
  * Creates a script element with the theme initialization code
  */
 export function createThemeScriptElement(): HTMLScriptElement {
-  const script = document.createElement('script');
+  const script = document.createElement("script");
   script.innerHTML = themeScript;
   return script;
 }
