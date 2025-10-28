@@ -11,9 +11,9 @@ export default function PDFsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">PDF Library</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Files library</h1>
           <p className="text-muted-foreground text-sm">
-            Manage your PDF documents with file system-style navigation
+            Manage your documents with file system-style navigation
           </p>
         </div>
       </div>
