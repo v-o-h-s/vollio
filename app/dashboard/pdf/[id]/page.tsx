@@ -43,30 +43,6 @@ export default function PDFViewerPage() {
       highlightColor
     );
   }, [selectedTool, highlightMode, highlightColor]);
-  // Keyboard shortcut for focus mode (F)
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // F key for focus mode
-      if (event.key === "f" || event.key === "F") {
-        // Only if not typing in an input
-        if (
-          !["INPUT", "TEXTAREA"].includes(
-            (event.target as HTMLElement)?.tagName
-          )
-        ) {
-          event.preventDefault();
-          setIsFocusMode(!isFocusMode);
-        }
-      }
-      // Escape to exit focus mode
-      else if (event.key === "Escape" && isFocusMode) {
-        setIsFocusMode(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isFocusMode]);
 
   // Show hint when first opening (since we start in focus mode)
   useEffect(() => {
@@ -210,8 +186,8 @@ export default function PDFViewerPage() {
           style={{
             top: 0,
             bottom: 0,
-            left: isFocusMode ? 0 : 256, // px - leave room for sidebar when not focused
-            width: isFocusMode ? "100vw" : "calc(100vw - 256px)",
+            left: 0,
+            width: "100vw",
             overflow: "hidden",
           }}
         >

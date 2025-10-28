@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import useShortcuts from "@/hooks/use-shortcuts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -88,6 +89,125 @@ export function PDFViewerHeader({
     { name: "Cyan", value: "#00FFFF", bg: "bg-cyan-400" },
   ];
 
+  // Keyboard shortcuts handlers
+  const shortcutHandlers = {
+    toggleFocusMode: () => {
+      setIsFocusMode(!isFocusMode);
+      if (!isFocusMode) {
+        setIsHeaderVisible(false);
+      }
+    },
+    toggleHeader: () => {
+      if (isFocusMode) {
+        setIsHeaderVisible(!isHeaderVisible);
+      }
+    },
+    exitFocusMode: () => {
+      if (isFocusMode) {
+        setIsFocusMode(false);
+        setIsHeaderVisible(true);
+      }
+    },
+    // Tool selection shortcuts
+    selectQuickHighlight: () => {
+      setSelectedTool("highlight");
+      setHighlightMode("quick");
+    },
+    selectCommentHighlight: () => {
+      setSelectedTool("highlight");
+      setHighlightMode("comment");
+    },
+    selectNoteHighlight: () => {
+      setSelectedTool("highlight");
+      setHighlightMode("note");
+    },
+    selectDeleteTool: () => {
+      setSelectedTool("delete");
+    },
+    selectNothingTool: () => {
+      setSelectedTool("nothing");
+    },
+    // Color shortcuts
+    setYellowColor: () => setHighlightColor("#FFFF00"),
+    setOrangeColor: () => setHighlightColor("#FFA500"),
+    setPinkColor: () => setHighlightColor("#FF69B4"),
+    setGreenColor: () => setHighlightColor("#00FF00"),
+    setBlueColor: () => setHighlightColor("#0080FF"),
+    setPurpleColor: () => setHighlightColor("#8A2BE2"),
+    setRedColor: () => setHighlightColor("#FF0000"),
+    setCyanColor: () => setHighlightColor("#00FFFF"),
+    // Navigation shortcuts
+    previousPage: () => {
+      if (pdfViewerRef?.current) {
+        try {
+          if (pdfViewerRef.current.navigation) {
+            pdfViewerRef.current.navigation.goToPreviousPage();
+          } else {
+            pdfViewerRef.current.goToPreviousPage();
+          }
+        } catch (error) {
+          console.error("Error navigating to previous page:", error);
+        }
+      }
+    },
+    nextPage: () => {
+      if (pdfViewerRef?.current) {
+        try {
+          if (pdfViewerRef.current.navigation) {
+            pdfViewerRef.current.navigation.goToNextPage();
+          } else {
+            pdfViewerRef.current.goToNextPage();
+          }
+        } catch (error) {
+          console.error("Error navigating to next page:", error);
+        }
+      }
+    },
+    // Zoom shortcuts
+    zoomIn: () => {
+      if (pdfViewerRef?.current) {
+        try {
+          if (pdfViewerRef.current.magnification) {
+            pdfViewerRef.current.magnification.zoomIn();
+          } else {
+            pdfViewerRef.current.zoomIn();
+          }
+        } catch (error) {
+          console.error("Error zooming in:", error);
+        }
+      }
+    },
+    zoomOut: () => {
+      if (pdfViewerRef?.current) {
+        try {
+          if (pdfViewerRef.current.magnification) {
+            pdfViewerRef.current.magnification.zoomOut();
+          } else {
+            pdfViewerRef.current.zoomOut();
+          }
+        } catch (error) {
+          console.error("Error zooming out:", error);
+        }
+      }
+    },
+    resetZoom: () => {
+      if (pdfViewerRef?.current) {
+        try {
+          if (pdfViewerRef.current.magnification) {
+            pdfViewerRef.current.magnification.fitToPage();
+          } else {
+            pdfViewerRef.current.fitToPage();
+          }
+        } catch (error) {
+          console.error("Error resetting zoom:", error);
+        }
+      }
+    },
+  };
+
+  // Initialize keyboard shortcuts
+  useShortcuts("pdf", shortcutHandlers);
+
   // Get current color info
   const getCurrentColorInfo = () => {
     const colorInfo = colorOptions.find(c => c.value === highlightColor);
@@ -161,18 +281,22 @@ export function PDFViewerHeader({
                       Choose Highlight Color
                     </div>
                     <div className="grid grid-cols-4 gap-2">
-                      {colorOptions.map((color) => (
-                        <button
-                          key={color.value}
-                          onClick={() => setHighlightColor(color.value)}
-                          className={`w-12 h-8 rounded-lg border-2 transition-all duration-200 hover:scale-105 ${
-                            highlightColor === color.value
-                              ? "border-foreground shadow-lg"
-                              : "border-white/30 dark:border-white/20 hover:border-foreground/50"
-                          }`}
-                          style={{ backgroundColor: color.value }}
-                          title={color.name}
-                        />
+                      {colorOptions.map((color, index) => (
+                        <div key={color.value} className="relative">
+                          <button
+                            onClick={() => setHighlightColor(color.value)}
+                            className={`w-12 h-8 rounded-lg border-2 transition-all duration-200 hover:scale-105 ${
+                              highlightColor === color.value
+                                ? "border-foreground shadow-lg"
+                                : "border-white/30 dark:border-white/20 hover:border-foreground/50"
+                            }`}
+                            style={{ backgroundColor: color.value }}
+                            title={`${color.name} (Shift+${index + 1})`}
+                          />
+                          <kbd className="absolute -top-1 -right-1 px-1 py-0.5 text-xs font-mono bg-background border rounded text-xs">
+                            Shift+{index + 1}
+                          </kbd>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -259,13 +383,16 @@ export function PDFViewerHeader({
                             No note, just color
                           </div>
                         </div>
-                        {highlightMode === "quick" &&
-                          selectedTool === "highlight" && (
-                            <Circle
-                              size={6}
-                              className="text-blue-500 fill-current"
-                            />
-                          )}
+                        <div className="flex items-center gap-2">
+                          <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border">Alt+1</kbd>
+                          {highlightMode === "quick" &&
+                            selectedTool === "highlight" && (
+                              <Circle
+                                size={6}
+                                className="text-blue-500 fill-current"
+                              />
+                            )}
+                        </div>
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => {
@@ -292,13 +419,16 @@ export function PDFViewerHeader({
                             Small text on hover
                           </div>
                         </div>
-                        {highlightMode === "comment" &&
-                          selectedTool === "highlight" && (
-                            <Circle
-                              size={6}
-                              className="text-blue-500 fill-current"
-                            />
-                          )}
+                        <div className="flex items-center gap-2">
+                          <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border">Alt+2</kbd>
+                          {highlightMode === "comment" &&
+                            selectedTool === "highlight" && (
+                              <Circle
+                                size={6}
+                                className="text-blue-500 fill-current"
+                              />
+                            )}
+                        </div>
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => {
@@ -323,13 +453,16 @@ export function PDFViewerHeader({
                             Expands to full note
                           </div>
                         </div>
-                        {highlightMode === "note" &&
-                          selectedTool === "highlight" && (
-                            <Circle
-                              size={6}
-                              className="text-blue-500 fill-current"
-                            />
-                          )}
+                        <div className="flex items-center gap-2">
+                          <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border">Alt+3</kbd>
+                          {highlightMode === "note" &&
+                            selectedTool === "highlight" && (
+                              <Circle
+                                size={6}
+                                className="text-blue-500 fill-current"
+                              />
+                            )}
+                        </div>
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
@@ -342,15 +475,18 @@ export function PDFViewerHeader({
                     className="flex items-center gap-3 cursor-pointer hover:bg-red-50 dark:hover:bg-red-950/20 focus:bg-red-50 dark:focus:bg-red-950/20 transition-colors duration-200"
                   >
                     <Trash2 size={16} className="text-red-500" />
-                    <span className="font-medium text-red-600 dark:text-red-400">
+                    <span className="font-medium text-red-600 dark:text-red-400 flex-1">
                       Delete Highlights
                     </span>
-                    {selectedTool === "delete" && (
-                      <Circle
-                        size={6}
-                        className="ml-auto text-blue-500 fill-current"
-                      />
-                    )}
+                    <div className="flex items-center gap-2">
+                      <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border">Alt+D</kbd>
+                      {selectedTool === "delete" && (
+                        <Circle
+                          size={6}
+                          className="text-blue-500 fill-current"
+                        />
+                      )}
+                    </div>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -361,13 +497,16 @@ export function PDFViewerHeader({
                     className="flex items-center gap-3 cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 focus:bg-black/10 dark:focus:bg-white/10 transition-colors duration-200"
                   >
                     <CircleSlash2 size={16} />
-                    <span className="font-medium">Nothing</span>
-                    {selectedTool === "nothing" && (
-                      <Circle
-                        size={6}
-                        className="ml-auto text-blue-500 fill-current"
-                      />
-                    )}
+                    <span className="font-medium flex-1">Nothing</span>
+                    <div className="flex items-center gap-2">
+                      <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border">Alt+N</kbd>
+                      {selectedTool === "nothing" && (
+                        <Circle
+                          size={6}
+                          className="text-blue-500 fill-current"
+                        />
+                      )}
+                    </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -420,7 +559,7 @@ export function PDFViewerHeader({
                 }}
                 className="flex items-center gap-2 flex-shrink-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 h-7 px-2 rounded-lg backdrop-blur-sm"
                 title={
-                  isFocusMode ? "Exit Focus Mode (Esc)" : "Enter Focus Mode (F)"
+                  isFocusMode ? "Exit Focus Mode (Esc)" : "Enter Focus Mode (Alt+F)"
                 }
               >
                 {isFocusMode ? (
@@ -429,6 +568,7 @@ export function PDFViewerHeader({
                     <span className="hidden sm:inline text-xs font-medium">
                       Exit Focus
                     </span>
+                    <kbd className="hidden sm:inline ml-1 px-1 py-0.5 text-xs font-mono bg-muted rounded border">Esc</kbd>
                   </>
                 ) : (
                   <>
@@ -436,6 +576,7 @@ export function PDFViewerHeader({
                     <span className="hidden sm:inline text-xs font-medium">
                       Focus Mode
                     </span>
+                    <kbd className="hidden sm:inline ml-1 px-1 py-0.5 text-xs font-mono bg-muted rounded border">Alt+F</kbd>
                   </>
                 )}
               </Button>
@@ -449,12 +590,13 @@ export function PDFViewerHeader({
                     size="sm"
                     onClick={() => setIsHeaderVisible(false)}
                     className="flex items-center gap-2 flex-shrink-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 h-7 px-2 rounded-lg backdrop-blur-sm"
-                    title="Hide Header"
+                    title="Hide Header (Alt+H)"
                   >
                     <ArrowLeft size={14} className="-rotate-90" />
                     <span className="hidden sm:inline text-xs font-medium">
                       Hide
                     </span>
+                    <kbd className="hidden sm:inline ml-1 px-1 py-0.5 text-xs font-mono bg-muted rounded border">Alt+H</kbd>
                   </Button>
                 </>
               )}
@@ -549,6 +691,7 @@ function PageNavigation({ pdfViewerRef }: { pdfViewerRef?: React.RefObject<any> 
         <button
           onClick={handlePageClick}
           className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-1 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5"
+          title="Click to edit page number (← → or PageUp/PageDown to navigate)"
         >
           {currentPage}
         </button>
@@ -677,7 +820,7 @@ function ZoomControls({ pdfViewerRef }: { pdfViewerRef?: React.RefObject<any> })
         size="sm"
         onClick={handleZoomOut}
         className="h-6 w-6 p-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded"
-        title="Zoom Out"
+        title="Zoom Out (Ctrl+-)"
       >
         <ZoomOut size={12} />
       </Button>
@@ -697,7 +840,7 @@ function ZoomControls({ pdfViewerRef }: { pdfViewerRef?: React.RefObject<any> })
           onClick={handleZoomClick}
           onDoubleClick={handleResetZoom}
           className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-2 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5 min-w-[3rem] text-center"
-          title="Click to edit zoom (10-400%), Double-click to reset"
+          title="Click to edit zoom (10-400%), Double-click or Ctrl+0 to reset"
         >
           {zoomLevel}%
         </button>
@@ -708,7 +851,7 @@ function ZoomControls({ pdfViewerRef }: { pdfViewerRef?: React.RefObject<any> })
         size="sm"
         onClick={handleZoomIn}
         className="h-6 w-6 p-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded"
-        title="Zoom In"
+        title="Zoom In (Ctrl+=)"
       >
         <ZoomIn size={12} />
       </Button>
