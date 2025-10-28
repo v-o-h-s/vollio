@@ -536,10 +536,12 @@ export default function FlashcardsPage() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 pt-2">
-                  <Button className="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 group">
-                    <Play className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                    {flashcard.dueForReview > 0 ? "Review" : "Study"}
-                  </Button>
+                  <Link href={`/dashboard/flashcards/study/${flashcard.id}`} className="flex-1">
+                    <Button className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 group">
+                      <Play className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                      {flashcard.dueForReview > 0 ? "Review" : "Study"}
+                    </Button>
+                  </Link>
                   {flashcard.lastStudied !== "Never" && (
                     <Button variant="outline" size="sm" className="hover:scale-105 transition-transform duration-200">
                       <TrendingUp className="w-4 h-4" />

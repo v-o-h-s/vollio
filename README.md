@@ -1,76 +1,64 @@
-# Noto - PDF Annotation & Note-Taking Application
+# Noto - Advanced PDF Annotation & Note-Taking Platform
 
-A modern, secure PDF annotation and note-taking application built with Next.js 15, React 19, and TypeScript. Noto provides enterprise-grade document processing, intelligent PDF annotation tools, and comprehensive note management with full theme support.
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Backend-green)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC)](https://tailwindcss.com/)
 
-## 🚀 Features
+**Noto** is a modern, enterprise-grade PDF annotation and note-taking application built with Next.js 15 and React 19. It provides intelligent document processing, sophisticated PDF annotation tools, and comprehensive note management with real-time synchronization.
 
-### Core PDF & Annotation System
-- **Advanced PDF Viewing**: Syncfusion PDF Viewer with text selection, zoom, search, and navigation
-- **Multi-Mode Highlighting**: Three distinct highlighting modes with color customization
-  - 🟡 **Quick Highlight**: Instant highlighting without note creation
-  - 🟠 **Inline Comment**: Highlighting with hover-based comments
-  - 🔵 **Linked Note**: Full note creation with highlight linkage
-- **Smart Annotation Tools**: Context-aware tooltips with coordinate-based positioning
-- **Highlight Management**: Advanced color picker, opacity control, and context menus
+## 🚀 Key Features
 
-### Document Processing
-- **Syncfusion Text Extraction**: Enterprise-grade text extraction with layout preservation
-- **OCR Fallback System**: Automatic fallback to node-tesseract-ocr for scanned documents
-- **Semantic Chunking**: Intelligent text segmentation with content type detection
-- **Multi-Language Support**: Comprehensive language detection and processing
+### 📄 Advanced PDF Management
+- **Enterprise PDF Viewer**: Syncfusion-powered PDF viewer with text selection, zoom, search, and navigation
+- **Multi-Mode Highlighting**: Three distinct annotation modes (Quick Highlight, Inline Comment, Linked Note)
+- **Intelligent Coordinate System**: Advanced PDF-to-screen coordinate conversion with viewport boundary handling
+- **Document Processing**: Syncfusion text extraction with OCR fallback for scanned documents
+- **Secure File Storage**: Supabase Storage integration with signed URLs and automatic cleanup
 
-### Rich Text Editor
-- **Notion-Style Editor**: TipTap-based block editor with slash commands
-- **Auto-Save Architecture**: Debounced auto-save with RTK Query integration
-- **Floating Toolbars**: Context-aware formatting with mobile responsiveness
-- **Cross-Tab Sync**: Real-time updates using BroadcastChannel API
+### ✍️ Rich Text Editor System
+- **Notion-Style Editor**: TipTap-based block editor with slash commands and floating toolbars
+- **Auto-Save Architecture**: Real-time auto-save with RTK Query integration and visual feedback
+- **Cross-Tab Synchronization**: Real-time updates using BroadcastChannel and PostMessage APIs
+- **Mobile-Optimized**: Touch-friendly editing with responsive design and gesture support
 
-### Modern Interface
-- **Floating Navigation**: Glassmorphism-based navigation dock with auto-hide functionality
-  - Collapsed state: Compact dock with quick navigation icons and user avatar
-  - Expanded state: Full 2x2 grid with descriptions, user profile, and settings
-  - Smart scroll detection with smooth visibility transitions
-  - Hydration-safe rendering with loading states
-- **Floating Sidebar**: Left-positioned collapsible sidebar with page-specific actions
-  - Context-aware quick actions based on current page
-  - Keyboard shortcuts integration with visual indicators
-  - Event-based communication system for seamless integration
+### 🎯 Quiz & Learning Tools
+- **Quiz Management Center**: Comprehensive quiz dashboard with filtering and progress tracking
+- **AI-Powered Generation**: Generate flashcards and quizzes from PDF content
+- **Document Summarization**: AI-powered document summarization with multiple templates
+- **Progress Analytics**: Detailed learning analytics with completion rates and performance metrics
+
+### 🎨 Modern User Experience
+- **Glassmorphism UI**: Modern floating navigation with backdrop blur effects
 - **Complete Theme System**: Dark/light mode with system preference detection
-- **Responsive Design**: Mobile-first approach with touch-friendly interactions
-- **File System Navigation**: Hierarchical folder management with drag & drop
-
-### Quiz Management
-- **Interactive Quiz Center**: Advanced filtering by category, difficulty, and progress
-- **Progress Tracking**: Comprehensive analytics with completion rates and scores
-- **Category Organization**: Mathematics, Programming, History, Chemistry, Computer Science, Language
-- **Statistics Dashboard**: Real-time overview with gradient-styled cards showing totals, completion, scores, and streaks
-- **Document Integration**: Quiz creation from uploaded PDFs with advanced document selection
-- **Bookmark System**: Save favorite quizzes with visual indicators and filtering
-- **Floating Sidebar Integration**: Page-specific quiz actions with keyboard shortcuts
+- **Responsive Design**: Mobile-first approach with touch-optimized interactions
+- **Accessibility**: WCAG-compliant with keyboard navigation and screen reader support
 
 ## 🛠 Tech Stack
 
 ### Frontend
-- **Next.js 15** with App Router
-- **React 19** with TypeScript (strict mode)
-- **Tailwind CSS** + shadcn/ui components
-- **Redux Toolkit** with RTK Query for state management
-- **TipTap** for rich text editing
-- **Syncfusion PDF Viewer** (licensed)
+- **Framework**: Next.js 15 with App Router
+- **UI Library**: React 19 with TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui components
+- **State Management**: Redux Toolkit with RTK Query
+- **Rich Text**: TipTap editor with custom extensions
+- **PDF Viewer**: Syncfusion PDF Viewer (licensed)
 
 ### Backend & Database
-- **Supabase** for database and storage
-- **Row Level Security (RLS)** for data isolation
-- **Clerk** for authentication with JWT integration
-- **Node.js** with TypeScript for API routes
+- **Database**: Supabase with Row Level Security (RLS)
+- **Authentication**: Clerk with JWT integration
+- **File Storage**: Supabase Storage with signed URLs
+- **API**: Next.js API routes with comprehensive error handling
+- **Document Processing**: Syncfusion + node-tesseract-ocr fallback
 
-### Key Libraries
-- **@dnd-kit** for drag and drop functionality
-- **react-hot-toast** for notifications
-- **lucide-react** for icons
-- **node-tesseract-ocr** for OCR processing
+### Development Tools
+- **Language**: TypeScript with strict mode
+- **Testing**: Vitest + React Testing Library
+- **Linting**: ESLint with custom configuration
+- **Deployment**: Vercel with automatic deployments
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 - Node.js 18+ and npm/yarn
@@ -82,7 +70,7 @@ A modern, secure PDF annotation and note-taking application built with Next.js 1
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/your-org/noto.git
    cd noto
    ```
 
@@ -91,36 +79,38 @@ A modern, secure PDF annotation and note-taking application built with Next.js 1
    npm install
    ```
 
-3. **Environment Setup**
-   Create `.env.local` with required variables:
+3. **Environment setup**
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Configure your environment variables:
    ```env
-   # Supabase
+   # Supabase Configuration
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
+   
    # Clerk Authentication
    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
    CLERK_SECRET_KEY=your_clerk_secret_key
-   NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-   NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-
+   
    # Syncfusion License
    SYNCFUSION_LICENSE_KEY=your_syncfusion_license
    ```
 
-4. **Database Setup**
-   Run Supabase migrations:
+4. **Database setup**
    ```bash
+   # Run Supabase migrations
    npx supabase db reset
    ```
 
-5. **Start Development Server**
+5. **Start development server**
    ```bash
    npm run dev
    ```
 
-   Open [http://localhost:3000](http://localhost:3000) in your browser.
+Visit `http://localhost:3000` to see the application.
 
 ## 📁 Project Structure
 
@@ -132,170 +122,217 @@ noto/
 │   │   ├── notes/                # Note management endpoints
 │   │   ├── highlights/           # Highlight management endpoints
 │   │   ├── folders/              # Folder management endpoints
-│   │   ├── annotations/          # Annotation management endpoints
-│   │   └── quiz/                 # Quiz generation and management endpoints
+│   │   └── flashcards/           # Flashcard generation endpoints
 │   ├── dashboard/                # Main application pages
 │   │   ├── pdfs/                 # PDF management interface
 │   │   ├── notes/                # Note management interface
 │   │   ├── quizzes/              # Quiz management interface
-│   │   └── layout.tsx            # Dashboard layout with floating navigation
-│   └── globals.css               # Global styles and comprehensive theme system
+│   │   ├── flashcards/           # Flashcard interface
+│   │   └── summarize/            # Document summarization
+│   └── (auth)/                   # Authentication pages
 ├── components/                   # React components
-│   ├── ui/                       # Base UI components (shadcn/ui + custom)
-│   ├── editor/                   # Rich text editor with TipTap integration
-│   ├── pdf/                      # PDF viewer and annotation system
-│   ├── navigation/               # Modern floating navigation system
-│   │   ├── FloatingNavigation.tsx # Glassmorphism navigation dock
-│   │   └── FloatingSidebar.tsx   # Context-aware page-specific actions
-│   ├── dashboard/                # Dashboard-specific components
-│   ├── theme/                    # Complete theme system components
-│   └── quiz/                     # Quiz management and document selection
-│       ├── DocumentSelectionTabs.tsx # Advanced document selection
-│       └── QuizConfiguration.tsx # Interactive quiz configuration
-├── lib/                          # Core utilities and configuration
-│   ├── store/                    # Redux store with RTK Query
-│   ├── types/                    # Comprehensive TypeScript definitions
-│   └── utils/                    # Utility functions and helpers
-├── hooks/                        # Custom React hooks including floating sidebar integration
-├── supabase/                     # Database migrations and RLS policies
-├── docs/                         # Comprehensive documentation
-└── .kiro/steering/               # Development guidelines and standards
+│   ├── ui/                       # Base UI components (shadcn/ui)
+│   ├── pdf/                      # PDF-related components
+│   ├── editor/                   # Rich text editor components
+│   ├── navigation/               # Navigation components
+│   ├── dashboard/                # Dashboard components
+│   ├── quiz/                     # Quiz components
+│   ├── flashcards/               # Flashcard components
+│   └── summarize/                # Summarization components
+├── lib/                          # Utilities and configuration
+│   ├── store/                    # Redux store configuration
+│   ├── types/                    # TypeScript type definitions
+│   └── utils/                    # Utility functions
+├── hooks/                        # Custom React hooks
+├── supabase/                     # Database migrations and policies
+└── docs/                         # Documentation
 ```
 
-## 🔧 Key Features Deep Dive
+## 🔧 Core Features
 
 ### PDF Annotation System
+- **Multi-Mode Highlighting**: Quick highlights, inline comments, and linked notes
+- **Advanced Coordinate System**: Precise PDF-to-screen coordinate conversion
+- **Context Menus**: Rich context menus with color picker and opacity controls
+- **Real-Time Sync**: Cross-tab synchronization of annotations
 
-The annotation system uses a sophisticated coordinate conversion system:
+### Rich Text Editor
+- **Block-Based Editing**: Notion-style block editor with drag-and-drop
+- **Floating Toolbars**: Context-aware formatting toolbars
+- **Slash Commands**: Quick formatting with `/` commands
+- **Auto-Save**: Debounced auto-save with visual feedback
 
-```typescript
-// Text selection triggers annotation tooltip
-const handleTextSelection = (args: TextSelectionEventArgs) => {
-  const bounds = calculateSelectionBounds(args.textBounds);
-  const screenPosition = convertPDFToScreenCoords(bounds, pdfViewerRef.current);
-  setTooltipPosition(adjustForViewport(screenPosition));
-};
-```
+### Document Processing
+- **Text Extraction**: Syncfusion primary extraction with OCR fallback
+- **Semantic Chunking**: Intelligent text segmentation for AI processing
+- **Multi-Language Support**: Comprehensive language detection and processing
+- **Background Processing**: Asynchronous document processing with progress tracking
 
-### Auto-Save Architecture
+### Quiz & Learning System
+- **Quiz Management**: Comprehensive quiz dashboard with filtering
+- **AI Generation**: Generate quizzes and flashcards from PDF content
+- **Progress Tracking**: Detailed analytics and performance metrics
+- **Document Summarization**: AI-powered summarization with templates
 
-Notes automatically save using RTK Query mutations:
-
-```typescript
-// Auto-save is handled internally by NotionEditor
-const [updateNote] = useUpdateNoteMutation();
-
-const handleAutoSave = useCallback(
-  debounce(async (content: JSONContent) => {
-    await updateNote({ id: noteId, content }).unwrap();
-  }, 1000),
-  [noteId, updateNote]
-);
-```
+## 🎨 UI/UX Features
 
 ### Theme System
+- **Dark/Light Mode**: Complete theme support with system preference detection
+- **Theme Persistence**: Cross-tab theme synchronization with localStorage
+- **Component Theming**: All components support theme switching
+- **Custom Properties**: CSS custom properties for consistent theming
 
-Complete dark/light mode support with system preference detection:
+### Navigation
+- **Floating Navigation**: Glassmorphism-based navigation dock with auto-hide
+- **Context Sidebar**: Page-specific quick actions with keyboard shortcuts
+- **Breadcrumb Navigation**: Hierarchical navigation for folder structures
+- **Mobile Optimization**: Touch-friendly navigation with gesture support
 
-```typescript
-// Theme provider with localStorage persistence
-const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') || 'system';
-    }
-    return 'system';
-  });
-  // ... theme logic
-};
-```
+### Responsive Design
+- **Mobile-First**: Touch-optimized interfaces with responsive layouts
+- **Adaptive Components**: Components that adapt to screen size and device type
+- **Touch Gestures**: Swipe, pinch, and tap gesture support
+- **Accessibility**: WCAG-compliant with keyboard navigation
+
+## 🔒 Security & Authentication
+
+### Authentication
+- **Clerk Integration**: Secure authentication with JWT tokens
+- **Row Level Security**: Automatic user data isolation with Supabase RLS
+- **Session Management**: Secure session handling with automatic refresh
+- **Multi-Factor Auth**: Optional MFA support through Clerk
+
+### Data Security
+- **File Validation**: Comprehensive file validation with security checks
+- **Signed URLs**: Time-limited access to stored files
+- **Input Sanitization**: All user inputs are validated and sanitized
+- **CORS Policies**: Proper CORS configuration for API security
+
+## 📊 Performance & Optimization
+
+### Frontend Performance
+- **Code Splitting**: Automatic code splitting with Next.js
+- **Lazy Loading**: Lazy loading of heavy components and routes
+- **Image Optimization**: Next.js Image component with optimization
+- **Bundle Analysis**: Regular bundle size monitoring and optimization
+
+### Backend Performance
+- **Database Indexing**: Optimized database indexes for query performance
+- **Caching Strategy**: RTK Query caching with intelligent invalidation
+- **File Storage**: Efficient file storage with CDN integration
+- **API Rate Limiting**: Rate limiting to prevent abuse
 
 ## 🧪 Testing
 
-Run the test suite:
+### Test Coverage
+- **Unit Tests**: Comprehensive unit tests for utilities and hooks
+- **Component Tests**: React Testing Library tests for components
+- **Integration Tests**: End-to-end testing of critical user flows
+- **API Tests**: API endpoint testing with mock data
 
+### Testing Commands
 ```bash
-# Unit tests
-npm run test
+# Run all tests
+npm test
 
-# E2E tests
-npm run test:e2e
+# Run tests in watch mode
+npm run test:watch
 
-# Test coverage
+# Run tests with coverage
 npm run test:coverage
+
+# Run E2E tests
+npm run test:e2e
 ```
 
 ## 📚 Documentation
 
-- [API Documentation](docs/API_DOCUMENTATION.md)
-- [PDF Annotation Tools](docs/PDF_ANNOTATION_TOOLS.md)
-- [Notion Editor](docs/NOTION_EDITOR.md)
-- [Error Handling](docs/ERROR_HANDLING.md)
-- [Project Overview](docs/PROJECT_OVERVIEW.md)
+### Component Documentation
+- **Storybook**: Interactive component documentation
+- **API Documentation**: Comprehensive API endpoint documentation
+- **Type Documentation**: TypeScript interface documentation
+- **Usage Examples**: Code examples for common use cases
 
-## 🔒 Security
-
-- **Authentication**: Clerk-based authentication with JWT tokens
-- **Authorization**: Supabase Row Level Security (RLS) policies
-- **File Security**: Time-limited signed URLs for PDF access
-- **Input Validation**: Comprehensive server-side validation
-- **Data Isolation**: User data automatically isolated via RLS
+### Development Guides
+- **Contributing Guide**: Guidelines for contributing to the project
+- **Architecture Guide**: Detailed architecture documentation
+- **Deployment Guide**: Step-by-step deployment instructions
+- **Troubleshooting**: Common issues and solutions
 
 ## 🚀 Deployment
 
-### Vercel (Recommended)
+### Production Deployment
+1. **Build the application**
+   ```bash
+   npm run build
+   ```
 
-1. Connect your repository to Vercel
-2. Configure environment variables
-3. Deploy automatically on push to main
+2. **Deploy to Vercel**
+   ```bash
+   npx vercel --prod
+   ```
 
-### Manual Deployment
+3. **Configure environment variables** in Vercel dashboard
 
-```bash
-# Build the application
-npm run build
+4. **Run database migrations** in production environment
 
-# Start production server
-npm start
-```
+### Environment Configuration
+- **Development**: Local development with hot reload
+- **Staging**: Staging environment for testing
+- **Production**: Production environment with optimizations
 
 ## 🤝 Contributing
 
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Workflow
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
 
-### Development Guidelines
-
-- Follow TypeScript strict mode
-- Use RTK Query for all API calls
-- Implement proper error boundaries
-- Maintain theme support in all components
-- Write tests for new features
-- Update documentation
+### Code Standards
+- **TypeScript**: Strict TypeScript with proper typing
+- **ESLint**: Follow ESLint configuration
+- **Prettier**: Code formatting with Prettier
+- **Conventional Commits**: Use conventional commit messages
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## 🆘 Support
 
-- [Syncfusion](https://www.syncfusion.com/) for the PDF Viewer component
-- [Supabase](https://supabase.com/) for the backend infrastructure
-- [Clerk](https://clerk.com/) for authentication services
-- [Vercel](https://vercel.com/) for hosting and deployment
-- [shadcn/ui](https://ui.shadcn.com/) for the component library
+### Getting Help
+- **Documentation**: Check the [docs](./docs) directory
+- **Issues**: Report bugs on GitHub Issues
+- **Discussions**: Join GitHub Discussions for questions
+- **Discord**: Join our Discord community
 
-## 📞 Support
+### Common Issues
+- **Syncfusion License**: Ensure valid Syncfusion license is configured
+- **Database Connection**: Check Supabase configuration and RLS policies
+- **Authentication**: Verify Clerk configuration and JWT setup
+- **File Upload**: Check file size limits and storage configuration
 
-For support and questions:
+## 🔮 Roadmap
 
-- Create an issue in the repository
-- Check the [documentation](docs/)
-- Review existing issues and discussions
+### Upcoming Features
+- **Collaboration**: Real-time collaborative editing
+- **Advanced AI**: Enhanced AI-powered features
+- **Mobile App**: Native mobile applications
+- **Enterprise Features**: Team workspaces and advanced permissions
+- **API Integrations**: Third-party service integrations
+
+### Performance Improvements
+- **Edge Computing**: Edge deployment for global performance
+- **Advanced Caching**: Sophisticated caching strategies
+- **Database Optimization**: Query optimization and indexing
+- **Bundle Optimization**: Further bundle size reductions
 
 ---
 
-**Noto** - Transforming how you interact with PDF documents through intelligent annotation and note-taking.
+**Built with ❤️ by the Noto Team**
+
+For more information, visit our [documentation](./docs) or check out the [live demo](https://noto-demo.vercel.app).

@@ -131,7 +131,7 @@ export default function QuizDetailPage() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div className="p-4 bg-muted rounded-lg">
-                  <BookOpen className="w-6 h-6 mx-auto mb-2 text-blue-500" />
+                  <BookOpen className="w-6 h-6 mx-auto mb-2 text-orange-500" />
                   <div className="font-semibold">{dummyQuiz.questions.length}</div>
                   <div className="text-sm text-muted-foreground">Questions</div>
                 </div>
@@ -178,7 +178,7 @@ export default function QuizDetailPage() {
             
             <CardContent className="space-y-6">
               <div className="text-center">
-                <div className="text-6xl font-bold text-blue-500 mb-2">{score}%</div>
+                <div className="text-6xl font-bold text-orange-500 mb-2">{score}%</div>
                 <div className="text-muted-foreground">
                   {selectedAnswers.filter((answer, index) => answer === dummyQuiz.questions[index].correctAnswer).length} out of {dummyQuiz.questions.length} correct
                 </div>
@@ -303,9 +303,9 @@ export default function QuizDetailPage() {
                   key={index}
                   onClick={() => handleAnswerSelect(index)}
                   className={cn(
-                    "w-full p-4 text-left border rounded-lg transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-700",
+                    "w-full p-4 text-left border rounded-lg transition-all duration-200 hover:border-orange-300 dark:hover:border-orange-700",
                     selectedAnswers[currentQuestion] === index
-                      ? "border-blue-500 bg-blue-50 dark:bg-blue-950/50"
+                      ? "border-orange-500 bg-orange-50 dark:bg-orange-950/50"
                       : "border-border hover:bg-muted/50"
                   )}
                 >
@@ -313,7 +313,7 @@ export default function QuizDetailPage() {
                     <div className={cn(
                       "w-6 h-6 rounded-full border-2 flex items-center justify-center text-sm font-medium",
                       selectedAnswers[currentQuestion] === index
-                        ? "border-blue-500 bg-blue-500 text-white"
+                        ? "border-orange-500 bg-orange-500 text-white"
                         : "border-muted-foreground"
                     )}>
                       {String.fromCharCode(65 + index)}
@@ -367,7 +367,7 @@ export default function QuizDetailPage() {
                   className={cn(
                     "w-10 h-10 rounded-lg border text-sm font-medium transition-all duration-200",
                     currentQuestion === index
-                      ? "border-blue-500 bg-blue-500 text-white"
+                      ? "border-orange-500 bg-orange-500 text-white"
                       : selectedAnswers[index] !== undefined
                       ? "border-green-500 bg-green-50 dark:bg-green-950/50 text-green-700 dark:text-green-400"
                       : "border-border hover:border-blue-300 dark:hover:border-blue-700 hover:bg-muted/50"

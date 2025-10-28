@@ -337,8 +337,8 @@ export default function CreateQuizPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/10 rounded-lg">
-              <Brain className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-2 bg-orange-500/10 rounded-lg">
+              <Brain className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">
@@ -742,11 +742,11 @@ export default function CreateQuizPage() {
                   )}
 
                   {/* Help Text */}
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                    <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+                  <div className="p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
+                    <h4 className="font-medium text-orange-800 dark:text-orange-200 mb-2">
                       How Sample Quizzes Work
                     </h4>
-                    <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                    <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
                       <li>
                         • Upload existing quizzes in various formats (JSON, TXT,
                         DOCX, PDF)

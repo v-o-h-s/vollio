@@ -1,6 +1,8 @@
 import { FloatingNavigation } from "@/components/navigation/FloatingNavigation";
 import { FloatingSidebar } from "@/components/navigation/FloatingSidebar";
 import { Toaster } from "react-hot-toast";
+import { SubscriptionProvider } from "@/lib/contexts/SubscriptionContext";
+import { PremiumToggle } from "@/components/dev/PremiumToggle";
 
 export default function DashboardLayout({
   children,
@@ -8,19 +10,23 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Main Content */}
-      <main className="w-full">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
-          {children}
-        </div>
-      </main>
+    <SubscriptionProvider>
+      <div className="min-h-screen bg-background">
+        {/* Development Premium Toggle */}
+        <PremiumToggle />
 
-      {/* Floating Navigation */}
-      <FloatingNavigation />
+        {/* Main Content */}
+        <main className="w-full">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
+            {children}
+          </div>
+        </main>
 
-      {/* Floating Sidebar */}
-      <FloatingSidebar />
+        {/* Floating Navigation */}
+        <FloatingNavigation />
+
+        {/* Floating Sidebar */}
+        <FloatingSidebar />
 
       {/* Toast Notifications */}
       <Toaster
@@ -57,6 +63,7 @@ export default function DashboardLayout({
           },
         }}
       />
-    </div>
+      </div>
+    </SubscriptionProvider>
   );
 }

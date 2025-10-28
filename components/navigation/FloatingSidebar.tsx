@@ -22,6 +22,11 @@ import {
   Star,
   Target,
   Bookmark,
+  FileBarChart,
+  Sparkles,
+  History,
+  Download,
+  Copy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -178,6 +183,89 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           },
         ];
 
+      case "/dashboard/summarize":
+        return [
+          {
+            id: "select-documents",
+            label: "Select Documents",
+            icon: FileText,
+            onClick: () => {
+              const selectEvent = new CustomEvent("trigger-document-select");
+              window.dispatchEvent(selectEvent);
+            },
+            variant: "primary",
+            shortcut: "Ctrl+O",
+          },
+          {
+            id: "generate-summary",
+            label: "Generate Summary",
+            icon: Sparkles,
+            onClick: () => {
+              const generateEvent = new CustomEvent("trigger-summary-generate");
+              window.dispatchEvent(generateEvent);
+            },
+            variant: "primary",
+            shortcut: "Ctrl+G",
+          },
+          {
+            id: "summary-templates",
+            label: "Templates",
+            icon: Target,
+            onClick: () => {
+              const templatesEvent = new CustomEvent("trigger-summary-templates");
+              window.dispatchEvent(templatesEvent);
+            },
+            shortcut: "Ctrl+T",
+          },
+          {
+            id: "summary-history",
+            label: "View History",
+            icon: History,
+            onClick: () => {
+              const historyEvent = new CustomEvent("trigger-summary-history");
+              window.dispatchEvent(historyEvent);
+            },
+          },
+          {
+            id: "search-summaries",
+            label: "Search Summaries",
+            icon: Search,
+            onClick: () => {
+              const searchEvent = new CustomEvent("trigger-summary-search");
+              window.dispatchEvent(searchEvent);
+            },
+            shortcut: "Ctrl+F",
+          },
+          {
+            id: "filter-summaries",
+            label: "Filter Type",
+            icon: Filter,
+            onClick: () => {
+              const filterEvent = new CustomEvent("trigger-summary-filter");
+              window.dispatchEvent(filterEvent);
+            },
+          },
+          {
+            id: "export-summary",
+            label: "Export Summary",
+            icon: Download,
+            onClick: () => {
+              const exportEvent = new CustomEvent("trigger-summary-export");
+              window.dispatchEvent(exportEvent);
+            },
+          },
+          {
+            id: "copy-summary",
+            label: "Copy to Clipboard",
+            icon: Copy,
+            onClick: () => {
+              const copyEvent = new CustomEvent("trigger-summary-copy");
+              window.dispatchEvent(copyEvent);
+            },
+            shortcut: "Ctrl+C",
+          },
+        ];
+
       case "/dashboard/quizzes":
         return [
           {
@@ -295,6 +383,8 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
         return "Files";
       case "/dashboard/notes":
         return "Notes";
+      case "/dashboard/summarize":
+        return "Summarize";
       case "/dashboard/quizzes":
         return "Quizzes";
       case "/dashboard":

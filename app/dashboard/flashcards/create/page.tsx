@@ -1,17 +1,15 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
+
 import {
-  CreditCard,
   Plus,
-  Trash2,
   Save,
   ArrowLeft,
   Shuffle,
@@ -19,17 +17,16 @@ import {
   EyeOff,
   Sparkles,
   Wand2,
-  RotateCcw,
-  Copy,
   Check,
-  AlertCircle,
   BookOpen,
   Brain,
-  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { FlashcardPreview, FlashcardEditor } from "@/components/flashcards";
+import { FlashcardPreview, FlashcardEditor, AIFlashcardGenerator } from "@/components/flashcards";
+import { useGetPDFsQuery } from "@/lib/store/apiSlice";
+import { useSubscription } from "@/lib/contexts/SubscriptionContext";
+import { PremiumBadge } from "@/components/ui/premium-badge";
 
 // Flashcard interface
 interface FlashcardItem {
@@ -98,19 +95,22 @@ export default function CreateFlashcardsPage() {
 
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [previewMode, setPreviewMode] = useState(false);
-  const [showBack, setShowBack] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
   const [savedCards, setSavedCards] = useState<Set<string>>(new Set());
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
 
-  const frontInputRef = useRef<HTMLTextAreaElement>(null);
-  const backInputRef = useRef<HTMLTextAreaElement>(null);
+  const { features } = useSubscription();
 
-  // Auto-resize textareas
-  const autoResize = (element: HTMLTextAreaElement) => {
-    element.style.height = "auto";
-    element.style.height = element.scrollHeight + "px";
-  };
+  // Fetch PDFs for AI generation
+  const {
+    data: pdfData,
+    isLoading: isLoadingPDFs,
+    error: pdfError,
+    refetch: refetchPDFs,
+  } = useGetPDFsQuery();
+
+
 
   // Add new flashcard
   const addFlashcard = () => {
@@ -213,6 +213,15 @@ export default function CreateFlashcardsPage() {
     toast.success("Cards shuffled!");
   };
 
+  // Handle AI generated cards
+  const handleAICardsGenerated = (generatedCards: FlashcardItem[]) => {
+    // Replace existing cards with generated ones
+    setFlashcards(generatedCards);
+    setCurrentCardIndex(0);
+    setShowAIGenerator(false);
+    toast.success(`Generated ${generatedCards.length} flashcards! You can now edit them.`);
+  };
+
   // Save deck
   const saveDeck = () => {
     if (!deckMetadata.title.trim()) {
@@ -272,6 +281,19 @@ export default function CreateFlashcardsPage() {
           <div className="flex gap-3">
             <Button
               variant="outline"
+              onClick={() => setShowAIGenerator(!showAIGenerator)}
+              className={`hover:scale-105 transition-transform duration-200 ${
+                features.aiGeneration
+                  ? "bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-300 dark:border-purple-700"
+                  : ""
+              }`}
+            >
+              <Sparkles className="w-4 h-4 mr-2" />
+              {showAIGenerator ? "Hide AI" : "AI Generate"}
+              {features.aiGeneration && <PremiumBadge size="sm" className="ml-2" />}
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => setPreviewMode(!previewMode)}
               className="hover:scale-105 transition-transform duration-200"
             >
@@ -312,6 +334,17 @@ export default function CreateFlashcardsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* AI Generator */}
+        {showAIGenerator && (
+          <AIFlashcardGenerator
+            availableDocuments={pdfData?.pdfs || []}
+            onCardsGenerated={handleAICardsGenerated}
+            isLoadingPDFs={isLoadingPDFs}
+            pdfError={pdfError}
+            refetchPDFs={refetchPDFs}
+          />
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Deck Metadata */}

@@ -11,6 +11,7 @@ import {
   NotebookPen,
   Brain,
   CreditCard,
+  FileBarChart,
   Settings,
   User,
   LogOut,
@@ -65,6 +66,15 @@ const navigationItems = [
     gradient: "from-purple-500 to-pink-500",
     color: "text-purple-600 dark:text-purple-400",
     bgColor: "bg-purple-500/10 hover:bg-purple-500/20",
+  },
+  {
+    name: "Summarize",
+    href: "/dashboard/summarize",
+    icon: FileBarChart,
+    description: "AI-powered document summaries",
+    gradient: "from-indigo-500 to-purple-500",
+    color: "text-indigo-600 dark:text-indigo-400",
+    bgColor: "bg-indigo-500/10 hover:bg-indigo-500/20",
   },
   {
     name: "Quizzes",

@@ -98,6 +98,19 @@ export function useFloatingSidebar() {
     return () => window.removeEventListener('trigger-quiz-stats', handleEvent);
   }, []);
 
+  // Flashcard page event handlers
+  const onSearchFlashcards = useCallback((handler: () => void) => {
+    const handleEvent = () => handler();
+    window.addEventListener('trigger-flashcard-search', handleEvent);
+    return () => window.removeEventListener('trigger-flashcard-search', handleEvent);
+  }, []);
+
+  const onShowDueCards = useCallback((handler: () => void) => {
+    const handleEvent = () => handler();
+    window.addEventListener('trigger-due-cards', handleEvent);
+    return () => window.removeEventListener('trigger-due-cards', handleEvent);
+  }, []);
+
   // Utility function to register multiple handlers at once
   const registerHandlers = useCallback((handlers: Record<string, () => void>) => {
     const cleanupFunctions: (() => void)[] = [];
@@ -120,6 +133,8 @@ export function useFloatingSidebar() {
           case 'filterDifficulty': return onFilterDifficulty(handler);
           case 'filterBookmarked': return onFilterBookmarked(handler);
           case 'showQuizStats': return onShowQuizStats(handler);
+          case 'searchFlashcards': return onSearchFlashcards(handler);
+          case 'showDueCards': return onShowDueCards(handler);
           default: return () => {};
         }
       })();
@@ -136,7 +151,8 @@ export function useFloatingSidebar() {
   }, [
     onUploadPDF, onCreateFolder, onSearchFiles, onFilterFiles, onToggleView,
     onSearchNotes, onFilterNotes, onSortNotes, onToggleNotesView, onFilterStarred,
-    onSearchQuizzes, onFilterCategory, onFilterDifficulty, onFilterBookmarked, onShowQuizStats
+    onSearchQuizzes, onFilterCategory, onFilterDifficulty, onFilterBookmarked, onShowQuizStats,
+    onSearchFlashcards, onShowDueCards
   ]);
 
   return {
@@ -160,6 +176,10 @@ export function useFloatingSidebar() {
     onFilterDifficulty,
     onFilterBookmarked,
     onShowQuizStats,
+    
+    // Flashcard page handlers
+    onSearchFlashcards,
+    onShowDueCards,
     
     // Utility
     registerHandlers,

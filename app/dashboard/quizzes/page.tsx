@@ -183,12 +183,12 @@ const getDifficultyColor = (difficulty: string) => {
 
 const getCategoryColor = (category: string) => {
   const colors = {
-    Programming: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
-    Mathematics: "bg-purple-500/10 text-purple-700 dark:text-purple-400",
+    Programming: "bg-orange-500/10 text-orange-700 dark:text-orange-400",
+    Mathematics: "bg-red-500/10 text-red-700 dark:text-red-400",
     History: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
-    Chemistry: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-    "Computer Science": "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400",
-    Language: "bg-pink-500/10 text-pink-700 dark:text-pink-400",
+    Chemistry: "bg-amber-600/10 text-amber-800 dark:text-amber-300",
+    "Computer Science": "bg-orange-600/10 text-orange-800 dark:text-orange-300",
+    Language: "bg-red-600/10 text-red-800 dark:text-red-300",
   };
   return (
     colors[category as keyof typeof colors] ||
@@ -306,7 +306,7 @@ export default function QuizzesPage() {
 
           <div className="flex gap-3">
             <Link href="/dashboard/quizzes/create">
-              <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white px-6 py-3">
+              <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Quiz
               </Button>
@@ -316,54 +316,54 @@ export default function QuizzesPage() {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 border-blue-200 dark:border-blue-800">
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/50 border-orange-200 dark:border-orange-800">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                  <p className="text-sm font-medium text-orange-700 dark:text-orange-300">
                     Total Quizzes
                   </p>
-                  <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                  <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
                     {stats.totalQuizzes}
                   </p>
                 </div>
-                <div className="p-3 bg-blue-500 rounded-full">
+                <div className="p-3 bg-orange-500 rounded-full">
                   <BookOpen className="w-6 h-6 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/50 border-green-200 dark:border-green-800">
+          <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/50 dark:to-red-900/50 border-red-200 dark:border-red-800">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                  <p className="text-sm font-medium text-red-700 dark:text-red-300">
                     Completed
                   </p>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-100">
+                  <p className="text-2xl font-bold text-red-900 dark:text-red-100">
                     {stats.completedQuizzes}
                   </p>
                 </div>
-                <div className="p-3 bg-green-500 rounded-full">
+                <div className="p-3 bg-red-500 rounded-full">
                   <Trophy className="w-6 h-6 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/50 border-purple-200 dark:border-purple-800">
+          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/50 border-amber-200 dark:border-amber-800">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
                     Average Score
                   </p>
-                  <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                  <p className="text-2xl font-bold text-amber-900 dark:text-amber-100">
                     {stats.averageScore}%
                   </p>
                 </div>
-                <div className="p-3 bg-purple-500 rounded-full">
+                <div className="p-3 bg-amber-500 rounded-full">
                   <Target className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -512,7 +512,7 @@ export default function QuizzesPage() {
                     </div>
                     <div className="w-full bg-muted rounded-full h-2">
                       <div
-                        className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-orange-500 to-red-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${quiz.completionRate}%` }}
                       />
                     </div>
@@ -552,7 +552,7 @@ export default function QuizzesPage() {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 pt-2">
-                  <Button className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600">
+                  <Button className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
                     <Play className="w-4 h-4 mr-2" />
                     {quiz.attempts > 0 ? "Continue" : "Start Quiz"}
                   </Button>

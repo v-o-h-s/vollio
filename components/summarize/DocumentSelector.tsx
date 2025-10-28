@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useGetPDFsQuery } from "@/lib/store/apiSlice";
 import toast from "react-hot-toast";
 
 import {
@@ -25,40 +26,42 @@ interface PDFDocument {
 interface SelectedDocument {
   id: string;
   title: string;
-  pageCount: number;
-  selectedPages: number[];
+  filename: string;
+  uploadedAt: string;
+  fileSize: number;
+  pageCount?: number;
+  selectedPages?: number[];
 }
 
-interface DocumentSelectionTabsProps {
-  availableDocuments?: PDFDocument[];
-  selectedDocuments?: SelectedDocument[];
-  onAddDocument?: (doc: PDFDocument) => void;
-  onRemoveDocument?: (docId: string) => void;
-  onUpdateDocumentPages?: (docId: string, pages: number[]) => void;
-  onDocumentsUploaded?: () => void;
-  isLoadingPDFs?: boolean;
-  pdfError?: any;
-  refetchPDFs?: () => void;
-  // Alternative props for different use cases
-  onDocumentsSelected?: (documents: any[]) => void;
+interface DocumentSelectorProps {
+  onDocumentsSelected: (documents: SelectedDocument[]) => void;
+  selectedDocuments: SelectedDocument[];
   mode?: string;
 }
 
-export function DocumentSelectionTabs({
-  availableDocuments = [],
-  selectedDocuments = [],
-  onAddDocument,
-  onRemoveDocument,
-  onUpdateDocumentPages,
-  onDocumentsUploaded,
-  isLoadingPDFs = false,
-  pdfError,
-  refetchPDFs,
-}: DocumentSelectionTabsProps) {
+export function DocumentSelector({
+  onDocumentsSelected,
+  selectedDocuments,
+  mode = "summarize",
+}: DocumentSelectorProps) {
   const [activeTab, setActiveTab] = useState<"library" | "upload">("library");
   const [isUploading, setIsUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    data: pdfData,
+    isLoading: isLoadingPDFs,
+    error: pdfError,
+    refetch: refetchPDFs,
+  } = useGetPDFsQuery();
+
+  // Transform PDFDocument to match DocumentSelector interface
+  const availableDocuments = (pdfData?.pdfs || []).map((pdf) => ({
+    id: pdf.id,
+    title: pdf.title,
+    page_count: pdf.page_count,
+  }));
 
   const handleFileUpload = async (files: File[]) => {
     setIsUploading(true);
@@ -85,7 +88,7 @@ export function DocumentSelectionTabs({
     }
 
     setIsUploading(false);
-    onDocumentsUploaded?.();
+    refetchPDFs();
     // Switch to library tab to show newly uploaded documents
     setActiveTab("library");
   };
@@ -117,6 +120,40 @@ export function DocumentSelectionTabs({
     setIsDragOver(false);
   };
 
+  const handleAddDocument = (doc: PDFDocument) => {
+    // Check if document is already selected
+    if (selectedDocuments.some(selected => selected.id === doc.id)) {
+      toast.error("Document is already selected");
+      return;
+    }
+
+    const newDocument: SelectedDocument = {
+      id: doc.id,
+      title: doc.title,
+      filename: doc.title,
+      uploadedAt: new Date().toISOString(),
+      fileSize: 0, // We don't have this info from the API
+      pageCount: doc.page_count || 1,
+      selectedPages: Array.from({ length: doc.page_count || 1 }, (_, i) => i + 1),
+    };
+
+    const updatedDocuments = [...selectedDocuments, newDocument];
+    onDocumentsSelected(updatedDocuments);
+    toast.success(`Added ${doc.title} to selection`);
+  };
+
+  const handleRemoveDocument = (docId: string) => {
+    const updatedDocuments = selectedDocuments.filter(doc => doc.id !== docId);
+    onDocumentsSelected(updatedDocuments);
+  };
+
+  const handleUpdateDocumentPages = (docId: string, pages: number[]) => {
+    const updatedDocuments = selectedDocuments.map(doc => 
+      doc.id === docId ? { ...doc, selectedPages: pages } : doc
+    );
+    onDocumentsSelected(updatedDocuments);
+  };
+
   return (
     <div className="space-y-4">
       {/* Tab Navigation */}
@@ -145,7 +182,7 @@ export function DocumentSelectionTabs({
       {activeTab === "library" && (
         <div className="space-y-4">
           <div>
-            <Label>Available Documents ({availableDocuments?.length || 0})</Label>
+            <Label>Available Documents ({availableDocuments.length})</Label>
             {isLoadingPDFs ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-3" />
@@ -162,13 +199,13 @@ export function DocumentSelectionTabs({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => refetchPDFs?.()}
+                  onClick={() => refetchPDFs()}
                   className="mt-2"
                 >
                   Try Again
                 </Button>
               </div>
-            ) : (availableDocuments?.length || 0) === 0 ? (
+            ) : availableDocuments.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <FileText className="w-12 h-12 text-muted-foreground mb-3" />
                 <p className="text-muted-foreground">
@@ -180,11 +217,11 @@ export function DocumentSelectionTabs({
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 max-h-60 overflow-y-auto border rounded-lg p-2">
-                {(availableDocuments || []).map((doc) => (
+                {availableDocuments.map((doc) => (
                   <div
                     key={doc.id}
                     className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => onAddDocument?.(doc)}
+                    onClick={() => handleAddDocument(doc)}
                   >
                     <div className="flex-1 min-w-0">
                       <p className="font-medium truncate">{doc.title}</p>
@@ -284,8 +321,8 @@ export function DocumentSelectionTabs({
 
       {/* Selected Documents */}
       <div>
-        <Label>Selected Documents ({selectedDocuments?.length || 0})</Label>
-        {(selectedDocuments?.length || 0) === 0 ? (
+        <Label>Selected Documents ({selectedDocuments.length})</Label>
+        {selectedDocuments.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-6 text-center border rounded-lg mt-2">
             <FileText className="w-8 h-8 text-muted-foreground mb-2" />
             <p className="text-sm text-muted-foreground">
@@ -297,20 +334,20 @@ export function DocumentSelectionTabs({
           </div>
         ) : (
           <div className="space-y-3 mt-2">
-            {(selectedDocuments || []).map((doc) => (
+            {selectedDocuments.map((doc) => (
               <div key={doc.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{doc.title}</p>
                     <p className="text-sm text-muted-foreground">
-                      {doc.selectedPages?.length || 0} of {doc.pageCount} pages
+                      {doc.selectedPages?.length || doc.pageCount || 0} of {doc.pageCount || 0} pages
                       selected
                     </p>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => onRemoveDocument?.(doc.id)}
+                    onClick={() => handleRemoveDocument(doc.id)}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -324,9 +361,9 @@ export function DocumentSelectionTabs({
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        onUpdateDocumentPages?.(
+                        handleUpdateDocumentPages(
                           doc.id,
-                          Array.from({ length: doc.pageCount }, (_, i) => i + 1)
+                          Array.from({ length: doc.pageCount || 0 }, (_, i) => i + 1)
                         )
                       }
                     >
@@ -335,13 +372,13 @@ export function DocumentSelectionTabs({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onUpdateDocumentPages?.(doc.id, [])}
+                      onClick={() => handleUpdateDocumentPages(doc.id, [])}
                     >
                       Clear
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {Array.from({ length: doc.pageCount }, (_, i) => i + 1).map(
+                    {Array.from({ length: doc.pageCount || 0 }, (_, i) => i + 1).map(
                       (page) => (
                         <Badge
                           key={page}
@@ -352,12 +389,11 @@ export function DocumentSelectionTabs({
                           }
                           className="cursor-pointer text-xs"
                           onClick={() => {
-                            const newPages = doc.selectedPages?.includes(page)
-                              ? doc.selectedPages?.filter((p) => p !== page) || []
-                              : [...(doc.selectedPages || []), page].sort(
-                                  (a, b) => a - b
-                                );
-                            onUpdateDocumentPages?.(doc.id, newPages);
+                            const currentPages = doc.selectedPages || [];
+                            const newPages = currentPages.includes(page)
+                              ? currentPages.filter((p) => p !== page)
+                              : [...currentPages, page].sort((a, b) => a - b);
+                            handleUpdateDocumentPages(doc.id, newPages);
                           }}
                         >
                           {page}
