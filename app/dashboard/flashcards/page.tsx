@@ -1,265 +1,357 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
-  BookOpen,
-  Brain,
+  CreditCard,
   Clock,
-  Star,
+  Trophy,
+  Target,
   Search,
   Filter,
-  Plus,
-  RotateCcw,
-  Eye,
-  Edit,
-  Trash2,
+  Star,
   Play,
-  Pause,
-  SkipForward,
-  SkipBack,
+  RotateCcw,
+  Bookmark,
+  BookmarkCheck,
+  Plus,
+  Zap,
+  Brain,
+  TrendingUp,
 } from "lucide-react";
+import Link from "next/link";
+import { useFloatingSidebarIntegration } from "@/hooks/use-floating-sidebar";
+import toast from "react-hot-toast";
+
+// Flashcard interface
+interface Flashcard {
+  id: number;
+  title: string;
+  description: string;
+  cards: number;
+  difficulty: "Easy" | "Medium" | "Hard";
+  category: string;
+  lastStudied: string;
+  masteryLevel: number; // 0-100
+  dueForReview: number;
+  tags: string[];
+  createdAt: string;
+  isBookmarked: boolean;
+  studyStreak: number;
+  averageScore: number;
+}
+
+// Categories and difficulties
+const categories = [
+  "All",
+  "Mathematics",
+  "Programming",
+  "History",
+  "Chemistry",
+  "Computer Science",
+  "Language",
+  "Medicine",
+  "Physics",
+];
+
+const difficulties = ["All", "Easy", "Medium", "Hard"];
 
 // Dummy flashcard data
-const dummyFlashcards = [
+const dummyFlashcards: Flashcard[] = [
   {
     id: 1,
-    title: "JavaScript Fundamentals",
-    description: "Core JavaScript concepts and syntax",
-    cardCount: 25,
-    category: "Programming",
+    title: "JavaScript ES6 Features",
+    description: "Modern JavaScript features including arrow functions, destructuring, and async/await.",
+    cards: 25,
     difficulty: "Medium",
+    category: "Programming",
     lastStudied: "2024-01-15",
-    masteryLevel: 75,
-    tags: ["JavaScript", "Web Development", "Frontend"],
-    createdAt: "2024-01-10",
+    masteryLevel: 78,
+    dueForReview: 5,
+    tags: ["javascript", "es6", "programming", "web-development"],
+    createdAt: "2024-01-01",
     isBookmarked: true,
-    studySessions: 8,
-    averageScore: 82,
+    studyStreak: 7,
+    averageScore: 85,
   },
   {
     id: 2,
-    title: "React Hooks",
-    description: "Understanding useState, useEffect, and custom hooks",
-    cardCount: 18,
-    category: "Programming",
+    title: "Calculus Derivatives",
+    description: "Fundamental derivative rules and applications in calculus.",
+    cards: 30,
     difficulty: "Hard",
-    lastStudied: "2024-01-14",
-    masteryLevel: 60,
-    tags: ["React", "Hooks", "Frontend"],
-    createdAt: "2024-01-08",
+    category: "Mathematics",
+    lastStudied: "2024-01-10",
+    masteryLevel: 92,
+    dueForReview: 2,
+    tags: ["calculus", "derivatives", "mathematics"],
+    createdAt: "2024-01-05",
     isBookmarked: false,
-    studySessions: 5,
-    averageScore: 78,
+    studyStreak: 12,
+    averageScore: 91,
   },
   {
     id: 3,
-    title: "Calculus Derivatives",
-    description: "Rules and applications of derivatives",
-    cardCount: 32,
-    category: "Mathematics",
-    difficulty: "Hard",
-    lastStudied: "2024-01-12",
-    masteryLevel: 45,
-    tags: ["Calculus", "Derivatives", "Math"],
-    createdAt: "2024-01-05",
+    title: "Spanish Vocabulary - Food",
+    description: "Essential Spanish vocabulary for food, cooking, and dining.",
+    cards: 40,
+    difficulty: "Easy",
+    category: "Language",
+    lastStudied: "Never",
+    masteryLevel: 0,
+    dueForReview: 40,
+    tags: ["spanish", "vocabulary", "food", "language"],
+    createdAt: "2024-01-08",
     isBookmarked: true,
-    studySessions: 12,
-    averageScore: 65,
+    studyStreak: 0,
+    averageScore: 0,
   },
   {
     id: 4,
-    title: "Spanish Vocabulary",
-    description: "Common Spanish words and phrases",
-    cardCount: 50,
-    category: "Language",
-    difficulty: "Easy",
-    lastStudied: "2024-01-16",
-    masteryLevel: 90,
-    tags: ["Spanish", "Vocabulary", "Language Learning"],
-    createdAt: "2024-01-01",
-    isBookmarked: false,
-    studySessions: 20,
-    averageScore: 88,
-  },
-  {
-    id: 5,
-    title: "Chemistry Elements",
-    description: "Periodic table elements and properties",
-    cardCount: 40,
+    title: "Organic Chemistry Reactions",
+    description: "Key organic chemistry reactions and mechanisms.",
+    cards: 35,
+    difficulty: "Hard",
     category: "Chemistry",
-    difficulty: "Medium",
-    lastStudied: "2024-01-13",
-    masteryLevel: 70,
-    tags: ["Chemistry", "Elements", "Science"],
+    lastStudied: "2024-01-12",
+    masteryLevel: 65,
+    dueForReview: 8,
+    tags: ["organic-chemistry", "reactions", "mechanisms"],
     createdAt: "2024-01-03",
-    isBookmarked: true,
-    studySessions: 15,
-    averageScore: 75,
-  },
-  {
-    id: 6,
-    title: "World History Timeline",
-    description: "Major historical events and dates",
-    cardCount: 35,
-    category: "History",
-    difficulty: "Medium",
-    lastStudied: "2024-01-11",
-    masteryLevel: 55,
-    tags: ["History", "Timeline", "Events"],
-    createdAt: "2024-01-02",
     isBookmarked: false,
-    studySessions: 6,
-    averageScore: 70,
+    studyStreak: 4,
+    averageScore: 72,
   },
 ];
 
-const categories = [
-  "All",
-  "Programming",
-  "Mathematics",
-  "Language",
-  "Chemistry",
-  "History",
-];
-const difficulties = ["All", "Easy", "Medium", "Hard"];
+// Utility functions
+const getDifficultyColor = (difficulty: string) => {
+  switch (difficulty) {
+    case "Easy":
+      return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20";
+    case "Medium":
+      return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20";
+    case "Hard":
+      return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
+    default:
+      return "bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20";
+  }
+};
+
+const getCategoryColor = (category: string) => {
+  const colors = {
+    Programming: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
+    Mathematics: "bg-purple-500/10 text-purple-700 dark:text-purple-400",
+    History: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    Chemistry: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    "Computer Science": "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400",
+    Language: "bg-pink-500/10 text-pink-700 dark:text-pink-400",
+    Medicine: "bg-rose-500/10 text-rose-700 dark:text-rose-400",
+    Physics: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400",
+  };
+  return (
+    colors[category as keyof typeof colors] ||
+    "bg-gray-500/10 text-gray-700 dark:text-gray-400"
+  );
+};
+
+const getMasteryColor = (level: number) => {
+  if (level >= 80) return "text-green-600 dark:text-green-400";
+  if (level >= 60) return "text-yellow-600 dark:text-yellow-400";
+  if (level >= 40) return "text-orange-600 dark:text-orange-400";
+  return "text-red-600 dark:text-red-400";
+};
 
 export default function FlashcardsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedDifficulty, setSelectedDifficulty] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [bookmarkedFlashcards, setBookmarkedFlashcards] = useState<Set<number>>(
+    new Set(dummyFlashcards.filter((f) => f.isBookmarked).map((f) => f.id))
+  );
+  const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
+  const [showDueOnly, setShowDueOnly] = useState(false);
+  
+  // Refs for sidebar integration
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Filter flashcards based on search and filters
-  const filteredFlashcards = dummyFlashcards.filter((deck) => {
-    const matchesCategory =
-      selectedCategory === "All" || deck.category === selectedCategory;
-    const matchesDifficulty =
-      selectedDifficulty === "All" || deck.difficulty === selectedDifficulty;
-    const matchesSearch =
-      deck.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      deck.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      deck.tags.some((tag) =>
-        tag.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  // Statistics calculations
+  const stats = useMemo(() => {
+    const totalFlashcards = dummyFlashcards.length;
+    const studiedFlashcards = dummyFlashcards.filter((f) => f.lastStudied !== "Never").length;
+    const averageMastery = Math.round(
+      dummyFlashcards.reduce((sum, f) => sum + f.masteryLevel, 0) / totalFlashcards
+    );
+    const totalDue = dummyFlashcards.reduce((sum, f) => sum + f.dueForReview, 0);
 
-    return matchesCategory && matchesDifficulty && matchesSearch;
+    return {
+      totalFlashcards,
+      studiedFlashcards,
+      averageMastery,
+      totalDue,
+    };
+  }, []);
+
+  // Combined filtering logic
+  const filteredFlashcards = useMemo(() => {
+    return dummyFlashcards.filter((flashcard) => {
+      const matchesCategory =
+        selectedCategory === "All" || flashcard.category === selectedCategory;
+      const matchesDifficulty =
+        selectedDifficulty === "All" || flashcard.difficulty === selectedDifficulty;
+      const matchesSearch =
+        flashcard.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        flashcard.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        flashcard.tags.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      const matchesBookmark = !showBookmarkedOnly || bookmarkedFlashcards.has(flashcard.id);
+      const matchesDue = !showDueOnly || flashcard.dueForReview > 0;
+
+      return matchesCategory && matchesDifficulty && matchesSearch && matchesBookmark && matchesDue;
+    });
+  }, [selectedCategory, selectedDifficulty, searchQuery, showBookmarkedOnly, showDueOnly, bookmarkedFlashcards]);
+
+  const toggleBookmark = (flashcardId: number) => {
+    setBookmarkedFlashcards((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(flashcardId)) {
+        newSet.delete(flashcardId);
+      } else {
+        newSet.add(flashcardId);
+      }
+      return newSet;
+    });
+  };
+
+  // Integrate with floating sidebar
+  useFloatingSidebarIntegration({
+    searchFlashcards: () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+        searchInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    },
+    filterCategory: () => {
+      const currentIndex = categories.indexOf(selectedCategory);
+      const nextIndex = (currentIndex + 1) % categories.length;
+      setSelectedCategory(categories[nextIndex]);
+      toast.success(`Category: ${categories[nextIndex]}`);
+    },
+    filterDifficulty: () => {
+      const currentIndex = difficulties.indexOf(selectedDifficulty);
+      const nextIndex = (currentIndex + 1) % difficulties.length;
+      setSelectedDifficulty(difficulties[nextIndex]);
+      toast.success(`Difficulty: ${difficulties[nextIndex]}`);
+    },
+    filterBookmarked: () => {
+      setShowBookmarkedOnly(!showBookmarkedOnly);
+      toast.success(showBookmarkedOnly ? 'Showing all flashcards' : 'Showing bookmarked only');
+    },
+    showDueCards: () => {
+      setShowDueOnly(!showDueOnly);
+      toast.success(showDueOnly ? 'Showing all flashcards' : 'Showing due cards only');
+    },
   });
 
-  // Calculate statistics
-  const totalDecks = dummyFlashcards.length;
-  const totalCards = dummyFlashcards.reduce(
-    (sum, deck) => sum + deck.cardCount,
-    0
-  );
-  const averageMastery = Math.round(
-    dummyFlashcards.reduce((sum, deck) => sum + deck.masteryLevel, 0) /
-      totalDecks
-  );
-  const studyStreak = 7; // Mock study streak
-
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "Easy":
-        return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20";
-      case "Medium":
-        return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20";
-      case "Hard":
-        return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
-      default:
-        return "bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20";
-    }
-  };
-
-  const getMasteryColor = (mastery: number) => {
-    if (mastery >= 80) return "bg-green-500";
-    if (mastery >= 60) return "bg-yellow-500";
-    return "bg-red-500";
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Flashcards
-          </h1>
-          <p className="text-muted-foreground">
-            Study with spaced repetition and track your progress
-          </p>
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="text-center lg:text-left space-y-4">
+            <h1 className="text-4xl font-bold text-foreground flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl">
+                <CreditCard className="w-8 h-8 text-white" />
+              </div>
+              Flashcard Center
+            </h1>
+            <p className="text-muted-foreground text-lg max-w-2xl">
+              Master any subject with spaced repetition flashcards. Create, study, and track your progress with intelligent review scheduling.
+            </p>
+          </div>
+
+          <div className="flex gap-3">
+            <Link href="/dashboard/flashcards/create">
+              <Button className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-6 py-3 group">
+                <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform duration-200" />
+                Create Flashcards
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 border-blue-200 dark:border-blue-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-950/50 dark:to-rose-900/50 border-pink-200 dark:border-pink-800 group hover:shadow-lg transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                  <p className="text-sm font-medium text-pink-700 dark:text-pink-300">
                     Total Decks
                   </p>
-                  <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                    {totalDecks}
+                  <p className="text-2xl font-bold text-pink-900 dark:text-pink-100">
+                    {stats.totalFlashcards}
                   </p>
                 </div>
-                <div className="p-3 bg-blue-500 rounded-full">
-                  <BookOpen className="w-6 h-6 text-white" />
+                <div className="p-3 bg-pink-500 rounded-full group-hover:scale-110 transition-transform duration-200">
+                  <CreditCard className="w-6 h-6 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/50 border-green-200 dark:border-green-800">
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/50 dark:to-emerald-900/50 border-green-200 dark:border-green-800 group hover:shadow-lg transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-green-700 dark:text-green-300">
-                    Total Cards
+                    Studied
                   </p>
                   <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                    {totalCards}
+                    {stats.studiedFlashcards}
                   </p>
                 </div>
-                <div className="p-3 bg-green-500 rounded-full">
+                <div className="p-3 bg-green-500 rounded-full group-hover:scale-110 transition-transform duration-200">
+                  <Trophy className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-950/50 dark:to-violet-900/50 border-purple-200 dark:border-purple-800 group hover:shadow-lg transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                    Avg. Mastery
+                  </p>
+                  <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                    {stats.averageMastery}%
+                  </p>
+                </div>
+                <div className="p-3 bg-purple-500 rounded-full group-hover:scale-110 transition-transform duration-200">
                   <Brain className="w-6 h-6 text-white" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/50 border-purple-200 dark:border-purple-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                    Avg Mastery
-                  </p>
-                  <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                    {averageMastery}%
-                  </p>
-                </div>
-                <div className="p-3 bg-purple-500 rounded-full">
-                  <Star className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/50 border-orange-200 dark:border-orange-800">
+          <Card className="bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-950/50 dark:to-amber-900/50 border-orange-200 dark:border-orange-800 group hover:shadow-lg transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-orange-700 dark:text-orange-300">
-                    Study Streak
+                    Due for Review
                   </p>
                   <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                    {studyStreak} days
+                    {stats.totalDue}
                   </p>
                 </div>
-                <div className="p-3 bg-orange-500 rounded-full">
+                <div className="p-3 bg-orange-500 rounded-full group-hover:scale-110 transition-transform duration-200">
                   <Clock className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -267,149 +359,192 @@ export default function FlashcardsPage() {
           </Card>
         </div>
 
-        {/* Filters and Search */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search flashcard decks..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+        {/* Filters */}
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5" />
+              Filter Flashcards
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    ref={searchInputRef}
+                    placeholder="Search flashcards, descriptions, or tags..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 border-border/50 focus:border-primary/50"
+                  />
+                </div>
+              </div>
+
+              {/* Category Filter */}
+              <div className="lg:w-48">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-border/50 rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50"
+                >
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Difficulty Filter */}
+              <div className="lg:w-32">
+                <select
+                  value={selectedDifficulty}
+                  onChange={(e) => setSelectedDifficulty(e.target.value)}
+                  className="w-full px-3 py-2 border border-border/50 rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50"
+                >
+                  {difficulties.map((difficulty) => (
+                    <option key={difficulty} value={difficulty}>
+                      {difficulty}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Quick Filters */}
+              <div className="flex gap-2">
+                <Button
+                  variant={showDueOnly ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowDueOnly(!showDueOnly)}
+                  className="whitespace-nowrap"
+                >
+                  <Zap className="w-4 h-4 mr-1" />
+                  Due Only
+                </Button>
+                <Button
+                  variant={showBookmarkedOnly ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowBookmarkedOnly(!showBookmarkedOnly)}
+                  className="whitespace-nowrap"
+                >
+                  <Bookmark className="w-4 h-4 mr-1" />
+                  Bookmarked
+                </Button>
+              </div>
             </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <div className="flex gap-2">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-border rounded-md bg-background text-foreground"
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={selectedDifficulty}
-              onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="px-3 py-2 border border-border rounded-md bg-background text-foreground"
-            >
-              {difficulties.map((difficulty) => (
-                <option key={difficulty} value={difficulty}>
-                  {difficulty}
-                </option>
-              ))}
-            </select>
-
-            <Button variant="outline" size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              New Deck
-            </Button>
-          </div>
-        </div>
-
-        {/* Flashcard Decks Grid */}
+        {/* Flashcard Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredFlashcards.map((deck) => (
+          {filteredFlashcards.map((flashcard) => (
             <Card
-              key={deck.id}
-              className="group hover:shadow-lg transition-all duration-300 border-border"
+              key={flashcard.id}
+              className="group hover:shadow-xl transition-all duration-300 border-border/50 hover:border-primary/20 hover:-translate-y-1"
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                      {deck.title}
+                    <CardTitle className="text-lg mb-2 group-hover:text-primary transition-colors">
+                      {flashcard.title}
                     </CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                      {deck.description}
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {flashcard.description}
                     </p>
                   </div>
-                  {deck.isBookmarked && (
-                    <Star className="w-4 h-4 text-yellow-500 fill-current ml-2 flex-shrink-0" />
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleBookmark(flashcard.id)}
+                    className="ml-2 p-1 h-8 w-8 hover:scale-110 transition-transform duration-200"
+                  >
+                    {bookmarkedFlashcards.has(flashcard.id) ? (
+                      <BookmarkCheck className="w-4 h-4 text-primary" />
+                    ) : (
+                      <Bookmark className="w-4 h-4" />
+                    )}
+                  </Button>
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-4">
-                {/* Deck Stats */}
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>{deck.cardCount} cards</span>
-                  <span>{deck.studySessions} sessions</span>
-                </div>
-
-                {/* Mastery Progress */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Mastery</span>
-                    <span className="font-medium text-foreground">
-                      {deck.masteryLevel}%
-                    </span>
+                {/* Flashcard Metadata */}
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <CreditCard className="w-4 h-4" />
+                    {flashcard.cards} cards
                   </div>
-                  <div className="w-full bg-muted rounded-full h-2">
-                    <div
-                      className={`h-2 rounded-full transition-all duration-300 ${getMasteryColor(
-                        deck.masteryLevel
-                      )}`}
-                      style={{ width: `${deck.masteryLevel}%` }}
-                    />
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    {flashcard.dueForReview} due
                   </div>
                 </div>
 
-                {/* Category and Difficulty */}
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {deck.category}
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={getDifficultyColor(flashcard.difficulty)}>
+                    {flashcard.difficulty}
                   </Badge>
-                  <Badge
-                    className={`text-xs border ${getDifficultyColor(
-                      deck.difficulty
-                    )}`}
-                  >
-                    {deck.difficulty}
+                  <Badge className={getCategoryColor(flashcard.category)}>
+                    {flashcard.category}
                   </Badge>
-                </div>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1">
-                  {deck.tags.slice(0, 3).map((tag, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                  {deck.tags.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{deck.tags.length - 3}
+                  {flashcard.studyStreak > 0 && (
+                    <Badge className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20">
+                      🔥 {flashcard.studyStreak} day streak
                     </Badge>
                   )}
                 </div>
 
-                {/* Last Studied */}
-                <p className="text-xs text-muted-foreground">
-                  Last studied:{" "}
-                  {new Date(deck.lastStudied).toLocaleDateString()}
-                </p>
+                {/* Mastery Progress */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Mastery Level</span>
+                    <span className={`font-medium ${getMasteryColor(flashcard.masteryLevel)}`}>
+                      {flashcard.masteryLevel}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-pink-500 to-rose-500 h-2 rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${flashcard.masteryLevel}%` }}
+                    />
+                  </div>
+                  {flashcard.lastStudied !== "Never" && (
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Last studied: {flashcard.lastStudied}</span>
+                      <span>Avg: {flashcard.averageScore}%</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1">
+                  {flashcard.tags.slice(0, 3).map((tag) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                  {flashcard.tags.length > 3 && (
+                    <Badge variant="outline" className="text-xs">
+                      +{flashcard.tags.length - 3}
+                    </Badge>
+                  )}
+                </div>
 
                 {/* Action Buttons */}
                 <div className="flex gap-2 pt-2">
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    Study
+                  <Button className="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 group">
+                    <Play className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                    {flashcard.dueForReview > 0 ? "Review" : "Study"}
                   </Button>
-                  <Button variant="outline" size="sm">
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Edit className="w-4 h-4" />
-                  </Button>
+                  {flashcard.lastStudied !== "Never" && (
+                    <Button variant="outline" size="sm" className="hover:scale-105 transition-transform duration-200">
+                      <TrendingUp className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -418,26 +553,39 @@ export default function FlashcardsPage() {
 
         {/* Empty State */}
         {filteredFlashcards.length === 0 && (
-          <div className="text-center py-12">
-            <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              No flashcard decks found
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              {searchQuery ||
-              selectedCategory !== "All" ||
-              selectedDifficulty !== "All"
-                ? "Try adjusting your search or filters"
-                : "Create your first flashcard deck to get started"}
-            </p>
-            <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Create New Deck
-            </Button>
-          </div>
+          <Card className="text-center py-12 border-border/50">
+            <CardContent>
+              <div className="animate-bounce mb-4">
+                <CreditCard className="w-16 h-16 text-muted-foreground mx-auto" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No flashcards found</h3>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your filters or create your first flashcard deck.
+              </p>
+              <div className="flex gap-2 justify-center">
+                <Button
+                  onClick={() => {
+                    setSelectedCategory("All");
+                    setSelectedDifficulty("All");
+                    setSearchQuery("");
+                    setShowBookmarkedOnly(false);
+                    setShowDueOnly(false);
+                  }}
+                  variant="outline"
+                >
+                  Clear Filters
+                </Button>
+                <Link href="/dashboard/flashcards/create">
+                  <Button className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Flashcards
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
   );
 }
-    
