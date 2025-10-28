@@ -10,6 +10,7 @@ import {
   FileText,
   NotebookPen,
   Brain,
+  CreditCard,
   Settings,
   User,
   LogOut,
@@ -74,6 +75,15 @@ const navigationItems = [
     color: "text-orange-600 dark:text-orange-400",
     bgColor: "bg-orange-500/10 hover:bg-orange-500/20",
   },
+  {
+    name: "Flashcards",
+    href: "/dashboard/flashcards",
+    icon: CreditCard,
+    description: "Study with spaced repetition",
+    gradient: "from-pink-500 to-rose-500",
+    color: "text-pink-600 dark:text-pink-400",
+    bgColor: "bg-pink-500/10 hover:bg-pink-500/20",
+  },
 ];
 
 interface FloatingNavigationProps {
@@ -81,25 +91,31 @@ interface FloatingNavigationProps {
 }
 
 export function FloatingNavigation({ className }: FloatingNavigationProps) {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Ensure component is mounted before rendering user-dependent content
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Auto-hide on scroll
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
         setIsExpanded(false);
       } else {
         setIsVisible(true);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
@@ -107,7 +123,44 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  const currentItem = navigationItems.find(item => item.href === pathname);
+  const currentItem = navigationItems.find((item) => item.href === pathname);
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!isMounted) {
+    return (
+      <div
+        className={cn(
+          "fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-out",
+          "translate-y-0 opacity-100",
+          className
+        )}
+      >
+        <div className="relative floating-nav-glass rounded-2xl shadow-2xl px-3 py-2">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10">
+              <div className="w-6 h-6 bg-muted rounded-lg animate-pulse" />
+              <span className="font-semibold text-sm text-foreground">Noto</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {navigationItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="p-2.5 rounded-xl bg-muted/50 animate-pulse"
+                >
+                  <div className="w-5 h-5 bg-muted-foreground/20 rounded" />
+                </div>
+              ))}
+            </div>
+            <div className="p-1 rounded-xl bg-muted/50">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                <User className="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -135,11 +188,11 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
               className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 transition-all duration-200 group"
             >
               <div className="relative">
-                <Image 
-                  src="/logo.png" 
-                  alt="Noto" 
-                  width={24} 
-                  height={24} 
+                <Image
+                  src="/logo.png"
+                  alt="Noto"
+                  width={24}
+                  height={24}
                   className="rounded-lg"
                 />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse" />
@@ -155,15 +208,15 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
-                
+
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
                     className={cn(
                       "relative p-2.5 rounded-xl transition-all duration-200 group floating-nav-item floating-nav-focus",
-                      isActive 
-                        ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg` 
+                      isActive
+                        ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg`
                         : `${item.bgColor} ${item.color} nav-icon-scale`
                     )}
                     title={item.name}
@@ -181,7 +234,11 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="relative p-1 rounded-xl bg-muted/50 hover:bg-muted transition-all duration-200 group">
-                  {user?.imageUrl ? (
+                  {!isMounted || !isLoaded ? (
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                  ) : user?.imageUrl ? (
                     <Image
                       src={user.imageUrl}
                       width={32}
@@ -200,9 +257,11 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
               <DropdownMenuContent className="w-56 mb-2" align="end">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{user?.fullName}</p>
+                    <p className="text-sm font-medium">
+                      {!isMounted || !isLoaded ? "Loading..." : user?.fullName || "User"}
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      {user?.emailAddresses[0]?.emailAddress}
+                      {!isMounted || !isLoaded ? "" : user?.emailAddresses[0]?.emailAddress || ""}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -218,7 +277,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                   </DropdownMenuItem>
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
-                      {theme === 'dark' ? (
+                      {theme === "dark" ? (
                         <Moon className="mr-2 h-4 w-4" />
                       ) : (
                         <Sun className="mr-2 h-4 w-4" />
@@ -226,15 +285,19 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                       Theme
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent>
-                      <DropdownMenuItem onClick={() => setTheme('light')}>
+                      <DropdownMenuItem onClick={() => setTheme("light")}>
                         <Sun className="mr-2 h-4 w-4" />
                         Light
-                        {theme === 'light' && <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />}
+                        {theme === "light" && (
+                          <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />
+                        )}
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setTheme('dark')}>
+                      <DropdownMenuItem onClick={() => setTheme("dark")}>
                         <Moon className="mr-2 h-4 w-4" />
                         Dark
-                        {theme === 'dark' && <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />}
+                        {theme === "dark" && (
+                          <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />
+                        )}
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
@@ -268,18 +331,20 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <Image 
-                    src="/logo.png" 
-                    alt="Noto" 
-                    width={32} 
-                    height={32} 
+                  <Image
+                    src="/logo.png"
+                    alt="Noto"
+                    width={32}
+                    height={32}
                     className="rounded-lg"
                   />
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse" />
                 </div>
                 <div>
                   <h2 className="font-bold text-lg text-foreground">Noto</h2>
-                  <p className="text-xs text-muted-foreground">PDF Annotation & Notes</p>
+                  <p className="text-xs text-muted-foreground">
+                    PDF Annotation & Notes
+                  </p>
                 </div>
               </div>
               <Button
@@ -297,7 +362,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
               {navigationItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
-                
+
                 return (
                   <Link
                     key={item.name}
@@ -305,32 +370,40 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                     onClick={() => setIsExpanded(false)}
                     className={cn(
                       "relative p-4 rounded-xl transition-all duration-200 group border",
-                      isActive 
-                        ? `bg-gradient-to-r ${item.gradient} text-white border-transparent shadow-lg` 
+                      isActive
+                        ? `bg-gradient-to-r ${item.gradient} text-white border-transparent shadow-lg`
                         : "bg-card/50 hover:bg-card border-border/50 hover:border-border"
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "p-2 rounded-lg transition-colors",
-                        isActive ? "bg-white/20" : item.bgColor
-                      )}>
-                        <Icon className={cn(
-                          "w-5 h-5",
-                          isActive ? "text-white" : item.color
-                        )} />
+                      <div
+                        className={cn(
+                          "p-2 rounded-lg transition-colors",
+                          isActive ? "bg-white/20" : item.bgColor
+                        )}
+                      >
+                        <Icon
+                          className={cn(
+                            "w-5 h-5",
+                            isActive ? "text-white" : item.color
+                          )}
+                        />
                       </div>
                       <div>
-                        <h3 className={cn(
-                          "font-semibold text-sm",
-                          isActive ? "text-white" : "text-foreground"
-                        )}>
+                        <h3
+                          className={cn(
+                            "font-semibold text-sm",
+                            isActive ? "text-white" : "text-foreground"
+                          )}
+                        >
                           {item.name}
                         </h3>
-                        <p className={cn(
-                          "text-xs",
-                          isActive ? "text-white/80" : "text-muted-foreground"
-                        )}>
+                        <p
+                          className={cn(
+                            "text-xs",
+                            isActive ? "text-white/80" : "text-muted-foreground"
+                          )}
+                        >
                           {item.description}
                         </p>
                       </div>
@@ -348,7 +421,11 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
             {/* User Section */}
             <div className="border-t border-border/50 pt-4">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
-                {user?.imageUrl ? (
+                {!isMounted || !isLoaded ? (
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                    <User className="w-5 h-5 text-white" />
+                  </div>
+                ) : user?.imageUrl ? (
                   <Image
                     src={user.imageUrl}
                     width={40}
@@ -363,10 +440,10 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground truncate">
-                    {user?.fullName}
+                    {!isMounted || !isLoaded ? "Loading..." : user?.fullName || "User"}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {user?.emailAddresses[0]?.emailAddress}
+                    {!isMounted || !isLoaded ? "" : user?.emailAddresses[0]?.emailAddress || ""}
                   </p>
                 </div>
                 <DropdownMenu>
@@ -387,7 +464,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                       </DropdownMenuItem>
                       <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
-                          {theme === 'dark' ? (
+                          {theme === "dark" ? (
                             <Moon className="mr-2 h-4 w-4" />
                           ) : (
                             <Sun className="mr-2 h-4 w-4" />
@@ -395,15 +472,19 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                           Theme
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent>
-                          <DropdownMenuItem onClick={() => setTheme('light')}>
+                          <DropdownMenuItem onClick={() => setTheme("light")}>
                             <Sun className="mr-2 h-4 w-4" />
                             Light
-                            {theme === 'light' && <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />}
+                            {theme === "light" && (
+                              <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />
+                            )}
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setTheme('dark')}>
+                          <DropdownMenuItem onClick={() => setTheme("dark")}>
                             <Moon className="mr-2 h-4 w-4" />
                             Dark
-                            {theme === 'dark' && <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />}
+                            {theme === "dark" && (
+                              <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />
+                            )}
                           </DropdownMenuItem>
                         </DropdownMenuSubContent>
                       </DropdownMenuSub>

@@ -2,7 +2,15 @@
 
 import { useContext } from 'react';
 import { ThemeContext } from '@/components/theme/ThemeProvider';
-import type { ThemeContextValue } from '@/lib/types/theme';
+
+// Use the actual ThemeContextValue from the ThemeProvider implementation
+type ThemeMode = 'light' | 'dark';
+
+interface ThemeContextValue {
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
+  toggleTheme: () => void;
+}
 
 /**
  * Hook for consuming theme context throughout the application

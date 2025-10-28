@@ -15,6 +15,7 @@ import {
   FileText,
   NotebookPen,
   Brain,
+  CreditCard,
   Plus,
   TrendingUp,
   Clock,
@@ -130,6 +131,14 @@ const quickActions = [
     gradient: "from-orange-500 to-orange-600",
     hoverGradient: "hover:from-orange-600 hover:to-orange-700",
   },
+  {
+    title: "Study Flashcards",
+    description: "Review with spaced repetition",
+    icon: CreditCard,
+    href: "/dashboard/flashcards",
+    gradient: "from-pink-500 to-rose-600",
+    hoverGradient: "hover:from-pink-600 hover:to-rose-700",
+  },
 ];
 
 export default function DashboardPage() {
@@ -193,7 +202,7 @@ export default function DashboardPage() {
       {/* Quick Actions */}
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold text-foreground">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {quickActions.map((action, index) => {
             const Icon = action.icon;
             return (

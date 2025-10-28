@@ -20,6 +20,7 @@ import {
   FileText,
   NotebookPen,
   Brain,
+  CreditCard,
   PanelLeftClose,
   PanelLeftOpen,
   Menu,
@@ -31,12 +32,10 @@ import {
   LogOut,
   Sun,
   Moon,
-  Monitor,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import { useTheme } from "@/hooks/use-theme";
-import { useSidebar } from "@/components/dashboard/SidebarProvider";
 
 interface SidebarProps {
   className?: string;
@@ -74,6 +73,14 @@ const navigationItems = [
     description: "Test your knowledge with interactive quizzes",
     gradient: "from-orange-500 to-red-500",
     hoverColor: "hover:bg-orange-500/10 hover:border-orange-500/20",
+  },
+  {
+    name: "Flashcards",
+    href: "/dashboard/flashcards",
+    icon: CreditCard,
+    description: "Study with spaced repetition flashcards",
+    gradient: "from-pink-500 to-rose-500",
+    hoverColor: "hover:bg-pink-500/10 hover:border-pink-500/20",
   },
 ];
 
@@ -116,12 +123,15 @@ export function DashboardSidebar({ className }: SidebarProps) {
           // Desktop styles with smooth width transition
           "lg:relative lg:translate-x-0 lg:transition-[width] lg:duration-300 lg:ease-out",
           isCollapsed ? "lg:w-16" : "lg:w-64",
-          // Mobile styles with transform transition  
+          // Mobile styles with transform transition
           "w-64 transition-transform duration-300 ease-out",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           className
         )}
-        style={{ minWidth: isCollapsed ? '4rem' : '16rem', maxWidth: isCollapsed ? '4rem' : '16rem' }}
+        style={{
+          minWidth: isCollapsed ? "4rem" : "16rem",
+          maxWidth: isCollapsed ? "4rem" : "16rem",
+        }}
       >
         {/* Branding Section */}
         <div
@@ -143,7 +153,10 @@ export function DashboardSidebar({ className }: SidebarProps) {
                 title="Expand sidebar"
                 className="w-8 h-8 bg-sidebar-accent rounded-xl flex items-center justify-center shadow-lg hover:bg-sidebar-accent/80 transition-colors duration-200"
               >
-                <PanelLeftOpen size={16} className="text-sidebar-accent-foreground" />
+                <PanelLeftOpen
+                  size={16}
+                  className="text-sidebar-accent-foreground"
+                />
               </button>
             ) : (
               // Logo and collapse button when expanded
@@ -161,7 +174,10 @@ export function DashboardSidebar({ className }: SidebarProps) {
                   title="Collapse sidebar"
                   className="hidden lg:flex w-7 h-7 bg-sidebar-accent hover:bg-sidebar-accent/80 rounded-lg items-center justify-center transition-colors duration-200"
                 >
-                  <PanelLeftClose size={14} className="text-sidebar-foreground/70" />
+                  <PanelLeftClose
+                    size={14}
+                    className="text-sidebar-foreground/70"
+                  />
                 </button>
               </>
             )}
@@ -250,7 +266,10 @@ export function DashboardSidebar({ className }: SidebarProps) {
                         className="rounded-2xl"
                       />
                     ) : (
-                      <User size={18} className="text-sidebar-accent-foreground" />
+                      <User
+                        size={18}
+                        className="text-sidebar-accent-foreground"
+                      />
                     )}
                   </button>
                 </DropdownMenuTrigger>
@@ -317,7 +336,10 @@ export function DashboardSidebar({ className }: SidebarProps) {
                   <div className="font-semibold text-sm text-sidebar-foreground truncate">
                     {user.user?.fullName}
                   </div>
-                  <div className="text-xs text-sidebar-foreground/60 truncate" title={user.user?.emailAddresses[0].emailAddress}>
+                  <div
+                    className="text-xs text-sidebar-foreground/60 truncate"
+                    title={user.user?.emailAddresses[0].emailAddress}
+                  >
                     {user.user?.emailAddresses[0].emailAddress}
                   </div>
                 </div>
@@ -350,7 +372,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                       <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
                           <div className="flex items-center">
-                            {theme === 'dark' ? (
+                            {theme === "dark" ? (
                               <Moon className="mr-2 h-4 w-4" />
                             ) : (
                               <Sun className="mr-2 h-4 w-4" />
@@ -359,25 +381,29 @@ export function DashboardSidebar({ className }: SidebarProps) {
                           </div>
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent>
-                          <DropdownMenuItem 
-                            onClick={() => setTheme('light')}
+                          <DropdownMenuItem
+                            onClick={() => setTheme("light")}
                             className="flex items-center justify-between"
                           >
                             <div className="flex items-center">
                               <Sun className="mr-2 h-4 w-4" />
                               Light
                             </div>
-                            {theme === 'light' && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                            {theme === "light" && (
+                              <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                            )}
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={() => setTheme('dark')}
+                          <DropdownMenuItem
+                            onClick={() => setTheme("dark")}
                             className="flex items-center justify-between"
                           >
                             <div className="flex items-center">
                               <Moon className="mr-2 h-4 w-4" />
                               Dark
                             </div>
-                            {theme === 'dark' && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                            {theme === "dark" && (
+                              <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                            )}
                           </DropdownMenuItem>
                         </DropdownMenuSubContent>
                       </DropdownMenuSub>
