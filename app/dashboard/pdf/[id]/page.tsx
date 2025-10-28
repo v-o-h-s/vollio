@@ -187,6 +187,47 @@ export default function PDFViewerPage() {
           </div>
         )}
 
+        {/* Current Tool Indicator (top right, only visible when header is hidden) */}
+        {!isHeaderVisible && (
+          <div className="fixed top-4 right-4 z-30">
+            <div className="bg-white/80 dark:bg-background/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-xl px-3 py-2 animate-fade-in shadow-lg shadow-black/5 dark:shadow-black/20">
+              <div className="flex items-center gap-2">
+                {selectedTool === "highlight" && (
+                  <>
+                    <div
+                      className="w-3 h-3 rounded-full shadow-sm border border-white/30"
+                      style={{ backgroundColor: highlightColor }}
+                    />
+                    <span className="text-xs font-medium text-foreground/80">
+                      {highlightMode === "quick"
+                        ? "Quick Highlight"
+                        : highlightMode === "comment"
+                        ? "Inline Comment"
+                        : "Linked Note"}
+                    </span>
+                  </>
+                )}
+                {selectedTool === "delete" && (
+                  <>
+                    <div className="w-3 h-3 rounded-full bg-red-500 shadow-sm" />
+                    <span className="text-xs font-medium text-red-600 dark:text-red-400">
+                      Delete Mode
+                    </span>
+                  </>
+                )}
+                {selectedTool === "nothing" && (
+                  <>
+                    <div className="w-3 h-3 rounded-full bg-gray-400 dark:bg-gray-500 shadow-sm" />
+                    <span className="text-xs font-medium text-foreground/80">
+                      Selection Only
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* PDF Viewer - Full viewport height with explicit top/bottom to avoid bottom gap */}
         <div
           className={`transition-all duration-300 ease-in-out fixed z-0`}
