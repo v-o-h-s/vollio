@@ -1,206 +1,225 @@
-# Noto Documentation Index 📚
+# Noto Documentation Index
 
-Welcome to the comprehensive documentation for Noto, the AI-powered PDF annotation platform. This index provides organized access to all documentation resources, from quick start guides to detailed technical references.
+Complete documentation index for the Noto PDF annotation application, organized by audience and topic for easy navigation.
 
 ## 🚀 Quick Start
 
-### Essential Getting Started Guides
-- **[Main README](./README.md)** - Project overview, features, and quick start guide
+### For Developers
+1. **[README.md](./README.md)** - Project overview, setup, and quick start
+2. **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards and patterns
+3. **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference
+
+### For Project Managers
+1. **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Vision, architecture, and roadmap
+2. **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
+
+### For DevOps
+1. **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database and storage configuration
+2. **[API Documentation](./docs/API_DOCUMENTATION.md)** - Backend integration details
+
+## 📚 Documentation by Category
+
+### 🏗️ Architecture & Setup
+
+#### Core Documentation
+- **[README.md](./README.md)** - Main project overview with setup instructions
 - **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Comprehensive project vision and architecture
-- **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database and storage configuration guide
-- **[Project Status](./docs/PROJECT_STATUS.md)** - Current implementation status and progress
-
-### Installation & Setup
-1. **Prerequisites**: Node.js 18+, Supabase project, Clerk authentication, Syncfusion license
-2. **Environment Setup**: Configure `.env.local` with required API keys and URLs
-3. **Database Setup**: Run Supabase migrations and configure RLS policies
-4. **Development Server**: `npm run dev` to start local development
-
-## 🏗️ Architecture & Technical Documentation
-
-### Core System Architecture
-- **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards, patterns, and best practices
+- **[Technical Guidelines](./.kiro/steering/tech.md)** - Development standards and best practices
 - **[Project Structure](./.kiro/steering/structure.md)** - File organization and naming conventions
-- **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
-- **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference with Supabase integration
 
-### Development Guidelines
-- **[Error Handling](./docs/ERROR_HANDLING.md)** - Comprehensive error handling patterns and strategies
-- **[Recent Activity](./docs/RECENT_ACTIVITY.md)** - Latest development updates and changes
+#### Backend & Database
+- **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database configuration and RLS policies
+- **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference with examples
+- **[Database Schema Updates](./.kiro/steering/updating database.md)** - Schema change guidelines
+- **[Supabase Helpers](./.kiro/steering/supabase-helper-summary.md)** - Utility functions reference
 
-## 🧩 Component Documentation
+### 🎨 User Interface & Components
 
-### PDF System Components
-- **[PDF Components](./components/pdf/README.md)** - Complete PDF viewer and annotation system
-  - Multi-mode highlighting (Quick, Comment, Note)
-  - Glassmorphism UI design and dynamic tool selection
-  - Coordinate-based positioning and cross-tab synchronization
-  - File management with drag & drop support
+#### Navigation System
+- **[Navigation Components](./components/navigation/README.md)** - Modern floating navigation system
+  - FloatingNavigation: Glassmorphism dock with auto-hide functionality
+  - FloatingSidebar: Context-aware page-specific actions
+- **[Navigation System Documentation](./docs/NAVIGATION_SYSTEM.md)** - Complete navigation architecture
 
-### Rich Text Editor System
-- **[Editor Components](./components/editor/README.md)** - Notion-like block editor system
-  - TipTap-based rich text editing with auto-save
-  - Floating toolbars and slash command system
-  - Cross-tab synchronization and mobile optimization
-  - PDF annotation integration
+#### Core UI Components
+- **[PDF Components](./components/pdf/README.md)** - PDF viewer and annotation system
+- **[Editor Components](./components/editor/README.md)** - Rich text editor with TipTap integration
+- **[Theme System](./components/theme/README.md)** - Complete dark/light mode implementation
+- **[UI Components](./components/ui/README.md)** - Base UI components and patterns
 
+#### Specialized Components
+- **[Quiz System](./.kiro/steering/quiz-system.md)** - Quiz management and creation interface
+- **[Dashboard Components](./components/dashboard/README.md)** - Dashboard-specific components
 
+### 🔧 Development & Testing
 
+#### Development Guidelines
+- **[Error Handling](./docs/ERROR_HANDLING.md)** - Comprehensive error management patterns
+- **[Debugging Guidelines](./.kiro/steering/checking.md)** - Problem resolution and debugging
+- **[Hooks Documentation](./hooks/README.md)** - Custom React hooks reference
 
+#### State Management
+- **[Store Documentation](./lib/store/README.md)** - Redux state management and RTK Query
+- **[Types Documentation](./lib/types/README.md)** - TypeScript type definitions
+- **[Utilities Documentation](./lib/README.md)** - Core utility functions
 
-### Theme & UI System
-- **[Theme Components](./components/theme/README.md)** - Complete theme management system
-  - Dark/light mode with system preference detection
-  - Cross-tab synchronization and persistent storage
-  - Accessibility features and responsive design
+#### Testing & Quality
+- **[Test Documentation](./test/README.md)** - Testing strategy and coverage
+- **[Performance Guidelines](./docs/PERFORMANCE.md)** - Optimization best practices
 
-## 🔧 Backend & Services Documentation
+### 📱 Features & Functionality
 
-### State Management & API Integration
-- **[Store Documentation](./lib/store/README.md)** - Redux store and RTK Query integration
+#### PDF Management
+- **[PDF Annotation Tools](./docs/PDF_ANNOTATION_TOOLS.md)** - Advanced annotation system
+- **[Document Processing](./docs/DOCUMENT_PROCESSING.md)** - Text extraction and OCR
+- **[File Management](./docs/FILE_MANAGEMENT.md)** - Upload, storage, and organization
 
+#### Rich Text Editing
+- **[Notion Editor](./docs/NOTION_EDITOR.md)** - TipTap-based editor system
+- **[Auto-Save System](./docs/AUTO_SAVE.md)** - Automatic content preservation
+- **[Cross-Tab Sync](./docs/CROSS_TAB_SYNC.md)** - Real-time synchronization
 
-### Backend Services
-- **[Library Documentation](./lib/README.md)** - Core utilities and configurations
-- **[Supabase Client](./lib/supabaseClient.ts)** - Database and storage integration
-- **[Utilities](./lib/utils/)** - Helper functions and error handling
+#### Quiz System
+- **[Quiz Management](./docs/QUIZ_SYSTEM.md)** - Interactive quiz center
+- **[Document Selection](./components/quiz/README.md)** - Advanced document selection for quizzes
 
-- **[Vector Search](./lib/services/README-vector-search.md)** - Advanced vector search capabilities
+### 🔐 Security & Authentication
 
-### Utilities & Helpers
-- **[Library Documentation](./lib/README.md)** - Core utilities and configurations
-- **[Types Documentation](./lib/types/README.md)** - TypeScript type definitions and interfaces
+#### Authentication & Authorization
+- **[Authentication Setup](./docs/AUTHENTICATION.md)** - Clerk integration guide
+- **[Security Guidelines](./docs/SECURITY.md)** - Security best practices
+- **[RLS Policies](./docs/RLS_POLICIES.md)** - Row Level Security configuration
 
-### Custom Hooks
-- **[Hooks Documentation](./hooks/README.md)** - Custom React hooks library
-  - Auto-save, error handling, and retry mechanisms
-  - Mobile detection, touch gestures, and accessibility
-  - Activity tracking, cross-tab sync, and network status
-  - Theme management and keyboard shortcuts
+#### Data Protection
+- **[Privacy Guidelines](./docs/PRIVACY.md)** - Data protection and privacy
+- **[File Security](./docs/FILE_SECURITY.md)** - Secure file handling
 
-## 📱 User Experience & Design
+### 🚀 Deployment & Operations
 
-### User Interface Guidelines
-- **Mobile-First Design**: Touch-friendly interactions and responsive layouts
-- **Accessibility Compliance**: WCAG 2.1 AA compliance with screen reader support
-- **Theme Integration**: Complete dark/light mode with system preference detection
-- **Performance Optimization**: Lazy loading, memoization, and efficient rendering
+#### Deployment
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment instructions
+- **[Environment Setup](./docs/ENVIRONMENT.md)** - Environment configuration
+- **[Monitoring](./docs/MONITORING.md)** - Application monitoring and logging
 
-### User Workflows
-1. **PDF Annotation Workflow**: Upload → View → Annotate → Save → Cross-tab sync
+#### Maintenance
+- **[Maintenance Guide](./docs/MAINTENANCE.md)** - Ongoing maintenance tasks
+- **[Troubleshooting](./docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Performance Monitoring](./docs/PERFORMANCE_MONITORING.md)** - Performance tracking
 
-3. **Note Management**: Create → Edit → Auto-save → Cross-component integration
-4. **Mobile Experience**: Touch selection → Mobile dialogs → Gesture navigation
+## 🎯 Documentation by Audience
 
-## 🧪 Testing & Quality Assurance
+### 👨‍💻 Developers
 
+#### Getting Started
+1. **[README.md](./README.md)** - Project setup and overview
+2. **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards
+3. **[Project Structure](./.kiro/steering/structure.md)** - File organization
+4. **[API Documentation](./docs/API_DOCUMENTATION.md)** - Backend integration
 
-### Quality Standards
-- **Code Coverage**: 80%+ test coverage for critical functionality
-- **Performance**: Loading times under 2 seconds for typical operations
-- **Accessibility**: WCAG 2.1 AA compliance verification
-- **Browser Support**: Modern browsers with ES2020 support
+#### Component Development
+- **[PDF Components](./components/pdf/README.md)** - PDF viewer system
+- **[Editor Components](./components/editor/README.md)** - Rich text editor
+- **[Navigation Components](./components/navigation/README.md)** - Modern navigation
+- **[UI Components](./components/ui/README.md)** - Base components
 
-## 🔒 Security & Authentication
+#### Advanced Topics
+- **[Error Handling](./docs/ERROR_HANDLING.md)** - Error management
+- **[State Management](./lib/store/README.md)** - Redux and RTK Query
+- **[Testing](./test/README.md)** - Testing strategies
+- **[Performance](./docs/PERFORMANCE.md)** - Optimization
 
-### Security Documentation
-- **Authentication**: Clerk integration with JWT-based RLS policies
-- **Data Protection**: Row Level Security (RLS) for automatic user data isolation
-- **File Security**: Comprehensive validation, signed URLs, and malicious pattern detection
-- **Input Validation**: Server-side validation and sanitization for all user inputs
+### 🏢 Project Managers
 
-### Privacy & Compliance
-- **Data Isolation**: Automatic user data separation via Supabase RLS
-- **Activity Tracking**: Privacy-compliant user activity monitoring
-- **File Storage**: Secure file organization and access control
-- **Error Handling**: Sanitized error messages to prevent information leakage
+#### Project Overview
+1. **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Vision and roadmap
+2. **[Product Context](./.kiro/steering/product.md)** - Feature requirements
+3. **[Quiz System](./.kiro/steering/quiz-system.md)** - Quiz functionality
 
-## 🚀 Deployment & Production
+#### Progress Tracking
+- **[Implementation Status](./docs/PROJECT_STATUS.md)** - Current progress
+- **[Feature Documentation](./docs/FEATURES.md)** - Completed features
+- **[Roadmap](./docs/ROADMAP.md)** - Future development
 
-### Production Deployment
-- **Environment Configuration**: Production environment variables and secrets
-- **Database Migrations**: Supabase schema management and version control
-- **Performance Optimization**: CDN integration, caching strategies, and monitoring
-- **Monitoring & Analytics**: Error tracking, performance monitoring, and user analytics
+### 🔧 DevOps Engineers
 
-### Scaling Considerations
-- **Horizontal Scaling**: Load balancing and distributed processing
-- **Database Optimization**: Query optimization and connection pooling
-- **File Storage**: CDN integration and global distribution
-- **Performance Monitoring**: Real-time performance tracking and alerting
+#### Infrastructure Setup
+1. **[Supabase Setup](./docs/SUPABASE_SETUP.md)** - Database configuration
+2. **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment
+3. **[Environment Setup](./docs/ENVIRONMENT.md)** - Configuration management
 
-## 🔮 Future Development
+#### Operations
+- **[Monitoring](./docs/MONITORING.md)** - Application monitoring
+- **[Security](./docs/SECURITY.md)** - Security configuration
+- **[Maintenance](./docs/MAINTENANCE.md)** - Operational procedures
 
-### Planned Enhancements
-- **Advanced AI Features**: Enhanced models, personalized learning paths, adaptive difficulty
-- **Collaboration Features**: Real-time collaborative editing and shared workspaces
-- **Enterprise Features**: Team management, advanced permissions, audit logging
-- **Performance Improvements**: Edge computing, advanced caching, WebAssembly integration
+### 🎨 Designers
 
-### Contributing Guidelines
-- **Development Standards**: TypeScript strict mode, comprehensive testing, documentation
-- **Code Review Process**: Pull request guidelines, quality checks, performance validation
-- **Feature Development**: Design patterns, architecture principles, user experience guidelines
+#### Design System
+- **[Theme System](./components/theme/README.md)** - Design tokens and themes
+- **[UI Components](./components/ui/README.md)** - Component library
+- **[Navigation Design](./components/navigation/README.md)** - Navigation patterns
 
-## 📞 Support & Resources
+#### User Experience
+- **[UX Guidelines](./docs/UX_GUIDELINES.md)** - User experience principles
+- **[Accessibility](./docs/ACCESSIBILITY.md)** - Accessibility standards
+- **[Mobile Design](./docs/MOBILE_DESIGN.md)** - Mobile-first approach
 
-### Getting Help
-- **GitHub Issues**: Bug reports, feature requests, and technical questions
-- **Documentation Updates**: Contributing to documentation and knowledge base
-- **Community Support**: Developer community and knowledge sharing
+## 🔍 Documentation by Feature
 
-### Development Resources
-- **Code Examples**: Comprehensive usage examples and implementation patterns
-- **Best Practices**: Established patterns, performance optimization, security guidelines
-- **Troubleshooting**: Common issues, debugging guides, and solution patterns
+### 📄 PDF Management
+- **[PDF Annotation Tools](./docs/PDF_ANNOTATION_TOOLS.md)** - Annotation system
+- **[PDF Components](./components/pdf/README.md)** - PDF viewer components
+- **[Document Processing](./docs/DOCUMENT_PROCESSING.md)** - Text extraction
+- **[File Management](./docs/FILE_MANAGEMENT.md)** - File operations
 
-## 📋 Documentation Status
+### ✏️ Rich Text Editing
+- **[Notion Editor](./docs/NOTION_EDITOR.md)** - Editor system
+- **[Editor Components](./components/editor/README.md)** - Editor components
+- **[Auto-Save](./docs/AUTO_SAVE.md)** - Automatic saving
+- **[Cross-Tab Sync](./docs/CROSS_TAB_SYNC.md)** - Synchronization
 
-### Completion Status
-- ✅ **Core Documentation**: Complete and up-to-date with latest implementations
-- ✅ **Component Documentation**: Comprehensive coverage of all major components
-- ✅ **API Documentation**: Complete REST API reference with all endpoints implemented
-- ✅ **Development Guidelines**: Established patterns and best practices for production
-- ✅ **User Guides**: Complete user workflows and feature documentation
-- ✅ **Production Ready**: All documentation reflects current production-ready implementation
+### 🧠 Quiz System
+- **[Quiz Management](./docs/QUIZ_SYSTEM.md)** - Quiz interface
+- **[Quiz Components](./components/quiz/README.md)** - Quiz components
+- **[Document Selection](./docs/DOCUMENT_SELECTION.md)** - Document integration
 
-### Recent Updates
-- **January 2025**: Complete documentation overhaul reflecting production-ready status
-  - **API Documentation**: Updated with all implemented endpoints (Folders, Highlights, Enhanced Notes)
-  - **Database Schema**: Complete documentation of all tables and relationships
-  - **Technical Guidelines**: Updated with latest implementation patterns and best practices
-  - **Production Status**: All documentation now reflects production-ready implementation
-  - **Steering Files**: Comprehensive update of all development guidelines
-  - **Error Handling**: Complete error handling documentation with production patterns
-- **Component READMEs**: Updated all component documentation with current features
-- **Development Guidelines**: Updated technical guidelines reflecting complete implementation
+### 🎨 User Interface
+- **[Navigation System](./docs/NAVIGATION_SYSTEM.md)** - Modern navigation
+- **[Theme System](./components/theme/README.md)** - Dark/light modes
+- **[Responsive Design](./docs/RESPONSIVE_DESIGN.md)** - Mobile optimization
 
----
+### 🔐 Security & Auth
+- **[Authentication](./docs/AUTHENTICATION.md)** - User authentication
+- **[Authorization](./docs/AUTHORIZATION.md)** - Access control
+- **[Security](./docs/SECURITY.md)** - Security measures
 
-## 🗺️ Navigation Quick Reference
+## 📊 Documentation Status
 
-### By Role
-- **Developers**: [Tech Guidelines](./.kiro/steering/tech.md) → [API Docs](./docs/API_DOCUMENTATION.md) → [Component Docs](./components/)
-- **Designers**: [Product Context](./.kiro/steering/product.md) → [Theme System](./components/theme/README.md) → [UI Components](./components/ui/)
-- **Product Managers**: [Project Overview](./docs/PROJECT_OVERVIEW.md) → [Project Status](./docs/PROJECT_STATUS.md) → [Feature Documentation](./components/)
-- **DevOps**: [Supabase Setup](./docs/SUPABASE_SETUP.md) → [API Documentation](./docs/API_DOCUMENTATION.md) → [Error Handling](./docs/ERROR_HANDLING.md)
+### ✅ Complete Documentation
+- Core project setup and architecture
+- Component libraries and patterns
+- API reference and integration
+- Development guidelines and standards
+- Navigation system and modern UI
+- Quiz management system
+- Error handling and debugging
 
-### By Feature
-- **PDF Annotation**: [PDF Components](./components/pdf/README.md) → [Editor Components](./components/editor/README.md)
+### 🔄 Recently Updated
+- **Navigation Components** - Added floating sidebar documentation
+- **Product Context** - Updated with modern navigation system
+- **Technical Guidelines** - Enhanced with navigation patterns
+- **Quiz System** - Comprehensive quiz management documentation
 
-- **Theme System**: [Theme Components](./components/theme/README.md) → [Hooks](./hooks/README.md)
-- **State Management**: [Store Documentation](./lib/store/README.md) → [API Integration](./docs/API_DOCUMENTATION.md)
-
-### By Development Phase
-- **Setup**: [README](./README.md) → [Supabase Setup](./docs/SUPABASE_SETUP.md) → [Tech Guidelines](./.kiro/steering/tech.md)
-- **Development**: [Structure Guidelines](./.kiro/steering/structure.md) → [Component Docs](./components/) → [Hooks](./hooks/README.md)
-- **Testing**: [Test Documentation](./test/README.md) → [Error Handling](./docs/ERROR_HANDLING.md) → [Testing Guidelines](./.kiro/steering/tech.md#testing-standards)
-- **Deployment**: [API Documentation](./docs/API_DOCUMENTATION.md) → [Production Guidelines](./README.md#production-deployment)
+### 📝 Maintenance Notes
+- All documentation reflects current production implementation
+- Regular updates ensure accuracy with codebase changes
+- Component documentation includes usage examples and patterns
+- API documentation includes complete endpoint coverage
 
 ---
 
 **Last Updated**: January 2025  
-**Documentation Version**: 1.0.0  
-**Project Status**: ✅ Production Ready
+**Maintained by**: Noto Development Team  
+**Documentation Version**: 2.0 (Production Ready)
 
-For the most current information, always refer to the individual documentation files as they are updated more frequently than this index.
+For questions or suggestions about documentation, please create an issue in the repository or contact the development team.

@@ -514,14 +514,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
         )}
       </div>
 
-      {/* Current Page Indicator */}
-      {!isExpanded && currentItem && (
-        <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-background/90 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg">
-          <p className="text-xs font-medium text-foreground whitespace-nowrap">
-            {currentItem.name}
-          </p>
-        </div>
-      )}
+   
     </div>
   );
 }

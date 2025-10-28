@@ -136,10 +136,41 @@ inclusion: always
 - **FloatingAutoSaveStatus.tsx** - Bottom-right positioned auto-save status indicator with real-time updates
 - **SidebarProvider.tsx** - Context provider for sidebar state management (collapsed/expanded)
 
+##### Quiz Components (`components/quiz/`) ✅ COMPLETED
+- **DocumentSelectionTabs.tsx** - Advanced document selection interface for quiz creation
+  - **Library Tab**: Browse and select from uploaded PDFs with search and filtering
+  - **Upload Tab**: Drag & drop interface for new document uploads with progress tracking
+  - **Document Management**: Selected documents display with page selection and removal options
+  - **File Validation**: Comprehensive PDF validation with error handling and user feedback
+  - **Integration**: Seamless integration with PDF upload API and document processing pipeline
+- **QuizCard.tsx** - Interactive quiz display card with metadata, progress tracking, and action buttons
+- **QuizFilters.tsx** - Advanced filtering interface with category, difficulty, and search options
+- **QuizStatistics.tsx** - Statistics dashboard with gradient-styled cards and real-time data
+- **QuizProgress.tsx** - Progress visualization components with completion rates and score tracking
+- **BookmarkSystem.tsx** - Quiz bookmarking functionality with visual indicators and filtering
+
 #### Layout Components (`components/` root)
 - **dashboard-sidebar.tsx** - Collapsible sidebar with navigation, user profile, and settings dropdown
 - **ErrorBoundary.tsx** - Comprehensive error boundary with specialized fallbacks (PDFErrorBoundary, UploadErrorBoundary)
 - **SyncfusionLicenseProvider.tsx** - Syncfusion license registration provider for PDF viewer
+
+#### Navigation Components (`components/navigation/`) ✅ COMPLETED
+- **FloatingNavigation.tsx** - Modern glassmorphism floating navigation dock with auto-hide functionality
+  - **Collapsed State**: Compact dock with logo, navigation icons, and user avatar for minimal screen footprint
+  - **Expanded State**: Full 2x2 grid layout with descriptions, user profile, and comprehensive settings access
+  - **Auto-Hide Behavior**: Smart scroll detection with smooth visibility transitions for immersive content viewing
+  - **Theme Integration**: Complete dark/light mode support with gradient effects and smooth transitions
+  - **User Profile Integration**: Dropdown menus with theme selection, settings, and account management
+  - **Hydration Safety**: Prevents layout shifts with proper loading states and mounted component detection
+  - **Responsive Design**: Touch-optimized interactions with mobile-first approach
+  - **Accessibility**: Full keyboard navigation and screen reader support
+- **FloatingSidebar.tsx** - Left-positioned collapsible sidebar with context-aware page-specific actions
+  - **Context-Aware Actions**: Dynamic action sets that adapt based on current route (PDFs, Notes, Quizzes, Dashboard)
+  - **Keyboard Shortcuts**: Integrated shortcuts with visual indicators (Ctrl+N, Ctrl+F, F5, etc.)
+  - **Event Communication**: Loose coupling with page components through custom event system
+  - **Glassmorphism Design**: Consistent styling with backdrop blur and theme-aware transparency
+  - **Tooltip Support**: Helpful tooltips for collapsed state actions with proper positioning
+- **index.ts** - Navigation component exports
 
 #### Export Pattern
 - Use `index.ts` files in feature directories for clean imports
@@ -194,6 +225,7 @@ inclusion: always
 - **use-auto-save.ts** - Debounced auto-save functionality with status tracking (idle, saving, saved, error) and retry mechanisms
 - **use-debounce.ts** - Generic debouncing utility for performance optimization and API call reduction
 - **use-retry.ts** - Retry logic with exponential backoff for failed operations and network resilience
+- **use-floating-sidebar.ts** - Event-based integration system for FloatingSidebar with page-specific action handlers
 
 #### Error Handling Hooks
 - **use-error-handling.ts** - Comprehensive error management with user-friendly messaging, recovery actions, and retry mechanisms

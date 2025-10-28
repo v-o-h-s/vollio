@@ -1,81 +1,105 @@
-# Custom React Hooks ✅ COMPLETED
+# Custom Hooks
 
-This directory contains custom React hooks that provide reusable functionality across the Noto PDF annotation application. These hooks encapsulate complex logic, state management, and side effects to promote code reuse and maintainability.
+A comprehensive collection of custom React hooks that provide reusable functionality across the Noto PDF annotation application. These hooks handle everything from auto-save functionality to mobile device detection and error handling.
 
 ## 🎯 Hook Categories
 
 ### Core Functionality Hooks
 
 #### `use-auto-save.ts` ✅
-Debounced auto-save functionality with status tracking and error handling.
+Debounced auto-save functionality with comprehensive status tracking and error handling.
 
 **Features:**
-- Debounced save operations to reduce API calls
-- Save status tracking (idle, saving, saved, error)
-- Retry mechanisms for failed saves
-- Configurable debounce delay and retry attempts
-- Integration with RTK Query mutations
+- **Debounced Saves**: Configurable debounce delay (default: 1000ms)
+- **Status Tracking**: Idle, typing, saving, saved, error states
+- **Retry Mechanisms**: Automatic retry on failure with exponential backoff
+- **Error Recovery**: Comprehensive error handling with user feedback
+- **Performance Optimized**: Efficient debouncing to reduce API calls
 
 **Usage:**
 ```tsx
 import { useAutoSave } from '@/hooks/use-auto-save';
 
-function NoteEditor({ noteId, initialContent }) {
-  const [content, setContent] = useState(initialContent);
+function MyEditor() {
+  const [content, setContent] = useState('');
   
-  const { saveStatus, error, retry } = useAutoSave({
+  const { status, error, retry } = useAutoSave({
     data: content,
     saveFunction: async (data) => {
       await updateNote({ id: noteId, content: data });
     },
-    delay: 1000, // 1 second debounce
-    enabled: !!noteId
+    delay: 1000,
+    enabled: true,
   });
-  
+
   return (
     <div>
       <textarea 
         value={content} 
         onChange={(e) => setContent(e.target.value)} 
       />
-      <div>Status: {saveStatus}</div>
+      <div>Status: {status}</div>
       {error && <button onClick={retry}>Retry</button>}
     </div>
   );
 }
 ```
 
+**API:**
+```tsx
+interface UseAutoSaveOptions<T> {
+  data: T;
+  saveFunction: (data: T) => Promise<void>;
+  delay?: number;
+  enabled?: boolean;
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}
+
+interface UseAutoSaveReturn {
+  status: 'idle' | 'typing' | 'saving' | 'saved' | 'error';
+  error: Error | null;
+  retry: () => void;
+  forceSave: () => Promise<void>;
+}
+```
+
 #### `use-retry.ts` ✅
-Retry logic with exponential backoff for failed operations.
+Retry logic with exponential backoff for failed operations and network resilience.
 
 **Features:**
-- Configurable retry attempts and delays
-- Exponential backoff strategy
-- Error filtering for retryable vs non-retryable errors
-- Loading state management
-- Success/failure callbacks
+- **Exponential Backoff**: Configurable backoff multiplier and initial delay
+- **Max Retries**: Configurable maximum retry attempts
+- **Error Filtering**: Only retry specific error types
+- **Status Tracking**: Track retry attempts and current status
+- **Manual Retry**: Force retry operations manually
 
 **Usage:**
 ```tsx
 import { useRetry } from '@/hooks/use-retry';
 
-function FileUpload() {
-  const { execute, isLoading, error, retryCount } = useRetry({
+function DataFetcher() {
+  const { execute, status, error, retryCount } = useRetry({
     maxRetries: 3,
     initialDelay: 1000,
     backoffMultiplier: 2,
-    retryableErrors: ['NETWORK_ERROR', 'TIMEOUT_ERROR']
+    retryableErrors: ['NETWORK_ERROR', 'TIMEOUT'],
   });
-  
-  const handleUpload = async (file) => {
-    await execute(() => uploadFile(file));
+
+  const fetchData = async () => {
+    await execute(async () => {
+      const response = await fetch('/api/data');
+      if (!response.ok) throw new Error('NETWORK_ERROR');
+      return response.json();
+    });
   };
-  
+
   return (
     <div>
-      <input type="file" onChange={(e) => handleUpload(e.target.files[0])} />
-      {isLoading && <div>Uploading... (Attempt {retryCount + 1})</div>}
-      {error && <div>Upload failed: {error.message}</div>}
+      <button onClick={fetchData}>Fetch Data</button>
+      <div>Status: {status}</div>
+      <div>Retry Count: {retryCount}</div>
+      {error && <div>Error: {error.message}</div>}
     </div>
   );
 }
@@ -87,44 +111,43 @@ function FileUpload() {
 Comprehensive error management with user-friendly messaging and recovery actions.
 
 **Features:**
-- Error boundary integration
-- User-friendly error message mapping
-- Recovery action suggestions
-- Error reporting and logging
-- Toast notification integration
+- **Error Classification**: Categorize errors by type and severity
+- **User-Friendly Messages**: Convert technical errors to user-friendly messages
+- **Recovery Actions**: Provide actionable recovery options
+- **Error Reporting**: Optional error reporting to analytics services
+- **Toast Integration**: Automatic toast notifications for errors
 
 **Usage:**
 ```tsx
 import { useErrorHandling } from '@/hooks/use-error-handling';
 
-function DataComponent() {
+function MyComponent() {
   const { handleError, clearError, error } = useErrorHandling({
-    onError: (error) => console.log('Error logged:', error),
-    showToast: true
+    showToast: true,
+    reportErrors: true,
   });
-  
-  const fetchData = async () => {
+
+  const performAction = async () => {
     try {
-      const data = await api.getData();
-      return data;
+      await riskyOperation();
     } catch (err) {
       handleError(err, {
-        context: 'data-fetch',
-        userMessage: 'Failed to load data. Please try again.',
-        recoveryActions: ['retry', 'refresh']
+        context: 'performAction',
+        recoveryAction: () => performAction(),
       });
     }
   };
-  
+
   return (
     <div>
+      <button onClick={performAction}>Perform Action</button>
       {error && (
         <div className="error-banner">
-          {error.userMessage}
+          <p>{error.userMessage}</p>
+          <button onClick={error.recoveryAction}>Retry</button>
           <button onClick={clearError}>Dismiss</button>
         </div>
       )}
-      <button onClick={fetchData}>Load Data</button>
     </div>
   );
 }
@@ -134,54 +157,23 @@ function DataComponent() {
 Editor-specific error recovery with content preservation and state restoration.
 
 **Features:**
-- Content backup and restoration
-- Editor state recovery
-- Graceful degradation for editor failures
-- Auto-recovery mechanisms
-- User notification for recovery actions
+- **Content Preservation**: Automatically save content before errors
+- **State Restoration**: Restore editor state after recovery
+- **Graceful Degradation**: Fallback to basic text editing on errors
+- **Auto-Recovery**: Attempt automatic recovery from common errors
+- **User Notification**: Clear communication about recovery actions
 
 ### User Interface Hooks
-
-#### `use-keyboard-shortcuts.ts` ✅
-Keyboard shortcut handling for accessibility and power user features.
-
-**Features:**
-- Global and scoped keyboard shortcuts
-- Modifier key combinations (Ctrl, Alt, Shift, Meta)
-- Conflict resolution for overlapping shortcuts
-- Accessibility compliance
-- Dynamic shortcut registration
-
-**Usage:**
-```tsx
-import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts';
-
-function Editor() {
-  const [content, setContent] = useState('');
-  
-  useKeyboardShortcuts({
-    'Ctrl+S': () => saveContent(content),
-    'Ctrl+Z': () => undo(),
-    'Ctrl+Y': () => redo(),
-    'Escape': () => exitFullscreen()
-  }, {
-    scope: 'editor',
-    preventDefault: true
-  });
-  
-  return <textarea value={content} onChange={(e) => setContent(e.target.value)} />;
-}
-```
 
 #### `use-mobile.ts` ✅
 Mobile device detection and responsive design utilities.
 
 **Features:**
-- Device type detection (mobile, tablet, desktop)
-- Touch capability detection
-- Screen orientation monitoring
-- Viewport size tracking
-- Mobile-specific behavior flags
+- **Device Detection**: Detect mobile, tablet, and desktop devices
+- **Touch Support**: Detect touch capability and gesture support
+- **Orientation**: Track device orientation changes
+- **Screen Size**: Responsive breakpoint detection
+- **Performance**: Efficient detection with minimal overhead
 
 **Usage:**
 ```tsx
@@ -191,19 +183,37 @@ function ResponsiveComponent() {
   const { 
     isMobile, 
     isTablet, 
+    isDesktop, 
     hasTouch, 
-    orientation, 
-    viewport 
+    orientation,
+    screenSize 
   } = useMobile();
-  
+
   return (
-    <div className={isMobile ? 'mobile-layout' : 'desktop-layout'}>
-      {isMobile ? <MobileMenu /> : <DesktopMenu />}
-      {hasTouch && <TouchGestures />}
-      <div>Orientation: {orientation}</div>
-      <div>Viewport: {viewport.width}x{viewport.height}</div>
+    <div>
+      {isMobile && <MobileInterface />}
+      {isTablet && <TabletInterface />}
+      {isDesktop && <DesktopInterface />}
+      
+      {hasTouch && <TouchControls />}
+      
+      <div className={`orientation-${orientation}`}>
+        Content adapts to {orientation}
+      </div>
     </div>
   );
+}
+```
+
+**API:**
+```tsx
+interface UseMobileReturn {
+  isMobile: boolean;
+  isTablet: boolean;
+  isDesktop: boolean;
+  hasTouch: boolean;
+  orientation: 'portrait' | 'landscape';
+  screenSize: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }
 ```
 
@@ -211,28 +221,31 @@ function ResponsiveComponent() {
 Touch gesture recognition for mobile interactions.
 
 **Features:**
-- Swipe gesture detection (up, down, left, right)
-- Pinch-to-zoom gesture handling
-- Tap and long-press detection
-- Multi-touch support
-- Gesture velocity and distance calculations
+- **Gesture Recognition**: Swipe, pinch, tap, long press detection
+- **Configurable Thresholds**: Customizable sensitivity and timing
+- **Multi-Touch Support**: Handle multiple simultaneous touches
+- **Gesture Combinations**: Support for complex gesture sequences
+- **Performance Optimized**: Efficient event handling and cleanup
 
 **Usage:**
 ```tsx
 import { useTouchGestures } from '@/hooks/use-touch-gestures';
 
-function TouchableComponent() {
+function TouchInterface() {
   const { bind, gestures } = useTouchGestures({
-    onSwipeLeft: () => navigateNext(),
-    onSwipeRight: () => navigatePrevious(),
-    onPinch: (scale) => setZoom(scale),
-    onLongPress: () => showContextMenu()
+    onSwipeLeft: () => console.log('Swiped left'),
+    onSwipeRight: () => console.log('Swiped right'),
+    onPinch: (scale) => console.log('Pinched:', scale),
+    onLongPress: () => console.log('Long pressed'),
+    swipeThreshold: 50,
+    longPressDelay: 500,
   });
-  
+
   return (
-    <div {...bind} className="touchable-area">
-      <div>Last gesture: {gestures.lastGesture}</div>
-      <div>Velocity: {gestures.velocity}</div>
+    <div {...bind} className="touch-area">
+      <p>Current gesture: {gestures.current}</p>
+      <p>Swipe direction: {gestures.swipeDirection}</p>
+      <p>Pinch scale: {gestures.pinchScale}</p>
     </div>
   );
 }
@@ -240,361 +253,285 @@ function TouchableComponent() {
 
 ### Activity and Sync Hooks
 
-#### `use-activity-tracking.ts` ✅
-User activity monitoring with debounced API calls and cache invalidation.
-
-**Features:**
-- Debounced activity logging to reduce API calls
-- Automatic cache invalidation for real-time updates
-- Activity type categorization (view, edit, create, delete)
-- Session tracking and analytics
-- Privacy-compliant activity logging
-
-**Usage:**
-```tsx
-import { useActivityTracking } from '@/hooks/use-activity-tracking';
-
-function PDFViewer({ pdfId }) {
-  const { trackActivity, recentActivity } = useActivityTracking();
-  
-  useEffect(() => {
-    trackActivity({
-      type: 'pdf_view',
-      resourceId: pdfId,
-      metadata: { timestamp: Date.now() }
-    });
-  }, [pdfId]);
-  
-  return (
-    <div>
-      <PDFContent />
-      <RecentActivitySidebar activities={recentActivity} />
-    </div>
-  );
-}
-```
-
 #### `use-note-sync.ts` ✅
 Cross-tab note synchronization using BroadcastChannel and PostMessage APIs.
 
 **Features:**
-- Real-time cross-tab synchronization
-- BroadcastChannel API for same-origin tabs
-- PostMessage fallback for cross-origin communication
-- Conflict resolution strategies
-- Automatic cache invalidation
+- **Real-Time Sync**: Instant synchronization across browser tabs
+- **BroadcastChannel**: Primary sync mechanism for same-origin tabs
+- **PostMessage Fallback**: Cross-origin communication support
+- **Conflict Resolution**: Last-write-wins strategy with user notifications
+- **Cache Management**: Automatic RTK Query cache updates and invalidation
 
 **Usage:**
 ```tsx
 import { useNoteSync } from '@/hooks/use-note-sync';
 
-function NoteEditor({ noteId }) {
+function NoteEditor() {
   const { broadcastUpdate, broadcastCreate, broadcastDelete } = useNoteSync({
     enableAutoNavigation: true,
-    enableAutoUpdate: true
+    enableAutoUpdate: true,
   });
-  
-  const handleSave = async (content) => {
-    await updateNote(noteId, content);
-    broadcastUpdate(noteId, content);
+
+  const handleSave = async (noteId: string, content: any) => {
+    await updateNote({ id: noteId, content });
+    broadcastUpdate(noteId, { content });
   };
-  
-  const handleCreate = async (newNote) => {
-    const created = await createNote(newNote);
-    broadcastCreate(created);
+
+  const handleCreate = async (noteData: any) => {
+    const newNote = await createNote(noteData);
+    broadcastCreate(newNote);
   };
-  
-  return <Editor onSave={handleSave} onCreate={handleCreate} />;
-}
-```
 
-### Network and Performance Hooks
-
-#### `use-network-status.ts` ✅
-Network connectivity monitoring with offline/online state management.
-
-**Features:**
-- Online/offline status detection
-- Connection quality monitoring
-- Automatic retry when connection restored
-- Offline queue management
-- Network change notifications
-
-**Usage:**
-```tsx
-import { useNetworkStatus } from '@/hooks/use-network-status';
-
-function DataSyncComponent() {
-  const { 
-    isOnline, 
-    connectionType, 
-    effectiveType, 
-    saveOffline 
-  } = useNetworkStatus();
-  
-  const handleSave = async (data) => {
-    if (isOnline) {
-      await saveToServer(data);
-    } else {
-      saveOffline(data);
-    }
+  const handleDelete = async (noteId: string) => {
+    await deleteNote(noteId);
+    broadcastDelete(noteId);
   };
-  
+
   return (
     <div>
-      <div className={isOnline ? 'online' : 'offline'}>
-        Status: {isOnline ? 'Online' : 'Offline'}
-      </div>
-      {!isOnline && <div>Changes will sync when connection is restored</div>}
+      {/* Editor interface */}
     </div>
   );
 }
 ```
 
-## 🎨 Theme and Accessibility Hooks
+### Theme and Accessibility Hooks
 
 #### `use-theme.ts` ✅
-Theme management with dark/light mode support and system preference detection.
+Theme management with system preference detection and persistence.
 
 **Features:**
-- Light, dark, and system theme modes
-- Persistent theme storage
-- System preference detection
-- Cross-tab theme synchronization
-- Theme transition animations
+- **Theme Switching**: Light, dark, and system preference modes
+- **System Integration**: Automatic system preference detection
+- **Persistence**: localStorage with cross-tab synchronization
+- **SSR Safe**: Prevents theme flashing during server-side rendering
+- **Type Safety**: Full TypeScript support with proper interfaces
 
 **Usage:**
 ```tsx
 import { useTheme } from '@/hooks/use-theme';
 
 function ThemeToggle() {
-  const { theme, resolvedTheme, setTheme, toggleTheme } = useTheme();
-  
+  const { theme, setTheme, resolvedTheme, systemTheme } = useTheme();
+
   return (
     <div>
-      <div>Current theme: {theme}</div>
-      <div>Resolved theme: {resolvedTheme}</div>
+      <p>Current theme: {theme}</p>
+      <p>Resolved theme: {resolvedTheme}</p>
+      <p>System theme: {systemTheme}</p>
+      
       <button onClick={() => setTheme('light')}>Light</button>
       <button onClick={() => setTheme('dark')}>Dark</button>
       <button onClick={() => setTheme('system')}>System</button>
-      <button onClick={toggleTheme}>Toggle</button>
     </div>
   );
 }
 ```
 
 #### `use-accessibility-mode.ts` ✅
-Accessibility mode detection and management for enhanced user experience.
+Accessibility features and compliance utilities.
 
 **Features:**
-- High contrast mode detection
-- Reduced motion preference
-- Screen reader detection
-- Font size preferences
-- Accessibility feature toggles
+- **High Contrast**: Enhanced contrast mode detection and application
+- **Reduced Motion**: Respect user's motion preferences
+- **Screen Reader**: Screen reader detection and optimization
+- **Keyboard Navigation**: Enhanced keyboard navigation support
+- **Focus Management**: Intelligent focus management and indicators
 
 **Usage:**
 ```tsx
 import { useAccessibilityMode } from '@/hooks/use-accessibility-mode';
 
 function AccessibleComponent() {
-  const { 
-    prefersReducedMotion, 
-    prefersHighContrast, 
-    screenReaderActive,
-    fontSize 
+  const {
+    highContrast,
+    reducedMotion,
+    screenReader,
+    keyboardNavigation,
+    focusVisible,
   } = useAccessibilityMode();
-  
+
   return (
     <div 
-      className={`
-        ${prefersHighContrast ? 'high-contrast' : ''}
-        ${prefersReducedMotion ? 'reduced-motion' : ''}
-      `}
-      style={{ fontSize: `${fontSize}px` }}
+      className={cn(
+        'component',
+        highContrast && 'high-contrast',
+        reducedMotion && 'reduced-motion',
+        focusVisible && 'focus-visible'
+      )}
     >
-      {screenReaderActive && <div aria-live="polite">Content loaded</div>}
+      {screenReader && <span className="sr-only">Screen reader content</span>}
+      {/* Component content */}
     </div>
   );
 }
 ```
 
-## 🧩 Specialized Hooks
+### Integration Hooks
 
-### Editor-Specific Hooks
-
-#### `use-editor-keyboard-shortcuts.ts` ✅
-Editor-specific keyboard shortcuts for formatting and navigation.
+#### `use-floating-sidebar.ts` ✅
+Integration hook for FloatingSidebar component interactions.
 
 **Features:**
-- Rich text formatting shortcuts (Bold, Italic, Underline)
-- Block-level shortcuts (Headings, Lists, Code blocks)
-- Navigation shortcuts (Undo, Redo, Select All)
-- Custom editor command integration
-- Context-aware shortcut activation
+- **Page-Specific Actions**: Different actions based on current route
+- **Event Integration**: Custom event system for loose coupling
+- **Keyboard Shortcuts**: Support for common keyboard shortcuts
+- **Action Mapping**: Map sidebar actions to page functionality
+- **Type Safety**: Fully typed action interfaces
 
-
-
-#### `use-rag-monitoring.ts` ✅
-RAG system monitoring and performance tracking.
-
-**Features:**
-- Real-time performance metrics
-- Quality assessment tracking
-- User feedback integration
-- System health monitoring
-- Performance optimization suggestions
-
-## 🏗️ Hook Architecture
-
-### Design Principles
-
-1. **Single Responsibility**: Each hook has a focused, well-defined purpose
-2. **Composability**: Hooks can be combined to create complex functionality
-3. **Reusability**: Hooks are designed for use across multiple components
-4. **Type Safety**: Full TypeScript support with proper type definitions
-5. **Performance**: Optimized with proper dependency management and memoization
-
-### Common Patterns
-
-#### State Management Pattern
+**Usage:**
 ```tsx
-export function useCustomHook(options: HookOptions) {
-  const [state, setState] = useState(initialState);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  
-  const execute = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await operation();
-      setState(result);
-      return result;
-    } catch (err) {
-      setError(err as Error);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, [dependencies]);
-  
-  return { state, loading, error, execute };
+import { useFloatingSidebarIntegration } from '@/hooks/use-floating-sidebar';
+
+function PDFsPage() {
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useFloatingSidebarIntegration({
+    uploadPDF: () => {
+      const uploadEvent = new CustomEvent('pdf-upload-trigger');
+      document.dispatchEvent(uploadEvent);
+    },
+    searchFiles: () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+        searchInputRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
+    },
+    createFolder: () => {
+      const folderEvent = new CustomEvent('pdf-folder-create');
+      document.dispatchEvent(folderEvent);
+    },
+  });
+
+  return (
+    <div>
+      <input ref={searchInputRef} placeholder="Search files..." />
+      {/* Page content */}
+    </div>
+  );
 }
 ```
 
-#### Effect Cleanup Pattern
-```tsx
-export function useEventListener(event: string, handler: Function) {
-  useEffect(() => {
-    const element = document;
-    element.addEventListener(event, handler);
-    
-    return () => {
-      element.removeEventListener(event, handler);
-    };
-  }, [event, handler]);
-}
-```
+## 🔧 Hook Development Guidelines
 
-#### Memoization Pattern
-```tsx
-export function useExpensiveCalculation(data: any[]) {
-  return useMemo(() => {
-    return data.reduce((acc, item) => {
-      // Expensive calculation
-      return acc + complexOperation(item);
-    }, 0);
-  }, [data]);
-}
-```
+### Naming Convention
+- Use `use-kebab-case.ts` format for consistency
+- Prefix all hooks with `use` following React conventions
+- Use descriptive names that indicate functionality
 
-## 🧪 Testing Hooks
+### TypeScript Integration
+- Full type safety with proper interfaces and return types
+- Export both hook function and related types
+- Use generic types where appropriate for reusability
 
-### Testing Strategy
+### Error Handling
+- Comprehensive error handling with user-friendly messages
+- Graceful degradation when features are unavailable
+- Proper cleanup of resources and event listeners
 
-All hooks include comprehensive unit tests covering:
-- Basic functionality and expected behavior
-- Error conditions and edge cases
-- Cleanup and memory leak prevention
-- Performance characteristics
-- TypeScript type safety
+### Performance Optimization
+- Memoization with `useMemo` and `useCallback` where appropriate
+- Efficient dependency management in `useEffect`
+- Debouncing for expensive operations
+- Cleanup functions for all side effects
 
-### Testing Example
+### Testing
+- Unit tests for all hooks with mock dependencies
+- Edge case coverage including error scenarios
+- Performance testing for hooks with heavy operations
+- Integration testing with React components
+
+## 📱 Mobile-Specific Hooks
+
+### Mobile Editor Hooks
+- **use-mobile-editor.ts**: Mobile-optimized editor functionality
+- **use-mobile-keyboard.ts**: Virtual keyboard handling and input optimization
+- **use-editor-keyboard-shortcuts.ts**: Editor-specific keyboard shortcuts
+
+### Mobile Interaction Hooks
+- **use-touch-gestures.ts**: Touch gesture recognition and handling
+- **use-mobile.ts**: Device detection and responsive utilities
+- **use-focus-management.ts**: Mobile-friendly focus management
+
+## 🚀 Performance Considerations
+
+### Efficient Hook Design
+- Minimize re-renders with proper memoization
+- Use `useCallback` for stable function references
+- Implement proper dependency arrays
+- Avoid unnecessary effect triggers
+
+### Memory Management
+- Clean up event listeners in effect cleanup functions
+- Cancel pending operations on component unmount
+- Dispose of resources properly (timers, subscriptions)
+- Use weak references where appropriate
+
+### Bundle Size Optimization
+- Tree-shakeable exports for individual hooks
+- Minimal external dependencies
+- Lazy loading for heavy functionality
+- Code splitting for optional features
+
+## 🧪 Testing Strategy
+
+### Unit Testing
 ```tsx
 import { renderHook, act } from '@testing-library/react';
 import { useAutoSave } from '@/hooks/use-auto-save';
 
-describe('useAutoSave', () => {
-  it('should debounce save operations', async () => {
-    const mockSave = jest.fn();
-    const { result } = renderHook(() => 
-      useAutoSave({ 
-        data: 'test', 
-        saveFunction: mockSave, 
-        delay: 100 
-      })
-    );
-    
-    // Multiple rapid changes should only trigger one save
-    act(() => {
-      result.current.trigger();
-      result.current.trigger();
-      result.current.trigger();
-    });
-    
-    await waitFor(() => {
-      expect(mockSave).toHaveBeenCalledTimes(1);
-    });
+test('auto-save functionality', async () => {
+  const mockSave = jest.fn();
+  const { result } = renderHook(() => 
+    useAutoSave({
+      data: 'test content',
+      saveFunction: mockSave,
+      delay: 100,
+    })
+  );
+
+  expect(result.current.status).toBe('idle');
+  
+  // Test debounced save
+  await act(async () => {
+    await new Promise(resolve => setTimeout(resolve, 150));
   });
+  
+  expect(mockSave).toHaveBeenCalledWith('test content');
+  expect(result.current.status).toBe('saved');
 });
 ```
 
-## 📚 Usage Guidelines
+### Integration Testing
+- Test hooks with actual React components
+- Verify cross-hook interactions and dependencies
+- Test error scenarios and recovery mechanisms
+- Validate performance under realistic conditions
 
-### Best Practices
+## 🤝 Contributing
 
-1. **Use TypeScript**: Always provide proper type definitions
-2. **Handle Cleanup**: Properly clean up subscriptions and event listeners
-3. **Optimize Dependencies**: Use proper dependency arrays to prevent unnecessary re-renders
-4. **Error Handling**: Include comprehensive error handling and recovery
-5. **Documentation**: Provide clear JSDoc comments and usage examples
+### Adding New Hooks
+1. Follow the established naming convention (`use-kebab-case.ts`)
+2. Include comprehensive TypeScript types and interfaces
+3. Implement proper error handling and cleanup
+4. Add unit tests with good coverage
+5. Update this documentation with usage examples
 
-### Performance Considerations
-
-1. **Memoization**: Use `useMemo` and `useCallback` for expensive operations
-2. **Debouncing**: Implement debouncing for frequent operations
-3. **Lazy Loading**: Load heavy dependencies only when needed
-4. **Memory Management**: Properly clean up resources and subscriptions
-
-### Common Pitfalls
-
-1. **Stale Closures**: Be careful with closures in useEffect and useCallback
-2. **Infinite Loops**: Avoid missing dependencies that cause infinite re-renders
-3. **Memory Leaks**: Always clean up subscriptions and event listeners
-4. **Over-optimization**: Don't memoize everything; measure performance impact
-
-## 🔮 Future Enhancements
-
-### Planned Hooks
-- `use-virtual-scrolling.ts` - Virtual scrolling for large lists
-- `use-drag-drop.ts` - Drag and drop functionality
-- `use-websocket.ts` - WebSocket connection management
-- `use-service-worker.ts` - Service worker integration
-- `use-analytics.ts` - User analytics and tracking
-
-### Performance Improvements
-- Web Workers integration for heavy computations
-- Streaming data processing hooks
-- Advanced caching strategies
-- Predictive prefetching hooks
-
----
-
-For detailed information about specific hooks or to contribute new functionality, refer to the individual hook files or contact the development team.
+### Code Standards
+- Use TypeScript strict mode for type safety
+- Follow React hooks rules and best practices
+- Implement proper cleanup for all side effects
+- Use semantic naming for functions and variables
+- Optimize for performance with memoization
 
 ---
 
 **Status**: ✅ Production Ready  
 **Last Updated**: January 2025  
 **Version**: 1.0.0
+
+The custom hooks system provides comprehensive functionality for the Noto application, covering everything from auto-save and error handling to mobile interactions and cross-tab synchronization.

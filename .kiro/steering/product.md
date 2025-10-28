@@ -73,7 +73,18 @@ inclusion: always
 - **Cross-tab Synchronization**: Theme changes synchronized across all open browser tabs
 
 #### Modern Dashboard & Navigation ✅ COMPLETED
-- **Responsive Dashboard**: Collapsible sidebar with theme selection, user profile management, and modern navigation
+- **Floating Navigation System**: Modern glassmorphism-based navigation dock with auto-hide functionality
+  - **Collapsed State**: Compact dock with logo, navigation icons, and user avatar for minimal screen footprint
+  - **Expanded State**: Full 2x2 grid layout with descriptions, user profile, and comprehensive settings access
+  - **Auto-Hide Behavior**: Smart scroll detection with smooth visibility transitions for immersive content viewing
+  - **Theme Integration**: Complete dark/light mode support with gradient effects and smooth transitions
+  - **User Profile Integration**: Dropdown menus with theme selection, settings, and account management
+  - **Hydration Safety**: Prevents layout shifts with proper loading states and mounted component detection
+- **Floating Sidebar**: Left-positioned collapsible sidebar with page-specific quick actions
+  - **Context-Aware Actions**: Dynamic action sets that adapt based on current route (PDFs, Notes, Quizzes, Dashboard)
+  - **Keyboard Shortcuts**: Integrated shortcuts with visual indicators (Ctrl+N, Ctrl+F, F5, etc.)
+  - **Event Communication**: Loose coupling with page components through custom event system
+  - **Glassmorphism Design**: Consistent styling with backdrop blur and theme-aware transparency
 - **Cross-Document Navigation**: Seamless switching between PDFs, annotations, and notes with router integration
 - **Mobile-First Design**: Touch-friendly interactions and responsive layouts with comprehensive mobile optimization
 - **Real-time Activity Tracking**: User activity monitoring with debounced API calls and recent activity display
@@ -104,7 +115,8 @@ When building UI flows, follow these established patterns:
 - **Rich Text Editing**: Use floating toolbars for context-aware formatting, slash commands for quick actions
 - **Theme Integration**: All components must support light/dark modes with theme-aware styling
 - **Visual Feedback**: Always highlight annotated text, show hover tooltips, use preview cards
-- **Navigation**: Dashboard as central hub with collapsible sidebar, easy PDF switching, breadcrumb navigation, seamless PDF-to-notes routing
+- **Navigation**: Modern floating navigation system with glassmorphism dock, auto-hide behavior, and seamless PDF-to-notes routing
+- **Floating Sidebar Integration**: Context-aware page-specific actions with keyboard shortcuts, event-based communication, and collapsible design
 - **Portal-Based UI**: Use React Portals for floating components with proper z-index management outside PDF containers
 - **Error Handling**: Show user-friendly messages, provide retry options, log detailed errors
 - **Confirmation Dialogs**: Use custom styled confirmation dialogs instead of browser alerts

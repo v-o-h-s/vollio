@@ -540,6 +540,44 @@ Upload images for rich text editor integration.
 - Supabase Storage integration
 - Signed URL generation
 
+### Quiz Management API ✅ PLANNED
+
+#### GET /api/quizzes
+Get all quizzes for the authenticated user with filtering options.
+
+**Query Parameters:**
+- `category` (optional): Filter by quiz category
+- `difficulty` (optional): Filter by difficulty level
+- `completed` (optional): Filter by completion status
+
+#### POST /api/quizzes
+Create a new quiz from selected documents.
+
+**Request Body:**
+```json
+{
+  "title": "Quiz Title",
+  "description": "Quiz description",
+  "category": "Programming",
+  "difficulty": "Medium",
+  "documents": [
+    {
+      "id": "doc_uuid",
+      "selectedPages": [1, 2, 3]
+    }
+  ]
+}
+```
+
+#### GET /api/quizzes/[id]
+Get a specific quiz by ID with questions and metadata.
+
+#### PUT /api/quizzes/[id]
+Update quiz metadata and settings.
+
+#### DELETE /api/quizzes/[id]
+Delete a quiz and associated data.
+
 ## Error Responses
 
 All endpoints return consistent error responses:

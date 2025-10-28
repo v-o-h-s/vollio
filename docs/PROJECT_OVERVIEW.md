@@ -88,6 +88,9 @@ Noto is a modern, secure, and responsive PDF annotation application that enables
 - **Advanced Annotations**: Multi-mode highlighting with context menus and management tools
 - **Rich Text Notes**: TipTap-based editor with auto-save and cross-tab synchronization
 - **Folder Organization**: Hierarchical folder structure with drag & drop support
+- **Modern Navigation**: Glassmorphism floating navigation dock with auto-hide functionality
+- **Quiz Management**: Complete quiz center with filtering, progress tracking, and statistics dashboard
+- **Document Processing**: Advanced PDF processing with Syncfusion extraction and OCR fallback
 - **Theme System**: Complete dark/light mode with system preference detection
 - **Mobile Optimization**: Touch-friendly interfaces with responsive design
 - **Error Handling**: Comprehensive error boundaries and recovery mechanisms

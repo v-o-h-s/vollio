@@ -1,4 +1,5 @@
 import { FloatingNavigation } from "@/components/navigation/FloatingNavigation";
+import { FloatingSidebar } from "@/components/navigation/FloatingSidebar";
 import { Toaster } from "react-hot-toast";
 
 export default function DashboardLayout({
@@ -17,6 +18,9 @@ export default function DashboardLayout({
 
       {/* Floating Navigation */}
       <FloatingNavigation />
+
+      {/* Floating Sidebar */}
+      <FloatingSidebar />
 
       {/* Toast Notifications */}
       <Toaster

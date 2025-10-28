@@ -20,6 +20,9 @@ export { useEditorErrorRecovery } from './use-editor-error-recovery';
 // Cross-tab synchronization hooks
 export { useNoteSync } from './use-note-sync';
 
+// Floating sidebar integration hooks
+export { useFloatingSidebar, useFloatingSidebarIntegration } from './use-floating-sidebar';
+
 // Mobile and touch hooks
 export { useMobile, useIsMobile, useHasTouch } from './use-mobile';
 export { useTouchGestures, useSwipeGestures } from './use-touch-gestures';

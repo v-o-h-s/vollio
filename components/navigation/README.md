@@ -1,173 +1,64 @@
-# Floating Navigation System
+# Navigation Components
 
-## Overview
+The Noto navigation system consists of two complementary floating components that provide modern, space-efficient navigation without interfering with the main content area.
 
-The Floating Navigation system replaces the traditional sidebar with a modern, glassmorphism-based floating dock that provides an immersive and space-efficient navigation experience for the Noto application.
+## FloatingNavigation
 
-## Design Philosophy
+The primary navigation component that replaces traditional sidebars with a modern floating dock at the bottom of the screen.
 
-### Why Floating Navigation?
+### Features
 
-1. **Immersive Experience**: Maximizes content area by removing the fixed sidebar
-2. **Modern Aesthetic**: Aligns with Noto's glassmorphism and modern design language
-3. **Mobile-First**: Better suited for responsive design and touch interactions
-4. **Context-Aware**: Auto-hides during scrolling to reduce visual clutter
-5. **Space Efficient**: Provides full navigation in a compact, expandable interface
+- **Glassmorphism Design**: Modern backdrop blur effects with semi-transparent backgrounds
+- **Dual States**: Collapsed dock for quick access, expanded view for full navigation
+- **Auto-Hide Behavior**: Intelligently hides during scrolling for immersive experience
+- **Theme Integration**: Complete light/dark mode support with smooth transitions
+- **User Profile**: Integrated user management with settings and theme controls
+- **Mobile Optimized**: Touch-friendly interactions with responsive design
 
-### Design Principles
-
-- **Glassmorphism**: Backdrop blur effects with semi-transparent backgrounds
-- **Smooth Animations**: Fluid transitions and micro-interactions
-- **Accessibility**: Full keyboard navigation and screen reader support
-- **Theme Awareness**: Seamless light/dark mode integration
-- **Progressive Disclosure**: Collapsed state for quick access, expanded for full features
-
-## Components
-
-### FloatingNavigation
-
-The main navigation component that provides:
+### States
 
 #### Collapsed State (Floating Dock)
-- **Brand Logo**: Noto logo with animated indicator
-- **Quick Navigation**: Icon-based access to all main sections
-- **User Avatar**: Profile access with status indicator
-- **Current Page Indicator**: Shows active section name
+- **Brand Logo**: Noto logo with animated status indicator
+- **Quick Navigation**: Icon-based access to all main sections (Dashboard, Files, Notes, Quizzes, Flashcards)
+- **User Avatar**: Profile access with online status indicator
+- **Current Page Indicator**: Floating tooltip showing active section
 
 #### Expanded State (Full Navigation)
-- **Complete Navigation**: Grid layout with descriptions
-- **User Profile**: Full user information and settings
-- **Theme Controls**: Integrated theme switching
-- **Quick Actions**: Direct access to common tasks
+- **Grid Layout**: 2-column grid with section descriptions
+- **User Profile**: Complete user information and settings access
+- **Theme Controls**: Integrated light/dark mode switching
+- **Navigation Cards**: Rich cards with icons, descriptions, and visual feedback
 
-## Features
-
-### Auto-Hide Behavior
-```typescript
-// Hides navigation when scrolling down, shows when scrolling up
-const handleScroll = () => {
-  const currentScrollY = window.scrollY;
-  
-  if (currentScrollY > lastScrollY && currentScrollY > 100) {
-    setIsVisible(false);
-    setIsExpanded(false);
-  } else {
-    setIsVisible(true);
-  }
-  
-  setLastScrollY(currentScrollY);
-};
-```
-
-### Glassmorphism Effects
-```css
-.floating-nav-glass {
-  backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 2px 8px rgba(0, 0, 0, 0.05);
-}
-```
-
-### Theme Integration
-- Automatic theme detection and switching
-- Theme-aware styling for all states
-- Smooth transitions between themes
-- Consistent with app-wide theme system
-
-## Navigation Items
-
-Each navigation item includes:
+### Navigation Sections
 
 ```typescript
-{
-  name: "Dashboard",
-  href: "/dashboard",
-  icon: Home,
-  description: "Overview and analytics",
-  gradient: "from-blue-500 to-cyan-500",
-  color: "text-blue-600 dark:text-blue-400",
-  bgColor: "bg-blue-500/10 hover:bg-blue-500/20",
-}
+const navigationItems = [
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: Home,
+    description: "Overview and analytics",
+    gradient: "from-blue-500 to-cyan-500",
+    color: "text-blue-600 dark:text-blue-400",
+  },
+  {
+    name: "Files", 
+    href: "/dashboard/pdfs",
+    icon: FileText,
+    description: "View and manage PDFs",
+    gradient: "from-emerald-500 to-teal-500",
+    color: "text-emerald-600 dark:text-emerald-400",
+  },
+  // ... more sections
+];
 ```
 
-### Current Navigation Sections
+### Usage
 
-1. **Dashboard** - Overview and analytics
-2. **Files** - PDF management and viewing
-3. **Notes** - Rich text note creation and editing
-4. **Quizzes** - Interactive knowledge testing
-
-## Responsive Design
-
-### Mobile Adaptations
-- Touch-friendly target sizes (minimum 44px)
-- Swipe gestures for expansion
-- Mobile-specific positioning
-- Optimized for small screens
-
-### Tablet Adaptations
-- Balanced layout for medium screens
-- Hover states for touch devices
-- Appropriate spacing and sizing
-
-### Desktop Features
-- Full hover interactions
-- Keyboard shortcuts
-- Advanced animations
-- Multi-state interactions
-
-## Accessibility
-
-### Keyboard Navigation
-- Tab navigation through all interactive elements
-- Enter/Space activation for buttons
-- Escape to close expanded state
-- Arrow keys for menu navigation
-
-### Screen Reader Support
-- Proper ARIA labels and roles
-- Descriptive text for all actions
-- Status announcements for state changes
-- Semantic HTML structure
-
-### Focus Management
-- Visible focus indicators
-- Logical tab order
-- Focus trapping in expanded state
-- Return focus on close
-
-## Animation System
-
-### CSS Animations
-```css
-@keyframes float-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-```
-
-### Micro-Interactions
-- Hover scale effects on icons
-- Pulse animations for active states
-- Smooth expand/collapse transitions
-- Loading state animations
-
-## Usage
-
-### Basic Implementation
 ```tsx
 import { FloatingNavigation } from '@/components/navigation';
 
-export default function Layout({ children }) {
+export default function DashboardLayout({ children }) {
   return (
     <div className="min-h-screen bg-background">
       <main className="w-full">
@@ -181,128 +72,243 @@ export default function Layout({ children }) {
 }
 ```
 
-### Customization
+## FloatingSidebar
+
+A context-aware floating sidebar positioned on the left side of the screen that provides page-specific quick actions and shortcuts.
+
+### Features
+
+- **Page-Specific Actions**: Dynamically adapts actions based on current route
+- **Collapsible Design**: Compact icon stack that expands to show full action list
+- **Auto-Hide on Scroll**: Hides when scrolling down, shows when scrolling up
+- **Keyboard Shortcuts**: Supports common shortcuts (Ctrl+N, Ctrl+F, F5, etc.)
+- **Event Integration**: Uses custom events to communicate with page components
+- **Tooltip Support**: Helpful tooltips for collapsed state actions
+- **Theme Aware**: Complete glassmorphism styling with theme support
+
+### Page-Specific Actions
+
+#### PDF Management (`/dashboard/pdfs`)
+- **Upload PDF** (Primary) - Trigger file upload dialog
+- **New Folder** - Create new folder in current location
+- **Search Files** - Focus search input with smooth scroll
+- **Filter & Sort** - Toggle advanced filtering panel
+- **View Mode** - Cycle between grid/list/compact views
+- **Refresh** - Reload page content
+
+#### Notes Management (`/dashboard/notes`)
+- **New Note** (Primary) - Navigate to note creation
+- **Search Notes** - Focus search input
+- **Filter Notes** - Toggle filter options
+- **Sort Options** - Cycle through sort modes
+- **View Mode** - Toggle between display modes
+- **Starred Notes** - Filter starred notes only
+
+#### Quiz Center (`/dashboard/quizzes`)
+- **Create Quiz** (Primary) - Navigate to quiz creation
+- **Search Quizzes** - Focus search input
+- **Filter Category** - Cycle through categories
+- **Difficulty Filter** - Cycle through difficulty levels
+- **Bookmarked** - Filter bookmarked quizzes
+- **Statistics** - Toggle stats panel
+
+#### Dashboard Overview (`/dashboard`)
+- **Quick Upload** (Primary) - Navigate to PDF upload
+- **New Note** - Create new note
+- **Create Quiz** - Navigate to quiz creation
+- **Recent Files** - Navigate to files page
+- **Settings** - Open settings modal
+
+### Integration with Pages
+
+Use the `useFloatingSidebarIntegration` hook to connect sidebar actions with page functionality:
+
 ```tsx
-<FloatingNavigation 
-  className="custom-positioning" 
-/>
+import { useFloatingSidebarIntegration } from '@/hooks/use-floating-sidebar';
+
+export default function PDFsPage() {
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useFloatingSidebarIntegration({
+    uploadPDF: () => {
+      const uploadEvent = new CustomEvent('pdf-upload-trigger');
+      document.dispatchEvent(uploadEvent);
+    },
+    searchFiles: () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+        searchInputRef.current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
+    },
+    createFolder: () => {
+      const folderEvent = new CustomEvent('pdf-folder-create');
+      document.dispatchEvent(folderEvent);
+    },
+  });
+
+  return (
+    <div>
+      <input ref={searchInputRef} placeholder="Search files..." />
+      {/* Page content */}
+    </div>
+  );
+}
 ```
 
-## Performance Considerations
+### Event System
 
-### Optimizations
-- Lazy loading of dropdown menus
-- Debounced scroll handlers
-- Memoized components
-- Efficient re-renders
+The sidebar uses a custom event system for loose coupling with page components:
 
-### Bundle Size
-- Tree-shakeable imports
-- Minimal dependencies
-- Optimized animations
-- Compressed assets
+```typescript
+// Sidebar triggers events
+const triggerAction = (actionType: string) => {
+  const event = new CustomEvent(`trigger-${actionType}`);
+  window.dispatchEvent(event);
+};
+
+// Pages listen for events
+useEffect(() => {
+  const handleAction = () => performAction();
+  window.addEventListener('trigger-action-name', handleAction);
+  return () => window.removeEventListener('trigger-action-name', handleAction);
+}, []);
+```
+
+## Styling System
+
+Both components share a consistent glassmorphism design system:
+
+### CSS Classes
+
+```css
+.floating-nav-glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .floating-nav-glass {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.floating-nav-enter {
+  animation: floating-nav-appear 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+```
+
+### Theme Integration
+
+- Automatic theme detection and switching
+- Theme-aware color tokens (`bg-muted`, `text-foreground`, `border-border`)
+- Smooth transitions between light and dark modes
+- Consistent with app-wide theme system
+
+## Accessibility
+
+### Keyboard Navigation
+- Full tab navigation through all interactive elements
+- Enter/Space activation for buttons and links
+- Escape key to close expanded states
+- Arrow keys for menu navigation
+
+### Screen Reader Support
+- Proper ARIA labels and roles (`button`, `navigation`, `menu`)
+- Descriptive text for all actions and states
+- Status announcements for state changes
+- Semantic HTML structure with landmarks
+
+### Focus Management
+- Visible focus indicators with high contrast
+- Logical tab order following visual layout
+- Focus trapping in expanded navigation state
+- Return focus to trigger on close
+
+## Performance Optimizations
+
+- **Lazy Loading**: Dropdown menus and expanded content load on demand
+- **Debounced Scroll**: Scroll handlers use debouncing to prevent excessive updates
+- **Memoized Components**: React.memo prevents unnecessary re-renders
+- **Event Delegation**: Efficient event handling for multiple interactive elements
+
+## Mobile Responsiveness
+
+### Touch Interactions
+- Minimum 44px touch targets for all interactive elements
+- Touch-friendly spacing and padding
+- Haptic feedback for supported devices
+- Swipe gestures for future enhancement
+
+### Responsive Design
+- Mobile-first approach with progressive enhancement
+- Adaptive layouts for different screen sizes
+- Optimized positioning for mobile viewports
+- Performance optimizations for mobile networks
 
 ## Browser Support
 
-### Modern Browsers
-- Chrome 88+
-- Firefox 87+
-- Safari 14+
-- Edge 88+
+- **Modern Browsers**: Chrome 88+, Firefox 87+, Safari 14+, Edge 88+
+- **Backdrop Filter**: Graceful fallbacks for older browsers
+- **Progressive Enhancement**: Core functionality works without advanced features
+- **Polyfills**: Automatic polyfills for missing features
 
-### Fallbacks
-- Backdrop filter fallbacks for older browsers
-- Progressive enhancement approach
-- Graceful degradation
+## Migration Guide
 
-## Migration from Sidebar
+### From Traditional Sidebar
 
-### Layout Changes
-1. Remove `DashboardSidebar` import
-2. Update layout structure
-3. Add `FloatingNavigation` component
-4. Adjust content padding
+1. **Remove Sidebar Component**
+   ```tsx
+   // Before
+   <DashboardSidebar />
+   
+   // After - Remove completely
+   ```
 
-### Styling Updates
-1. Remove sidebar-specific styles
-2. Update container widths
-3. Adjust responsive breakpoints
-4. Update z-index layers
+2. **Update Layout Structure**
+   ```tsx
+   // Before
+   <div className="flex h-screen">
+     <DashboardSidebar />
+     <main className="flex-1">{children}</main>
+   </div>
+   
+   // After
+   <div className="min-h-screen bg-background">
+     <main className="w-full">
+       <div className="container mx-auto px-4 py-6 pb-24">
+         {children}
+       </div>
+     </main>
+     <FloatingNavigation />
+     <FloatingSidebar />
+   </div>
+   ```
 
-### Before (Sidebar)
-```tsx
-<div className="flex h-screen bg-background">
-  <DashboardSidebar />
-  <main className="flex-1 overflow-auto">
-    <div className="p-6 lg:p-8 lg:pl-12">{children}</div>
-  </main>
-</div>
-```
-
-### After (Floating Navigation)
-```tsx
-<div className="min-h-screen bg-background">
-  <main className="w-full">
-    <div className="container mx-auto px-4 py-6 pb-24">
-      {children}
-    </div>
-  </main>
-  <FloatingNavigation />
-</div>
-```
+3. **Adjust Content Padding**
+   - Remove left padding for sidebar space
+   - Add bottom padding for floating navigation
+   - Update responsive breakpoints
 
 ## Future Enhancements
 
 ### Planned Features
-1. **Gesture Support**: Swipe gestures for mobile
-2. **Voice Navigation**: Voice commands for accessibility
-3. **Customizable Layout**: User-configurable navigation items
-4. **Quick Search**: Integrated search functionality
-5. **Notification Center**: Integrated notification system
+- **Gesture Support**: Swipe gestures for mobile navigation
+- **Voice Commands**: Accessibility-focused voice navigation
+- **Customizable Layout**: User-configurable navigation items
+- **Quick Search**: Integrated global search functionality
+- **Notification Center**: In-navigation notification system
 
 ### Advanced Interactions
-1. **Drag & Drop**: Reorder navigation items
-2. **Shortcuts**: Customizable keyboard shortcuts
-3. **Context Menus**: Right-click actions
-4. **Multi-Selection**: Batch operations
+- **Drag & Drop**: Reorder navigation items
+- **Context Menus**: Right-click actions for power users
+- **Keyboard Shortcuts**: Customizable shortcut system
+- **Multi-Selection**: Batch operations support
 
-## Troubleshooting
-
-### Common Issues
-
-#### Navigation Not Visible
-- Check z-index conflicts
-- Verify positioning styles
-- Ensure proper container structure
-
-#### Theme Not Switching
-- Verify ThemeProvider wrapper
-- Check theme context usage
-- Validate theme storage
-
-#### Animations Not Working
-- Check CSS support for backdrop-filter
-- Verify animation CSS is loaded
-- Test browser compatibility
-
-### Debug Mode
-```tsx
-// Enable debug logging
-<FloatingNavigation debug={true} />
-```
-
-## Contributing
-
-### Adding New Navigation Items
-1. Update `navigationItems` array
-2. Add appropriate icons and colors
-3. Create corresponding routes
-4. Update tests
-
-### Styling Guidelines
-- Use theme tokens for colors
-- Follow glassmorphism patterns
-- Maintain accessibility standards
-- Test across devices
-
-This floating navigation system provides a modern, efficient, and accessible way to navigate the Noto application while maintaining the app's design philosophy and user experience goals.
+This navigation system provides a modern, efficient, and accessible way to navigate the Noto application while maintaining immersive content experiences and supporting both desktop and mobile workflows.

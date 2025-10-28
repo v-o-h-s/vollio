@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,10 @@ import {
   Bookmark,
   BookmarkCheck,
   Plus,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { useFloatingSidebarIntegration } from "@/hooks/use-floating-sidebar";
+import toast from "react-hot-toast";
 
 // Quiz interface matching the steering rules
 interface Quiz {
@@ -202,6 +203,11 @@ export default function QuizzesPage() {
   const [bookmarkedQuizzes, setBookmarkedQuizzes] = useState<Set<number>>(
     new Set(dummyQuizzes.filter((q) => q.isBookmarked).map((q) => q.id))
   );
+  const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
+  const [showStatsExpanded, setShowStatsExpanded] = useState(false);
+  
+  // Refs for sidebar integration
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Statistics calculations
   const stats = useMemo(() => {
@@ -235,10 +241,11 @@ export default function QuizzesPage() {
         quiz.tags.some((tag) =>
           tag.toLowerCase().includes(searchQuery.toLowerCase())
         );
+      const matchesBookmark = !showBookmarkedOnly || bookmarkedQuizzes.has(quiz.id);
 
-      return matchesCategory && matchesDifficulty && matchesSearch;
+      return matchesCategory && matchesDifficulty && matchesSearch && matchesBookmark;
     });
-  }, [selectedCategory, selectedDifficulty, searchQuery]);
+  }, [selectedCategory, selectedDifficulty, searchQuery, showBookmarkedOnly, bookmarkedQuizzes]);
 
   const toggleBookmark = (quizId: number) => {
     setBookmarkedQuizzes((prev) => {
@@ -251,6 +258,38 @@ export default function QuizzesPage() {
       return newSet;
     });
   };
+
+  // Integrate with floating sidebar
+  useFloatingSidebarIntegration({
+    searchQuizzes: () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+        searchInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    },
+    filterCategory: () => {
+      // Cycle through categories
+      const currentIndex = categories.indexOf(selectedCategory);
+      const nextIndex = (currentIndex + 1) % categories.length;
+      setSelectedCategory(categories[nextIndex]);
+      toast.success(`Category: ${categories[nextIndex]}`);
+    },
+    filterDifficulty: () => {
+      // Cycle through difficulties
+      const currentIndex = difficulties.indexOf(selectedDifficulty);
+      const nextIndex = (currentIndex + 1) % difficulties.length;
+      setSelectedDifficulty(difficulties[nextIndex]);
+      toast.success(`Difficulty: ${difficulties[nextIndex]}`);
+    },
+    filterBookmarked: () => {
+      setShowBookmarkedOnly(!showBookmarkedOnly);
+      toast.success(showBookmarkedOnly ? 'Showing all quizzes' : 'Showing bookmarked only');
+    },
+    showQuizStats: () => {
+      setShowStatsExpanded(!showStatsExpanded);
+      toast.success(showStatsExpanded ? 'Stats collapsed' : 'Stats expanded');
+    },
+  });
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -365,6 +404,7 @@ export default function QuizzesPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                   <Input
+                    ref={searchInputRef}
                     placeholder="Search quizzes, descriptions, or tags..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}

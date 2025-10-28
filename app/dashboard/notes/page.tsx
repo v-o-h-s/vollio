@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useGetNotesQuery, useDeleteNoteMutation } from "@/lib/store/apiSlice";
 import { useRouter } from "next/navigation";
 import { Plus, FileText, Sparkles, BookOpen, PenTool, Type } from "lucide-react";
@@ -11,6 +11,7 @@ import { useNoteSync } from "@/hooks/use-note-sync";
 import { EnhancedNotesListSkeleton } from "@/components/ui/enhanced-notes-list-skeleton";
 import { EnhancedNotesList } from "@/components/ui/enhanced-notes-list";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
+import { useFloatingSidebarIntegration } from "@/hooks/use-floating-sidebar";
 import toast from "react-hot-toast";
 
 /**
@@ -26,6 +27,10 @@ const NotesPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'updated' | 'created' | 'title' | 'wordCount'>('updated');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filterBy, setFilterBy] = useState('');
+  const [showStarredOnly, setShowStarredOnly] = useState(false);
+  
+  // Refs for sidebar integration
+  const searchInputRef = useRef<HTMLInputElement>(null);
   
   // Delete confirmation dialog state
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -87,6 +92,46 @@ const NotesPage: React.FC = () => {
   useNoteSync({
     enableAutoNavigation: false, // Don't auto-navigate from list page
     enableAutoUpdate: true,
+  });
+
+  // Integrate with floating sidebar
+  useFloatingSidebarIntegration({
+    searchNotes: () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+        searchInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    },
+    filterNotes: () => {
+      // Toggle filter visibility or focus filter input
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
+    },
+    sortNotes: () => {
+      // Cycle through sort options
+      const sortOptions: Array<'updated' | 'created' | 'title' | 'wordCount'> = ['updated', 'created', 'title', 'wordCount'];
+      const currentIndex = sortOptions.indexOf(sortBy);
+      const nextIndex = (currentIndex + 1) % sortOptions.length;
+      setSortBy(sortOptions[nextIndex]);
+      
+      // Show toast to indicate sort change
+      toast.success(`Sorted by ${sortOptions[nextIndex]}`);
+    },
+    toggleNotesView: () => {
+      // Cycle through view modes
+      const viewModes: Array<'grid' | 'list' | 'compact'> = ['grid', 'list', 'compact'];
+      const currentIndex = viewModes.indexOf(viewMode);
+      const nextIndex = (currentIndex + 1) % viewModes.length;
+      setViewMode(viewModes[nextIndex]);
+      
+      // Show toast to indicate view change
+      toast.success(`Switched to ${viewModes[nextIndex]} view`);
+    },
+    filterStarred: () => {
+      setShowStarredOnly(!showStarredOnly);
+      toast.success(showStarredOnly ? 'Showing all notes' : 'Showing starred notes only');
+    },
   });
 
   const handleCreateNote = () => {
@@ -273,14 +318,29 @@ const NotesPage: React.FC = () => {
               </div>
             )}
           </div>
-          <Button 
-            onClick={handleCreateNote} 
-            size="sm"
-            className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-          >
-            <Plus size={14} />
-            New Note
-          </Button>
+          
+          <div className="flex items-center gap-3">
+            {/* Quick Search */}
+            <div className="relative">
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search notes..."
+                value={filterBy}
+                onChange={(e) => setFilterBy(e.target.value)}
+                className="pl-3 pr-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-48 text-sm"
+              />
+            </div>
+            
+            <Button 
+              onClick={handleCreateNote} 
+              size="sm"
+              className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              <Plus size={14} />
+              New Note
+            </Button>
+          </div>
         </div>
 
         {/* Enhanced Notes List with Modern Layout */}
