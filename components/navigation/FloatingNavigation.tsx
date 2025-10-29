@@ -185,19 +185,20 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
       {/* Main Navigation Bar */}
       <div
         className={cn(
-          "relative floating-nav-glass rounded-2xl shadow-2xl transition-all duration-300 ease-out theme-transition",
+          "relative floating-nav-glass rounded-2xl shadow-2xl transition-all duration-500 ease-out theme-transition",
           "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-r before:from-white/10 before:to-transparent before:pointer-events-none",
-          isExpanded ? "px-4 py-3" : "px-3 py-2",
-          "floating-nav-enter"
+          "backdrop-blur-xl bg-background/80 border border-border/50",
+          isExpanded ? "px-4 py-3 scale-105" : "px-3 py-2 scale-100",
+          "floating-nav-enter transform-gpu"
         )}
       >
         {/* Collapsed State - Floating Dock */}
         {!isExpanded && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 transition-all duration-300 ease-out">
             {/* Logo/Brand */}
             <button
               onClick={() => setIsExpanded(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 transition-all duration-200 group"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 transition-all duration-300 group hover:scale-105 active:scale-95"
             >
               <div className="relative">
                 <Image
@@ -226,10 +227,11 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "relative p-2.5 rounded-xl transition-all duration-200 group floating-nav-item floating-nav-focus",
+                      "relative p-2.5 rounded-xl transition-all duration-300 group floating-nav-item floating-nav-focus",
+                      "hover:backdrop-blur-sm hover:shadow-lg transform-gpu",
                       isActive
-                        ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg`
-                        : `${item.bgColor} ${item.color} nav-icon-scale`
+                        ? `bg-gradient-to-r ${item.gradient} text-white shadow-lg scale-110`
+                        : `${item.bgColor} ${item.color} nav-icon-scale hover:scale-110`
                     )}
                     title={item.name}
                   >
@@ -351,7 +353,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
 
         {/* Expanded State - Full Navigation */}
         {isExpanded && (
-          <div className="space-y-4">
+          <div className="space-y-4 transition-all duration-300 ease-out animate-in fade-in slide-in-from-bottom-2">
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -376,7 +378,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsExpanded(false)}
-                className="h-8 w-8 rounded-lg"
+                className="h-8 w-8 rounded-lg transition-all duration-300 hover:scale-110 active:scale-95"
               >
                 <ChevronDown className="w-4 h-4" />
               </Button>
@@ -384,7 +386,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
 
             {/* Navigation Items */}
             <div className="grid grid-cols-2 gap-2">
-              {navigationItems.map((item) => {
+              {navigationItems.map((item, index) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
 
@@ -394,11 +396,13 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                     href={item.href}
                     onClick={() => setIsExpanded(false)}
                     className={cn(
-                      "relative p-4 rounded-xl transition-all duration-200 group border",
+                      "relative p-4 rounded-xl transition-all duration-300 group border animate-in fade-in slide-in-from-bottom-2 transform-gpu",
+                      "hover:scale-105 hover:shadow-lg hover:backdrop-blur-sm",
                       isActive
-                        ? `bg-gradient-to-r ${item.gradient} text-white border-transparent shadow-lg`
+                        ? `bg-gradient-to-r ${item.gradient} text-white border-transparent shadow-lg scale-105`
                         : "bg-card/50 hover:bg-card border-border/50 hover:border-border"
                     )}
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <div className="flex items-center gap-3">
                       <div

@@ -8,18 +8,13 @@ import { Input } from "@/components/ui/input";
 import {
   CreditCard,
   Clock,
-  Trophy,
-  Target,
   Search,
   Filter,
-  Star,
   Play,
-  RotateCcw,
   Bookmark,
   BookmarkCheck,
   Plus,
   Zap,
-  Brain,
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
@@ -178,22 +173,7 @@ export default function FlashcardsPage() {
   // Refs for sidebar integration
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Statistics calculations
-  const stats = useMemo(() => {
-    const totalFlashcards = dummyFlashcards.length;
-    const studiedFlashcards = dummyFlashcards.filter((f) => f.lastStudied !== "Never").length;
-    const averageMastery = Math.round(
-      dummyFlashcards.reduce((sum, f) => sum + f.masteryLevel, 0) / totalFlashcards
-    );
-    const totalDue = dummyFlashcards.reduce((sum, f) => sum + f.dueForReview, 0);
 
-    return {
-      totalFlashcards,
-      studiedFlashcards,
-      averageMastery,
-      totalDue,
-    };
-  }, []);
 
   // Combined filtering logic
   const filteredFlashcards = useMemo(() => {
@@ -282,81 +262,6 @@ export default function FlashcardsPage() {
               </Button>
             </Link>
           </div>
-        </div>
-
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-950/50 dark:to-rose-900/50 border-pink-200 dark:border-pink-800 group hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-pink-700 dark:text-pink-300">
-                    Total Decks
-                  </p>
-                  <p className="text-2xl font-bold text-pink-900 dark:text-pink-100">
-                    {stats.totalFlashcards}
-                  </p>
-                </div>
-                <div className="p-3 bg-pink-500 rounded-full group-hover:scale-110 transition-transform duration-200">
-                  <CreditCard className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/50 dark:to-emerald-900/50 border-green-200 dark:border-green-800 group hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-green-700 dark:text-green-300">
-                    Studied
-                  </p>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                    {stats.studiedFlashcards}
-                  </p>
-                </div>
-                <div className="p-3 bg-green-500 rounded-full group-hover:scale-110 transition-transform duration-200">
-                  <Trophy className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-950/50 dark:to-violet-900/50 border-purple-200 dark:border-purple-800 group hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                    Avg. Mastery
-                  </p>
-                  <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                    {stats.averageMastery}%
-                  </p>
-                </div>
-                <div className="p-3 bg-purple-500 rounded-full group-hover:scale-110 transition-transform duration-200">
-                  <Brain className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-950/50 dark:to-amber-900/50 border-orange-200 dark:border-orange-800 group hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-orange-700 dark:text-orange-300">
-                    Due for Review
-                  </p>
-                  <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                    {stats.totalDue}
-                  </p>
-                </div>
-                <div className="p-3 bg-orange-500 rounded-full group-hover:scale-110 transition-transform duration-200">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Filters */}

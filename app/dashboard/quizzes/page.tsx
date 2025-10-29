@@ -6,18 +6,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  BookOpen,
-  Clock,
-  Trophy,
-  Target,
   Search,
   Filter,
-  Star,
   Play,
   RotateCcw,
   Bookmark,
   BookmarkCheck,
   Plus,
+  BookOpen,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 import { useFloatingSidebarIntegration } from "@/hooks/use-floating-sidebar";
@@ -205,28 +202,9 @@ export default function QuizzesPage() {
   );
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const [showStatsExpanded, setShowStatsExpanded] = useState(false);
-  
+
   // Refs for sidebar integration
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  // Statistics calculations
-  const stats = useMemo(() => {
-    const totalQuizzes = dummyQuizzes.length;
-    const completedQuizzes = dummyQuizzes.filter((q) => q.attempts > 0).length;
-    const averageScore =
-      dummyQuizzes
-        .filter((q) => q.bestScore !== null)
-        .reduce((sum, q) => sum + (q.bestScore || 0), 0) /
-      (dummyQuizzes.filter((q) => q.bestScore !== null).length || 1);
-    const studyStreak = 7; // Mock data
-
-    return {
-      totalQuizzes,
-      completedQuizzes,
-      averageScore: Math.round(averageScore),
-      studyStreak,
-    };
-  }, []);
 
   // Combined filtering logic from steering rules
   const filteredQuizzes = useMemo(() => {
@@ -241,11 +219,20 @@ export default function QuizzesPage() {
         quiz.tags.some((tag) =>
           tag.toLowerCase().includes(searchQuery.toLowerCase())
         );
-      const matchesBookmark = !showBookmarkedOnly || bookmarkedQuizzes.has(quiz.id);
+      const matchesBookmark =
+        !showBookmarkedOnly || bookmarkedQuizzes.has(quiz.id);
 
-      return matchesCategory && matchesDifficulty && matchesSearch && matchesBookmark;
+      return (
+        matchesCategory && matchesDifficulty && matchesSearch && matchesBookmark
+      );
     });
-  }, [selectedCategory, selectedDifficulty, searchQuery, showBookmarkedOnly, bookmarkedQuizzes]);
+  }, [
+    selectedCategory,
+    selectedDifficulty,
+    searchQuery,
+    showBookmarkedOnly,
+    bookmarkedQuizzes,
+  ]);
 
   const toggleBookmark = (quizId: number) => {
     setBookmarkedQuizzes((prev) => {
@@ -264,7 +251,10 @@ export default function QuizzesPage() {
     searchQuizzes: () => {
       if (searchInputRef.current) {
         searchInputRef.current.focus();
-        searchInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        searchInputRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
       }
     },
     filterCategory: () => {
@@ -283,11 +273,13 @@ export default function QuizzesPage() {
     },
     filterBookmarked: () => {
       setShowBookmarkedOnly(!showBookmarkedOnly);
-      toast.success(showBookmarkedOnly ? 'Showing all quizzes' : 'Showing bookmarked only');
+      toast.success(
+        showBookmarkedOnly ? "Showing all quizzes" : "Showing bookmarked only"
+      );
     },
     showQuizStats: () => {
       setShowStatsExpanded(!showStatsExpanded);
-      toast.success(showStatsExpanded ? 'Stats collapsed' : 'Stats expanded');
+      toast.success(showStatsExpanded ? "Stats collapsed" : "Stats expanded");
     },
   });
 
@@ -312,81 +304,6 @@ export default function QuizzesPage() {
               </Button>
             </Link>
           </div>
-        </div>
-
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/50 border-orange-200 dark:border-orange-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-orange-700 dark:text-orange-300">
-                    Total Quizzes
-                  </p>
-                  <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                    {stats.totalQuizzes}
-                  </p>
-                </div>
-                <div className="p-3 bg-orange-500 rounded-full">
-                  <BookOpen className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/50 dark:to-red-900/50 border-red-200 dark:border-red-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-red-700 dark:text-red-300">
-                    Completed
-                  </p>
-                  <p className="text-2xl font-bold text-red-900 dark:text-red-100">
-                    {stats.completedQuizzes}
-                  </p>
-                </div>
-                <div className="p-3 bg-red-500 rounded-full">
-                  <Trophy className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/50 dark:to-amber-900/50 border-amber-200 dark:border-amber-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                    Average Score
-                  </p>
-                  <p className="text-2xl font-bold text-amber-900 dark:text-amber-100">
-                    {stats.averageScore}%
-                  </p>
-                </div>
-                <div className="p-3 bg-amber-500 rounded-full">
-                  <Target className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/50 dark:to-orange-900/50 border-orange-200 dark:border-orange-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-orange-700 dark:text-orange-300">
-                    Study Streak
-                  </p>
-                  <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">
-                    {stats.studyStreak} days
-                  </p>
-                </div>
-                <div className="p-3 bg-orange-500 rounded-full">
-                  <Star className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Filters */}

@@ -63,48 +63,7 @@ const recentActivity = [
   },
 ];
 
-const quickStats = [
-  {
-    title: "Total Files",
-    value: "24",
-    change: "+3 this week",
-    icon: FileText,
-    gradient: "from-blue-500 to-cyan-500",
-    bgColor: "bg-blue-50 dark:bg-blue-950/50",
-    borderColor: "border-blue-200 dark:border-blue-800",
-    iconBg: "bg-blue-500",
-  },
-  {
-    title: "Notes Created",
-    value: "18",
-    change: "+5 this week",
-    icon: NotebookPen,
-    gradient: "from-purple-500 to-pink-500",
-    bgColor: "bg-purple-50 dark:bg-purple-950/50",
-    borderColor: "border-purple-200 dark:border-purple-800",
-    iconBg: "bg-purple-500",
-  },
-  {
-    title: "Quizzes Taken",
-    value: "12",
-    change: "+2 this week",
-    icon: Brain,
-    gradient: "from-orange-500 to-red-500",
-    bgColor: "bg-orange-50 dark:bg-orange-950/50",
-    borderColor: "border-orange-200 dark:border-orange-800",
-    iconBg: "bg-orange-500",
-  },
-  {
-    title: "Study Streak",
-    value: "7 days",
-    change: "Keep it up!",
-    icon: Award,
-    gradient: "from-green-500 to-emerald-500",
-    bgColor: "bg-green-50 dark:bg-green-950/50",
-    borderColor: "border-green-200 dark:border-green-800",
-    iconBg: "bg-green-500",
-  },
-];
+
 
 const quickActions = [
   {
@@ -161,42 +120,6 @@ export default function DashboardPage() {
           Manage your PDFs, create notes, and test your knowledge all in one place.
           Your personalized learning experience starts here.
         </p>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {quickStats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card
-              key={index}
-              className={cn(
-                "relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1",
-                stat.bgColor,
-                stat.borderColor
-              )}
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {stat.title}
-                    </p>
-                    <p className="text-2xl font-bold text-foreground">
-                      {stat.value}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {stat.change}
-                    </p>
-                  </div>
-                  <div className={cn("p-3 rounded-full", stat.iconBg)}>
-                    <Icon className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
       </div>
 
       {/* Quick Actions */}

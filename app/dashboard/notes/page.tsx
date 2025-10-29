@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react";
 import { useGetNotesQuery, useDeleteNoteMutation } from "@/lib/store/apiSlice";
 import { useRouter } from "next/navigation";
-import { Plus, FileText, Sparkles, BookOpen, PenTool, Type } from "lucide-react";
+import { Plus, FileText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -52,41 +52,9 @@ const NotesPage: React.FC = () => {
 
   const [deleteNote, { isLoading: isDeleting }] = useDeleteNoteMutation();
 
-  // Calculate content statistics
-  const extractTextFromContent = (content: any): string => {
-    if (!content || !content.content) return '';
-    
-    const extractText = (node: any): string => {
-      if (node.type === 'text') {
-        return node.text || '';
-      }
-      if (node.content && Array.isArray(node.content)) {
-        return node.content.map(extractText).join('');
-      }
-      return '';
-    };
-    
-    return content.content.map(extractText).join('');
-  };
 
-  const totalWords = notes.reduce((acc, note) => {
-    const text = extractTextFromContent(note.content);
-    const wordCount = text.trim().split(/\s+/).filter(word => word.length > 0).length;
-    return acc + wordCount;
-  }, 0);
 
-  const totalCharacters = notes.reduce((acc, note) => {
-    const text = extractTextFromContent(note.content);
-    return acc + text.length;
-  }, 0);
 
-  // Format content size (using characters as "size")
-  const formatContentSize = (chars: number): string => {
-    if (chars === 0) return '0 chars';
-    if (chars < 1000) return `${chars} chars`;
-    if (chars < 1000000) return `${(chars / 1000).toFixed(1)}K chars`;
-    return `${(chars / 1000000).toFixed(1)}M chars`;
-  };
 
   // Cross-tab synchronization
   useNoteSync({
@@ -298,25 +266,6 @@ const NotesPage: React.FC = () => {
             <p className="text-sm text-muted-foreground/80">
               Organize your thoughts and link them to PDF annotations
             </p>
-            {/* Stats */}
-            {notes.length > 0 && (
-              <div className="flex items-center gap-4 text-xs text-muted-foreground/70 mt-2">
-                <div className="flex items-center gap-1">
-                  <BookOpen size={12} />
-                  <span>{notes.length} {notes.length === 1 ? 'note' : 'notes'}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Type size={12} />
-                  <span>{totalWords.toLocaleString()} words</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <PenTool size={12} />
-                  <span>
-                    {notes.filter(note => note.pdfAnnotationId).length} linked to PDFs
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
           
           <div className="flex items-center gap-3">
