@@ -11,7 +11,7 @@ export * from "./document-processing";
 export * from "./editor";
 export * from "./errors";
 export * from "./pdf";
-
+export * from "./lms";
 export * from "./theme";
 
 // Re-export JSONContent from TipTap for convenience

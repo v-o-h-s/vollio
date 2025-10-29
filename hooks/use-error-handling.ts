@@ -18,7 +18,7 @@ import {
   createUploadErrorContext,
   createPDFErrorContext,
   createNetworkErrorContext,
-} from "@/lib/utils/error-handling/error-handling";
+} from "@/lib/utils/error-handling/frontend-error-handling";
 
 // Error state interface
 interface ErrorState {

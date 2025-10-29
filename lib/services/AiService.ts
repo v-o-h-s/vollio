@@ -400,7 +400,11 @@ export async function createStreamingCompletion(
         // Call error callback if provided
         if (options.onError) {
           try {
-            options.onError(serverError);
+            // Convert ServerError to Error for callback compatibility
+            const error = new Error(serverError.message);
+            error.name = serverError.type;
+            error.cause = serverError;
+            options.onError(error);
           } catch (callbackError) {
             console.warn("Error callback error:", callbackError);
           }
@@ -416,7 +420,11 @@ export async function createStreamingCompletion(
     // Call error callback if provided
     if (options.onError) {
       try {
-        options.onError(serverError);
+        // Convert ServerError to Error for callback compatibility
+        const error = new Error(serverError.message);
+        error.name = serverError.type;
+        error.cause = serverError;
+        options.onError(error);
       } catch (callbackError) {
         console.warn("Error callback error:", callbackError);
       }

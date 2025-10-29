@@ -1,23 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
+import { withRetry, generateSignedUrl } from "@/lib/utils/supabase-helpers";
+import type { SupabasePDFListResponse } from "@/lib/types/pdf";
 import {
-  getAuthenticatedSupabaseClient,
-} from "@/lib/supabaseClient";
-import type { SupabasePDFListResponse } from "@/lib/types";
-import {
-  withRetry,
-  generateSignedUrl,
-} from "@/lib/utils/supabase-helpers";
-import { 
   withErrorHandling,
   extractRequestContext,
   createServerError,
-  ServerErrorType,
-  logServerError
+  logServerError,
 } from "@/lib/utils/error-handling/server-error-handling";
-import {
-  checkEnhancedRateLimit,
-} from "@/lib/utils/security-validation";
+import { ErrorType } from "@/lib/types/errors";
+import { checkEnhancedRateLimit } from "@/lib/utils/security-validation";
 import {
   requireAuthentication,
   validateAuthentication,
@@ -30,24 +23,27 @@ import {
 async function fetchUserPDFs(supabaseClient: any, userId: string) {
   const { data, error, count } = await supabaseClient
     .from("pdfs")
-    .select(`
+    .select(
+      `
       *,
       folders (
         id,
         name,
         parent_id
       )
-    `, { count: "exact" })
+    `,
+      { count: "exact" }
+    )
     .order("uploaded_at", { ascending: false })
     .limit(50);
 
   if (error) {
     throw createServerError(
-      ServerErrorType.DATABASE_ERROR,
+      ErrorType.DATABASE_ERROR,
       `Failed to fetch user PDFs: ${error.message}`,
-      { 
-        operation: 'fetch_user_pdfs',
-        userId 
+      {
+        operation: "fetch_user_pdfs",
+        userId,
       },
       error
     );
@@ -86,11 +82,11 @@ async function fetchRecentActivity(supabaseClient: any) {
     if (error.code === "PGRST116") {
       return null;
     }
-    
+
     throw createServerError(
-      ServerErrorType.DATABASE_ERROR,
+      ErrorType.DATABASE_ERROR,
       `Failed to fetch recent activity: ${error.message}`,
-      { operation: 'fetch_recent_activity' },
+      { operation: "fetch_recent_activity" },
       error
     );
   }
@@ -99,11 +95,13 @@ async function fetchRecentActivity(supabaseClient: any) {
 }
 
 // Enhanced GET handler with comprehensive error handling
-async function handleGET(request: NextRequest): Promise<NextResponse<SupabasePDFListResponse>> {
-  const context = extractRequestContext(request, '/api/pdfs');
+async function handleGET(
+  request: NextRequest
+): Promise<NextResponse<SupabasePDFListResponse>> {
+  const context = extractRequestContext(request, "/api/pdfs");
 
   // Enhanced authentication validation
-  const authContext = await requireAuthentication(request, ['read']);
+  const authContext = await requireAuthentication(request, ["read"]);
   const userId = authContext.userId;
 
   // Additional validation check
@@ -113,7 +111,7 @@ async function handleGET(request: NextRequest): Promise<NextResponse<SupabasePDF
   }
 
   // Enhanced rate limiting for API calls
-  checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });
+  checkEnhancedRateLimit(userId, "API_CALLS", { ...context, userId });
 
   // Get authenticated Supabase client with proper RLS
   const supabaseClient = await getAuthenticatedSupabaseClient();
@@ -144,9 +142,14 @@ async function handleGET(request: NextRequest): Promise<NextResponse<SupabasePDF
       } catch (error) {
         // Log the error but don't fail the entire request
         const signedUrlError = createServerError(
-          ServerErrorType.STORAGE_ERROR,
+          ErrorType.STORAGE_ERROR,
           `Failed to generate signed URL for PDF ${pdfRow.id}`,
-          { ...context, userId, operation: 'generate_signed_url', fileName: pdfRow.filename },
+          {
+            ...context,
+            userId,
+            operation: "generate_signed_url",
+            fileName: pdfRow.filename,
+          },
           error
         );
         logServerError(signedUrlError);
@@ -189,16 +192,18 @@ async function handleGET(request: NextRequest): Promise<NextResponse<SupabasePDF
   } catch (error) {
     // Log but don't fail the request
     const activityError = createServerError(
-      ServerErrorType.DATABASE_ERROR,
-      'Failed to fetch recent activity',
-      { ...context, userId, operation: 'fetch_recent_activity' },
+      ErrorType.DATABASE_ERROR,
+      "Failed to fetch recent activity",
+      { ...context, userId, operation: "fetch_recent_activity" },
       error
     );
     logServerError(activityError);
   }
 
   // Log successful request
-  console.log(`✅ PDF list fetched successfully for user ${userId}: ${pdfsWithUrls.length} PDFs`);
+  console.log(
+    `✅ PDF list fetched successfully for user ${userId}: ${pdfsWithUrls.length} PDFs`
+  );
 
   // Return success response
   const response: SupabasePDFListResponse = {
@@ -214,7 +219,7 @@ async function handleGET(request: NextRequest): Promise<NextResponse<SupabasePDF
 }
 
 // Export the wrapped handler
-export const GET = withErrorHandling(
-  handleGET,
-  { endpoint: '/api/pdfs', method: 'GET' }
-);
+export const GET = withErrorHandling(handleGET, {
+  endpoint: "/api/pdfs",
+  method: "GET",
+});

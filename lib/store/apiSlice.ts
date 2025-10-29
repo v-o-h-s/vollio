@@ -21,16 +21,23 @@ import {
   SupabaseNoteResponse,
   CreateNoteRequest,
   UpdateNoteRequest,
+  LMSProvider,
+  LMSConnectionResponse,
+  LMSCoursesResponse,
+  LMSCourseMaterialsResponse,
+  LMSImportResponse,
+  LMSTokenStatusResponse,
+  LMSConnectionStatusResponse,
+  ImportFileRequest,
+  BatchImportRequest,
+  BatchImportResponse,
 } from "../types/";
 import { AppError, ErrorType } from "../types/errors";
-import {
-  createAppError,
-  mapErrorToAppError,
+import { createAppError, mapErrorToAppError,
   withRetry,
   createUploadErrorContext,
   createNetworkErrorContext,
-  logError,
-} from "../utils/error-handling/error-handling";
+  logError,  } from "../utils/error-handling/frontend-error-handling";
 import { pdfNotifications } from "../utils/notifications";
 
 export interface ApiResponse<T> {
@@ -101,7 +108,7 @@ const baseQueryWithRetry: BaseQueryFn = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithRetry,
-  tagTypes: ["Annotation", "Highlight", "PDF", "Note", "Folder"],
+  tagTypes: ["Annotation", "Highlight", "PDF", "Note", "Folder", "LMS"],
   endpoints: (builder) => ({
     // PDF endpoints with enhanced error handling
     uploadPDF: builder.mutation<PDFDocument, FormData>({
@@ -1699,6 +1706,447 @@ export const apiSlice = createApi({
         { type: "Folder", id: "LIST" }, // Invalidate folders as PDF counts might change
       ],
     }),
+
+    // LMS (Learning Management System) endpoints
+    getLMSProviders: builder.query<LMSProvider[], void>({
+      query: () => "school-lms/providers",
+      transformResponse: (response: any) => {
+        if (!response.success || !response.data) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch LMS providers",
+            { component: "LMSImportModal", action: "fetch_providers" }
+          );
+        }
+        return response.data.providers;
+      },
+      transformErrorResponse: (response: any) => {
+        const context = { component: "LMSImportModal", action: "fetch_providers" };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: [{ type: "LMS", id: "PROVIDERS" }],
+    }),
+
+    checkLMSConnection: builder.query<LMSTokenStatusResponse, string>({
+      query: (provider) => `school-lms/${provider}/tokens`,
+      transformResponse: (response: LMSTokenStatusResponse) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to check LMS connection",
+            { component: "LMSImportModal", action: "check_connection" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, provider) => {
+        const context = { 
+          component: "LMSImportModal", 
+          action: "check_connection",
+          provider 
+        };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result, error, provider) => [
+        { type: "LMS", id: `CONNECTION_${provider.toUpperCase()}` }
+      ],
+    }),
+
+    connectToLMS: builder.mutation<LMSConnectionResponse, string>({
+      query: (provider) => ({
+        url: `school-lms/${provider}/auth-url`,
+        method: "GET",
+      }),
+      transformResponse: (response: LMSConnectionResponse) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to get LMS connection URL",
+            { component: "LMSImportModal", action: "connect" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, provider) => {
+        const context = { 
+          component: "LMSImportModal", 
+          action: "connect",
+          provider 
+        };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, provider) => [
+        { type: "LMS", id: `CONNECTION_${provider.toUpperCase()}` }
+      ],
+    }),
+
+    getLMSCourses: builder.query<LMSCoursesResponse, string>({
+      query: (provider) => `school-lms/${provider}/courses`,
+      transformResponse: (response: LMSCoursesResponse) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch LMS courses",
+            { component: "LMSImportModal", action: "fetch_courses" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, provider) => {
+        const context = { 
+          component: "LMSImportModal", 
+          action: "fetch_courses",
+          provider 
+        };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "LMS not connected. Please connect your account first.",
+            context
+          );
+        } else if (response.status === 403) {
+          return createAppError(
+            ErrorType.AUTHORIZATION_ERROR,
+            "Access denied to LMS courses",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result, error, provider) => [
+        { type: "LMS", id: `COURSES_${provider.toUpperCase()}` },
+        ...(result?.courses?.map((course) => ({ 
+          type: "LMS" as const, 
+          id: `COURSE_${course.id}` 
+        })) || []),
+      ],
+    }),
+
+    getLMSCourseMaterials: builder.query<
+      LMSCourseMaterialsResponse, 
+      { provider: string; courseId: string }
+    >({
+      query: ({ provider, courseId }) => 
+        `school-lms/${provider}/course-materials?courseId=${courseId}`,
+      transformResponse: (response: LMSCourseMaterialsResponse) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to fetch course materials",
+            { component: "LMSImportModal", action: "fetch_materials" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, { provider, courseId }) => {
+        const context = { 
+          component: "LMSImportModal", 
+          action: "fetch_materials",
+          provider,
+          courseId 
+        };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "LMS connection expired. Please reconnect your account.",
+            context
+          );
+        } else if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "Course not found",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result, error, { provider, courseId }) => [
+        { type: "LMS", id: `MATERIALS_${provider.toUpperCase()}_${courseId}` },
+        ...(result?.materials?.map((material) => ({ 
+          type: "LMS" as const, 
+          id: `MATERIAL_${material.id}` 
+        })) || []),
+      ],
+    }),
+
+    importLMSFile: builder.mutation<
+      LMSImportResponse,
+      { provider: string; fileId: string; fileName: string; folderId?: string }
+    >({
+      query: ({ provider, ...data }) => ({
+        url: `school-lms/${provider}/import-file`,
+        method: "POST",
+        body: data,
+      }),
+      transformResponse: (response: LMSImportResponse) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to import file from LMS",
+            { component: "LMSImportModal", action: "import_file" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, { provider, fileName }) => {
+        const context = { 
+          component: "LMSImportModal", 
+          action: "import_file",
+          provider,
+          fileName 
+        };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "LMS connection expired. Please reconnect your account.",
+            context
+          );
+        } else if (response.status === 404) {
+          return createAppError(
+            ErrorType.VALIDATION_ERROR,
+            "File not found in LMS",
+            context
+          );
+        } else if (response.status === 413) {
+          return createAppError(
+            ErrorType.FILE_TOO_LARGE,
+            "File too large to import",
+            context
+          );
+        } else if (response.status === 415) {
+          return createAppError(
+            ErrorType.INVALID_FILE_TYPE,
+            "File type not supported",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: [
+        { type: "PDF", id: "LIST" },
+        { type: "Folder", id: "LIST" },
+      ],
+      async onQueryStarted({ fileName }, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          // Success notification handled by component
+        } catch (error: any) {
+          const appError = error.error as AppError;
+          const message = appError?.userMessage || appError?.message || `Failed to import ${fileName}`;
+          // Error notification handled by component
+          logError(appError || mapErrorToAppError(error));
+        }
+      },
+    }),
+
+    batchImportLMSFiles: builder.mutation<
+      BatchImportResponse,
+      { provider: string; files: ImportFileRequest[] }
+    >({
+      query: ({ provider, files }) => ({
+        url: `school-lms/${provider}/batch-import`,
+        method: "POST",
+        body: { files },
+      }),
+      transformResponse: (response: BatchImportResponse) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to batch import files from LMS",
+            { component: "LMSImportModal", action: "batch_import" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, { provider, files }) => {
+        const context = { 
+          component: "LMSImportModal", 
+          action: "batch_import",
+          provider,
+          fileCount: files.length 
+        };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "LMS connection expired. Please reconnect your account.",
+            context
+          );
+        } else if (response.status === 413) {
+          return createAppError(
+            ErrorType.FILE_TOO_LARGE,
+            "One or more files are too large to import",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: [
+        { type: "PDF", id: "LIST" },
+        { type: "Folder", id: "LIST" },
+      ],
+      async onQueryStarted({ files }, { queryFulfilled }) {
+        try {
+          const result = await queryFulfilled;
+          // Success notification handled by component
+        } catch (error: any) {
+          const appError = error.error as AppError;
+          const message = appError?.userMessage || appError?.message || "Failed to import files";
+          // Error notification handled by component
+          logError(appError || mapErrorToAppError(error));
+        }
+      },
+    }),
+
+    disconnectLMS: builder.mutation<{ success: boolean }, string>({
+      query: (provider) => ({
+        url: `school-lms/${provider}/disconnect`,
+        method: "DELETE",
+      }),
+      transformResponse: (response: any) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to disconnect from LMS",
+            { component: "LMSImportModal", action: "disconnect" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, provider) => {
+        const context = { 
+          component: "LMSImportModal", 
+          action: "disconnect",
+          provider 
+        };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: (result, error, provider) => [
+        { type: "LMS", id: `CONNECTION_${provider.toUpperCase()}` },
+        { type: "LMS", id: `COURSES_${provider.toUpperCase()}` },
+      ],
+    }),
+
+    // Get LMS connection status
+    getLMSConnectionStatus: builder.query<LMSConnectionStatusResponse, string>({
+      query: (provider) => `school-lms/${provider}/status`,
+      transformResponse: (response: LMSConnectionStatusResponse) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to get LMS connection status",
+            { component: "LMSIntegration", action: "get_status" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, provider) => {
+        const context = { 
+          component: "LMSIntegration", 
+          action: "get_status",
+          provider 
+        };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "Authentication required",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      providesTags: (result, error, provider) => [
+        { type: "LMS", id: `STATUS_${provider.toUpperCase()}` }
+      ],
+    }),
+
+    // Import LMS content (courses, assignments, etc.)
+    importLMSContent: builder.mutation<
+      LMSImportResponse,
+      { provider: string; courseId: string; contentType: string; contentId: string }
+    >({
+      query: ({ provider, courseId, contentType, contentId }) => ({
+        url: `school-lms/${provider}/import`,
+        method: "POST",
+        body: { courseId, contentType, contentId },
+      }),
+      transformResponse: (response: LMSImportResponse) => {
+        if (!response.success) {
+          throw createAppError(
+            ErrorType.DATABASE_ERROR,
+            response.error || "Failed to import LMS content",
+            { component: "LMSIntegration", action: "import_content" }
+          );
+        }
+        return response;
+      },
+      transformErrorResponse: (response: any, meta, { provider }) => {
+        const context = { 
+          component: "LMSIntegration", 
+          action: "import_content",
+          provider 
+        };
+
+        if (response.status === 401) {
+          return createAppError(
+            ErrorType.AUTHENTICATION_ERROR,
+            "LMS connection expired. Please reconnect your account.",
+            context
+          );
+        }
+
+        return mapErrorToAppError(response, context);
+      },
+      invalidatesTags: [
+        { type: "PDF", id: "LIST" },
+        { type: "Folder", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -1728,6 +2176,17 @@ export const {
   useUpdateFolderMutation,
   useDeleteFolderMutation,
   useMovePDFMutation,
+  // LMS hooks
+  useGetLMSProvidersQuery,
+  useCheckLMSConnectionQuery,
+  useConnectToLMSMutation,
+  useGetLMSCoursesQuery,
+  useGetLMSCourseMaterialsQuery,
+  useImportLMSFileMutation,
+  useBatchImportLMSFilesMutation,
+  useDisconnectLMSMutation,
+  useGetLMSConnectionStatusQuery,
+  useImportLMSContentMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

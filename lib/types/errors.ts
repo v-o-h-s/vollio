@@ -8,45 +8,45 @@ export enum ErrorType {
   AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR",
   AUTHORIZATION_ERROR = "AUTHORIZATION_ERROR",
   TOKEN_EXPIRED = "TOKEN_EXPIRED",
-  
+
   // Validation errors
   VALIDATION_ERROR = "VALIDATION_ERROR",
   FILE_TOO_LARGE = "FILE_TOO_LARGE",
   INVALID_FILE_TYPE = "INVALID_FILE_TYPE",
   INVALID_FILE_FORMAT = "INVALID_FILE_FORMAT",
-  
+
   // Storage errors
   STORAGE_ERROR = "STORAGE_ERROR",
   STORAGE_QUOTA_EXCEEDED = "STORAGE_QUOTA_EXCEEDED",
   STORAGE_UPLOAD_FAILED = "STORAGE_UPLOAD_FAILED",
   STORAGE_ACCESS_DENIED = "STORAGE_ACCESS_DENIED",
-  
+
   // Database errors
   DATABASE_ERROR = "DATABASE_ERROR",
   DATABASE_CONNECTION_ERROR = "DATABASE_CONNECTION_ERROR",
   DATABASE_CONSTRAINT_ERROR = "DATABASE_CONSTRAINT_ERROR",
-  
+
   // Network errors
   NETWORK_ERROR = "NETWORK_ERROR",
   TIMEOUT_ERROR = "TIMEOUT_ERROR",
   CONNECTION_ERROR = "CONNECTION_ERROR",
-  
+
   // PDF-specific errors
   PDF_LOADING_ERROR = "PDF_LOADING_ERROR",
   PDF_RENDERING_ERROR = "PDF_RENDERING_ERROR",
   PDF_CORRUPTED = "PDF_CORRUPTED",
-  
+
   // Rate limiting and external service errors
   RATE_LIMIT_ERROR = "RATE_LIMIT_ERROR",
   EXTERNAL_SERVICE_ERROR = "EXTERNAL_SERVICE_ERROR",
   PROCESSING_ERROR = "PROCESSING_ERROR",
-  
+
   // AI service specific errors
   AI_SERVICE_ERROR = "AI_SERVICE_ERROR",
   AI_QUOTA_EXCEEDED = "AI_QUOTA_EXCEEDED",
   AI_CONTENT_POLICY_VIOLATION = "AI_CONTENT_POLICY_VIOLATION",
   AI_MODEL_UNAVAILABLE = "AI_MODEL_UNAVAILABLE",
-  
+
   // General errors
   UNKNOWN_ERROR = "UNKNOWN_ERROR",
   INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
@@ -81,7 +81,7 @@ export interface ErrorContext {
   userId?: string;
   pdfId?: string;
   documentId?: string;
-
+  folderId?: string;
   fileSize?: number;
   fileName?: string;
   url?: string;
@@ -128,9 +128,14 @@ export interface ErrorNotificationOptions {
   duration?: number;
   persistent?: boolean;
   showDetails?: boolean;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+  position?:
+    | "top-right"
+    | "top-left"
+    | "bottom-right"
+    | "bottom-left"
+    | "top-center"
+    | "bottom-center";
 }
-
 
 // Default retry configuration
 export const DEFAULT_RETRY_CONFIG: RetryConfig = {
@@ -184,7 +189,10 @@ export const ERROR_SEVERITY_MAP: Record<ErrorType, ErrorSeverity> = {
 };
 
 // User-friendly error messages
-export const ERROR_MESSAGES: Record<ErrorType, { title: string; message: string; action?: string }> = {
+export const ERROR_MESSAGES: Record<
+  ErrorType,
+  { title: string; message: string; action?: string }
+> = {
   [ErrorType.AUTHENTICATION_ERROR]: {
     title: "Authentication Required",
     message: "Please sign in to continue using Noto.",
@@ -217,7 +225,8 @@ export const ERROR_MESSAGES: Record<ErrorType, { title: string; message: string;
   },
   [ErrorType.INVALID_FILE_FORMAT]: {
     title: "Invalid File Format",
-    message: "The selected file appears to be corrupted or in an unsupported format.",
+    message:
+      "The selected file appears to be corrupted or in an unsupported format.",
     action: "Choose Another File",
   },
   [ErrorType.STORAGE_ERROR]: {
@@ -227,12 +236,14 @@ export const ERROR_MESSAGES: Record<ErrorType, { title: string; message: string;
   },
   [ErrorType.STORAGE_QUOTA_EXCEEDED]: {
     title: "Storage Full",
-    message: "You've reached your storage limit. Please delete some files or upgrade your plan.",
+    message:
+      "You've reached your storage limit. Please delete some files or upgrade your plan.",
     action: "Manage Storage",
   },
   [ErrorType.STORAGE_UPLOAD_FAILED]: {
     title: "Upload Failed",
-    message: "Failed to upload your file. Please check your connection and try again.",
+    message:
+      "Failed to upload your file. Please check your connection and try again.",
     action: "Retry Upload",
   },
   [ErrorType.STORAGE_ACCESS_DENIED]: {
@@ -252,7 +263,8 @@ export const ERROR_MESSAGES: Record<ErrorType, { title: string; message: string;
   },
   [ErrorType.DATABASE_CONSTRAINT_ERROR]: {
     title: "Data Conflict",
-    message: "There was a conflict with your data. Please refresh and try again.",
+    message:
+      "There was a conflict with your data. Please refresh and try again.",
     action: "Refresh",
   },
   [ErrorType.NETWORK_ERROR]: {
@@ -322,17 +334,20 @@ export const ERROR_MESSAGES: Record<ErrorType, { title: string; message: string;
   },
   [ErrorType.AI_QUOTA_EXCEEDED]: {
     title: "AI Quota Exceeded",
-    message: "You've reached your AI usage limit. Please upgrade your plan or try again later.",
+    message:
+      "You've reached your AI usage limit. Please upgrade your plan or try again later.",
     action: "Upgrade Plan",
   },
   [ErrorType.AI_CONTENT_POLICY_VIOLATION]: {
     title: "Content Policy Violation",
-    message: "Your request violates AI content policies. Please modify your request.",
+    message:
+      "Your request violates AI content policies. Please modify your request.",
     action: "Modify Request",
   },
   [ErrorType.AI_MODEL_UNAVAILABLE]: {
     title: "AI Model Unavailable",
-    message: "The requested AI model is temporarily unavailable. Using default model.",
+    message:
+      "The requested AI model is temporarily unavailable. Using default model.",
     action: "Continue",
   },
 };

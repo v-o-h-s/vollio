@@ -13,14 +13,19 @@ export default function PDFsPage() {
   // Integrate with floating sidebar
   useFloatingSidebarIntegration({
     uploadPDF: () => {
-      // Trigger upload dialog - this would need to be implemented in PDFDirectoryView
+      // Trigger upload dialog
       const uploadEvent = new CustomEvent("pdf-upload-trigger");
       document.dispatchEvent(uploadEvent);
     },
     createFolder: () => {
-      // Trigger folder creation - this would need to be implemented in PDFDirectoryView
+      // Trigger folder creation
       const folderEvent = new CustomEvent("pdf-folder-create");
       document.dispatchEvent(folderEvent);
+    },
+    importFromLMS: () => {
+      // Trigger LMS import modal
+      const lmsEvent = new CustomEvent("trigger-lms-import");
+      document.dispatchEvent(lmsEvent);
     },
     searchFiles: () => {
       // Focus search input

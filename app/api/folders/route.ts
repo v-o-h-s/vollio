@@ -4,9 +4,9 @@ import {
   withErrorHandling,
   extractRequestContext,
   createServerError,
-  ServerErrorType,
   validateRequired,
 } from "@/lib/utils/error-handling/server-error-handling";
+import { ErrorType } from "@/lib/types/errors";
 import {
   requireAuthentication,
   validateAuthentication,
@@ -51,11 +51,11 @@ async function fetchUserFolders(supabaseClient: any, userId: string) {
 
   if (error) {
     throw createServerError(
-      ServerErrorType.DATABASE_ERROR,
+      ErrorType.DATABASE_ERROR,
       `Failed to fetch user folders: ${error.message}`,
-      { 
-        operation: 'fetch_user_folders',
-        userId 
+      {
+        operation: "fetch_user_folders",
+        userId,
       },
       error
     );
@@ -102,9 +102,9 @@ async function createFolder(
 
     if (parentError || !parentFolder) {
       throw createServerError(
-        ServerErrorType.VALIDATION_ERROR,
+        ErrorType.VALIDATION_ERROR,
         "Parent folder not found or access denied",
-        { operation: 'validate_parent_folder', userId }
+        { operation: "validate_parent_folder", userId }
       );
     }
   }
@@ -121,12 +121,12 @@ async function createFolder(
 
   if (error) {
     throw createServerError(
-      ServerErrorType.DATABASE_ERROR,
+      ErrorType.DATABASE_ERROR,
       `Failed to create folder: ${error.message}`,
-      { 
-        operation: 'create_folder',
+      {
+        operation: "create_folder",
         userId,
-        fileName: name
+        fileName: name,
       },
       error
     );
@@ -139,11 +139,13 @@ async function createFolder(
 }
 
 // GET handler - Fetch all folders
-async function handleGET(request: NextRequest): Promise<NextResponse<FoldersResponse>> {
-  const context = extractRequestContext(request, '/api/folders');
+async function handleGET(
+  request: NextRequest
+): Promise<NextResponse<FoldersResponse>> {
+  const context = extractRequestContext(request, "/api/folders");
 
   // Enhanced authentication validation
-  const authContext = await requireAuthentication(request, ['read']);
+  const authContext = await requireAuthentication(request, ["read"]);
   const userId = authContext.userId;
 
   // Additional validation check
@@ -153,16 +155,21 @@ async function handleGET(request: NextRequest): Promise<NextResponse<FoldersResp
   }
 
   // Enhanced rate limiting for API calls
-  checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });
+  checkEnhancedRateLimit(userId, "API_CALLS", { ...context, userId });
 
   // Get authenticated Supabase client with proper RLS
   const supabaseClient = await getAuthenticatedSupabaseClient();
 
   // Fetch user's folders
-  const { folders, totalCount } = await fetchUserFolders(supabaseClient, userId);
+  const { folders, totalCount } = await fetchUserFolders(
+    supabaseClient,
+    userId
+  );
 
   // Log successful request
-  console.log(`✅ Folders fetched successfully for user ${userId}: ${folders.length} folders`);
+  console.log(
+    `✅ Folders fetched successfully for user ${userId}: ${folders.length} folders`
+  );
 
   // Return success response
   const response: FoldersResponse = {
@@ -177,27 +184,29 @@ async function handleGET(request: NextRequest): Promise<NextResponse<FoldersResp
 }
 
 // POST handler - Create new folder
-async function handlePOST(request: NextRequest): Promise<NextResponse<CreateFolderResponse>> {
-  const context = extractRequestContext(request, '/api/folders');
+async function handlePOST(
+  request: NextRequest
+): Promise<NextResponse<CreateFolderResponse>> {
+  const context = extractRequestContext(request, "/api/folders");
 
   // Enhanced authentication validation
-  const authContext = await requireAuthentication(request, ['write']);
+  const authContext = await requireAuthentication(request, ["write"]);
   const userId = authContext.userId;
 
   // Enhanced rate limiting for API calls
-  checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });
+  checkEnhancedRateLimit(userId, "API_CALLS", { ...context, userId });
 
   // Parse request body
   const body: CreateFolderRequest = await request.json();
-  
+
   // Validate required fields
-  validateRequired(body.name, 'name', { ...context, userId });
+  validateRequired(body.name, "name", { ...context, userId });
 
   // Validate folder name
   const folderName = body.name.trim();
   if (folderName.length === 0) {
     throw createServerError(
-      ServerErrorType.VALIDATION_ERROR,
+      ErrorType.VALIDATION_ERROR,
       "Folder name cannot be empty",
       { ...context, userId }
     );
@@ -205,7 +214,7 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<CreateFold
 
   if (folderName.length > 255) {
     throw createServerError(
-      ServerErrorType.VALIDATION_ERROR,
+      ErrorType.VALIDATION_ERROR,
       "Folder name is too long (max 255 characters)",
       { ...context, userId }
     );
@@ -225,17 +234,24 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<CreateFold
 
   if (existingFolder) {
     throw createServerError(
-      ServerErrorType.VALIDATION_ERROR,
+      ErrorType.VALIDATION_ERROR,
       "A folder with this name already exists in the same location",
       { ...context, userId, fileName: folderName }
     );
   }
 
   // Create the folder
-  const folder = await createFolder(supabaseClient, userId, folderName, body.parent_id);
+  const folder = await createFolder(
+    supabaseClient,
+    userId,
+    folderName,
+    body.parent_id
+  );
 
   // Log successful creation
-  console.log(`✅ Folder created successfully: ${folderName} for user ${userId}`);
+  console.log(
+    `✅ Folder created successfully: ${folderName} for user ${userId}`
+  );
 
   // Return success response
   const response: CreateFolderResponse = {
@@ -247,12 +263,12 @@ async function handlePOST(request: NextRequest): Promise<NextResponse<CreateFold
 }
 
 // Export the wrapped handlers
-export const GET = withErrorHandling(
-  handleGET,
-  { endpoint: '/api/folders', method: 'GET' }
-);
+export const GET = withErrorHandling(handleGET, {
+  endpoint: "/api/folders",
+  method: "GET",
+});
 
-export const POST = withErrorHandling(
-  handlePOST,
-  { endpoint: '/api/folders', method: 'POST' }
-);
+export const POST = withErrorHandling(handlePOST, {
+  endpoint: "/api/folders",
+  method: "POST",
+});

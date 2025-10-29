@@ -2,8 +2,9 @@
  * Enhanced security validation utilities for file uploads and user operations
  */
 
-import { createServerError, ServerErrorType } from "./error-handling/server-error-handling";
+import { createServerError } from "./error-handling/server-error-handling";
 import { STORAGE_CONFIG } from "../supabaseClient";
+import { ErrorType } from "@/lib/types/errors";
 
 // PDF magic number signatures for validation
 const PDF_SIGNATURES = [

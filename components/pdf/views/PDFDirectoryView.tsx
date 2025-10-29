@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ErrorNotification } from "@/components/ui/error-notification";
@@ -22,6 +22,7 @@ import {
 } from "@dnd-kit/sortable";
 import {
   useGetPDFsQuery,
+  useUploadPDFMutation,
   useDeletePDFMutation,
   useRenamePDFMutation,
   useGetFoldersQuery,
@@ -29,6 +30,7 @@ import {
   useUpdateFolderMutation,
   useDeleteFolderMutation,
   useMovePDFMutation,
+  useGetLMSCoursesQuery
 } from "@/lib/store/apiSlice";
 import { ErrorType, ErrorSeverity, AppError } from "@/lib/types/errors";
 import { PDFDocument, Folder } from "@/lib/types/pdf";
@@ -46,7 +48,8 @@ import { DraggableFolder } from "./DraggableFolder";
 import { DragOverlayContent } from "./DragOverlay";
 import { TreeView } from "./TreeView";
 import { RenameDialog } from "../RenameDialog";
-import { FileText, FolderOpen, Upload } from "lucide-react";
+import { FileText, FolderOpen, Upload, School } from "lucide-react";
+import { LMSIntegrationPanel } from "@/components/lms";
 
 export type ViewMode = "grid" | "list" | "compact" | "details";
 export type SortBy = "name" | "date" | "size" | "type";
@@ -121,6 +124,7 @@ export function PDFDirectoryView({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set()
   );
+  const [showLMSPanel, setShowLMSPanel] = useState(false);
 
   // DnD Kit sensors
   const sensors = useSensors(
@@ -138,6 +142,7 @@ export function PDFDirectoryView({
     isLoading: isFoldersLoading,
     refetch: refetchFolders,
   } = useGetFoldersQuery();
+  const [uploadPDF, { isLoading: isUploading }] = useUploadPDFMutation();
   const [deletePDF, { isLoading: isDeleting }] = useDeletePDFMutation();
   const [renamePDF, { isLoading: isRenaming }] = useRenamePDFMutation();
   const [createFolderMutation, { isLoading: isCreatingFolderMutation }] =
@@ -147,6 +152,23 @@ export function PDFDirectoryView({
   const [deleteFolderMutation, { isLoading: isDeletingFolder }] =
     useDeleteFolderMutation();
   const [movePDFMutation, { isLoading: isMovingPDF }] = useMovePDFMutation();
+
+  // Event listeners for floating sidebar integration
+  useEffect(() => {
+    const handleUploadTrigger = () => fileInputRef.current?.click();
+    const handleFolderCreate = () => setIsCreatingFolder(true);
+    const handleLMSIntegration = () => setShowLMSPanel(true);
+
+    window.addEventListener("trigger-pdf-upload", handleUploadTrigger);
+    window.addEventListener("trigger-folder-create", handleFolderCreate);
+    window.addEventListener("trigger-lms-import", handleLMSIntegration);
+
+    return () => {
+      window.removeEventListener("trigger-pdf-upload", handleUploadTrigger);
+      window.removeEventListener("trigger-folder-create", handleFolderCreate);
+      window.removeEventListener("trigger-lms-import", handleLMSIntegration);
+    };
+  }, []);
 
   const pdfs = pdfData?.pdfs || [];
   const folders = folderData?.folders || [];
@@ -236,22 +258,13 @@ export function PDFDirectoryView({
       }
 
       try {
-        const response = await fetch("/api/pdfs/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error("Upload failed");
-        }
-
-        toast.success(`${file.name} has been uploaded successfully.`);
+        await uploadPDF(formData).unwrap();
+        // Success notification is handled by RTK Query onQueryStarted
       } catch (error) {
-        toast.error(`Failed to upload ${file.name}.`);
+        // Error notification is handled by RTK Query onQueryStarted
+        console.error(`Failed to upload ${file.name}:`, error);
       }
     }
-    refetch();
-    refetchFolders();
   };
 
   // DnD Kit handlers
@@ -533,6 +546,14 @@ export function PDFDirectoryView({
               <Upload className="h-4 w-4 mr-2" />
               Upload
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowLMSPanel(true)}
+            >
+              <School className="h-4 w-4 mr-2" />
+              LMS
+            </Button>
           </div>
         </div>
 
@@ -786,6 +807,18 @@ export function PDFDirectoryView({
             />
           ) : null}
         </DragOverlay>
+
+        {/* LMS Integration Panel */}
+        <LMSIntegrationPanel
+          isOpen={showLMSPanel}
+          onClose={() => setShowLMSPanel(false)}
+          onContentImported={(courseId, contentType, contentId) => {
+            // Refresh the PDFs and folders after import
+            refetch();
+            refetchFolders();
+            toast.success(`${contentType} imported successfully!`);
+          }}
+        />
       </div>
     </DndContext>
   );

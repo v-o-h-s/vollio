@@ -5,8 +5,9 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Backend-green)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC)](https://tailwindcss.com/)
+[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com)
 
-**Noto** is a modern, enterprise-grade PDF annotation and note-taking application built with Next.js 15 and React 19. It provides intelligent document processing, sophisticated PDF annotation tools, and comprehensive note management with real-time synchronization.
+**Noto** is a modern, enterprise-grade PDF annotation and note-taking application built with Next.js 15 and React 19. It provides intelligent document processing, sophisticated PDF annotation tools, comprehensive note management with real-time synchronization, and advanced learning features including AI-powered quiz generation and document summarization.
 
 ## 🚀 Key Features
 
@@ -16,24 +17,34 @@
 - **Intelligent Coordinate System**: Advanced PDF-to-screen coordinate conversion with viewport boundary handling
 - **Document Processing**: Syncfusion text extraction with OCR fallback for scanned documents
 - **Secure File Storage**: Supabase Storage integration with signed URLs and automatic cleanup
+- **Folder Organization**: Hierarchical folder system with drag & drop support for PDF organization
 
 ### ✍️ Rich Text Editor System
 - **Notion-Style Editor**: TipTap-based block editor with slash commands and floating toolbars
 - **Auto-Save Architecture**: Real-time auto-save with RTK Query integration and visual feedback
 - **Cross-Tab Synchronization**: Real-time updates using BroadcastChannel and PostMessage APIs
 - **Mobile-Optimized**: Touch-friendly editing with responsive design and gesture support
+- **Advanced Formatting**: Rich text formatting with image upload, links, and custom extensions
 
 ### 🎯 Quiz & Learning Tools
 - **Quiz Management Center**: Comprehensive quiz dashboard with filtering and progress tracking
-- **AI-Powered Generation**: Generate flashcards and quizzes from PDF content
-- **Document Summarization**: AI-powered document summarization with multiple templates
+- **AI-Powered Generation**: Generate flashcards and quizzes from PDF content using advanced AI
+- **Document Summarization**: AI-powered document summarization with multiple templates and styles
 - **Progress Analytics**: Detailed learning analytics with completion rates and performance metrics
+- **Flashcard System**: Interactive flashcard creation and study modes with spaced repetition
+
+### 🔗 LMS Integration
+- **Google Classroom**: Complete integration with courses, assignments, and student management
+- **OAuth Security**: Encrypted token storage with automatic refresh and secure authentication
+- **Multi-Platform Support**: Extensible architecture for future LMS platform integrations
+- **Real-Time Sync**: Automatic synchronization of course data and assignments
 
 ### 🎨 Modern User Experience
-- **Glassmorphism UI**: Modern floating navigation with backdrop blur effects
-- **Complete Theme System**: Dark/light mode with system preference detection
-- **Responsive Design**: Mobile-first approach with touch-optimized interactions
+- **Glassmorphism UI**: Modern floating navigation with backdrop blur effects and transparency
+- **Complete Theme System**: Dark/light mode with system preference detection and cross-tab sync
+- **Responsive Design**: Mobile-first approach with touch-optimized interactions and gestures
 - **Accessibility**: WCAG-compliant with keyboard navigation and screen reader support
+- **Floating Navigation**: Auto-hide navigation dock with context-aware sidebar for quick actions
 
 ## 🛠 Tech Stack
 
@@ -46,11 +57,12 @@
 - **PDF Viewer**: Syncfusion PDF Viewer (licensed)
 
 ### Backend & Database
-- **Database**: Supabase with Row Level Security (RLS)
-- **Authentication**: Clerk with JWT integration
-- **File Storage**: Supabase Storage with signed URLs
-- **API**: Next.js API routes with comprehensive error handling
-- **Document Processing**: Syncfusion + node-tesseract-ocr fallback
+- **Database**: Supabase with Row Level Security (RLS) and optimized indexes
+- **Authentication**: Clerk with JWT integration and automatic user isolation
+- **File Storage**: Supabase Storage with signed URLs and automatic cleanup
+- **API**: Next.js API routes with comprehensive error handling and rate limiting
+- **Document Processing**: Syncfusion + node-tesseract-ocr fallback with semantic chunking
+- **LMS Integration**: Secure OAuth integration with encrypted token storage
 
 ### Development Tools
 - **Language**: TypeScript with strict mode
@@ -97,6 +109,17 @@
    
    # Syncfusion License
    SYNCFUSION_LICENSE_KEY=your_syncfusion_license
+   
+   # Encryption for OAuth tokens
+   ENCRYPTION_KEY=your_256_bit_encryption_key
+   
+   # Google LMS Integration (Optional)
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   GOOGLE_REDIRECT_URI=your_redirect_uri
+   
+   # AI Services (Optional)
+   DEEPSEEK_API_KEY=your_deepseek_api_key
    ```
 
 4. **Database setup**
@@ -122,13 +145,19 @@ noto/
 │   │   ├── notes/                # Note management endpoints
 │   │   ├── highlights/           # Highlight management endpoints
 │   │   ├── folders/              # Folder management endpoints
-│   │   └── flashcards/           # Flashcard generation endpoints
+│   │   ├── flashcards/           # Flashcard generation endpoints
+│   │   ├── quiz/                 # Quiz generation and management
+│   │   ├── summarize/            # Document summarization endpoints
+│   │   ├── school-lms/           # LMS integration endpoints
+│   │   ├── google/               # Google OAuth endpoints
+│   │   └── deepseek/             # AI service endpoints
 │   ├── dashboard/                # Main application pages
 │   │   ├── pdfs/                 # PDF management interface
 │   │   ├── notes/                # Note management interface
 │   │   ├── quizzes/              # Quiz management interface
 │   │   ├── flashcards/           # Flashcard interface
-│   │   └── summarize/            # Document summarization
+│   │   ├── summarize/            # Document summarization
+│   │   └── school-lms-test/      # LMS integration testing
 │   └── (auth)/                   # Authentication pages
 ├── components/                   # React components
 │   ├── ui/                       # Base UI components (shadcn/ui)
@@ -138,11 +167,17 @@ noto/
 │   ├── dashboard/                # Dashboard components
 │   ├── quiz/                     # Quiz components
 │   ├── flashcards/               # Flashcard components
-│   └── summarize/                # Summarization components
+│   ├── summarize/                # Summarization components
+│   ├── theme/                    # Theme system components
+│   ├── landing/                  # Landing page components
+│   └── ai/                       # AI service components
 ├── lib/                          # Utilities and configuration
 │   ├── store/                    # Redux store configuration
 │   ├── types/                    # TypeScript type definitions
-│   └── utils/                    # Utility functions
+│   ├── utils/                    # Utility functions
+│   ├── services/                 # Service layer (AI, OAuth)
+│   ├── school-lms/               # LMS integration module
+│   └── contexts/                 # React context providers
 ├── hooks/                        # Custom React hooks
 ├── supabase/                     # Database migrations and policies
 └── docs/                         # Documentation

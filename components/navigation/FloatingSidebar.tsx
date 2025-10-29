@@ -33,6 +33,7 @@ import {
   Award,
   BarChart3,
   CreditCard,
+  School,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -84,6 +85,16 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
             },
             variant: "primary",
             shortcut: "Ctrl+U",
+          },
+          {
+            id: "import-lms",
+            label: "Import from LMS",
+            icon: School,
+            onClick: () => {
+              const lmsEvent = new CustomEvent("trigger-lms-import");
+              window.dispatchEvent(lmsEvent);
+            },
+            variant: "secondary",
           },
           {
             id: "create-folder",

@@ -323,6 +323,44 @@ export interface Database {
           updated_at?: string;
         };
       };
+      oauth_tokens: {
+        Row: {
+          id: string;
+          user_id: string;
+          provider: string;
+          encrypted_access_token: string;
+          encrypted_refresh_token: string | null;
+          token_type: string;
+          expires_at: string | null;
+          scope: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          provider?: string;
+          encrypted_access_token: string;
+          encrypted_refresh_token?: string | null;
+          token_type?: string;
+          expires_at?: string | null;
+          scope?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          provider?: string;
+          encrypted_access_token?: string;
+          encrypted_refresh_token?: string | null;
+          token_type?: string;
+          expires_at?: string | null;
+          scope?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -389,6 +427,10 @@ export type DocumentProcessingStatusInsert =
   Database["public"]["Tables"]["document_processing_status"]["Insert"];
 export type DocumentProcessingStatusUpdate =
   Database["public"]["Tables"]["document_processing_status"]["Update"];
+
+export type OAuthTokenRow = Database["public"]["Tables"]["oauth_tokens"]["Row"];
+export type OAuthTokenInsert = Database["public"]["Tables"]["oauth_tokens"]["Insert"];
+export type OAuthTokenUpdate = Database["public"]["Tables"]["oauth_tokens"]["Update"];
 
 export type ActivityType = Database["public"]["Enums"]["activity_type"];
 

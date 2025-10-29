@@ -13,9 +13,10 @@ import {
   validateRequired,
   checkRateLimit,
   createErrorResponse,
-  ServerErrorType,
   createServerError
 } from "@/lib/utils/error-handling/server-error-handling";
+
+import { ErrorType } from "@/lib/types/errors";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -57,7 +58,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
   // Validate input - either message or messages array is required
   if (!message && (!messages || !Array.isArray(messages) || messages.length === 0)) {
     throw createServerError(
-      ServerErrorType.VALIDATION_ERROR,
+      ErrorType.VALIDATION_ERROR,
       "Either 'message' or 'messages' array is required",
       context
     );

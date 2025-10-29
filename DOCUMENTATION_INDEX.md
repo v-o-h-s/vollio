@@ -1,239 +1,230 @@
-# Documentation Index
+# Noto Documentation Index
 
-This comprehensive index organizes all documentation resources for the Noto PDF annotation application by audience, feature area, and document type.
+## 📚 Complete Documentation Guide
+
+This comprehensive documentation index provides organized access to all Noto PDF annotation application documentation, covering everything from quick start guides to advanced technical implementation details.
 
 ## 🚀 Quick Start
 
-### New Developers
-1. **[Main README](./README.md)** - Project overview and setup
-2. **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards and patterns
-3. **[Project Structure](./.kiro/steering/structure.md)** - File organization
-4. **[API Documentation](./docs/API_DOCUMENTATION.md)** - Backend integration
+### New Users
+1. **[Main README](./README.md)** - Project overview, installation, and quick start guide
+2. **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Comprehensive project vision and architecture
+3. **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete REST API reference
 
-### Project Managers
-1. **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Vision and architecture
-2. **[Feature Documentation](#-by-feature-area)** - Implemented features
-3. **[Component Status](#-component-documentation)** - Implementation status
+### Developers
+1. **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards, patterns, and architectural decisions
+2. **[Project Structure](./.kiro/steering/structure.md)** - File organization and naming conventions
+3. **[Error Handling Guide](./.kiro/steering/checking.md)** - Debugging and problem resolution
 
-### DevOps Engineers
-1. **[Setup Guide](./README.md#-quick-start)** - Installation and deployment
-2. **[API Documentation](./docs/API_DOCUMENTATION.md)** - Backend configuration
-3. **[Error Handling](./docs/ERROR_HANDLING.md)** - Monitoring and debugging
+## 📁 Documentation by Category
 
-## 📚 By Document Type
+### Core System Documentation
 
-### Core Documentation
-| Document | Description | Audience | Status |
-|----------|-------------|----------|---------|
-| **[README.md](./README.md)** | Main project overview, setup, and quick start | All | ✅ Complete |
-| **[API Documentation](./docs/API_DOCUMENTATION.md)** | Complete REST API reference | Developers, DevOps | ✅ Complete |
-| **[Project Overview](./docs/PROJECT_OVERVIEW.md)** | Vision, architecture, and roadmap | PM, Architects | ✅ Complete |
-| **[Error Handling](./docs/ERROR_HANDLING.md)** | Error patterns and debugging | Developers | ✅ Complete |
+#### Main Project Files
+- **[README.md](./README.md)** - Main project documentation with setup instructions
+- **[PROJECT_OVERVIEW.md](./docs/PROJECT_OVERVIEW.md)** - Comprehensive project vision and technical roadmap
+- **[API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md)** - Complete REST API reference with authentication
+- **[ERROR_HANDLING.md](./docs/ERROR_HANDLING.md)** - Error handling patterns and recovery mechanisms
 
-### Technical Guidelines
-| Document | Description | Audience | Status |
-|----------|-------------|----------|---------|
-| **[Technical Guidelines](./.kiro/steering/tech.md)** | Code standards and patterns | Developers | ✅ Complete |
-| **[Project Structure](./.kiro/steering/structure.md)** | File organization and naming | Developers | ✅ Complete |
-| **[Product Context](./.kiro/steering/product.md)** | Feature requirements and UX | PM, Developers | ✅ Complete |
-| **[Supabase Helpers](./.kiro/steering/supabase-helper-summary.md)** | Database integration patterns | Developers | ✅ Complete |
+#### System Architecture
+- **[NAVIGATION_SYSTEM.md](./docs/NAVIGATION_SYSTEM.md)** - Modern floating navigation with glassmorphism design
+- **[NOTIFICATIONS_SYSTEM.md](./docs/NOTIFICATIONS_SYSTEM.md)** - User notification system with toast messages
+- **[PDF_ANNOTATION_TOOLS.md](./docs/PDF_ANNOTATION_TOOLS.md)** - Advanced PDF annotation system
+- **[NOTION_EDITOR.md](./docs/NOTION_EDITOR.md)** - Rich text editor system documentation
+- **[NOTES_SYSTEM.md](./docs/NOTES_SYSTEM.md)** - Note management system with cross-tab sync
+- **[QUIZ_SYSTEM.md](./docs/QUIZ_SYSTEM.md)** - Quiz management and creation system
 
-### System Documentation
-| Document | Description | Audience | Status |
-|----------|-------------|----------|---------|
-| **[Navigation System](./docs/NAVIGATION_SYSTEM.md)** | Floating navigation architecture | Developers, Designers | ✅ Complete |
-| **[Notifications System](./docs/NOTIFICATIONS_SYSTEM.md)** | User notification patterns | Developers | ✅ Complete |
-| **[PDF Annotation Tools](./docs/PDF_ANNOTATION_TOOLS.md)** | Advanced annotation system | Developers | ✅ Complete |
-| **[Notion Editor](./docs/NOTION_EDITOR.md)** | Rich text editor system | Developers | ✅ Complete |
-| **[Notes System](./docs/NOTES_SYSTEM.md)** | Note management and sync | Developers | ✅ Complete |
-| **[Quiz System](./docs/QUIZ_SYSTEM.md)** | Quiz management system | Developers | ✅ Complete |
+### Component Documentation
 
-## 🧩 Component Documentation
+#### Core Components
+- **[PDF Components](./components/pdf/README.md)** - PDF viewer, annotation tools, and file management
+- **[Editor Components](./components/editor/README.md)** - Rich text editor with TipTap integration
+- **[Navigation Components](./components/navigation/README.md)** - Floating navigation and sidebar systems
+- **[Theme Components](./components/theme/README.md)** - Complete theme system with dark/light mode
 
-### Core Components
-| Component | Description | Features | Status |
-|-----------|-------------|----------|---------|
-| **[PDF Components](./components/pdf/README.md)** | PDF viewer and annotation tools | Multi-mode highlighting, file management | ✅ Production Ready |
-| **[Editor Components](./components/editor/README.md)** | Rich text editor system | TipTap integration, auto-save, floating toolbars | ✅ Production Ready |
-| **[Navigation Components](./components/navigation/README.md)** | Modern floating navigation | Glassmorphism design, auto-hide, context actions | ✅ Production Ready |
-| **[Theme Components](./components/theme/README.md)** | Complete theme system | Dark/light mode, system detection, cross-tab sync | ✅ Production Ready |
+#### Feature Components
+- **[Dashboard Components](./components/dashboard/README.md)** - Dashboard interface and widgets
+- **[Quiz Components](./components/quiz/README.md)** - Quiz management and analytics
+- **[Flashcard Components](./components/flashcards/README.md)** - Flashcard creation and study system
+- **[Summarize Components](./components/summarize/README.md)** - AI-powered document summarization
 
-### Feature Components
-| Component | Description | Features | Status |
-|-----------|-------------|----------|---------|
-| **[Summarize Components](./components/summarize/README.md)** | AI document summarization | Multiple templates, history, export | ✅ Production Ready |
-| **[Flashcard Components](./components/flashcards/README.md)** | Flashcard creation and study | AI generation, spaced repetition, analytics | ✅ Production Ready |
-| **[Quiz Components](./components/quiz/README.md)** | Quiz management system | Document integration, analytics, filtering | ✅ Production Ready |
-| **[Dashboard Components](./components/dashboard/README.md)** | Dashboard interface | Activity tracking, status indicators | ✅ Production Ready |
+#### UI Components
+- **[UI Components](./components/ui/README.md)** - Base UI components with shadcn/ui integration
+- **[Landing Components](./components/landing/README.md)** - Landing page and marketing components
 
-### UI Components
-| Component | Description | Features | Status |
-|-----------|-------------|----------|---------|
-| **[UI Components](./components/ui/README.md)** | Base UI components | shadcn/ui integration, theme support | ✅ Production Ready |
-| **[Landing Components](./components/landing/README.md)** | Marketing and landing pages | Modern design, responsive layout | ✅ Production Ready |
+### Technical Documentation
 
-## 🔧 Technical Documentation
+#### Backend & Infrastructure
+- **[Store Documentation](./lib/store/README.md)** - Redux state management and RTK Query
+- **[Types Documentation](./lib/types/README.md)** - TypeScript type definitions and interfaces
+- **[Utils Documentation](./lib/utils/README.md)** - Utility functions and helper libraries
+- **[School LMS Integration](./lib/school-lms/README.md)** - LMS integration module with OAuth security
 
-### State Management
-| Document | Description | Coverage | Status |
-|----------|-------------|----------|---------|
-| **[Store Documentation](./lib/store/README.md)** | Redux and RTK Query setup | Complete state management | ✅ Complete |
-| **[Hooks Documentation](./hooks/README.md)** | Custom React hooks | All custom hooks documented | ✅ Complete |
+#### Development Tools
+- **[Hooks Documentation](./hooks/README.md)** - Custom React hooks and state management
+- **[Supabase Setup](./supabase/README.md)** - Database configuration and migrations
 
-### Type System
-| Document | Description | Coverage | Status |
-|----------|-------------|----------|---------|
-| **[Types Documentation](./lib/types/README.md)** | TypeScript interfaces | All major types documented | ✅ Complete |
-| **[Database Types](./lib/types/database.ts)** | Supabase schema types | Complete database coverage | ✅ Complete |
+### Development Guidelines
 
-### Utilities
-| Document | Description | Coverage | Status |
-|----------|-------------|----------|---------|
-| **[Utils Documentation](./lib/utils/README.md)** | Utility functions | All utility modules | ✅ Complete |
-| **[Error Handling Utils](./lib/utils/error-handling.ts)** | Error management patterns | Comprehensive error handling | ✅ Complete |
+#### Steering Files (Development Rules)
+- **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards, patterns, and architectural decisions
+- **[Project Structure](./.kiro/steering/structure.md)** - File organization, naming conventions, and best practices
+- **[Product Context](./.kiro/steering/product.md)** - Feature requirements, UX principles, and business logic
+- **[Quiz System Guide](./.kiro/steering/quiz-system.md)** - Comprehensive quiz system implementation guide
+- **[Supabase Helpers](./.kiro/steering/supabase-helper-summary.md)** - Database integration patterns and utilities
+- **[Error Handling & Debugging](./.kiro/steering/checking.md)** - Problem resolution and debugging guide
+- **[Database Management](./.kiro/steering/updating database.md)** - Database schema management guidelines
 
-## 🎯 By Feature Area
+## 🎯 Documentation by Use Case
 
-### PDF Management & Annotation
-| Feature | Components | Documentation | API | Status |
-|---------|------------|---------------|-----|---------|
-| **PDF Viewer** | PDFAnnotationViewer | [PDF Components](./components/pdf/README.md) | [PDF API](./docs/API_DOCUMENTATION.md#pdf-endpoints) | ✅ Complete |
-| **Multi-Mode Highlighting** | HighlightContextMenu, HoverTrigger | [PDF Annotation Tools](./docs/PDF_ANNOTATION_TOOLS.md) | [Highlights API](./docs/API_DOCUMENTATION.md#highlights-endpoints) | ✅ Complete |
-| **File Management** | PDFDirectoryView, Upload | [PDF Components](./components/pdf/README.md) | [Upload API](./docs/API_DOCUMENTATION.md#upload-endpoints) | ✅ Complete |
-| **Folder System** | TreeView, Breadcrumb | [PDF Components](./components/pdf/README.md) | [Folders API](./docs/API_DOCUMENTATION.md#folders-endpoints) | ✅ Complete |
+### Setting Up Development Environment
+1. **[README.md](./README.md)** - Installation and environment setup
+2. **[Technical Guidelines](./.kiro/steering/tech.md)** - Development tools and configuration
+3. **[Supabase Setup](./supabase/README.md)** - Database and storage configuration
+4. **[API Documentation](./docs/API_DOCUMENTATION.md)** - API endpoints and authentication
 
-### Rich Text Editing & Notes
-| Feature | Components | Documentation | API | Status |
-|---------|------------|---------------|-----|---------|
-| **Rich Text Editor** | NotionEditor, FloatingToolbar | [Editor Components](./components/editor/README.md) | [Notes API](./docs/API_DOCUMENTATION.md#notes-endpoints) | ✅ Complete |
-| **Auto-Save System** | EditorProvider, AutoSaveStatus | [Notion Editor](./docs/NOTION_EDITOR.md) | RTK Query Integration | ✅ Complete |
-| **Cross-Tab Sync** | useNoteSync hook | [Notes System](./docs/NOTES_SYSTEM.md) | BroadcastChannel API | ✅ Complete |
-| **Note Management** | NoteCard, NotesList | [Notes System](./docs/NOTES_SYSTEM.md) | [Notes API](./docs/API_DOCUMENTATION.md#notes-endpoints) | ✅ Complete |
+### Building PDF Features
+1. **[PDF Components](./components/pdf/README.md)** - PDF viewer and annotation components
+2. **[PDF Annotation Tools](./docs/PDF_ANNOTATION_TOOLS.md)** - Advanced annotation system
+3. **[Product Context](./.kiro/steering/product.md)** - PDF feature requirements
+4. **[Error Handling](./.kiro/steering/checking.md)** - PDF-specific debugging
 
-### Learning & Assessment
-| Feature | Components | Documentation | API | Status |
-|---------|------------|---------------|-----|---------|
-| **Quiz System** | QuizCard, DocumentSelection | [Quiz Components](./components/quiz/README.md) | [Quiz API](./docs/API_DOCUMENTATION.md#quiz-endpoints) | ✅ Complete |
-| **Flashcard System** | FlashcardEditor, StudyMode | [Flashcard Components](./components/flashcards/README.md) | [Flashcard API](./docs/API_DOCUMENTATION.md#flashcard-endpoints) | ✅ Complete |
-| **AI Generation** | AIFlashcardGenerator | [Flashcard Components](./components/flashcards/README.md) | [AI API](./docs/API_DOCUMENTATION.md#ai-endpoints) | ✅ Complete |
-| **Document Summarization** | AISummaryGenerator | [Summarize Components](./components/summarize/README.md) | [Summarize API](./docs/API_DOCUMENTATION.md#summarize-endpoints) | ✅ Complete |
+### Implementing Rich Text Editing
+1. **[Editor Components](./components/editor/README.md)** - TipTap editor integration
+2. **[Notion Editor](./docs/NOTION_EDITOR.md)** - Rich text editor system
+3. **[Notes System](./docs/NOTES_SYSTEM.md)** - Note management implementation
+4. **[Technical Guidelines](./.kiro/steering/tech.md)** - Editor patterns and best practices
 
-### User Interface & Experience
-| Feature | Components | Documentation | Implementation | Status |
-|---------|------------|---------------|----------------|---------|
-| **Floating Navigation** | FloatingNavigation | [Navigation Components](./components/navigation/README.md) | Glassmorphism design | ✅ Complete |
-| **Context Sidebar** | FloatingSidebar | [Navigation System](./docs/NAVIGATION_SYSTEM.md) | Page-specific actions | ✅ Complete |
-| **Theme System** | ThemeProvider, ThemeToggle | [Theme Components](./components/theme/README.md) | Dark/light mode | ✅ Complete |
-| **Responsive Design** | All components | [Technical Guidelines](./.kiro/steering/tech.md) | Mobile-first approach | ✅ Complete |
+### Creating Learning Features
+1. **[Quiz Components](./components/quiz/README.md)** - Quiz management interface
+2. **[Quiz System Guide](./.kiro/steering/quiz-system.md)** - Complete quiz implementation
+3. **[Flashcard Components](./components/flashcards/README.md)** - Flashcard system
+4. **[Summarize Components](./components/summarize/README.md)** - Document summarization
 
-## 👥 By Audience
+### Integrating with LMS Platforms
+1. **[School LMS Integration](./lib/school-lms/README.md)** - LMS integration module
+2. **[API Documentation](./docs/API_DOCUMENTATION.md)** - LMS API endpoints
+3. **[Technical Guidelines](./.kiro/steering/tech.md)** - OAuth and security patterns
+4. **[Error Handling](./.kiro/steering/checking.md)** - LMS integration debugging
+
+### Building UI Components
+1. **[UI Components](./components/ui/README.md)** - Base component library
+2. **[Theme Components](./components/theme/README.md)** - Theme system implementation
+3. **[Navigation Components](./components/navigation/README.md)** - Navigation systems
+4. **[Project Structure](./.kiro/steering/structure.md)** - Component organization
+
+### Database & API Development
+1. **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete API reference
+2. **[Supabase Helpers](./.kiro/steering/supabase-helper-summary.md)** - Database utilities
+3. **[Store Documentation](./lib/store/README.md)** - State management patterns
+4. **[Database Management](./.kiro/steering/updating database.md)** - Schema management
+
+### Mobile Development
+1. **[Technical Guidelines](./.kiro/steering/tech.md)** - Mobile optimization patterns
+2. **[PDF Components](./components/pdf/README.md)** - Mobile PDF interactions
+3. **[Editor Components](./components/editor/README.md)** - Mobile text editing
+4. **[Navigation Components](./components/navigation/README.md)** - Mobile navigation
+
+### Testing & Quality Assurance
+1. **[Error Handling](./.kiro/steering/checking.md)** - Testing and debugging guide
+2. **[Technical Guidelines](./.kiro/steering/tech.md)** - Testing standards and practices
+3. **[Project Structure](./.kiro/steering/structure.md)** - Test organization
+4. **Component READMEs** - Component-specific testing information
+
+## 🔍 Documentation by Audience
+
+### Product Managers
+- **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Project vision and roadmap
+- **[Product Context](./.kiro/steering/product.md)** - Feature requirements and UX principles
+- **[Quiz System Guide](./.kiro/steering/quiz-system.md)** - Learning feature overview
+- **Component READMEs** - Feature implementation status
 
 ### Frontend Developers
-#### Getting Started
-- **[README.md](./README.md)** - Project setup and overview
-- **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards and patterns
-- **[Project Structure](./.kiro/steering/structure.md)** - File organization
-
-#### Component Development
-- **[PDF Components](./components/pdf/README.md)** - PDF viewer and annotation system
-- **[Editor Components](./components/editor/README.md)** - Rich text editor with TipTap
-- **[UI Components](./components/ui/README.md)** - Base UI component library
-- **[Theme Components](./components/theme/README.md)** - Theme system integration
-
-#### State Management
-- **[Store Documentation](./lib/store/README.md)** - Redux and RTK Query
-- **[Hooks Documentation](./hooks/README.md)** - Custom React hooks
-- **[Types Documentation](./lib/types/README.md)** - TypeScript interfaces
+- **[Technical Guidelines](./.kiro/steering/tech.md)** - React, TypeScript, and UI patterns
+- **[Project Structure](./.kiro/steering/structure.md)** - Component organization
+- **[Editor Components](./components/editor/README.md)** - Rich text editor implementation
+- **[PDF Components](./components/pdf/README.md)** - PDF annotation system
+- **[Navigation Components](./components/navigation/README.md)** - Navigation implementation
 
 ### Backend Developers
-#### API Development
-- **[API Documentation](./docs/API_DOCUMENTATION.md)** - Complete REST API reference
-- **[Supabase Helpers](./.kiro/steering/supabase-helper-summary.md)** - Database integration
-- **[Error Handling](./docs/ERROR_HANDLING.md)** - Error patterns and recovery
-
-#### Database & Storage
-- **[Database Types](./lib/types/database.ts)** - Supabase schema types
-- **[Technical Guidelines](./.kiro/steering/tech.md)** - Backend patterns
-- **[Utils Documentation](./lib/utils/README.md)** - Server utilities
-
-### Full-Stack Developers
-#### Complete System
-- **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Architecture overview
-- **[Product Context](./.kiro/steering/product.md)** - Feature requirements
-- **[Navigation System](./docs/NAVIGATION_SYSTEM.md)** - UI/UX architecture
-- **[PDF Annotation Tools](./docs/PDF_ANNOTATION_TOOLS.md)** - Advanced features
-
-### Project Managers & Stakeholders
-#### Project Status
-- **[Project Overview](./docs/PROJECT_OVERVIEW.md)** - Vision and roadmap
-- **[Feature Documentation](#-by-feature-area)** - Implementation status
-- **[Component Status](#-component-documentation)** - Technical progress
-
-#### Business Context
-- **[Product Context](./.kiro/steering/product.md)** - Requirements and UX
-- **[Quiz System Guide](./.kiro/steering/quiz-system.md)** - Learning features
-- **[README.md](./README.md)** - Project capabilities
+- **[API Documentation](./docs/API_DOCUMENTATION.md)** - REST API specification
+- **[Supabase Helpers](./.kiro/steering/supabase-helper-summary.md)** - Database utilities
+- **[Store Documentation](./lib/store/README.md)** - State management
+- **[School LMS Integration](./lib/school-lms/README.md)** - LMS integration patterns
 
 ### DevOps & Infrastructure
-#### Deployment
-- **[README.md](./README.md#-deployment)** - Deployment instructions
-- **[API Documentation](./docs/API_DOCUMENTATION.md)** - Backend configuration
-- **[Technical Guidelines](./.kiro/steering/tech.md)** - Infrastructure patterns
+- **[README.md](./README.md)** - Deployment and environment setup
+- **[Supabase Setup](./supabase/README.md)** - Database configuration
+- **[Error Handling](./docs/ERROR_HANDLING.md)** - System monitoring and debugging
+- **[Technical Guidelines](./.kiro/steering/tech.md)** - Infrastructure requirements
 
-#### Monitoring & Debugging
-- **[Error Handling](./docs/ERROR_HANDLING.md)** - Error monitoring
-- **[Notifications System](./docs/NOTIFICATIONS_SYSTEM.md)** - User feedback
-- **[Utils Documentation](./lib/utils/README.md)** - Debugging utilities
+### QA Engineers
+- **[Error Handling](./.kiro/steering/checking.md)** - Testing and debugging procedures
+- **[Technical Guidelines](./.kiro/steering/tech.md)** - Testing standards
+- **Component READMEs** - Component testing information
+- **[API Documentation](./docs/API_DOCUMENTATION.md)** - API testing reference
 
-## 🔍 Search & Discovery
+## 📊 Feature Implementation Status
 
-### By Technology
-- **React 19**: [Editor Components](./components/editor/README.md), [PDF Components](./components/pdf/README.md)
-- **Next.js 15**: [Technical Guidelines](./.kiro/steering/tech.md), [API Documentation](./docs/API_DOCUMENTATION.md)
-- **Supabase**: [API Documentation](./docs/API_DOCUMENTATION.md), [Supabase Helpers](./.kiro/steering/supabase-helper-summary.md)
-- **TypeScript**: [Types Documentation](./lib/types/README.md), [Technical Guidelines](./.kiro/steering/tech.md)
-- **TipTap**: [Editor Components](./components/editor/README.md), [Notion Editor](./docs/NOTION_EDITOR.md)
-- **Redux Toolkit**: [Store Documentation](./lib/store/README.md), [Technical Guidelines](./.kiro/steering/tech.md)
+### ✅ Production Ready Features
+- **PDF Management**: Upload, viewing, annotation, and organization
+- **Rich Text Editor**: TipTap-based editor with auto-save and floating toolbars
+- **Note Management**: Complete CRUD operations with cross-tab synchronization
+- **Theme System**: Dark/light mode with system preference detection
+- **Navigation**: Floating navigation dock and context-aware sidebar
+- **Quiz System**: Complete quiz management with filtering and analytics
+- **LMS Integration**: Google Classroom integration with encrypted OAuth
+- **Folder Management**: Hierarchical organization with drag & drop
+- **Mobile Support**: Touch-optimized interfaces and responsive design
+- **Error Handling**: Comprehensive error boundaries and recovery
 
-### By Use Case
-- **PDF Annotation**: [PDF Components](./components/pdf/README.md) → [PDF Annotation Tools](./docs/PDF_ANNOTATION_TOOLS.md)
-- **Note Taking**: [Editor Components](./components/editor/README.md) → [Notes System](./docs/NOTES_SYSTEM.md)
-- **Learning Tools**: [Quiz Components](./components/quiz/README.md) → [Flashcard Components](./components/flashcards/README.md)
-- **Document Processing**: [API Documentation](./docs/API_DOCUMENTATION.md) → [Technical Guidelines](./.kiro/steering/tech.md)
-- **User Interface**: [Navigation Components](./components/navigation/README.md) → [Theme Components](./components/theme/README.md)
+### 🚧 Future Enhancements
+- **Collaboration**: Real-time collaborative editing and shared workspaces
+- **Advanced AI**: Enhanced AI-powered content analysis and suggestions
+- **Enterprise Features**: Team management, advanced permissions, audit logging
+- **Additional LMS**: Moodle, Canvas, and Blackboard integrations
+- **Performance**: Advanced caching, edge computing, and optimization
 
-### By Implementation Status
-- **✅ Production Ready**: All major components and features
-- **🚀 Recently Updated**: All documentation refreshed January 2025
-- **📋 Comprehensive**: Complete coverage of implemented features
-- **🔄 Maintained**: Regular updates with feature releases
-
-## 📋 Documentation Maintenance
+## 🔄 Documentation Maintenance
 
 ### Update Schedule
-- **Feature Releases**: Documentation updated with each feature
-- **Monthly Reviews**: Comprehensive documentation review
-- **Quarterly Audits**: Complete accuracy and completeness check
-- **Annual Refresh**: Major documentation restructuring if needed
+- **Weekly**: Component READMEs updated with feature changes
+- **Monthly**: Technical guidelines reviewed and updated
+- **Quarterly**: Complete documentation audit and refresh
+- **Release**: All documentation updated with new features
 
-### Contributing Guidelines
-1. **Follow Standards**: Use established formatting and conventions
-2. **Include Examples**: Add practical code examples and use cases
-3. **Cross-Reference**: Link to related documentation
-4. **Review Process**: All changes go through code review
-5. **Status Updates**: Keep implementation status current
+### Contributing to Documentation
+1. **Identify Gaps**: Look for missing or outdated information
+2. **Follow Standards**: Use established formatting and writing conventions
+3. **Include Examples**: Add practical code examples and use cases
+4. **Cross-Reference**: Link to related documentation and components
+5. **Review Process**: Submit documentation changes through pull requests
 
-### Quality Standards
-- **Accuracy**: Technical details verified against implementation
-- **Completeness**: All features and components documented
-- **Clarity**: Clear, concise language with practical examples
-- **Consistency**: Uniform formatting and structure across documents
+### Documentation Standards
+- **Clarity**: Use clear, concise language with practical examples
+- **Structure**: Follow consistent formatting with proper headings
+- **Code Examples**: Include working code snippets with syntax highlighting
+- **Status Indicators**: Use ✅ for completed, 🚧 for in-progress, 📋 for planned
+- **Cross-References**: Maintain links between related documentation
+
+## 🤝 Getting Help
+
+### Documentation Issues
+- **Missing Information**: Create an issue for missing documentation
+- **Outdated Content**: Report outdated information for updates
+- **Unclear Instructions**: Request clarification or improvements
+- **New Features**: Request documentation for new features
+
+### Support Channels
+- **GitHub Issues**: Technical problems and bug reports
+- **GitHub Discussions**: Questions and community support
+- **Documentation PRs**: Contribute improvements and corrections
+- **Team Chat**: Internal team communication and coordination
 
 ---
 
+**Status**: ✅ Complete and Current  
 **Last Updated**: January 2025  
-**Total Documents**: 25+ comprehensive documentation files  
-**Coverage**: 100% of implemented features  
-**Status**: ✅ Production Ready
+**Maintained by**: Noto Development Team
 
-This index is maintained alongside the codebase to ensure accuracy and completeness. For the latest updates, see individual component READMEs and the main project documentation.
+This documentation index is regularly updated to reflect the current state of the Noto PDF annotation application. For the most current information, always refer to the latest version of each document.

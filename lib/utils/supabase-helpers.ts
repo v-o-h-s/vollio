@@ -131,6 +131,27 @@ export const isFolderRow = (
 };
 
 /**
+ * Type guard for OAuth token row types
+ */
+export const isOAuthTokenRow = (
+  row: any
+): row is Database["public"]["Tables"]["oauth_tokens"]["Row"] => {
+  return (
+    row &&
+    typeof row.id === "string" &&
+    typeof row.user_id === "string" &&
+    typeof row.provider === "string" &&
+    typeof row.encrypted_access_token === "string" &&
+    (row.encrypted_refresh_token === null || typeof row.encrypted_refresh_token === "string") &&
+    typeof row.token_type === "string" &&
+    (row.expires_at === null || typeof row.expires_at === "string") &&
+    (row.scope === null || typeof row.scope === "string") &&
+    typeof row.created_at === "string" &&
+    typeof row.updated_at === "string"
+  );
+};
+
+/**
  * Retry configuration for Supabase operations
  */
 export const RETRY_CONFIG = {

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import {
   getAuthenticatedSupabaseClient,
   STORAGE_CONFIG,
@@ -10,20 +9,16 @@ import {
   withErrorHandling,
   extractRequestContext,
   createServerError,
-  ServerErrorType,
   validateRequired,
   logServerError,
 } from "@/lib/utils/error-handling/server-error-handling";
+import { ErrorType } from "@/lib/types/errors";
 import {
   validateFileUploadSecurity,
   checkUserQuota,
   checkEnhancedRateLimit,
   generateSecureStoragePath,
 } from "@/lib/utils/security-validation";
-import {
-  requireAuthentication,
-  validateAuthentication,
-} from "@/lib/utils/auth-validation";
 import { randomUUID } from "crypto";
 
 /**
@@ -51,7 +46,7 @@ async function uploadToStorage(
 
     if (error) {
       throw createServerError(
-        ServerErrorType.STORAGE_ERROR,
+        ErrorType.STORAGE_ERROR,
         `Storage upload failed: ${error.message}`,
         {
           operation: "storage_upload",
@@ -65,7 +60,7 @@ async function uploadToStorage(
 
     if (!data?.path) {
       throw createServerError(
-        ServerErrorType.STORAGE_ERROR,
+        ErrorType.STORAGE_ERROR,
         "Upload succeeded but no path returned",
         {
           operation: "storage_upload",
@@ -91,7 +86,7 @@ async function uploadToStorage(
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     throw createServerError(
-      ServerErrorType.STORAGE_ERROR,
+      ErrorType.STORAGE_ERROR,
       `Storage upload failed: ${errorMessage}`,
       {
         operation: "storage_upload",
@@ -142,7 +137,7 @@ async function storePDFMetadata(
 
     if (error) {
       throw createServerError(
-        ServerErrorType.DATABASE_ERROR,
+        ErrorType.DATABASE_ERROR,
         `Failed to store PDF metadata: ${error.message}`,
         {
           operation: "database_insert",
@@ -156,7 +151,7 @@ async function storePDFMetadata(
 
     if (!data?.id) {
       throw createServerError(
-        ServerErrorType.DATABASE_ERROR,
+        ErrorType.DATABASE_ERROR,
         "PDF metadata stored but no ID returned",
         {
           operation: "database_insert",
@@ -178,7 +173,7 @@ async function storePDFMetadata(
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     throw createServerError(
-      ServerErrorType.DATABASE_ERROR,
+      ErrorType.DATABASE_ERROR,
       `Database operation failed: ${errorMessage}`,
       {
         operation: "database_insert",
@@ -207,7 +202,7 @@ async function recordUploadActivity(
 
   if (error) {
     throw createServerError(
-      ServerErrorType.DATABASE_ERROR,
+      ErrorType.DATABASE_ERROR,
       `Failed to record upload activity: ${error.message}`,
       {
         operation: "record_activity",
@@ -226,14 +221,16 @@ async function handlePOST(
   let supabaseClient: any = null;
   const context = extractRequestContext(request, "/api/pdfs/upload");
 
-  // Enhanced authentication validation
-  const authContext = await requireAuthentication(request, ["upload", "write"]);
-  const userId = authContext.userId;
+  // Simple Clerk authentication (more reliable)
+  const { auth } = await import("@clerk/nextjs/server");
+  const { userId } = await auth();
 
-  // Additional validation check
-  const authValidation = await validateAuthentication(request);
-  if (authValidation.shouldRefresh) {
-    console.warn(`⚠️ User ${userId} should refresh their authentication token`);
+  if (!userId) {
+    throw createServerError(
+      ErrorType.AUTHENTICATION_ERROR,
+      "Authentication required",
+      { ...context, operation: "auth_check" }
+    );
   }
 
   // Enhanced rate limiting with multiple violation tracking
@@ -252,31 +249,28 @@ async function handlePOST(
   if (!securityValidation.valid) {
     throw createServerError(
       securityValidation.severity === "critical"
-        ? ServerErrorType.VALIDATION_ERROR
-        : ServerErrorType.VALIDATION_ERROR,
+        ? ErrorType.VALIDATION_ERROR
+        : ErrorType.VALIDATION_ERROR,
       securityValidation.error || "File validation failed",
       { ...context, userId, fileName: file?.name, fileSize: file?.size },
       securityValidation.details
     );
   }
 
-  // Check user quota limits
-  const quotaInfo = await checkUserQuota(
-    supabaseClient || (await getAuthenticatedSupabaseClient()),
-    userId
-  );
-  if (!quotaInfo.canUpload) {
-    throw createServerError(
-      ServerErrorType.VALIDATION_ERROR,
-      `Upload quota exceeded: ${quotaInfo.quotaExceeded.join(", ")}`,
-      { ...context, userId, fileName: file?.name, fileSize: file?.size },
-      { quotaInfo }
-    );
-  }
-
   try {
-    // Get authenticated Supabase client
+    // Get authenticated Supabase client FIRST
     supabaseClient = await getAuthenticatedSupabaseClient();
+
+    // Check user quota limits
+    const quotaInfo = await checkUserQuota(supabaseClient, userId);
+    if (!quotaInfo.canUpload) {
+      throw createServerError(
+        ErrorType.VALIDATION_ERROR,
+        `Upload quota exceeded: ${quotaInfo.quotaExceeded.join(", ")}`,
+        { ...context, userId, fileName: file?.name, fileSize: file?.size },
+        { quotaInfo }
+      );
+    }
 
     // Validate folder exists and belongs to user if folderId is provided
     if (folderId) {
@@ -289,9 +283,9 @@ async function handlePOST(
 
       if (folderError || !folder) {
         throw createServerError(
-          ServerErrorType.VALIDATION_ERROR,
+          ErrorType.VALIDATION_ERROR,
           "Folder not found or access denied",
-          { ...context, userId, folderId }
+          { ...context, userId,  folderId }
         );
       }
     }
@@ -321,7 +315,7 @@ async function handlePOST(
     } catch (activityError) {
       // Log but don't fail the upload
       const activityServerError = createServerError(
-        ServerErrorType.DATABASE_ERROR,
+        ErrorType.DATABASE_ERROR,
         "Failed to record upload activity",
         { ...context, userId, operation: "record_activity" },
         { originalError: activityError, pdfId }
@@ -362,7 +356,7 @@ async function handlePOST(
         );
       } catch (cleanupError) {
         const cleanupServerError = createServerError(
-          ServerErrorType.STORAGE_ERROR,
+          ErrorType.STORAGE_ERROR,
           "Failed to cleanup uploaded file after error",
           { ...context, userId, operation: "cleanup", fileName: file?.name },
           cleanupError
