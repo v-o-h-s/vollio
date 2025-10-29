@@ -30,7 +30,7 @@ import {
   createUploadErrorContext,
   createNetworkErrorContext,
   logError,
-} from "../utils/error-handling";
+} from "../utils/error-handling/error-handling";
 import { pdfNotifications } from "../utils/notifications";
 
 export interface ApiResponse<T> {

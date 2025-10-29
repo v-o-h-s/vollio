@@ -41,6 +41,12 @@ export enum ErrorType {
   EXTERNAL_SERVICE_ERROR = "EXTERNAL_SERVICE_ERROR",
   PROCESSING_ERROR = "PROCESSING_ERROR",
   
+  // AI service specific errors
+  AI_SERVICE_ERROR = "AI_SERVICE_ERROR",
+  AI_QUOTA_EXCEEDED = "AI_QUOTA_EXCEEDED",
+  AI_CONTENT_POLICY_VIOLATION = "AI_CONTENT_POLICY_VIOLATION",
+  AI_MODEL_UNAVAILABLE = "AI_MODEL_UNAVAILABLE",
+  
   // General errors
   UNKNOWN_ERROR = "UNKNOWN_ERROR",
   INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
@@ -125,33 +131,6 @@ export interface ErrorNotificationOptions {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
 }
 
-// Upload error details
-export interface UploadErrorDetails {
-  fileName: string;
-  fileSize: number;
-  fileType: string;
-  uploadProgress?: number;
-  bytesUploaded?: number;
-}
-
-// PDF error details
-export interface PDFErrorDetails {
-  pdfId?: string;
-  fileName?: string;
-  fileSize?: number;
-  pageNumber?: number;
-  operation?: 'load' | 'render' | 'annotate' | 'save';
-}
-
-// Network error details
-export interface NetworkErrorDetails {
-  url: string;
-  method: string;
-  status?: number;
-  statusText?: string;
-  timeout?: boolean;
-  retryAttempt?: number;
-}
 
 // Default retry configuration
 export const DEFAULT_RETRY_CONFIG: RetryConfig = {
@@ -195,6 +174,10 @@ export const ERROR_SEVERITY_MAP: Record<ErrorType, ErrorSeverity> = {
   [ErrorType.RATE_LIMIT_ERROR]: ErrorSeverity.MEDIUM,
   [ErrorType.EXTERNAL_SERVICE_ERROR]: ErrorSeverity.MEDIUM,
   [ErrorType.PROCESSING_ERROR]: ErrorSeverity.MEDIUM,
+  [ErrorType.AI_SERVICE_ERROR]: ErrorSeverity.MEDIUM,
+  [ErrorType.AI_QUOTA_EXCEEDED]: ErrorSeverity.HIGH,
+  [ErrorType.AI_CONTENT_POLICY_VIOLATION]: ErrorSeverity.LOW,
+  [ErrorType.AI_MODEL_UNAVAILABLE]: ErrorSeverity.MEDIUM,
   [ErrorType.UNKNOWN_ERROR]: ErrorSeverity.MEDIUM,
   [ErrorType.INTERNAL_SERVER_ERROR]: ErrorSeverity.HIGH,
   [ErrorType.SERVICE_UNAVAILABLE]: ErrorSeverity.HIGH,
@@ -331,5 +314,25 @@ export const ERROR_MESSAGES: Record<ErrorType, { title: string; message: string;
     title: "Service Unavailable",
     message: "The service is temporarily unavailable. Please try again later.",
     action: "Try Again",
+  },
+  [ErrorType.AI_SERVICE_ERROR]: {
+    title: "AI Service Error",
+    message: "The AI service encountered an error. Please try again.",
+    action: "Try Again",
+  },
+  [ErrorType.AI_QUOTA_EXCEEDED]: {
+    title: "AI Quota Exceeded",
+    message: "You've reached your AI usage limit. Please upgrade your plan or try again later.",
+    action: "Upgrade Plan",
+  },
+  [ErrorType.AI_CONTENT_POLICY_VIOLATION]: {
+    title: "Content Policy Violation",
+    message: "Your request violates AI content policies. Please modify your request.",
+    action: "Modify Request",
+  },
+  [ErrorType.AI_MODEL_UNAVAILABLE]: {
+    title: "AI Model Unavailable",
+    message: "The requested AI model is temporarily unavailable. Using default model.",
+    action: "Continue",
   },
 };

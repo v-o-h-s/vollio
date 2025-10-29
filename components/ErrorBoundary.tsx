@@ -28,7 +28,7 @@ import {
   shouldReportError,
   formatErrorForDisplay,
   createAppError,
-} from "@/lib/utils/error-handling";
+} from "@/lib/utils/error-handling/error-handling";
 
 interface ErrorBoundaryProps {
   children: ReactNode;

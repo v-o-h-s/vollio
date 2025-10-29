@@ -13,7 +13,7 @@ import {
   ServerErrorType,
   validateRequired,
   logServerError,
-} from "@/lib/utils/server-error-handling";
+} from "@/lib/utils/error-handling/server-error-handling";
 import {
   validateFileUploadSecurity,
   checkUserQuota,

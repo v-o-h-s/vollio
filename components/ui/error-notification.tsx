@@ -17,7 +17,7 @@ import {
   ErrorNotificationOptions,
   ErrorRecoveryAction,
 } from "@/lib/types/errors";
-import { formatErrorForDisplay } from "@/lib/utils/error-handling";
+import { formatErrorForDisplay } from "@/lib/utils/error-handling/error-handling";
 
 interface ErrorNotificationProps {
   error: AppError;

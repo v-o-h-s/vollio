@@ -11,9 +11,6 @@ import {
   DEFAULT_RETRY_CONFIG,
   ERROR_SEVERITY_MAP,
   ERROR_MESSAGES,
-  UploadErrorDetails,
-  PDFErrorDetails,
-  NetworkErrorDetails,
 } from "@/lib/types/errors";
 
 /**
@@ -387,7 +384,7 @@ export async function withRetry<T>(
 export function createUploadErrorContext(
   fileName: string,
   fileSize: number,
-  fileType: string,
+  fileType?: string,
   uploadProgress?: number
 ): ErrorContext {
   return {
@@ -395,6 +392,9 @@ export function createUploadErrorContext(
     action: "upload",
     fileName,
     fileSize,
+    // Include additional context if provided
+    ...(fileType && { fileType }),
+    ...(uploadProgress !== undefined && { uploadProgress }),
   };
 }
 
@@ -412,6 +412,7 @@ export function createPDFErrorContext(
     action: operation,
     pdfId,
     fileName,
+    ...(pageNumber !== undefined && { pageNumber }),
   };
 }
 
@@ -427,6 +428,7 @@ export function createNetworkErrorContext(
     component: "NetworkRequest",
     action: method.toLowerCase(),
     url,
+    ...(retryAttempt !== undefined && { retryAttempt }),
   };
 }
 

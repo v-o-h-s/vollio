@@ -6,7 +6,7 @@ import {
   createServerError,
   ServerErrorType,
   validateRequired,
-} from "@/lib/utils/server-error-handling";
+} from "@/lib/utils/error-handling/server-error-handling";
 import {
   requireAuthentication,
   validateAuthentication,

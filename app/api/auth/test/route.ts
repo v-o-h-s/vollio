@@ -10,7 +10,7 @@ import {
   extractRequestContext,
   createServerError,
   ServerErrorType,
-} from "@/lib/utils/server-error-handling";
+} from "@/lib/utils/error-handling/server-error-handling";
 import {
   validateAuthentication,
   testRLSPolicies,

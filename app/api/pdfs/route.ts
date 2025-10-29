@@ -14,7 +14,7 @@ import {
   createServerError,
   ServerErrorType,
   logServerError
-} from "@/lib/utils/server-error-handling";
+} from "@/lib/utils/error-handling/server-error-handling";
 import {
   checkEnhancedRateLimit,
 } from "@/lib/utils/security-validation";

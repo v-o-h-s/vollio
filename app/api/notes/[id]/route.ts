@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
-import { withErrorHandling } from "@/lib/utils/server-error-handling";
+import { withErrorHandling } from "@/lib/utils/error-handling/server-error-handling";
 
 // GET /api/notes/[id] - Get a specific note
 export const GET = withErrorHandling(async (
