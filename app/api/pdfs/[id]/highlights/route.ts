@@ -14,7 +14,7 @@ interface RouteParams {
  * Retrieves all highlights for a specific PDF
  * Query parameters:
  * - type: Filter by highlight type (quick, comment, note) (optional)
- * - page: Page number for pagination (optional)
+ * - page: Page number for paginatio n (optional)
  * - limit: Number of highlights per page (optional, max 100)
  */
 export const GET = withErrorHandling(async (request: NextRequest, { params }: RouteParams) => {
