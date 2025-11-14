@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getOAuthTokens, deleteOAuthTokens } from "@/lib/services/oauth-token-service";
+import { getOAuthTokens, deleteOAuthTokens } from "@/lib/services/school-lms/oauth-token-service";
 
 /**
  * Get Google OAuth tokens for the authenticated user

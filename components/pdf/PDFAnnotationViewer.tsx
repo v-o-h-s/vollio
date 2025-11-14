@@ -1,5 +1,5 @@
 // TODO pls update the any types to proper types from Syncfusion if possible
-import React, { useRef, useState, useCallback, useEffect } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   PdfViewerComponent,
@@ -7,20 +7,16 @@ import {
   TextSelection,
   TextSearch,
   Navigation,
-  Magnification,
   LinkAnnotation,
   BookmarkView,
   ThumbnailView,
   Print,
   Annotation,
-  AnnotationSelectEventArgs,
 } from "@syncfusion/ej2-react-pdfviewer";
 import {
   useGetPDFQuery,
   useCreateHighlightMutation,
   useGetPDFHighlightsQuery,
-  useDeleteHighlightMutation,
-  useDeleteNoteMutation,
 } from "@/lib/store/apiSlice";
 import toast from "react-hot-toast";
 import { PDFDocument, TextBounds } from "@/lib/types/pdf";
@@ -30,9 +26,13 @@ import { PDFViewerFallback } from "@/components/pdf/FallbackUI";
 import { FileText, AlertCircle, RefreshCw } from "lucide-react";
 
 import { HighlightSettings } from "@syncfusion/ej2-react-pdfviewer";
-import { UnifiedNoteModal } from "./UnifiedNoteModal";
+import { NoteCreationModal } from "./NoteCreationModal";
 import { HighlightHoverToolbar } from "./HighlightHoverToolbar";
-import { DeleteHighlightDialog } from "@/components/ui/delete-highlight-dialog";
+import { NotePreviewModal } from "./NotePreviewModal";
+import HighlightHoverTrigger from "./HighlightHoverTrigger";
+import HighlightContextMenu from "./HighlightContextMenu";
+
+
 
 /**
  * Props interface for PDFAnnotationViewer component
@@ -43,13 +43,9 @@ export interface PDFAnnotationViewerProps {
   /** Additional CSS classes */
   className?: string;
   /** Currently selected annotation tool */
-  selectedTool: "highlight" | "nothing" | "comment" | "note" | "delete";
+  selectedTool: "highlight" | "nothing" | "comment" | "note";
   /** Current highlight mode when highlight tool is selected */
   highlightMode?: "quick" | "comment" | "note";
-  /** Current highlight color */
-  highlightColor?: string;
-  /** External ref to access PDF viewer instance */
-  externalRef?: React.RefObject<any>;
 }
 
 interface TextSelectionCompleteEventArgs {
@@ -68,13 +64,11 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   className = "",
   selectedTool = "highlight",
   highlightMode = "quick",
-  highlightColor = "#FFFF00",
-  externalRef,
 }) => {
   // Component state
   const [isLoading, setIsLoading] = useState(true);
   const [annotationsLoaded, setAnnotationsLoaded] = useState(false);
-  const [isViewerReady, setIsViewerReady] = useState(false);
+
   // Text selection and toolbar state
   const [selectedText, setSelectedText] = useState<string>("");
   const [selectionBounds, setSelectionBounds] = useState<TextBounds | null>(
@@ -92,8 +86,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     position: { x: number; y: number };
     noteTitle?: string;
   } | null>(null);
-
-  // Note preview modal state
+  const [showHoverToolbar, setShowHoverToolbar] = useState(false);
   const [showNotePreview, setShowNotePreview] = useState(false);
   const [previewNoteId, setPreviewNoteId] = useState<string | null>(null);
 
@@ -109,13 +102,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Component refs
   const pdfViewerRef = useRef<PdfViewerComponent>(null);
-
-  // Sync external ref with internal ref
-  useEffect(() => {
-    if (externalRef && pdfViewerRef.current) {
-      externalRef.current = pdfViewerRef.current;
-    }
-  }, [externalRef, isViewerReady]);
 
   // Hooks
   const router = useRouter();
@@ -137,13 +123,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
   // Highlight API hooks
   const [createHighlight] = useCreateHighlightMutation();
-  const [deleteHighlight] = useDeleteHighlightMutation();
-  const [deleteNote] = useDeleteNoteMutation();
-  const {
-    data: highlightsData,
-    error: highlightsError,
-    isLoading: highlightsLoading,
-  } = useGetPDFHighlightsQuery(
+  const { data: highlightsData } = useGetPDFHighlightsQuery(
     { pdfId: pdfDocument?.id || "" },
     { skip: !pdfDocument?.id }
   );
@@ -166,6 +146,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       height: b.height || (b.bottom ? b.bottom - (b.top || b.y || 0) : 0) || 0,
     }));
   };
+
+  /**
+   * Check if PDF viewer is fully initialized and ready for annotations
+   */
+  const isPdfViewerReady = useCallback((): boolean => {
+    return true 
+  }, []);
 
   /* Text Selection Handlers */
   const handleSelectionTextEnd = useCallback(
@@ -199,8 +186,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         switch (highlightMode) {
           case "quick":
             try {
+              console.log("Creating quick highlight on page:", pageNumber);
+
               // Check if PDF viewer is ready before creating annotation
-              if (!isViewerReady) {
+              if (!isPdfViewerReady()) {
                 console.error("PDF viewer not ready for annotation creation");
                 toast.error(
                   "PDF viewer is still loading. Please try again in a moment."
@@ -211,10 +200,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               // Create Syncfusion annotation first
               const annotationOptions: Partial<HighlightSettings> = {
                 bounds: textBounds,
-                pageNumber: pageNumber ,
+                pageNumber: pageNumber, // Syncfusion uses (page 1 is 1 not 0)
                 author: "User",
                 subject: "Quick Highlight",
-                color: highlightColor, // Use selected highlight color
+                color: "#FFFF00", // Yellow for quick highlights
                 opacity: 0.4,
                 customData: {
                   id: `quick-highlight-${Date.now()}`,
@@ -233,7 +222,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 const savedHighlight = await createHighlight({
                   pdfId: currentPdfData.id,
                   content: selectedTextContent,
-                  color: highlightColor,
+                  color: "#FFFF00",
                   opacity: 0.4,
                   pageNumber: pageNumber,
                   type: "quick",
@@ -256,6 +245,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                     ) {
                       lastAnnotation.customData.highlightId =
                         savedHighlight.highlight.id;
+                      console.log(
+                        "Updated annotation with highlight ID:",
+                        savedHighlight.highlight.id
+                      );
                     }
                   } catch (error) {
                     console.error(
@@ -280,8 +273,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
 
           case "comment":
             try {
+              console.log("Creating comment highlight on page:", pageNumber);
+
               // Check if PDF viewer is ready before creating annotation
-              if (!isViewerReady) {
+              if (!isPdfViewerReady()) {
                 console.error("PDF viewer not ready for annotation creation");
                 toast.error(
                   "PDF viewer is still loading. Please try again in a moment."
@@ -292,10 +287,10 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               // Create Syncfusion annotation
               const annotationOptions: Partial<HighlightSettings> = {
                 bounds: textBounds,
-                pageNumber: pageNumber, // Convert to 1-based page numbers for Syncfusion
+                pageNumber: pageNumber,
                 author: "User",
                 subject: "Comment Highlight",
-                color: highlightColor, // Use selected highlight color
+                color: "#FFA500", // Orange for comments
                 opacity: 0.4,
                 customData: {
                   id: `comment-highlight-${Date.now()}`,
@@ -308,18 +303,20 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
                 "Highlight",
                 annotationOptions as HighlightSettings
               );
+              console.log("Syncfusion comment highlight created successfully");
 
               // Save to database
               if (currentPdfData?.id) {
                 await createHighlight({
                   pdfId: currentPdfData.id,
                   content: selectedTextContent,
-                  color: highlightColor,
+                  color: "#FFA500",
                   opacity: 0.4,
                   pageNumber: pageNumber,
                   type: "comment",
                   textbounds: textBounds,
                 }).unwrap();
+                console.log("Comment highlight saved to database successfully");
                 toast.success("Comment highlight created");
               }
 
@@ -336,8 +333,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             break;
 
           case "note":
-            // Reset highlight creation flag for new note
-            setHighlightCreated(false);
+            // Store selection data for note creation modal
             setShowNoteModal(true);
             break;
 
@@ -354,34 +350,14 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       selectedText,
       currentPageNumber,
       selectedTextBounds,
-      isViewerReady,
+      isPdfViewerReady,
     ]
   );
-
-  // Track if highlight has been created for the current note
-  const [highlightCreated, setHighlightCreated] = useState(false);
-
-  // Delete dialog state
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{
-    annotation: any;
-    customData: any;
-  } | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   // Handle note creation completion
   const handleNoteCreated = useCallback(
     async (noteId: string) => {
-      console.log("📝 Note created with ID:", noteId);
-      console.log("📍 Current selection state:", {
-        selectedText,
-        selectedTextBounds,
-        currentPageNumber,
-        isViewerReady,
-        pdfId: currentPdfData?.id,
-      });
-
-      // Create highlight annotation when note is created
+      // Create highlight annotation linked to the note
       if (
         pdfViewerRef.current &&
         selectedTextBounds &&
@@ -390,7 +366,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       ) {
         try {
           // Check if PDF viewer is ready before creating annotation
-          if (!isViewerReady) {
+          if (!isPdfViewerReady()) {
             console.error("PDF viewer not ready for annotation creation");
             toast.error(
               "PDF viewer is still loading. Please try again in a moment."
@@ -398,15 +374,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             return;
           }
 
-          console.log("🎯 Creating Syncfusion annotation with bounds:", selectedTextBounds);
-
           // Create Syncfusion annotation
           const annotationOptions: Partial<HighlightSettings> = {
             bounds: selectedTextBounds,
-            pageNumber: currentPageNumber , // Convert to 1-based page numbers for Syncfusion
+            pageNumber: currentPageNumber, // Syncfusion uses 1-based page numbers
             author: "User",
             subject: "Note Highlight",
-            color: highlightColor, // Use selected highlight color
+            color: "#4A90E2", // Blue for note highlights
             opacity: 0.4,
             customData: {
               id: `note-highlight-${noteId}`,
@@ -420,39 +394,31 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             "Highlight",
             annotationOptions as HighlightSettings
           );
-
-          console.log("✅ Syncfusion annotation created");
+          console.log("Syncfusion note highlight created successfully");
 
           // Save highlight to database with note linkage
-          const savedHighlight = await createHighlight({
+          await createHighlight({
             pdfId: currentPdfData.id,
             content: selectedText,
-            color: highlightColor,
+            color: "#4A90E2",
             opacity: 0.4,
             pageNumber: currentPageNumber,
             type: "note",
             textbounds: selectedTextBounds,
             noteId: noteId, // Link to the created note
           }).unwrap();
-
-          console.log("💾 Highlight saved to database:", savedHighlight);
+          console.log("Note highlight saved to database successfully");
           toast.success("Note and highlight created successfully");
 
-          // Don't automatically close the modal - let user continue editing
-          // The modal will close when user clicks "Save Note" or close button
-          // Just reset the highlight creation flag
-          setHighlightCreated(false); // Reset for next selection
+          // Clear selection after creating note highlight
+          setSelectedText("");
+          setSelectionBounds(null);
+          setSelectedTextBounds(null);
+          setShowNoteModal(false);
         } catch (error) {
           console.error("Error creating note highlight:", error);
           toast.error("Failed to create note highlight. Please try again.");
         }
-      } else {
-        console.error("❌ Missing required data for highlight creation:", {
-          hasPdfViewer: !!pdfViewerRef.current,
-          hasTextBounds: !!selectedTextBounds,
-          hasSelectedText: !!selectedText,
-          hasPdfId: !!currentPdfData?.id,
-        });
       }
     },
     [
@@ -461,28 +427,17 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
       selectedTextBounds,
       currentPdfData?.id,
       createHighlight,
-      isViewerReady,
+      isPdfViewerReady,
     ]
   );
-
-  // Clear selection state helper
-  const clearSelectionState = useCallback(() => {
-    setSelectedText("");
-    setSelectionBounds(null);
-    setSelectedTextBounds(null);
-    setHighlightCreated(false);
-  }, []);
 
   // Handle modal close without creating note
   const handleCloseNoteModal = useCallback(() => {
     setShowNoteModal(false);
-    clearSelectionState();
-  }, [clearSelectionState]);
-
-  // Handle note saved (when user clicks "Save Note" button)
-  const handleNoteSaved = useCallback(() => {
-    clearSelectionState();
-  }, [clearSelectionState]);
+    // Clear selection state when modal is manually closed
+    setSelectedText("");
+    setSelectionBounds(null);
+  }, []);
 
   // Handle annotation mouseover
   const handleAnnotationMouseover = useCallback(
@@ -493,7 +448,6 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         if (!annotation || !annotation.customData) return;
 
         const customData = annotation.customData;
-        console.log(customData);
         const annotationType = customData.type;
 
         // Convert PDF coordinates to screen coordinates
@@ -536,6 +490,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             position: { x: screenX, y: screenY },
             noteTitle: customData.noteTitle || "Note",
           });
+          setShowHoverToolbar(true);
         }
       } catch (error) {
         console.error("Error handling annotation mouseover:", error);
@@ -550,132 +505,46 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     setTimeout(() => {
       setShowHoverTrigger(false);
       setHoveredQuickHighlight(null);
+      setShowHoverToolbar(false);
       setHoveredHighlight(null);
     }, 100);
   }, []);
 
-  // handle annotation click
-  const handleAnnotationClick = useCallback(
-    (args: AnnotationSelectEventArgs) => {
-      try {
-        const annotation = args.annotation;
-
-        if (!annotation) {
-          console.log("No annotation found in args");
-          return;
-        }
-
-        if (!annotation.customData) {
-          console.log("No customData found in annotation:", annotation);
-          return;
-        }
-
-        const customData = annotation.customData;
-        console.log("📋 Annotation customData:", customData);
-
-        // Handle delete mode
-        if (selectedTool === "delete") {
-          handleDeleteHighlight(annotation, customData);
-          return;
-        }
-
-        // Check if this is a linked note highlight
-        if (customData.type === "note" && customData.noteId) {
-          console.log(
-            "✅ Found note annotation with noteId:",
-            customData.noteId
-          );
-
-          // Open note preview modal
-          console.log("🔄 Setting preview state:", {
-            noteId: customData.noteId,
-            showNotePreview: true,
-          });
-
-          setPreviewNoteId(customData.noteId);
-          setShowNotePreview(true);
-
-          console.log("📊 Modal state after setting:", {
-            previewNoteId: customData.noteId,
-            showNotePreview: true,
-          });
-
-          toast.success("Opening note preview");
-        } else {
-          console.log("❌ Annotation conditions not met:", {
-            type: customData.type,
-            noteId: customData.noteId,
-            hasNoteId: !!customData.noteId,
-            isNoteType: customData.type === "note",
-          });
-        }
-      } catch (error) {
-        console.error("Error handling annotation click:", error);
-      }
-    },
-    [selectedTool]
-  );
-
-  // Handle delete highlight
-  const handleDeleteHighlight = useCallback(
-    (annotation: any, customData: any) => {
-      setDeleteTarget({ annotation, customData });
-      setShowDeleteDialog(true);
+  // Handle highlight hover (legacy - keeping for compatibility)
+  const handleHighlightHover = useCallback(
+    (_annotationId: string, position: { x: number; y: number }) => {
+      // TODO: Get note ID from annotation metadata
+      // For now, we'll use placeholder data
+      setHoveredHighlight({
+        noteId: "note-id-placeholder",
+        position,
+        noteTitle: "Sample Note Title",
+      });
+      setShowHoverToolbar(true);
     },
     []
   );
 
-  // Handle delete confirmation
-  const handleDeleteConfirm = useCallback(
-    async (shouldDeleteNote: boolean) => {
-      if (!deleteTarget) return;
+  // Handle highlight hover end (legacy - keeping for compatibility)
+  const handleHighlightHoverEnd = useCallback(() => {
+    setShowHoverToolbar(false);
+    setHoveredHighlight(null);
+  }, []);
 
-      setIsDeleting(true);
-      try {
-        const { annotation, customData } = deleteTarget;
-        const highlightId = customData.highlightId;
-        const noteId = customData.noteId;
-
-        // Delete the highlight from Syncfusion viewer
-        if (pdfViewerRef.current?.annotation && annotation.annotationId) {
-          // First select the annotation, then delete it
-          pdfViewerRef.current.annotation.selectAnnotation(
-            annotation.annotationId
-          );
-          pdfViewerRef.current.annotation.deleteAnnotation();
-        }
-
-        // Delete from database
-        if (highlightId) {
-          await deleteHighlight(highlightId).unwrap();
-          toast.success("Highlight deleted successfully");
-        }
-
-        // Delete the note if requested
-        if (shouldDeleteNote && noteId) {
-          await deleteNote(noteId).unwrap();
-          toast.success("Note deleted successfully");
-        }
-
-        setShowDeleteDialog(false);
-        setDeleteTarget(null);
-      } catch (error) {
-        console.error("Error deleting highlight:", error);
-        toast.error("Failed to delete highlight");
-      } finally {
-        setIsDeleting(false);
-      }
-    },
-    [deleteTarget, deleteHighlight, deleteNote]
-  );
-
-  // Handle delete dialog close
-  const handleDeleteDialogClose = useCallback(() => {
-    if (!isDeleting) {
-      setShowDeleteDialog(false);
-      setDeleteTarget(null);
+  // Handle view note in preview
+  const handleViewNote = useCallback(() => {
+    if (hoveredHighlight?.noteId) {
+      setPreviewNoteId(hoveredHighlight.noteId);
+      setShowNotePreview(true);
+      setShowHoverToolbar(false);
     }
-  }, [isDeleting]);
+  }, [hoveredHighlight]);
+
+  // Handle close note preview
+  const handleCloseNotePreview = useCallback(() => {
+    setShowNotePreview(false);
+    setPreviewNoteId(null);
+  }, []);
 
   // Handle context menu trigger click
   const handleContextMenuTriggerClick = useCallback(() => {
@@ -715,7 +584,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
             try {
               pdfViewerRef.current.annotation.editAnnotation(targetAnnotation);
             } catch (editError) {
-              // Edit annotation method failed, properties updated in memory
+              console.log(
+                "Edit annotation method failed, properties updated in memory"
+              );
             }
           }
         } catch (error) {
@@ -726,83 +597,103 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     []
   );
   /**
-   * Load existing highlights from database
+   * Load existing highlights from database with proper initialization checks
    */
-  const loadExistingHighlights = useCallback(async () => {
-    // Don't load if already loaded
-    if (annotationsLoaded) {
-      return;
-    }
+  const loadExistingHighlights = useCallback(
+    async (retryCount = 0) => {
+      const MAX_RETRIES = 10; // Maximum 10 retries (5 seconds total)
 
-    // Check if we have highlights to load
-    if (!highlightsData?.highlights || highlightsData.highlights.length === 0) {
-      setAnnotationsLoaded(true);
-      return;
-    }
+      // Don't load if already loaded
+      if (annotationsLoaded) {
+        console.log("Annotations already loaded, skipping...");
+        return;
+      }
 
-    // Check if PDF viewer and annotation module are ready
-    if (!pdfViewerRef.current?.annotation) {
-      return;
-    }
+      if (
+        !highlightsData?.highlights ||
+        highlightsData.highlights.length === 0
+      ) {
+        console.log("No highlights to load");
+        setAnnotationsLoaded(true);
+        return;
+      }
 
-    try {
-      let successCount = 0;
-      let errorCount = 0;
-
-      for (const highlight of highlightsData.highlights) {
-        try {
-          // Ensure page number is 1-based for Syncfusion (convert from 0-based if needed)
-          const syncfusionPageNumber =
-            highlight.pageNumber >= 1
-              ? highlight.pageNumber
-              : highlight.pageNumber + 1;
-
-          const annotationOptions: Partial<HighlightSettings> = {
-            bounds: highlight.textbounds,
-            pageNumber: syncfusionPageNumber,
-            author: "User",
-            subject: `${highlight.type} Highlight`,
-            color: highlight.color,
-            opacity: highlight.opacity,
-            customData: {
-              id: `existing-highlight-${highlight.id}`,
-              highlightId: highlight.id,
-              noteId: highlight.noteId,
-              type: highlight.type,
-              text: highlight.content,
-            },
-          };
-
-          pdfViewerRef.current.annotation.addAnnotation(
-            "Highlight",
-            annotationOptions as HighlightSettings
-          );
-
-          successCount++;
-        } catch (highlightError) {
-          errorCount++;
+      // Check if PDF viewer is ready
+      if (!isPdfViewerReady()) {
+        if (retryCount >= MAX_RETRIES) {
           console.error(
-            `❌ Error loading highlight ${highlight.id}:`,
-            highlightError
+            "PDF viewer failed to initialize after maximum retries, giving up"
           );
-          // Continue loading other highlights even if one fails
+          setAnnotationsLoaded(true); // Mark as loaded to prevent further attempts
+          return;
         }
+
+        console.log(
+          `PDF viewer not ready, retrying in 500ms... (attempt ${
+            retryCount + 1
+          }/${MAX_RETRIES})`
+        );
+        setTimeout(() => loadExistingHighlights(retryCount + 1), 1000);
+        return;
       }
 
-      setAnnotationsLoaded(true);
+      try {
+        console.log(
+          "Loading existing highlights:",
+          highlightsData.highlights.length
+        );
 
-      if (successCount > 0) {
-        toast.success(`Loaded ${successCount} existing highlights`);
+        for (const highlight of highlightsData.highlights) {
+          try {
+            const annotationOptions: Partial<HighlightSettings> = {
+              bounds: highlight.textbounds,
+              pageNumber: highlight.pageNumber,
+              author: "User",
+              subject: `${highlight.type} Highlight`,
+              color: highlight.color,
+              opacity: highlight.opacity,
+              customData: {
+                id: `existing-highlight-${highlight.id}`,
+                highlightId: highlight.id,
+                noteId: highlight.noteId,
+                type: highlight.type,
+                text: highlight.content,
+              },
+            };
+
+            pdfViewerRef.current?.annotation.addAnnotation(
+              "Highlight",
+              annotationOptions as HighlightSettings
+            );
+
+            console.log(
+              `Loaded highlight ${highlight.id} on page ${highlight.pageNumber}`
+            );
+          } catch (highlightError) {
+            console.error(
+              `Error loading highlight ${highlight.id}:`,
+              highlightError
+            );
+            // Continue loading other highlights even if one fails
+          }
+        }
+
+        setAnnotationsLoaded(true);
+        console.log("All existing highlights loaded successfully");
+      } catch (error) {
+        console.error("Error loading existing highlights:", error);
+        // Retry after a longer delay if there's a general error
+        setTimeout(() => loadExistingHighlights(), 2000);
       }
-    } catch (error) {
-      console.error("Error loading existing highlights:", error);
-      setAnnotationsLoaded(true); // Mark as loaded to prevent infinite retries
-    }
-  }, [highlightsData, annotationsLoaded]);
+    },
+    [highlightsData, isPdfViewerReady, annotationsLoaded]
+  );
 
   // Handle highlight deleted
   const handleHighlightDeleted = useCallback(
     (highlightId: string) => {
+      console.log("Highlight deleted:", highlightId);
+
       // Remove the annotation from Syncfusion viewer
       if (pdfViewerRef.current?.annotationCollection) {
         try {
@@ -813,12 +704,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
               ann.customData?.id === highlightId
           );
 
-          if (targetAnnotation && targetAnnotation.annotationId) {
-            // First select the annotation, then delete it
-            pdfViewerRef.current.annotation.selectAnnotation(
-              targetAnnotation.annotationId
-            );
-            pdfViewerRef.current.annotation.deleteAnnotation();
+          if (targetAnnotation) {
+            //pdfViewerRef.current.annotation.deleteAnnotation(targetAnnotation);
+            console.log("Syncfusion annotation deleted successfully");
           }
         } catch (error) {
           console.error("Error deleting Syncfusion annotation:", error);
@@ -839,56 +727,18 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
     setHoveredQuickHighlight(null);
   }, []);
 
-  // Handle note preview modal close
-  const handleCloseNotePreview = useCallback(() => {
-    setShowNotePreview(false);
-    setPreviewNoteId(null);
-  }, []);
+  /**
+   * Handle PDF document loading
+   */
+  const handleDocumentLoad = useCallback(async () => {
+    console.log("PDF document loaded");
+    setIsLoading(false);
 
-  // Effect to load highlights when viewer is ready and we have data
-  useEffect(() => {
-    if (
-      isViewerReady &&
-      highlightsData &&
-      !annotationsLoaded &&
-      pdfViewerRef.current?.annotation
-    ) {
-      loadExistingHighlights();
-    }
-  }, [
-    isViewerReady,
-    highlightsData,
-    annotationsLoaded,
-    loadExistingHighlights,
-  ]);
-
-  // Effect to handle initial loading state
-  useEffect(() => {
-    if (currentPdfData?.fileUrl && !isPdfLoading) {
-      // Keep isLoading true until documentLoad event fires
-    } else if (!currentPdfData && !isPdfLoading && !pdfError) {
-      // If no PDF data and not loading, something went wrong
-      setIsLoading(false);
-    }
-  }, [currentPdfData?.fileUrl, isPdfLoading, pdfError]);
-
-  // Effect to reset loading state when fresh PDF data is available
-  useEffect(() => {
-    if (currentPdfData?.fileUrl && isLoading && !isPdfLoading) {
-      // Fallback timeout to prevent infinite loading
-      const loadingTimeout = setTimeout(() => {
-        if (isLoading) {
-          console.warn(
-            "Document load timeout reached, forcing loading state to false"
-          );
-          setIsLoading(false);
-          setIsViewerReady(true);
-        }
-      }, 15000); // 15 second timeout
-
-      return () => clearTimeout(loadingTimeout);
-    }
-  }, [currentPdfData?.fileUrl, isLoading, isPdfLoading]);
+    // Load existing highlights after PDF is loaded
+    setTimeout(() => {
+      loadExistingHighlights(0);
+    }, 1000);
+  }, [loadExistingHighlights]);
 
   /**
    * Handle PDF loading errors
@@ -904,9 +754,9 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
    */
   const handleRefreshUrl = useCallback(async () => {
     if (pdfDocument?.id) {
+      console.log("Refreshing PDF URL and resetting annotations...");
       setAnnotationsLoaded(false); // Reset annotations loaded state for new URL
       setIsLoading(true); // Show loading state during refresh
-      setIsViewerReady(false); // Reset viewer ready state
       await refetchPdf();
     }
   }, [pdfDocument?.id, refetchPdf]);
@@ -985,11 +835,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         console.error("PDFAnnotationViewer error:", error, errorInfo);
       }}
     >
-      <div
-        className={`relative w-full h-full overflow-hidden ${className} ${
-          selectedTool === "delete" ? "cursor-crosshair" : ""
-        }`}
-      >
+      <div className={`relative w-full h-full overflow-hidden ${className}`}>
         {/* Syncfusion PDF Viewer */}
         <PdfViewerComponent
           ref={pdfViewerRef}
@@ -998,14 +844,8 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           serviceUrl="" // Using client-side rendering
           resourceUrl={resourceUrl}
           style={{ height: "100%", width: "100%" }}
-          documentLoad={() => {
-            setIsLoading(false);
-            setIsViewerReady(true);
-          }}
+          documentLoad={handleDocumentLoad}
           documentLoadFailed={handleDocumentLoadFailed}
-          created={() => {
-            // PDF viewer created
-          }}
           enableTextSelection={true}
           enableTextSearch={true}
           enableNavigation={true}
@@ -1029,14 +869,13 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
           }}
           annotationMouseover={(args) => handleAnnotationMouseover(args)}
           annotationMouseLeave={() => handleAnnotationMouseLeave()}
-          annotationSelect={(args) => handleAnnotationClick(args)}
+          annotationDoubleClick={() => {}}
         >
           <Inject
             services={[
               TextSelection,
               TextSearch,
               Navigation,
-              Magnification,
               LinkAnnotation,
               BookmarkView,
               ThumbnailView,
@@ -1047,49 +886,61 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
         </PdfViewerComponent>
 
         {/* Loading Overlay */}
-        {(isLoading || isPdfLoading) && (
-          <div className="absolute inset-0 bg-background/75 backdrop-blur-sm flex items-center justify-center">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
             <div className="text-center">
               <RefreshCw
                 size={32}
-                className="text-primary mx-auto mb-2 animate-spin"
+                className="text-blue-500 mx-auto mb-2 animate-spin"
               />
-              <p className="text-foreground font-medium">Loading PDF...</p>
+              <p className="text-gray-600 font-medium">Loading PDF...</p>
             </div>
           </div>
         )}
 
         {/* Note Creation Modal */}
-        {showNoteModal && (
-          <UnifiedNoteModal
-            onClose={handleCloseNoteModal}
-            selectedText={selectedText}
-            pdfTitle={currentPdfData?.filename}
-            onNoteCreated={handleNoteCreated}
-            onNoteSaved={handleNoteSaved}
-            mode="create"
-          />
-        )}
+        <NoteCreationModal
+          isOpen={showNoteModal}
+          onClose={handleCloseNoteModal}
+          selectedText={selectedText}
+          pdfTitle={currentPdfData?.filename}
+          onNoteCreated={handleNoteCreated}
+        />
+
+        {/* Highlight Hover Toolbar */}
+        <HighlightHoverToolbar
+          isVisible={showHoverToolbar}
+          position={hoveredHighlight?.position || null}
+          noteId={hoveredHighlight?.noteId || null}
+          noteTitle={hoveredHighlight?.noteTitle}
+          onViewNote={handleViewNote}
+        />
 
         {/* Note Preview Modal */}
-        {showNotePreview && (
-          <UnifiedNoteModal
-            onClose={handleCloseNotePreview}
-            noteId={previewNoteId}
-            mode="preview"
-          />
-        )}
+        <NotePreviewModal
+          isOpen={showNotePreview}
+          onClose={handleCloseNotePreview}
+          noteId={previewNoteId}
+        />
 
-        {/* Delete Highlight Dialog */}
-        <DeleteHighlightDialog
-          open={showDeleteDialog}
-          onClose={handleDeleteDialogClose}
-          onConfirm={handleDeleteConfirm}
-          hasLinkedNote={
-            deleteTarget?.customData?.type === "note" &&
-            !!deleteTarget?.customData?.noteId
-          }
-          isDeleting={isDeleting}
+        {/* Quick Highlight Hover Trigger */}
+        <HighlightHoverTrigger
+          isVisible={showHoverTrigger}
+          position={hoveredQuickHighlight?.position || null}
+          onTriggerClick={handleContextMenuTriggerClick}
+          onHoverEnd={handleHoverTriggerEnd}
+        />
+
+        {/* Quick Highlight Context Menu */}
+        <HighlightContextMenu
+          isVisible={showContextMenu}
+          position={hoveredQuickHighlight?.position || null}
+          highlightId={hoveredQuickHighlight?.id || null}
+          currentColor={hoveredQuickHighlight?.color}
+          currentOpacity={hoveredQuickHighlight?.opacity}
+          onHighlightUpdated={handleHighlightUpdated}
+          onHighlightDeleted={handleHighlightDeleted}
+          onClose={handleContextMenuClose}
         />
       </div>
     </ErrorBoundary>

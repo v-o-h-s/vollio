@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import { getValidOAuthTokens } from '@/lib/services/oauth-token-service';
+import { getValidOAuthTokens } from '@/lib/services/school-lms/oauth-token-service';
 
 // Client-side Google Auth utilities
 // Note: Server-side Google Auth logic is in /app/api/google/ routes

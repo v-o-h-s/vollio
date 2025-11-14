@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Playfair_Display, Poppins, Outfit } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Poppins, Outfit } from "next/font/google";
 import "./globals.css";
 import "./syncfusion.css";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -23,11 +23,12 @@ const inter = Inter({
   display: "swap",
 });
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  display: "swap",
-});
+// Temporarily disabled due to Turbopack font loading issue
+// const playfair = Playfair_Display({
+//   variable: "--font-playfair",
+//   subsets: ["latin"],
+//   display: "swap",
+// });
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -62,7 +63,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${playfair.variable} ${poppins.variable} ${outfit.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable}  ${poppins.variable} ${outfit.variable} antialiased`}
       >
         <ThemeProvider defaultTheme="light" storageKey="noto-theme">
           <ClerkProvider

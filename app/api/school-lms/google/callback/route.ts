@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 import { auth } from "@clerk/nextjs/server";
-import { saveOAuthTokens } from "@/lib/services/oauth-token-service";
+import { saveOAuthTokens } from "@/lib/services/school-lms/oauth-token-service";
 
 // Create OAuth2 client for server-side use
 const oauth2Client = new google.auth.OAuth2(

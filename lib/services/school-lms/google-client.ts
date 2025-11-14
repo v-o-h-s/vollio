@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import { getOAuthTokens, areTokensExpired } from '@/lib/services/oauth-token-service';
+import { getOAuthTokens, areTokensExpired } from '@/lib/services/school-lms/oauth-token-service';
 
 /**
  * Client-side function to get Google Auth URL
