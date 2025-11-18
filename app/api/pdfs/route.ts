@@ -11,13 +11,13 @@ import { Logger } from "@/lib/utils/logger";
 
 /**
  * Fetches all user's PDFs with sorting and enhanced error handling
- * Uses RLS policies to automatically filter by authenticated user
+ * Uses RLS policies to automatically filter by authenticated user 
  */
 async function fetchUserPDFs(supabaseClient: any) {
   Logger.debug("Fetching user PDFs from database");
   const startTime = performance.now();
 
-  const { data, error, count } = await supabaseClient
+  const { data,  error, count } = await supabaseClient
     .from("pdfs")
     .select(
       `
