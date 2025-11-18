@@ -107,7 +107,7 @@ async function attachFileWithUrls(supabaseClient: any, pdfs: any[]) {
 
   try {
     const result = await Promise.all(
-      pdfs.map(async (pdf, index) => {
+      pdfs.map(async (pdf,  index) => {
         
         const signedUrl = await generateSignedUrl(supabaseClient, pdf.storage_path);
         return {
