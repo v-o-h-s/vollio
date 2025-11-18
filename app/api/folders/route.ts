@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
-import { AuthError, DatabaseError } from "@/lib/utils/error-handling";
-import { ValidationError } from "@/lib/utils/error-handling/ValidationError";
-import { withErrorHandler } from "@/lib/utils/error-handling";
+import { AuthError, DatabaseError, GeneralError } from "@/lib/utils/error-handling";
 import { Logger } from "@/lib/utils/logger";
+import { withValidation } from "@/lib/wrappers/withValidation";
+import { createFolderSchema } from "@/lib/dto/folder";
+import { withErrorHandling } from "@/lib/wrappers/withErrorHandling";
 interface Folder {
   id: string;
   user_id: string;
@@ -84,18 +85,17 @@ async function handleGET(request: NextRequest) {
   );
 
   Logger.success(`📂 Successfully returned ${foldersWithCounts.length} folders with PDF counts`);
-
-  return NextResponse.json(
-    {
-      success: true,
-      data: {
-        folders: foldersWithCounts,
-        totalCount: count || 0,
-      },
+  const response: FoldersResponse = {
+    success: true,
+    data: {
+      folders: foldersWithCounts,
+      totalCount: count || 0,
     },
-    { status: 200 }
-  );
+  };
+
+  return NextResponse.json(response);
 }
+
 
 /**
  * POST /api/folders - Create a new folder
@@ -114,24 +114,9 @@ async function handlePOST(request: NextRequest) {
   Logger.info(`👤 Authenticated user: ${userId}`);
 
   const body = (await request.json()) as CreateFolderRequest;
-  Logger.info(`📋 Request body received`, { name: body.name, parent_id: body.parent_id });
-
-  // Validate required fields
-  if (!body.name || (typeof body.name === "string" && body.name.trim() === "")) {
-    Logger.warn(`❌ Validation failed: name is required for user ${userId}`);
-    throw ValidationError.fieldRequired("name", { ...context, userId });
-  }
+  Logger.info(`📋 Request body received (already validated by Zod)`, { name: body.name, parent_id: body.parent_id });
 
   const folderName = body.name.trim();
-
-  // Validate folder name length
-  if (folderName.length === 0 || folderName.length > 255) {
-    Logger.warn(`❌ Validation failed: folder name length invalid for user ${userId}`, { length: folderName.length });
-    throw ValidationError.fieldLengthInvalid("name", 1, 255, { ...context, userId, folderName });
-  }
-
-  Logger.info(`✅ Field validation passed`, { folderName });
-
   const supabase = await getAuthenticatedSupabaseClient();
 
   // If parent_id provided, validate it exists and belongs to user
@@ -147,9 +132,8 @@ async function handlePOST(request: NextRequest) {
 
     if (parentError || !parentFolder) {
       Logger.warn(`❌ Parent folder validation failed`, { parent_id: body.parent_id, userId });
-      throw ValidationError.invalidFormat(
-        "parent_id",
-        "valid folder ID belonging to this user",
+      throw GeneralError.unknown(
+        `Parent folder not found or access denied`,
         { ...context, userId, parent_id: body.parent_id }
       );
     }
@@ -170,8 +154,7 @@ async function handlePOST(request: NextRequest) {
 
   if (!checkError && existingFolder) {
     Logger.warn(`❌ Duplicate folder detected`, { folderName, parent_id: body.parent_id, userId });
-    throw ValidationError.duplicateValue(
-      "name",
+    throw GeneralError.unknown(
       `A folder with the name "${folderName}" already exists in this location`,
       { ...context, userId, folderName }
     );
@@ -202,18 +185,13 @@ async function handlePOST(request: NextRequest) {
   }
 
   Logger.success(`📂 Folder created successfully`, { folderId: folder.id, folderName, userId });
+  const response: CreateFolderResponse = {
+    success: true,
+    data: folder,
+  };
 
-  return NextResponse.json(
-    {
-      success: true,
-      data: {
-        ...folder,
-        pdf_count: 0,
-      },
-    },
-    { status: 201 }
-  );
+  return NextResponse.json(response);
+
 }
-
-export const GET = withErrorHandler(handleGET);
-export const POST = withErrorHandler(handlePOST);
+export const GET = withErrorHandling(handleGET);
+export const POST = withErrorHandling(withValidation(createFolderSchema, handlePOST));

@@ -1,4 +1,4 @@
-import { BaseAppError, ErrorSeverity, ErrorContext } from "./BaseAppError";
+import { BaseAppError, ErrorSeverity } from "./BaseAppError";
 
 export enum AuthErrorType {
   AUTHENTICATION_REQUIRED = "AUTHENTICATION_REQUIRED",
@@ -21,7 +21,7 @@ export class AuthError extends BaseAppError {
       userMessage: string;
       technicalMessage?: string;
       statusCode: number;
-      context?: ErrorContext;
+      context?: any,
       actionLabel?: string;
     }
   ) {
@@ -39,7 +39,7 @@ export class AuthError extends BaseAppError {
    */
   static authenticationRequired(
     message: string = "Authentication required",
-    context?: ErrorContext,
+    context?: any,
   ): AuthError {
     return new AuthError(
       AuthErrorType.AUTHENTICATION_REQUIRED,
@@ -61,7 +61,7 @@ export class AuthError extends BaseAppError {
    */
   static authorizationDenied(
     message: string = "Access denied",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): AuthError {
     return new AuthError(
@@ -82,7 +82,7 @@ export class AuthError extends BaseAppError {
    */
   static tokenExpired(
     message: string = "Token expired",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): AuthError {
     return new AuthError(

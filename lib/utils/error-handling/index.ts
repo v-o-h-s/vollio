@@ -56,7 +56,7 @@
  */
 
 // Base error and types
-export { BaseAppError, ErrorSeverity, type ErrorContext } from "./BaseAppError";
+export { BaseAppError, ErrorSeverity } from "./BaseAppError";
 import { BaseAppError, ErrorSeverity } from "./BaseAppError";
 
 // Authentication errors
@@ -85,5 +85,4 @@ export { GeneralError, GeneralErrorType } from "./GeneralError";
 import { GeneralError } from "./GeneralError";
 
 // Error handling utilities
-export { withErrorHandler } from "../../wrappers/withErrorHandling";
 

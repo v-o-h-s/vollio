@@ -143,11 +143,30 @@ inclusion: always
 - **Accessibility**: Full keyboard navigation and screen reader support
 - **Performance**: Optimized animations with hardware acceleration
 
-### UI/UX Architecture
-- **Custom Dialog Components**: Styled confirmation dialogs replacing browser alerts
-- **Context-Based State**: AutoSaveStatusProvider for global auto-save status management
-- **Floating Components**: Bottom-right positioned status indicators with scoped visibility
-- **Modern Navigation System**: Glassmorphism floating navigation dock and context-aware sidebar
+### Advanced Error Handling System ✅ COMPLETED
+- **8-Category Error Classification**: AuthError, AIError, ValidationError, StorageError, FileError, DatabaseError, NetworkError, GeneralError
+- **Factory Method Pattern**: Static factory methods for creating specific error types with proper context
+- **BaseAppError Architecture**: All errors inherit from BaseAppError with timestamp, severity, userMessage, technicalMessage, statusCode, context, and retryable properties
+- **Comprehensive Error Mapping**: DatabaseError.mapSupabaseErrorCodeToDatabaseError() for automatic Supabase error mapping
+- **withErrorHandler Wrapper**: API route wrapper for consistent error formatting and JSON responses
+- **withValidation Wrapper**: Request body validation using Zod schemas with proper error handling
+- **withValidatedHandler Wrapper**: Composed wrapper combining validation and error handling for cleaner routes
+- **Error Response Formatting**: Consistent JSON responses with errorType, errorSubType, userMessage, severity, timestamp, actionLabel, and context
+
+### Request Validation System ✅ COMPLETED
+- **Zod Schema Integration**: Request body validation at route level before handler execution
+- **withValidation Wrapper**: Automatically validates request against schema and throws ValidationError on failure
+- **Flexible Validation Methods**: ValidationError factory methods for field-level, format, length, and duplicate value validations
+- **Comprehensive Error Details**: Validation errors include field paths, error codes, expected formats, and human-readable messages
+- **Type Safety**: Full TypeScript support for validated request bodies
+
+### Logging Architecture ✅ COMPLETED
+- **Logger Utility**: Centralized logging with colorized output, timestamps, and emoji indicators
+- **Log Levels**: info(), warn(), error(), success() methods with distinct styling
+- **Emoji Indicators**: Visual hierarchy with 📂, 📝, 👤, 🔍, ✅, ❌, 🔐, 💾, ⚠️ for quick scanning
+- **Request Tracing**: Logging at request entry, validation, authentication, operations, and response points
+- **Comprehensive Context**: Logs include operation names, user IDs, resource IDs, error details, and timing information
+- **Error Logging**: Full error stack traces and context for debugging in error handlers
 - **Obsidian-Style Design**: Clean interface with separate title input and borderless layouts
 
 ### RTK Query Patterns

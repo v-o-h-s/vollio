@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-
+import {Logger} from "@/lib/utils/logger";
 /**
  * GET /api/school-lms/google
  * Google Classroom LMS Integration API Overview
  */
 export async function GET(request: NextRequest) {
   try {
+    Logger.info("📋 Generating Google Classroom API overview");
+
     const { userId } = await auth();
+    Logger.info(`👤 User authenticated: ${userId ? "yes" : "no"}`);
     
     const baseUrl = new URL(request.url).origin;
+    Logger.info(`🌐 Base URL: ${baseUrl}`);
     
     const apiOverview = {
       name: "Google Classroom LMS Integration API",
@@ -81,7 +85,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error("Error generating API overview:", error);
+    Logger.error("❌ Error generating API overview", error);
     return NextResponse.json(
       { error: "Failed to generate API overview" },
       { status: 500 }

@@ -6,7 +6,7 @@ import { generateSignedUrl, getTokenForTesting } from "@/lib/utils/supabase-help
 import type { SupabasePDFListResponse } from "@/lib/types/pdf";
 
 import { AuthError, DatabaseError } from "@/lib/utils/error-handling";
-import { withErrorHandler } from "@/lib/utils/error-handling";
+import { withErrorHandling } from "@/lib/wrappers/withErrorHandling";
 import { Logger } from "@/lib/utils/logger";
 
 /**
@@ -108,10 +108,7 @@ async function attachFileWithUrls(supabaseClient: any, pdfs: any[]) {
   try {
     const result = await Promise.all(
       pdfs.map(async (pdf, index) => {
-        Logger.debug(`Generating signed URL for PDF ${index + 1}/${pdfs.length}`, {
-          pdfId: pdf.id,
-          storagePath: pdf.storage_path
-        });
+        
         const signedUrl = await generateSignedUrl(supabaseClient, pdf.storage_path);
         return {
           ...pdf,
@@ -120,8 +117,7 @@ async function attachFileWithUrls(supabaseClient: any, pdfs: any[]) {
       })
     );
 
-    const duration = performance.now() - startTime;
-    Logger.debug(`Successfully generated ${result.length} signed URLs`, { duration });
+
     return result;
   } catch (error) {
     Logger.error("Failed to attach file URLs", { error, pdfCount: pdfs.length });
@@ -134,7 +130,7 @@ async function handleGET(request: NextRequest): Promise<NextResponse> {
   Logger.info("GET /api/pdfs request received");
 
   // Get auth session with token
-  const { userId, getToken,sessionId } = await auth();
+  const { userId, getToken, sessionId } = await auth();
 
   //testing
   //const supabaseToken = await getTokenForTesting(getToken,sessionId);
@@ -188,4 +184,4 @@ async function handleGET(request: NextRequest): Promise<NextResponse> {
 }
 
 // Enhanced GET handler with comprehensive error handling
-export const GET = withErrorHandler(handleGET);
+export const GET = withErrorHandling(handleGET);

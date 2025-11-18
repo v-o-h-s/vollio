@@ -8,10 +8,7 @@ export enum ErrorSeverity {
   HIGH = "HIGH",
   CRITICAL = "CRITICAL",
 }
-
-export interface ErrorContext {
-  [key: string]: any;
-}
+// TODO :update the type of context
 
 export abstract class BaseAppError extends Error {
   public readonly timestamp: Date;
@@ -19,7 +16,7 @@ export abstract class BaseAppError extends Error {
   public readonly userMessage: string;
   public readonly technicalMessage?: string;
   public readonly statusCode: number;
-  public readonly context?: ErrorContext;
+  public readonly context?: any;
   public readonly details?: any;
   public readonly actionLabel?: string;
   public readonly cause?: Error;
@@ -30,7 +27,7 @@ export abstract class BaseAppError extends Error {
       severity: ErrorSeverity;
       userMessage: string;
       statusCode: number;
-      context?: ErrorContext;
+      context?: any;
       actionLabel?: string;
       cause?: Error;
     }

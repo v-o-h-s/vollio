@@ -1,4 +1,4 @@
-import { BaseAppError, ErrorSeverity, ErrorContext } from "./BaseAppError";
+import { BaseAppError, ErrorSeverity } from "./BaseAppError";
 
 export enum AIErrorType {
   SERVICE_ERROR = "SERVICE_ERROR",
@@ -22,7 +22,7 @@ export class AIError extends BaseAppError {
       userMessage: string;
       actionLabel: string;
       statusCode: number;
-      context?: ErrorContext;
+      context?: any,
     }
   ) {
     super(message, {
@@ -39,7 +39,7 @@ export class AIError extends BaseAppError {
    */
   static serviceError(
     message: string = "AI service error",
-    context?: ErrorContext,
+    context?: any,
   ): AIError {
     return new AIError(AIErrorType.SERVICE_ERROR, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -55,7 +55,7 @@ export class AIError extends BaseAppError {
    */
   static quotaExceeded(
     message: string = "AI quota exceeded",
-    context?: ErrorContext,
+    context?: any,
   ): AIError {
     return new AIError(AIErrorType.QUOTA_EXCEEDED, message, {
       severity: ErrorSeverity.HIGH,
@@ -72,7 +72,7 @@ export class AIError extends BaseAppError {
    */
   static contentPolicyViolation(
     message: string = "Content policy violation",
-    context?: ErrorContext,
+    context?: any,
   ): AIError {
     return new AIError(AIErrorType.CONTENT_POLICY_VIOLATION, message, {
       severity: ErrorSeverity.LOW,
@@ -89,7 +89,7 @@ export class AIError extends BaseAppError {
    */
   static modelUnavailable(
     message: string = "AI model unavailable",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): AIError {
     return new AIError(AIErrorType.MODEL_UNAVAILABLE, message, {

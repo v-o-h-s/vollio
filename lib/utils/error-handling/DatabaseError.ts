@@ -1,4 +1,4 @@
-import { BaseAppError, ErrorSeverity, ErrorContext } from "./BaseAppError";
+import { BaseAppError, ErrorSeverity } from "./BaseAppError";
 
 export enum DatabaseErrorType {
   GENERAL_ERROR = "GENERAL_ERROR",
@@ -27,7 +27,7 @@ export class DatabaseError extends BaseAppError {
       userMessage: string;
       actionLabel: string;
       statusCode: number;
-      context?: ErrorContext;
+      context?: any;
       cause?: Error;
     }
   ) {
@@ -46,7 +46,7 @@ export class DatabaseError extends BaseAppError {
    */
   static general(
     message: string = "Database error",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): DatabaseError {
     return new DatabaseError(DatabaseErrorType.GENERAL_ERROR, message, {
@@ -64,7 +64,7 @@ export class DatabaseError extends BaseAppError {
    */
   static connectionError(
     message: string = "Database connection failed",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): DatabaseError {
     return new DatabaseError(DatabaseErrorType.CONNECTION_ERROR, message, {
@@ -82,7 +82,7 @@ export class DatabaseError extends BaseAppError {
    */
   static constraintError(
     message: string = "Database constraint violation",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): DatabaseError {
     return new DatabaseError(DatabaseErrorType.CONSTRAINT_ERROR, message, {
@@ -101,7 +101,7 @@ export class DatabaseError extends BaseAppError {
    */
   static accessDenied(
     message: string = "Access denied",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): DatabaseError {
     return new DatabaseError(DatabaseErrorType.ACCESS_DENIED, message, {
@@ -119,7 +119,7 @@ export class DatabaseError extends BaseAppError {
    */
   static notFound(
     message: string = "Resource not found",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): DatabaseError {
     return new DatabaseError(DatabaseErrorType.NOT_FOUND, message, {
@@ -137,7 +137,7 @@ export class DatabaseError extends BaseAppError {
    */
   static jwtExpired(
     message: string = "Authentication token expired",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): DatabaseError {
     return new DatabaseError(DatabaseErrorType.JWT_EXPIRED, message, {
@@ -155,7 +155,7 @@ export class DatabaseError extends BaseAppError {
    */
   static networkError(
     message: string = "Network error",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): DatabaseError {
     return new DatabaseError(DatabaseErrorType.NETWORK_ERROR, message, {
@@ -173,7 +173,7 @@ export class DatabaseError extends BaseAppError {
    */
   static storageError(
     message: string = "File storage error",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): DatabaseError {
     return new DatabaseError(DatabaseErrorType.STORAGE_ERROR, message, {
@@ -191,7 +191,7 @@ export class DatabaseError extends BaseAppError {
    */
   static RlsViolationError(
     message: string = "RLS violation",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): DatabaseError {
     return new DatabaseError(DatabaseErrorType.RLS_VIOLATION_ERROR, message, {
@@ -257,7 +257,7 @@ export class DatabaseError extends BaseAppError {
   static mapSupabaseErrorCodeToDatabaseError(
     supabaseErrorCode: string,
     message?: string,
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): DatabaseError {
     switch (supabaseErrorCode) {
@@ -306,7 +306,7 @@ export class DatabaseError extends BaseAppError {
    */
   static mapErrorMessageToDatabaseError(
     error: any,
-    context?: ErrorContext
+    context?: any
   ): DatabaseError {
     const errorMessage = error?.message || "";
 

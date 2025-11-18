@@ -1,4 +1,4 @@
-import { BaseAppError, ErrorSeverity, ErrorContext } from "./BaseAppError";
+import { BaseAppError, ErrorSeverity, } from "./BaseAppError";
 
 export enum NetworkErrorType {
   GENERAL_ERROR = "GENERAL_ERROR",
@@ -21,7 +21,7 @@ export class NetworkError extends BaseAppError {
       userMessage: string;
       actionLabel: string;
       statusCode: number;
-      context?: ErrorContext;
+      context?: any;
     }
   ) {
     super(message, {
@@ -39,7 +39,7 @@ export class NetworkError extends BaseAppError {
    */
   static general(
     message: string = "Network error",
-    context?: ErrorContext
+    context?: any,
   ): NetworkError {
     return new NetworkError(NetworkErrorType.GENERAL_ERROR, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -55,7 +55,7 @@ export class NetworkError extends BaseAppError {
    */
   static timeout(
     message: string = "Request timeout",
-    context?: ErrorContext,
+    context?: any,
   ): NetworkError {
     return new NetworkError(NetworkErrorType.TIMEOUT, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -71,7 +71,7 @@ export class NetworkError extends BaseAppError {
    */
   static connectionFailed(
     message: string = "Connection failed",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): NetworkError {
     return new NetworkError(NetworkErrorType.CONNECTION_FAILED, message, {

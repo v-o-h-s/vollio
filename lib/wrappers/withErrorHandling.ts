@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ZodSchema } from "zod";
 import { BaseAppError } from "../utils/error-handling/BaseAppError";
 import { GeneralError } from "../utils/error-handling/GeneralError";
 import { AuthError } from "../utils/error-handling/AuthError";
@@ -8,6 +9,8 @@ import { StorageError } from "../utils/error-handling/StorageError";
 import { FileError } from "../utils/error-handling/files/FileError";
 import { DatabaseError } from "../utils/error-handling/DatabaseError";
 import { NetworkError } from "../utils/error-handling/NetworkError";
+import { ValidationError } from "../utils/error-handling/ValidationError";
+import { withValidation } from "./withValidation";
 import { Logger } from "../utils/logger";
 
 /**
@@ -22,10 +25,10 @@ import { Logger } from "../utils/logger";
  * });
  * ```
  */
-export function withErrorHandler(
+export function withErrorHandling(
     handler: (request: NextRequest) => Promise<NextResponse>
 ) {
-    return async (request: NextRequest): Promise<NextResponse> => { 
+    return async (request: NextRequest): Promise<NextResponse> => {
         try {
             return await handler(request);
         } catch (error: unknown) {
@@ -77,6 +80,25 @@ export function withErrorHandler(
                         success: false,
                         errorType: "VALIDATION_ERROR",
                         errorSubType: error.FileValidationErrorType,
+                        error: {
+                            userMessage: error.userMessage,
+                            message: error.message,
+                            severity: error.severity,
+                            timestamp: error.timestamp,
+                            context: error.context,
+                            actionLabel: error.actionLabel,
+                        },
+                    },
+                    { status: error.statusCode }
+                );
+            }
+
+            // Handle Zod ValidationError
+            if (error instanceof ValidationError) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        errorType: "VALIDATION_ERROR",
                         error: {
                             userMessage: error.userMessage,
                             message: error.message,

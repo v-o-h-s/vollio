@@ -153,6 +153,46 @@ When building UI flows, follow these established patterns:
 
 ## Development Context
 
+### Error Handling & User Experience
+
+All errors in Noto are designed with the user experience in mind. The system maps technical errors to user-friendly messages and recovery actions:
+
+#### User-Facing Error Messages
+
+**Authentication Errors**
+- "You must sign in to access this feature" → User directed to sign in page
+- "Your session has expired. Please sign in again." → Auto-refresh with sign-in prompt
+- "You don't have permission to access this resource." → Explain limited access, offer upgrade options
+
+**Validation Errors** 
+- "Folder name is required" → Highlight empty field with red border
+- "Folder name must be between 1 and 255 characters" → Show character count indicator
+- "A folder with this name already exists" → Suggest renaming or viewing existing folder
+- "File is too large (max 100MB)" → Show file size limit in upload dialog
+
+**File Errors**
+- "Failed to upload PDF. The file might be corrupted." → Suggest retrying or converting file format
+- "PDF could not be read. It might be encrypted or use an unsupported format." → Guide user to verify file
+- "Text extraction failed. Please try again or contact support." → Provide error code for support team
+
+**Database Errors**
+- "Could not save your changes. Please try again." → Automatic retry button
+- "Connection lost. Your changes will sync when online." → Show offline indicator
+- "An unexpected error occurred. Your work has been saved." → Reassure user, provide error code
+
+**Network Errors**
+- "Connection timeout. Please check your internet and try again." → Network status indicator
+- "Could not reach the server. Please try again." → Retry button with exponential backoff
+- "Service is temporarily unavailable. Please try again in a few minutes." → Graceful degradation
+
+#### Recovery Actions
+
+- **Automatic Retry**: Failed operations automatically retry up to 3 times with exponential backoff
+- **Offline Support**: Local caching ensures users can continue viewing and creating notes offline
+- **Clear Next Steps**: Every error message includes actionable next steps (Retry, Reload, Contact Support, Sign In)
+- **Error Codes**: Technical errors include codes for support team reference
+- **Contextual Help**: Help text explains why errors occur and how to prevent them
+
 ### Available Infrastructure
 When building features, leverage these completed and tested systems:
 - **Supabase Backend**: Complete database with RLS, file storage with signed URLs, comprehensive error handling, and activity tracking
@@ -164,7 +204,7 @@ When building features, leverage these completed and tested systems:
 - **State Management**: Redux store with RTK Query, typed hooks, selectors, and real-time cache invalidation
 - **Mobile Support**: Touch-friendly interfaces, responsive dialogs, mobile-specific interactions, and gesture handling
 - **Cross-tab Sync**: PostMessage-based navigation and state synchronization with error handling
-- **Error Handling**: Comprehensive error boundaries, recovery mechanisms, and user-friendly error messages
+- **Error Handling**: 8-category error classification with automatic validation, detailed logging, and user-friendly messages
 - **Activity Tracking**: Real-time user activity monitoring with debounced API calls and recent activity display
 - **Dashboard**: Complete PDF and note management interface with recent activity, upload functionality, and signed URL handling
 
