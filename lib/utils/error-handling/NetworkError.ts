@@ -27,7 +27,6 @@ export class NetworkError extends BaseAppError {
     super(message, {
       severity: options.severity,
       userMessage: options.userMessage,
-      technicalMessage: message,
       statusCode: options.statusCode,
       context: options.context,
       actionLabel: options.actionLabel,

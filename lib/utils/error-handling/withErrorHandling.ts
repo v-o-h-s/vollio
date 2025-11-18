@@ -9,16 +9,16 @@ import { DatabaseError, DatabaseErrorType } from "./DatabaseError";
 import { NetworkError, NetworkErrorType } from "./NetworkError";
 import { FileError, FileErrorType } from "./files/FileError";
 import { Logger } from "../logger";
-enum ErrorType{
-    AUTH="AUTH ERROR",
-    AI="AI ERROR",
-    VALIDATION="VALIDATION ERROR",
-    STORAGE="STORAGE ERROR",
-    DATABASE="DATABASE ERROR",
-    NETWORK="NETWORK ERROR",
-    FILE="FILE ERROR",
-    GENERAL="GENERAL ERROR",
-    UNKNOWN="UNKNOWN ERROR"
+enum ErrorType {
+    AUTH = "AUTH ERROR",
+    AI = "AI ERROR",
+    VALIDATION = "VALIDATION ERROR",
+    STORAGE = "STORAGE ERROR",
+    DATABASE = "DATABASE ERROR",
+    NETWORK = "NETWORK ERROR",
+    FILE = "FILE ERROR",
+    GENERAL = "GENERAL ERROR",
+    UNKNOWN = "UNKNOWN ERROR"
 }
 /**
  * Higher-order function to wrap API handlers with error handling
@@ -46,9 +46,9 @@ export function withErrorHandler(handler: NextApiHandler) {
                     errorSubType: error.authErrorType,
                     error: {
                         userMessage: error.userMessage,
-                        technicalMessage: error.technicalMessage,
                         severity: error.severity,
                         timestamp: error.timestamp,
+                        actionLabel: error.actionLabel,
                         context: error.context,
                     },
                 });
@@ -57,11 +57,12 @@ export function withErrorHandler(handler: NextApiHandler) {
             if (error instanceof AIError) {
                 return res.status(error.statusCode).json({
                     success: false,
-                    errorType:  ErrorType.AI,
+                    errorType: ErrorType.AI,
                     errorSubType: error.aiErrorType,
                     error: {
                         userMessage: error.userMessage,
-                        technicalMessage: error.technicalMessage,
+                        message: error.message,
+                        actionLabel: error.actionLabel,
                         severity: error.severity,
                         timestamp: error.timestamp,
                         context: error.context,
@@ -76,10 +77,11 @@ export function withErrorHandler(handler: NextApiHandler) {
                     errorSubType: error.validationErrorType,
                     error: {
                         userMessage: error.userMessage,
-                        technicalMessage: error.technicalMessage,
+                        message: error.message,
                         severity: error.severity,
                         timestamp: error.timestamp,
                         context: error.context,
+                        actionLabel: error.actionLabel,
                     },
                 });
             }
@@ -91,10 +93,11 @@ export function withErrorHandler(handler: NextApiHandler) {
                     errorSubType: error.storageErrorType,
                     error: {
                         userMessage: error.userMessage,
-                        technicalMessage: error.technicalMessage,
+                        message: error.message,
                         severity: error.severity,
                         timestamp: error.timestamp,
                         context: error.context,
+                        actionLabel: error.actionLabel,
                     },
                 });
             }
@@ -106,10 +109,11 @@ export function withErrorHandler(handler: NextApiHandler) {
                     errorSubType: error.databaseErrorType,
                     error: {
                         userMessage: error.userMessage,
-                        technicalMessage: error.technicalMessage,
+                        message: error.message,
                         severity: error.severity,
                         timestamp: error.timestamp,
                         context: error.context,
+                        actionLabel: error.actionLabel,
                     },
                 });
             }
@@ -121,10 +125,11 @@ export function withErrorHandler(handler: NextApiHandler) {
                     errorSubType: error.networkErrorType,
                     error: {
                         userMessage: error.userMessage,
-                        technicalMessage: error.technicalMessage,
+                        message: error.message,
                         severity: error.severity,
                         timestamp: error.timestamp,
                         context: error.context,
+                        actionLabel: error.actionLabel,
                     },
                 });
             }
@@ -133,11 +138,11 @@ export function withErrorHandler(handler: NextApiHandler) {
                 return res.status(error.statusCode).json({
                     success: false,
                     errorType: ErrorType.FILE,
-                    errorSubType: error.fileErrorType,
-                    fileName: error.fileName,
+                    errorSubType: error.FileErrorType,
+                    fileName: error.FileName,
                     error: {
                         userMessage: error.userMessage,
-                        technicalMessage: error.technicalMessage,
+                        message: error.message,
                         severity: error.severity,
                         timestamp: error.timestamp,
                         context: error.context,
@@ -152,10 +157,11 @@ export function withErrorHandler(handler: NextApiHandler) {
                     errorSubType: error.generalErrorType,
                     error: {
                         userMessage: error.userMessage,
-                        technicalMessage: error.technicalMessage,
+                        message: error.message,
                         severity: error.severity,
                         timestamp: error.timestamp,
                         context: error.context,
+                        actionLabel: error.actionLabel,
                     },
                 });
             }
@@ -169,9 +175,10 @@ export function withErrorHandler(handler: NextApiHandler) {
                     errorSubType: appError.generalErrorType,
                     error: {
                         userMessage: appError.userMessage,
-                        technicalMessage: error.message,
+                        message: error.message,
                         severity: appError.severity,
                         timestamp: appError.timestamp,
+
                     },
                 });
             }
@@ -189,29 +196,5 @@ export function withErrorHandler(handler: NextApiHandler) {
             });
         }
     };
-}
-
-/**
- * Async error boundary for use in try-catch blocks
- * 
- * Usage:
- * ```typescript
- * try {
- *   await someAsyncOperation();
- * } catch (error) {
- *   throw handleAsyncError(error);
- * }
- * ```
- */
-export function handleAsyncError(error: unknown): BaseAppError {
-    if (error instanceof BaseAppError) {
-        return error;
-    }
-
-    if (error instanceof Error) {
-        return GeneralError.unknown(error.message, undefined, error);
-    }
-
-    return GeneralError.unknown(String(error));
 }
 

@@ -28,7 +28,6 @@ export class AIError extends BaseAppError {
     super(message, {
       severity: options.severity,
       userMessage: options.userMessage,
-      technicalMessage: message,
       statusCode: options.statusCode,
       context: options.context,
     });

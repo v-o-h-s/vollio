@@ -16,6 +16,8 @@ import {
 } from "../supabaseClient";
 import type { Database } from "../types/database";
 import { AppError } from "./error-handling/errors";
+import { Logger } from "./logger";
+import { DatabaseError } from "./error-handling";
 
 /**
  * Maps Supabase errors to our application error types
@@ -392,23 +394,26 @@ export async function generateSignedUrl(
   supabaseClient: any,
   storagePath: string
 ): Promise<string> {
-  try {
-    const { data, error } = await supabaseClient.storage
-      .from(STORAGE_CONFIG.BUCKET_NAME)
-      .createSignedUrl(storagePath, STORAGE_CONFIG.SIGNED_URL_EXPIRY);
+  const { data, error } = await supabaseClient.storage
+    .from(STORAGE_CONFIG.BUCKET_NAME)
+    .createSignedUrl(storagePath, STORAGE_CONFIG.SIGNED_URL_EXPIRY);
 
-    if (error) {
-      console.error("Signed URL generation error:", error);
-      throw new Error(`Failed to generate signed URL: ${error.message}`);
-    }
-
-    if (!data?.signedUrl) {
-      throw new Error("Signed URL generation succeeded but no URL returned");
-    }
-
-    return data.signedUrl;
-  } catch (error) {
-    console.error("Error in generateSignedUrl:", error);
-    throw error;
+  if (error) {
+    Logger.error("Error generating signed URL:", error);
+    throw DatabaseError.general(
+      `Failed to generate signed URL: ${error.message}`,
+      { operation: "generate_signed_url" },
+      error
+    );
   }
+
+  if (!data?.signedUrl) {
+    Logger.error("Failed to generate signed URL: No URL returned");
+    throw DatabaseError.general(
+      "Failed to generate signed URL: No URL returned",
+      { operation: "generate_signed_url" }
+    );
+  }
+
+  return data.signedUrl;
 }

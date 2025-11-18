@@ -1,5 +1,6 @@
-import { BaseAppError, ErrorSeverity, ErrorContext } from "./BaseAppError";
-
+import { BaseAppError } from "./BaseAppError";
+import { ErrorSeverity } from "./BaseAppError";
+import { ErrorContext } from "./BaseAppError";
 export enum GeneralErrorType {
   UNKNOWN = "UNKNOWN",
   INTERNAL_SERVER = "INTERNAL_SERVER",
@@ -31,7 +32,6 @@ export class GeneralError extends BaseAppError {
   ) {
     super(message, {
       severity: options.severity,
-      retryable: options.retryable,
       userMessage: options.userMessage,
       technicalMessage: message,
       statusCode: options.statusCode,

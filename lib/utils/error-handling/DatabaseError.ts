@@ -4,6 +4,7 @@ export enum DatabaseErrorType {
   GENERAL_ERROR = "GENERAL_ERROR",
   CONNECTION_ERROR = "CONNECTION_ERROR",
   CONSTRAINT_ERROR = "CONSTRAINT_ERROR",
+  RLS_VIOLATION_ERROR = "RLS_VIOLATION_ERROR"
 }
 
 /**
@@ -29,7 +30,6 @@ export class DatabaseError extends BaseAppError {
     super(message, {
       severity: options.severity,
       userMessage: options.userMessage,
-      technicalMessage: message,
       statusCode: options.statusCode,
       context: options.context,
     });
@@ -74,6 +74,23 @@ export class DatabaseError extends BaseAppError {
     });
   }
 
+  static RlsViolationError(
+    message: string = "Database RLS violation",
+    context?: ErrorContext,
+    cause?: Error
+  ): DatabaseError {
+    return new DatabaseError(DatabaseErrorType.RLS_VIOLATION_ERROR, message, {
+      severity: ErrorSeverity.MEDIUM,
+      retryable: false,
+      userMessage:
+        "You do not have permission to access this data. Please contact support if you believe this is an error.",
+      actionLabel: "Contact Support",
+      statusCode: 403,
+      context,
+      cause,
+    });
+  }
+
   /**
    * Create a constraint error
    */
@@ -93,6 +110,7 @@ export class DatabaseError extends BaseAppError {
       cause,
     });
   }
+
 
   getTitle(): string {
     switch (this.databaseErrorType) {
@@ -117,6 +135,39 @@ export class DatabaseError extends BaseAppError {
         return "Refresh";
       default:
         return "Try Again";
+    }
+  }
+  static mapSupabaseErrorCodeToDatabaseError(
+    supabaseErrorCode: string,
+    message?: string,
+    context?: ErrorContext,
+    cause?: Error
+  ): DatabaseError {
+    switch (supabaseErrorCode) {
+      case "PGRST000":
+        return DatabaseError.connectionError(
+          message || "Failed to connect to the database",
+          context,
+          cause
+        );
+      case "PGRST101":
+        return DatabaseError.constraintError(
+          message || "Database constraint violation",
+          context,
+          cause
+        );
+      case "42501":
+        return DatabaseError.RlsViolationError(
+          message || "Database RLS violation",
+          context,
+          cause
+        );
+      default:
+        return DatabaseError.general(
+          message || "General database error",
+          context,
+          cause
+        );
     }
   }
 }

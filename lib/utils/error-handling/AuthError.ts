@@ -28,7 +28,6 @@ export class AuthError extends BaseAppError {
     super(message, {
       severity: options.severity,
       userMessage: options.userMessage,
-      technicalMessage: message,
       statusCode: options.statusCode,
       context: options.context,
       actionLabel: options.actionLabel,});
@@ -52,7 +51,7 @@ export class AuthError extends BaseAppError {
         actionLabel: "Sign In",
         statusCode: 401,
         context,
-        
+
       }
     );
   }

@@ -22,16 +22,17 @@ export abstract class BaseAppError extends Error {
   public readonly context?: ErrorContext;
   public readonly details?: any;
   public readonly actionLabel?: string;
+  public readonly cause?: Error;
 
   constructor(
     message: string,
     options: {
       severity: ErrorSeverity;
       userMessage: string;
-      technicalMessage?: string;
       statusCode: number;
       context?: ErrorContext;
       actionLabel?: string;
+      cause?: Error;
     }
   ) {
     super(message);
@@ -39,10 +40,10 @@ export abstract class BaseAppError extends Error {
     this.timestamp = new Date();
     this.severity = options.severity;
     this.userMessage = options.userMessage;
-    this.technicalMessage = options.technicalMessage || message;
     this.statusCode = options.statusCode;
     this.context = options.context;
     this.actionLabel = options.actionLabel;
+    this.cause = options.cause;
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
     }
