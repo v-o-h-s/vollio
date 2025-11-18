@@ -4,9 +4,9 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "../supabaseClient";
-import { createServerError } from "./error-handling/server-error-handling";
+import { createServerError } from "./error-handling/errorHandling";
 import { checkEnhancedRateLimit } from "./security-validation";
-import { ErrorType } from "@/lib/types/errors";
+import { ErrorType } from "@/lib/utils/error-handling/errors";
 
 export interface AuthContext {
   userId: string;

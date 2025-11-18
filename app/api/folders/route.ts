@@ -5,8 +5,8 @@ import {
   extractRequestContext,
   createServerError,
   validateRequired,
-} from "@/lib/utils/error-handling/server-error-handling";
-import { ErrorType } from "@/lib/types/errors";
+} from "@/lib/utils/error-handling/errorHandling";
+import { ErrorType } from "@/lib/utils/error-handling/errors";
 import {
   requireAuthentication,
   validateAuthentication,

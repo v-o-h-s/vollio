@@ -1,0 +1,87 @@
+/**
+ * Base error class that all application errors extend from
+ */
+
+export enum ErrorSeverity {
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  CRITICAL = "CRITICAL",
+}
+
+export interface ErrorContext {
+  [key: string]: any;
+}
+
+export abstract class BaseAppError extends Error {
+  public readonly timestamp: Date;
+  public readonly severity: ErrorSeverity;
+  public readonly userMessage: string;
+  public readonly technicalMessage?: string;
+  public readonly statusCode: number;
+  public readonly context?: ErrorContext;
+  public readonly details?: any;
+  public readonly actionLabel?: string;
+
+  constructor(
+    message: string,
+    options: {
+      severity: ErrorSeverity;
+      userMessage: string;
+      technicalMessage?: string;
+      statusCode: number;
+      context?: ErrorContext;
+      actionLabel?: string;
+    }
+  ) {
+    super(message);
+    this.name = this.constructor.name;
+    this.timestamp = new Date();
+    this.severity = options.severity;
+    this.userMessage = options.userMessage;
+    this.technicalMessage = options.technicalMessage || message;
+    this.statusCode = options.statusCode;
+    this.context = options.context;
+    this.actionLabel = options.actionLabel;
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
+
+  /**
+   * Get the title for this error (used in UI)
+   */
+  abstract getTitle(): string;
+
+  /**
+   * Get a user-friendly error message with context
+   */
+  getDisplayMessage() {
+    return this.userMessage;
+  }
+
+  /**
+   * Get the action label for this error (used in UI)
+   */
+  getActionLabel() {
+    return this.actionLabel;
+  }
+
+  /**
+   * Convert error to a JSON-serializable object
+   */
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      userMessage: this.userMessage,
+      technicalMessage: this.technicalMessage,
+      severity: this.severity,
+      statusCode: this.statusCode,
+      timestamp: this.timestamp.toISOString(),
+      context: this.context,
+      details: this.details,
+      stack: this.stack,
+    };
+  }
+}

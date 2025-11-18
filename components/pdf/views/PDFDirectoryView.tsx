@@ -32,7 +32,7 @@ import {
   useMovePDFMutation,
   useGetLMSCoursesQuery
 } from "@/lib/store/apiSlice";
-import { ErrorType, ErrorSeverity, AppError } from "@/lib/types/errors";
+import { ErrorType, ErrorSeverity, AppError } from "@/lib/utils/error-handling/errors";
 import { PDFDocument, Folder } from "@/lib/types/pdf";
 import { PDFUploadZone } from "./PDFUploadZone";
 import { PDFContextMenu } from "../PDFContextMenu";

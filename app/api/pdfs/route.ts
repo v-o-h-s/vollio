@@ -8,8 +8,8 @@ import {
   extractRequestContext,
   createServerError,
   logServerError,
-} from "@/lib/utils/error-handling/server-error-handling";
-import { ErrorType } from "@/lib/types/errors";
+} from "@/lib/utils/error-handling/errorHandling";
+import { ErrorType } from "@/lib/utils/error-handling/errors";
 import { checkEnhancedRateLimit } from "@/lib/utils/security-validation";
 import {
   requireAuthentication,

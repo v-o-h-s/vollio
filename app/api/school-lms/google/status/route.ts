@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getValidOAuthTokens } from "@/lib/services/school-lms/oauth-token-service";
-import { withErrorHandling } from "@/lib/utils/error-handling/server-error-handling";
+import { withErrorHandling } from "@/lib/utils/error-handling/errorHandling";
 /**
  * GET /api/school-lms/google/status
  * Get Google Classroom connection status

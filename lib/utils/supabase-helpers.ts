@@ -15,7 +15,7 @@ import {
   STORAGE_CONFIG,
 } from "../supabaseClient";
 import type { Database } from "../types/database";
-import { AppError } from "../types/errors";
+import { AppError } from "./error-handling/errors";
 
 /**
  * Maps Supabase errors to our application error types

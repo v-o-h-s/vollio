@@ -16,7 +16,7 @@ import {
   ErrorSeverity,
   ErrorNotificationOptions,
   ErrorRecoveryAction,
-} from "@/lib/types/errors";
+} from "@/lib/utils/error-handling/errors";
 import { formatErrorForDisplay } from "@/lib/utils/error-handling/frontend-error-handling";
 
 interface ErrorNotificationProps {

@@ -3,8 +3,8 @@ import {
   createServerError,
   type ServerErrorContext,
   logServerError,
-} from "@/lib/utils/error-handling/server-error-handling";
-import { ErrorType } from "@/lib/types/errors";
+} from "@/lib/utils/error-handling/errorHandling";
+import { ErrorType } from "@/lib/utils/error-handling/errors";
 // Simple retry helper for server-side operations
 async function retryOperation<T>(
   operation: () => Promise<T>,

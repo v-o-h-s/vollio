@@ -32,7 +32,7 @@ import {
   BatchImportRequest,
   BatchImportResponse,
 } from "../types/";
-import { AppError, ErrorType } from "../types/errors";
+import { AppError, ErrorType } from "../utils/error-handling/errors";
 import { createAppError, mapErrorToAppError,
   withRetry,
   createUploadErrorContext,

@@ -21,7 +21,7 @@ import {
   ErrorDisplayOptions,
   ErrorType,
   ErrorSeverity,
-} from "@/lib/types/errors";
+} from "@/lib/utils/error-handling/errors";
 import {
   mapErrorToAppError,
   logError,
