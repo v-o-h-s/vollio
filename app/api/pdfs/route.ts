@@ -14,7 +14,7 @@ import { Logger } from "@/lib/utils/logger";
  * Uses RLS policies to automatically filter by authenticated user 
  */
 async function fetchUserPDFs(supabaseClient: any) {
-  Logger.debug("Fetching user PDFs from database ");
+  Logger.debug("Fetching user PDFs from database");
   const startTime = performance.now();
 
   const { data,  error, count } = await supabaseClient
