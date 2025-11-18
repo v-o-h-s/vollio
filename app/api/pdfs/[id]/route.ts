@@ -4,7 +4,7 @@ import {
   getAuthenticatedSupabaseClient,
   STORAGE_CONFIG,
 } from "@/lib/supabaseClient";
-import type { SupabasePDFAccessResponse } from "@/lib/types";
+import type { SupabasePDFAccessResponse } from "@/lib/types/pdf"; 
 import {
   withRetry,
   generateSignedUrl,
@@ -13,7 +13,7 @@ import {
   withErrorHandling,
   extractRequestContext,
   createServerError,
-  ServerErrorType,
+  ServerError,
   validateRequired,
   validateUUID,
   logServerError,
@@ -42,7 +42,7 @@ async function fetchPDFById(supabaseClient: any, pdfId: string) {
     }
 
     throw createServerError(
-      ServerErrorType.DATABASE_ERROR,
+      ServerError.DATABASE_ERROR,
       `Failed to fetch PDF: ${error.message}`,
       { operation: "fetch_pdf_by_id" },
       { originalError: error, pdfId }
