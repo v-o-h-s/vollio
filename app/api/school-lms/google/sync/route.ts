@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getGoogleClassroomClient } from "@/lib/googleClient";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
-import { withErrorHandling } from "@/lib/utils/error-handling/errorHandling";
+import { withErrorHandling } from "@/lib/utils/error-handling";
 
 interface SyncRequest {
   courseId: string;

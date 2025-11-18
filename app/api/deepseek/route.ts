@@ -14,7 +14,7 @@ import {
   checkRateLimit,
   createErrorResponse,
   createServerError
-} from "@/lib/utils/error-handling/errorHandling";
+} from "@/lib/utils/error-handling";
 
 import { ErrorType } from "@/lib/utils/error-handling/errors";
 import { auth } from "@clerk/nextjs/server";

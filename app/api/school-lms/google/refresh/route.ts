@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { refreshOAuthTokens } from "@/lib/services/school-lms/oauth-token-service";
-import { withErrorHandling } from "@/lib/utils/error-handling/errorHandling";
+import { withErrorHandling } from "@/lib/utils/error-handling";
 
 /**
  * POST /api/school-lms/google/refresh

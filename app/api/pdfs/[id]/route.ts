@@ -17,7 +17,7 @@ import {
   validateRequired,
   validateUUID,
   logServerError,
-} from "@/lib/utils/error-handling/errorHandling";
+} from "@/lib/utils/error-handling";
 import {
   checkEnhancedRateLimit,
 } from "@/lib/utils/security-validation";

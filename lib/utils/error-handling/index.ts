@@ -66,13 +66,13 @@ export { AuthError, AuthErrorType } from "./AuthError";
 export { AIError, AIErrorType } from "./AIError";
 
 // Validation errors
-export { ValidationError, ValidationErrorType } from "./files/ValidationError";
+export { FileValidationError, FileValidationErrorType } from "./files/FileValidationError";
 
 // Storage errors
-export { StorageError, StorageErrorType } from "./files/StorageError";
+export { StorageError, StorageErrorType } from "./StorageError";
 
 // Database errors
-export { DatabaseError, DatabaseErrorType } from "./DatabaseError";
+export { DatabaseError } from "./DatabaseError";
 
 // Network errors
 export { NetworkError, NetworkErrorType } from "./NetworkError";
@@ -85,5 +85,5 @@ export { GeneralError, GeneralErrorType } from "./GeneralError";
 import { GeneralError } from "./GeneralError";
 
 // Error handling utilities
-export { withErrorHandler } from "./withErrorHandling";
+export { withErrorHandler } from "../../wrappers/withErrorHandling";
 

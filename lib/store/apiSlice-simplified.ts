@@ -102,7 +102,7 @@ export const apiSlice = createApi({
     getPDFs: builder.query<
       {
         pdfs: PDFDocument[];
-        //recentActivity?: UserActivity & { filename?: string; fileUrl?: string };
+        recentActivity?: UserActivity & { filename?: string; fileUrl?: string };
         totalCount: number;
       },
       void

@@ -1,4 +1,4 @@
-import { BaseAppError, ErrorSeverity, ErrorContext } from "../BaseAppError";
+import { BaseAppError, ErrorSeverity, ErrorContext } from "./BaseAppError";
 
 export enum ValidationErrorType {
   GENERAL_VALIDATION = "GENERAL_VALIDATION",
@@ -24,14 +24,15 @@ export class ValidationError extends BaseAppError {
       actionLabel: string;
       statusCode: number;
       context?: ErrorContext;
+      cause?: Error;
     }
   ) {
     super(message, {
       severity: options.severity,
       userMessage: options.userMessage,
-      technicalMessage: message,
       statusCode: options.statusCode,
       context: options.context,
+      cause: options.cause,
     });
     this.validationErrorType = validationErrorType;
   }
@@ -41,6 +42,8 @@ export class ValidationError extends BaseAppError {
    */
   static general(
     message: string = "Validation error",
+    context?: ErrorContext,
+    cause?: Error
   ): ValidationError {
     return new ValidationError(ValidationErrorType.GENERAL_VALIDATION, message, {
       severity: ErrorSeverity.LOW,
@@ -48,6 +51,8 @@ export class ValidationError extends BaseAppError {
       userMessage: "Please check your input and try again.",
       actionLabel: "Try Again",
       statusCode: 400,
+      context,
+      cause,
     });
   }
 
@@ -57,6 +62,7 @@ export class ValidationError extends BaseAppError {
   static fileTooLarge(
     maxSize: number = 50,
     context?: ErrorContext,
+    cause?: Error
   ): ValidationError {
     return new ValidationError(
       ValidationErrorType.FILE_TOO_LARGE,
@@ -68,6 +74,7 @@ export class ValidationError extends BaseAppError {
         actionLabel: "Choose Another File",
         statusCode: 413,
         context,
+        cause,
       }
     );
   }
@@ -78,6 +85,7 @@ export class ValidationError extends BaseAppError {
   static invalidFileType(
     expectedType: string = "PDF",
     context?: ErrorContext,
+    cause?: Error
   ): ValidationError {
     return new ValidationError(
       ValidationErrorType.INVALID_FILE_TYPE,
@@ -89,6 +97,7 @@ export class ValidationError extends BaseAppError {
         actionLabel: `Choose ${expectedType} File`,
         statusCode: 400,
         context,
+        cause,
       }
     );
   }
@@ -99,6 +108,7 @@ export class ValidationError extends BaseAppError {
   static invalidFileFormat(
     message: string = "Invalid file format",
     context?: ErrorContext,
+    cause?: Error
   ): ValidationError {
     return new ValidationError(ValidationErrorType.INVALID_FILE_FORMAT, message, {
       severity: ErrorSeverity.LOW,
@@ -108,7 +118,100 @@ export class ValidationError extends BaseAppError {
       actionLabel: "Choose Another File",
       statusCode: 400,
       context,
+      cause,
     });
+  }
+
+  /**
+   * Create a field required error
+   */
+  static fieldRequired(
+    fieldName: string,
+    context?: ErrorContext,
+    cause?: Error
+  ): ValidationError {
+    return new ValidationError(ValidationErrorType.GENERAL_VALIDATION, `${fieldName} is required`, {
+      severity: ErrorSeverity.LOW,
+      retryable: false,
+      userMessage: `${fieldName} is required. Please provide a value.`,
+      actionLabel: "Try Again",
+      statusCode: 400,
+      context,
+      cause,
+    });
+  }
+
+  /**
+   * Create a field length invalid error
+   */
+  static fieldLengthInvalid(
+    fieldName: string,
+    minLength: number,
+    maxLength: number,
+    context?: ErrorContext,
+    cause?: Error
+  ): ValidationError {
+    return new ValidationError(
+      ValidationErrorType.GENERAL_VALIDATION,
+      `${fieldName} must be between ${minLength} and ${maxLength} characters`,
+      {
+        severity: ErrorSeverity.LOW,
+        retryable: false,
+        userMessage: `${fieldName} must be between ${minLength} and ${maxLength} characters long.`,
+        actionLabel: "Try Again",
+        statusCode: 400,
+        context,
+        cause,
+      }
+    );
+  }
+
+  /**
+   * Create an invalid format error (for non-file fields)
+   */
+  static invalidFormat(
+    fieldName: string,
+    expectedFormat: string,
+    context?: ErrorContext,
+    cause?: Error
+  ): ValidationError {
+    return new ValidationError(
+      ValidationErrorType.GENERAL_VALIDATION,
+      `${fieldName} has invalid format`,
+      {
+        severity: ErrorSeverity.LOW,
+        retryable: false,
+        userMessage: `${fieldName} must be in the format: ${expectedFormat}`,
+        actionLabel: "Try Again",
+        statusCode: 400,
+        context,
+        cause,
+      }
+    );
+  }
+
+  /**
+   * Create a duplicate value error
+   */
+  static duplicateValue(
+    fieldName: string,
+    message: string = "This value already exists",
+    context?: ErrorContext,
+    cause?: Error
+  ): ValidationError {
+    return new ValidationError(
+      ValidationErrorType.GENERAL_VALIDATION,
+      `Duplicate ${fieldName}: ${message}`,
+      {
+        severity: ErrorSeverity.LOW,
+        retryable: false,
+        userMessage: message,
+        actionLabel: "Try Again",
+        statusCode: 409,
+        context,
+        cause,
+      }
+    );
   }
 
   getTitle(): string {

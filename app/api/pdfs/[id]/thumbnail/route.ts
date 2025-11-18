@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
-import { withErrorHandling } from "@/lib/utils/error-handling/errorHandling";
+import { withErrorHandling } from "@/lib/utils/error-handling";
 import { PDFDocument } from "pdf-lib";
 import sharp from "sharp";
 

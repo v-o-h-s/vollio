@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
-import { withErrorHandling } from "@/lib/utils/error-handling/errorHandling";
+import { withErrorHandler } from "@/lib/utils/error-handling";
 
 // GET /api/notes - List all notes for the authenticated user
-export const GET = withErrorHandling(async (request: NextRequest) => {
+export const GET = withErrorHandler(async (request: NextRequest) => {
   const { userId } = await auth();
-  
+
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase =await getAuthenticatedSupabaseClient();
-  
+  const supabase = await getAuthenticatedSupabaseClient();
+
   const { data: notesData, error } = await supabase
     .from("notes")
     .select("*")
@@ -42,9 +42,9 @@ export const GET = withErrorHandling(async (request: NextRequest) => {
 });
 
 // POST /api/notes - Create a new note
-export const POST = withErrorHandling(async (request: NextRequest) => {
+export const POST = withErrorHandler(async (request: NextRequest) => {
   const { userId } = await auth();
-  
+
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -67,8 +67,8 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
     );
   }
 
-  const supabase =await getAuthenticatedSupabaseClient();
-  
+  const supabase = await getAuthenticatedSupabaseClient();
+
   const { data: noteData, error } = await supabase
     .from("notes")
     .insert({

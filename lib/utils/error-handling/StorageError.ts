@@ -1,4 +1,4 @@
-import { BaseAppError, ErrorSeverity, ErrorContext } from "../BaseAppError";
+import { BaseAppError, ErrorSeverity, ErrorContext } from "./BaseAppError";
 
 export enum StorageErrorType {
   GENERAL_ERROR = "GENERAL_ERROR",
@@ -30,7 +30,6 @@ export class StorageError extends BaseAppError {
     super(message, {
       severity: options.severity,
       userMessage: options.userMessage,
-      technicalMessage: message,
       statusCode: options.statusCode,
       context: options.context,
     });

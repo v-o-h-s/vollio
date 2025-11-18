@@ -11,7 +11,7 @@ import {
   createServerError,
   validateRequired,
   logServerError,
-} from "@/lib/utils/error-handling/errorHandling";
+} from "@/lib/utils/error-handling";
 import { ErrorType } from "@/lib/utils/error-handling/errors";
 import {
   validateFileUploadSecurity,

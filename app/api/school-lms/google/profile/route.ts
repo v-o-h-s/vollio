@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getGoogleOAuth2Client } from "@/lib/googleClient";
-import { withErrorHandling } from "@/lib/utils/error-handling/errorHandling";
+import { withErrorHandling } from "@/lib/utils/error-handling";
 
 /**
  * GET /api/school-lms/google/profile
