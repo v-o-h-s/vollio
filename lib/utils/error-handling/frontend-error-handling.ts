@@ -16,6 +16,7 @@ import {
 /**
  * Creates a standardized AppError from various error sources
  */
+
 export function createAppError(
   type: ErrorType,
   message: string,
