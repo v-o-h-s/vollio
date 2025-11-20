@@ -1,6 +1,5 @@
 import { BaseAppError } from "./BaseAppError";
 import { ErrorSeverity } from "./BaseAppError";
-import { ErrorContext } from "./BaseAppError";
 export enum GeneralErrorType {
   UNKNOWN = "UNKNOWN",
   INTERNAL_SERVER = "INTERNAL_SERVER",
@@ -26,14 +25,13 @@ export class GeneralError extends BaseAppError {
       userMessage: string;
       actionLabel: string;
       statusCode: number;
-      context?: ErrorContext;
+      context?: any;
       cause?: Error;
     }
   ) {
     super(message, {
       severity: options.severity,
       userMessage: options.userMessage,
-      technicalMessage: message,
       statusCode: options.statusCode,
       context: options.context,
       cause: options.cause,
@@ -46,7 +44,7 @@ export class GeneralError extends BaseAppError {
    */
   static unknown(
     message: string = "Unknown error",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): GeneralError {
     return new GeneralError(GeneralErrorType.UNKNOWN, message, {
@@ -65,7 +63,7 @@ export class GeneralError extends BaseAppError {
    */
   static internalServer(
     message: string = "Internal server error",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): GeneralError {
     return new GeneralError(GeneralErrorType.INTERNAL_SERVER, message, {
@@ -84,7 +82,7 @@ export class GeneralError extends BaseAppError {
    */
   static serviceUnavailable(
     message: string = "Service unavailable",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): GeneralError {
     return new GeneralError(GeneralErrorType.SERVICE_UNAVAILABLE, message, {
@@ -103,7 +101,7 @@ export class GeneralError extends BaseAppError {
    */
   static externalService(
     message: string = "External service error",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): GeneralError {
     return new GeneralError(GeneralErrorType.EXTERNAL_SERVICE, message, {
@@ -122,7 +120,7 @@ export class GeneralError extends BaseAppError {
    */
   static processing(
     message: string = "Processing error",
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): GeneralError {
     return new GeneralError(GeneralErrorType.PROCESSING, message, {
@@ -142,7 +140,7 @@ export class GeneralError extends BaseAppError {
   static rateLimit(
     message: string = "Rate limit exceeded",
     retryAfter?: number,
-    context?: ErrorContext,
+    context?: any,
     cause?: Error
   ): GeneralError {
     const userMessage = retryAfter

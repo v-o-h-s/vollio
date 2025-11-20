@@ -1,4 +1,4 @@
-import { BaseAppError, ErrorSeverity, ErrorContext } from "../BaseAppError";
+import { BaseAppError, ErrorSeverity, } from "../BaseAppError";
 
 export enum FileValidationErrorType {
   GENERAL_VALIDATION = "GENERAL_VALIDATION",
@@ -18,12 +18,12 @@ export class FileValidationError extends BaseAppError {
     FileValidationErrorType: FileValidationErrorType,
     message: string,
     options: {
+      context?: any;
       severity: ErrorSeverity;
       retryable: boolean;
       userMessage: string;
       actionLabel: string;
       statusCode: number;
-      context?: ErrorContext;
     }
   ) {
     super(message, {
@@ -55,7 +55,7 @@ export class FileValidationError extends BaseAppError {
    */
   static fileTooLarge(
     maxSize: number = 50,
-    context?: ErrorContext,
+    context?: any,
   ): FileValidationError {
     return new FileValidationError(
       FileValidationErrorType.FILE_TOO_LARGE,
@@ -76,7 +76,7 @@ export class FileValidationError extends BaseAppError {
    */
   static invalidFileType(
     expectedType: string = "PDF",
-    context?: ErrorContext,
+    context?: any,
   ): FileValidationError {
     return new FileValidationError(
       FileValidationErrorType.INVALID_FILE_TYPE,
@@ -97,7 +97,7 @@ export class FileValidationError extends BaseAppError {
    */
   static invalidFileFormat(
     message: string = "Invalid file format",
-    context?: ErrorContext,
+    context?: any,
   ): FileValidationError {
     return new FileValidationError(FileValidationErrorType.INVALID_FILE_FORMAT, message, {
       severity: ErrorSeverity.LOW,
@@ -115,7 +115,7 @@ export class FileValidationError extends BaseAppError {
    */
   static fieldRequired(
     fieldName: string,
-    context?: ErrorContext,
+    context?: any,
   ): FileValidationError {
     return new FileValidationError(FileValidationErrorType.GENERAL_VALIDATION, `${fieldName} is required`, {
       severity: ErrorSeverity.LOW,
@@ -134,7 +134,7 @@ export class FileValidationError extends BaseAppError {
     fieldName: string,
     minLength: number,
     maxLength: number,
-    context?: ErrorContext,
+    context?: any,
   ): FileValidationError {
     return new FileValidationError(
       FileValidationErrorType.GENERAL_VALIDATION,
@@ -156,7 +156,7 @@ export class FileValidationError extends BaseAppError {
   static invalidFormat(
     fieldName: string,
     expectedFormat: string,
-    context?: ErrorContext,
+    context?: any,
   ): FileValidationError {
     return new FileValidationError(
       FileValidationErrorType.GENERAL_VALIDATION,
@@ -178,7 +178,7 @@ export class FileValidationError extends BaseAppError {
   static duplicateValue(
     fieldName: string,
     message: string = "This value already exists",
-    context?: ErrorContext,
+    context?: any,
   ): FileValidationError {
     return new FileValidationError(
       FileValidationErrorType.GENERAL_VALIDATION,

@@ -1,4 +1,4 @@
-import { BaseAppError, ErrorSeverity, ErrorContext } from "../BaseAppError";
+import { BaseAppError, ErrorSeverity } from "../BaseAppError";
 
 export enum FileErrorType {
   GENERAL_ERROR = "GENERAL_ERROR",
@@ -23,7 +23,7 @@ export class FileError extends BaseAppError {
       severity: ErrorSeverity;
       userMessage: string;
       statusCode: number;
-      context?: ErrorContext;
+      context?: any;
       technicalMessage?: string;
       actionLabel?: string;
     }
@@ -46,7 +46,7 @@ export class FileError extends BaseAppError {
   static general(
     message: string = "File error",
     fileName: string = "file",
-    context?: ErrorContext,
+    context?: any,
   ): FileError {
     return new FileError(fileName, FileErrorType.GENERAL_ERROR, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -63,7 +63,7 @@ export class FileError extends BaseAppError {
   static loadingError(
     message: string = "File loading failed",
     fileName: string = "file",
-    context?: ErrorContext,
+    context?: any,
   ): FileError {
     return new FileError(fileName, FileErrorType.LOADING_ERROR, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -82,7 +82,7 @@ export class FileError extends BaseAppError {
   static corrupted(
     message: string = "File file is corrupted",
     fileName: string = "file",
-    context?: ErrorContext,
+    context?: any ,
   ): FileError {
     return new FileError(fileName, FileErrorType.CORRUPTED, message, {
       severity: ErrorSeverity.HIGH,

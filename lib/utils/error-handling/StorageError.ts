@@ -1,4 +1,4 @@
-import { BaseAppError, ErrorSeverity, ErrorContext } from "./BaseAppError";
+import { BaseAppError, ErrorSeverity } from "./BaseAppError";
 
 export enum StorageErrorType {
   GENERAL_ERROR = "GENERAL_ERROR",
@@ -23,7 +23,7 @@ export class StorageError extends BaseAppError {
       userMessage: string;
       actionLabel: string;
       statusCode: number;
-      context?: ErrorContext;
+      context?: any;
       cause?: Error;
     }
   ) {
@@ -41,7 +41,7 @@ export class StorageError extends BaseAppError {
    */
   static general(
     message: string = "Storage error",
-    context?: ErrorContext,
+    context?: any,
   ): StorageError {
     return new StorageError(StorageErrorType.GENERAL_ERROR, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -58,7 +58,7 @@ export class StorageError extends BaseAppError {
    */
   static quotaExceeded(
     message: string = "Storage quota exceeded",
-    context?: ErrorContext,
+    context?: any,
   ): StorageError {
     return new StorageError(StorageErrorType.QUOTA_EXCEEDED, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -76,7 +76,7 @@ export class StorageError extends BaseAppError {
    */
   static uploadFailed(
     message: string = "Upload failed",
-    context?: ErrorContext,
+    context?: any,
   ): StorageError {
     return new StorageError(StorageErrorType.UPLOAD_FAILED, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -94,7 +94,7 @@ export class StorageError extends BaseAppError {
    */
   static accessDenied(
     message: string = "Storage access denied",
-    context?: ErrorContext,
+    context?: any,
   ): StorageError {
     return new StorageError(StorageErrorType.ACCESS_DENIED, message, {
       severity: ErrorSeverity.HIGH,
