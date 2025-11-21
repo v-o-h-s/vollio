@@ -129,11 +129,7 @@ const PDFAnnotationViewer: React.FC<PDFAnnotationViewerProps> = ({
   );
 
   // Configure resource URL for Syncfusion PDF Viewer
-  const resourceUrl =
-    typeof window !== "undefined"
-      ? `${window.location.protocol}//${window.location.host}/lib`
-      : "/lib";
-
+ 
   // extracting the selection bounds - Syncfusion expects bounds in a specific format
   const extractSelectionBounds = (
     args: TextSelectionCompleteEventArgs

@@ -25,12 +25,15 @@ import { Logger } from "../utils/logger";
  * });
  * ```
  */
-export function withErrorHandling(
-    handler: (request: NextRequest) => Promise<NextResponse>
+export function withErrorHandling<TArgs extends unknown[] = []>(
+    handler: (request: NextRequest, ...args: TArgs) => Promise<NextResponse>
 ) {
-    return async (request: NextRequest): Promise<NextResponse> => {
+    return async (
+        request: NextRequest,
+        ...args: TArgs
+    ): Promise<NextResponse> => {
         try {
-            return await handler(request);
+            return await handler(request, ...args);
         } catch (error: unknown) {
             Logger.error("API error caught", error);
 

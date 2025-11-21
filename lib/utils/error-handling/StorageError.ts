@@ -5,6 +5,7 @@ export enum StorageErrorType {
   QUOTA_EXCEEDED = "QUOTA_EXCEEDED",
   UPLOAD_FAILED = "UPLOAD_FAILED",
   ACCESS_DENIED = "ACCESS_DENIED",
+  DELETE_FAILED = "DELETE_FAILED",
 }
 
 /**
@@ -41,7 +42,7 @@ export class StorageError extends BaseAppError {
    */
   static general(
     message: string = "Storage error",
-    context?: any,
+    context?: any
   ): StorageError {
     return new StorageError(StorageErrorType.GENERAL_ERROR, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -58,7 +59,7 @@ export class StorageError extends BaseAppError {
    */
   static quotaExceeded(
     message: string = "Storage quota exceeded",
-    context?: any,
+    context?: any
   ): StorageError {
     return new StorageError(StorageErrorType.QUOTA_EXCEEDED, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -76,7 +77,7 @@ export class StorageError extends BaseAppError {
    */
   static uploadFailed(
     message: string = "Upload failed",
-    context?: any,
+    context?: any
   ): StorageError {
     return new StorageError(StorageErrorType.UPLOAD_FAILED, message, {
       severity: ErrorSeverity.MEDIUM,
@@ -94,7 +95,7 @@ export class StorageError extends BaseAppError {
    */
   static accessDenied(
     message: string = "Storage access denied",
-    context?: any,
+    context?: any
   ): StorageError {
     return new StorageError(StorageErrorType.ACCESS_DENIED, message, {
       severity: ErrorSeverity.HIGH,
@@ -133,5 +134,21 @@ export class StorageError extends BaseAppError {
       default:
         return "Try Again";
     }
+  }
+
+  static deleteFailed(
+    message: string = "Failed to delete file from storage",
+    context?: any,
+    cause?: Error
+  ): StorageError {
+    return new StorageError(StorageErrorType.DELETE_FAILED, message, {
+      severity: ErrorSeverity.MEDIUM,
+      retryable: true,
+      userMessage: "Failed to delete file from storage. Please try again.",
+      actionLabel: "Retry Delete",
+      statusCode: 500,
+      context,
+      cause,
+    });
   }
 }

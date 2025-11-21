@@ -1,32 +1,30 @@
+"use client";
 import { FloatingNavigation } from "@/components/navigation/FloatingNavigation";
 import { FloatingSidebar } from "@/components/navigation/FloatingSidebar";
+import { usePathname } from "next/navigation";
 import { Toaster } from "react-hot-toast";
-import { SubscriptionProvider } from "@/lib/contexts/SubscriptionContext";
-import { PremiumToggle } from "@/components/dev/PremiumToggle";
-
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathName=usePathname();
+  const isPdfPage=pathName.startsWith("/dashboard/pdfs");
   return (
-    <SubscriptionProvider>
-      <div className="min-h-screen bg-background">
-        {/* Development Premium Toggle */}
-        <PremiumToggle />
+    <div className="min-h-screen bg-background">
 
-        {/* Main Content */}
-        <main className="w-full">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
-            {children}
-          </div>
-        </main>
+      {/* Main Content */}
+      <main className="w-full">
+        <div className="">
+          {children}
+        </div>
+      </main>
 
-        {/* Floating Navigation */}
-        <FloatingNavigation />
+      {/* Floating Navigation */}
+      {!isPdfPage && <FloatingNavigation />}
 
-        {/* Floating Sidebar */}
-        <FloatingSidebar />
+      {/* Floating Sidebar */}
+      {!isPdfPage && <FloatingSidebar />}
 
       {/* Toast Notifications */}
       <Toaster
@@ -63,7 +61,6 @@ export default function DashboardLayout({
           },
         }}
       />
-      </div>
-    </SubscriptionProvider>
+    </div>
   );
 }
