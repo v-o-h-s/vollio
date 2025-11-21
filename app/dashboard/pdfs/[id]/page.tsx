@@ -15,9 +15,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Viewer from "@/components/pdf/Viewer";
-import Noter from "@/components/pdf/noter/noter";
+import Noter from "@/components/pdf/noter/Noter";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import NotesTabsManager from "@/components/pdf/noter/NotesTabsManager";
 
 export default function PDFPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function PDFPage() {
   const [leftWidth, setLeftWidth] = useState(50); // percentage
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const { data, isLoading, isError, error, refetch } = useGetPDFQuery(
     id as string
   );
@@ -187,7 +188,10 @@ export default function PDFPage() {
   }
 
   return (
-    <div ref={containerRef} className="flex h-screen w-screen p-2 gap-2 relative">
+    <div
+      ref={containerRef}
+      className="flex h-screen w-screen p-2 gap-2 relative"
+    >
       {/* PDF Viewer Panel */}
       <div
         className={cn(
@@ -197,15 +201,17 @@ export default function PDFPage() {
           "transition-none"
         )}
         style={{
-          width: isNoterOpen ? `calc(${leftWidth}% - ${isDragging ? "16px" : "4px"})` : "100%",
+          width: isNoterOpen
+            ? `calc(${leftWidth}% - ${isDragging ? "16px" : "4px"})`
+            : "100%",
         }}
       >
-        <Viewer 
-          pdfDocument={data} 
-          onToggleNoter={() => setIsNoteOpen(!isNoterOpen)} 
+        <Viewer
+          pdfDocument={data}
+          onToggleNoter={() => setIsNoteOpen(!isNoterOpen)}
         />
       </div>
-      
+
       {isNoterOpen && (
         <>
           {/* Resizable Divider */}
@@ -232,7 +238,7 @@ export default function PDFPage() {
                   : "w-0.5 bg-border group-hover:w-1 group-hover:bg-primary/80"
               )}
             />
-            
+
             {/* Grip Icon */}
             <div
               className={cn(
@@ -245,7 +251,7 @@ export default function PDFPage() {
             >
               <GripVertical className="w-4 h-4" />
             </div>
-            
+
             {/* Simple Tooltip */}
             <div
               className={cn(
@@ -259,19 +265,22 @@ export default function PDFPage() {
               Drag to resize
             </div>
           </div>
-          
+
           {/* Noter Panel */}
           <div
             className={cn(
-              "h-full rounded-[var(--radius)] flex flex-row overflow-hidden",
-              "border border-border bg-card",
+              "h-full rounded-[var(--radius)] flex flex-row overflow-hidden pt-14 relative",
+              "border border-border ",
               "shadow-md",
               "transition-none"
             )}
             style={{
-              width: `calc(${100 - leftWidth}% - ${isDragging ? "32px" : "8px"})`,
+              width: `calc(${100 - leftWidth}% - ${
+                isDragging ? "32px" : "8px"
+              })`,
             }}
           >
+            <NotesTabsManager />
             <Noter pdfDocument={data} />
           </div>
         </>
