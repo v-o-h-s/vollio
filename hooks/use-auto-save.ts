@@ -22,7 +22,7 @@ interface UseAutoSaveReturn {
 }
 
 export function useAutoSave({
-  onSave,
+  onSave, // what will happen when the auto save is triggered
   delay = 500,
   enabled = true,
 }: UseAutoSaveOptions): UseAutoSaveReturn {

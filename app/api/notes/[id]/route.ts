@@ -1,5 +1,5 @@
-import { withErrorHandling } from "@/lib/wrappers/withErrorHandling";
 import { withValidation } from "@/lib/wrappers/withValidation";
+import { withErrorHandling } from "@/lib/wrappers/withErrorHandling";
 import { updateNoteDtoSchema } from "@/lib/dto/updateNoteDto";
 import { getNoteHandler } from "./handlers/getNote";
 import { updateNoteHandler } from "./handlers/updateNote";

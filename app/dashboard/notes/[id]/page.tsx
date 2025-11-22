@@ -20,7 +20,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
   useGetNoteQuery,
   useUpdateNoteMutation,
-  useDeleteNoteMutation
+  useDeleteNoteMutation,
 } from "@/lib/store/apiSlice";
 import toast from "react-hot-toast";
 import type { JSONContent } from "@tiptap/core";
@@ -53,17 +53,12 @@ export default function NoteEditPage() {
   // Initialize content when note loads
   useEffect(() => {
     if (note) {
-     
       setNoteContent({
         title: note.title || "",
         content: note.content,
       });
     }
   }, [note]);
-
- 
-
-
 
   // Handle go back
   const handleGoBack = useCallback(() => {
@@ -101,8 +96,6 @@ export default function NoteEditPage() {
     setShowDeleteDialog(false);
   }, []);
 
-
-
   // Warn user before leaving if there are unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -135,7 +128,10 @@ export default function NoteEditPage() {
     };
 
     noteContent.content.content.forEach(extractText);
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    return text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
   };
 
   // Loading state with improved styling
@@ -149,8 +145,12 @@ export default function NoteEditPage() {
               <div className="absolute inset-0 h-8 w-8 rounded-full border-2 border-primary/20"></div>
             </div>
             <div className="space-y-2">
-              <h3 className="text-lg font-medium text-foreground">Loading note...</h3>
-              <p className="text-sm text-muted-foreground">Please wait while we fetch your note</p>
+              <h3 className="text-lg font-medium text-foreground">
+                Loading note...
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Please wait while we fetch your note
+              </p>
             </div>
           </div>
         </div>
@@ -169,16 +169,25 @@ export default function NoteEditPage() {
                 <ExternalLink className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
             </div>
-            <h2 className="text-xl font-semibold text-foreground mb-3">Note not found</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-3">
+              Note not found
+            </h2>
             <p className="text-muted-foreground mb-6 leading-relaxed">
-              The note you're looking for could not be found or you don't have permission to view it.
+              The note you're looking for could not be found or you don't have
+              permission to view it.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={handleGoBack} className="flex items-center gap-2">
+              <Button
+                onClick={handleGoBack}
+                className="flex items-center gap-2"
+              >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Notes
               </Button>
-              <Button variant="outline" onClick={() => window.location.reload()}>
+              <Button
+                variant="outline"
+                onClick={() => window.location.reload()}
+              >
                 Try Again
               </Button>
             </div>
@@ -219,12 +228,15 @@ export default function NoteEditPage() {
                   </h1>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span>
-                      Last updated: {note?.updatedAt ? new Date(note.updatedAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      }) : 'Unknown'}
+                      Last updated:{" "}
+                      {note?.updatedAt
+                        ? new Date(note.updatedAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Unknown"}
                     </span>
                     {noteContent.content && (
                       <>
@@ -271,7 +283,7 @@ export default function NoteEditPage() {
                     key={`editor-${noteId}`} // Force re-render when noteId changes
                     content={{
                       title: noteContent.title,
-                      content: noteContent.content
+                      content: noteContent.content,
                     }}
                     placeholder="Start writing your note..."
                     autoFocus={false}

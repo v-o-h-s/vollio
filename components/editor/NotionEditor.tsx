@@ -65,6 +65,7 @@ function NotionEditorInner({
   autoSaveDelay = 500,
   onAutoSaveStatusChange,
   onNoteCreated,
+  pdfId,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState(content?.title || "");
@@ -80,7 +81,7 @@ function NotionEditorInner({
 
   // Update title when content prop changes (only on initial load)
   const hasInitialized = useRef(false);
-  
+
   useEffect(() => {
     // Only update title from props on initial load, not during user editing
     if (content?.title !== undefined && !hasInitialized.current) {
@@ -95,7 +96,8 @@ function NotionEditorInner({
     async (noteContent: NoteContent) => {
       // Use the title from noteContent first, then fallback to current noteTitle state
       // Only use "Untitled Note" if both are truly empty
-      const title = (noteContent.title?.trim() || noteTitle.trim() || "Untitled Note");
+      const title =
+        noteContent.title?.trim() || noteTitle.trim() || "Untitled Note";
       const content = noteContent.content;
 
       console.log("🔄 Auto-save triggered:", {
@@ -103,17 +105,24 @@ function NotionEditorInner({
         noteTitleState: noteTitle,
         finalTitle: title,
         currentNoteId,
+        hasContent: !!content,
       });
 
-      if (!content) {
-        console.warn("Auto-save called with empty content");
+      // For new notes, we need content
+      if (!currentNoteId && !content) {
+        console.warn("Auto-save: Cannot create new note without content");
         return;
       }
 
       if (!currentNoteId) {
         // Create new note using RTK Query
-        console.log("📝 Creating new note with title:", title);
-        const newNote = await createNote({ title, content }).unwrap();
+        console.log("📝 Creating new note with title:", title, "pdfId:", pdfId);
+
+        const newNote = await createNote({
+          title,
+          content,
+          pdfId,
+        }).unwrap();
         const newNoteId = newNote.id;
 
         setCurrentNoteId(newNoteId);
@@ -125,9 +134,15 @@ function NotionEditorInner({
       } else {
         // Update existing note using RTK Query
         console.log("💾 Updating existing note with title:", title);
+
+        // Build updates object - only include fields that are provided
+        const updates: { title?: string; content?: any } = {};
+        if (title) updates.title = title;
+        if (content) updates.content = content;
+
         await updateNote({
           id: currentNoteId,
-          updates: { title, content },
+          updates,
         }).unwrap();
       }
     },
@@ -355,7 +370,9 @@ function NotionEditorInner({
   useEffect(() => {
     if (autoFocus && !noteId && !content?.title) {
       // Focus the title input for new notes
-      const titleInput = document.querySelector('input[placeholder="Enter note title..."]') as HTMLInputElement;
+      const titleInput = document.querySelector(
+        'input[placeholder="Enter note title..."]'
+      ) as HTMLInputElement;
       if (titleInput) {
         setTimeout(() => titleInput.focus(), 100);
       }
@@ -464,6 +481,19 @@ function NotionEditorInner({
           isOpen={isLinkDialogOpen}
           onClose={() => setIsLinkDialogOpen(false)}
         />
+      )}
+
+      {/* AutoSaveStatus - Shows in bottom-right when autoSave is enabled */}
+      {autoSave && (
+        <div className="absolute bottom-2 right-2 z-10">
+          <AutoSaveStatus
+            status={autoSaveStatus}
+            lastSaved={lastSaved}
+            error={autoSaveError}
+            isCreating={!currentNoteId}
+            size="sm"
+          />
+        </div>
       )}
     </div>
   );

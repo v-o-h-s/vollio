@@ -12,28 +12,31 @@ import NoteTab from "./NoteTab";
 export type Tab = {
   id: string;
   label: string;
+  isHome?: boolean; // Special flag for the home tab
 };
 
 interface NotesTabsManagerProps {
   tabs: Tab[];
+  activeTabId: string;
   onReorder: (tabs: Tab[]) => void;
   onAddNote: () => void;
   onDeleteNote: (id: string) => void;
+  onTabClick: (tabId: string) => void;
 }
-
 
 export default function NotesTabsManager({
   tabs,
+  activeTabId,
   onReorder,
   onAddNote,
   onDeleteNote,
+  onTabClick,
 }: NotesTabsManagerProps) {
-
-
-
+  // Only sortable tabs (exclude home tab)
+  const sortableTabs = useMemo(() => tabs.filter((tab) => !tab.isHome), [tabs]);
   const sortableIds = useMemo(
-    () => tabs.map((tab) => tab.id),
-    [tabs],
+    () => sortableTabs.map((tab) => tab.id),
+    [sortableTabs]
   );
   const { isOver, setNodeRef } = useDroppable({ id: "droppable" });
   const style = isOver ? { backgroundColor: "var(--muted)" } : undefined;
@@ -44,18 +47,27 @@ export default function NotesTabsManager({
       return;
     }
 
-    const oldIndex = tabs.findIndex((tab) => tab.id === active.id);
-    const newIndex = tabs.findIndex((tab) => tab.id === over.id);
+    const oldIndex = sortableTabs.findIndex((tab) => tab.id === active.id);
+    const newIndex = sortableTabs.findIndex((tab) => tab.id === over.id);
 
     if (oldIndex === -1 || newIndex === -1) {
       return;
     }
 
-    onReorder(arrayMove<Tab>(tabs, oldIndex, newIndex));
+    // Reorder only sortable tabs, then merge back with home tab
+    const reorderedSortable = arrayMove<Tab>(sortableTabs, oldIndex, newIndex);
+    const homeTab = tabs.find((tab) => tab.isHome);
+    const newTabs = homeTab
+      ? [homeTab, ...reorderedSortable]
+      : reorderedSortable;
+    onReorder(newTabs);
   };
 
   return (
-    <DndContext modifiers={[restrictToHorizontalAxis]} onDragEnd={handleDragEnd}>
+    <DndContext
+      modifiers={[restrictToHorizontalAxis]}
+      onDragEnd={handleDragEnd}
+    >
       <div
         className="flex flex-col justify-center  absolute top-0 w-full   px-2"
         ref={setNodeRef}
@@ -67,7 +79,15 @@ export default function NotesTabsManager({
         >
           <div className="flex flex-row  items-center gap-2 justify-start ">
             {tabs.map((tab) => (
-              <NoteTab id={tab.id} label={tab.label} key={tab.id} onDelete={onDeleteNote} />
+              <NoteTab
+                id={tab.id}
+                label={tab.label}
+                key={tab.id}
+                isActive={activeTabId === tab.id}
+                isHome={tab.isHome}
+                onDelete={onDeleteNote}
+                onClick={onTabClick}
+              />
             ))}
 
             <NoteAddButton onClick={onAddNote} />

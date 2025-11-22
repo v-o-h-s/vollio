@@ -23,7 +23,7 @@ export type { JSONContent };
  * Note content structure
  */
 export interface NoteContent {
-  title: string;
+  title?: string;
   content?: JSONContent | null;
 }
 
@@ -31,6 +31,7 @@ export interface NoteContent {
  * Props for the main NotionEditor component
  */
 export interface NotionEditorProps {
+  pdfId?: string;
   content?: NoteContent;
   onChange?: (content: JSONContent) => void;
   onUpdate?: (editor: Editor) => void;
@@ -136,7 +137,7 @@ export interface Note {
  */
 export interface CreateNoteRequest {
   title?: string;
-  content: JSONContent;
+  content?: JSONContent|null;
   pdfId?: string;
 }
 
