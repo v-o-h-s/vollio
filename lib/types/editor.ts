@@ -161,6 +161,37 @@ export interface SupabaseNotesResponse {
  */
 export interface SupabaseNoteResponse {
   success: boolean;
-  data?: Note;
+  data?: SupabaseNote;
   error?: string;
+}
+
+interface SupabaseNote {
+  id: string;
+  userId: string;
+  title: string;
+  content: string;
+  pdfAnnotationId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  pdfId: string | null;
+}
+
+/**
+ * supabase response for fetching all notes
+ */
+
+export interface SupabaseNotesListResponse {
+  success: boolean;
+  data?: SupabaseSingleNoteFromListRepsonse[];
+  error?: string;
+}
+
+export interface SupabaseSingleNoteFromListRepsonse {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  pdfId: string | null;
 }

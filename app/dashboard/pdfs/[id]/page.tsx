@@ -269,18 +269,17 @@ export default function PDFPage() {
           {/* Noter Panel */}
           <div
             className={cn(
-              "h-full rounded-[var(--radius)] flex flex-row overflow-hidden pt-14 relative",
+              "h-full rounded-[var(--radius)] flex flex-row overflow-hidden pt-1 relative",
               "border border-border ",
               "shadow-md",
               "transition-none"
             )}
             style={{
-              width: `calc(${100 - leftWidth}% - ${
-                isDragging ? "32px" : "8px"
-              })`,
+              width: `calc(${100 - leftWidth}% - ${isDragging ? "32px" : "8px"
+                })`,
             }}
           >
-            <NotesTabsManager />
+
             <Noter pdfDocument={data} />
           </div>
         </>

@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { ZodSchema } from "zod";
 import { ValidationError } from "../utils/error-handling/ValidationError";
 import { Logger } from "../utils/logger";
-export function withValidation(schema: ZodSchema, handler: (request: NextRequest) => Promise<NextResponse>) {
-    return async (request: NextRequest): Promise<NextResponse> => {
+export function withValidation<Targs extends unknown[]=[]>(schema: ZodSchema, handler: (request: NextRequest, ...args: Targs) => Promise<NextResponse>) {
+    return async (request: NextRequest, ...args: Targs): Promise<NextResponse> => {
         Logger.info("🔍 Starting Zod validation", {
-            endpoint: request.nextUrl.pathname,
+            endpoint: request.nextUrl.pathname, 
             method: request.method,
         });
 
@@ -35,6 +35,6 @@ export function withValidation(schema: ZodSchema, handler: (request: NextRequest
             method: request.method,
         });
 
-        return handler(request);
+        return handler(request, ...args);
     };
 }
