@@ -22,7 +22,7 @@ export const createNoteHandler = async (request: NextRequest) => {
   Logger.info(`👤 Creating note for user: ${userId}`);
 
   const body = await request.json();
-  const { title, content } = body;
+  const { title, content, pdfId } = body;
 
   Logger.info(`📋 Validating note data`, { title, hasContent: !!content });
 
@@ -60,6 +60,7 @@ export const createNoteHandler = async (request: NextRequest) => {
       title,
       content,
       user_id: userId,
+      pdf_id: pdfId,
     })
     .select()
     .single();

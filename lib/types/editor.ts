@@ -128,6 +128,7 @@ export interface Note {
   createdAt: string; // ISO string for Redux serialization
   updatedAt: string; // ISO string for Redux serialization
   isDeleted: boolean;
+  pdfId?: string | null;
 }
 
 /**
@@ -136,7 +137,7 @@ export interface Note {
 export interface CreateNoteRequest {
   title?: string;
   content: JSONContent;
-  pdfAnnotationId?: string;
+  pdfId?: string;
 }
 
 /**
@@ -145,15 +146,6 @@ export interface CreateNoteRequest {
 export interface UpdateNoteRequest {
   title?: string;
   content?: JSONContent;
-}
-
-/**
- * Supabase notes list response
- */
-export interface SupabaseNotesResponse {
-  success: boolean;
-  data?: Note[];
-  error?: string;
 }
 
 /**

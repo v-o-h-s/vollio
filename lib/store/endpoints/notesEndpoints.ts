@@ -2,24 +2,30 @@ import type {
   CreateNoteRequest,
   Note,
   SupabaseNoteResponse,
-  SupabaseNotesResponse,
+  SupabaseNotesListResponse,
+  SupabaseSingleNoteFromListRepsonse,
   UpdateNoteRequest,
-} from "../../types";
+} from "@/lib/types/editor";
 import type { ApiBuilder } from "./types";
+
+const transformNote = (
+  note: NonNullable<SupabaseNoteResponse["data"]>
+): Note => ({
+  ...note,
+  content:
+    typeof note.content === "string" ? JSON.parse(note.content) : note.content,
+});
 
 export const notesEndpoints = (builder: ApiBuilder) => ({
   getNotes: builder.query<
-    Note[],
-    { pdfAnnotationId?: string; highlightId?: string }
+    SupabaseSingleNoteFromListRepsonse[],
+    { pdfId?: string } | void
   >({
-    query: ({ pdfAnnotationId, highlightId } = {}) => ({
+    query: (params) => ({
       url: "notes",
-      params: {
-        ...(pdfAnnotationId && { pdfAnnotationId }),
-        ...(highlightId && { highlightId }),
-      },
+      params: params?.pdfId ? { pdfId: params.pdfId } : undefined,
     }),
-    transformResponse: (response: SupabaseNotesResponse) => {
+    transformResponse: (response: SupabaseNotesListResponse) => {
       if (!response.success || !response.data) {
         throw new Error(response.error || "Failed to fetch notes");
       }
@@ -38,7 +44,7 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
       if (!response.success || !response.data) {
         throw new Error(response.error || "Failed to fetch note");
       }
-      return response.data;
+      return transformNote(response.data);
     },
     providesTags: (_result, _error, noteId) => [{ type: "Note", id: noteId }],
   }),
@@ -53,7 +59,7 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
       if (!response.success || !response.data) {
         throw new Error(response.error || "Failed to create note");
       }
-      return response.data;
+      return transformNote(response.data);
     },
     invalidatesTags: [{ type: "Note", id: "LIST" }],
   }),
@@ -71,7 +77,7 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
       if (!response.success || !response.data) {
         throw new Error(response.error || "Failed to update note");
       }
-      return response.data;
+      return transformNote(response.data);
     },
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Note", id: "LIST" },
@@ -90,4 +96,3 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
     ],
   }),
 });
-

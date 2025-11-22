@@ -8,6 +8,9 @@ import {
 } from "@/lib/types/editor";
 
 export const getNotesHandler = async (request: NextRequest) => {
+  const { searchParams } = request.nextUrl;
+  const pdfId = searchParams.get("pdfId");
+
   Logger.info("📝 Fetching all notes");
 
   const { userId } = await auth();
@@ -22,10 +25,15 @@ export const getNotesHandler = async (request: NextRequest) => {
   const supabase = await getAuthenticatedSupabaseClient();
 
   Logger.info("💾 Querying notes from database");
-  const { data: notesData, error } = await supabase
-    .from("notes")
-    .select("*")
-    .order("updated_at", { ascending: false });
+  let query = supabase.from("notes").select("*");
+
+  if (pdfId) {
+    query = query.eq("pdf_id", pdfId);
+  }
+
+  const { data: notesData, error } = await query.order("updated_at", {
+    ascending: false,
+  });
 
   if (error) {
     Logger.error(`❌ Database error fetching notes for user ${userId}`, error);
