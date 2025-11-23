@@ -137,7 +137,7 @@ export interface Note {
  */
 export interface CreateNoteRequest {
   title?: string;
-  content?: JSONContent|null;
+  content?: JSONContent | null;
   pdfId?: string;
 }
 
@@ -162,7 +162,7 @@ interface SupabaseNote {
   id: string;
   userId: string;
   title: string;
-  content: string;
+  content: JSONContent | null;
   pdfAnnotationId: string | null;
   createdAt: string;
   updatedAt: string;

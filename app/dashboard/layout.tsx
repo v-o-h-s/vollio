@@ -24,7 +24,7 @@ export default function DashboardLayout({
       {!isPdfPage && <FloatingNavigation />}
 
       {/* Floating Sidebar */}
-      {!isPdfPage && <FloatingSidebar />}
+      {/* {!isPdfPage && <FloatingSidebar />} */}
 
       {/* Toast Notifications */}
       <Toaster

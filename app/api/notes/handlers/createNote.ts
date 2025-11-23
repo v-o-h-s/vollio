@@ -3,8 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { Logger } from "@/lib/utils/logger";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import { NextResponse } from "next/server";
-import { success } from "zod";
 import { SupabaseNoteResponse } from "@/lib/types/editor";
+import { DatabaseError } from "@/lib/utils/error-handling";
 
 export const createNoteHandler = async (request: NextRequest) => {
   Logger.info("📝 Creating new note");
@@ -24,34 +24,6 @@ export const createNoteHandler = async (request: NextRequest) => {
   const body = await request.json();
   const { title, content, pdfId } = body;
 
-  Logger.info(`📋 Validating note data`, { title, hasContent: !!content });
-
-  if (!title || !content) {
-    Logger.warn(
-      `❌ Validation failed: missing required fields for user ${userId}`
-    );
-    return NextResponse.json(
-      { success: false, error: "Title and content are required" },
-      { status: 400 }
-    );
-  }
-
-  // Validate content is a proper TipTap document structure
-  if (typeof content !== "object" || !content.type) {
-    Logger.warn(
-      `❌ Validation failed: invalid TipTap document structure for user ${userId}`
-    );
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Content must be a valid TipTap document with a type property",
-      },
-      { status: 400 }
-    );
-  }
-
-  Logger.info(`✅ Validation passed, inserting note into database`, { title });
-
   const supabase = await getAuthenticatedSupabaseClient();
 
   const { data: noteData, error } = await supabase
@@ -67,10 +39,7 @@ export const createNoteHandler = async (request: NextRequest) => {
 
   if (error) {
     Logger.error(`❌ Database error creating note for user ${userId}`, error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create note" },
-      { status: 500 }
-    );
+    throw DatabaseError.mapSupabaseErrorCodeToDatabaseError(error.code);
   }
 
   Logger.success(`📝 Note created successfully`, {

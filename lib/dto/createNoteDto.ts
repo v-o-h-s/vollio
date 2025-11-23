@@ -15,7 +15,7 @@ export type JSONContent = {
 
 export const createNoteDtoSchema = z.object({
   title: z.string().optional().default("Untitled Note"),
-  content: z.custom<JSONContent>(),
+  content: z.custom<JSONContent>().optional(),
   pdfId: z.string().optional(),
 });
 

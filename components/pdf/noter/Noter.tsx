@@ -253,7 +253,7 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
               // Creating new note
               <div className="p-8 h-full">
                 <NotionEditor
-                  content={{ title: "" }}
+                  content={{ title: "Untitled Note", content: [] }}
                   pdfId={pdfDocument.id}
                   autoSave={true}
                   autoSaveDelay={500}

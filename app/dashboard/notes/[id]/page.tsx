@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
+import { NotionEditor } from "@/components/editor/NotionEditor";
 import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveStatus";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
@@ -137,8 +137,8 @@ export default function NoteEditPage() {
   // Loading state with improved styling
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
-        <div className="flex-1 flex items-center justify-center">
+      <div className="flex h-screen bg-background overflow-x-hidden">
+        <div className="flex-1 flex items-center justify-center px-4">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="relative">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -161,8 +161,8 @@ export default function NoteEditPage() {
   // Error state with improved styling
   if (error) {
     return (
-      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
-        <div className="flex-1 flex items-center justify-center">
+      <div className="flex h-screen bg-background overflow-x-hidden">
+        <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center max-w-md mx-auto p-6">
             <div className="mb-4">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
@@ -199,7 +199,7 @@ export default function NoteEditPage() {
 
   return (
     <ErrorBoundary>
-      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
+      <div className="flex h-screen bg-background overflow-x-hidden">
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
           {/* Enhanced Header */}
@@ -277,9 +277,9 @@ export default function NoteEditPage() {
           {/* Enhanced Editor Area */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-auto">
-              <div className="max-w-4xl mx-auto w-full p-3 lg:p-6">
+              <div className="max-w-4xl mx-auto w-full px-4 py-6 sm:px-6 lg:px-8">
                 {noteContent.content !== null ? (
-                  <RobustNotionEditor
+                  <NotionEditor
                     key={`editor-${noteId}`} // Force re-render when noteId changes
                     content={{
                       title: noteContent.title,
@@ -315,7 +315,6 @@ export default function NoteEditPage() {
         isDeleting={isDeleting}
       />
 
-      <FloatingAutoSaveStatus />
     </ErrorBoundary>
   );
 }

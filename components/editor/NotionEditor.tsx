@@ -136,7 +136,7 @@ function NotionEditorInner({
         console.log("💾 Updating existing note with title:", title);
 
         // Build updates object - only include fields that are provided
-        const updates: { title?: string; content?: any } = {};
+        const updates: { title?: string; content?: JSONContent } = {};
         if (title) updates.title = title;
         if (content) updates.content = content;
 
@@ -350,20 +350,21 @@ function NotionEditorInner({
       }
     },
   });
+
+  // will back to this shit soon lol 
+
+
+
   // Handle title change
   const handleTitleChange = useCallback(
     (newTitle: string) => {
       console.log("📝 Title changed:", { oldTitle: noteTitle, newTitle });
       setNoteTitle(newTitle);
 
-      // Trigger auto-save when title changes
-      if (autoSave && editable && editor) {
-        const currentContent = { title: newTitle, content: editor.getJSON() };
-        console.log("🔄 Triggering auto-save with content:", currentContent);
-        updateContent(currentContent);
-      }
+      // Trigger auto-save when title changes (will debounce in useEffect below)
+      // The debounce effect will handle the actual saving
     },
-    [autoSave, editable, editor, updateContent, noteTitle]
+    [noteTitle]
   );
 
   // Focus title input for new notes
@@ -378,6 +379,21 @@ function NotionEditorInner({
       }
     }
   }, [autoFocus, noteId, content?.title]);
+
+  // Save title changes with debounce (500ms) to avoid excessive requests
+  useEffect(() => {
+    if (!currentNoteId || !autoSave) return;
+
+    const timer = setTimeout(() => {
+      if (noteTitle && noteTitle !== content?.title) {
+        console.log("💾 Saving title change to database:", noteTitle);
+        // Use updateContent to trigger auto-save through the hook for proper status tracking
+        updateContent({ title: noteTitle, content: editor?.getJSON()  });
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [noteTitle, currentNoteId, editor, updateContent, content?.title, autoSave]);
   // Handle content updates when prop changes
   useEffect(() => {
     if (editor && content?.content !== undefined) {

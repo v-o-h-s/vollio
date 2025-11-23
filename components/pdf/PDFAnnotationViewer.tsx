@@ -1,4 +1,4 @@
-// TODO pls update the any types to proper types from Syncfusion if possible
+// TODO : will be deleted soon 
 import React, { useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {

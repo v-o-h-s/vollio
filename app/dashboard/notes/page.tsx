@@ -44,11 +44,19 @@ const NotesPage: React.FC = () => {
   });
   
   const {
-    data: notes = [],
+    data: notesRaw = [],
     isLoading,
     error,
     refetch,
   } = useGetNotesQuery({});
+
+  // Transform API response to match Note type
+  const notes = notesRaw.map(note => ({
+    ...note,
+    userId: '', // Default userId for list view
+    content: { type: 'doc', content: [] }, // Empty valid JSONContent
+    pdfAnnotationId: undefined,
+  }));
 
   const [deleteNote, { isLoading: isDeleting }] = useDeleteNoteMutation();
 
@@ -258,7 +266,7 @@ const NotesPage: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="space-y-6 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         {/* Enhanced Header with Better Typography and Spacing */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
