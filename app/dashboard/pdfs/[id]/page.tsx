@@ -110,42 +110,38 @@ export default function PDFPage() {
       error && "status" in error ? (error as FetchBaseQueryError).status : null;
 
     return (
-      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 h-[200px] w-[400px]">
-        <Card className="border-destructive/20 shadow-lg overflow-hidden h-full w-full">
-          <CardContent className="pt-6">
-            <div className="flex flex-col items-center space-y-4 overflow-x-auto max-w-full">
-              <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
-                <AlertCircle className="w-8 h-8 text-destructive" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-2xl font-semibold text-foreground">
-                  {statusCode === 404 ? "PDF Not Found" : "Error Loading PDF"}
-                </h3>
-                <p className="text-base mt-2 text-muted-foreground break-words">
-                  {message ?? "Failed to load PDF. Please try again."}
-                </p>
-              </div>
-              <div className="flex flex-col gap-2 w-full">
-                <Button
-                  onClick={() => refetch()}
-                  variant="default"
-                  className="gap-2 w-full"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Try Again
-                </Button>
-                <Button
-                  onClick={() => router.push("/dashboard/pdfs")}
-                  variant="outline"
-                  className="gap-2 w-full"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to PDFs
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
+        <div className="flex flex-col items-center space-y-4 w-[400px]">
+          <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+            <AlertCircle className="w-8 h-8 text-destructive" />
+          </div>
+          <div className="text-center">
+            <h3 className="text-2xl font-semibold text-foreground">
+              {statusCode === 404 ? "PDF Not Found" : "Error Loading PDF"}
+            </h3>
+            <p className="text-base mt-2 text-muted-foreground break-words">
+              {message ?? "Failed to load PDF. Please try again."}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 w-full">
+            <Button
+              onClick={() => refetch()}
+              variant="default"
+              className="gap-2 w-full"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Try Again
+            </Button>
+            <Button
+              onClick={() => router.push("/dashboard/pdfs")}
+              variant="outline"
+              className="gap-2 w-full"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to PDFs
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -153,32 +149,28 @@ export default function PDFPage() {
   // No data case
   if (!data) {
     return (
-      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 h-[200px] w-[400px]">
-        <Card className="border-border/50 shadow-lg overflow-hidden h-full w-full">
-          <CardContent className="pt-6">
-            <div className="flex flex-col items-center space-y-4 overflow-x-auto max-w-full">
-              <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                <FileText className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-xl font-semibold text-foreground">
-                  No PDF Data
-                </h3>
-                <p className="text-sm text-muted-foreground mt-2 break-words">
-                  Unable to load the requested PDF document.
-                </p>
-              </div>
-              <Button
-                onClick={() => router.push("/dashboard/pdfs")}
-                variant="default"
-                className="w-full gap-2"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to PDFs
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
+        <div className="flex flex-col items-center space-y-4 w-[400px]">
+          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+            <FileText className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-foreground">
+              No PDF Data
+            </h3>
+            <p className="text-sm text-muted-foreground mt-2 break-words">
+              Unable to load the requested PDF document.
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push("/dashboard/pdfs")}
+            variant="default"
+            className="w-full gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to PDFs
+          </Button>
+        </div>
       </div>
     );
   }
@@ -206,7 +198,7 @@ export default function PDFPage() {
           pdfDocument={data}
           onToggleNoter={() => setIsNoteOpen(!isNoterOpen)}
         />
-      </div>
+      </div>  
 
       {isNoterOpen && (
         <>
@@ -271,11 +263,11 @@ export default function PDFPage() {
               "transition-none"
             )}
             style={{
-              width: `calc(${100 - leftWidth}% - ${isDragging ? "32px" : "8px"
-                })`,
+              width: `calc(${100 - leftWidth}% - ${
+                isDragging ? "32px" : "8px"
+              })`,
             }}
           >
-
             <Noter pdfDocument={data} />
           </div>
         </>
