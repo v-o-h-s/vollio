@@ -1,3 +1,6 @@
+// TODO you must handle when user click on some note from the home , and another tab does already exist
+// TODO you must handle when user click on some tab from the tabs
+
 import { DndContext, type DragEndEvent, useDroppable } from "@dnd-kit/core";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import {

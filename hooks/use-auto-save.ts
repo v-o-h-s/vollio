@@ -54,6 +54,7 @@ export function useAutoSave({
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Failed to save");
+      console.log(err);
       console.error("Auto-save error:", err);
     }
   }, [onSave, enabled]);
