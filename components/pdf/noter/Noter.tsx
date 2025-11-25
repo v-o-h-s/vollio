@@ -1,6 +1,6 @@
 import { PDFDocument } from "@/lib/types/pdf";
 import NotesTabsManager, { Tab } from "./NotesTabsManager";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Home, RefreshCw } from "lucide-react";
 import {
@@ -133,13 +133,13 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
     setActiveTabId(noteId);
   };
 
-  const handleTitleChange = (noteId: string, newTitle: string) => {
+  const handleTitleChange = useCallback((noteId: string, newTitle: string) => {
     setTabs((prevTabs) =>
       prevTabs.map((tab) =>
         tab.id === noteId ? { ...tab, label: newTitle } : tab
       )
     );
-  };
+  }, []);
 
   if (isLoading) {
     return (

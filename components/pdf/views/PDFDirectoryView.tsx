@@ -29,9 +29,13 @@ import {
   useUpdateFolderMutation,
   useDeleteFolderMutation,
   useMovePDFMutation,
-  useGetLMSCoursesQuery
+  useGetLMSCoursesQuery,
 } from "@/lib/store/apiSlice";
-import { ErrorType, ErrorSeverity, AppError } from "@/lib/utils/error-handling/errors";
+import {
+  ErrorType,
+  ErrorSeverity,
+  AppError,
+} from "@/lib/utils/error-handling/errors";
 import { PDFDocument, Folder } from "@/lib/types/pdf";
 import { PDFUploadZone } from "./PDFUploadZone";
 import { PDFContextMenu } from "../PDFContextMenu";
@@ -50,6 +54,7 @@ import { RenameDialog } from "../RenameDialog";
 import { FileText, FolderOpen, Upload, School } from "lucide-react";
 import { LMSIntegrationPanel } from "@/components/lms";
 import { Logger } from "@/lib/utils/logger";
+import { PDFDirectoryLoadingState } from "./PDFDirectoryLoadingState";
 
 export type ViewMode = "grid" | "list" | "compact" | "details";
 export type SortBy = "name" | "date" | "size" | "type";
@@ -479,7 +484,7 @@ export function PDFDirectoryView({
   };
 
   if (isLoading || isFoldersLoading) {
-    return <div>Loading...</div>;
+    return <PDFDirectoryLoadingState />;
   }
 
   if (error) {
@@ -555,17 +560,18 @@ export function PDFDirectoryView({
 
         {/* Content area */}
         <div
-          className={`min-h-[400px] ${isDragOver
+          className={`min-h-[400px] ${
+            isDragOver
               ? "bg-primary/5 border-2 border-dashed border-primary"
               : ""
-            }`}
+          }`}
           onDragOver={handleFileDragOver}
           onDragLeave={handleFileDragLeave}
           onDrop={handleFileDrop}
         >
           {filteredAndSortedPDFs.length === 0 &&
-            folders.filter((f) => f.parent_id === currentFolder).length === 0 &&
-            !isCreatingFolder ? (
+          folders.filter((f) => f.parent_id === currentFolder).length === 0 &&
+          !isCreatingFolder ? (
             <div className="flex flex-col items-center justify-center py-12">
               <FileText className="h-16 w-16 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No items found</h3>
@@ -623,7 +629,9 @@ export function PDFDirectoryView({
                     onItemSelect={handleItemSelect}
                     onContextMenu={handleContextMenu}
                     onFolderContextMenu={handleFolderContextMenu}
-                    onPDFOpen={(pdf) => router.push(`/dashboard/pdfs/${pdf.id}`)}
+                    onPDFOpen={(pdf) =>
+                      router.push(`/dashboard/pdfs/${pdf.id}`)
+                    }
                     onCreateFolder={handleCreateFolder}
                     onCancelCreateFolder={() => setIsCreatingFolder(false)}
                   />
@@ -645,7 +653,7 @@ export function PDFDirectoryView({
                           folder={folder}
                           viewMode={viewMode}
                           onOpen={() => handleFolderNavigation(folder.id)}
-                          onSelect={() => { }}
+                          onSelect={() => {}}
                           onContextMenu={(e) =>
                             handleFolderContextMenu(e, folder.id)
                           }
