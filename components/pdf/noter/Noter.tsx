@@ -133,6 +133,14 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
     setActiveTabId(noteId);
   };
 
+  const handleTitleChange = (noteId: string, newTitle: string) => {
+    setTabs((prevTabs) =>
+      prevTabs.map((tab) =>
+        tab.id === noteId ? { ...tab, label: newTitle } : tab
+      )
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full w-full">
@@ -297,6 +305,7 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
                 noteId={tab.id}
                 pdfId={pdfDocument.id}
                 isActive={activeTabId === tab.id}
+                onTitleChange={handleTitleChange}
               />
             </div>
           ))}

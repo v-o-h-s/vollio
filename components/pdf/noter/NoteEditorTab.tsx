@@ -1,19 +1,33 @@
 import { useGetNoteQuery } from "@/lib/store/apiSlice";
 import { LoadingState } from "@/components/ui/loading";
 import { NotionEditor } from "@/components/editor";
+import { useEffect } from "react";
 
 interface NoteEditorTabProps {
   noteId: string;
   pdfId: string;
   isActive: boolean;
+  onTitleChange?: (noteId: string, newTitle: string) => void;
 }
 
 /**
  * A persistent editor instance for a single note tab.
  * The editor remains mounted when hidden, preserving undo/redo history and cursor position.
  */
-export function NoteEditorTab({ noteId, pdfId, isActive }: NoteEditorTabProps) {
+export function NoteEditorTab({
+  noteId,
+  pdfId,
+  isActive,
+  onTitleChange,
+}: NoteEditorTabProps) {
   const { data: noteData, error, isLoading } = useGetNoteQuery(noteId);
+
+  // Update tab label when note title changes
+  useEffect(() => {
+    if (noteData && onTitleChange) {
+      onTitleChange(noteId, noteData.title);
+    }
+  }, [noteData?.title, noteId, onTitleChange]);
 
   if (isLoading) {
     return (

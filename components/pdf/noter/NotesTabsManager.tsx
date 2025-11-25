@@ -1,7 +1,14 @@
 // TODO you must handle when user click on some note from the home , and another tab does already exist
 // TODO you must handle when user click on some tab from the tabs
 
-import { DndContext, type DragEndEvent, useDroppable } from "@dnd-kit/core";
+import {
+  DndContext,
+  type DragEndEvent,
+  useDroppable,
+  useSensor,
+  useSensors,
+  PointerSensor,
+} from "@dnd-kit/core";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import {
   SortableContext,
@@ -35,6 +42,16 @@ export default function NotesTabsManager({
   onDeleteNote,
   onTabClick,
 }: NotesTabsManagerProps) {
+  // Configure sensors with activation constraints
+  // This allows clicks to work normally while still enabling drag after 8px movement
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px movement before drag starts
+      },
+    })
+  );
+
   // Only sortable tabs (exclude home tab)
   const sortableTabs = useMemo(() => tabs.filter((tab) => !tab.isHome), [tabs]);
   const sortableIds = useMemo(
@@ -68,6 +85,7 @@ export default function NotesTabsManager({
 
   return (
     <DndContext
+      sensors={sensors}
       modifiers={[restrictToHorizontalAxis]}
       onDragEnd={handleDragEnd}
     >
