@@ -5,14 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Plus, Home, RefreshCw } from "lucide-react";
 import {
   useGetNotesQuery,
-  useGetNoteQuery,
   useDeleteNoteMutation,
   useCreateNoteMutation,
 } from "@/lib/store/apiSlice";
 import { LoadingState } from "@/components/ui/loading";
-import { NotionEditor } from "@/components/editor";
 import { NoteCard } from "./NoteCard";
-import { NoteContent } from "@/lib/types/editor";
+import { NoteEditorTab } from "./NoteEditorTab";
 
 const HOME_TAB_ID = "home";
 
@@ -35,12 +33,6 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
   const [deleteNote] = useDeleteNoteMutation();
   const [createNote, { error: createNoteError, isLoading: isLoadingNewNote }] =
     useCreateNoteMutation();
-  // this line will run every time the activeTabId changes
-  const {
-    data: activeNoteContent,
-    error: getNoteError,
-    isLoading: isLoadingNote,
-  } = useGetNoteQuery(activeTabId, { skip: activeTabId === HOME_TAB_ID });
 
   // Sort notes by most recently updated
   const sortedNotes = useMemo(() => {
@@ -50,18 +42,6 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
   }, [fileNotes]);
-
-  useEffect(() => {
-    if (activeNoteContent) {
-      const noteId = activeNoteContent.id;
-      const noteTitle = activeNoteContent.title;
-      setTabs((prevTabs) =>
-        prevTabs.map((tab) =>
-          tab.id === noteId ? { ...tab, label: noteTitle } : tab
-        )
-      );
-    }
-  }, [activeNoteContent]);
 
   const handleCreateNote = async () => {
     if (isLoadingNewNote) return;
@@ -301,38 +281,25 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
               </div>
             )}
           </div>
-        ) : (
-          // Note editor view
-          <div className="h-full">
-            {isLoadingNote ? (
-              <div className="flex justify-center items-center h-full">
-                <LoadingState
-                  title="Loading note..."
-                  description="Please wait..."
-                />
-              </div>
-            ) : activeNoteContent ? (
-              // Editing existing note
-              <div className="p-8 h-full flex flex-col">
-                <div className="flex-1 h-full">
-                  <NotionEditor
-                    key={activeNoteContent.id} // Force remount when switching notes
-                    noteId={activeNoteContent.id}
-                    content={{
-                      title: activeNoteContent.title,
-                      content: activeNoteContent.content,
-                    }}
-                    pdfId={pdfDocument.id}
-                    autoSave={true}
-                    autoSaveDelay={500}
-                  />
-                </div>
-              </div>
-            ) : (
-              <p>Not found</p>
-            )}
-          </div>
-        )}
+        ) : null}
+
+        {/* Render all open note editors - hidden when not active */}
+        {tabs
+          .filter((tab) => !tab.isHome)
+          .map((tab) => (
+            <div
+              key={tab.id}
+              className={`h-full ${
+                activeTabId === tab.id ? "block" : "hidden"
+              }`}
+            >
+              <NoteEditorTab
+                noteId={tab.id}
+                pdfId={pdfDocument.id}
+                isActive={activeTabId === tab.id}
+              />
+            </div>
+          ))}
       </div>
     </div>
   );
