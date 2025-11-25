@@ -23,6 +23,7 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
   ]);
   const [activeTabId, setActiveTabId] = useState<string>(HOME_TAB_ID);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
 
   //rtk queries
   const {
@@ -31,8 +32,7 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
     error,
     refetch,
   } = useGetNotesQuery({ pdfId: pdfDocument.id });
-  const [deleteNote, { isLoading: isLoadingDeleteNote }] =
-    useDeleteNoteMutation();
+  const [deleteNote] = useDeleteNoteMutation();
   const [createNote, { error: createNoteError, isLoading: isLoadingNewNote }] =
     useCreateNoteMutation();
   // this line will run every time the activeTabId changes
@@ -79,6 +79,7 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
   };
 
   const handleDeleteNote = async (noteId: string) => {
+    setDeletingNoteId(noteId);
     try {
       await deleteNote(noteId).unwrap();
       // Also close the tab if it's open
@@ -88,6 +89,8 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
       }
     } catch (error) {
       console.error("Failed to delete note:", error);
+    } finally {
+      setDeletingNoteId(null);
     }
   };
 
@@ -263,7 +266,7 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
                       note={note}
                       onClick={handleNoteCardClick}
                       onDelete={handleDeleteNote}
-                      isDeleting={isLoadingDeleteNote}
+                      isDeleting={deletingNoteId === note.id}
                     />
                   ))}
                 </div>
