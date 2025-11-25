@@ -1,18 +1,16 @@
 import { PDFDocument } from "@/lib/types/pdf";
 import NotesTabsManager, { Tab } from "./NotesTabsManager";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Home, RefreshCw } from "lucide-react";
 import {
   useGetNotesQuery,
-  useGetNoteQuery,
   useDeleteNoteMutation,
   useCreateNoteMutation,
 } from "@/lib/store/apiSlice";
 import { LoadingState } from "@/components/ui/loading";
-import { NotionEditor } from "@/components/editor";
 import { NoteCard } from "./NoteCard";
-import { NoteContent } from "@/lib/types/editor";
+import { NoteEditorTab } from "./NoteEditorTab";
 
 const HOME_TAB_ID = "home";
 
@@ -35,12 +33,6 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
   const [deleteNote] = useDeleteNoteMutation();
   const [createNote, { error: createNoteError, isLoading: isLoadingNewNote }] =
     useCreateNoteMutation();
-  // this line will run every time the activeTabId changes
-  const {
-    data: activeNoteContent,
-    error: getNoteError,
-    isLoading: isLoadingNote,
-  } = useGetNoteQuery(activeTabId, { skip: activeTabId === HOME_TAB_ID });
 
   // Sort notes by most recently updated
   const sortedNotes = useMemo(() => {
@@ -71,11 +63,26 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
   };
 
   const handleDeleteTab = (id: string) => {
-    setTabs((prev) => prev.filter((tab) => tab.id !== id));
-    // If we deleted the active tab, switch to home
+    // If we're deleting the active tab, find the next tab to activate
     if (activeTabId === id) {
-      setActiveTabId(HOME_TAB_ID);
+      const currentIndex = tabs.findIndex((tab) => tab.id === id);
+
+      // Try to activate the previous tab first, then next, then home
+      let newActiveTabId = HOME_TAB_ID;
+
+      if (currentIndex > 0) {
+        // Activate the tab before this one
+        newActiveTabId = tabs[currentIndex - 1].id;
+      } else if (currentIndex < tabs.length - 1) {
+        // If this is the first tab, activate the next one
+        newActiveTabId = tabs[currentIndex + 1].id;
+      }
+
+      setActiveTabId(newActiveTabId);
     }
+
+    // Remove the tab
+    setTabs((prev) => prev.filter((tab) => tab.id !== id));
   };
 
   const handleDeleteNote = async (noteId: string) => {
@@ -101,6 +108,7 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
   };
 
   const handleTabClick = (tabId: string) => {
+    console.log("Tab clicked:", tabId);
     setActiveTabId(tabId);
   };
 
@@ -125,18 +133,13 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
     setActiveTabId(noteId);
   };
 
-  const handleNoteCreated = (noteId: string) => {
-    // When a new note is created, update the tab ID
-    const currentTab = tabs.find((t) => t.id === activeTabId);
-    if (currentTab && !currentTab.isHome) {
-      setTabs((prev) =>
-        prev.map((tab) =>
-          tab.id === activeTabId ? { ...tab, id: noteId } : tab
-        )
-      );
-      setActiveTabId(noteId);
-    }
-  };
+  const handleTitleChange = useCallback((noteId: string, newTitle: string) => {
+    setTabs((prevTabs) =>
+      prevTabs.map((tab) =>
+        tab.id === noteId ? { ...tab, label: newTitle } : tab
+      )
+    );
+  }, []);
 
   if (isLoading) {
     return (
@@ -149,6 +152,19 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
       </div>
     );
   }
+
+  if (isLoadingNewNote) {
+    return (
+      <div className="flex justify-center items-center h-full w-full">
+        <LoadingState
+          title="Creating note..."
+          description="Please wait while we create your new note."
+          className="text-white"
+        />
+      </div>
+    );
+  }
+
   if (createNoteError) {
     const errorMessage =
       createNoteError instanceof Error
@@ -273,37 +289,26 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
               </div>
             )}
           </div>
-        ) : (
-          // Note editor view
-          <div className="h-full">
-            {isLoadingNote ? (
-              <div className="flex justify-center items-center h-full">
-                <LoadingState
-                  title="Loading note..."
-                  description="Please wait..."
-                />
-              </div>
-            ) : activeNoteContent ? (
-              // Editing existing note
-              <div className="p-8 h-full flex flex-col">
-                <div className="flex-1 h-full">
-                  <NotionEditor
-                    noteId={activeNoteContent.id}
-                    content={{
-                      title: activeNoteContent.title,
-                      content: activeNoteContent.content,
-                    }}
-                    pdfId={pdfDocument.id}
-                    autoSave={true}
-                    autoSaveDelay={500}
-                  />
-                </div>
-              </div>
-            ) : (
-              <p>Not found</p>
-            )}
-          </div>
-        )}
+        ) : null}
+
+        {/* Render all open note editors - hidden when not active */}
+        {tabs
+          .filter((tab) => !tab.isHome)
+          .map((tab) => (
+            <div
+              key={tab.id}
+              className={`h-full ${
+                activeTabId === tab.id ? "block" : "hidden"
+              }`}
+            >
+              <NoteEditorTab
+                noteId={tab.id}
+                pdfId={pdfDocument.id}
+                isActive={activeTabId === tab.id}
+                onTitleChange={handleTitleChange}
+              />
+            </div>
+          ))}
       </div>
     </div>
   );
