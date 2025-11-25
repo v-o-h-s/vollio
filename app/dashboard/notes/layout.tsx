@@ -1,4 +1,3 @@
-import { AutoSaveStatusProvider } from '@/components/dashboard/AutoSaveStatusProvider'
 
 export default function NotesLayout({
     children,
@@ -6,8 +5,8 @@ export default function NotesLayout({
     children: React.ReactNode
 }) {
     return (
-        <AutoSaveStatusProvider>
+        <>
             {children}
-        </AutoSaveStatusProvider>
+        </>
     )
 }

@@ -8,14 +8,96 @@ inclusion: always
 
 # Error Handling and Problem Resolution
 
+## Error Handling Checklist
+
+When implementing new API endpoints, follow this standardized error handling pattern:
+
+### Endpoint Implementation Checklist
+
+- [ ] **Schema Definition**: Create Zod schema in `/lib/dto/` with proper validation rules
+  - [ ] Required fields properly marked
+  - [ ] String length constraints (min/max)
+  - [ ] Enum values for known options
+  - [ ] Custom validation for complex fields (emails, UUIDs, etc.)
+
+- [ ] **Handler Implementation**: Create handler function following the pattern
+  - [ ] Authenticate user with `const { userId } = await auth()`
+  - [ ] Throw `AuthError.authenticationRequired()` if no userId
+  - [ ] Parse request body with proper error handling
+  - [ ] Implement business logic validation (not field validation)
+  - [ ] Log operations with `Logger.info()`, `Logger.success()`, `Logger.error()`
+  - [ ] Use emoji indicators for visual scanning (📂, 📝, 🔐, ✅, ❌)
+
+- [ ] **Wrapper Integration**: Use proper wrapper composition
+  - [ ] For validation + error handling: `export const POST = withValidatedHandler(schema, handler)`
+  - [ ] For error handling only: `export const GET = withErrorHandler(handler)`
+  - [ ] Schema should not be passed to handler directly - it's already validated
+
+- [ ] **Error Throwing**: Use proper error classes with context
+  - [ ] `AuthError.authenticationRequired()` for missing auth
+  - [ ] `ValidationError.fieldRequired()` for missing fields (should be caught by Zod)
+  - [ ] `ValidationError.duplicateValue()` for constraint violations
+  - [ ] `DatabaseError.insertFailed()` for DB insert failures
+  - [ ] `DatabaseError.queryFailed()` for DB query failures
+
+- [ ] **Logging Best Practices**
+  - [ ] Log at request start with resource type emoji (📂 folders, 📝 notes)
+  - [ ] Log at key operations (auth check: 🔐, validation: ✅/❌, DB: 💾)
+  - [ ] Include context in all logs (userId, resourceId, operation name)
+  - [ ] Log success before return: `Logger.success('✅ Created', { id })`
+  - [ ] Log errors with full context: `Logger.error('❌ Failed', { error, context })`
+
+- [ ] **Type Safety**
+  - [ ] Validated body data should be fully typed from Zod schema
+  - [ ] Use type inference: `type CreateRequest = z.infer<typeof createSchema>`
+  - [ ] No `any` types in handlers
+  - [ ] Response types should be explicit interfaces
+
+### Common Implementation Patterns
+
+**Modern GET Endpoint:**
+```typescript
+export const GET = withErrorHandler(async (req: NextRequest) => {
+  Logger.info('📂 Fetching resources');
+  const { userId } = await auth();
+  if (!userId) throw AuthError.authenticationRequired('Auth required', {});
+  
+  const data = await db.query(userId);
+  Logger.success('✅ Fetched', { count: data.length });
+  return NextResponse.json({ success: true, data });
+});
+```
+
+**Modern POST Endpoint with Validation:**
+```typescript
+export const POST = withValidatedHandler(createSchema, async (req) => {
+  Logger.info('📝 Creating resource');
+  const { userId } = await auth();
+  if (!userId) throw AuthError.authenticationRequired('Auth required', {});
+  
+  const body = await req.json(); // Already validated by wrapper
+  
+  // Business logic validation only (field validation handled by Zod)
+  const existing = await findDuplicate(body.name);
+  if (existing) {
+    throw ValidationError.duplicateValue('name', 'Already exists', { userId });
+  }
+  
+  const result = await db.insert({ ...body, userId });
+  Logger.success('✅ Created', { id: result.id });
+  return NextResponse.json({ success: true, data: result });
+});
+```
+
 ## Debugging Approach
 
 When encountering errors or implementation challenges:
 
 1. **Analyze first**: Check error messages, stack traces, and console logs
-2. **Use existing patterns**: Reference `@/lib/utils/error-handling.ts` and `@/components/ErrorBoundary.tsx`
+2. **Use existing patterns**: Reference error classes in `/lib/utils/error-handling/`
 3. **Test incrementally**: Apply small, isolated changes
 4. **Verify core flows**: Ensure fixes don't break PDF upload → annotation → navigation
+5. **Check logs**: Look for emoji indicators in console/server logs to trace execution
 
 ## Framework-Specific Issues
 

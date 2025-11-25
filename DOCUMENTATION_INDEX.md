@@ -14,17 +14,18 @@ This comprehensive documentation index provides organized access to all Noto PDF
 ### Developers
 1. **[Technical Guidelines](./.kiro/steering/tech.md)** - Code standards, patterns, and architectural decisions
 2. **[Project Structure](./.kiro/steering/structure.md)** - File organization and naming conventions
-3. **[Error Handling Guide](./.kiro/steering/checking.md)** - Debugging and problem resolution
+3. **[Error Handling Guide](./docs/ERROR_HANDLING.md)** - Comprehensive error handling system and best practices
+4. **[Checking & Testing](./.kiro/steering/checking.md)** - Error handling checklist and debugging approaches
 
 ## 📁 Documentation by Category
 
 ### Core System Documentation
 
 #### Main Project Files
-- **[README.md](./README.md)** - Main project documentation with setup instructions
+- **[README.md](./README.md)** - Main project documentation with setup instructions and error handling overview
 - **[PROJECT_OVERVIEW.md](./docs/PROJECT_OVERVIEW.md)** - Comprehensive project vision and technical roadmap
-- **[API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md)** - Complete REST API reference with authentication
-- **[ERROR_HANDLING.md](./docs/ERROR_HANDLING.md)** - Error handling patterns and recovery mechanisms
+- **[API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md)** - Complete REST API reference with authentication, validation, and error responses
+- **[ERROR_HANDLING.md](./docs/ERROR_HANDLING.md)** - Comprehensive 8-category error handling system with factory methods, wrappers, and best practices
 
 #### System Architecture
 - **[NAVIGATION_SYSTEM.md](./docs/NAVIGATION_SYSTEM.md)** - Modern floating navigation with glassmorphism design

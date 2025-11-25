@@ -243,6 +243,41 @@ noto/
 - **Input Sanitization**: All user inputs are validated and sanitized
 - **CORS Policies**: Proper CORS configuration for API security
 
+## ⚠️ Error Handling & Validation
+
+Noto implements a comprehensive, 8-category error handling system with automatic validation and detailed logging:
+
+### Error Categories
+
+All API endpoints consistently handle errors across 8 categories:
+
+1. **AuthError** - Authentication and authorization failures (401/403)
+2. **ValidationError** - Invalid request data with detailed field information (400)
+3. **DatabaseError** - Supabase operations with automatic error code mapping (500)
+4. **FileError** - File operation failures with context (500)
+5. **StorageError** - Cloud storage operation failures (500)
+6. **NetworkError** - Network connectivity issues (503)
+7. **AIError** - AI service failures (500)
+8. **GeneralError** - Unexpected server errors (500)
+
+### Request Validation
+
+All POST/PUT endpoints automatically validate requests using:
+- **Zod Schemas**: Type-safe schema validation
+- **Automatic Validation**: Middleware wrapper validates before handler execution
+- **Detailed Errors**: Field-level error information for client handling
+- **Type Safety**: Validated data is fully typed through the handler
+
+### Logging & Debugging
+
+Comprehensive logging with visual indicators:
+- **Emoji Indicators**: 📂 folders, 📝 notes, 🔐 auth, ✅ success, ❌ errors
+- **Request Tracing**: Full context logging for debugging
+- **Error Context**: Detailed context information for support teams
+- **Performance Metrics**: Operation timing and performance insights
+
+For detailed information, see [Error Handling Documentation](./docs/ERROR_HANDLING.md).
+
 ## 📊 Performance & Optimization
 
 ### Frontend Performance

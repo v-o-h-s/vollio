@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Note } from "@/lib/types";
+import { Note } from "@/lib/types/editor";
 import { EnhancedNoteCard } from "./enhanced-note-card";
 import { Button } from "./button";
 import { Input } from "./input";

@@ -1,470 +1,157 @@
 "use client";
 
-import React, { ReactNode, ErrorInfo, useState, useCallback } from "react";
+import { type ReactNode } from "react";
 import {
   ErrorBoundary as ReactErrorBoundary,
-  FallbackProps,
+  type ErrorBoundaryProps as ReactErrorBoundaryProps,
+  type FallbackProps,
 } from "react-error-boundary";
-import {
-  AlertTriangle,
-  RefreshCw,
-  Home,
-  Bug,
-  Copy,
-  CheckCircle,
-  ExternalLink,
-} from "lucide-react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  AppError,
-  ErrorRecoveryAction,
-  ErrorDisplayOptions,
-  ErrorType,
-  ErrorSeverity,
-} from "@/lib/types/errors";
-import {
-  mapErrorToAppError,
-  logError,
-  shouldReportError,
-  formatErrorForDisplay,
-  createAppError,
-} from "@/lib/utils/error-handling/frontend-error-handling";
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
-  displayOptions?: ErrorDisplayOptions;
-  recoveryActions?: ErrorRecoveryAction[];
+type ResetHandler = ReactErrorBoundaryProps["onReset"];
+type ErrorHandler = ReactErrorBoundaryProps["onError"];
+type ResetKeys = ReactErrorBoundaryProps["resetKeys"];
+interface DefaultFallbackProps extends FallbackProps {
+  title?: string;
+  description?: string;
   context?: string;
 }
 
-interface ErrorFallbackProps extends FallbackProps {
-  appError?: AppError;
-  displayOptions?: ErrorDisplayOptions;
-  recoveryActions?: ErrorRecoveryAction[];
-  context?: string;
-}
-
-// Enhanced error fallback component with retry logic and better UX
-function EnhancedErrorFallback({
+const DefaultFallback = ({  
   error,
   resetErrorBoundary,
-  appError,
-  displayOptions = {},
-  recoveryActions = [],
+  title,
+  description,
   context,
-}: ErrorFallbackProps) {
-  const [retryCount, setRetryCount] = useState(0);
-  const [isRetrying, setIsRetrying] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  // Convert native error to AppError if needed
-  const processedError =
-    appError || mapErrorToAppError(error, { component: context });
-  const displayError = formatErrorForDisplay(processedError);
-
-  // Log the error
-  React.useEffect(() => {
-    logError(processedError);
-  }, [processedError]);
-
-  const handleRetry = useCallback(async () => {
-    setIsRetrying(true);
-    setRetryCount((prev) => prev + 1);
-
-    try {
-      // Add delay for better UX
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      resetErrorBoundary();
-    } catch (retryError) {
-      console.error("Retry failed:", retryError);
-    } finally {
-      setIsRetrying(false);
-    }
-  }, [resetErrorBoundary]);
-
-  const handleCopyError = useCallback(async () => {
-    const errorDetails = {
-      type: processedError.type,
-      message: processedError.message,
-      timestamp: processedError.timestamp,
-      context: processedError.context,
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-    };
-
-    try {
-      await navigator.clipboard.writeText(
-        JSON.stringify(errorDetails, null, 2)
-      );
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (clipboardError) {
-      console.error("Failed to copy error details:", clipboardError);
-    }
-  }, [processedError]);
-
-  const handleGoHome = useCallback(() => {
-    window.location.href = "/dashboard";
-  }, []);
-
-  const handleRefreshPage = useCallback(() => {
-    window.location.reload();
-  }, []);
-
-  const getSeverityColor = (severity: ErrorSeverity) => {
-    switch (severity) {
-      case ErrorSeverity.CRITICAL:
-        return "bg-red-600 text-white";
-      case ErrorSeverity.HIGH:
-        return "bg-red-500 text-white";
-      case ErrorSeverity.MEDIUM:
-        return "bg-orange-500 text-white";
-      case ErrorSeverity.LOW:
-        return "bg-yellow-500 text-white";
-      default:
-        return "bg-gray-500 text-white";
-    }
-  };
-
-  const defaultActions: ErrorRecoveryAction[] = [
-    ...(displayOptions.showRetryButton !== false && processedError.retryable
-      ? [
-          {
-            label: isRetrying
-              ? "Retrying..."
-              : `Try Again${retryCount > 0 ? ` (${retryCount})` : ""}`,
-            action: handleRetry,
-            primary: true,
-          },
-        ]
-      : []),
-    {
-      label: "Go Home",
-      action: handleGoHome,
-    },
-    {
-      label: "Refresh Page",
-      action: handleRefreshPage,
-    },
-  ];
-
-  const allActions = [...recoveryActions, ...defaultActions];
+}: DefaultFallbackProps) => {
+  const errorMessage =
+    error instanceof Error ? error.message : String(error ?? "Unknown error");
+  const errorStack = error instanceof Error ? error.stack : undefined;
 
   return (
-    <div className="min-h-[400px] flex items-center justify-center bg-red-50 rounded-xl border border-red-200">
-      <div className="text-center max-w-lg p-6">
-        {/* Error Icon and Severity Badge */}
-        <div className="relative mx-auto mb-4">
-          <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center">
-            <AlertTriangle size={28} className="text-red-500" />
-          </div>
-          <div
-            className={`absolute -top-2 -right-2 px-2 py-1 rounded-full text-xs font-semibold ${getSeverityColor(
-              processedError.severity
-            )}`}
-          >
-            {processedError.severity}
-          </div>
+    <div className="flex items-center justify-center px-6 py-12">
+      <div className="max-w-md w-full space-y-5 rounded-2xl border border-border/70 bg-card p-8 text-center shadow-sm">
+        <div className="flex justify-center">
+          <AlertTriangle className="h-12 w-12 text-destructive" />
         </div>
 
-        {/* Error Title and Message */}
-        <h3 className="text-lg font-semibold text-red-900 mb-2">
-          {displayError.title}
-        </h3>
-        <p className="text-red-700 text-sm mb-4">{displayError.message}</p>
-
-        {/* Context Information */}
-        {processedError.context && (
-          <div className="bg-red-100 rounded-lg p-3 mb-4 text-left">
-            <p className="text-xs text-red-600 font-medium mb-1">
-              Error Context:
+        <div className="space-y-2">
+          <h3 className="text-xl font-semibold">
+            {title ?? "Something went wrong"}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {description ?? "An unexpected error occurred. Please try again."}
+          </p>
+          {context && (
+            <p className="text-xs text-muted-foreground/80">
+              Context: {context}
             </p>
-            <div className="text-xs text-red-700 space-y-1">
-              {processedError.context.component && (
-                <div>Component: {processedError.context.component}</div>
-              )}
-              {processedError.context.action && (
-                <div>Action: {processedError.context.action}</div>
-              )}
-              {processedError.context.fileName && (
-                <div>File: {processedError.context.fileName}</div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-3 justify-center mb-4">
-          {allActions.map((action, index) => (
-            <Button
-              key={index}
-              onClick={action.action}
-              variant={action.primary ? "default" : "outline"}
-              size="sm"
-              disabled={isRetrying}
-              className={`flex items-center gap-2 ${
-                action.primary ? "bg-red-500 hover:bg-red-600 text-white" : ""
-              }`}
-            >
-              {action.label === "Try Again" ||
-              action.label.includes("Retrying") ? (
-                <RefreshCw
-                  size={16}
-                  className={isRetrying ? "animate-spin" : ""}
-                />
-              ) : action.label === "Go Home" ? (
-                <Home size={16} />
-              ) : action.label === "Refresh Page" ? (
-                <RefreshCw size={16} />
-              ) : null}
-              {action.label}
-            </Button>
-          ))}
-        </div>
-
-        {/* Additional Options */}
-        <div className="flex justify-center gap-4 text-xs">
-          {displayOptions.showTechnicalDetails !== false && (
-            <button
-              onClick={() => setShowDetails(!showDetails)}
-              className="text-red-600 hover:text-red-700 flex items-center gap-1"
-            >
-              <Bug size={12} />
-              {showDetails ? "Hide" : "Show"} Details
-            </button>
           )}
-
-          <button
-            onClick={handleCopyError}
-            className="text-red-600 hover:text-red-700 flex items-center gap-1"
-          >
-            {copied ? <CheckCircle size={12} /> : <Copy size={12} />}
-            {copied ? "Copied!" : "Copy Error"}
-          </button>
-
-          {displayOptions.showContactSupport !== false &&
-            shouldReportError(processedError) && (
-              <a
-                href="mailto:support@noto.app?subject=Error Report"
-                className="text-red-600 hover:text-red-700 flex items-center gap-1"
-              >
-                <ExternalLink size={12} />
-                Contact Support
-              </a>
-            )}
         </div>
 
-        {/* Technical Details */}
-        {showDetails && displayOptions.showTechnicalDetails !== false && (
-          <details className="mt-4 text-left bg-red-100 rounded-lg p-3">
-            <summary className="text-xs text-red-600 cursor-pointer font-medium mb-2">
-              Technical Details
+        {process.env.NODE_ENV === "development" && error && (
+          <details className="text-left text-xs bg-muted/40 border border-border/60 rounded-lg p-3 max-h-48 overflow-auto">
+            <summary className="cursor-pointer font-medium">
+              Error details
             </summary>
-            <div className="text-xs text-red-700 space-y-2">
-              <div>
-                <strong>Error Type:</strong> {processedError.type}
-              </div>
-              <div>
-                <strong>Timestamp:</strong>{" "}
-                {processedError.timestamp.toISOString()}
-              </div>
-              {processedError.technicalMessage && (
-                <div>
-                  <strong>Technical Message:</strong>{" "}
-                  {processedError.technicalMessage}
-                </div>
-              )}
-              {process.env.NODE_ENV === "development" && error?.stack && (
-                <div>
-                  <strong>Stack Trace:</strong>
-                  <pre className="text-xs bg-red-200 p-2 rounded mt-1 overflow-auto max-h-32">
-                    {error.stack}
-                  </pre>
-                </div>
-              )}
-            </div>
+            <pre className="mt-2 whitespace-pre-wrap text-destructive">
+              {errorStack ?? errorMessage}
+            </pre>
           </details>
         )}
 
-        {/* Retry Count Display */}
-        {retryCount > 0 && (
-          <p className="text-xs text-red-600 mt-2">
-            Retry attempts: {retryCount}
-          </p>
-        )}
+        <div className="flex justify-center">
+          <Button variant="outline" onClick={() => resetErrorBoundary()} className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Try again
+          </Button>
+        </div>
       </div>
     </div>
   );
+};
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  /**
+   * Provide a custom fallback UI as a ReactNode.
+   */
+  fallback?: ReactNode;
+  /**
+   * Optional reset callback invoked when the boundary successfully resets.
+   */
+  onReset?: ResetHandler;
+  /**
+   * Optional error callback from `react-error-boundary`.
+   */
+  onError?: ErrorHandler;
+  /**
+   * Keys that trigger an automatic reset when they change.
+   */
+  resetKeys?: ResetKeys;
+  /**
+   * Override the default title copy rendered by the built-in fallback UI.
+   */
+  title?: string;
+  /**
+   * Override the default description copy rendered by the built-in fallback UI.
+   */
+  description?: string;
+  /**
+   * Helpful context string shown underneath the description in the default UI.
+   */
+  context?: string;
 }
 
-// PDF-specific error fallback component
-function PDFErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
-  const pdfError = createAppError(
-    ErrorType.PDF_LOADING_ERROR,
-    error?.message || "PDF loading failed",
-    { component: "PDFViewer", action: "load" }
-  );
-
-  const recoveryActions: ErrorRecoveryAction[] = [
-    {
-      label: "Try Different PDF",
-      action: () => window.history.back(),
-    },
-    {
-      label: "Upload New PDF",
-      action: () => (window.location.href = "/dashboard"),
-    },
-  ];
-
-  return (
-    <EnhancedErrorFallback
-      error={error}
-      resetErrorBoundary={resetErrorBoundary}
-      appError={pdfError}
-      recoveryActions={recoveryActions}
-      context="PDFViewer"
-      displayOptions={{
-        showTechnicalDetails: true,
-        showRetryButton: true,
-        showContactSupport: true,
-      }}
-    />
-  );
-}
-
-// Upload-specific error fallback component
-function UploadErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
-  const uploadError = createAppError(
-    ErrorType.STORAGE_UPLOAD_FAILED,
-    error?.message || "File upload failed",
-    { component: "FileUpload", action: "upload" }
-  );
-
-  const recoveryActions: ErrorRecoveryAction[] = [
-    {
-      label: "Choose Different File",
-      action: () => {
-        // Trigger file picker
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = ".pdf";
-        input.click();
-      },
-    },
-  ];
-
-  return (
-    <EnhancedErrorFallback
-      error={error}
-      resetErrorBoundary={resetErrorBoundary}
-      appError={uploadError}
-      recoveryActions={recoveryActions}
-      context="FileUpload"
-      displayOptions={{
-        showRetryButton: true,
-        showTechnicalDetails: false,
-      }}
-    />
-  );
-}
-
-// General error boundary wrapper
-export function ErrorBoundary({
+export const ErrorBoundary = ({
   children,
   fallback,
+  onReset,
   onError,
-  displayOptions,
-  recoveryActions,
+  resetKeys,
+  title,
+  description,
   context,
-}: ErrorBoundaryProps) {
-  const handleError = (error: Error, errorInfo: ErrorInfo) => {
-    const appError = mapErrorToAppError(error, {
-      component: context,
-      action: "render",
-    });
+}: ErrorBoundaryProps) => {
+  const defaultFallbackRender = (props: FallbackProps) => (
+    <DefaultFallback
+      {...props}
+      title={title}
+      description={description}
+      context={context} 
+    />
+  );
 
-    logError(appError);
-    onError?.(error, errorInfo);
+  const resolvedFallbackProps = fallback
+    ? { fallback }
+    : { fallbackRender: defaultFallbackRender };
+
+  const handleReset: ResetHandler = (details) => {
+    onReset?.(details);
   };
 
-  const FallbackComponent = fallback
-    ? () => <>{fallback}</>
-    : (props: FallbackProps) => (
-        <EnhancedErrorFallback
-          {...props}
-          displayOptions={displayOptions}
-          recoveryActions={recoveryActions}
-          context={context}
-        />
+  const handleError: ErrorHandler = (error, info) => {
+    if (process.env.NODE_ENV !== "production") {
+      const contextLabel = context ? ` [${context}]` : "";
+      console.error(
+        `ErrorBoundary${contextLabel} caught an error:`,
+        error,
+        info,
       );
-
-  return (
-    <ReactErrorBoundary
-      FallbackComponent={FallbackComponent}
-      onError={handleError}
-    >
-      {children}
-    </ReactErrorBoundary>
-  );
-}
-
-// Specialized error boundary for PDF components
-export function PDFErrorBoundary({
-  children,
-  fallback,
-  onError,
-  displayOptions,
-  recoveryActions,
-}: ErrorBoundaryProps) {
-  const handleError = (error: Error, errorInfo: ErrorInfo) => {
-    const pdfError = createAppError(
-      ErrorType.PDF_LOADING_ERROR,
-      error?.message || "PDF component error",
-      { component: "PDFViewer", action: "render" }
-    );
-
-    logError(pdfError);
-    onError?.(error, errorInfo);
+    }
+    onError?.(error, info);
   };
 
   return (
     <ReactErrorBoundary
-      FallbackComponent={fallback ? () => <>{fallback}</> : PDFErrorFallback}
+      onReset={handleReset}
       onError={handleError}
+      resetKeys={resetKeys}
+      {...resolvedFallbackProps}
     >
       {children}
     </ReactErrorBoundary>
   );
-}
+};
 
-// Specialized error boundary for upload components
-export function UploadErrorBoundary({
-  children,
-  fallback,
-  onError,
-  displayOptions,
-  recoveryActions,
-}: ErrorBoundaryProps) {
-  const handleError = (error: Error, errorInfo: ErrorInfo) => {
-    const uploadError = createAppError(
-      ErrorType.STORAGE_UPLOAD_FAILED,
-      error?.message || "Upload component error",
-      { component: "FileUpload", action: "render" }
-    );
-
-    logError(uploadError);
-    onError?.(error, errorInfo);
-  };
-
-  return (
-    <ReactErrorBoundary
-      FallbackComponent={fallback ? () => <>{fallback}</> : UploadErrorFallback}
-      onError={handleError}
-    >
-      {children}
-    </ReactErrorBoundary>
-  );
-}

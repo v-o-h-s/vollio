@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { PDFDocument, TextSelection, Annotation } from "../types";
-
+import { PDFDocument } from "../types/pdf";
+import { TextSelection } from "../types/pdf";
+import { Annotation } from "../types/pdf";
 // will be used when implementing notes 
 interface PreviewCardState {
   visible: boolean;

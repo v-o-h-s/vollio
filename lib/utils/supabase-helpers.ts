@@ -15,53 +15,9 @@ import {
   STORAGE_CONFIG,
 } from "../supabaseClient";
 import type { Database } from "../types/database";
-import { AppError } from "../types/errors";
-
-/**
- * Maps Supabase errors to our application error types
- */
-export const mapSupabaseError = (error: any): AppError => {
-  let type: string;
-  let message: string;
-  let retryable = false;
-
-  if (error?.code === "PGRST116") {
-    type = "AUTHENTICATION_ERROR";
-    message = "Access denied. Please check your permissions.";
-  } else if (error?.code === "PGRST301") {
-    type = "DATABASE_ERROR";
-    message = "Resource not found.";
-  } else if (error?.message?.includes("JWT")) {
-    type = "AUTHENTICATION_ERROR";
-    message = "Authentication token expired. Please sign in again.";
-  } else if (error?.message?.includes("network")) {
-    type = "NETWORK_ERROR";
-    message = "Network error occurred. Please try again.";
-    retryable = true;
-  } else if (error?.message?.includes("storage")) {
-    type = "STORAGE_ERROR";
-    message = "File storage error occurred.";
-    retryable = true;
-  } else {
-    type = "DATABASE_ERROR";
-    message = error?.message || "An unexpected error occurred.";
-    retryable = true;
-  }
-
-  return {
-    type: type as any,
-    message,
-    severity: "medium" as any,
-    retryable,
-    userMessage: message,
-    timestamp: new Date(),
-    context: {
-      component: "supabase-helpers",
-      action: "database_operation",
-      details: error,
-    },
-  };
-};
+import { AppError } from "./error-handling/errors";
+import { Logger } from "./logger";
+import { DatabaseError } from "./error-handling";
 
 /**
  * Type guard for database row types
@@ -165,95 +121,8 @@ export const RETRY_CONFIG = {
   ] as string[],
 };
 
-/**
- * Implements exponential backoff retry logic
- */
-export const withRetry = async <T>(
-  operation: () => Promise<T>,
-  config = RETRY_CONFIG
-): Promise<T> => {
-  let lastError: any;
 
-  for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
-    try {
-      return await operation();
-    } catch (error) {
-      lastError = error;
 
-      if (attempt === config.maxRetries) {
-        break;
-      }
-
-      const mappedError = mapSupabaseError(error);
-      if (
-        !mappedError.retryable ||
-        !config.retryableErrors.includes(mappedError.type)
-      ) {
-        throw error;
-      }
-
-      const delay =
-        config.initialDelay * Math.pow(config.backoffMultiplier, attempt);
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
-  }
-
-  throw lastError;
-};
-
-/**
- * Helper to create standardized API responses
- */
-export const createAPIResponse = <T>(
-  success: boolean,
-  data?: T,
-  error?: string
-) => ({
-  success,
-  data,
-  error,
-});
-
-/**
- * Helper to handle Supabase query results
- */
-export const handleSupabaseResult = <T>(result: {
-  data: T | null;
-  error: any;
-}) => {
-  if (result.error) {
-    throw mapSupabaseError(result.error);
-  }
-  return result.data;
-};
-
-/**
- * Helper to check if a user has access to a resource
- */
-export const checkUserAccess = async (
-  supabaseClient: any,
-  table: string,
-  resourceId: string,
-  userId: string
-): Promise<boolean> => {
-  try {
-    const { data, error } = await supabaseClient
-      .from(table)
-      .select("id")
-      .eq("id", resourceId)
-      .eq("user_id", userId)
-      .single();
-
-    if (error && error.code !== "PGRST116") {
-      throw mapSupabaseError(error);
-    }
-
-    return !!data;
-  } catch (error) {
-    console.error("Error checking user access:", error);
-    return false;
-  }
-};
 
 /**
  * Helper to format database timestamps to Date objects
@@ -392,23 +261,38 @@ export async function generateSignedUrl(
   supabaseClient: any,
   storagePath: string
 ): Promise<string> {
-  try {
-    const { data, error } = await supabaseClient.storage
-      .from(STORAGE_CONFIG.BUCKET_NAME)
-      .createSignedUrl(storagePath, STORAGE_CONFIG.SIGNED_URL_EXPIRY);
+  const { data, error } = await supabaseClient.storage
+    .from(STORAGE_CONFIG.BUCKET_NAME)
+    .createSignedUrl(storagePath, STORAGE_CONFIG.SIGNED_URL_EXPIRY);
 
-    if (error) {
-      console.error("Signed URL generation error:", error);
-      throw new Error(`Failed to generate signed URL: ${error.message}`);
-    }
-
-    if (!data?.signedUrl) {
-      throw new Error("Signed URL generation succeeded but no URL returned");
-    }
-
-    return data.signedUrl;
-  } catch (error) {
-    console.error("Error in generateSignedUrl:", error);
-    throw error;
+  if (error) {
+    Logger.error("Error generating signed URL:", error);
+    throw DatabaseError.general(
+      `Failed to generate signed URL: ${error.message}`,
+      { operation: "generate_signed_url" },
+      error
+    );
   }
+
+  if (!data?.signedUrl) {
+    Logger.error("Failed to generate signed URL: No URL returned");
+    throw DatabaseError.general(
+      "Failed to generate signed URL: No URL returned",
+      { operation: "generate_signed_url" }
+    );
+  }
+
+  return data.signedUrl;
+}
+
+
+export const getTokenForTesting = async function getTokenForTesting(getToken: any,sessionId:any) {
+  let supabaseToken: string | null = null;
+  try {
+    supabaseToken = await getToken({ template: 'supabase', sessionId });
+    Logger.debug("Successfully retrieved Supabase token from Clerk");
+  } catch (error) {
+    Logger.warn("Could not retrieve Supabase token from Clerk", { error });
+  }
+  return supabaseToken;
 }

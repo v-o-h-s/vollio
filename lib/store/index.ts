@@ -22,7 +22,7 @@ export const store = configureStore({
           // Annotation actions
           "annotations/setPdfDocument",
           // Ignore all RTK Query internal actions
-          /^api\//,
+          "/^api\//",
         ],
         // Ignore these field paths in all actions
         ignoredActionsPaths: [

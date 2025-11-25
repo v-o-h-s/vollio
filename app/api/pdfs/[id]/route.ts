@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import {
@@ -334,3 +335,11 @@ export const DELETE = withErrorHandling(handleDELETE, {
   endpoint: "/api/pdfs/[id]",
   method: "DELETE",
 });
+=======
+import { withErrorHandling } from "@/lib/wrappers/withErrorHandling";
+import { handleGet } from "./handlers/getPdf";
+import { handleDelete } from "./handlers/deletePdf";
+
+export const GET = withErrorHandling(handleGet);
+export const DELETE = withErrorHandling(handleDelete);
+>>>>>>> feature/ntf

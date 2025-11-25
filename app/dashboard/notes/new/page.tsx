@@ -11,7 +11,7 @@ import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveS
 
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { Rectangle } from "@/lib/types";
+import { Rectangle } from "@/lib/types/pdf"; 
 import {
   useCreateAnnotationMutation,
 } from "@/lib/store/apiSlice";
@@ -227,11 +227,11 @@ export default function NewNotePage() {
 
   return (
     <ErrorBoundary>
-      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
+      <div className="flex h-screen bg-background">
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="flex items-center justify-between p-4 lg:px-6 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-10">
+          <header className="flex items-center justify-between p-4 lg:px-8 border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-10">
             <div className="flex items-center gap-2 lg:gap-4 min-w-0 flex-1">
               <Button
                 variant="ghost"
@@ -325,7 +325,7 @@ export default function NewNotePage() {
           {/* Editor Area */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-auto">
-              <div className="max-w-4xl mx-auto w-full p-3 lg:p-6">
+              <div className="max-w-4xl mx-auto w-full px-4 py-6 sm:px-6 lg:px-8">
                 <RobustNotionEditor
                   content={noteContent.content}
                   placeholder="Start writing your note..."

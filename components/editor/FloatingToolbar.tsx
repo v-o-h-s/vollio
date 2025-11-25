@@ -184,7 +184,9 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
           handleCommand(() => editor.chain().focus().toggleUnderline().run())
         }
         data-active={editor.isActive("underline")}
-        aria-label={`Underline ${editor.isActive("underline") ? "(active)" : ""}`}
+        aria-label={`Underline ${
+          editor.isActive("underline") ? "(active)" : ""
+        }`}
         aria-pressed={editor.isActive("underline")}
         title="Underline (Ctrl+U)"
       >
@@ -199,7 +201,9 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
           handleCommand(() => editor.chain().focus().toggleStrike().run())
         }
         data-active={editor.isActive("strike")}
-        aria-label={`Strikethrough ${editor.isActive("strike") ? "(active)" : ""}`}
+        aria-label={`Strikethrough ${
+          editor.isActive("strike") ? "(active)" : ""
+        }`}
         aria-pressed={editor.isActive("strike")}
         title="Strikethrough (Ctrl+Shift+X)"
       >

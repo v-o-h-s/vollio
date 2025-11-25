@@ -12,7 +12,6 @@ export { BubbleMenu } from './BubbleMenu';
 export { TableBubbleMenu } from './TableBubbleMenu';
 
 // Enhanced editor variants
-export { ResponsiveNotionEditor } from './ResponsiveNotionEditor';
 export { RobustNotionEditor } from './RobustNotionEditor';
 
 // Auto-save and status components

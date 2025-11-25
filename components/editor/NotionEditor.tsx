@@ -35,7 +35,6 @@ import { LinkDialog } from "./LinkDialog";
 import { BubbleMenu } from "./BubbleMenu";
 import { TableBubbleMenu } from "./TableBubbleMenu";
 import { FloatingToolbar } from "./FloatingToolbar";
-
 import { cn } from "@/lib/utils";
 import { AutoSaveStatus } from "./AutoSaveStatus";
 import { useAutoSave } from "@/hooks/use-auto-save";
@@ -65,6 +64,7 @@ function NotionEditorInner({
   autoSaveDelay = 500,
   onAutoSaveStatusChange,
   onNoteCreated,
+  pdfId,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState(content?.title || "");
@@ -80,7 +80,8 @@ function NotionEditorInner({
 
   // Update title when content prop changes (only on initial load)
   const hasInitialized = useRef(false);
-  
+  const hasContentInitialized = useRef(false);
+
   useEffect(() => {
     // Only update title from props on initial load, not during user editing
     if (content?.title !== undefined && !hasInitialized.current) {
@@ -95,7 +96,8 @@ function NotionEditorInner({
     async (noteContent: NoteContent) => {
       // Use the title from noteContent first, then fallback to current noteTitle state
       // Only use "Untitled Note" if both are truly empty
-      const title = (noteContent.title?.trim() || noteTitle.trim() || "Untitled Note");
+      const title =
+        noteContent.title?.trim() || noteTitle.trim() || "Untitled Note";
       const content = noteContent.content;
 
       console.log("🔄 Auto-save triggered:", {
@@ -103,17 +105,24 @@ function NotionEditorInner({
         noteTitleState: noteTitle,
         finalTitle: title,
         currentNoteId,
+        hasContent: !!content,
       });
 
-      if (!content) {
-        console.warn("Auto-save called with empty content");
+      // For new notes, we need content
+      if (!currentNoteId && !content) {
+        console.warn("Auto-save: Cannot create new note without content");
         return;
       }
 
       if (!currentNoteId) {
         // Create new note using RTK Query
-        console.log("📝 Creating new note with title:", title);
-        const newNote = await createNote({ title, content }).unwrap();
+        console.log("📝 Creating new note with title:", title, "pdfId:", pdfId);
+
+        const newNote = await createNote({
+          title,
+          content,
+          pdfId,
+        }).unwrap();
         const newNoteId = newNote.id;
 
         setCurrentNoteId(newNoteId);
@@ -125,9 +134,15 @@ function NotionEditorInner({
       } else {
         // Update existing note using RTK Query
         console.log("💾 Updating existing note with title:", title);
+
+        // Build updates object - only include fields that are provided
+        const updates: { title?: string; content?: JSONContent } = {};
+        if (title) updates.title = title;
+        if (content) updates.content = content;
+
         await updateNote({
           id: currentNoteId,
-          updates: { title, content },
+          updates,
         }).unwrap();
       }
     },
@@ -308,6 +323,9 @@ function NotionEditorInner({
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+      }),
     ],
     content: content?.content || "",
     editable,
@@ -335,41 +353,73 @@ function NotionEditorInner({
       }
     },
   });
+
+  // will back to this shit soon lol
+
   // Handle title change
   const handleTitleChange = useCallback(
     (newTitle: string) => {
       console.log("📝 Title changed:", { oldTitle: noteTitle, newTitle });
       setNoteTitle(newTitle);
 
-      // Trigger auto-save when title changes
-      if (autoSave && editable && editor) {
-        const currentContent = { title: newTitle, content: editor.getJSON() };
-        console.log("🔄 Triggering auto-save with content:", currentContent);
-        updateContent(currentContent);
-      }
+      // Trigger auto-save when title changes (will debounce in useEffect below)
+      // The debounce effect will handle the actual saving
     },
-    [autoSave, editable, editor, updateContent, noteTitle]
+    [noteTitle]
   );
 
   // Focus title input for new notes
   useEffect(() => {
     if (autoFocus && !noteId && !content?.title) {
       // Focus the title input for new notes
-      const titleInput = document.querySelector('input[placeholder="Enter note title..."]') as HTMLInputElement;
+      const titleInput = document.querySelector(
+        'input[placeholder="Enter note title..."]'
+      ) as HTMLInputElement;
       if (titleInput) {
         setTimeout(() => titleInput.focus(), 100);
       }
     }
   }, [autoFocus, noteId, content?.title]);
-  // Handle content updates when prop changes
+
+  // Save title changes with debounce (500ms) to avoid excessive requests
+  useEffect(() => {
+    if (!currentNoteId || !autoSave) return;
+
+    const timer = setTimeout(() => {
+      if (noteTitle && noteTitle !== content?.title) {
+        console.log("💾 Saving title change to database:", noteTitle);
+        // Use updateContent to trigger auto-save through the hook for proper status tracking
+        updateContent({ title: noteTitle, content: editor?.getJSON() });
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [
+    noteTitle,
+    currentNoteId,
+    editor,
+    updateContent,
+    content?.title,
+    autoSave,
+  ]);
+  // Handle content updates when prop changes (only on initial load or when switching notes)
   useEffect(() => {
     if (editor && content?.content !== undefined) {
-      const currentContent = editor.getJSON();
-      if (JSON.stringify(currentContent) !== JSON.stringify(content.content)) {
+      // Only set content on initial load or when switching to a different note
+      // This prevents cache updates from overwriting current edits during auto-save
+      if (!hasContentInitialized.current) {
+        console.log("🔄 Initial content load", { noteId: currentNoteId });
         editor.commands.setContent(content.content, { emitUpdate: false });
+        hasContentInitialized.current = true;
       }
     }
-  }, [editor, content?.content]);
+  }, [editor, content?.content, currentNoteId]);
+
+  // Reset content initialization when switching notes
+  useEffect(() => {
+    hasContentInitialized.current = false;
+    hasInitialized.current = false;
+  }, [noteId]);
 
   // Handle editable state changes
   useEffect(() => {
@@ -392,7 +442,7 @@ function NotionEditorInner({
     return { wordCount, readingTime };
   }, [editor, content?.content]);
 
-  // Handle dialog keyboard shortcuts
+  // Handle dialog keyboard shortcuts and custom events
   useEffect(() => {
     const handleOpenLinkDialog = () => {
       if (editor && !editor.isDestroyed) {
@@ -464,6 +514,19 @@ function NotionEditorInner({
           isOpen={isLinkDialogOpen}
           onClose={() => setIsLinkDialogOpen(false)}
         />
+      )}
+
+      {/* AutoSaveStatus - Shows in bottom-right when autoSave is enabled */}
+      {autoSave && (
+        <div className="absolute bottom-2 right-2 z-10">
+          <AutoSaveStatus
+            status={autoSaveStatus}
+            lastSaved={lastSaved}
+            error={autoSaveError}
+            isCreating={!currentNoteId}
+            size="sm"
+          />
+        </div>
       )}
     </div>
   );

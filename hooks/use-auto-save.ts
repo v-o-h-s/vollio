@@ -9,7 +9,7 @@ import { NoteContent } from "@/lib/types/editor";
 export type AutoSaveStatus = "idle" | "typing" | "saving" | "saved" | "error";
 
 interface UseAutoSaveOptions {
-  onSave: (content: any) => Promise<void>;
+  onSave: (content: Partial<NoteContent>) => Promise<void>;
   delay?: number;
   enabled?: boolean;
 }
@@ -22,7 +22,7 @@ interface UseAutoSaveReturn {
 }
 
 export function useAutoSave({
-  onSave,
+  onSave, // what will happen when the auto save is triggered
   delay = 500,
   enabled = true,
 }: UseAutoSaveOptions): UseAutoSaveReturn {
@@ -30,7 +30,7 @@ export function useAutoSave({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
   const contentRef = useRef<any>(null); /// this is for content updating , we have used useref instead of usestate because we don't want uneccessary renders , hope that won't cause some bugs in the future
-  const isTypingRef = useRef(false);
+  const isTypingRef = useRef(false); // same here , just to track if user is typing or not
 
   const performSave = useCallback(async () => {
     if (!enabled || !contentRef.current) {
@@ -54,6 +54,7 @@ export function useAutoSave({
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Failed to save");
+      console.log(err);
       console.error("Auto-save error:", err);
     }
   }, [onSave, enabled]);

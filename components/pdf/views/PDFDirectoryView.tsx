@@ -3,7 +3,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ErrorNotification } from "@/components/ui/error-notification";
 import toast from "react-hot-toast";
 import {
   DndContext,
@@ -32,7 +31,7 @@ import {
   useMovePDFMutation,
   useGetLMSCoursesQuery
 } from "@/lib/store/apiSlice";
-import { ErrorType, ErrorSeverity, AppError } from "@/lib/types/errors";
+import { ErrorType, ErrorSeverity, AppError } from "@/lib/utils/error-handling/errors";
 import { PDFDocument, Folder } from "@/lib/types/pdf";
 import { PDFUploadZone } from "./PDFUploadZone";
 import { PDFContextMenu } from "../PDFContextMenu";
@@ -50,6 +49,7 @@ import { TreeView } from "./TreeView";
 import { RenameDialog } from "../RenameDialog";
 import { FileText, FolderOpen, Upload, School } from "lucide-react";
 import { LMSIntegrationPanel } from "@/components/lms";
+import { Logger } from "@/lib/utils/logger";
 
 export type ViewMode = "grid" | "list" | "compact" | "details";
 export type SortBy = "name" | "date" | "size" | "type";
@@ -483,20 +483,7 @@ export function PDFDirectoryView({
   }
 
   if (error) {
-    const appError: AppError = {
-      type: ErrorType.DATABASE_ERROR,
-      message: "Unable to fetch your PDF documents. Please try again.",
-      severity: ErrorSeverity.MEDIUM,
-      retryable: true,
-      userMessage: "Failed to load PDFs",
-      timestamp: new Date(),
-      context: {
-        component: "PDFDirectoryView",
-        action: "fetch_pdfs",
-      },
-    };
-
-    return <ErrorNotification error={appError} onRetry={refetch} />;
+    Logger.error("Failed to load PDFs or folders", { error });
   }
 
   const allItems = [
@@ -568,18 +555,17 @@ export function PDFDirectoryView({
 
         {/* Content area */}
         <div
-          className={`min-h-[400px] ${
-            isDragOver
+          className={`min-h-[400px] ${isDragOver
               ? "bg-primary/5 border-2 border-dashed border-primary"
               : ""
-          }`}
+            }`}
           onDragOver={handleFileDragOver}
           onDragLeave={handleFileDragLeave}
           onDrop={handleFileDrop}
         >
           {filteredAndSortedPDFs.length === 0 &&
-          folders.filter((f) => f.parent_id === currentFolder).length === 0 &&
-          !isCreatingFolder ? (
+            folders.filter((f) => f.parent_id === currentFolder).length === 0 &&
+            !isCreatingFolder ? (
             <div className="flex flex-col items-center justify-center py-12">
               <FileText className="h-16 w-16 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No items found</h3>
@@ -637,7 +623,7 @@ export function PDFDirectoryView({
                     onItemSelect={handleItemSelect}
                     onContextMenu={handleContextMenu}
                     onFolderContextMenu={handleFolderContextMenu}
-                    onPDFOpen={(pdf) => router.push(`/dashboard/pdf/${pdf.id}`)}
+                    onPDFOpen={(pdf) => router.push(`/dashboard/pdfs/${pdf.id}`)}
                     onCreateFolder={handleCreateFolder}
                     onCancelCreateFolder={() => setIsCreatingFolder(false)}
                   />
@@ -659,7 +645,7 @@ export function PDFDirectoryView({
                           folder={folder}
                           viewMode={viewMode}
                           onOpen={() => handleFolderNavigation(folder.id)}
-                          onSelect={() => {}}
+                          onSelect={() => { }}
                           onContextMenu={(e) =>
                             handleFolderContextMenu(e, folder.id)
                           }
@@ -677,7 +663,7 @@ export function PDFDirectoryView({
                           handleItemSelect(pdf.id, isCtrlClick)
                         }
                         onContextMenu={(e) => handleContextMenu(e, pdf.id)}
-                        onOpen={() => router.push(`/dashboard/pdf/${pdf.id}`)}
+                        onOpen={() => router.push(`/dashboard/pdfs/${pdf.id}`)}
                         isDragging={activeId === pdf.id}
                       />
                     ))}

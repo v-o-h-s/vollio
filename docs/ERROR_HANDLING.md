@@ -4,100 +4,316 @@ inclusion: always
 
 # Error Handling Guidelines
 
-## Core Error Handling Patterns
+## Overview
 
-### API Route Error Handling
+This project uses a comprehensive, categorized error handling system with 8 error types, proper logging, and consistent JSON responses.
 
-**Always use `withErrorHandling` wrapper for API routes:**
+## Error Categories
 
+The system includes 8 main error classes with static factory methods:
+
+### 1. **AuthError** - Authentication & Authorization
 ```typescript
-import { withErrorHandling, createServerError, ServerErrorType } from '@/lib/utils/server-error-handling';
+throw AuthError.authenticationRequired("User not logged in", context);
+throw AuthError.authorizationDenied("No permission", context);
+throw AuthError.tokenExpired("Token has expired", context);
+```
 
-export const POST = withErrorHandling(
-  async (request: Request) => {
-    // Your handler logic
-  },
-  { endpoint: '/api/your-endpoint', method: 'POST' }
+### 2. **AIError** - AI Service Operations
+```typescript
+throw AIError.serviceError("DeepSeek API failed", context);
+throw AIError.quotaExceeded("API quota exceeded", context);
+throw AIError.modelUnavailable("Model not available", context);
+```
+
+### 3. **ValidationError** - Input Validation
+```typescript
+throw ValidationError.general("Validation error", context);
+throw ValidationError.fileTooLarge(100, context); // 100MB limit
+throw ValidationError.invalidFileType("PDF", context);
+throw ValidationError.invalidFileFormat("Invalid format", context);
+throw ValidationError.fieldRequired("name", context);
+throw ValidationError.fieldLengthInvalid("name", 1, 255, context);
+throw ValidationError.invalidFormat("parent_id", "UUID format", context);
+throw ValidationError.duplicateValue("name", "Already exists", context);
+```
+
+### 4. **StorageError** - Cloud Storage Operations
+```typescript
+throw StorageError.general("Upload failed", context);
+throw StorageError.quotaExceeded("Storage quota exceeded", context);
+throw StorageError.uploadFailed("Upload error", context);
+throw StorageError.accessDenied("Access denied", context);
+```
+
+### 5. **FileError** - File Operations
+```typescript
+throw FileError.general("File operation failed", context);
+throw FileError.notFound("File not found", context);
+throw FileError.corrupted("File is corrupted", context);
+throw FileError.loadingError("Failed to load file", context);
+```
+
+### 6. **DatabaseError** - Database Operations
+```typescript
+throw DatabaseError.general("Query failed", context);
+throw DatabaseError.connectionError("Connection failed", context);
+throw DatabaseError.constraintError("Constraint violation", context);
+throw DatabaseError.rlsViolation("RLS policy violation", context);
+throw DatabaseError.accessDenied("Access denied", context);
+throw DatabaseError.notFound("Record not found", context);
+throw DatabaseError.jwtExpired("JWT token expired", context);
+
+// Map Supabase errors automatically
+throw DatabaseError.mapSupabaseErrorCodeToDatabaseError(
+  error.code,
+  `Failed to fetch user folders: ${error.message}`,
+  { operation: "fetch_user_folders", userId }
 );
 ```
 
-**Required error handling flow:**
-1. Validate authentication and parameters using `validateRequired()`
-2. Wrap business logic in try-catch blocks
-3. Use `createServerError()` for structured errors
-4. Implement cleanup on failures (e.g., remove uploaded files)
-5. Return appropriate HTTP status codes
-
-### Client-Side Error Boundaries
-
-**Wrap components with appropriate error boundaries:**
-
+### 7. **NetworkError** - Network Operations
 ```typescript
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-
-<ErrorBoundary context="ComponentName">
-  <YourComponent />
-</ErrorBoundary>
+throw NetworkError.general("Request failed", context);
+throw NetworkError.timeout("Request timeout", context);
+throw NetworkError.connectionFailed("Connection failed", context);
 ```
 
-**Available error boundaries:**
-- `ErrorBoundary` - General purpose
-- `PDFErrorBoundary` - PDF-specific operations
-- `UploadErrorBoundary` - File upload operations
-
-### Error Hooks Usage
-
-**Use specialized error hooks for different contexts:**
-
+### 8. **GeneralError** - General/Unknown Errors
 ```typescript
-import { 
-  useErrorHandler, 
-  useUploadErrorHandler, 
-  usePDFErrorHandler 
-} from '@/hooks/use-error-handling';
-
-// General error handling
-const { handleError, retry } = useErrorHandler();
-
-// Upload-specific error handling
-const { handleUploadError } = useUploadErrorHandler();
-
-// PDF-specific error handling
-const { handlePDFError } = usePDFErrorHandler();
+throw GeneralError.unknown("Unexpected error", context);
+throw GeneralError.internalServer("Internal server error", context);
+throw GeneralError.serviceUnavailable("Service unavailable", context);
+throw GeneralError.externalService("External service failed", context);
+throw GeneralError.processing("Processing failed", context);
+throw GeneralError.rateLimit("Too many requests", 60, context); // retry after 60s
 ```
 
-## File Upload Error Handling
+## Error Properties
 
-**Always validate file uploads comprehensively:**
+All errors inherit from `BaseAppError` and include:
 
 ```typescript
-import { validateFileUpload } from '@/lib/utils/server-error-handling';
-
-validateFileUpload(
-  file,
-  STORAGE_CONFIG.MAX_FILE_SIZE, // 50MB max
-  STORAGE_CONFIG.ALLOWED_MIME_TYPES, // PDF only
-  { userId, fileName: file?.name, fileSize: file?.size }
-);
+{
+  timestamp: string;           // ISO 8601 timestamp
+  severity: ErrorSeverity;     // CRITICAL | HIGH | MEDIUM | LOW
+  userMessage: string;         // User-friendly message
+  technicalMessage: string;    // Technical error details
+  statusCode: number;          // HTTP status code
+  context?: ErrorContext;      // Operation context (operation, userId, etc.)
+  retryable?: boolean;         // Whether operation can be retried
+}
 ```
 
-**Required validation checks:**
-- File existence and type
-- Size limits (50MB maximum)
-- MIME type validation (PDF only)
-- File corruption detection
+## Error Handling Wrappers
 
-## Database Error Handling
+### withErrorHandler - API Error Handling
 
-**Map Supabase errors to application errors:**
+Wraps API route handlers and provides comprehensive error formatting:
 
 ```typescript
-import { mapSupabaseError } from '@/lib/utils/server-error-handling';
+import { withErrorHandler } from "@/lib/wrappers/withErrorHandling";
 
+export const GET = withErrorHandler(async (request: NextRequest) => {
+  // Your handler logic
+  throw AuthError.authenticationRequired("Auth required", context);
+});
+```
+
+**Response Format:**
+```json
+{
+  "success": false,
+  "errorType": "AUTH_ERROR",
+  "errorSubType": "AUTHENTICATION_REQUIRED",
+  "error": {
+    "userMessage": "Please log in to continue",
+    "severity": "HIGH",
+    "timestamp": "2025-11-18T14:30:45.000Z",
+    "actionLabel": "Sign In",
+    "context": { "operation": "fetch_folders" }
+  }
+}
+```
+
+### withValidation - Request Body Validation
+
+Validates request bodies using Zod schemas before handler execution:
+
+```typescript
+import { withValidation } from "@/lib/wrappers/withValidation";
+import { z } from "zod";
+
+const createFolderSchema = z.object({
+  name: z.string().min(1).max(255),
+  parent_id: z.string().uuid().optional(),
+});
+
+export const POST = withValidation(createFolderSchema, handlePOST);
+```
+
+**Validation Error Response:**
+```json
+{
+  "success": false,
+  "errorType": "VALIDATION_ERROR",
+  "error": {
+    "userMessage": "There was a validation error. Please check your input and try again.",
+    "message": "name: String must contain at least 1 character; parent_id: Invalid UUID format",
+    "severity": "LOW",
+    "statusCode": 400,
+    "timestamp": "2025-11-18T14:30:45.000Z"
+  }
+}
+```
+
+### withValidatedHandler - Combined Validation & Error Handling
+
+Composes both wrappers for cleaner code:
+
+```typescript
+import { withValidatedHandler } from "@/lib/wrappers/withErrorHandling";
+
+const schema = z.object({
+  name: z.string().min(1).max(255),
+});
+
+export const POST = withValidatedHandler(schema, async (request: NextRequest) => {
+  // Request body already validated
+  const body = await request.json();
+  // Your logic here
+});
+```
+
+## Logging
+
+All API handlers should use the `Logger` utility for comprehensive logging:
+
+```typescript
+import { Logger } from "@/lib/utils/logger";
+
+Logger.info("📂 Fetching folders", { endpoint: "/api/folders" });
+Logger.warn("🔐 Unauthorized access attempt", { userId });
+Logger.error("❌ Database error", error);
+Logger.success("✅ Operation completed", { count: 5 });
+```
+
+**Log Levels:**
+- `info()` - General operations
+- `warn()` - Warnings and suspicious activity
+- `error()` - Error states
+- `success()` - Successful operations
+
+## API Endpoint Pattern
+
+**Recommended pattern for all API routes:**
+
+```typescript
+import { withValidatedHandler } from "@/lib/wrappers/withErrorHandling";
+import { AuthError, DatabaseError } from "@/lib/utils/error-handling";
+import { Logger } from "@/lib/utils/logger";
+import { auth } from "@clerk/nextjs/server";
+
+// Schema validation
+const createSchema = z.object({
+  name: z.string().min(1).max(255),
+});
+
+async function handlePOST(request: NextRequest) {
+  const context = { operation: "create_resource" };
+  
+  Logger.info("📝 Creating resource", { endpoint: "/api/resource" });
+
+  // Authentication
+  const { userId } = await auth();
+  if (!userId) {
+    Logger.warn("🔐 Unauthorized access");
+    throw AuthError.authenticationRequired("Auth required", context);
+  }
+
+  // Parse validated body
+  const body = await request.json();
+
+  // Database operation
+  const supabase = await getAuthenticatedSupabaseClient();
+  const { data, error } = await supabase.from("table").insert(body);
+
+  if (error) {
+    Logger.error("Database error", error);
+    throw DatabaseError.mapSupabaseErrorCodeToDatabaseError(
+      error.code,
+      `Failed to create resource: ${error.message}`,
+      { ...context, userId }
+    );
+  }
+
+  Logger.success("✅ Resource created", { id: data.id });
+  return NextResponse.json({ success: true, data }, { status: 201 });
+}
+
+export const POST = withValidatedHandler(createSchema, handlePOST);
+```
+
+## Error Context
+
+Always pass context to errors for better debugging:
+
+```typescript
+const context = {
+  operation: "fetch_user_folders",      // What operation failed
+  userId: userId,                       // Who it affected
+  resourceId: folderId,                 // What resource
+  additionalInfo: "custom data"         // Any other relevant info
+};
+
+throw DatabaseError.general("Query failed", context);
+```
+
+## Best Practices
+
+1. **Throw Errors Early** - Don't try to handle them, let the wrapper catch them
+2. **Use Factory Methods** - Always use static factory methods, never `new Error()`
+3. **Add Context** - Include operation, userId, and resource IDs in errors
+4. **Log Before Throwing** - Log the error context before throwing
+5. **Validate at Boundary** - Use Zod schemas to validate all inputs
+6. **Handle in Wrapper** - Let `withErrorHandler` format responses
+7. **No Manual Error Responses** - Don't manually create error JSON responses
+8. **Remove console.log** - Use Logger utility instead of console
+
+## Migration Guide
+
+**Old Pattern (❌ Don't use):**
+```typescript
 try {
-  const { data, error } = await supabase.from('table').insert(data);
-  if (error) throw mapSupabaseError(error, context);
+  // logic
 } catch (error) {
+  console.error("error:", error);
+  return NextResponse.json({ error: "failed" }, { status: 500 });
+}
+```
+
+**New Pattern (✅ Use this):**
+```typescript
+export const GET = withErrorHandler(async (request: NextRequest) => {
+  Logger.info("Starting operation");
+  // logic
+  throw DatabaseError.general("Failed", context);
+});
+```
+
+## Common Error Codes
+
+| Error Type | HTTP Status | Example |
+|-----------|-----------|---------|
+| AuthenticationRequired | 401 | User not logged in |
+| AuthorizationDenied | 403 | No permission |
+| ValidationError | 400 | Invalid input |
+| NotFound | 404 | Resource not found |
+| ConflictError | 409 | Duplicate value |
+| RateLimitExceeded | 429 | Too many requests |
+| InternalServerError | 500 | Database query failed |
+| ServiceUnavailable | 503 | External service down |
+````
   throw createServerError(
     ServerErrorType.DATABASE_ERROR,
     'Operation failed',

@@ -9,9 +9,9 @@ import {
   Trash2,
   ExternalLink,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"; 
 import { Badge } from "@/components/ui/badge";
-import { RobustNotionEditor } from "@/components/editor/RobustNotionEditor";
+import { NotionEditor } from "@/components/editor/NotionEditor";
 import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveStatus";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
@@ -20,7 +20,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
   useGetNoteQuery,
   useUpdateNoteMutation,
-  useDeleteNoteMutation
+  useDeleteNoteMutation,
 } from "@/lib/store/apiSlice";
 import toast from "react-hot-toast";
 import type { JSONContent } from "@tiptap/core";
@@ -53,17 +53,12 @@ export default function NoteEditPage() {
   // Initialize content when note loads
   useEffect(() => {
     if (note) {
-     
       setNoteContent({
         title: note.title || "",
         content: note.content,
       });
     }
   }, [note]);
-
- 
-
-
 
   // Handle go back
   const handleGoBack = useCallback(() => {
@@ -101,8 +96,6 @@ export default function NoteEditPage() {
     setShowDeleteDialog(false);
   }, []);
 
-
-
   // Warn user before leaving if there are unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -135,22 +128,29 @@ export default function NoteEditPage() {
     };
 
     noteContent.content.content.forEach(extractText);
-    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+    return text
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
   };
 
   // Loading state with improved styling
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
-        <div className="flex-1 flex items-center justify-center">
+      <div className="flex h-screen bg-background overflow-x-hidden">
+        <div className="flex-1 flex items-center justify-center px-4">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="relative">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
               <div className="absolute inset-0 h-8 w-8 rounded-full border-2 border-primary/20"></div>
             </div>
             <div className="space-y-2">
-              <h3 className="text-lg font-medium text-foreground">Loading note...</h3>
-              <p className="text-sm text-muted-foreground">Please wait while we fetch your note</p>
+              <h3 className="text-lg font-medium text-foreground">
+                Loading note...
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Please wait while we fetch your note
+              </p>
             </div>
           </div>
         </div>
@@ -161,24 +161,33 @@ export default function NoteEditPage() {
   // Error state with improved styling
   if (error) {
     return (
-      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
-        <div className="flex-1 flex items-center justify-center">
+      <div className="flex h-screen bg-background overflow-x-hidden">
+        <div className="flex-1 flex items-center justify-center px-4">
           <div className="text-center max-w-md mx-auto p-6">
             <div className="mb-4">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
                 <ExternalLink className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
             </div>
-            <h2 className="text-xl font-semibold text-foreground mb-3">Note not found</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-3">
+              Note not found
+            </h2>
             <p className="text-muted-foreground mb-6 leading-relaxed">
-              The note you're looking for could not be found or you don't have permission to view it.
+              The note you're looking for could not be found or you don't have
+              permission to view it.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={handleGoBack} className="flex items-center gap-2">
+              <Button
+                onClick={handleGoBack}
+                className="flex items-center gap-2"
+              >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Notes
               </Button>
-              <Button variant="outline" onClick={() => window.location.reload()}>
+              <Button
+                variant="outline"
+                onClick={() => window.location.reload()}
+              >
                 Try Again
               </Button>
             </div>
@@ -190,7 +199,7 @@ export default function NoteEditPage() {
 
   return (
     <ErrorBoundary>
-      <div className="flex h-screen bg-background -m-6 lg:-m-8 lg:-ml-12">
+      <div className="flex h-screen bg-background overflow-x-hidden">
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
           {/* Enhanced Header */}
@@ -219,12 +228,15 @@ export default function NoteEditPage() {
                   </h1>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span>
-                      Last updated: {note?.updatedAt ? new Date(note.updatedAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      }) : 'Unknown'}
+                      Last updated:{" "}
+                      {note?.updatedAt
+                        ? new Date(note.updatedAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Unknown"}
                     </span>
                     {noteContent.content && (
                       <>
@@ -265,13 +277,13 @@ export default function NoteEditPage() {
           {/* Enhanced Editor Area */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-auto">
-              <div className="max-w-4xl mx-auto w-full p-3 lg:p-6">
+              <div className="max-w-4xl mx-auto w-full px-4 py-6 sm:px-6 lg:px-8">
                 {noteContent.content !== null ? (
-                  <RobustNotionEditor
+                  <NotionEditor
                     key={`editor-${noteId}`} // Force re-render when noteId changes
                     content={{
                       title: noteContent.title,
-                      content: noteContent.content
+                      content: noteContent.content,
                     }}
                     placeholder="Start writing your note..."
                     autoFocus={false}
@@ -303,7 +315,6 @@ export default function NoteEditPage() {
         isDeleting={isDeleting}
       />
 
-      <FloatingAutoSaveStatus />
     </ErrorBoundary>
   );
 }

@@ -8,12 +8,65 @@ The Noto API is fully implemented and production-ready with:
 - **Complete CRUD Operations**: All core endpoints (PDFs, Notes, Annotations, Highlights, Folders)
 - **Advanced Features**: Document processing, vector search, highlight management
 - **Security**: JWT authentication, RLS policies, comprehensive validation
+- **Error Handling**: 8-category error classification with proper status codes and user-friendly messages
+- **Logging**: Comprehensive request/response logging with emoji indicators
 - **Performance**: Rate limiting, caching, optimized queries
-- **Error Handling**: Comprehensive error boundaries and recovery mechanisms
 
 ## Authentication
 
 All endpoints require Clerk authentication with JWT tokens. The `userId` is automatically extracted from the authenticated session and used for Row Level Security (RLS) in Supabase.
+
+## Error Handling
+
+### Error Categories
+
+All endpoints use a consistent 8-category error handling system:
+
+1. **AuthError** (401/403) - Authentication and authorization failures
+2. **ValidationError** (400) - Invalid request data or schema validation failures
+3. **DatabaseError** (500) - Supabase operation failures with automatic error code mapping
+4. **FileError** (500) - File operation failures
+5. **StorageError** (500) - Cloud storage operation failures
+6. **NetworkError** (503) - Network connectivity issues
+7. **AIError** (500) - AI service failures
+8. **GeneralError** (500) - Unexpected or internal server errors
+
+### Error Response Format
+
+All error responses follow a consistent format:
+
+```json
+{
+  "success": false,
+  "errorType": "AUTH_ERROR",
+  "errorSubType": "AUTHENTICATION_REQUIRED",
+  "error": {
+    "userMessage": "User must be authenticated to perform this operation",
+    "message": "User authentication failed",
+    "severity": "HIGH",
+    "timestamp": "2025-11-18T14:30:45.000Z",
+    "actionLabel": "Sign In",
+    "statusCode": 401,
+    "context": {
+      "operation": "fetch_user_folders",
+      "userId": null
+    }
+  }
+}
+```
+
+### Common HTTP Status Codes
+
+- **200** - Successful GET/POST/PUT request
+- **201** - Successful resource creation
+- **400** - Bad request or validation error
+- **401** - Unauthorized (authentication required)
+- **403** - Forbidden (insufficient permissions)
+- **404** - Resource not found
+- **409** - Conflict (duplicate value or constraint violation)
+- **429** - Too many requests (rate limited)
+- **500** - Internal server error
+- **503** - Service unavailable
 
 ## Client Integration
 
@@ -29,6 +82,100 @@ const [createNote] = useCreateNoteMutation();
 // Avoid: Direct fetch calls
 // const response = await fetch('/api/notes');
 ```
+
+## Request Validation
+
+All POST and PUT endpoints validate request data using Zod schemas before processing. Validation happens automatically via the `withValidation` wrapper middleware.
+
+### Validation Error Response Format
+
+When validation fails, the response includes detailed information about which fields failed and why:
+
+```json
+{
+  "success": false,
+  "errorType": "VALIDATION_ERROR",
+  "error": {
+    "userMessage": "Invalid request data. Please check the errors and try again",
+    "message": "Validation failed for request body: name is required; name must be between 1 and 255 characters",
+    "statusCode": 400,
+    "context": {
+      "operation": "create_folder",
+      "validationErrors": [
+        {
+          "path": "name",
+          "message": "Required",
+          "code": "too_small"
+        },
+        {
+          "path": "color",
+          "message": "Invalid enum value",
+          "code": "invalid_enum_value"
+        }
+      ]
+    }
+  }
+}
+```
+
+### Common Validation Errors
+
+- **Field Required** (400): A required field is missing
+- **Field Too Long** (400): String exceeds maximum length
+- **Field Too Short** (400): String is below minimum length
+- **Invalid Format** (400): Field value doesn't match expected format (email, UUID, color, etc.)
+- **Invalid Enum** (400): Value not in allowed options list
+- **Duplicate Value** (409): Unique constraint violation (e.g., folder name already exists)
+- **Invalid File** (400): Uploaded file has invalid type or size
+
+## API Endpoint Patterns
+
+### Modern Endpoint Pattern with Validation & Error Handling
+
+All modern API endpoints follow this standardized pattern combining validation and error handling:
+
+```typescript
+import { withValidatedHandler } from '@/lib/wrappers/withErrorHandling';
+import { createFolderSchema } from '@/lib/dto/folder';
+import { Logger } from '@/lib/utils/logger';
+
+async function handlePOST(req: NextRequest) {
+  Logger.info('📂 Creating folder');
+  
+  // Auth check
+  const { userId } = await auth();
+  if (!userId) throw AuthError.authenticationRequired('Auth required', {});
+  
+  // Body already validated by wrapper - fully typed
+  const body = await req.json();
+  
+  // Business logic validation only
+  const existingFolder = await findFolder(body.name, userId);
+  if (existingFolder) {
+    throw ValidationError.duplicateValue('name', 'A folder with this name already exists', {
+      userId,
+      requestedName: body.name
+    });
+  }
+  
+  // Insert and return
+  const folder = await createFolderInDB({ ...body, userId });
+  Logger.success('✅ Folder created', { id: folder.id });
+  
+  return NextResponse.json({ success: true, data: folder });
+}
+
+export const POST = withValidatedHandler(createFolderSchema, handlePOST);
+```
+
+### Key Benefits of This Pattern
+
+1. **Automatic Validation**: Schema validation runs before handler executes
+2. **Typed Request Data**: Body data is fully typed from Zod schema
+3. **Comprehensive Logging**: Request entry, validation, errors all logged with emojis
+4. **Consistent Error Handling**: All 8 error types handled with proper status codes
+5. **No Redundant Checks**: Wrapper handles field validation, handler handles business logic
+6. **User-Friendly Messages**: Validation errors include helpful context for clients
 
 ## Core API Endpoints
 

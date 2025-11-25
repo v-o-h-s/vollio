@@ -23,7 +23,7 @@ export type { JSONContent };
  * Note content structure
  */
 export interface NoteContent {
-  title: string;
+  title?: string;
   content?: JSONContent | null;
 }
 
@@ -31,6 +31,7 @@ export interface NoteContent {
  * Props for the main NotionEditor component
  */
 export interface NotionEditorProps {
+  pdfId?: string;
   content?: NoteContent;
   onChange?: (content: JSONContent) => void;
   onUpdate?: (editor: Editor) => void;
@@ -128,6 +129,7 @@ export interface Note {
   createdAt: string; // ISO string for Redux serialization
   updatedAt: string; // ISO string for Redux serialization
   isDeleted: boolean;
+  pdfId?: string | null;
 }
 
 /**
@@ -135,8 +137,8 @@ export interface Note {
  */
 export interface CreateNoteRequest {
   title?: string;
-  content: JSONContent;
-  pdfAnnotationId?: string;
+  content?: JSONContent | null;
+  pdfId?: string;
 }
 
 /**
@@ -148,19 +150,41 @@ export interface UpdateNoteRequest {
 }
 
 /**
- * Supabase notes list response
- */
-export interface SupabaseNotesResponse {
-  success: boolean;
-  data?: Note[];
-  error?: string;
-}
-
-/**
  * Supabase single note response
  */
 export interface SupabaseNoteResponse {
   success: boolean;
-  data?: Note;
+  data?: SupabaseNote;
   error?: string;
+}
+
+interface SupabaseNote {
+  id: string;
+  userId: string;
+  title: string;
+  content: JSONContent | null;
+  pdfAnnotationId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  pdfId: string | null;
+}
+
+/**
+ * supabase response for fetching all notes
+ */
+
+export interface SupabaseNotesListResponse {
+  success: boolean;
+  data?: SupabaseSingleNoteFromListRepsonse[];
+  error?: string;
+}
+
+export interface SupabaseSingleNoteFromListRepsonse {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  pdfId: string | null;
 }

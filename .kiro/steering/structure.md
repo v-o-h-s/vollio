@@ -293,6 +293,115 @@ export function ComponentName({ prop }: ComponentProps) {
 
 ### API Routes ✅ FULLY IMPLEMENTED
 
+#### Modern API Architecture
+
+All API endpoints follow a standardized, composable architecture using middleware wrappers:
+
+**Error Handling Wrapper** (`withErrorHandler`)
+- Wraps handlers to catch and format all errors
+- Returns consistent JSON responses with error details
+- Handles 8 error categories with proper HTTP status codes
+- Logs all errors with context for debugging
+
+**Validation Wrapper** (`withValidation`)
+- Validates request bodies using Zod schemas
+- Runs before handler execution
+- Throws ValidationError with field-level details on failure
+- Automatically logs validation results
+
+**Composed Wrapper** (`withValidatedHandler`)
+- Combines validation + error handling
+- Cleaner endpoint exports: `export const POST = withValidatedHandler(schema, handler)`
+- Ensures validation runs before business logic
+
+#### API Route Structure
+
+```typescript
+// File: app/api/[resource]/route.ts
+
+import { withValidatedHandler, withErrorHandler } from '@/lib/wrappers/withErrorHandling';
+import { createResourceSchema } from '@/lib/dto/resource';
+import { Logger } from '@/lib/utils/logger';
+import { auth } from '@clerk/nextjs';
+
+// Handler function - business logic only
+async function handleGET(req: NextRequest) {
+  Logger.info('📂 Fetching resources');
+  const { userId } = await auth();
+  if (!userId) throw AuthError.authenticationRequired('Auth required', {});
+  
+  const data = await supabase.from('resources').select('*').eq('user_id', userId);
+  Logger.success('✅ Fetched', { count: data.length });
+  return NextResponse.json({ success: true, data });
+}
+
+async function handlePOST(req: NextRequest) {
+  Logger.info('📝 Creating resource');
+  const { userId } = await auth();
+  if (!userId) throw AuthError.authenticationRequired('Auth required', {});
+  
+  const body = await req.json(); // Already validated by wrapper
+  
+  // Business logic validation only
+  const existing = await findDuplicate(body.name, userId);
+  if (existing) {
+    throw ValidationError.duplicateValue('name', 'Already exists', { userId });
+  }
+  
+  const result = await supabase.from('resources').insert({ ...body, user_id: userId });
+  Logger.success('✅ Created', { id: result.id });
+  return NextResponse.json({ success: true, data: result });
+}
+
+// Exports - use composed wrapper for validation + error handling
+export const GET = withErrorHandler(handleGET);
+export const POST = withValidatedHandler(createResourceSchema, handlePOST);
+```
+
+#### Error Categories & Status Codes
+
+| Error Type | Status | Use Case |
+|-----------|--------|----------|
+| AuthError | 401/403 | Missing/invalid authentication, insufficient permissions |
+| ValidationError | 400 | Invalid request data, missing fields, constraint violations |
+| DatabaseError | 500 | Query failures, connection issues, data integrity errors |
+| FileError | 500 | Upload failures, invalid file types, size violations |
+| StorageError | 500 | Cloud storage operation failures |
+| NetworkError | 503 | Service unavailable, timeouts |
+| AIError | 500 | AI service failures, processing errors |
+| GeneralError | 500 | Unexpected or unclassified errors |
+
+#### Validation with Zod
+
+Schema definitions in `/lib/dto/`:
+
+```typescript
+// File: lib/dto/resource.ts
+import { z } from 'zod';
+
+export const createResourceSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255, 'Name too long'),
+  description: z.string().optional(),
+  type: z.enum(['document', 'note', 'folder']),
+});
+
+// Type inference for type safety
+export type CreateResourceRequest = z.infer<typeof createResourceSchema>;
+```
+
+#### Logging Pattern
+
+All handlers follow consistent logging:
+
+1. **Entry Point**: `Logger.info('📂 Operation name')`
+2. **Auth Check**: `Logger.info('🔐 Checking auth')` 
+3. **Business Logic**: `Logger.info('🔍 Validating business rules')`
+4. **Database Ops**: `Logger.info('💾 Saving to database')`
+5. **Success**: `Logger.success('✅ Operation complete', { context })`
+6. **Errors**: `Logger.error('❌ Operation failed', { error, context })`
+
+#### Current API Coverage
+
 - **Complete API Coverage**: All core endpoints (PDFs, Notes, Annotations, Highlights, Folders) fully implemented
 - **Pattern**: Export named functions for HTTP methods (GET, POST, PUT, DELETE) - implemented in all routes
 - **Error Handling**: Use `withErrorHandling` wrapper for all API routes - implemented with comprehensive error logging
@@ -311,3 +420,7 @@ export function ComponentName({ prop }: ComponentProps) {
 3. **Always** export through `index.ts` files in feature directories
 4. **Never** mix UI components with feature components in same directory
 5. **Always** use proper TypeScript interfaces for props and API data
+6. **API Routes**: Always compose wrappers for validation + error handling
+7. **Logging**: Use Logger utility with emoji indicators for all operations
+8. **Error Throwing**: Use proper error classes with context from `/lib/utils/error-handling`
+
