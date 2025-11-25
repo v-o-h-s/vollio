@@ -5,20 +5,9 @@ import {
 } from "@/lib/supabaseClient";
 import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types/pdf";
 import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
-import {
-  withErrorHandling,
-  extractRequestContext,
-  createServerError,
-  validateRequired,
-  logServerError,
-} from "@/lib/utils/error-handling";
+
 import { ErrorType } from "@/lib/utils/error-handling/errors";
-import {
-  validateFileUploadSecurity,
-  checkUserQuota,
-  checkEnhancedRateLimit,
-  generateSecureStoragePath,
-} from "@/lib/utils/security-validation";
+
 import { randomUUID } from "crypto";
 
 /**
@@ -29,6 +18,7 @@ async function uploadToStorage(
   file: File,
   userId: string
 ): Promise<StorageUploadResult> {
+  // the storage path in supabase like user_id/filename(even the filename should be updated i g)
   const storagePath = generateSecureStoragePath(userId, file.name);
 
   try {
@@ -146,6 +136,7 @@ async function storePDFMetadata(
           userId,
         },
         error
+        
       );
     }
 

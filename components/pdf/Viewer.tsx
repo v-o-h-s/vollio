@@ -1,5 +1,6 @@
 import { PDFDocument } from "@/lib/types/pdf";
 import { ViewerHeader } from "./ViewerHeader";
+import { TextSelectionPopup } from "./TextSelectionPopup";
 import { useRef, useState } from "react";
 import {
   Annotation,
@@ -20,6 +21,15 @@ interface ViewerProps {
   pdfDocument: PDFDocument;
   onToggleNoter?: () => void;
 }
+export interface textBound {
+  bottom: number;
+  height: number;
+  left: number;
+  pageIndex: number;
+  right: number;
+  top: number;
+  width: number;
+}
 
 export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
   const resourceUrl =
@@ -29,6 +39,46 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const pdfViewerRef = useRef<PdfViewerComponent>(null);
+
+  // State for text selection popup
+  const [selectionBounds, setSelectionBounds] = useState<{
+    x: number;
+    y: number;
+    textBounds: textBound[];
+    // for now we will just handle selection in one page lol
+    pageIndex: number;
+  } | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
+
+  // Handle text selection end
+  const handleTextSelectionEnd = (args: any) => {
+    console.log("Text selection args:", args);
+
+    if (args.textBounds && args.textBounds.length > 0) {
+      // Get the first text bound to calculate popup position
+      const firstBound = args.textBounds[0];
+
+      // Calculate popup position (above the selection)
+      // Using the viewer's coordinate system
+      const x = firstBound.left;
+      const y = firstBound.top - 10; // Position above the selection
+
+      setSelectionBounds({
+        x,
+        y,
+        textBounds: args.textBounds,
+        pageIndex: firstBound.pageIndex,
+      });
+      setShowPopup(true);
+    }
+  };
+
+  // Close popup when clicking outside
+  const handlePageClick = () => {
+    setShowPopup(false);
+    setSelectionBounds(null);
+  };
+
   return (
     <div className="relative w-full h-full flex flex-col">
       {isHeaderVisible ? (
@@ -58,7 +108,18 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
           <span>Show Header</span>
         </button>
       )}
-      <div className="flex-1 w-full overflow-hidden">
+      <div className="flex-1 w-full overflow-hidden relative">
+        {/* Text Selection Popup */}
+        {showPopup && selectionBounds && (
+          <TextSelectionPopup
+            x={selectionBounds.x}
+            y={selectionBounds.y}
+            textBounds={selectionBounds.textBounds}
+            pageIndex={selectionBounds.pageIndex}
+            onClose={() => setShowPopup(false)}
+          />
+        )}
+
         <PdfViewerComponent
           ref={pdfViewerRef}
           id="viewer"
@@ -79,13 +140,8 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
           zoomMode="FitToWidth"
           enableAnnotation={true}
           textSelectionStart={() => {}}
-          // textSelectionEnd={(args) => handleSelectionTextEnd(args)}
-          // pageClick={() => {
-          //   // Close tooltip when clicking on empty page area (not during text selection)
-          //   if (!selectedText) {
-          //     setSelectionBounds(null);
-          //   }
-          // }}
+          textSelectionEnd={handleTextSelectionEnd}
+          pageClick={handlePageClick}
           // annotationMouseover={(args) => handleAnnotationMouseover(args)}
           // annotationMouseLeave={() => handleAnnotationMouseLeave()}
           annotationDoubleClick={() => {}}
