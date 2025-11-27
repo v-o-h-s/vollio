@@ -43,9 +43,21 @@ export interface PDFViewerHeaderProps {
   isHeaderVisible: boolean;
   /** Function to set header visibility */
   setIsHeaderVisible: (visible: boolean) => void;
-
+  /** PDF viewer ref */
   pdfViewerRef?: React.RefObject<any>;
+  /** Current highlight color */
+  currentHighlightColor?: string;
+  /** Function to set highlight color */
+  onHighlightColorChange?: (color: string) => void;
 }
+
+const HIGHLIGHT_COLORS = [
+  { name: "Yellow", value: "#FFEB3B", rgb: "255, 235, 59" },
+  { name: "Green", value: "#4CAF50", rgb: "76, 175, 80" },
+  { name: "Blue", value: "#2196F3", rgb: "33, 150, 243" },
+  { name: "Pink", value: "#E91E63", rgb: "233, 30, 99" },
+  { name: "Orange", value: "#FF9800", rgb: "255, 152, 0" },
+];
 
 export function ViewerHeader({
   pdfDocument,
@@ -53,10 +65,16 @@ export function ViewerHeader({
   setIsHeaderVisible,
   onToggleNoter,
   pdfViewerRef,
+  currentHighlightColor = "#FFEB3B",
+  onHighlightColorChange,
 }: PDFViewerHeaderProps) {
   const router = useRouter();
 
-  // Get current color info
+  const handleColorChange = (color: string) => {
+    if (onHighlightColorChange) {
+      onHighlightColorChange(color);
+    }
+  };
 
   return (
     <div
@@ -98,6 +116,44 @@ export function ViewerHeader({
 
               {/* Zoom Controls */}
               <ZoomControls pdfViewerRef={pdfViewerRef} />
+
+              {/* Separator */}
+              <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
+
+              {/* Highlight Color Selector */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2 cursor-pointer">
+                    <div
+                      className="w-4 h-4 rounded border border-white/30"
+                      style={{ backgroundColor: currentHighlightColor }}
+                    />
+                    <span className="text-xs">Highlight</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <div className="p-2">
+                    <p className="text-xs font-medium mb-2 text-muted-foreground">
+                      Select Highlight Color
+                    </p>
+                    <div className="grid grid-cols-5 gap-2">
+                      {HIGHLIGHT_COLORS.map((color) => (
+                        <button
+                          key={color.value}
+                          onClick={() => handleColorChange(color.value)}
+                          className={`w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform cursor-pointer ${
+                            currentHighlightColor === color.value
+                              ? "border-primary ring-2 ring-primary ring-offset-2"
+                              : "border-border"
+                          }`}
+                          style={{ backgroundColor: color.value }}
+                          title={color.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {/* Separator */}
               <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />

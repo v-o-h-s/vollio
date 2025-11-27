@@ -4,12 +4,14 @@ import { Separator } from "@/components/ui/separator";
 import { textBound } from "./Viewer";
 import { Sparkles, NotebookPen, X, Highlighter } from "lucide-react";
 
+
 interface TextSelectionPopupProps {
   x: number;
   y: number;
   textBounds: textBound[];
   pageIndex: number;
   onClose: () => void;
+  onHighlight: () => void;
 }
 
 export function TextSelectionPopup({
@@ -18,6 +20,7 @@ export function TextSelectionPopup({
   textBounds,
   pageIndex,
   onClose,
+  onHighlight,
 }: TextSelectionPopupProps) {
   // Placeholder handlers for future implementation
   const handleExplain = () => {
@@ -28,13 +31,6 @@ export function TextSelectionPopup({
     // TODO: Implement AI explanation feature
   };
 
-  const handleHighlight = () => {
-    console.log("Highlight feature - will highlight selected text", {
-      textBounds,
-      pageIndex,
-    });
-    // TODO: Implement text highlighting feature
-  };
 
   const handleAddToNotes = () => {
     console.log("Add to notes - will trigger TipTap extension", {
@@ -82,15 +78,19 @@ export function TextSelectionPopup({
               <span>Explain with AI</span>
             </Button>
 
-            <Button
-              onClick={handleHighlight}
-              variant="ghost"
-              size="sm"
-              className="w-full justify-start gap-2 h-9 font-normal hover:bg-accent cursor-pointer"
-            >
-              <Highlighter className="h-4 w-4 text-muted-foreground" />
-              <span>Highlight</span>
-            </Button>
+            <div className="relative">
+              <Button
+                onClick={onHighlight}
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start gap-2 h-9 font-normal hover:bg-accent cursor-pointer"
+              >
+                <Highlighter className="h-4 w-4 text-muted-foreground" />
+                <span>Highlight</span>
+              </Button>
+
+              
+            </div>
 
             <Button
               onClick={handleAddToNotes}

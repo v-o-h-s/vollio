@@ -1,7 +1,7 @@
 import { PDFDocument } from "@/lib/types/pdf";
 import { ViewerHeader } from "./ViewerHeader";
 import { TextSelectionPopup } from "./TextSelectionPopup";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Annotation,
   BookmarkView,
@@ -38,6 +38,7 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
       : "/lib";
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const pdfViewerRef = useRef<PdfViewerComponent>(null);
 
   // State for text selection popup
@@ -49,6 +50,38 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
     pageIndex: number;
   } | null>(null);
   const [showPopup, setShowPopup] = useState(false);
+
+
+
+  // Handle highlight with selected color
+  const handleHighlight = async () => {
+    if (!pdfViewerRef.current || !selectionBounds) return;
+
+    try {
+      const viewer = pdfViewerRef.current;
+
+      // Set highlight color in annotation settings
+      viewer.highlightSettings.color = currentHighlightColor;
+      viewer.highlightSettings.opacity = 0.5;
+
+      // Add highlight annotation
+      viewer.annotation.addAnnotation("Highlight");
+
+      // TODO: Save highlight to backend
+      console.log("Highlight created:", {
+        pdfId: pdfDocument.id,
+        currentHighlightColor,
+        bounds: selectionBounds.textBounds,
+        pageIndex: selectionBounds.pageIndex,
+      });
+
+      // Close popup after highlighting
+      setShowPopup(false);
+      setSelectionBounds(null);
+    } catch (error) {
+      console.error("Failed to create highlight:", error);
+    }
+  };
 
   // Handle text selection end
   const handleTextSelectionEnd = (args: any) => {
@@ -83,6 +116,8 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
     <div className="relative w-full h-full flex flex-col">
       {isHeaderVisible ? (
         <ViewerHeader
+          currentHighlightColor={currentHighlightColor}
+          onHighlightColorChange={setCurrentHighlightColor}
           onToggleNoter={onToggleNoter}
           pdfDocument={pdfDocument}
           isHeaderVisible={isHeaderVisible}
@@ -112,6 +147,7 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
         {/* Text Selection Popup */}
         {showPopup && selectionBounds && (
           <TextSelectionPopup
+            onHighlight={handleHighlight}
             x={selectionBounds.x}
             y={selectionBounds.y}
             textBounds={selectionBounds.textBounds}
@@ -139,12 +175,12 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
           enableTextMarkupAnnotation={true} // Enable highlighting
           zoomMode="FitToWidth"
           enableAnnotation={true}
-          textSelectionStart={() => {}}
+          textSelectionStart={() => { }}
           textSelectionEnd={handleTextSelectionEnd}
           pageClick={handlePageClick}
           // annotationMouseover={(args) => handleAnnotationMouseover(args)}
           // annotationMouseLeave={() => handleAnnotationMouseLeave()}
-          annotationDoubleClick={() => {}}
+          annotationDoubleClick={() => { }}
         >
           <Inject
             services={[
