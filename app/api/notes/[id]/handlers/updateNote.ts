@@ -4,8 +4,11 @@ import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import { AuthError } from "@/lib/utils/error-handling";
 import { Logger } from "@/lib/utils/logger";
 
+import { UpdateNoteDto } from "@/lib/dto/updateNoteDto";
+
 export const updateNoteHandler = async (
   request: NextRequest,
+  data: UpdateNoteDto,
   { params }: { params: Promise<{ id: string }> }
 ) => {
   const { userId } = await auth();
@@ -16,8 +19,7 @@ export const updateNoteHandler = async (
   }
 
   const { id } = await params;
-  const body = await request.json();
-  const { title, content } = body;
+  const { title, content } = data;
 
   if (!title || !content) {
     return NextResponse.json(

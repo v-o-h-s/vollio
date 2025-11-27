@@ -6,7 +6,12 @@ import { NextResponse } from "next/server";
 import { SupabaseNoteResponse } from "@/lib/types/editor";
 import { DatabaseError } from "@/lib/utils/error-handling";
 
-export const createNoteHandler = async (request: NextRequest) => {
+import { CreateNoteDto } from "@/lib/dto/createNoteDto";
+
+export const createNoteHandler = async (
+  request: NextRequest,
+  data: CreateNoteDto
+) => {
   Logger.info("📝 Creating new note");
 
   const { userId } = await auth();
@@ -21,8 +26,7 @@ export const createNoteHandler = async (request: NextRequest) => {
 
   Logger.info(`👤 Creating note for user: ${userId}`);
 
-  const body = await request.json();
-  const { title, content, pdfId } = body;
+  const { title, content, pdfId } = data;
 
   const supabase = await getAuthenticatedSupabaseClient();
 

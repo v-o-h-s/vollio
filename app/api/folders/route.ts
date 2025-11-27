@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
-import { AuthError, DatabaseError, GeneralError } from "@/lib/utils/error-handling";
+import {
+  AuthError,
+  DatabaseError,
+  GeneralError,
+} from "@/lib/utils/error-handling";
 import { Logger } from "@/lib/utils/logger";
 import { withValidation } from "@/lib/wrappers/withValidation";
 import { createFolderSchema } from "@/lib/dto/folder";
@@ -40,19 +44,29 @@ interface CreateFolderResponse {
 async function handleGET(request: NextRequest) {
   const context = { operation: "fetch_user_folders" };
 
-  Logger.info("📂 Fetching folders", { method: "GET", endpoint: "/api/folders" });
+  Logger.info("📂 Fetching folders", {
+    method: "GET",
+    endpoint: "/api/folders",
+  });
 
   const { userId } = await auth();
   if (!userId) {
     Logger.warn("🔐 Unauthorized access attempt to fetch folders");
-    throw AuthError.authenticationRequired("User must be authenticated to fetch folders", context);
+    throw AuthError.authenticationRequired(
+      "User must be authenticated to fetch folders",
+      context
+    );
   }
 
   Logger.info(`👤 Authenticated user: ${userId}`);
 
   const supabase = await getAuthenticatedSupabaseClient();
 
-  const { data: folders, error, count } = await supabase
+  const {
+    data: folders,
+    error,
+    count,
+  } = await supabase
     .from("folders")
     .select("*", { count: "exact" })
     .eq("user_id", userId)
@@ -84,7 +98,9 @@ async function handleGET(request: NextRequest) {
     })
   );
 
-  Logger.success(`📂 Successfully returned ${foldersWithCounts.length} folders with PDF counts`);
+  Logger.success(
+    `📂 Successfully returned ${foldersWithCounts.length} folders with PDF counts`
+  );
   const response: FoldersResponse = {
     success: true,
     data: {
@@ -96,25 +112,32 @@ async function handleGET(request: NextRequest) {
   return NextResponse.json(response);
 }
 
-
 /**
  * POST /api/folders - Create a new folder
  */
-async function handlePOST(request: NextRequest) {
+async function handlePOST(request: NextRequest, body: CreateFolderRequest) {
   const context = { operation: "create_folder" };
 
-  Logger.info("📂 Creating new folder", { method: "POST", endpoint: "/api/folders" });
+  Logger.info("📂 Creating new folder", {
+    method: "POST",
+    endpoint: "/api/folders",
+  });
 
   const { userId } = await auth();
   if (!userId) {
     Logger.warn("🔐 Unauthorized access attempt to create folder");
-    throw AuthError.authenticationRequired("User must be authenticated to create folders", context);
+    throw AuthError.authenticationRequired(
+      "User must be authenticated to create folders",
+      context
+    );
   }
 
   Logger.info(`👤 Authenticated user: ${userId}`);
 
-  const body = (await request.json()) as CreateFolderRequest;
-  Logger.info(`📋 Request body received (already validated by Zod)`, { name: body.name, parent_id: body.parent_id });
+  Logger.info(`📋 Request body received (already validated by Zod)`, {
+    name: body.name,
+    parent_id: body.parent_id,
+  });
 
   const folderName = body.name.trim();
   const supabase = await getAuthenticatedSupabaseClient();
@@ -131,18 +154,25 @@ async function handlePOST(request: NextRequest) {
       .single();
 
     if (parentError || !parentFolder) {
-      Logger.warn(`❌ Parent folder validation failed`, { parent_id: body.parent_id, userId });
-      throw GeneralError.unknown(
-        `Parent folder not found or access denied`,
-        { ...context, userId, parent_id: body.parent_id }
-      );
+      Logger.warn(`❌ Parent folder validation failed`, {
+        parent_id: body.parent_id,
+        userId,
+      });
+      throw GeneralError.unknown(`Parent folder not found or access denied`, {
+        ...context,
+        userId,
+        parent_id: body.parent_id,
+      });
     }
 
     Logger.info(`✅ Parent folder validated`);
   }
 
   // Check for duplicate folder names in the same parent
-  Logger.info(`🔍 Checking for duplicate folder names`, { folderName, parent_id: body.parent_id });
+  Logger.info(`🔍 Checking for duplicate folder names`, {
+    folderName,
+    parent_id: body.parent_id,
+  });
 
   const { data: existingFolder, error: checkError } = await supabase
     .from("folders")
@@ -153,7 +183,11 @@ async function handlePOST(request: NextRequest) {
     .single();
 
   if (!checkError && existingFolder) {
-    Logger.warn(`❌ Duplicate folder detected`, { folderName, parent_id: body.parent_id, userId });
+    Logger.warn(`❌ Duplicate folder detected`, {
+      folderName,
+      parent_id: body.parent_id,
+      userId,
+    });
     throw GeneralError.unknown(
       `A folder with the name "${folderName}" already exists in this location`,
       { ...context, userId, folderName }
@@ -184,14 +218,19 @@ async function handlePOST(request: NextRequest) {
     );
   }
 
-  Logger.success(`📂 Folder created successfully`, { folderId: folder.id, folderName, userId });
+  Logger.success(`📂 Folder created successfully`, {
+    folderId: folder.id,
+    folderName,
+    userId,
+  });
   const response: CreateFolderResponse = {
     success: true,
     data: folder,
   };
 
   return NextResponse.json(response);
-
 }
 export const GET = withErrorHandling(handleGET);
-export const POST = withErrorHandling(withValidation(createFolderSchema, handlePOST));
+export const POST = withErrorHandling(
+  withValidation(createFolderSchema, handlePOST)
+);
