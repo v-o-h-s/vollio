@@ -1,7 +1,7 @@
 import { PDFDocument } from "@/lib/types/pdf";
 import { ViewerHeader } from "./ViewerHeader";
 import { TextSelectionPopup } from "./TextSelectionPopup";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Annotation,
   BookmarkView,
@@ -14,6 +14,7 @@ import {
   TextSearch,
   TextSelection,
   ThumbnailView,
+  HighlightSettings,
 } from "@syncfusion/ej2-react-pdfviewer";
 import { ChevronUp } from "lucide-react";
 
@@ -21,6 +22,7 @@ interface ViewerProps {
   pdfDocument: PDFDocument;
   onToggleNoter?: () => void;
 }
+
 export interface textBound {
   bottom: number;
   height: number;
@@ -46,12 +48,9 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
     x: number;
     y: number;
     textBounds: textBound[];
-    // for now we will just handle selection in one page lol
     pageIndex: number;
   } | null>(null);
   const [showPopup, setShowPopup] = useState(false);
-
-
 
   // Handle highlight with selected color
   const handleHighlight = async () => {
@@ -60,41 +59,45 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
     try {
       const viewer = pdfViewerRef.current;
 
-      // Set highlight color in annotation settings
-      viewer.highlightSettings.color = currentHighlightColor;
-      viewer.highlightSettings.opacity = 0.5;
+      // Process bounds to the format expected by Syncfusion
+      const processedBounds = selectionBounds.textBounds.map((bound) => ({
+        x: bound.left,
+        y: bound.top,
+        width: bound.width,
+        height: bound.height,
+      }));
 
-      // Add highlight annotation
-      viewer.annotation.addAnnotation("Highlight");
+   
 
-      // TODO: Save highlight to backend
-      console.log("Highlight created:", {
-        pdfId: pdfDocument.id,
-        currentHighlightColor,
-        bounds: selectionBounds.textBounds,
-        pageIndex: selectionBounds.pageIndex,
+      // Use the exact pattern from Syncfusion documentation
+      viewer.annotation.addAnnotation("Highlight", {
+        bounds: processedBounds,
+        pageNumber: selectionBounds.pageIndex, // Convert to 1-based page numbers
+        color: currentHighlightColor,
+        opacity: 0.5,
       });
+
 
       // Close popup after highlighting
       setShowPopup(false);
       setSelectionBounds(null);
     } catch (error) {
       console.error("Failed to create highlight:", error);
+      setShowPopup(false);
+      setSelectionBounds(null);
     }
   };
 
   // Handle text selection end
   const handleTextSelectionEnd = (args: any) => {
-    console.log("Text selection args:", args);
 
     if (args.textBounds && args.textBounds.length > 0) {
       // Get the first text bound to calculate popup position
       const firstBound = args.textBounds[0];
 
       // Calculate popup position (above the selection)
-      // Using the viewer's coordinate system
       const x = firstBound.left;
-      const y = firstBound.top - 10; // Position above the selection
+      const y = firstBound.top - 10;
 
       setSelectionBounds({
         x,
@@ -166,21 +169,19 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
           enableTextSearch={true}
           enableNavigation={true}
           enablePrint={true}
-          enableDownload={false} // Disable download to prevent bypassing signed URLs
+          enableDownload={false}
           enableHyperlink={true}
           enableBookmark={true}
           enableThumbnail={true}
           enableToolbar={true}
           enableNavigationToolbar={true}
-          enableTextMarkupAnnotation={true} // Enable highlighting
+          enableTextMarkupAnnotation={true}
           zoomMode="FitToWidth"
           enableAnnotation={true}
-          textSelectionStart={() => { }}
+          textSelectionStart={() => {}}
           textSelectionEnd={handleTextSelectionEnd}
           pageClick={handlePageClick}
-          // annotationMouseover={(args) => handleAnnotationMouseover(args)}
-          // annotationMouseLeave={() => handleAnnotationMouseLeave()}
-          annotationDoubleClick={() => { }}
+          annotationDoubleClick={() => {}}
         >
           <Inject
             services={[
