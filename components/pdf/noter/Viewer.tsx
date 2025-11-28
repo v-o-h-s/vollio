@@ -1,7 +1,8 @@
 import { PDFDocument } from "@/lib/types/pdf";
 import { ViewerHeader } from "./ViewerHeader";
 import { TextSelectionPopup } from "./TextSelectionPopup";
-import { useRef, useState } from "react";
+import { AnnotationPopup } from "./AnnotationPopup";
+import { useRef, useState, useEffect } from "react";
 import {
   Annotation,
   BookmarkView,
@@ -52,6 +53,13 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
   } | null>(null);
   const [showPopup, setShowPopup] = useState(false);
 
+  // State for annotation popup
+  const [annotationPopup, setAnnotationPopup] = useState<{
+    x: number;
+    y: number;
+    annotationId: string;
+  } | null>(null);
+
   // Handle highlight with selected color
   const handleHighlight = async () => {
     if (!pdfViewerRef.current || !selectionBounds) return;
@@ -69,7 +77,6 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
 
       // Use the exact pattern from Syncfusion documentation
       viewer.annotation.addAnnotation("Highlight", {
-        isLock: true,
         bounds: processedBounds,
         pageNumber: selectionBounds.pageIndex, // Convert to 1-based page numbers
         color: currentHighlightColor,
@@ -110,6 +117,14 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
   const handlePageClick = () => {
     setShowPopup(false);
     setSelectionBounds(null);
+    setAnnotationPopup(null);
+  };
+
+  const handleDeleteAnnotation = (id: string) => {
+    if (pdfViewerRef.current) {
+      (pdfViewerRef.current.annotation as any).deleteAnnotation(id);
+      setAnnotationPopup(null);
+    }
   };
 
   return (
@@ -156,6 +171,17 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
           />
         )}
 
+        {/* Annotation Popup */}
+        {annotationPopup && (
+          <AnnotationPopup
+            x={annotationPopup.x}
+            y={annotationPopup.y}
+            annotationId={annotationPopup.annotationId}
+            onClose={() => setAnnotationPopup(null)}
+            onDelete={handleDeleteAnnotation}
+          />
+        )}
+
         <PdfViewerComponent
           ref={pdfViewerRef}
           id="viewer"
@@ -178,15 +204,18 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
           textSelectionStart={() => {}}
           textSelectionEnd={handleTextSelectionEnd}
           pageClick={handlePageClick}
-          annotationDoubleClick={() => {}}
-          {...({
-            annotationMouseover: (args: any) => {
-              console.log("Annotation Mouse Over:", args);
-            },
-            annotationMouseLeave: (args: any) => {
-              console.log("Annotation Mouse Leave:", args);
-            },
-          } as any)}
+          annotationSelect={(args: any) => {
+            console.log("Selected annotation:", args);
+            // Show popup when annotation is selected
+            if (args.annotationId && args.annotationBounds) {
+              const bounds = args.annotationBounds;
+              setAnnotationPopup({
+                x: bounds.left,
+                y: bounds.top - 10,
+                annotationId: args.annotationId,
+              });
+            }
+          }}
         >
           <Inject
             services={[
