@@ -1,0 +1,513 @@
+/* Unified Note Modal Styles - Solid Backgrounds */
+.unified-note-modal {
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Modal header solid background */
+.modal-header-solid {
+  background: hsl(var(--background)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+/* Modal content area */
+.modal-content-solid {
+  background: hsl(var(--background)) !important;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* Custom Modal Classes */
+.modal-backdrop {
+  animation: modal-fade-in 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-content-animate {
+  animation: modal-scale-in 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-slide-animate {
+  animation: modal-slide-up 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modal Header Glass Effect */
+.modal-header-glass {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark .modal-header-glass {
+  background: rgba(0, 0, 0, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Modal Header Solid Effect - Override all transparency */
+.modal-header-solid {
+  background: hsl(var(--background)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  opacity: 1 !important;
+}
+
+.dark .modal-header-solid {
+  background: hsl(var(--background)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  opacity: 1 !important;
+}
+
+/* Override any conflicting modal-header-enhanced styles */
+.modal-header-enhanced.modal-header-solid {
+  background: hsl(var(--background)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+.dark .modal-header-enhanced.modal-header-solid {
+  background: hsl(var(--background)) !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+}
+
+.modal-header-enhanced {
+  position: relative;
+  z-index: 10;
+}
+
+/* Modal Fullscreen Transition */
+.modal-fullscreen-transition {
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced Modal Backdrop */
+.modal-backdrop-enhanced {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Modal Focus Trap */
+.modal-focus-trap {
+  position: relative;
+}
+
+.modal-focus-trap:focus {
+  outline: none;
+}
+
+/* Debug Modal Visibility */
+.debug-modal-visible {
+  border: 2px solid #ff0000 !important;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5) !important;
+}
+
+/* Enhanced Modal Shadow */
+.enhanced-modal-content {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.dark .enhanced-modal-content {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive Modal Adjustments */
+@media (max-width: 768px) {
+  .modal-content-animate {
+    animation: modal-slide-up 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Focus management for modal dialogs */
+
+/* Modal Editor Z-Index Fixes */
+/* Ensure editor components in modals have proper z-index hierarchy */
+.notion-editor-modal {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix z-index for slash command menu in modals */
+.notion-editor-modal .slash-command-menu,
+.notion-editor-modal [data-tippy-root],
+.notion-editor-modal .tippy-box {
+  z-index: 60 !important;
+}
+
+/* Fix z-index for floating toolbar in modals */
+.notion-editor-modal .floating-toolbar,
+.notion-editor-modal .bubble-menu {
+  z-index: 55 !important;
+}
+
+/* Fix z-index for color picker and dropdowns in modals */
+.notion-editor-modal .color-picker,
+.notion-editor-modal .dropdown-menu,
+.notion-editor-modal [role="menu"],
+.notion-editor-modal [role="listbox"] {
+  z-index: 65 !important;
+}
+
+/* Ensure modal dialog content has lower z-index than editor components */
+[data-radix-dialog-content] {
+  z-index: 50 !important;
+}
+
+/* Fix for any popover content in modals */
+.notion-editor-modal [data-radix-popover-content],
+.notion-editor-modal [data-radix-dropdown-menu-content] {
+  z-index: 60 !important;
+}
+
+/* Enhanced Modal Styling - Notion-like Experience */
+.enhanced-modal-content {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border) / 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.dark .enhanced-modal-content {
+  background: hsl(var(--background));
+  border-color: hsl(var(--border) / 0.3);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Modal header glassmorphism effect */
+.modal-header-glass {
+  background: hsl(var(--background) / 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid hsl(var(--border) / 0.3);
+}
+
+/* Enhanced modal transitions */
+.modal-transition {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fullscreen modal styles */
+.modal-fullscreen {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+/* Modal content padding adjustments */
+.modal-content-padding {
+  padding: 0;
+}
+
+.modal-content-padding .modal-header {
+  padding: 1.5rem 2rem;
+}
+
+.modal-content-padding .modal-body {
+  padding: 0 2rem 2rem 2rem;
+}
+
+/* Enhanced button hover effects in modals */
+.modal-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Modal auto-save status positioning */
+.modal-autosave-status {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 10;
+}
+
+/* Responsive modal adjustments */
+@media (max-width: 768px) {
+  .enhanced-modal-content {
+    width: 95vw !important;
+    height: 95vh !important;
+    margin: 2.5vh auto !important;
+  }
+
+  .modal-content-padding .modal-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .modal-content-padding .modal-body {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+  }
+
+  .modal-autosave-status {
+    bottom: 1rem;
+    right: 1rem;
+  }
+}
+
+/* Enhanced editor container in modals */
+.modal-editor-container {
+  background: hsl(var(--background));
+  border-radius: 0.5rem;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Enhanced modal backdrop */
+.modal-backdrop-enhanced {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Smooth modal animations */
+.modal-content-animate {
+  animation: modal-content-appear 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced focus states for modal */
+.notion-editor-modal .ProseMirror:focus-within {
+  outline: none;
+}
+
+/* Modal header enhancements */
+.modal-header-enhanced {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: hsl(var(--background) / 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+/* Enhanced button hover effects in modal */
+.modal-header-enhanced button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-header-enhanced button:hover {
+  background: hsl(var(--accent));
+  transform: scale(1.05);
+}
+
+/* Modal fullscreen transition */
+.modal-fullscreen-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced auto-save status in modal */
+.modal-autosave-enhanced {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--border) / 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Dark mode enhancements for modal */
+.dark .notion-editor-modal .ProseMirror {
+  color: hsl(var(--foreground));
+}
+
+.dark .modal-header-enhanced {
+  background: hsl(var(--background) / 0.95);
+  border-bottom-color: hsl(var(--border) / 0.3);
+}
+
+.dark .modal-autosave-enhanced {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Fix for modal visibility issues */
+[data-radix-dialog-overlay] {
+  z-index: 50 !important;
+}
+
+[data-radix-dialog-content] {
+  z-index: 51 !important;
+}
+
+/* Ensure modal content is visible */
+.enhanced-modal-content {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Fix for potential transform issues */
+.modal-content-animate {
+  transform: translate(-50%, -50%) !important;
+}
+
+/* Ensure dialog portal is properly positioned */
+[data-radix-portal] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 50 !important;
+}
+
+/* Debug styles for modal visibility (remove in production) */
+.debug-modal-visible {
+  border: 2px solid red !important;
+  background: rgba(255, 0, 0, 0.1) !important;
+}
+
+/* Ensure the unified modal has proper stacking and positioning */
+.unified-note-modal {
+  z-index: 9998 !important;
+}
+
+.unified-note-modal [data-radix-dialog-overlay] {
+  z-index: 9998 !important;
+}
+
+.unified-note-modal [data-radix-dialog-content] {
+  z-index: 9999 !important;
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 95vw !important;
+  height: 90vh !important;
+  max-width: 80rem !important;
+  max-height: 90vh !important;
+}
+
+/* Fullscreen mode for unified modal */
+.unified-note-modal.modal-fullscreen [data-radix-dialog-content] {
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: none !important;
+  max-height: none !important;
+  transform: none !important;
+}
+
+/* Fixed Modal Positioning Styles */
+.unified-note-modal-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+  box-sizing: border-box !important;
+}
+
+.unified-note-modal-backdrop {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+
+.unified-note-modal-content {
+  position: relative !important;
+  z-index: 100000 !important;
+  width: 100% !important;
+  max-width: 80rem !important;
+  height: 85vh !important;
+  max-height: 85vh !important;
+  background: hsl(var(--background)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.unified-note-modal-content.fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  border-radius: 0 !important;
+}
+
+.dark .unified-note-modal-content {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Ensure modal appears above everything */
+.unified-note-modal-container * {
+  box-sizing: border-box;
+}
+
+/* Mobile responsive modal */
+@media (max-width: 768px) {
+  .unified-note-modal-container {
+    padding: 0.5rem !important;
+  }
+
+  .unified-note-modal-content {
+    width: calc(100vw - 1rem) !important;
+    height: calc(100vh - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+    max-height: calc(100vh - 1rem) !important;
+  }
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* Ensure dialogs appear above PDF viewers and other high z-index elements */
+[data-radix-popper-content-wrapper],
+[data-radix-dialog-overlay],
+[data-radix-dialog-content] {
+  z-index: 999999 !important;
+}
+
+/* Specific override for dialog overlays */
+.fixed.inset-0[data-radix-dialog-overlay] {
+  z-index: 999998 !important;
+}
+
+/* Ensure dialog content is above overlay */
+[data-radix-dialog-content] {
+  z-index: 999999 !important;
+}
+
+/* Force dialog visibility above Syncfusion PDF viewer */
+[data-state="open"][data-radix-dialog-overlay] {
+  z-index: 999998 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-state="open"][data-radix-dialog-content] {
+  z-index: 999999 !important;
+}

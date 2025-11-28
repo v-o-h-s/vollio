@@ -1,0 +1,115 @@
+/* Screen reader only content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* High Contrast Mode */
+.accessibility-high-contrast,
+[data-accessibility-mode="high-contrast"] {
+  /* Override theme colors with high contrast variants */
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(0 0% 0%);
+  --muted: hsl(0 0% 90%);
+  --muted-foreground: hsl(0 0% 20%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 0%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 0%);
+  --border: hsl(0 0% 0%);
+  --input: hsl(0 0% 100%);
+  --primary: hsl(0 0% 0%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 0% 85%);
+  --secondary-foreground: hsl(0 0% 0%);
+  --accent: hsl(0 0% 85%);
+  --accent-foreground: hsl(0 0% 0%);
+  --destructive: hsl(0 0% 0%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --ring: hsl(0 0% 0%);
+  --radius: 0.5rem;
+}
+
+.dark.accessibility-high-contrast,
+.dark[data-accessibility-mode="high-contrast"] {
+  --background: hsl(0 0% 0%);
+  --foreground: hsl(0 0% 100%);
+  --muted: hsl(0 0% 10%);
+  --muted-foreground: hsl(0 0% 80%);
+  --popover: hsl(0 0% 0%);
+  --popover-foreground: hsl(0 0% 100%);
+  --card: hsl(0 0% 0%);
+  --card-foreground: hsl(0 0% 100%);
+  --border: hsl(0 0% 100%);
+  --input: hsl(0 0% 0%);
+  --primary: hsl(0 0% 100%);
+  --primary-foreground: hsl(0 0% 0%);
+  --secondary: hsl(0 0% 15%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --accent: hsl(0 0% 15%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 0% 100%);
+  --destructive-foreground: hsl(0 0% 0%);
+  --ring: hsl(0 0% 100%);
+}
+
+/* High contrast specific overrides */
+.accessibility-high-contrast * {
+  border-width: 2px !important;
+}
+
+/* Enhanced Focus Indicators */
+.enhanced-focus *:focus,
+.enhanced-focus *:focus-visible {
+  outline: 3px solid var(--ring) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring) !important;
+}
+
+.accessibility-high-contrast.enhanced-focus *:focus,
+.accessibility-high-contrast.enhanced-focus *:focus-visible {
+  outline: 4px solid var(--primary) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 6px var(--primary) !important;
+}
+
+/* Reduced Motion */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Screen Reader Optimizations */
+
+/* Ensure proper contrast for badges and indicators */
+.accessibility-high-contrast .badge {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border: 2px solid var(--primary) !important;
+}
+
+.accessibility-high-contrast .badge-secondary {
+  background: var(--secondary) !important;
+  color: var(--secondary-foreground) !important;
+  border: 2px solid var(--secondary-foreground) !important;
+}
+
+/* Media queries for system preferences */
+
+@media (prefers-color-scheme: dark) {
+  .accessibility-high-contrast {
+    --background: hsl(0 0% 0%);
+    --foreground: hsl(0 0% 100%);
+  }
+}

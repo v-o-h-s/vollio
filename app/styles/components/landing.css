@@ -1,0 +1,58 @@
+/* Modern Landing Page Dark Theme Styles */
+
+/* Grid background pattern */
+.bg-grid-white\/\[0\.02\] {
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.02) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Enhanced dark theme for landing page */
+.dark .landing-page {
+  --background: #0a0a0a;
+  --foreground: #fafafa;
+  --card: #0f0f0f;
+  --card-foreground: #fafafa;
+  --popover: #0f0f0f;
+  --popover-foreground: #fafafa;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #fafafa;
+  --muted: #1a1a1a;
+  --muted-foreground: #a1a1aa;
+  --accent: #1a1a1a;
+  --accent-foreground: #fafafa;
+  --destructive: #ef4444;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #3b82f6;
+}
+
+/* Modern glassmorphism effects */
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Enhanced scrollbar for specific sections */
+.landing-page ::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    45deg,
+    rgba(59, 130, 246, 0.4),
+    rgba(59, 130, 246, 0.6)
+  );
+  border-radius: 4px;
+}
+
+.landing-page ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    45deg,
+    rgba(59, 130, 246, 0.6),
+    rgba(59, 130, 246, 0.8)
+  );
+}

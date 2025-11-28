@@ -67,16 +67,14 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
         height: bound.height,
       }));
 
-   
-
       // Use the exact pattern from Syncfusion documentation
       viewer.annotation.addAnnotation("Highlight", {
+        isLock: true,
         bounds: processedBounds,
         pageNumber: selectionBounds.pageIndex, // Convert to 1-based page numbers
         color: currentHighlightColor,
         opacity: 0.5,
       });
-
 
       // Close popup after highlighting
       setShowPopup(false);
@@ -90,7 +88,6 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
 
   // Handle text selection end
   const handleTextSelectionEnd = (args: any) => {
-
     if (args.textBounds && args.textBounds.length > 0) {
       // Get the first text bound to calculate popup position
       const firstBound = args.textBounds[0];
@@ -182,6 +179,14 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
           textSelectionEnd={handleTextSelectionEnd}
           pageClick={handlePageClick}
           annotationDoubleClick={() => {}}
+          {...({
+            annotationMouseover: (args: any) => {
+              console.log("Annotation Mouse Over:", args);
+            },
+            annotationMouseLeave: (args: any) => {
+              console.log("Annotation Mouse Leave:", args);
+            },
+          } as any)}
         >
           <Inject
             services={[

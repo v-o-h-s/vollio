@@ -1,0 +1,519 @@
+/* TipTap Editor Styles */
+.ProseMirror {
+  outline: none;
+  padding: 1rem;
+  line-height: 1.6;
+}
+
+.ProseMirror p {
+  margin: 0.5rem 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3 {
+  margin: 1.5rem 0 0.75rem 0;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.ProseMirror h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 2rem;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  margin: 0.5rem 0;
+  padding-left: 0;
+}
+
+.ProseMirror li {
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.ProseMirror ul li {
+  list-style: none;
+}
+
+.ProseMirror ul li::before {
+  content: "•";
+  position: absolute;
+  left: 0.5rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: bold;
+}
+
+.ProseMirror ol li {
+  list-style: none;
+  counter-increment: list-counter;
+}
+
+.ProseMirror ol {
+  counter-reset: list-counter;
+}
+
+.ProseMirror ol li::before {
+  content: counter(list-counter) ".";
+  position: absolute;
+  left: 0.5rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+  min-width: 1rem;
+  text-align: right;
+}
+
+/* Nested list indentation */
+.ProseMirror ul ul,
+.ProseMirror ol ol,
+.ProseMirror ul ol,
+.ProseMirror ol ul {
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror ul ul li::before {
+  content: "◦";
+}
+
+.ProseMirror ul ul ul li::before {
+  content: "▪";
+}
+
+.ProseMirror blockquote {
+  border-left: 4px solid hsl(var(--primary));
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  background-color: hsl(var(--muted) / 0.3);
+  border-radius: 0 0.375rem 0.375rem 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.ProseMirror a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+
+.ProseMirror a:hover {
+  color: hsl(var(--primary) / 0.8);
+}
+
+.ProseMirror strong {
+  font-weight: 600;
+}
+
+.ProseMirror em {
+  font-style: italic;
+}
+
+.ProseMirror code {
+  background-color: hsl(var(--muted));
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
+    "Liberation Mono", Menlo, monospace;
+  font-size: 0.875em;
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+.ProseMirror pre {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border: 1px solid hsl(var(--border));
+  position: relative;
+}
+
+.ProseMirror pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+  border: none;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Syntax highlighting for code blocks */
+.ProseMirror .hljs-comment,
+.ProseMirror .hljs-quote {
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+.ProseMirror .hljs-keyword,
+.ProseMirror .hljs-selector-tag,
+.ProseMirror .hljs-subst {
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+
+.ProseMirror .hljs-number,
+.ProseMirror .hljs-literal,
+.ProseMirror .hljs-variable,
+.ProseMirror .hljs-template-variable,
+.ProseMirror .hljs-tag .hljs-attr {
+  color: #e11d48;
+}
+
+.ProseMirror .hljs-string,
+.ProseMirror .hljs-doctag {
+  color: #059669;
+}
+
+.ProseMirror .hljs-title,
+.ProseMirror .hljs-section,
+.ProseMirror .hljs-selector-id {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.ProseMirror .hljs-type,
+.ProseMirror .hljs-class .hljs-title {
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.ProseMirror .hljs-tag,
+.ProseMirror .hljs-name,
+.ProseMirror .hljs-attribute {
+  color: #0ea5e9;
+  font-weight: normal;
+}
+
+.ProseMirror .hljs-regexp,
+.ProseMirror .hljs-link {
+  color: #0891b2;
+}
+
+.ProseMirror .hljs-symbol,
+.ProseMirror .hljs-bullet {
+  color: #8b5cf6;
+}
+
+.ProseMirror .hljs-built_in,
+.ProseMirror .hljs-builtin-name {
+  color: #0ea5e9;
+}
+
+.ProseMirror .hljs-meta {
+  color: hsl(var(--muted-foreground));
+}
+
+.ProseMirror .hljs-deletion {
+  background: #fecaca;
+}
+
+.ProseMirror .hljs-addition {
+  background: #bbf7d0;
+}
+
+.ProseMirror .hljs-emphasis {
+  font-style: italic;
+}
+
+.ProseMirror .hljs-strong {
+  font-weight: 600;
+}
+
+/* Focus styles */
+.ProseMirror:focus {
+  outline: none;
+}
+
+/* Placeholder styles */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Enhanced TipTap Editor Styles */
+.ProseMirror {
+  outline: none !important;
+  padding: 1rem;
+  line-height: 1.6;
+  min-height: 200px;
+}
+
+/* Dark mode support for TipTap */
+.dark .ProseMirror blockquote {
+  background-color: rgba(30, 41, 59, 0.5);
+  border-left-color: #64748b;
+}
+
+.dark .ProseMirror code {
+  background-color: rgba(30, 41, 59, 0.8);
+  color: #e2e8f0;
+}
+
+.dark .ProseMirror pre {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+/* Editor toolbar styles */
+.editor-toolbar {
+  border-bottom: 1px solid hsl(var(--border));
+  background-color: hsl(var(--muted) / 0.5);
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.editor-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.editor-toolbar-separator {
+  width: 1px;
+  height: 1.5rem;
+  background-color: hsl(var(--border));
+  margin: 0 0.25rem;
+}
+
+/* Editor button states */
+.editor-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  border: none;
+  background: transparent;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.editor-button:hover {
+  background-color: hsl(var(--accent));
+}
+
+.editor-button.active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.editor-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Editor focus styles */
+.editor-container:focus-within {
+  ring: 2px;
+  ring-color: hsl(var(--ring));
+  ring-offset: 2px;
+}
+
+/* Responsive editor styles */
+@media (max-width: 768px) {
+  .editor-toolbar {
+    padding: 0.375rem;
+    gap: 0.375rem;
+  }
+
+  .editor-button {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .ProseMirror {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+}
+
+/* Editor placeholder enhancement */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  height: 0;
+  font-style: italic;
+}
+/* Selection styles */
+.ProseMirror ::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+.ProseMirror ::-moz-selection {
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Fix for editor focus in modals */
+.notion-editor-modal .ProseMirror:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensure proper text selection in modal editors */
+.notion-editor-modal .ProseMirror ::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+.notion-editor-modal .ProseMirror ::-moz-selection {
+  background-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Enhanced Notion-like Modal Editor Styling */
+.notion-editor-modal .ProseMirror {
+  padding: 2rem 3rem;
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 400px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: hsl(var(--foreground));
+}
+
+.notion-editor-modal .ProseMirror h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 2rem 0 1rem 0;
+  line-height: 1.2;
+  color: hsl(var(--foreground));
+}
+
+.notion-editor-modal .ProseMirror h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin: 1.75rem 0 0.75rem 0;
+  line-height: 1.3;
+  color: hsl(var(--foreground));
+}
+
+.notion-editor-modal .ProseMirror h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.5rem 0;
+  line-height: 1.4;
+  color: hsl(var(--foreground));
+}
+
+.notion-editor-modal .ProseMirror p {
+  margin: 0.75rem 0;
+  line-height: 1.7;
+}
+
+.notion-editor-modal .ProseMirror blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid hsl(var(--primary));
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+}
+
+.notion-editor-modal .ProseMirror ul,
+.notion-editor-modal .ProseMirror ol {
+  margin: 1rem 0;
+  padding-left: 0;
+}
+
+.notion-editor-modal .ProseMirror li {
+  margin: 0.5rem 0;
+  padding-left: 2rem;
+  line-height: 1.6;
+}
+
+/* Enhanced placeholder styling for modal */
+.notion-editor-modal .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  height: 0;
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+/* Responsive modal editor */
+@media (max-width: 768px) {
+  .notion-editor-modal .ProseMirror {
+    padding: 1.5rem 1rem;
+    font-size: 15px;
+  }
+
+  .notion-editor-modal .ProseMirror h1 {
+    font-size: 2rem;
+  }
+
+  .notion-editor-modal .ProseMirror h2 {
+    font-size: 1.5rem;
+  }
+
+  .notion-editor-modal .ProseMirror h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Enhanced focus states for modal */
+.notion-editor-modal .ProseMirror:focus-within {
+  outline: none;
+}
+
+/* Better text selection in modal */
+.notion-editor-modal .ProseMirror ::selection {
+  background-color: rgba(59, 130, 246, 0.25);
+  color: inherit;
+}
+
+.notion-editor-modal .ProseMirror ::-moz-selection {
+  background-color: rgba(59, 130, 246, 0.25);
+  color: inherit;
+}
+
+/* Enhanced scrollbar for modal editor */
+.notion-editor-modal .ProseMirror::-webkit-scrollbar {
+  width: 8px;
+}
+
+.notion-editor-modal .ProseMirror::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notion-editor-modal .ProseMirror::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+.notion-editor-modal .ProseMirror::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Dark mode enhancements for modal */
+.dark .notion-editor-modal .ProseMirror {
+  color: hsl(var(--foreground));
+}
