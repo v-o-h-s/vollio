@@ -16,9 +16,9 @@ export const createHighlightHandler = async (
     throw AuthError.authenticationRequired();
   }
 
-  const { id,pdfId, type, content, position, color, hasNote, note_id } = data;
+  const { id,pdfId, type, content, position, color, hasNote, noteId } = data;
 
-  const supabase = await getAuthenticatedSupabaseClient();
+  const supabase = await getAuthenticatedSupabaseClient();    
 
   const { data: highlightData, error } = await supabase
     .from("highlights")
@@ -30,7 +30,7 @@ export const createHighlightHandler = async (
       position,
       color,
       has_note: hasNote ?? false,
-      note_id,
+      note_id: noteId,
       user_id: userId,
     })
     .select()
