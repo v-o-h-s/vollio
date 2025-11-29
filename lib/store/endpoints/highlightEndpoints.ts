@@ -1,4 +1,3 @@
-import type { Highlight } from "../../types";
 import type { ApiBuilder } from "./types";
 
 export const highlightEndpoints = (builder: ApiBuilder) => ({

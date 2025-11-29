@@ -22,3 +22,7 @@ ALTER COLUMN content SET DEFAULT NULL;
 COMMENT ON COLUMN notes.title IS 'Note title - optional, can be NULL';
 COMMENT ON COLUMN notes.content IS 'TipTap JSONContent format - optional, can be NULL';
 COMMENT ON COLUMN notes.pdf_id IS 'Direct reference to the PDF document - optional, can be NULL';
+
+
+
+-- added known rls
