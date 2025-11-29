@@ -1,182 +1,67 @@
-import type { ApiBuilder } from "./types";
+import {
+  HighlightwithDetails,
+  HighlightServerResponse,
+} from "@/lib/types/highlight";
+import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
+import { ApiBuilder } from "./types";
 
 export const highlightEndpoints = (builder: ApiBuilder) => ({
-  getHighlights: builder.query<
-    {
-      highlights: Highlight[];
-      total: number;
-      pagination: {
-        page: number;
-        limit: number;
-        totalPages: number;
-        hasNext: boolean;
-        hasPrev: boolean;
-      };
-    },
-    {
-      pdfId?: string;
-      noteId?: string;
-      type?: "quick" | "comment" | "note";
-      page?: number;
-      limit?: number;
-    }
-  >({
-    query: ({ pdfId, noteId, type, page = 1, limit = 50 }) => {
-      const params = new URLSearchParams();
-      if (pdfId) params.append("pdfId", pdfId);
-      if (noteId) params.append("noteId", noteId);
-      if (type) params.append("type", type);
-      params.append("page", page.toString());
-      params.append("limit", limit.toString());
-
-      return `highlights?${params.toString()}`;
-    },
-    transformResponse: (response: any) => {
-      if (!response.success) {
-        throw new Error(response.error || "Failed to fetch highlights");
-      }
-      return response.data;
-    },
-    providesTags: (result) => [
-      { type: "Highlight", id: "LIST" },
-      ...(result?.highlights || []).map((highlight) => ({
-        type: "Highlight" as const,
-        id: highlight.id,
-      })),
-    ],
+  getHighlights: builder.query<HighlightwithDetails[], void>({
+    query: () => "highlights",
+    transformResponse: (response: { data: HighlightwithDetails[] }) =>
+      response.data,
+    providesTags: (result) =>
+      result
+        ? [
+            ...result.map(({ id }) => ({ type: "Highlight" as const, id })),
+            { type: "Highlight", id: "LIST" },
+          ]
+        : [{ type: "Highlight", id: "LIST" }],
   }),
-
-  getPDFHighlights: builder.query<
-    {
-      highlights: Highlight[];
-      total: number;
-      pdfId: string;
-      pagination: {
-        page: number;
-        limit: number;
-        totalPages: number;
-        hasNext: boolean;
-        hasPrev: boolean;
-      };
-    },
-    {
-      pdfId: string;
-      type?: "quick" | "comment" | "note";
-      page?: number;
-      limit?: number;
-    }
-  >({
-    query: ({ pdfId, type, page = 1, limit = 50 }) => {
-      const params = new URLSearchParams();
-      if (type) params.append("type", type);
-      params.append("page", page.toString());
-      params.append("limit", limit.toString());
-
-      return `pdfs/${pdfId}/highlights?${params.toString()}`;
-    },
-    transformResponse: (response: any) => {
-      if (!response.success) {
-        throw new Error(response.error || "Failed to fetch PDF highlights");
-      }
-      return response.data;
-    },
-    providesTags: (result, _error, { pdfId }) => [
-      { type: "Highlight", id: "LIST" },
-      { type: "PDF", id: pdfId },
-      ...(result?.highlights || []).map((highlight) => ({
-        type: "Highlight" as const,
-        id: highlight.id,
-      })),
-    ],
+  getPDFHighlights: builder.query<HighlightwithDetails[], string>({
+    query: (pdfId) => `highlights?pdfId=${pdfId}`,
+    transformResponse: (response: { data: HighlightwithDetails[] }) =>
+      response.data,
+    providesTags: (result) =>
+      result
+        ? [
+            ...result.map(({ id }) => ({ type: "Highlight" as const, id })),
+            { type: "Highlight", id: "LIST" },
+          ]
+        : [{ type: "Highlight", id: "LIST" }],
   }),
-
-  createHighlight: builder.mutation<
-    { highlight: Highlight },
-    {
-      pdfId: string;
-      noteId?: string;
-      content: string;
-      title?: string;
-      color?: string;
-      opacity?: number;
-      pageNumber: number;
-      type?: "quick" | "comment" | "note";
-      textbounds: Array<{
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-      }>;
-    }
-  >({
-    query: (highlightData) => ({
+  createHighlight: builder.mutation<HighlightwithDetails, CreateHighlightDto>({
+    query: (highlight) => ({
       url: "highlights",
       method: "POST",
-      body: highlightData,
+      body: highlight,
     }),
-    transformResponse: (response: any) => {
-      if (!response.success) {
-        throw new Error(response.error || "Failed to create highlight");
-      }
-      return response.data;
-    },
-    invalidatesTags: [
-      { type: "Highlight", id: "LIST" },
-      { type: "PDF", id: "LIST" },
-    ],
+    transformResponse: (response: HighlightServerResponse) => response.data,
+    invalidatesTags: [{ type: "Highlight", id: "LIST" }],
   }),
-
   updateHighlight: builder.mutation<
-    { highlight: Highlight },
-    {
-      id: string;
-      updates: {
-        content?: string;
-        title?: string;
-        color?: string;
-        opacity?: number;
-        type?: "quick" | "comment" | "note";
-        noteId?: string;
-        textbounds?: Array<{
-          x: number;
-          y: number;
-          width: number;
-          height: number;
-        }>;
-      };
-    }
+    HighlightwithDetails,
+    { id: string; highlight: Partial<CreateHighlightDto> }
   >({
-    query: ({ id, updates }) => ({
+    query: ({ id, highlight }) => ({
       url: `highlights/${id}`,
-      method: "PUT",
-      body: updates,
+      method: "PATCH",
+      body: highlight,
     }),
-    transformResponse: (response: any) => {
-      if (!response.success) {
-        throw new Error(response.error || "Failed to update highlight");
-      }
-      return response.data;
-    },
-    invalidatesTags: (_result, _error, { id }) => [
+    transformResponse: (response: HighlightServerResponse) => response.data,
+    invalidatesTags: (result, error, { id }) => [
       { type: "Highlight", id },
       { type: "Highlight", id: "LIST" },
     ],
   }),
-
-  deleteHighlight: builder.mutation<void, string>({
+  deleteHighlight: builder.mutation<{ success: boolean; id: string }, string>({
     query: (id) => ({
       url: `highlights/${id}`,
       method: "DELETE",
     }),
-    transformResponse: (response: any) => {
-      if (!response.success) {
-        throw new Error(response.error || "Failed to delete highlight");
-      }
-    },
-    invalidatesTags: (_result, _error, id) => [
+    invalidatesTags: (result, error, id) => [
       { type: "Highlight", id },
       { type: "Highlight", id: "LIST" },
     ],
   }),
 });
-

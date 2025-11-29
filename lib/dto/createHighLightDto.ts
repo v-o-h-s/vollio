@@ -33,7 +33,7 @@ export const createHighlightDtoSchema = z.object({
   position: scaledPositionSchema,
   color: z.string().optional(),
   hasNote: z.boolean().nullable().optional(),
-  note_id: z.string().uuid().nullable().optional(),
+  noteId: z.string().uuid().nullable().optional(),
 });
 
 export type CreateHighlightDto = z.infer<typeof createHighlightDtoSchema>;

@@ -74,7 +74,7 @@ export const mapSupabaseHighlightResponseToHighlight = (
     position: highlight.position,
     color: highlight.color,
     hasNote: highlight.has_note,
-    note_id: highlight.note_id,
+    noteId: highlight.note_id,
     createdAt: highlight.created_at,
     updatedAt: highlight.updated_at,
   };
