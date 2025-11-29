@@ -20,6 +20,8 @@ import { PDFLoading } from "@/components/ui/PDFLoading";
 import {
   useGetPDFHighlightsQuery,
   useCreateHighlightMutation,
+  useUpdateHighlightMutation,
+  useDeleteHighlightMutation,
 } from "@/lib/store/apiSlice";
 import type { HighlightwithDetails } from "@/lib/types/highlight";
 import type { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
@@ -133,6 +135,30 @@ export const BetterViewer = ({
     };
   }, []);
 
+  /// handlers
+
+  // handler to delete a highlight
+  const handleDeleteHighlight = async (highlightId: string) => {
+    try {
+      await deleteHighlight(highlightId).unwrap();
+    } catch (error) {
+      console.error("Failed to delete highlight:", error);
+    }
+  };
+  // handler to update a highlight
+  const handleUpdateHighlight = async (
+    highlightId: string,
+    highlight: Partial<CreateHighlightDto>
+  ) => {
+    try {
+      const updated = await updateHighlight({
+        id: highlightId,
+        highlight,
+      }).unwrap();
+    } catch (error) {
+      console.error("Failed to update highlight:", error);
+    }
+  };
   // Handler to create a new highlight
   const handleHighlight = async () => {
     const selection = highlighterUtilsRef.current?.getCurrentSelection();
@@ -218,7 +244,10 @@ export const BetterViewer = ({
               selectionTip={<ExpandableTip onHighlight={handleHighlight} />}
               highlights={highlights}
             >
-              <HighlightContainer />
+              <HighlightContainer
+                onHighlightDelete={handleDeleteHighlight}
+                onHighlightUpdate={handleUpdateHighlight}
+              />
             </PdfHighlighter>
           )}
         </PdfLoader>

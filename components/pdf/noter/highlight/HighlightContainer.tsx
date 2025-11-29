@@ -4,11 +4,10 @@ import { useHighlightContainerContext } from "react-pdf-highlighter-extended";
 import { TextHighlight } from "react-pdf-highlighter-extended";
 import { HighlightWithColor } from "../BetterViewer";
 import { useState, useRef, useEffect } from "react";
-import {
-  useDeleteHighlightMutation,
-  useUpdateHighlightMutation,
-} from "@/lib/store/apiSlice";
+
 import toast from "react-hot-toast";
+import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
+import { Button, Card } from "@/components/ui";
 
 // Helper function to convert hex to rgba
 const hexToRgba = (hex: string, alpha: number = 0.4): string => {
@@ -130,9 +129,20 @@ const ContextMenu = ({
       </div>
     </div>
   );
+ 
 };
+interface HighlightContainerProps {
+  onHighlightDelete: (highlightId: string) => Promise<void>;
+  onHighlightUpdate: (
+    highlightId: string,
+    highlight: Partial<CreateHighlightDto>
+  ) => Promise<void>;
+}
 
-export const HighlightContainer = () => {
+export const HighlightContainer = ({
+  onHighlightDelete,
+  onHighlightUpdate,
+}: HighlightContainerProps) => {
   const { highlight, isScrolledTo } =
     useHighlightContainerContext<HighlightWithColor>();
 
@@ -141,9 +151,6 @@ export const HighlightContainer = () => {
     x: number;
     y: number;
   } | null>(null);
-
-  const [deleteHighlight] = useDeleteHighlightMutation();
-  const [updateHighlight] = useUpdateHighlightMutation();
 
   if (!highlight) return null;
 
@@ -171,7 +178,7 @@ export const HighlightContainer = () => {
 
   const handleDelete = async () => {
     try {
-      await deleteHighlight(highlight.id).unwrap();
+      await onHighlightDelete(highlight.id);
       toast.success("Highlight deleted", {
         duration: 2000,
         position: "bottom-right",
@@ -187,10 +194,7 @@ export const HighlightContainer = () => {
 
   const handleChangeColor = async (newColor: string) => {
     try {
-      await updateHighlight({
-        id: highlight.id,
-        highlight: { color: newColor },
-      }).unwrap();
+      await onHighlightUpdate(highlight.id, { color: newColor });
       toast.success("Highlight color updated", {
         duration: 2000,
         position: "bottom-right",
