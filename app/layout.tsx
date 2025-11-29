@@ -7,6 +7,7 @@ import { ReduxProvider } from "@/lib/store/provider";
 import SyncfusionLicenseProvider from "@/components/SyncfusionLicenseProvider";
 import { EditorProvider } from "@/components/editor";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { Toaster } from "react-hot-toast";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -89,6 +90,7 @@ export default function RootLayout({
             </SyncfusionLicenseProvider>
           </ClerkProvider>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

@@ -3,11 +3,11 @@ import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import {
   mapSupabaseHighlightResponseToHighlight,
-  HighlightwithDetails,
   HighlightServerResponse,
 } from "@/lib/types/highlight";
 import { DatabaseError, AuthError } from "@/lib/utils/error-handling";
 import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
+import { Logger } from "@/lib/utils/logger";
 
 export const updateHighlightHandler = async (
   request: NextRequest,
@@ -15,16 +15,25 @@ export const updateHighlightHandler = async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   const { id } = await params;
+
+  Logger.info("🎨 Updating highlight", { highlightId: id });
+
   const { userId } = await auth();
 
   if (!userId) {
+    Logger.warn("🔐 Unauthorized access attempt to update highlight", {
+      highlightId: id,
+    });
     throw AuthError.authenticationRequired();
   }
+
+  Logger.info(`👤 Updating highlight for user: ${userId}`, {
+    highlightId: id,
+  });
 
   const supabase = await getAuthenticatedSupabaseClient();
 
   // We need to map the camelCase DTO to snake_case database columns
-  // This is a bit manual since we don't have a reverse mapper yet
   const updates: any = {};
   if (data.color !== undefined) updates.color = data.color;
   if (data.content !== undefined) updates.content = data.content;
@@ -32,10 +41,16 @@ export const updateHighlightHandler = async (
   if (data.noteId !== undefined) updates.note_id = data.noteId;
   if (data.position !== undefined) updates.position = data.position;
   if (data.type !== undefined) updates.type = data.type;
-  // pdf_id and user_id usually shouldn't change, but if needed:
   if (data.pdfId !== undefined) updates.pdf_id = data.pdfId;
 
   updates.updated_at = new Date().toISOString();
+
+  Logger.info("📋 Highlight updates to apply", {
+    highlightId: id,
+    fieldsUpdated: Object.keys(updates),
+  });
+
+  Logger.info("💾 Updating highlight in database");
 
   const { data: highlightData, error } = await supabase
     .from("highlights")
@@ -46,8 +61,18 @@ export const updateHighlightHandler = async (
     .single();
 
   if (error) {
+    Logger.error(`❌ Database error updating highlight for user ${userId}`, {
+      error,
+      highlightId: id,
+    });
     throw DatabaseError.mapErrorMessageToDatabaseError(error);
   }
+
+  Logger.success(`🎨 Highlight updated successfully`, {
+    highlightId: id,
+    userId,
+    fieldsUpdated: Object.keys(updates),
+  });
 
   const serverResponse: HighlightServerResponse = {
     success: true,

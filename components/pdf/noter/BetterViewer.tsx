@@ -3,7 +3,7 @@
 import "@/app/styles/components/viewer.css";
 import { ChevronUp } from "lucide-react";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   PdfHighlighter,
   PdfHighlighterUtils,
@@ -17,6 +17,14 @@ import { ExpandableTip } from "./highlight/ExpandableTip";
 import { HighlightContainer } from "./highlight/HighlightContainer";
 import { ViewerHeader } from "./ViewerHeader";
 import { PDFLoading } from "@/components/ui/PDFLoading";
+import {
+  useGetPDFHighlightsQuery,
+  useCreateHighlightMutation,
+} from "@/lib/store/apiSlice";
+import type { HighlightwithDetails } from "@/lib/types/highlight";
+import type { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
+import toast from "react-hot-toast";
+import { v4 as uuidv4 } from "uuid";
 
 // Extend Highlight type to include color
 export interface HighlightWithColor extends Highlight {
@@ -30,7 +38,12 @@ export const BetterViewer = ({
   pdfDocument: PDFDocument;
   onToggleNoter?: () => void;
 }) => {
-  const [highlights, setHighlights] = useState<Array<HighlightWithColor>>([]);
+  // Fetch highlights for this PDF from API
+  const { data: apiHighlights, isLoading: isLoadingHighlights } =
+    useGetPDFHighlightsQuery(pdfDocument.id);
+  const [createHighlight] = useCreateHighlightMutation();
+  const [deleteHighlight] = useDeleteHighlightMutation();
+  const [updateHighlight] = useUpdateHighlightMutation();
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
@@ -38,6 +51,18 @@ export const BetterViewer = ({
 
   /** Refs for PdfHighlighter utilities */
   const highlighterUtilsRef = useRef<PdfHighlighterUtils | null>(null);
+
+  // Map API highlights to react-pdf-highlighter format
+  const highlights = useMemo<Array<HighlightWithColor>>(() => {
+    if (!apiHighlights) return [];
+    return apiHighlights.map((h) => ({
+      id: h.id,
+      position: h.position,
+      content: h.content,
+      type: h.type,
+      color: h.color,
+    }));
+  }, [apiHighlights]);
 
   // Adapter to make ViewerHeader work with react-pdf-highlighter-extended
   const pdfViewerAdapter = useRef<any>({
@@ -108,6 +133,41 @@ export const BetterViewer = ({
     };
   }, []);
 
+  // Handler to create a new highlight
+  const handleHighlight = async () => {
+    const selection = highlighterUtilsRef.current?.getCurrentSelection();
+    if (!selection) return;
+
+    try {
+      // Generate a proper UUID for the highlight
+      const highlightId = uuidv4();
+
+      // Prepare the DTO for the API
+      const newHighlightDto: CreateHighlightDto = {
+        id: highlightId,
+        pdfId: pdfDocument.id,
+        type: selection.content.image ? "area" : "text",
+        content: selection.content,
+        position: selection.position,
+        color: currentHighlightColor,
+        hasNote: false,
+        noteId: null,
+      };
+
+      // Create the highlight via API
+      await createHighlight(newHighlightDto).unwrap();
+
+      // The highlights list will automatically update via RTK Query cache
+    } catch (error) {
+      // Show error toast
+      toast.error("Failed to create highlight. Please try again.", {
+        duration: 3000,
+        position: "bottom-right",
+      });
+      console.error("Failed to create highlight:", error);
+    }
+  };
+
   return (
     <div className="relative h-full w-full flex flex-col overflow-hidden ">
       {isHeaderVisible ? (
@@ -155,23 +215,7 @@ export const BetterViewer = ({
               utilsRef={(_pdfHighlighterUtils) => {
                 highlighterUtilsRef.current = _pdfHighlighterUtils;
               }}
-              selectionTip={
-                <ExpandableTip
-                  onHighlight={() => {
-                    const selection =
-                      highlighterUtilsRef.current?.getCurrentSelection();
-                    if (selection) {
-                      const newHighlight: HighlightWithColor = {
-                        id: Math.random().toString(36).substr(2, 9),
-                        position: selection.position,
-                        content: selection.content,
-                        color: currentHighlightColor,
-                      };
-                      setHighlights([...highlights, newHighlight]);
-                    }
-                  }}
-                />
-              }
+              selectionTip={<ExpandableTip onHighlight={handleHighlight} />}
               highlights={highlights}
             >
               <HighlightContainer />
