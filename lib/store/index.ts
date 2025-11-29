@@ -1,10 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
-import annotationReducer from "./annotationSlice";
 import { apiSlice } from "./apiSlice";
 
 export const store = configureStore({
   reducer: {
-    annotations: annotationReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -14,20 +12,18 @@ export const store = configureStore({
         ignoredActions: [
           // RTK Query actions
           "api/executeQuery/pending",
-          "api/executeQuery/fulfilled", 
+          "api/executeQuery/fulfilled",
           "api/executeQuery/rejected",
           "api/executeMutation/pending",
           "api/executeMutation/fulfilled",
           "api/executeMutation/rejected",
-          // Annotation actions
-          "annotations/setPdfDocument",
           // Ignore all RTK Query internal actions
-          "/^api\//",
+          "/^api//",
         ],
         // Ignore these field paths in all actions
         ignoredActionsPaths: [
           "payload.createdAt",
-          "payload.updatedAt", 
+          "payload.updatedAt",
           "payload.uploadedAt",
           "payload.accessedAt",
           "meta.arg.originalArgs",
@@ -40,7 +36,6 @@ export const store = configureStore({
         ],
         // Ignore these paths in the state
         ignoredPaths: [
-          "annotations.currentPdf",
           "api.queries",
           "api.mutations",
           "api.provided",
@@ -55,6 +50,5 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 // Re-export API slice and hooks for convenience
-export { apiSlice } from './apiSlice';
-export * from './hooks';
-
+export { apiSlice } from "./apiSlice";
+export * from "./hooks";
