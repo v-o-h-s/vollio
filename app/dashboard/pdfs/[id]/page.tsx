@@ -19,6 +19,7 @@ import Noter from "@/components/pdf/noter/Noter";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import NotesTabsManager from "@/components/pdf/noter/NotesTabsManager";
+import { BetterViewer } from "@/components/pdf/noter/BetterViewer";
 
 export default function PDFPage() {
   const router = useRouter();
@@ -194,11 +195,15 @@ export default function PDFPage() {
             : "100%",
         }}
       >
-        <Viewer
+        {/* <Viewer
+          pdfDocument={data}
+          onToggleNoter={() => setIsNoteOpen(!isNoterOpen)}
+        /> */}
+        <BetterViewer
           pdfDocument={data}
           onToggleNoter={() => setIsNoteOpen(!isNoterOpen)}
         />
-      </div>  
+      </div>
 
       {isNoterOpen && (
         <>
