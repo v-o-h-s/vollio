@@ -3,6 +3,8 @@
  * Matches the database schema for the highlights table
  */
 
+import { CreateHighlightDto } from "../dto/createHighLightDto";
+
 // Allowed highlight types
 export type HighlightType = "text" | "area";
 
@@ -36,4 +38,52 @@ export interface Highlight {
   type?: HighlightType;
   content?: Content;
   position: ScaledPosition;
+}
+///
+// real work start here
+///
+
+// Main Highlight interface matching database schema
+export interface SupabaseHighlightResponse {
+  id: string;
+  pdf_id: string;
+  user_id: string;
+  type: HighlightType;
+  content: Content;
+  position: ScaledPosition;
+  color?: string;
+  has_note: boolean;
+  note_id?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HighlightwithDetails extends CreateHighlightDto {
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const mapSupabaseHighlightResponseToHighlight = (
+  highlight: SupabaseHighlightResponse
+): HighlightwithDetails => {
+  return {
+    id: highlight.id,
+    pdfId: highlight.pdf_id,
+    type: highlight.type,
+    content: highlight.content,
+    position: highlight.position,
+    color: highlight.color,
+    hasNote: highlight.has_note,
+    note_id: highlight.note_id,
+    createdAt: highlight.created_at,
+    updatedAt: highlight.updated_at,
+  };
+};
+
+// supabase response
+export interface HighlightServerResponse {
+  success: boolean;
+  status: number;
+  data: HighlightwithDetails;
+  error: string | null;
 }

@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS highlights CASCADE;
 
 CREATE TABLE highlights (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL, -- Clerk user ID
     pdf_id UUID NOT NULL REFERENCES pdfs(id) ON DELETE CASCADE,
     type VARCHAR(20) NOT NULL DEFAULT 'text' 
         CHECK (type IN ('text', 'area')),
@@ -19,6 +20,7 @@ CREATE TABLE highlights (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
     
     -- Constraints
+    CONSTRAINT highlights_user_id_check CHECK (char_length(user_id) > 0),
     CONSTRAINT highlights_content_is_object CHECK (jsonb_typeof(content) = 'object'),
     CONSTRAINT highlights_position_is_object CHECK (jsonb_typeof(position) = 'object'),
     CONSTRAINT highlights_position_has_bounding_rect CHECK (position ? 'boundingRect'),
