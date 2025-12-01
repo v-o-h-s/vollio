@@ -38,7 +38,7 @@ import {
 } from "@/lib/utils/error-handling/errors";
 import { PDFDocument, Folder } from "@/lib/types/pdf";
 import { PDFUploadZone } from "./PDFUploadZone";
-import { PDFContextMenu } from "../PDFContextMenu";
+import { PDFContextMenu } from "./PDFContextMenu";
 import { FolderContextMenu } from "./FolderContextMenu";
 import { PDFBreadcrumb } from "./PDFBreadcrumb";
 import { PDFViewToggle } from "./PDFViewToggle";
@@ -50,7 +50,7 @@ import { DraggablePDFItem } from "./DraggablePDFItem";
 import { DraggableFolder } from "./DraggableFolder";
 import { DragOverlayContent } from "./DragOverlay";
 import { TreeView } from "./TreeView";
-import { RenameDialog } from "../RenameDialog";
+import { RenameDialog } from "./RenameDialog";
 import { FileText, FolderOpen, Upload, School } from "lucide-react";
 import { LMSIntegrationPanel } from "@/components/lms";
 import { Logger } from "@/lib/utils/logger";
