@@ -14,12 +14,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Viewer from "@/components/pdf/nowier/Viewer";
-import Noter from "@/components/pdf/nowier/Noter";
+import Viewer from "@/components/pdf/smart-pdf/Viewer";
+import Noter from "@/components/pdf/smart-pdf/Noter";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import NotesTabsManager from "@/components/pdf/nowier/NotesTabsManager";
-import { BetterViewer } from "@/components/pdf/nowier/BetterViewer";
+import NotesTabsManager from "@/components/pdf/smart-pdf/NotesTabsManager";
+import { BetterViewer } from "@/components/pdf/smart-pdf/BetterViewer";
 
 export default function PDFPage() {
   const router = useRouter();
