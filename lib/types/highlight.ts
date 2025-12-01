@@ -32,7 +32,7 @@ export interface ScaledPosition {
   usePdfCoordinates?: boolean;
 }
 
-// Main Highlight interface
+// Main Highlight interface (not used in the code , it is from react-pdf-highlighter-extended)
 export interface Highlight {
   id: string;
   type?: HighlightType;
@@ -40,8 +40,16 @@ export interface Highlight {
   position: ScaledPosition;
 }
 ///
-// real work start here
+// real work start from here
 ///
+
+// Extend Highlight type to include color
+export interface MyHighlight extends Highlight {
+  tags?: string[];
+  style?: "highlight" | "tagged";
+  noteId?: string;
+  color?: string;
+}
 
 // Main Highlight interface matching database schema
 export interface SupabaseHighlightResponse {
@@ -55,7 +63,7 @@ export interface SupabaseHighlightResponse {
   has_note: boolean;
   note_id?: string | null;
   tags?: string[] | null;
-  style?: "highlight" | "underline" | "tagged" | null;
+  style?: "highlight" | "tagged" | null;
   created_at: string;
   updated_at: string;
 }

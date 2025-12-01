@@ -35,7 +35,7 @@ export const createHighlightDtoSchema = z.object({
   hasNote: z.boolean().nullable().optional(),
   noteId: z.string().uuid().nullable().optional(),
   tags: z.array(z.string()).optional(),
-  style: z.enum(["highlight", "underline", "tagged"]).optional(),
+  style: z.enum(["highlight", "tagged"]).optional(),
 });
 
 export type CreateHighlightDto = z.infer<typeof createHighlightDtoSchema>;

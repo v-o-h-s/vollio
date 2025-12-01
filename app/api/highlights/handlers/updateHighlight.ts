@@ -42,6 +42,8 @@ export const updateHighlightHandler = async (
   if (data.position !== undefined) updates.position = data.position;
   if (data.type !== undefined) updates.type = data.type;
   if (data.pdfId !== undefined) updates.pdf_id = data.pdfId;
+  if (data.tags !== undefined) updates.tags = data.tags;
+  if (data.style !== undefined) updates.style = data.style;
 
   updates.updated_at = new Date().toISOString();
 
