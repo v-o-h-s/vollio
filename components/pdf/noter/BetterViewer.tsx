@@ -174,8 +174,8 @@ export const BetterViewer = ({
         <PdfLoader
           onError={(error) => console.log(error)} // todo Better visualization
           document={pdfDocument.fileUrl as string}
-          //workerSrc="/public/pdf.worker.min.mjs"
-          workerSrc="//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs"
+          workerSrc="/pdf.worker.min.mjs"
+          //workerSrc="//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs"
           beforeLoad={(progress) => <PDFLoading progress={progress} />}
         >
           {(pdfDocument) => (

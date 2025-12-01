@@ -1,4 +1,3 @@
-// TaggedHighlight.tsx
 import React, { useMemo, useState } from "react";
 import {
   Popover,
@@ -6,9 +5,12 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { Tag as TagIcon } from "lucide-react";
+import { Tag as TagIcon, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MyHighlight } from "@/lib/types/highlight";
+import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
+import { TagSelectionDialog } from "./TagSelectionDialog";
+import { Button } from "@/components/ui/button";
 
 interface PageOffset {
   x: number;
@@ -19,24 +21,91 @@ interface TaggedHighlightProps {
   highlight: MyHighlight;
   isScrolledTo: boolean;
   color: string;
-  /** current viewer scale (1 = 100%) */
   scale?: number;
-  /** page offset in viewer coordinates (defaults to 0,0) */
   pageOffset?: PageOffset;
-  /** optional page container width for clamping tag button */
   pageWidth?: number;
+  updateHighlight: (
+    highlightId: string,
+    highlight: Partial<CreateHighlightDto>
+  ) => any;
+  deleteHighlight: (highlightId: string) => any;
 }
-// hhhh we figured out that the position returned by the hook is using like left and right instead of x1 x2 , crazy typeshit
+
+const TAG_COLORS: Record<string, string> = {
+  Definition: "#3b82f6", // blue-500
+  Example: "#22c55e", // green-500
+  "Important detail": "#ef4444", // red-500
+  "Key idea": "#a855f7", // purple-500
+  "To revisit": "#f97316", // orange-500
+  "Step / Process": "#14b8a6", // teal-500
+};
+
+const hexToRgb = (hex: string) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : null;
+};
+
+const rgbToHex = (r: number, g: number, b: number) => {
+  return (
+    "#" +
+    ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()
+  );
+};
+
+const mixColors = (tags: string[]) => {
+  if (!tags || tags.length === 0) return "#FFEB3B"; // Default yellow
+
+  const validColors = tags
+    .map((tag) => TAG_COLORS[tag])
+    .filter((c) => c !== undefined);
+
+  if (validColors.length === 0) return "#FFEB3B";
+  if (validColors.length === 1) return validColors[0];
+
+  let r = 0,
+    g = 0,
+    b = 0;
+
+  validColors.forEach((hex) => {
+    const rgb = hexToRgb(hex);
+    if (rgb) {
+      r += rgb.r;
+      g += rgb.g;
+      b += rgb.b;
+    }
+  });
+
+  const count = validColors.length;
+  return rgbToHex(
+    Math.round(r / count),
+    Math.round(g / count),
+    Math.round(b / count)
+  );
+};
 
 export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
   highlight,
   isScrolledTo,
-  color,
+  color: defaultColor, // We might ignore this if we use tag colors
   scale = 1,
   pageOffset = { x: 0, y: 0 },
   pageWidth,
+  updateHighlight,
+  deleteHighlight,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
+
+  // Calculate mixed color based on tags
+  const displayColor = useMemo(() => {
+    return mixColors(highlight.tags || []);
+  }, [highlight.tags]);
 
   // normalize rects once and convert to DOM coordinates (scale + page offset)
   const rects = useMemo(() => {
@@ -63,7 +132,7 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
   const tagGap = 2; // px gap from underline
   const tagSize = 20; // px (width/height of button)
   let tagLeft = lastRect.left + lastRect.width + tagGap;
-  let tagTop = lastRect.top + lastRect.height - tagSize / 2;
+  let tagTop = lastRect.top + lastRect.height;
 
   // clamp to page width if provided
   if (pageWidth) {
@@ -77,6 +146,24 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
 
   // small upward adjustment so the button sits slightly above the underline
   tagTop = tagTop - Math.max(6, underlineHeight);
+
+  const handleRemoveTag = async (tagToRemove: string) => {
+    const currentTags = highlight.tags || [];
+    const newTags = currentTags.filter((t) => t !== tagToRemove);
+
+    if (newTags.length === 0) {
+      await deleteHighlight(highlight.id);
+    } else {
+      await updateHighlight(highlight.id, { tags: newTags });
+    }
+  };
+
+  const handleAddTags = async (newTags: string[]) => {
+    // Merge new tags with existing ones, avoiding duplicates
+    const currentTags = highlight.tags || [];
+    const uniqueTags = Array.from(new Set([...currentTags, ...newTags]));
+    await updateHighlight(highlight.id, { tags: uniqueTags });
+  };
 
   return (
     <>
@@ -95,7 +182,7 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
               top: `${top}px`,
               width: `${r.width}px`,
               height: `${underlineHeight}px`,
-              backgroundColor: color,
+              backgroundColor: displayColor,
               pointerEvents: "auto",
               transition:
                 "height 0.12s ease, top 0.12s ease, transform 0.12s ease",
@@ -125,8 +212,8 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
                 top: `${tagTop}px`,
                 width: `${tagSize}px`,
                 height: `${tagSize}px`,
-                borderColor: color,
-                color: color,
+                borderColor: displayColor,
+                color: displayColor,
                 pointerEvents: "auto",
               }}
               onClick={(e) => {
@@ -142,21 +229,45 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
 
           <PopoverContent className="w-auto max-w-xs p-3" align="start">
             <div className="space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground">
-                Tags:
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-muted-foreground">
+                  Tags
+                </p>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 rounded-full hover:bg-muted"
+                  onClick={() => setIsTagDialogOpen(true)}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </div>
+
               <div className="flex flex-wrap gap-1.5">
                 {(highlight.tags || []).length > 0 ? (
-                  highlight.tags!.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="outline"
-                      className="text-xs font-normal"
-                      style={{ borderColor: color, color: color }}
-                    >
-                      {tag}
-                    </Badge>
-                  ))
+                  highlight.tags!.map((tag) => {
+                    const tagColor = TAG_COLORS[tag] || defaultColor;
+                    return (
+                      <Badge
+                        key={tag}
+                        variant="outline"
+                        className="text-xs font-normal flex items-center gap-1 pr-1"
+                        style={{ borderColor: tagColor, color: tagColor }}
+                      >
+                        {tag}
+                        <div
+                          role="button"
+                          className="rounded-full hover:bg-muted p-0.5 cursor-pointer"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveTag(tag);
+                          }}
+                        >
+                          <X size={10} />
+                        </div>
+                      </Badge>
+                    );
+                  })
                 ) : (
                   <span className="text-xs text-muted-foreground">No tags</span>
                 )}
@@ -165,6 +276,13 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
           </PopoverContent>
         </Popover>
       )}
+
+      <TagSelectionDialog
+        open={isTagDialogOpen}
+        onOpenChange={setIsTagDialogOpen}
+        onConfirm={handleAddTags}
+        initialTags={highlight.tags || []}
+      />
     </>
   );
 };

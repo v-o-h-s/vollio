@@ -74,6 +74,8 @@ export const HighlightContainer = ({
             highlight={highlight as any}
             isScrolledTo={isScrolledTo}
             color={color}
+            updateHighlight={updateHighlight}
+            deleteHighlight={deleteHighlight}
           />
         );
       default: // "highlight"
