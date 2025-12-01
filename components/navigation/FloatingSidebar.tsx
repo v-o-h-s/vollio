@@ -87,16 +87,6 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
             shortcut: "Ctrl+U",
           },
           {
-            id: "import-lms",
-            label: "Import from LMS",
-            icon: School,
-            onClick: () => {
-              const lmsEvent = new CustomEvent("trigger-lms-import");
-              window.dispatchEvent(lmsEvent);
-            },
-            variant: "secondary",
-          },
-          {
             id: "create-folder",
             label: "New Folder",
             icon: FolderPlus,

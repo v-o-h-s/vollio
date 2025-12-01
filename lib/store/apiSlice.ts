@@ -10,7 +10,6 @@ import {
 import { annotationEndpoints } from "./endpoints/annotationEndpoints";
 import { folderEndpoints } from "./endpoints/folderEndpoints";
 import { highlightEndpoints } from "./endpoints/highlightEndpoints";
-import { lmsEndpoints } from "./endpoints/lmsEndpoints";
 import { notesEndpoints } from "./endpoints/notesEndpoints";
 import { pdfEndpoints } from "./endpoints/pdfEndpoints";
 
@@ -31,14 +30,13 @@ const baseQuery = fetchBaseQuery({
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Annotation", "Highlight", "PDF", "Note", "Folder", "LMS"],
+  tagTypes: ["Annotation", "Highlight", "PDF", "Note", "Folder"],
   endpoints: (builder) => ({
     ...pdfEndpoints(builder),
     ...notesEndpoints(builder),
     ...annotationEndpoints(builder),
     ...highlightEndpoints(builder),
     ...folderEndpoints(builder),
-    ...lmsEndpoints(builder),
   }),
 });
 
@@ -66,16 +64,6 @@ export const {
   useUpdateFolderMutation,
   useDeleteFolderMutation,
   useMovePDFMutation,
-  useGetLMSProvidersQuery,
-  useCheckLMSConnectionQuery,
-  useConnectToLMSMutation,
-  useGetLMSCoursesQuery,
-  useGetLMSCourseMaterialsQuery,
-  useImportLMSFileMutation,
-  useBatchImportLMSFilesMutation,
-  useDisconnectLMSMutation,
-  useGetLMSConnectionStatusQuery,
-  useImportLMSContentMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

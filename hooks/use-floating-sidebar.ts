@@ -12,12 +12,6 @@ export function useFloatingSidebar() {
     return () => window.removeEventListener('trigger-pdf-upload', handleEvent);
   }, []);
 
-  const onImportFromLMS = useCallback((handler: () => void) => {
-    const handleEvent = () => handler();
-    window.addEventListener('trigger-lms-import', handleEvent);
-    return () => window.removeEventListener('trigger-lms-import', handleEvent);
-  }, []);
-
   const onCreateFolder = useCallback((handler: () => void) => {
     const handleEvent = () => handler();
     window.addEventListener('trigger-folder-create', handleEvent);
@@ -125,7 +119,6 @@ export function useFloatingSidebar() {
       const cleanup = (() => {
         switch (eventType) {
           case 'uploadPDF': return onUploadPDF(handler);
-          case 'importFromLMS': return onImportFromLMS(handler);
           case 'createFolder': return onCreateFolder(handler);
           case 'searchFiles': return onSearchFiles(handler);
           case 'filterFiles': return onFilterFiles(handler);
@@ -156,7 +149,7 @@ export function useFloatingSidebar() {
       cleanupFunctions.forEach(cleanup => cleanup());
     };
   }, [
-    onUploadPDF, onImportFromLMS, onCreateFolder, onSearchFiles, onFilterFiles, onToggleView,
+    onUploadPDF, onCreateFolder, onSearchFiles, onFilterFiles, onToggleView,
     onSearchNotes, onFilterNotes, onSortNotes, onToggleNotesView, onFilterStarred,
     onSearchQuizzes, onFilterCategory, onFilterDifficulty, onFilterBookmarked, onShowQuizStats,
     onSearchFlashcards, onShowDueCards
@@ -165,7 +158,6 @@ export function useFloatingSidebar() {
   return {
     // PDF page handlers
     onUploadPDF,
-    onImportFromLMS,
     onCreateFolder,
     onSearchFiles,
     onFilterFiles,

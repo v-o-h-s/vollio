@@ -29,10 +29,8 @@ import {
   Users,
   Calendar,
   ArrowRight,
-  School,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { LMSConnectionManager } from "@/components/dashboard/LMSConnectionManager";
 
 // Mock data for dashboard
 const recentActivity = [
@@ -162,22 +160,6 @@ export default function DashboardPage() {
             );
           })}
         </div>
-      </div>
-
-      {/* LMS Connections */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold text-foreground">LMS Connections</h2>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push("/dashboard/settings/lms")}
-          >
-            <School className="w-4 h-4 mr-2" />
-            Manage LMS
-          </Button>
-        </div>
-        <LMSConnectionManager />
       </div>
 
       {/* Recent Activity & Overview */}

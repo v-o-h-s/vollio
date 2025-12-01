@@ -22,11 +22,6 @@ export default function PDFsPage() {
       const folderEvent = new CustomEvent("pdf-folder-create");
       document.dispatchEvent(folderEvent);
     },
-    importFromLMS: () => {
-      // Trigger LMS import modal
-      const lmsEvent = new CustomEvent("trigger-lms-import");
-      document.dispatchEvent(lmsEvent);
-    },
     searchFiles: () => {
       // Focus search input
       if (searchInputRef.current) {

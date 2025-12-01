@@ -29,7 +29,6 @@ import {
   useUpdateFolderMutation,
   useDeleteFolderMutation,
   useMovePDFMutation,
-  useGetLMSCoursesQuery,
 } from "@/lib/store/apiSlice";
 import {
   ErrorType,
@@ -51,8 +50,7 @@ import { DraggableFolder } from "./DraggableFolder";
 import { DragOverlayContent } from "./DragOverlay";
 import { TreeView } from "./TreeView";
 import { RenameDialog } from "./RenameDialog";
-import { FileText, FolderOpen, Upload, School } from "lucide-react";
-import { LMSIntegrationPanel } from "@/components/lms";
+import { FileText, FolderOpen, Upload } from "lucide-react";
 import { Logger } from "@/lib/utils/logger";
 import { PDFDirectoryLoadingState } from "./PDFDirectoryLoadingState";
 
@@ -129,7 +127,6 @@ export function PDFDirectoryView({
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set()
   );
-  const [showLMSPanel, setShowLMSPanel] = useState(false);
 
   // DnD Kit sensors
   const sensors = useSensors(
@@ -162,16 +159,13 @@ export function PDFDirectoryView({
   useEffect(() => {
     const handleUploadTrigger = () => fileInputRef.current?.click();
     const handleFolderCreate = () => setIsCreatingFolder(true);
-    const handleLMSIntegration = () => setShowLMSPanel(true);
 
     window.addEventListener("trigger-pdf-upload", handleUploadTrigger);
     window.addEventListener("trigger-folder-create", handleFolderCreate);
-    window.addEventListener("trigger-lms-import", handleLMSIntegration);
 
     return () => {
       window.removeEventListener("trigger-pdf-upload", handleUploadTrigger);
       window.removeEventListener("trigger-folder-create", handleFolderCreate);
-      window.removeEventListener("trigger-lms-import", handleLMSIntegration);
     };
   }, []);
 
@@ -538,14 +532,6 @@ export function PDFDirectoryView({
               <Upload className="h-4 w-4 mr-2" />
               Upload
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowLMSPanel(true)}
-            >
-              <School className="h-4 w-4 mr-2" />
-              LMS
-            </Button>
           </div>
         </div>
 
@@ -802,17 +788,6 @@ export function PDFDirectoryView({
           ) : null}
         </DragOverlay>
 
-        {/* LMS Integration Panel */}
-        <LMSIntegrationPanel
-          isOpen={showLMSPanel}
-          onClose={() => setShowLMSPanel(false)}
-          onContentImported={(courseId, contentType, contentId) => {
-            // Refresh the PDFs and folders after import
-            refetch();
-            refetchFolders();
-            toast.success(`${contentType} imported successfully!`);
-          }}
-        />
       </div>
     </DndContext>
   );
