@@ -21,6 +21,7 @@ import {
   RotateCcw,
   Eye,
   Home,
+  Tag as TagIcon,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -33,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PDFDocument } from "@/lib/types/pdf";
+import { cn } from "@/lib/utils";
 
 export interface PDFViewerHeaderProps {
   /** Function to toggle noter */
@@ -49,6 +51,12 @@ export interface PDFViewerHeaderProps {
   currentHighlightColor?: string;
   /** Function to set highlight color */
   onHighlightColorChange?: (color: string) => void;
+  /** Function to toggle tags sidebar */
+  onToggleTags?: () => void;
+  /** Whether tags sidebar is open */
+  isTagsOpen?: boolean;
+  /** Width of the viewer container (for responsive resizing) */
+  viewerWidth?: string;
 }
 
 const HIGHLIGHT_COLORS = [
@@ -67,8 +75,31 @@ export function ViewerHeader({
   pdfViewerRef,
   currentHighlightColor = "#FFEB3B",
   onHighlightColorChange,
+  onToggleTags,
+  isTagsOpen,
+  viewerWidth = "100%",
 }: PDFViewerHeaderProps) {
   const router = useRouter();
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [headerWidth, setHeaderWidth] = useState(0);
+
+  // Observe header width to determine if we should collapse tools
+  useEffect(() => {
+    if (!headerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setHeaderWidth(entry.contentRect.width);
+      }
+    });
+
+    resizeObserver.observe(headerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  // Only collapse tools section when header is narrow (< 900px)
+  // Navigation and zoom always stay inline, only tools go to dropdown
+  const shouldCollapseTools = headerWidth < 900;
 
   const handleColorChange = (color: string) => {
     if (onHighlightColorChange) {
@@ -78,105 +109,210 @@ export function ViewerHeader({
 
   return (
     <div
+      ref={headerRef}
       className={`absolute top-4 left-1/2 z-20 transition-all duration-500 ease-in-out ${
         !isHeaderVisible
-          ? "-translate-y-full -translate-x-1/2 opacity-0"
+          ? "-translate-y-full -translate-x-1/2 opacity-0 pointer-events-none"
           : "-translate-x-1/2 translate-y-0 opacity-100"
       }`}
-      style={{ width: "calc(100% - 2rem)" }}
+      style={{ 
+        width: `calc(${viewerWidth} - 0.5rem)`,
+        maxWidth: `calc(${viewerWidth} - 0.5rem)`,
+      }}
     >
       {/* Enhanced stylish header with glassmorphism effect */}
-      <div className="bg-white dark:bg-background backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/30">
-        <div className="bg-gradient-to-r from-white/5 to-transparent dark:from-white/5 dark:to-transparent rounded-2xl">
-          <div className="flex items-center justify-between px-4 sm:px-2 py-2">
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-              {/* Back Button */}
-              <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard/pdfs")} className="cursor-pointer">
-                <Home size={12} />
+      <div className="bg-white dark:bg-background backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl shadow-black/10 dark:shadow-black/30">
+        <div className="bg-gradient-to-r from-white/5 to-transparent dark:from-white/5 dark:to-transparent rounded-xl sm:rounded-2xl">
+          {/* Always horizontal layout */}
+          <div className="flex flex-row items-center justify-between px-2 sm:px-3 lg:px-4 py-2 gap-2">
+            {/* Left Section: Back & Title */}
+            <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push("/dashboard/pdfs")}
+                className="cursor-pointer h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-full flex-shrink-0"
+                title="Back to PDFs"
+              >
+                <Home size={12} className="sm:w-4 sm:h-4" />
               </Button>
 
-              {/* PDF Info */}
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div className="w-7 h-7 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
-                  <FileText size={14} className="text-white" />
+              <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded flex items-center justify-center flex-shrink-0 shadow-md">
+                  <FileText size={10} className="sm:w-3 sm:h-3 text-white" />
                 </div>
-                <h1 className="text-xs font-semibold text-foreground truncate">
+                <h1 className="text-xs sm:text-sm font-semibold text-foreground truncate">
                   {pdfDocument.filename}
                 </h1>
               </div>
+            </div>
 
-              {/* Separator */}
-              <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
-
-              {/* Page Navigation */}
+            {/* Middle Section: Navigation & Zoom - Always visible */}
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-3">
+              <div className="w-px h-4 bg-border flex-shrink-0" />
               <PageNavigation pdfViewerRef={pdfViewerRef} />
-
-              {/* Separator */}
-              <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
-
-              {/* Zoom Controls */}
+              <div className="w-px h-4 bg-border flex-shrink-0" />
               <ZoomControls pdfViewerRef={pdfViewerRef} />
+              <div className="w-px h-4 bg-border flex-shrink-0" />
+            </div>
 
-              {/* Separator */}
-              <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
-
-              {/* Highlight Color Selector */}
+            {/* Right Section: Tools */}
+            {/* Compact: Dropdown Menu (when header is narrow) */}
+            {shouldCollapseTools ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2 cursor-pointer">
-                    <div
-                      className="w-4 h-4 rounded border border-white/30"
-                      style={{ backgroundColor: currentHighlightColor }}
-                    />
-                    <span className="text-xs">Highlight</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 sm:h-8 w-7 sm:w-8 p-0 flex-shrink-0"
+                    title="More tools"
+                  >
+                    <ChevronDown size={12} className="sm:w-4 sm:h-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <div className="p-2">
-                    <p className="text-xs font-medium mb-2 text-muted-foreground">
-                      Select Highlight Color
-                    </p>
-                    <div className="grid grid-cols-5 gap-2">
-                      {HIGHLIGHT_COLORS.map((color) => (
-                        <button
-                          key={color.value}
-                          onClick={() => handleColorChange(color.value)}
-                          className={`w-8 h-8 rounded-full border-2 hover:scale-110 transition-transform cursor-pointer ${
-                            currentHighlightColor === color.value
-                              ? "border-primary ring-2 ring-primary ring-offset-2"
-                              : "border-border"
-                          }`}
-                          style={{ backgroundColor: color.value }}
-                          title={color.name}
-                        />
-                      ))}
+                <DropdownMenuContent align="end" className="w-48 sm:w-56">
+                  <div className="p-2 space-y-3">
+                    {/* Highlight Color Selector */}
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground px-1">
+                        Highlight Color
+                      </p>
+                      <div className="grid grid-cols-5 gap-1.5 px-1">
+                        {HIGHLIGHT_COLORS.map((color) => (
+                          <button
+                            key={color.value}
+                            onClick={() => handleColorChange(color.value)}
+                            className={`w-6 h-6 rounded-full border-2 hover:scale-110 active:scale-95 transition-transform cursor-pointer ${
+                              currentHighlightColor === color.value
+                                ? "border-primary ring-2 ring-primary ring-offset-2"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                            style={{ backgroundColor: color.value }}
+                            title={color.name}
+                          />
+                        ))}
+                      </div>
                     </div>
+
+                    <DropdownMenuSeparator />
+
+                    {/* Tags Toggle */}
+                    <button
+                      onClick={onToggleTags}
+                      className={cn(
+                        "w-full text-left px-3 py-2 rounded text-sm font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer flex items-center gap-2",
+                        isTagsOpen && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <TagIcon size={16} />
+                      <span>Tags</span>
+                    </button>
+
+                    {/* Notes Toggle */}
+                    <button
+                      onClick={onToggleNoter}
+                      className="w-full text-left px-3 py-2 rounded text-sm font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer flex items-center gap-2"
+                    >
+                      <FileText size={16} />
+                      <span>Notes</span>
+                    </button>
+
+                    <DropdownMenuSeparator />
+
+                    {/* Hide Header */}
+                    <button
+                      onClick={() => setIsHeaderVisible(false)}
+                      className="w-full text-left px-3 py-2 rounded text-sm font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer flex items-center gap-2"
+                    >
+                      <Eye size={16} />
+                      <span>Hide Header</span>
+                    </button>
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
+            ) : (
+              // Desktop: Inline Tool Buttons (when header is wide enough)
+              <div className="flex items-center gap-2 justify-end">
+                {/* Highlight Color */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-2 cursor-pointer px-2 h-8 flex-shrink-0"
+                      title="Highlight color"
+                    >
+                      <div
+                        className="w-4 h-4 rounded-full border border-white/30"
+                        style={{ backgroundColor: currentHighlightColor }}
+                      />
+                      <span className="text-xs">Color</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <div className="p-2">
+                      <p className="text-xs font-medium mb-2 text-muted-foreground">
+                        Highlight
+                      </p>
+                      <div className="grid grid-cols-5 gap-2">
+                        {HIGHLIGHT_COLORS.map((color) => (
+                          <button
+                            key={color.value}
+                            onClick={() => handleColorChange(color.value)}
+                            className={`w-8 h-8 rounded-full border-2 hover:scale-110 active:scale-95 transition-transform cursor-pointer ${
+                              currentHighlightColor === color.value
+                                ? "border-primary ring-2 ring-primary ring-offset-2"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                            style={{ backgroundColor: color.value }}
+                            title={color.name}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-              {/* Separator */}
-              <div className="w-px h-5 bg-white/20 dark:bg-white/10 flex-shrink-0" />
+                {/* Tags Toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleTags}
+                  className={cn(
+                    "cursor-pointer h-8 px-2 flex-shrink-0",
+                    isTagsOpen && "bg-accent text-accent-foreground"
+                  )}
+                  title="Tags"
+                >
+                  <TagIcon size={14} />
+                  <span className="text-xs ml-1">Tags</span>
+                </Button>
 
-              {/* Noter Toggle */}
-              <Button variant="ghost" size="sm" onClick={onToggleNoter}>
-                <span className="flex items-center gap-1 cursor-pointer">
-                  <FileText size={12} />
-                  <span className="text-xs">Notes</span>
-                </span>
-              </Button>
-              <Button
-              className="cursor-pointer"
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsHeaderVisible(false)}
-              >
-                <span className="flex items-center gap-1 cursor-pointer ">
-                  <Eye size={12} />
-                  <span className="text-xs">Hide Header</span>
-                </span>
-              </Button>
-            </div>
+                {/* Notes Toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleNoter}
+                  className="cursor-pointer h-8 px-2 flex-shrink-0"
+                  title="Notes"
+                >
+                  <FileText size={14} />
+                  <span className="text-xs ml-1">Notes</span>
+                </Button>
+
+                {/* Hide Header */}
+                <Button
+                  className="cursor-pointer h-8 px-2 flex-shrink-0"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsHeaderVisible(false)}
+                  title="Hide Header (Esc)"
+                >
+                  <Eye size={14} />
+                  <span className="text-xs ml-1">Hide</span>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -257,7 +393,7 @@ function PageNavigation({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1 sm:gap-2 text-xs">
       {isEditing ? (
         <Input
           ref={inputRef}
@@ -265,19 +401,19 @@ function PageNavigation({
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={handleInputSubmit}
           onKeyDown={handleInputKeyDown}
-          className="w-12 h-6 text-xs text-center bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 rounded px-1"
+          className="w-10 sm:w-12 h-6 text-xs text-center bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 rounded px-1"
         />
       ) : (
         <button
           onClick={handlePageClick}
-          className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-1 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5"
-          title="Click to edit page number (← → or PageUp/PageDown to navigate)"
+          className="font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-1 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5"
+          title="Click to edit page number"
         >
           {currentPage}
         </button>
       )}
-      <span className="text-xs text-foreground/60">/</span>
-      <span className="text-xs font-medium text-foreground/80">
+      <span className="text-foreground/60">/</span>
+      <span className="font-medium text-foreground/80">
         {totalPages}
       </span>
     </div>
@@ -326,7 +462,9 @@ function ZoomControls({
   const handleZoomIn = () => {
     const magnification = getMagnificationModule();
     if (!magnification) {
-      console.warn("Magnification module is not available on the PDF viewer instance.");
+      console.warn(
+        "Magnification module is not available on the PDF viewer instance."
+      );
       return;
     }
 
@@ -340,7 +478,9 @@ function ZoomControls({
   const handleZoomOut = () => {
     const magnification = getMagnificationModule();
     if (!magnification) {
-      console.warn("Magnification module is not available on the PDF viewer instance.");
+      console.warn(
+        "Magnification module is not available on the PDF viewer instance."
+      );
       return;
     }
 
@@ -354,7 +494,9 @@ function ZoomControls({
   const handleResetZoom = () => {
     const magnification = getMagnificationModule();
     if (!magnification) {
-      console.warn("Magnification module is not available on the PDF viewer instance.");
+      console.warn(
+        "Magnification module is not available on the PDF viewer instance."
+      );
       return;
     }
 
@@ -395,15 +537,15 @@ function ZoomControls({
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5 sm:gap-1">
       <Button
         variant="ghost"
         size="sm"
         onClick={handleZoomOut}
-        className="h-6 w-6 p-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded cursor-pointer"
+        className="h-6 w-6 p-0 sm:h-7 sm:w-7 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded cursor-pointer flex-shrink-0"
         title="Zoom Out (Ctrl+-)"
       >
-        <ZoomOut size={12} />
+        <ZoomOut size={10} className="sm:w-4 sm:h-4" />
       </Button>
 
       {isEditing ? (
@@ -413,15 +555,15 @@ function ZoomControls({
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={handleZoomInputSubmit}
           onKeyDown={handleZoomInputKeyDown}
-          className="w-14 h-6 text-xs text-center bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 rounded px-1"
+          className="w-12 sm:w-14 h-6 text-xs text-center bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 rounded px-1"
           placeholder="10-400"
         />
       ) : (
         <button
           onClick={handleZoomClick}
           onDoubleClick={handleResetZoom}
-          className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-2 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5 min-w-[3rem] text-center"
-          title="Click to edit zoom (10-400%), Double-click or Ctrl+0 to reset"
+          className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-1 sm:px-2 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5 min-w-[2.5rem] sm:min-w-[3rem] text-center"
+          title="Click to edit zoom, Double-click to reset"
         >
           {zoomLevel}%
         </button>
@@ -431,10 +573,10 @@ function ZoomControls({
         variant="ghost"
         size="sm"
         onClick={handleZoomIn}
-        className="h-6 w-6 p-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded cursor-pointer"
+        className="h-6 w-6 p-0 sm:h-7 sm:w-7 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded cursor-pointer flex-shrink-0"
         title="Zoom In (Ctrl+=)"
       >
-        <ZoomIn size={12} />
+        <ZoomIn size={10} className="sm:w-4 sm:h-4" />
       </Button>
     </div>
   );

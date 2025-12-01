@@ -30,7 +30,7 @@ interface TaggedHighlightProps {
   ) => any;
   deleteHighlight: (highlightId: string) => any;
 }
-
+// todo , in the future in the settings add color customization there and tags custom
 const TAG_COLORS: Record<string, string> = {
   Definition: "#3b82f6", // blue-500
   Example: "#22c55e", // green-500

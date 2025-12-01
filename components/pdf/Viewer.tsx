@@ -1,3 +1,4 @@
+// will be deleted soon
 import { PDFDocument } from "@/lib/types/pdf";
 import { ViewerHeader } from "./ViewerHeader";
 import { TextSelectionPopup } from "./TextSelectionPopup";

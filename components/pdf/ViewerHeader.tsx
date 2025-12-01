@@ -49,6 +49,8 @@ export interface PDFViewerHeaderProps {
   currentHighlightColor?: string;
   /** Function to set highlight color */
   onHighlightColorChange?: (color: string) => void;
+  /** Width of the viewer (for responsive header) */
+  viewerWidth?: string;
 }
 
 const HIGHLIGHT_COLORS = [
@@ -67,6 +69,7 @@ export function ViewerHeader({
   pdfViewerRef,
   currentHighlightColor = "#FFEB3B",
   onHighlightColorChange,
+  viewerWidth = "100%",
 }: PDFViewerHeaderProps) {
   const router = useRouter();
 
@@ -83,7 +86,7 @@ export function ViewerHeader({
           ? "-translate-y-full -translate-x-1/2 opacity-0"
           : "-translate-x-1/2 translate-y-0 opacity-100"
       }`}
-      style={{ width: "calc(100% - 2rem)" }}
+      style={{ width: `calc(${viewerWidth} - 0.5rem)` }}
     >
       {/* Enhanced stylish header with glassmorphism effect */}
       <div className="bg-white dark:bg-background backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/30">

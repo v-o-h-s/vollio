@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
 import { ContextMenu } from "./ContextMenu";
 import { StandardHighlight } from "./StandardHighlight";
-import { TaggedHighlight } from "./TaggedHighlight";
+import { TaggedHighlight } from "../tags/TaggedHighlight";
 import { MyHighlight } from "@/lib/types/highlight";
 
 interface HighlightContainerProps {

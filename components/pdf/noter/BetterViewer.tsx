@@ -8,12 +8,12 @@ import {
   PdfLoader,
   PdfScaleValue,
 } from "react-pdf-highlighter-extended";
-import { Highlight } from "react-pdf-highlighter-extended";
 import { useRef } from "react";
 import { PDFDocument } from "@/lib/types/pdf";
 import { ExpandableTip } from "./highlight/ExpandableTip";
-import { TagSelectionDialog } from "./highlight/TagSelectionDialog";
+import { TagSelectionDialog } from "./tags/TagSelectionDialog";
 import { HighlightContainer } from "./highlight/HighlightContainer";
+import { TagSidebar } from "./tags/TagSidebar";
 import { ViewerHeader } from "./ViewerHeader";
 import { PDFLoading } from "@/components/ui/PDFLoading";
 import { useGetPDFHighlightsQuery } from "@/lib/store/apiSlice";
@@ -35,6 +35,7 @@ export const BetterViewer = ({
     useHighlightActions();
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [isTagSidebarOpen, setIsTagSidebarOpen] = useState(false);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const [zoomValue, setZoomValue] = useState<PdfScaleValue>("page-width");
 
@@ -138,6 +139,12 @@ export const BetterViewer = ({
     };
   }, []);
 
+  const handleScrollToHighlight = (highlight: MyHighlight) => {
+    if (highlighterUtilsRef.current) {
+      highlighterUtilsRef.current.scrollToHighlight(highlight);
+    }
+  };
+
   return (
     <div className="relative h-full w-full flex flex-col overflow-hidden ">
       {isHeaderVisible ? (
@@ -149,6 +156,8 @@ export const BetterViewer = ({
           currentHighlightColor={currentHighlightColor}
           onHighlightColorChange={setCurrentHighlightColor}
           onToggleNoter={onToggleNoter}
+          onToggleTags={() => setIsTagSidebarOpen(!isTagSidebarOpen)}
+          isTagsOpen={isTagSidebarOpen}
         />
       ) : (
         <button
@@ -210,6 +219,14 @@ export const BetterViewer = ({
         open={isTagDialogOpen}
         onOpenChange={setIsTagDialogOpen}
         onConfirm={handleTagConfirm}
+      />
+
+      {/* Tag Sidebar Overlay */}
+      <TagSidebar
+        isOpen={isTagSidebarOpen}
+        onClose={() => setIsTagSidebarOpen(false)}
+        highlights={highlights}
+        onScrollToHighlight={handleScrollToHighlight}
       />
     </div>
   );

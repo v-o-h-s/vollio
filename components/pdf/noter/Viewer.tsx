@@ -1,3 +1,5 @@
+// will be deleted soon
+
 import { PDFDocument } from "@/lib/types/pdf";
 import { ViewerHeader } from "./ViewerHeader";
 import { TextSelectionPopup } from "./TextSelectionPopup";
@@ -22,6 +24,7 @@ import { ChevronUp } from "lucide-react";
 interface ViewerProps {
   pdfDocument: PDFDocument;
   onToggleNoter?: () => void;
+  viewerWidth?: string;
 }
 
 export interface textBound {
@@ -34,7 +37,7 @@ export interface textBound {
   width: number;
 }
 
-export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
+export default function Viewer({ pdfDocument, onToggleNoter, viewerWidth = "100%" }: ViewerProps) {
   const resourceUrl =
     typeof window !== "undefined"
       ? `${window.location.protocol}//${window.location.host}/lib`
@@ -67,21 +70,12 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
     try {
       const viewer = pdfViewerRef.current;
 
-      // Process bounds to the format expected by Syncfusion
-      const processedBounds = selectionBounds.textBounds.map((bound) => ({
-        x: bound.left,
-        y: bound.top,
-        width: bound.width,
-        height: bound.height,
-      }));
-
-      // Use the exact pattern from Syncfusion documentation
-      viewer.annotation.addAnnotation("Highlight", {
-        bounds: processedBounds,
-        pageNumber: selectionBounds.pageIndex, // Convert to 1-based page numbers
-        color: currentHighlightColor,
-        opacity: 0.5,
-      });
+      // Set highlight color and add annotation
+      viewer.highlightSettings.color = currentHighlightColor;
+      viewer.highlightSettings.opacity = 0.5;
+      
+      // Add highlight annotation
+      viewer.annotation.addAnnotation("Highlight");
 
       // Close popup after highlighting
       setShowPopup(false);
@@ -138,6 +132,7 @@ export default function Viewer({ pdfDocument, onToggleNoter }: ViewerProps) {
           isHeaderVisible={isHeaderVisible}
           setIsHeaderVisible={setIsHeaderVisible}
           pdfViewerRef={pdfViewerRef}
+          viewerWidth={viewerWidth}
         />
       ) : (
         <button
