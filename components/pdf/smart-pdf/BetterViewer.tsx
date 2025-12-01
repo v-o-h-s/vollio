@@ -14,13 +14,12 @@ import { ExpandableTip } from "./highlight/ExpandableTip";
 import { TagSelectionDialog } from "./tags/TagSelectionDialog";
 import { HighlightContainer } from "./highlight/HighlightContainer";
 import { TagSidebar } from "./tags/TagSidebar";
-import { ViewerHeader } from "./ViewerHeader";
 import { PDFLoading } from "@/components/ui/PDFLoading";
 import { useGetPDFHighlightsQuery } from "@/lib/store/apiSlice";
 import { useSelection } from "@/hooks/useTextSelection";
 import { useHighlightActions } from "@/hooks/useHighlightActions";
 import { MyHighlight } from "@/lib/types/highlight";
-
+import { ViewerHeader } from "./viewerheader";
 export const BetterViewer = ({
   pdfDocument,
   onToggleNoter,
