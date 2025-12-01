@@ -1,25 +1,81 @@
 import React from "react";
-import { Highlighter } from "lucide-react";
+import { Highlighter, Tag, StickyNote, ListChecks } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface ExpandableTipProps {
   onHighlight: () => void;
+  onAddTag?: () => void;
+  onAddNote?: () => void;
+  onAddToSummary?: () => void;
 }
 
-export const ExpandableTip = ({ onHighlight }: ExpandableTipProps) => {
+export const ExpandableTip = ({
+  onHighlight,
+  onAddTag,
+  onAddNote,
+  onAddToSummary,
+}: ExpandableTipProps) => {
   return (
     <Card className="shadow-lg border-muted animate-in fade-in zoom-in duration-200">
-      <CardContent className="p-1.5">
+      <CardContent className="p-1.5 flex items-center gap-1">
+        {/* Highlight Button */}
         <Button
           onClick={onHighlight}
           variant="ghost"
           size="sm"
-          className="h-8 px-3 gap-2 font-normal hover:bg-accent cursor-pointer"
+          className="group h-8 px-2 gap-2 font-normal hover:bg-accent cursor-pointer transition-all duration-200 overflow-hidden"
         >
-          <Highlighter className="h-4 w-4" />
-          <span className="text-sm">Highlight</span>
+          <Highlighter className="h-4 w-4 flex-shrink-0" />
+          <span className="text-sm max-w-0 group-hover:max-w-[100px] overflow-hidden whitespace-nowrap transition-all duration-200">
+            Highlight
+          </span>
         </Button>
+
+        {/* Add Tag Button */}
+        {onAddTag && (
+          <Button
+            onClick={onAddTag}
+            variant="ghost"
+            size="sm"
+            className="group h-8 px-2 gap-2 font-normal hover:bg-accent cursor-pointer transition-all duration-200 overflow-hidden"
+          >
+            <Tag className="h-4 w-4 flex-shrink-0" />
+            <span className="text-sm max-w-0 group-hover:max-w-[100px] overflow-hidden whitespace-nowrap transition-all duration-200">
+              Add Tag
+            </span>
+          </Button>
+        )}
+
+        {/* Add Note Button */}
+        {onAddNote && (
+          <Button
+            onClick={onAddNote}
+            variant="ghost"
+            size="sm"
+            className="group h-8 px-2 gap-2 font-normal hover:bg-accent cursor-pointer transition-all duration-200 overflow-hidden"
+          >
+            <StickyNote className="h-4 w-4 flex-shrink-0" />
+            <span className="text-sm max-w-0 group-hover:max-w-[100px] overflow-hidden whitespace-nowrap transition-all duration-200">
+              Note
+            </span>
+          </Button>
+        )}
+
+        {/* Add to Summary Button */}
+        {onAddToSummary && (
+          <Button
+            onClick={onAddToSummary}
+            variant="ghost"
+            size="sm"
+            className="group h-8 px-2 gap-2 font-normal hover:bg-accent cursor-pointer transition-all duration-200 overflow-hidden"
+          >
+            <ListChecks className="h-4 w-4 flex-shrink-0" />
+            <span className="text-sm max-w-0 group-hover:max-w-[200px] overflow-hidden whitespace-nowrap transition-all duration-200">
+              add to summary main points
+            </span>
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

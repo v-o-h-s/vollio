@@ -14,6 +14,7 @@ import { Highlight } from "react-pdf-highlighter-extended";
 import { useRef } from "react";
 import { PDFDocument } from "@/lib/types/pdf";
 import { ExpandableTip } from "./highlight/ExpandableTip";
+import { TagSelectionDialog } from "./highlight/TagSelectionDialog";
 import { HighlightContainer } from "./highlight/HighlightContainer";
 import { ViewerHeader } from "./ViewerHeader";
 import { PDFLoading } from "@/components/ui/PDFLoading";
@@ -23,13 +24,15 @@ import {
   useUpdateHighlightMutation,
   useDeleteHighlightMutation,
 } from "@/lib/store/apiSlice";
-import type { HighlightwithDetails } from "@/lib/types/highlight";
 import type { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 
 // Extend Highlight type to include color
-export interface HighlightWithColor extends Highlight {
+export interface MyHighlight extends Highlight {
+  tags?: string[];
+  style?: "highlight" | "underline" | "tagged";
+  noteId?: string;
   color?: string;
 }
 
@@ -50,12 +53,14 @@ export const BetterViewer = ({
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const [zoomValue, setZoomValue] = useState<PdfScaleValue>("page-width");
+  const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
+  const [pendingSelection, setPendingSelection] = useState<any>(null);
 
   /** Refs for PdfHighlighter utilities */
   const highlighterUtilsRef = useRef<PdfHighlighterUtils | null>(null);
 
   // Map API highlights to react-pdf-highlighter format
-  const highlights = useMemo<Array<HighlightWithColor>>(() => {
+  const highlights = useMemo<Array<MyHighlight>>(() => {
     if (!apiHighlights) return [];
     return apiHighlights.map((h) => ({
       id: h.id,
@@ -63,6 +68,9 @@ export const BetterViewer = ({
       content: h.content,
       type: h.type,
       color: h.color,
+      tags: (h as any).tags, // todo will be fixed later
+      style: (h as any).style,
+      noteId: (h as any).noteId,
     }));
   }, [apiHighlights]);
 
@@ -138,7 +146,7 @@ export const BetterViewer = ({
   /// handlers
 
   // handler to delete a highlight
-  const handleDeleteHighlight = async (highlightId: string) => {
+  const handleDeleteAllHighlight = async (highlightId: string) => {
     try {
       await deleteHighlight(highlightId).unwrap();
     } catch (error) {
@@ -146,7 +154,7 @@ export const BetterViewer = ({
     }
   };
   // handler to update a highlight
-  const handleUpdateHighlight = async (
+  const handleUpdateAllHighlight = async (
     highlightId: string,
     highlight: Partial<CreateHighlightDto>
   ) => {
@@ -160,7 +168,7 @@ export const BetterViewer = ({
     }
   };
   // Handler to create a new highlight
-  const handleHighlight = async () => {
+  const handleCreateHighlight = async () => {
     const selection = highlighterUtilsRef.current?.getCurrentSelection();
     if (!selection) return;
 
@@ -192,6 +200,83 @@ export const BetterViewer = ({
       });
       console.error("Failed to create highlight:", error);
     }
+  };
+
+  // Handler to add a tag to selected text
+  const handleAddTag = () => {
+    const selection = highlighterUtilsRef.current?.getCurrentSelection();
+    if (!selection) return;
+
+    // Store the selection and open the tag dialog
+    setPendingSelection(selection);
+    setIsTagDialogOpen(true);
+  };
+
+  // Handler when tags are confirmed in the dialog
+  const handleTagConfirm = async (selectedTags: string[]) => {
+    if (!pendingSelection) return;
+
+    try {
+      // Generate a proper UUID for the highlight
+      const highlightId = uuidv4();
+
+      // Prepare the DTO for the API with tags
+      const newHighlightDto: CreateHighlightDto = {
+        id: highlightId,
+        pdfId: pdfDocument.id,
+        type: pendingSelection.content.image ? "area" : "text",
+        content: pendingSelection.content,
+        position: pendingSelection.position,
+        color: currentHighlightColor,
+        hasNote: false,
+        noteId: null,
+        tags: selectedTags,
+        style: "tagged",
+      };
+
+      // Create the highlight via API
+      await createHighlight(newHighlightDto).unwrap();
+
+      toast.success(`Highlight created with ${selectedTags.length} tag(s)`, {
+        duration: 2000,
+        position: "bottom-right",
+      });
+
+      // Clear pending selection
+      setPendingSelection(null);
+    } catch (error) {
+      toast.error("Failed to create highlight with tags. Please try again.", {
+        duration: 3000,
+        position: "bottom-right",
+      });
+      console.error("Failed to create highlight with tags:", error);
+    }
+  };
+
+  // Handler to add a note to selected text
+  const handleAddNote = () => {
+    const selection = highlighterUtilsRef.current?.getCurrentSelection();
+    if (!selection) return;
+
+    // TODO: Implement note input dialog
+    console.log("Add note to selection:", selection.content.text);
+    toast.success("Note feature coming soon!", {
+      duration: 2000,
+      position: "bottom-right",
+    });
+  };
+
+  // Handler to add selected text to summary
+  const handleAddToSummary = () => {
+    const selection = highlighterUtilsRef.current?.getCurrentSelection();
+    if (!selection) return;
+
+    // TODO: Implement add to summary functionality
+    console.log("Add to summary:", selection.content.text);
+    toast.success("Summary feature coming soon!", {
+      duration: 2000,
+      position: "bottom-right",
+    });
   };
 
   return (
@@ -241,17 +326,31 @@ export const BetterViewer = ({
               utilsRef={(_pdfHighlighterUtils) => {
                 highlighterUtilsRef.current = _pdfHighlighterUtils;
               }}
-              selectionTip={<ExpandableTip onHighlight={handleHighlight} />}
+              selectionTip={
+                <ExpandableTip
+                  onHighlight={handleCreateHighlight}
+                  onAddTag={handleAddTag}
+                  onAddNote={handleAddNote}
+                  onAddToSummary={handleAddToSummary}
+                />
+              }
               highlights={highlights}
             >
               <HighlightContainer
-                onHighlightDelete={handleDeleteHighlight}
-                onHighlightUpdate={handleUpdateHighlight}
+                onHighlightDelete={handleDeleteAllHighlight}
+                onHighlightUpdate={handleUpdateAllHighlight}
               />
             </PdfHighlighter>
           )}
         </PdfLoader>
       </div>
+
+      {/* Tag Selection Dialog */}
+      <TagSelectionDialog
+        open={isTagDialogOpen}
+        onOpenChange={setIsTagDialogOpen}
+        onConfirm={handleTagConfirm}
+      />
     </div>
   );
 };

@@ -2,12 +2,12 @@
 
 import { useHighlightContainerContext } from "react-pdf-highlighter-extended";
 import { TextHighlight } from "react-pdf-highlighter-extended";
-import { HighlightWithColor } from "../BetterViewer";
 import { useState, useRef, useEffect } from "react";
 
 import toast from "react-hot-toast";
 import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
 import { Button, Card } from "@/components/ui";
+import { MyHighlight } from "../BetterViewer";
 
 // Helper function to convert hex to rgba
 const hexToRgba = (hex: string, alpha: number = 0.4): string => {
@@ -129,7 +129,6 @@ const ContextMenu = ({
       </div>
     </div>
   );
- 
 };
 interface HighlightContainerProps {
   onHighlightDelete: (highlightId: string) => Promise<void>;
@@ -144,7 +143,7 @@ export const HighlightContainer = ({
   onHighlightUpdate,
 }: HighlightContainerProps) => {
   const { highlight, isScrolledTo } =
-    useHighlightContainerContext<HighlightWithColor>();
+    useHighlightContainerContext<MyHighlight>();
 
   const [isHovered, setIsHovered] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
@@ -156,15 +155,38 @@ export const HighlightContainer = ({
 
   // Access custom properties
   const color = (highlight as any).color;
+  const style = (highlight as any).style || "highlight";
+  const tags = (highlight as any).tags;
 
   // Adjust opacity based on hover state
   const baseOpacity = 0.4;
   const hoveredOpacity = 0.25;
   const currentOpacity = isHovered ? hoveredOpacity : baseOpacity;
 
-  const backgroundColor = color
-    ? hexToRgba(color, currentOpacity)
-    : `rgba(255, 235, 59, ${currentOpacity})`;
+  const getHighlightStyle = () => {
+    const baseColor = color || "#FFEB3B";
+    const rgbaColor = hexToRgba(baseColor, currentOpacity);
+
+    switch (style) {
+      case "underline":
+        return {
+          borderBottom: `2px solid ${baseColor}`,
+          backgroundColor: "transparent",
+        };
+      case "tagged":
+        return {
+          backgroundColor: rgbaColor,
+          border: `2px solid ${baseColor}`,
+          borderRadius: "12px", // Circular border effect
+        };
+      default: // "highlight"
+        return {
+          backgroundColor: rgbaColor,
+        };
+    }
+  };
+
+  const highlightStyle = getHighlightStyle();
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -220,9 +242,9 @@ export const HighlightContainer = ({
           highlight={highlight}
           isScrolledTo={isScrolledTo}
           style={{
-            backgroundColor,
+            ...highlightStyle,
             mixBlendMode: "multiply",
-            transition: "background-color 0.2s ease",
+            transition: "all 0.2s ease",
           }}
         />
       </div>
