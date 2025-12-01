@@ -1,8 +1,6 @@
 "use client";
-
 import "@/app/styles/components/viewer.css";
 import { ChevronUp } from "lucide-react";
-
 import { useState, useEffect, useMemo } from "react";
 import {
   PdfHighlighter,
@@ -20,13 +18,11 @@ import { ViewerHeader } from "./ViewerHeader";
 import { PDFLoading } from "@/components/ui/PDFLoading";
 import {
   useGetPDFHighlightsQuery,
-  useCreateHighlightMutation,
   useUpdateHighlightMutation,
   useDeleteHighlightMutation,
 } from "@/lib/store/apiSlice";
-import type { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
-import toast from "react-hot-toast";
-import { v4 as uuidv4 } from "uuid";
+import { useSelection } from "@/hooks/useTextSelection";
+import { useHighlightActions } from "@/hooks/useHighlightActions";
 
 // Extend Highlight type to include color
 export interface MyHighlight extends Highlight {
@@ -46,18 +42,28 @@ export const BetterViewer = ({
   // Fetch highlights for this PDF from API
   const { data: apiHighlights, isLoading: isLoadingHighlights } =
     useGetPDFHighlightsQuery(pdfDocument.id);
-  const [createHighlight] = useCreateHighlightMutation();
-  const [deleteHighlight] = useDeleteHighlightMutation();
-  const [updateHighlight] = useUpdateHighlightMutation();
+  const { handleUpdateAllHighlight, handleDeleteAllHighlight } =
+    useHighlightActions();
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const [zoomValue, setZoomValue] = useState<PdfScaleValue>("page-width");
-  const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
-  const [pendingSelection, setPendingSelection] = useState<any>(null);
 
   /** Refs for PdfHighlighter utilities */
   const highlighterUtilsRef = useRef<PdfHighlighterUtils | null>(null);
+  const {
+    isTagDialogOpen,
+    setIsTagDialogOpen,
+    handleAddTag,
+    handleTagConfirm,
+    handleCreateHighlight,
+    handleAddToSummary,
+    handleAddNote,
+  } = useSelection({
+    highlighterUtilsRef,
+    pdfDocument,
+    currentHighlightColor,
+  });
 
   // Map API highlights to react-pdf-highlighter format
   const highlights = useMemo<Array<MyHighlight>>(() => {
@@ -143,142 +149,6 @@ export const BetterViewer = ({
     };
   }, []);
 
-  /// handlers
-
-  // handler to delete a highlight
-  const handleDeleteAllHighlight = async (highlightId: string) => {
-    try {
-      await deleteHighlight(highlightId).unwrap();
-    } catch (error) {
-      console.error("Failed to delete highlight:", error);
-    }
-  };
-  // handler to update a highlight
-  const handleUpdateAllHighlight = async (
-    highlightId: string,
-    highlight: Partial<CreateHighlightDto>
-  ) => {
-    try {
-      const updated = await updateHighlight({
-        id: highlightId,
-        highlight,
-      }).unwrap();
-    } catch (error) {
-      console.error("Failed to update highlight:", error);
-    }
-  };
-  // Handler to create a new highlight
-  const handleCreateHighlight = async () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection) return;
-
-    try {
-      // Generate a proper UUID for the highlight
-      const highlightId = uuidv4();
-
-      // Prepare the DTO for the API
-      const newHighlightDto: CreateHighlightDto = {
-        id: highlightId,
-        pdfId: pdfDocument.id,
-        type: selection.content.image ? "area" : "text",
-        content: selection.content,
-        position: selection.position,
-        color: currentHighlightColor,
-        hasNote: false,
-        noteId: null,
-      };
-
-      // Create the highlight via API
-      await createHighlight(newHighlightDto).unwrap();
-
-      // The highlights list will automatically update via RTK Query cache
-    } catch (error) {
-      // Show error toast
-      toast.error("Failed to create highlight. Please try again.", {
-        duration: 3000,
-        position: "bottom-right",
-      });
-      console.error("Failed to create highlight:", error);
-    }
-  };
-
-  // Handler to add a tag to selected text
-  const handleAddTag = () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection) return;
-
-    // Store the selection and open the tag dialog
-    setPendingSelection(selection);
-    setIsTagDialogOpen(true);
-  };
-
-  // Handler when tags are confirmed in the dialog
-  const handleTagConfirm = async (selectedTags: string[]) => {
-    if (!pendingSelection) return;
-
-    try {
-      // Generate a proper UUID for the highlight
-      const highlightId = uuidv4();
-
-      // Prepare the DTO for the API with tags
-      const newHighlightDto: CreateHighlightDto = {
-        id: highlightId,
-        pdfId: pdfDocument.id,
-        type: pendingSelection.content.image ? "area" : "text",
-        content: pendingSelection.content,
-        position: pendingSelection.position,
-        color: currentHighlightColor,
-        hasNote: false,
-        noteId: null,
-        tags: selectedTags,
-        style: "tagged",
-      };
-
-      // Create the highlight via API
-      await createHighlight(newHighlightDto).unwrap();
-
-      toast.success(`Highlight created with ${selectedTags.length} tag(s)`, {
-        duration: 2000,
-        position: "bottom-right",
-      });
-
-      // Clear pending selection
-      setPendingSelection(null);
-    } catch (error) {
-      toast.error("Failed to create highlight with tags. Please try again.", {
-        duration: 3000,
-        position: "bottom-right",
-      });
-      console.error("Failed to create highlight with tags:", error);
-    }
-  };
-
-  // Handler to add a note to selected text
-  const handleAddNote = () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection) return;
-
-    // TODO: Implement note input dialog
-    console.log("Add note to selection:", selection.content.text);
-    toast.success("Note feature coming soon!", {
-      duration: 2000,
-      position: "bottom-right",
-    });
-  };
-
-  // Handler to add selected text to summary
-  const handleAddToSummary = () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection) return;
-
-    // TODO: Implement add to summary functionality
-    console.log("Add to summary:", selection.content.text);
-    toast.success("Summary feature coming soon!", {
-      duration: 2000,
-      position: "bottom-right",
-    });
-  };
-
   return (
     <div className="relative h-full w-full flex flex-col overflow-hidden ">
       {isHeaderVisible ? (
@@ -337,8 +207,8 @@ export const BetterViewer = ({
               highlights={highlights}
             >
               <HighlightContainer
-                onHighlightDelete={handleDeleteAllHighlight}
-                onHighlightUpdate={handleUpdateAllHighlight}
+                updateHighlight={handleUpdateAllHighlight}
+                deleteHighlight={handleDeleteAllHighlight}
               />
             </PdfHighlighter>
           )}
