@@ -54,6 +54,8 @@ export interface SupabaseHighlightResponse {
   color?: string;
   has_note: boolean;
   note_id?: string | null;
+  tags?: string[] | null;
+  style?: "highlight" | "underline" | "tagged" | null;
   created_at: string;
   updated_at: string;
 }
@@ -75,6 +77,8 @@ export const mapSupabaseHighlightResponseToHighlight = (
     color: highlight.color,
     hasNote: highlight.has_note,
     noteId: highlight.note_id,
+    tags: highlight.tags || undefined,
+    style: highlight.style || undefined,
     createdAt: highlight.created_at,
     updatedAt: highlight.updated_at,
   };

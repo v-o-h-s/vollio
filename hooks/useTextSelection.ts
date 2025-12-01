@@ -31,41 +31,6 @@ export function useSelection({
     setIsTagDialogOpen(true);
   };
 
-  // Handler to create a new highlight
-  const handleCreateHighlight = async () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection) return;
-
-    try {
-      // Generate a proper UUID for the highlight
-      const highlightId = uuidv4();
-
-      // Prepare the DTO for the API
-      const newHighlightDto: CreateHighlightDto = {
-        id: highlightId,
-        pdfId: pdfDocument.id,
-        type: selection.content.image ? "area" : "text",
-        content: selection.content,
-        position: selection.position,
-        color: currentHighlightColor ?? "#FF0000",
-        hasNote: false,
-        noteId: null,
-      };
-
-      // Create the highlight via API
-      await createHighlight(newHighlightDto).unwrap();
-
-      // The highlights list will automatically update via RTK Query cache
-    } catch (error) {
-      // Show error toast
-      toast.error("Failed to create highlight. Please try again.", {
-        duration: 3000,
-        position: "bottom-right",
-      });
-      console.error("Failed to create highlight:", error);
-    }
-  };
-
   // Handler when tags are confirmed in the dialog
   const handleTagConfirm = async (selectedTags: string[]) => {
     if (!pendingSelection) return;
@@ -104,6 +69,41 @@ export function useSelection({
         position: "bottom-right",
       });
       console.error("Failed to create highlight with tags:", error);
+    }
+  };
+
+  // Handler to create a new highlight
+  const handleCreateHighlight = async () => {
+    const selection = highlighterUtilsRef.current?.getCurrentSelection();
+    if (!selection) return;
+
+    try {
+      // Generate a proper UUID for the highlight
+      const highlightId = uuidv4();
+
+      // Prepare the DTO for the API
+      const newHighlightDto: CreateHighlightDto = {
+        id: highlightId,
+        pdfId: pdfDocument.id,
+        type: selection.content.image ? "area" : "text",
+        content: selection.content,
+        position: selection.position,
+        color: currentHighlightColor ?? "#FF0000",
+        hasNote: false,
+        noteId: null,
+      };
+
+      // Create the highlight via API
+      await createHighlight(newHighlightDto).unwrap();
+
+      // The highlights list will automatically update via RTK Query cache
+    } catch (error) {
+      // Show error toast
+      toast.error("Failed to create highlight. Please try again.", {
+        duration: 3000,
+        position: "bottom-right",
+      });
+      console.error("Failed to create highlight:", error);
     }
   };
 

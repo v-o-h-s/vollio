@@ -10,9 +10,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Check } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Spinner } from "@/components/ui/spinner";
 
 export const PREDEFINED_TAGS = [
   "Definition",
@@ -26,7 +27,7 @@ export const PREDEFINED_TAGS = [
 interface TagSelectionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: (selectedTags: string[]) => void;
+  onConfirm: (selectedTags: string[]) => Promise<void>;
   initialTags?: string[];
 }
 
@@ -37,16 +38,21 @@ export const TagSelectionDialog = ({
   initialTags = [],
 }: TagSelectionDialogProps) => {
   const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const handleToggleTag = (tag: string) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
   };
 
-  const handleConfirm = () => {
-    onConfirm(selectedTags);
-    onOpenChange(false);
+  const handleConfirm = async () => {
+    try {
+      setIsLoading(true);
+      await onConfirm(selectedTags);
+      onOpenChange(false);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -72,12 +78,15 @@ export const TagSelectionDialog = ({
                 className="flex items-center space-x-3 rounded-md border border-border p-3 hover:bg-accent/50 transition-colors cursor-pointer"
                 onClick={() => handleToggleTag(tag)}
               >
-                <Checkbox
-                  id={tag}
-                  checked={selectedTags.includes(tag)}
-                  onCheckedChange={() => handleToggleTag(tag)}
-                  className="cursor-pointer"
-                />
+                <div
+                  className={`flex h-4 w-4 items-center justify-center rounded-sm border border-primary ${
+                    selectedTags.includes(tag)
+                      ? "bg-primary text-primary-foreground"
+                      : "opacity-50"
+                  }`}
+                >
+                  {selectedTags.includes(tag) && <Check className="h-3 w-3" />}
+                </div>
                 <Label
                   htmlFor={tag}
                   className="flex-1 text-sm font-medium leading-none cursor-pointer"
@@ -113,8 +122,18 @@ export const TagSelectionDialog = ({
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
-          <Button onClick={handleConfirm} disabled={selectedTags.length === 0}>
-            Add {selectedTags.length > 0 && `(${selectedTags.length})`}
+          <Button
+            onClick={handleConfirm}
+            disabled={selectedTags.length === 0 || isLoading}
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <Spinner />
+                Saving...
+              </div>
+            ) : (
+              <>Add {selectedTags.length > 0 && `(${selectedTags.length})`}</>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -16,11 +16,7 @@ import { TagSelectionDialog } from "./highlight/TagSelectionDialog";
 import { HighlightContainer } from "./highlight/HighlightContainer";
 import { ViewerHeader } from "./ViewerHeader";
 import { PDFLoading } from "@/components/ui/PDFLoading";
-import {
-  useGetPDFHighlightsQuery,
-  useUpdateHighlightMutation,
-  useDeleteHighlightMutation,
-} from "@/lib/store/apiSlice";
+import { useGetPDFHighlightsQuery } from "@/lib/store/apiSlice";
 import { useSelection } from "@/hooks/useTextSelection";
 import { useHighlightActions } from "@/hooks/useHighlightActions";
 
@@ -74,9 +70,9 @@ export const BetterViewer = ({
       content: h.content,
       type: h.type,
       color: h.color,
-      tags: (h as any).tags, // todo will be fixed later
-      style: (h as any).style,
-      noteId: (h as any).noteId,
+      tags: h.tags,
+      style: h.style,
+      noteId: h.noteId ?? undefined,
     }));
   }, [apiHighlights]);
 
@@ -183,7 +179,7 @@ export const BetterViewer = ({
 
       <div className="flex-1 relative overflow-hidden [&_*::-webkit-scrollbar]:w-2 [&_*::-webkit-scrollbar]:h-2 [&_*::-webkit-scrollbar-track]:bg-transparent [&_*::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&_*::-webkit-scrollbar-thumb]:rounded-full hover:[&_*::-webkit-scrollbar-thumb]:bg-muted-foreground/40 transition-colors">
         <PdfLoader
-          onError={(error) => console.log(error)}
+          onError={(error) => console.log(error)} // todo Better visualization
           document={pdfDocument.fileUrl as string}
           workerSrc="//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs"
           beforeLoad={(progress) => <PDFLoading progress={progress} />}

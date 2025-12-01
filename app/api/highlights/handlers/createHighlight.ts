@@ -22,7 +22,18 @@ export const createHighlightHandler = async (
 
   Logger.info(`👤 Creating highlight for user: ${userId}`);
 
-  const { id, pdfId, type, content, position, color, hasNote, noteId } = data;
+  const {
+    id,
+    pdfId,
+    type,
+    content,
+    position,
+    color,
+    hasNote,
+    noteId,
+    tags,
+    style,
+  } = data;
 
   Logger.info("📋 Highlight data received", {
     highlightId: id,
@@ -30,6 +41,8 @@ export const createHighlightHandler = async (
     type,
     hasNote,
     color,
+    tags,
+    style,
   });
 
   const supabase = await getAuthenticatedSupabaseClient();
@@ -48,6 +61,8 @@ export const createHighlightHandler = async (
       has_note: hasNote ?? false,
       note_id: noteId,
       user_id: userId,
+      tags,
+      style,
     })
     .select()
     .single();
