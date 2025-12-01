@@ -19,7 +19,7 @@ import { useGetPDFHighlightsQuery } from "@/lib/store/apiSlice";
 import { useSelection } from "@/hooks/useTextSelection";
 import { useHighlightActions } from "@/hooks/useHighlightActions";
 import { MyHighlight } from "@/lib/types/highlight";
-import { ViewerHeader } from "./viewerheader";
+import { ViewerHeader } from "./viewheader";
 export const BetterViewer = ({
   pdfDocument,
   onToggleNoter,

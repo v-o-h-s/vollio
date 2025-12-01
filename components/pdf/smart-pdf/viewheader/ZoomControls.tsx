@@ -46,7 +46,9 @@ export function ZoomControls({ pdfViewerRef }: ZoomControlsProps) {
   const handleZoomIn = () => {
     const magnification = getMagnificationModule();
     if (!magnification) {
-      console.warn("Magnification module is not available on the PDF viewer instance.");
+      console.warn(
+        "Magnification module is not available on the PDF viewer instance."
+      );
       return;
     }
 
@@ -60,7 +62,9 @@ export function ZoomControls({ pdfViewerRef }: ZoomControlsProps) {
   const handleZoomOut = () => {
     const magnification = getMagnificationModule();
     if (!magnification) {
-      console.warn("Magnification module is not available on the PDF viewer instance.");
+      console.warn(
+        "Magnification module is not available on the PDF viewer instance."
+      );
       return;
     }
 
@@ -74,7 +78,9 @@ export function ZoomControls({ pdfViewerRef }: ZoomControlsProps) {
   const handleResetZoom = () => {
     const magnification = getMagnificationModule();
     if (!magnification) {
-      console.warn("Magnification module is not available on the PDF viewer instance.");
+      console.warn(
+        "Magnification module is not available on the PDF viewer instance."
+      );
       return;
     }
 
@@ -115,15 +121,15 @@ export function ZoomControls({ pdfViewerRef }: ZoomControlsProps) {
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5 sm:gap-1">
       <Button
         variant="ghost"
         size="sm"
         onClick={handleZoomOut}
-        className="h-6 w-6 p-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded cursor-pointer"
+        className="h-6 w-6 p-0 sm:h-7 sm:w-7 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded cursor-pointer flex-shrink-0"
         title="Zoom Out (Ctrl+-)"
       >
-        <ZoomOut size={12} />
+        <ZoomOut size={10} className="sm:w-4 sm:h-4" />
       </Button>
 
       {isEditing ? (
@@ -133,15 +139,15 @@ export function ZoomControls({ pdfViewerRef }: ZoomControlsProps) {
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={handleZoomInputSubmit}
           onKeyDown={handleZoomInputKeyDown}
-          className="w-14 h-6 text-xs text-center bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 rounded px-1"
+          className="w-12 sm:w-14 h-6 text-xs text-center bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 rounded px-1"
           placeholder="10-400"
         />
       ) : (
         <button
           onClick={handleZoomClick}
           onDoubleClick={handleResetZoom}
-          className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-2 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5 min-w-[3rem] text-center"
-          title="Click to edit zoom (10-400%), Double-click or Ctrl+0 to reset"
+          className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-1 sm:px-2 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5 min-w-[2.5rem] sm:min-w-[3rem] text-center"
+          title="Click to edit zoom, Double-click to reset"
         >
           {zoomLevel}%
         </button>
@@ -151,10 +157,10 @@ export function ZoomControls({ pdfViewerRef }: ZoomControlsProps) {
         variant="ghost"
         size="sm"
         onClick={handleZoomIn}
-        className="h-6 w-6 p-0 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded cursor-pointer"
+        className="h-6 w-6 p-0 sm:h-7 sm:w-7 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 rounded cursor-pointer flex-shrink-0"
         title="Zoom In (Ctrl+=)"
       >
-        <ZoomIn size={12} />
+        <ZoomIn size={10} className="sm:w-4 sm:h-4" />
       </Button>
     </div>
   );

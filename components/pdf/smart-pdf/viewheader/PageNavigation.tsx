@@ -50,7 +50,7 @@ export function PageNavigation({ pdfViewerRef }: PageNavigationProps) {
     const pageNum = parseInt(inputValue);
     if (pageNum >= 1 && pageNum <= totalPages && pdfViewerRef?.current) {
       try {
-        // Use Syncfusion's navigation API to go to page
+        // Use navigation API to go to page
         if (pdfViewerRef.current.navigation) {
           pdfViewerRef.current.navigation.goToPage(pageNum);
         } else {
@@ -75,7 +75,7 @@ export function PageNavigation({ pdfViewerRef }: PageNavigationProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1 sm:gap-2 text-xs">
       {isEditing ? (
         <Input
           ref={inputRef}
@@ -83,21 +83,19 @@ export function PageNavigation({ pdfViewerRef }: PageNavigationProps) {
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={handleInputSubmit}
           onKeyDown={handleInputKeyDown}
-          className="w-12 h-6 text-xs text-center bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 rounded px-1"
+          className="w-10 sm:w-12 h-6 text-xs text-center bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 rounded px-1"
         />
       ) : (
         <button
           onClick={handlePageClick}
-          className="text-xs font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-1 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5"
-          title="Click to edit page number (← → or PageUp/PageDown to navigate)"
+          className="font-medium text-foreground/80 hover:text-foreground transition-colors cursor-pointer px-1 py-0.5 rounded hover:bg-white/10 dark:hover:bg-white/5"
+          title="Click to edit page number"
         >
           {currentPage}
         </button>
       )}
-      <span className="text-xs text-foreground/60">/</span>
-      <span className="text-xs font-medium text-foreground/80">
-        {totalPages}
-      </span>
+      <span className="text-foreground/60">/</span>
+      <span className="font-medium text-foreground/80">{totalPages}</span>
     </div>
   );
 }
