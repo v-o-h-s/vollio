@@ -12,7 +12,7 @@ import {
   generateStoragePath,
   handleSupabaseError,
   withRetry,
-} from "../supabaseClient";
+} from "../../supabase/supabase";
 
 // Mock Clerk
 vi.mock("@clerk/nextjs/server", () => ({

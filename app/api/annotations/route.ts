@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
+import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 import { withErrorHandling } from "@/lib/utils/error-handling";
 import { z } from "zod";
 import { Content } from "next/font/google";
 
 // Validation schema for annotation creation
-const createAnnotationSchema = z.object({  
+const createAnnotationSchema = z.object({
   pdfId: z.string().uuid("Invalid PDF ID format"),
   noteId: z.string().uuid("Invalid note ID format"),
   selectedText: z
@@ -20,7 +20,7 @@ const createAnnotationSchema = z.object({
     width: z.number().min(0, "Width must be positive"),
     height: z.number().min(0, "Height must be positive"),
   }),
-  noteContent: z.string().optional(),// will be modified later
+  noteContent: z.string().optional(), // will be modified later
 });
 
 /**
@@ -136,7 +136,6 @@ export const POST = withErrorHandling(async (request: NextRequest) => {
       createdAt: annotation.created_at,
       updatedAt: annotation.updated_at,
     };
-
 
     return NextResponse.json({
       success: true,

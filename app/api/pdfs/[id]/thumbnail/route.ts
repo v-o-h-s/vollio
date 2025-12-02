@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
+import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 import { withErrorHandling } from "@/lib/utils/error-handling";
 import { PDFDocument } from "pdf-lib";
 import sharp from "sharp";
 
 export const GET = withErrorHandling(
-  async (request: NextRequest, { params }: { params: Promise<{ id: string }> }) => {
+  async (
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+  ) => {
     const { userId } = await auth();
 
     if (!userId) {

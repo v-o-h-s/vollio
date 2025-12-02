@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
+import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 import {
   withErrorHandling,
   extractRequestContext,
   createServerError,
   ServerErrorType,
 } from "@/lib/utils/error-handling";
-import {
-  requireAuthentication,
-} from "@/lib/utils/auth-validation";
+import { requireAuthentication } from "@/lib/utils/auth-validation";
 import { checkEnhancedRateLimit } from "@/lib/utils/security-validation";
 
 interface UpdateFolderRequest {
@@ -43,7 +41,7 @@ async function updateFolder(
     throw createServerError(
       ServerErrorType.AUTHORIZATION_ERROR,
       "Folder not found or access denied",
-      { operation: 'validate_folder', userId }
+      { operation: "validate_folder", userId }
     );
   }
 
@@ -61,7 +59,7 @@ async function updateFolder(
       throw createServerError(
         ServerErrorType.VALIDATION_ERROR,
         "Parent folder not found or access denied",
-        { operation: 'validate_parent_folder', userId }
+        { operation: "validate_parent_folder", userId }
       );
     }
 
@@ -70,19 +68,24 @@ async function updateFolder(
       throw createServerError(
         ServerErrorType.VALIDATION_ERROR,
         "A folder cannot be its own parent",
-        { operation: 'validate_circular_reference', userId }
+        { operation: "validate_circular_reference", userId }
       );
     }
 
     // Check if moving to a descendant (would create circular reference)
-    const { data: descendants } = await supabaseClient
-      .rpc('get_folder_descendants', { folder_uuid: folderId });
+    const { data: descendants } = await supabaseClient.rpc(
+      "get_folder_descendants",
+      { folder_uuid: folderId }
+    );
 
-    if (descendants && descendants.some((d: any) => d.id === updates.parent_id)) {
+    if (
+      descendants &&
+      descendants.some((d: any) => d.id === updates.parent_id)
+    ) {
       throw createServerError(
         ServerErrorType.VALIDATION_ERROR,
         "Cannot move folder to one of its descendants",
-        { operation: 'validate_circular_reference', userId }
+        { operation: "validate_circular_reference", userId }
       );
     }
   }
@@ -93,7 +96,12 @@ async function updateFolder(
       .from("folders")
       .select("id")
       .eq("name", updates.name.trim())
-      .eq("parent_id", updates.parent_id !== undefined ? updates.parent_id : existingFolder.parent_id)
+      .eq(
+        "parent_id",
+        updates.parent_id !== undefined
+          ? updates.parent_id
+          : existingFolder.parent_id
+      )
       .eq("user_id", userId)
       .neq("id", folderId)
       .single();
@@ -102,7 +110,7 @@ async function updateFolder(
       throw createServerError(
         ServerErrorType.VALIDATION_ERROR,
         "A folder with this name already exists in the same location",
-        { operation: 'validate_duplicate_name', userId }
+        { operation: "validate_duplicate_name", userId }
       );
     }
   }
@@ -129,9 +137,9 @@ async function updateFolder(
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
       `Failed to update folder: ${error.message}`,
-      { 
-        operation: 'update_folder',
-        userId
+      {
+        operation: "update_folder",
+        userId,
       },
       error
     );
@@ -161,7 +169,7 @@ async function deleteFolder(
     throw createServerError(
       ServerErrorType.AUTHORIZATION_ERROR,
       "Folder not found or access denied",
-      { operation: 'validate_folder', userId }
+      { operation: "validate_folder", userId }
     );
   }
 
@@ -178,7 +186,7 @@ async function deleteFolder(
       throw createServerError(
         ServerErrorType.VALIDATION_ERROR,
         "Target folder not found or access denied",
-        { operation: 'validate_target_folder', userId }
+        { operation: "validate_target_folder", userId }
       );
     }
   }
@@ -194,7 +202,7 @@ async function deleteFolder(
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
       `Failed to move PDFs: ${movePDFsError.message}`,
-      { operation: 'move_pdfs', userId },
+      { operation: "move_pdfs", userId },
       movePDFsError
     );
   }
@@ -210,7 +218,7 @@ async function deleteFolder(
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
       `Failed to move subfolders: ${moveSubfoldersError.message}`,
-      { operation: 'move_subfolders', userId },
+      { operation: "move_subfolders", userId },
       moveSubfoldersError
     );
   }
@@ -226,7 +234,7 @@ async function deleteFolder(
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
       `Failed to delete folder: ${deleteError.message}`,
-      { operation: 'delete_folder', userId },
+      { operation: "delete_folder", userId },
       deleteError
     );
   }
@@ -242,11 +250,11 @@ async function handlePUT(
   const context = extractRequestContext(request, `/api/folders/${folderId}`);
 
   // Enhanced authentication validation
-  const authContext = await requireAuthentication(request, ['write']);
+  const authContext = await requireAuthentication(request, ["write"]);
   const userId = authContext.userId;
 
   // Validate folder ID
-  if (!folderId || folderId === 'undefined' || folderId === 'null') {
+  if (!folderId || folderId === "undefined" || folderId === "null") {
     throw createServerError(
       ServerErrorType.VALIDATION_ERROR,
       "Invalid folder ID provided",
@@ -255,7 +263,7 @@ async function handlePUT(
   }
 
   // Enhanced rate limiting for API calls
-  checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });
+  checkEnhancedRateLimit(userId, "API_CALLS", { ...context, userId });
 
   // Parse request body
   const body: UpdateFolderRequest = await request.json();
@@ -293,7 +301,12 @@ async function handlePUT(
   const supabaseClient = await getAuthenticatedSupabaseClient();
 
   // Update the folder
-  const updatedFolder = await updateFolder(supabaseClient, userId, folderId, body);
+  const updatedFolder = await updateFolder(
+    supabaseClient,
+    userId,
+    folderId,
+    body
+  );
 
   // Log successful update
   console.log(`✅ Folder updated successfully: ${folderId} for user ${userId}`);
@@ -317,11 +330,11 @@ async function handleDELETE(
   const context = extractRequestContext(request, `/api/folders/${folderId}`);
 
   // Enhanced authentication validation
-  const authContext = await requireAuthentication(request, ['delete']);
+  const authContext = await requireAuthentication(request, ["delete"]);
   const userId = authContext.userId;
 
   // Validate folder ID
-  if (!folderId || folderId === 'undefined' || folderId === 'null') {
+  if (!folderId || folderId === "undefined" || folderId === "null") {
     throw createServerError(
       ServerErrorType.VALIDATION_ERROR,
       "Invalid folder ID provided",
@@ -330,14 +343,16 @@ async function handleDELETE(
   }
 
   // Log the deletion attempt
-  console.log(`🗑️ Attempting to delete folder: ${folderId} for user: ${userId}`);
+  console.log(
+    `🗑️ Attempting to delete folder: ${folderId} for user: ${userId}`
+  );
 
   // Enhanced rate limiting for API calls
-  checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });
+  checkEnhancedRateLimit(userId, "API_CALLS", { ...context, userId });
 
   // Parse query parameters
   const url = new URL(request.url);
-  const moveContentsTo = url.searchParams.get('moveContentsTo');
+  const moveContentsTo = url.searchParams.get("moveContentsTo");
 
   // Get authenticated Supabase client
   const supabaseClient = await getAuthenticatedSupabaseClient();
@@ -358,12 +373,12 @@ async function handleDELETE(
 }
 
 // Export the wrapped handlers
-export const PUT = withErrorHandling(
-  handlePUT,
-  { endpoint: '/api/folders/[id]', method: 'PUT' }
-);
+export const PUT = withErrorHandling(handlePUT, {
+  endpoint: "/api/folders/[id]",
+  method: "PUT",
+});
 
-export const DELETE = withErrorHandling(
-  handleDELETE,
-  { endpoint: '/api/folders/[id]', method: 'DELETE' }
-);
+export const DELETE = withErrorHandling(handleDELETE, {
+  endpoint: "/api/folders/[id]",
+  method: "DELETE",
+});

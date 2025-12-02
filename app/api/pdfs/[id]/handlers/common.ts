@@ -1,14 +1,8 @@
 import { Logger } from "@/lib/utils/logger";
-import { STORAGE_CONFIG } from "@/lib/supabaseClient";
-import {
-  DatabaseError,
-  StorageError,
-} from "@/lib/utils/error-handling";
+import { STORAGE_CONFIG } from "@/supabase/supabase";
+import { DatabaseError, StorageError } from "@/lib/utils/error-handling";
 
-export async function fetchPDFById(
-  supabaseClient: any,
-  pdfId: string
-) {
+export async function fetchPDFById(supabaseClient: any, pdfId: string) {
   const { data, error } = await supabaseClient
     .from("pdfs")
     .select("*")
@@ -73,5 +67,3 @@ export async function deletePDFFromDatabase(
 
   return data;
 }
-
-

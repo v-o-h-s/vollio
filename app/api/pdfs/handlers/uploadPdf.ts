@@ -4,7 +4,7 @@ import { Logger } from "@/lib/utils/logger";
 import {
   getAuthenticatedSupabaseClient,
   STORAGE_CONFIG,
-} from "@/lib/supabaseClient";
+} from "@/supabase/supabase";
 import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types/pdf";
 import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
 import { StorageError } from "@/lib/utils/error-handling/StorageError";

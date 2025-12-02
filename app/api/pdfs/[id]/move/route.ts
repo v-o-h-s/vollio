@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
+import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 import {
   withErrorHandling,
   extractRequestContext,
@@ -44,7 +44,7 @@ async function movePDF(
     throw createServerError(
       ServerErrorType.NOT_FOUND_ERROR,
       "PDF not found or access denied",
-      { operation: 'validate_pdf', userId, pdfId }
+      { operation: "validate_pdf", userId, pdfId }
     );
   }
 
@@ -61,7 +61,7 @@ async function movePDF(
       throw createServerError(
         ServerErrorType.VALIDATION_ERROR,
         "Target folder not found or access denied",
-        { operation: 'validate_folder', userId, folderId }
+        { operation: "validate_folder", userId, folderId }
       );
     }
   }
@@ -79,11 +79,11 @@ async function movePDF(
     throw createServerError(
       ServerErrorType.DATABASE_ERROR,
       `Failed to move PDF: ${error.message}`,
-      { 
-        operation: 'move_pdf',
+      {
+        operation: "move_pdf",
         userId,
         pdfId,
-        folderId
+        folderId,
       },
       error
     );
@@ -102,11 +102,11 @@ async function handlePATCH(
   const context = extractRequestContext(request, `/api/pdfs/${pdfId}/move`);
 
   // Enhanced authentication validation
-  const authContext = await requireAuthentication(request, ['write']);
+  const authContext = await requireAuthentication(request, ["write"]);
   const userId = authContext.userId;
 
   // Enhanced rate limiting for API calls
-  checkEnhancedRateLimit(userId, 'API_CALLS', { ...context, userId });
+  checkEnhancedRateLimit(userId, "API_CALLS", { ...context, userId });
 
   // Parse request body
   const body: MovePDFRequest = await request.json();
@@ -115,10 +115,19 @@ async function handlePATCH(
   const supabaseClient = await getAuthenticatedSupabaseClient();
 
   // Move the PDF
-  const updatedPDF = await movePDF(supabaseClient, userId, pdfId, body.folderId);
+  const updatedPDF = await movePDF(
+    supabaseClient,
+    userId,
+    pdfId,
+    body.folderId
+  );
 
   // Log successful move
-  console.log(`✅ PDF moved successfully: ${pdfId} to folder ${body.folderId || 'root'} for user ${userId}`);
+  console.log(
+    `✅ PDF moved successfully: ${pdfId} to folder ${
+      body.folderId || "root"
+    } for user ${userId}`
+  );
 
   // Return success response
   const response: MovePDFResponse = {
@@ -131,7 +140,7 @@ async function handlePATCH(
 }
 
 // Export the wrapped handler
-export const PATCH = withErrorHandling(
-  handlePATCH,
-  { endpoint: '/api/pdfs/[id]/move', method: 'PATCH' }
-);
+export const PATCH = withErrorHandling(handlePATCH, {
+  endpoint: "/api/pdfs/[id]/move",
+  method: "PATCH",
+});
