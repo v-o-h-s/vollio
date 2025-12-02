@@ -63,7 +63,7 @@ import { BaseAppError, ErrorSeverity } from "./BaseAppError";
 export { AuthError, AuthErrorType } from "./AuthError";
 
 // AI errors
-export { AIError, AIErrorType } from "./AIError";
+export { AIError } from "./AIError";
 
 // Validation errors
 export { FileValidationError, FileValidationErrorType } from "./files/FileValidationError";

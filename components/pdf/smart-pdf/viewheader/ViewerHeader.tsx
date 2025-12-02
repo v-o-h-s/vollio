@@ -3,7 +3,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { FileText, ChevronDown, Eye, Home, Tag as TagIcon } from "lucide-react";
+import {
+  FileText,
+  ChevronDown,
+  Eye,
+  Home,
+  Tag as TagIcon,
+  ScrollText,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +33,8 @@ export function ViewerHeader({
   onHighlightColorChange,
   onToggleTags,
   isTagsOpen,
+  onToggleSummary,
+  isSummaryOpen,
   viewerWidth = "100%",
 }: PDFViewerHeaderProps) {
   const router = useRouter();
@@ -59,13 +68,13 @@ export function ViewerHeader({
   return (
     <div
       ref={headerRef}
-      className={`absolute top-4 left-1/2 z-20 transition-all duration-500 ease-in-out ${
+      className={`absolute top-2 left-1/2 z-20 transition-all duration-500 ease-in-out ${
         !isHeaderVisible
           ? "-translate-y-full -translate-x-1/2 opacity-0 pointer-events-none"
           : "-translate-x-1/2 translate-y-0 opacity-100"
       }`}
       style={{
-        width: `calc(${viewerWidth} - 0.5rem)`,
+        width: `calc(${viewerWidth} - 2rem)`,
         maxWidth: `calc(${viewerWidth} - 0.5rem)`,
       }}
     >
@@ -157,6 +166,18 @@ export function ViewerHeader({
                       <span>Tags</span>
                     </button>
 
+                    {/* Summary Toggle */}
+                    <button
+                      onClick={onToggleSummary}
+                      className={cn(
+                        "w-full text-left px-3 py-2 rounded text-sm font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer flex items-center gap-2",
+                        isSummaryOpen && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <ScrollText size={16} />
+                      <span>Summary</span>
+                    </button>
+
                     {/* Notes Toggle */}
                     <button
                       onClick={onToggleNoter}
@@ -235,6 +256,21 @@ export function ViewerHeader({
                 >
                   <TagIcon size={14} />
                   <span className="text-xs ml-1">Tags</span>
+                </Button>
+
+                {/* Summary Toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleSummary}
+                  className={cn(
+                    "cursor-pointer h-8 px-2 flex-shrink-0",
+                    isSummaryOpen && "bg-accent text-accent-foreground"
+                  )}
+                  title="Summary"
+                >
+                  <ScrollText size={14} />
+                  <span className="text-xs ml-1">Summary</span>
                 </Button>
 
                 {/* Notes Toggle */}

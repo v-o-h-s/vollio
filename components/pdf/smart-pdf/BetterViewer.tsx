@@ -20,6 +20,8 @@ import { useSelection } from "@/hooks/useTextSelection";
 import { useHighlightActions } from "@/hooks/useHighlightActions";
 import { MyHighlight } from "@/lib/types/highlight";
 import { ViewerHeader } from "./viewheader";
+import { useSummaryActions } from "@/hooks/useSummaryActions";
+import { SummarySidebar } from "./summary/SummarySidebar";
 export const BetterViewer = ({
   pdfDocument,
   onToggleNoter,
@@ -35,24 +37,45 @@ export const BetterViewer = ({
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isTagSidebarOpen, setIsTagSidebarOpen] = useState(false);
+  const [isSummarySidebarOpen, setIsSummarySidebarOpen] = useState(false);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const [zoomValue, setZoomValue] = useState<PdfScaleValue>("page-width");
 
   /** Refs for PdfHighlighter utilities */
   const highlighterUtilsRef = useRef<PdfHighlighterUtils | null>(null);
+
+  // Summary actions hook
+  const { summary, addMainPoint, removeMainPoint } = useSummaryActions(
+    pdfDocument.id
+  );
+
   const {
     isTagDialogOpen,
     setIsTagDialogOpen,
     handleAddTag,
     handleTagConfirm,
     handleCreateHighlight,
-    handleAddToSummary,
+    handleAddToSummary: handleAddToSummaryBase,
     handleAddNote,
   } = useSelection({
     highlighterUtilsRef,
     pdfDocument,
     currentHighlightColor,
   });
+
+  // Enhanced add to summary handler
+  const handleAddToSummary = async () => {
+    const selection = highlighterUtilsRef.current?.getCurrentSelection();
+    if (!selection || !selection.content.text) return;
+
+    try {
+      await addMainPoint(selection.content.text);
+      // Clear ghost highlight after adding
+      highlighterUtilsRef.current?.removeGhostHighlight();
+    } catch (error) {
+      console.error("Failed to add to summary:", error);
+    }
+  };
 
   // Map API highlights to react-pdf-highlighter format
   const highlights = useMemo<Array<MyHighlight>>(() => {
@@ -157,6 +180,8 @@ export const BetterViewer = ({
           onToggleNoter={onToggleNoter}
           onToggleTags={() => setIsTagSidebarOpen(!isTagSidebarOpen)}
           isTagsOpen={isTagSidebarOpen}
+          onToggleSummary={() => setIsSummarySidebarOpen(!isSummarySidebarOpen)}
+          isSummaryOpen={isSummarySidebarOpen}
         />
       ) : (
         <button
@@ -226,6 +251,14 @@ export const BetterViewer = ({
         onClose={() => setIsTagSidebarOpen(false)}
         highlights={highlights}
         onScrollToHighlight={handleScrollToHighlight}
+      />
+
+      {/* Summary Sidebar */}
+      <SummarySidebar
+        isOpen={isSummarySidebarOpen}
+        onClose={() => setIsSummarySidebarOpen(false)}
+        summary={summary ?? null}
+        onRemoveMainPoint={removeMainPoint}
       />
     </div>
   );

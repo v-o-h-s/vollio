@@ -19,6 +19,10 @@ export interface PDFViewerHeaderProps {
   onToggleTags?: () => void;
   /** Whether tags sidebar is open */
   isTagsOpen?: boolean;
+  /** Function to toggle summary sidebar */
+  onToggleSummary?: () => void;
+  /** Whether summary sidebar is open */
+  isSummaryOpen?: boolean;
   /** Width of the viewer container (for responsive resizing) */
   viewerWidth?: string;
 }

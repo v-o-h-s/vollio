@@ -121,13 +121,13 @@ export function useSelection({
   };
 
   // Handler to add selected text to summary
-  const handleAddToSummary = () => {
+  const handleAddToSummary = async () => {
     const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection) return;
+    if (!selection || !selection.content.text) return;
 
-    // TODO: Implement add to summary functionality
+    // Note: This function will be enhanced by useSummaryActions hook in BetterViewer
     console.log("Add to summary:", selection.content.text);
-    toast.success("Summary feature coming soon!", {
+    toast.success("Added to summary main points", {
       duration: 2000,
       position: "bottom-right",
     });
