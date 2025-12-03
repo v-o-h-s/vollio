@@ -1,9 +1,8 @@
 import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
 import { HighlightServerResponse } from "@/lib/types/highlight";
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { mapSupabaseHighlightResponseToHighlight } from "@/lib/types/highlight";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 import { DatabaseError, AuthError } from "@/lib/error-handling";
 import { Logger } from "@/lib/utils/logger";
 
@@ -13,12 +12,21 @@ export const createHighlightHandler = async (
 ) => {
   Logger.info("🎨 Creating new highlight");
 
-  const { userId } = await auth();
+  // Get authenticated Supabase client
+  const supabase = await createClient();
 
-  if (!userId) {
+  // Get authenticated user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
     Logger.warn("🔐 Unauthorized access attempt to create highlight");
     throw AuthError.authenticationRequired();
   }
+
+  const userId = user.id;
 
   Logger.info(`👤 Creating highlight for user: ${userId}`);
 
@@ -44,8 +52,6 @@ export const createHighlightHandler = async (
     tags,
     style,
   });
-
-  const supabase = await getAuthenticatedSupabaseClient();
 
   Logger.info("💾 Inserting highlight into database");
 

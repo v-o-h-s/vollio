@@ -4,10 +4,10 @@ import {
   mapSupabaseSummaryResponseToSummary,
 } from "@/lib/types/summary";
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 import { DatabaseError, AuthError } from "@/lib/error-handling";
 import { Logger } from "@/lib/utils/logger";
+import { create } from "lodash";
+import { createClient } from "@/lib/supabase/server";
 
 export const updateSummaryHandler = async (
   request: NextRequest,
@@ -16,7 +16,10 @@ export const updateSummaryHandler = async (
 ) => {
   Logger.info("✏️ Updating summary");
 
-  const { userId } = await auth();
+  const supabase = await createClient();
+  const { data: authData } = await supabase.auth.getClaims();
+  const userId = authData?.claims.sub; // same as user.id
+
 
   if (!userId) {
     Logger.warn("🔐 Unauthorized access attempt to update summary");
@@ -31,7 +34,6 @@ export const updateSummaryHandler = async (
 
   const { mainPoints, attributes } = data;
 
-  const supabase = await getAuthenticatedSupabaseClient();
 
   // Build update object
   const updateData: any = {};

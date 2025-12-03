@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
+import { createClient } from "@/lib/supabase/server";
 import { DatabaseError, AuthError } from "@/lib/error-handling";
 import { Logger } from "@/lib/utils/logger";
 
@@ -12,20 +11,27 @@ export const deleteHighlightHandler = async (
 
   Logger.info("🎨 Deleting highlight", { highlightId: id });
 
-  const { userId } = await auth();
+  // Get authenticated Supabase client
+  const supabase = await createClient();
 
-  if (!userId) {
+  // Get authenticated user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
     Logger.warn("🔐 Unauthorized access attempt to delete highlight", {
       highlightId: id,
     });
     throw AuthError.authenticationRequired();
   }
 
+  const userId = user.id;
+
   Logger.info(`👤 Deleting highlight for user: ${userId}`, {
     highlightId: id,
   });
-
-  const supabase = await getAuthenticatedSupabaseClient();
 
   Logger.info("💾 Deleting highlight from database");
 

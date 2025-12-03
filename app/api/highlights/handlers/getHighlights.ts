@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
+import { createClient } from "@/lib/supabase/server";
 import {
   mapSupabaseHighlightResponseToHighlight,
   HighlightwithDetails,
@@ -11,12 +10,21 @@ import { Logger } from "@/lib/utils/logger";
 export const getHighlightsHandler = async (request: NextRequest) => {
   Logger.info("🎨 Fetching highlights");
 
-  const { userId } = await auth();
+  // Get authenticated Supabase client
+  const supabase = await createClient();
 
-  if (!userId) {
+  // Get authenticated user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
     Logger.warn("🔐 Unauthorized access attempt to fetch highlights");
     throw AuthError.authenticationRequired();
   }
+
+  const userId = user.id;
 
   const searchParams = request.nextUrl.searchParams;
   const pdfId = searchParams.get("pdfId");
@@ -24,8 +32,6 @@ export const getHighlightsHandler = async (request: NextRequest) => {
   Logger.info(`👤 Fetching highlights for user: ${userId}`, {
     pdfId: pdfId || "all",
   });
-
-  const supabase = await getAuthenticatedSupabaseClient();
 
   Logger.info("💾 Querying highlights from database");
 

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 import { DatabaseError, AuthError } from "@/lib/error-handling";
 import { Logger } from "@/lib/utils/logger";
+import { createClient } from "@/lib/supabase/server";
 
 export const deleteSummaryHandler = async (
   request: NextRequest,
@@ -10,20 +9,18 @@ export const deleteSummaryHandler = async (
 ) => {
   Logger.info("🗑️ Deleting summary");
 
-  const { userId } = await auth();
 
-  if (!userId) {
-    Logger.warn("🔐 Unauthorized access attempt to delete summary");
-    throw AuthError.authenticationRequired();
-  }
 
   const { id: summaryId } = await params;
 
   Logger.info(
-    `👤 Deleting summary for user: ${userId}, summaryId: ${summaryId}`
+    `👤 Deleting summary for user", summaryId: ${summaryId}`
   );
 
-  const supabase = await getAuthenticatedSupabaseClient();
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub; // same as user.id
+
 
   const { error } = await supabase
     .from("summaries")

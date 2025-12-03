@@ -1,16 +1,12 @@
 // TODO pls stop using any
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
-import {
-  generateSignedUrl,
-  getTokenForTesting,
-} from "@/lib/utils/supabase-helpers";
+import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
 import type { SupabasePDFListResponse } from "@/lib/types/pdf";
 
 import { AuthError, DatabaseError } from "@/lib/error-handling";
 import { withErrorHandling } from "@/lib/wrappers/withErrorHandling";
 import { Logger } from "@/lib/utils/logger";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Fetches all user's PDFs with sorting and enhanced error handling
@@ -146,29 +142,15 @@ async function handleGET(request: NextRequest): Promise<NextResponse> {
   const startTime = performance.now();
   Logger.info("GET /api/pdfs request received");
 
-  // Get auth session with token
-  const { userId, getToken, sessionId } = await auth();
-
-  //testing
-  //const supabaseToken = await getTokenForTesting(getToken,sessionId);
-  //Logger.debug("Supabase token obtained for testing", { supabaseToken });
-
-  if (!userId) {
-    Logger.warn("GET /api/pdfs: Authentication failed - no userId");
-    throw AuthError.authenticationRequired();
-  }
-
-  Logger.debug(`Authenticated user: ${userId}`);
-
   // Get authenticated Supabase client with proper RLS
   Logger.debug("Initializing authenticated Supabase client");
-  const supabaseClient = await getAuthenticatedSupabaseClient();
+  const supabaseClient = await createClient();
 
   // Fetch user's PDFs with retry logic
   Logger.debug("Starting PDF fetch operation");
   const result = await fetchUserPDFs(supabaseClient);
   if (!result) {
-    Logger.info(`No PDFs found for user ${userId}`);
+    Logger.info(`No PDFs found for user`);
     return NextResponse.json({ success: true, data: null }, { status: 200 });
   }
 
@@ -183,7 +165,7 @@ async function handleGET(request: NextRequest): Promise<NextResponse> {
 
   // Log successful request
   Logger.info(
-    `✅ PDF list fetched successfully for user ${userId}: ${pdfsWithUrls.length} PDFs`,
+    `✅ PDF list fetched successfully for user: ${pdfsWithUrls.length} PDFs`,
     { totalCount, duration: totalDuration }
   );
 

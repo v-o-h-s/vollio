@@ -7,9 +7,7 @@ export * from "./api";
 export * from "./auth";
 export * from "./dashboard";
 export * from "./database";
-export * from "./document-processing";
 export * from "./editor";
-export * from "../error-handling/errors";
 export * from "./pdf";
 export * from "./theme";
 

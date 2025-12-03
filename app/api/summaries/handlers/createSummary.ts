@@ -4,10 +4,10 @@ import {
   mapSupabaseSummaryResponseToSummary,
 } from "@/lib/types/summary";
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 import { DatabaseError, AuthError } from "@/lib/error-handling";
 import { Logger } from "@/lib/utils/logger";
+import { create } from "lodash";
+import { createClient } from "@/lib/supabase/server";
 
 export const createSummaryHandler = async (
   request: NextRequest,
@@ -15,14 +15,7 @@ export const createSummaryHandler = async (
 ) => {
   Logger.info("📝 Creating or updating summary");
 
-  const { userId } = await auth();
 
-  if (!userId) {
-    Logger.warn("🔐 Unauthorized access attempt to create summary");
-    throw AuthError.authenticationRequired();
-  }
-
-  Logger.info(`👤 Creating summary for user: ${userId}`);
 
   const { pdfId, mainPoints, attributes } = data;
 
@@ -31,7 +24,7 @@ export const createSummaryHandler = async (
     mainPointsCount: mainPoints?.length || 0,
   });
 
-  const supabase = await getAuthenticatedSupabaseClient();
+  const supabase = await createClient();
 
   Logger.info("💾 Upserting summary into database");
 
@@ -40,7 +33,6 @@ export const createSummaryHandler = async (
     .from("summaries")
     .upsert(
       {
-        user_id: userId,
         pdf_id: pdfId,
         main_points: mainPoints || [],
         attributes: attributes || null,
@@ -53,7 +45,7 @@ export const createSummaryHandler = async (
     .single();
 
   if (error) {
-    Logger.error(`❌ Database error creating summary for user ${userId}`, {
+    Logger.error(`❌ Database error creating summary`, {
       error,
       pdfId,
     });
@@ -63,7 +55,6 @@ export const createSummaryHandler = async (
   Logger.success(`📝 Summary created/updated successfully`, {
     summaryId: summaryData.id,
     pdfId: summaryData.pdf_id,
-    userId,
   });
 
   const serverResponse: SummaryServerResponse = {

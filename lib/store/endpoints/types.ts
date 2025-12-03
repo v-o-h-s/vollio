@@ -11,7 +11,8 @@ export type ApiTag =
   | "Highlight"
   | "PDF"
   | "Note"
-  | "Folder";
+  | "Folder"
+  | "Summary";
 
 export type ApiBuilder = EndpointBuilder<
   BaseQueryFn<

@@ -12,6 +12,7 @@ import { folderEndpoints } from "./endpoints/folderEndpoints";
 import { highlightEndpoints } from "./endpoints/highlightEndpoints";
 import { notesEndpoints } from "./endpoints/notesEndpoints";
 import { pdfEndpoints } from "./endpoints/pdfEndpoints";
+import { summaryEndpoints } from "./endpoints/summaryEndpoints";
 
 // Simple base query configuration
 const baseQuery = fetchBaseQuery({
@@ -30,13 +31,14 @@ const baseQuery = fetchBaseQuery({
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Annotation", "Highlight", "PDF", "Note", "Folder"],
+  tagTypes: ["Annotation", "Highlight", "PDF", "Note", "Folder", "Summary"],
   endpoints: (builder) => ({
     ...pdfEndpoints(builder),
     ...notesEndpoints(builder),
     ...annotationEndpoints(builder),
     ...highlightEndpoints(builder),
     ...folderEndpoints(builder),
+    ...summaryEndpoints(builder),
   }),
 });
 
@@ -64,6 +66,10 @@ export const {
   useUpdateFolderMutation,
   useDeleteFolderMutation,
   useMovePDFMutation,
+  useGetSummaryByPdfIdQuery,
+  useCreateOrUpdateSummaryMutation,
+  useUpdateSummaryMutation,
+  useDeleteSummaryMutation,
 } = apiSlice;
 
 // Export the reducer and middleware
