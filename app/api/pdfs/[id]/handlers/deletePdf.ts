@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import { Logger } from "@/lib/utils/logger";
-import {
-  DatabaseError,
-  AuthError,
-} from "@/lib/utils/error-handling";
+import { DatabaseError } from "@/lib/error-handling";
+import { createClient } from "@/lib/supabase/server";
 import {
   fetchPDFById,
   deleteFromStorage,
@@ -16,39 +12,29 @@ export async function handleDelete(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const { userId } = await auth();
-
-  if (!userId) {
-    Logger.error("User not authenticated", { userId });
-    throw AuthError.authenticationRequired("User not authenticated");
-  }
+  const supabase = await createClient();
 
   const { id } = await params;
-  const supabaseClient = await getAuthenticatedSupabaseClient();
-  const pdfData = await fetchPDFById(supabaseClient, id);
+  const pdfData = await fetchPDFById(supabase, id);
 
   if (!pdfData) {
     throw DatabaseError.notFound("PDF not found or access denied", {
-      userId,
       pdfId: id,
     });
   }
 
-  const deletedPDF = await deletePDFFromDatabase(supabaseClient, id);
+  const deletedPDF = await deletePDFFromDatabase(supabase, id);
 
   if (!deletedPDF) {
     throw DatabaseError.notFound("PDF not found or access denied", {
-      userId,
       pdfId: id,
     });
   }
-  Logger.info("PDF deleted from database", { userId, pdfId: id });
+  Logger.info("PDF deleted from database", { pdfId: id });
 
-  await deleteFromStorage(supabaseClient, pdfData.storage_path);
+  await deleteFromStorage(supabase, pdfData.storage_path);
 
-  Logger.info("PDF deleted from storage", { userId, pdfId: id });
+  Logger.info("PDF deleted from storage", { pdfId: id });
 
   return NextResponse.json({ success: true }, { status: 200 });
 }
-
-

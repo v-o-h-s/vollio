@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
+import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 
 interface FlashcardItem {
   id: string;
@@ -24,10 +24,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { documentId, settings }: { documentId: string; settings: AIGenerationSettings } = await request.json();
+    const {
+      documentId,
+      settings,
+    }: { documentId: string; settings: AIGenerationSettings } =
+      await request.json();
 
     if (!documentId) {
-      return NextResponse.json({ error: "Document ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Document ID is required" },
+        { status: 400 }
+      );
     }
 
     const supabaseClient = getAuthenticatedSupabaseClient(userId);
@@ -40,16 +47,22 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (docError || !document) {
-      return NextResponse.json({ error: "Document not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Document not found" },
+        { status: 404 }
+      );
     }
 
     // Extract text content from chunks
-    const textContent = document.document_chunks
-      ?.map((chunk: any) => chunk.content)
-      .join(" ") || "";
+    const textContent =
+      document.document_chunks?.map((chunk: any) => chunk.content).join(" ") ||
+      "";
 
     if (!textContent.trim()) {
-      return NextResponse.json({ error: "No content found in document" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No content found in document" },
+        { status: 400 }
+      );
     }
 
     // Generate flashcards based on content
@@ -75,18 +88,19 @@ function generateFlashcardsFromContent(
 ): FlashcardItem[] {
   // This is a simplified implementation
   // In a real app, you would use AI/ML services like OpenAI, Anthropic, etc.
-  
-  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 20);
+
+  const sentences = content.split(/[.!?]+/).filter((s) => s.trim().length > 20);
   const flashcards: FlashcardItem[] = [];
-  
-  const cardTypes = settings.cardStyle === "Mixed" 
-    ? ["Definition", "Question-Answer", "Fill-in-blank"]
-    : [settings.cardStyle];
+
+  const cardTypes =
+    settings.cardStyle === "Mixed"
+      ? ["Definition", "Question-Answer", "Fill-in-blank"]
+      : [settings.cardStyle];
 
   for (let i = 0; i < Math.min(settings.numberOfCards, sentences.length); i++) {
     const sentence = sentences[i].trim();
     const cardType = cardTypes[i % cardTypes.length];
-    
+
     let front = "";
     let back = "";
     let hint = "";
@@ -95,14 +109,14 @@ function generateFlashcardsFromContent(
       case "Definition":
         // Extract key terms for definition cards
         const words = sentence.split(" ");
-        const keyWord = words.find(w => w.length > 6) || words[0];
+        const keyWord = words.find((w) => w.length > 6) || words[0];
         front = `What is ${keyWord}?`;
         back = sentence;
         if (settings.includeHints) {
           hint = `Think about ${keyWord.toLowerCase()}`;
         }
         break;
-        
+
       case "Question-Answer":
         front = `Explain: ${sentence.substring(0, 50)}...`;
         back = sentence;
@@ -110,9 +124,9 @@ function generateFlashcardsFromContent(
           hint = "Consider the main concept being discussed";
         }
         break;
-        
+
       case "Fill-in-blank":
-        const importantWords = sentence.split(" ").filter(w => w.length > 5);
+        const importantWords = sentence.split(" ").filter((w) => w.length > 5);
         if (importantWords.length > 0) {
           const wordToBlank = importantWords[0];
           front = sentence.replace(wordToBlank, "______");

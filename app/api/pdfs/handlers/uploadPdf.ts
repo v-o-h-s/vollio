@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { Logger } from "@/lib/utils/logger";
-import {
-  getAuthenticatedSupabaseClient,
-  STORAGE_CONFIG,
-} from "@/lib/supabaseClient";
+import { STORAGE_CONFIG } from "@/supabase/supabase";
 import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types/pdf";
 import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
-import { StorageError } from "@/lib/utils/error-handling/StorageError";
-import { DatabaseError } from "@/lib/utils/error-handling/DatabaseError";
-import { AuthError } from "@/lib/utils/error-handling/AuthError";
-import { FileValidationError } from "@/lib/utils/error-handling/files/FileValidationError";
+import { StorageError } from "@/lib/error-handling/StorageError";
+import { DatabaseError } from "@/lib/error-handling/DatabaseError";
+import { AuthError } from "@/lib/error-handling/AuthError";
+import { FileValidationError } from "@/lib/error-handling/files/FileValidationError";
 import { randomUUID } from "crypto";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Generate a secure storage path for PDF files
@@ -27,7 +24,7 @@ function generateSecureStoragePath(userId: string, filename: string): string {
  */
 function validatePdfFile(file: File | null): void {
   if (!file) {
-    throw FileValidationError.fileRequired();
+    throw FileValidationError.general("File is required");
   }
 
   // Validate file type
@@ -41,13 +38,12 @@ function validatePdfFile(file: File | null): void {
 
   // Validate file size (50MB limit)
   const maxSizeBytes = 50 * 1024 * 1024; // 50MB
+  const maxSizeMB = 50;
   if (file.size > maxSizeBytes) {
-    throw FileValidationError.fileTooLarge(
-      `File size ${(file.size / 1024 / 1024).toFixed(
-        2
-      )}MB exceeds the maximum allowed size of 50MB.`,
-      { fileName: file.name, fileSize: file.size, maxSize: maxSizeBytes }
-    );
+    throw FileValidationError.fileTooLarge(maxSizeMB, {
+      fileName: file.name,
+      fileSize: file.size,
+    });
   }
 }
 
@@ -158,9 +154,8 @@ async function storePDFMetadata(
     }
 
     if (!data?.id) {
-      throw DatabaseError.insertFailed(
+      throw DatabaseError.general(
         "PDF metadata stored but no ID returned",
-        { fileName: file.name, fileSize: file.size, userId }
       );
     }
 
@@ -175,9 +170,8 @@ async function storePDFMetadata(
     // Otherwise, wrap it
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    throw DatabaseError.insertFailed(
-      `Failed to store PDF metadata: ${errorMessage}`,
-      { fileName: file.name, fileSize: file.size, userId, originalError: error }
+    throw DatabaseError.general(
+      `Failed to store PDF metadata: ${errorMessage}`
     );
   }
 }
@@ -212,12 +206,21 @@ async function recordUploadActivity(
 export const uploadPdfHandler = async (request: NextRequest) => {
   Logger.info("📤 Uploading PDF");
 
-  const { userId } = await auth();
+  // Get authenticated Supabase client
+  const supabase = await createClient();
 
-  if (!userId) {
+  // Get authenticated user
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
     Logger.warn("🔐 Unauthorized access attempt to upload PDF");
     throw AuthError.authenticationRequired();
   }
+
+  const userId = user.id;
 
   Logger.info(`👤 Uploading PDF for user: ${userId}`);
 
@@ -233,8 +236,8 @@ export const uploadPdfHandler = async (request: NextRequest) => {
     // Validate file
     validatePdfFile(file);
 
-    // Get authenticated Supabase client
-    supabaseClient = await getAuthenticatedSupabaseClient();
+    // Use the authenticated Supabase client
+    supabaseClient = supabase;
 
     // Validate folder exists and belongs to user if folderId is provided
     if (folderId) {

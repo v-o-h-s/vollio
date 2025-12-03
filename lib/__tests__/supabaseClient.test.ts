@@ -12,16 +12,7 @@ import {
   generateStoragePath,
   handleSupabaseError,
   withRetry,
-} from "../supabaseClient";
-
-// Mock Clerk
-vi.mock("@clerk/nextjs/server", () => ({
-  auth: vi.fn(),
-}));
-
-vi.mock("@clerk/nextjs", () => ({
-  useAuth: vi.fn(),
-}));
+} from "../../supabase/supabase";
 
 describe("Supabase Client Configuration", () => {
   beforeEach(() => {

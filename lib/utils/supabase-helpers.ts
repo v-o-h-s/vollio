@@ -13,11 +13,11 @@ import type { PDFRow, UserActivityRow, FolderRow } from "../types/database";
 import {
   getAuthenticatedSupabaseClient,
   STORAGE_CONFIG,
-} from "../supabaseClient";
+} from "../../supabase/supabase";
 import type { Database } from "../types/database";
-import { AppError } from "./error-handling/errors";
+import { AppError } from "../error-handling/errors";
 import { Logger } from "./logger";
-import { DatabaseError } from "./error-handling";
+import { DatabaseError } from "../error-handling";
 
 /**
  * Type guard for database row types
@@ -98,7 +98,8 @@ export const isOAuthTokenRow = (
     typeof row.user_id === "string" &&
     typeof row.provider === "string" &&
     typeof row.encrypted_access_token === "string" &&
-    (row.encrypted_refresh_token === null || typeof row.encrypted_refresh_token === "string") &&
+    (row.encrypted_refresh_token === null ||
+      typeof row.encrypted_refresh_token === "string") &&
     typeof row.token_type === "string" &&
     (row.expires_at === null || typeof row.expires_at === "string") &&
     (row.scope === null || typeof row.scope === "string") &&
@@ -120,9 +121,6 @@ export const RETRY_CONFIG = {
     "DATABASE_ERROR",
   ] as string[],
 };
-
-
-
 
 /**
  * Helper to format database timestamps to Date objects
@@ -154,7 +152,9 @@ export function mapPDFRowToDocument(row: PDFRow): PDFDocument {
     uploadedAt: row.uploaded_at
       ? new Date(row.uploaded_at).toISOString()
       : new Date().toISOString(),
-    updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : new Date().toISOString(),
+    updatedAt: row.updated_at
+      ? new Date(row.updated_at).toISOString()
+      : new Date().toISOString(),
   };
 }
 
@@ -285,14 +285,16 @@ export async function generateSignedUrl(
   return data.signedUrl;
 }
 
-
-export const getTokenForTesting = async function getTokenForTesting(getToken: any,sessionId:any) {
+export const getTokenForTesting = async function getTokenForTesting(
+  getToken: any,
+  sessionId: any
+) {
   let supabaseToken: string | null = null;
   try {
-    supabaseToken = await getToken({ template: 'supabase', sessionId });
+    supabaseToken = await getToken({ template: "supabase", sessionId });
     Logger.debug("Successfully retrieved Supabase token from Clerk");
   } catch (error) {
     Logger.warn("Could not retrieve Supabase token from Clerk", { error });
   }
   return supabaseToken;
-}
+};

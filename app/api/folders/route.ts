@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
-import {
-  AuthError,
-  DatabaseError,
-  GeneralError,
-} from "@/lib/utils/error-handling";
+import { AuthError, DatabaseError, GeneralError } from "@/lib/error-handling";
 import { Logger } from "@/lib/utils/logger";
 import { withValidation } from "@/lib/wrappers/withValidation";
 import { createFolderSchema } from "@/lib/dto/folder";
 import { withErrorHandling } from "@/lib/wrappers/withErrorHandling";
+import { createClient } from "@/lib/supabase/server";
 interface Folder {
   id: string;
   user_id: string;
@@ -49,7 +44,11 @@ async function handleGET(request: NextRequest) {
     endpoint: "/api/folders",
   });
 
-  const { userId } = await auth();
+
+
+  const supabase = await createClient()
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub; // same as user.id
   if (!userId) {
     Logger.warn("🔐 Unauthorized access attempt to fetch folders");
     throw AuthError.authenticationRequired(
@@ -59,9 +58,6 @@ async function handleGET(request: NextRequest) {
   }
 
   Logger.info(`👤 Authenticated user: ${userId}`);
-
-  const supabase = await getAuthenticatedSupabaseClient();
-
   const {
     data: folders,
     error,
@@ -123,7 +119,19 @@ async function handlePOST(request: NextRequest, body: CreateFolderRequest) {
     endpoint: "/api/folders",
   });
 
-  const { userId } = await auth();
+ 
+
+  Logger.info(`👤 Authenticated user`);
+
+  Logger.info(`📋 Request body received (already validated by Zod)`, {
+    name: body.name,
+    parent_id: body.parent_id,
+  });
+
+  const folderName = body.name.trim();
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub; // same as user.id
   if (!userId) {
     Logger.warn("🔐 Unauthorized access attempt to create folder");
     throw AuthError.authenticationRequired(
@@ -133,15 +141,6 @@ async function handlePOST(request: NextRequest, body: CreateFolderRequest) {
   }
 
   Logger.info(`👤 Authenticated user: ${userId}`);
-
-  Logger.info(`📋 Request body received (already validated by Zod)`, {
-    name: body.name,
-    parent_id: body.parent_id,
-  });
-
-  const folderName = body.name.trim();
-  const supabase = await getAuthenticatedSupabaseClient();
-
   // If parent_id provided, validate it exists and belongs to user
   if (body.parent_id) {
     Logger.info(`🔍 Validating parent folder`, { parent_id: body.parent_id });

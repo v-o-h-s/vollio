@@ -1,49 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/lib/supabaseClient";
 import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
 import { Logger } from "@/lib/utils/logger";
-import {
-  DatabaseError,
-  AuthError,
-} from "@/lib/utils/error-handling";
-import { ValidationError } from "@/lib/utils/error-handling/ValidationError";
+import { DatabaseError } from "@/lib/error-handling";
+import { ValidationError } from "@/lib/error-handling/ValidationError";
 import { SupabasePDFAccessResponse } from "@/lib/types/pdf";
 import { fetchPDFById } from "./common";
+import { createClient } from "@/lib/supabase/server";
 
 export async function handleGet(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<SupabasePDFAccessResponse>> {
-  const { userId } = await auth();
-
-  if (!userId) {
-    Logger.error("User not authenticated", { userId });
-    throw AuthError.authenticationRequired("User not authenticated");
-  }
-
+  const supabase = await createClient();
   const { id } = await params;
   if (!id) {
     throw ValidationError.General("PDF ID is required");
   }
 
-  const supabaseClient = await getAuthenticatedSupabaseClient();
-  const pdfData = await fetchPDFById(supabaseClient, id);
+  const pdfData = await fetchPDFById(supabase, id);
 
   if (!pdfData) {
-    Logger.error("PDF not found or access denied", { userId, pdfId: id });
+    Logger.error("PDF not found or access denied", { pdfId: id });
     throw DatabaseError.notFound("PDF not found or access denied", {
-      userId,
       pdfId: id,
     });
   }
 
-  const signedUrl = await generateSignedUrl(
-    supabaseClient,
-    pdfData.storage_path
-  );
+  const signedUrl = await generateSignedUrl(supabase, pdfData.storage_path);
 
-  Logger.info("PDF accessed successfully", { userId, pdfId: id });
+  Logger.info("PDF accessed successfully", { pdfId: id });
 
   const response: SupabasePDFAccessResponse = {
     success: true,
@@ -59,5 +44,3 @@ export async function handleGet(
 
   return NextResponse.json(response, { status: 200 });
 }
-
-

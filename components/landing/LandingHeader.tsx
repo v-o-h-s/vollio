@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
@@ -33,7 +33,9 @@ export function LandingHeader() {
                 height={32}
                 className="h-8 w-8"
               />
-              <span className="text-xl font-heading font-elegant-bold bg-gradient-to-r from-blue-600 to-violet-600 dark:from-blue-400 dark:to-violet-400 bg-clip-text text-transparent tracking-elegant">Noto</span>
+              <span className="text-xl font-heading font-elegant-bold bg-gradient-to-r from-blue-600 to-violet-600 dark:from-blue-400 dark:to-violet-400 bg-clip-text text-transparent tracking-elegant">
+                Noto
+              </span>
             </Link>
           </div>
 
@@ -56,20 +58,16 @@ export function LandingHeader() {
             <ThemeToggle variant="button" size="sm" />
 
             {/* Authentication */}
-            <SignedOut>
-              <SignInButton mode="modal">
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 dark:from-blue-500 dark:to-violet-500 dark:hover:from-blue-600 dark:hover:to-violet-600 border-0 shadow-lg hover:shadow-xl transition-all duration-200 font-body font-elegant-semibold tracking-luxury"
-                >
-                  Sign In
-                </Button>
-              </SignInButton>
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
+            {/* Authentication */}
+            <Link href="/sign-in">
+              <Button
+                variant="default"
+                size="sm"
+                className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 dark:from-blue-500 dark:to-violet-500 dark:hover:from-blue-600 dark:hover:to-violet-600 border-0 shadow-lg hover:shadow-xl transition-all duration-200 font-body font-elegant-semibold tracking-luxury"
+              >
+                Sign In
+              </Button>
+            </Link>
 
             {/* Mobile Menu Button */}
             <Button

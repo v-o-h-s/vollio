@@ -12,9 +12,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   FileText,
@@ -34,8 +34,8 @@ import {
   Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SignOutButton, useUser } from "@clerk/nextjs";
 import { useTheme } from "@/hooks/use-theme";
+import { createClient } from "@/lib/supabase/client";
 
 interface SidebarProps {
   className?: string;
@@ -85,13 +85,30 @@ const navigationItems = [
 ];
 
 export function DashboardSidebar({ className }: SidebarProps) {
-  const user = useUser();
+  const supabase = createClient();
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
   const { theme, setTheme } = useTheme();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
   const settingsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
 
   const toggleCollapse = () => setIsCollapsed(!isCollapsed);
   const toggleMobile = () => setIsMobileOpen(!isMobileOpen);
@@ -257,9 +274,9 @@ export function DashboardSidebar({ className }: SidebarProps) {
                     title="User menu"
                     className="bg-sidebar-accent rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 w-9 h-9"
                   >
-                    {user.user && user && user.user.imageUrl ? (
+                    {user?.user_metadata?.avatar_url ? (
                       <Image
-                        src={user.user?.imageUrl}
+                        src={user.user_metadata.avatar_url}
                         width={36}
                         height={36}
                         alt="image"
@@ -278,7 +295,9 @@ export function DashboardSidebar({ className }: SidebarProps) {
                   align="start"
                   side="right"
                 >
-                  <DropdownMenuLabel>{user.user?.fullName}</DropdownMenuLabel>
+                  <DropdownMenuLabel>
+                    {user?.user_metadata?.full_name || "User"}
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
                     <DropdownMenuItem>
@@ -299,24 +318,22 @@ export function DashboardSidebar({ className }: SidebarProps) {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <SignOutButton redirectUrl="/">
-                      <div className="flex flex-row gap-2 items-center text-red-500">
-                        <LogOut className="mr-2 h-4 w-4 text-red-500" />
-                        Log out
-                      </div>
-                    </SignOutButton>
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <div className="flex flex-row gap-2 items-center text-red-500">
+                      <LogOut className="mr-2 h-4 w-4 text-red-500" />
+                      Log out
+                    </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <button
-                title="John Doe"
+                title={user?.user_metadata?.full_name || "User"}
                 className="bg-sidebar-accent rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 w-9 h-9"
               >
-                {user.user && user && user.user.imageUrl ? (
+                {user?.user_metadata?.avatar_url ? (
                   <Image
-                    src={user.user?.imageUrl}
+                    src={user.user_metadata.avatar_url}
                     width={36}
                     height={36}
                     alt="image"
@@ -334,13 +351,13 @@ export function DashboardSidebar({ className }: SidebarProps) {
                 {/* User Info */}
                 <div className="flex-1 min-w-0 max-w-[calc(16rem-6rem)]">
                   <div className="font-semibold text-sm text-sidebar-foreground truncate">
-                    {user.user?.fullName}
+                    {user?.user_metadata?.full_name || "User"}
                   </div>
                   <div
                     className="text-xs text-sidebar-foreground/60 truncate"
-                    title={user.user?.emailAddresses[0].emailAddress}
+                    title={user?.email}
                   >
-                    {user.user?.emailAddresses[0].emailAddress}
+                    {user?.email}
                   </div>
                 </div>
 
@@ -417,13 +434,11 @@ export function DashboardSidebar({ className }: SidebarProps) {
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <SignOutButton redirectUrl="/">
-                        <div className="flex flex-row gap-2 items-center text-red-500">
-                          <LogOut className="mr-2 h-4 w-4 text-red-500" />
-                          Log out
-                        </div>
-                      </SignOutButton>
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <div className="flex flex-row gap-2 items-center text-red-500">
+                        <LogOut className="mr-2 h-4 w-4 text-red-500" />
+                        Log out
+                      </div>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
