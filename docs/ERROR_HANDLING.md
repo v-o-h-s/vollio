@@ -13,6 +13,7 @@ This project uses a comprehensive, categorized error handling system with 8 erro
 The system includes 8 main error classes with static factory methods:
 
 ### 1. **AuthError** - Authentication & Authorization
+
 ```typescript
 throw AuthError.authenticationRequired("User not logged in", context);
 throw AuthError.authorizationDenied("No permission", context);
@@ -20,6 +21,7 @@ throw AuthError.tokenExpired("Token has expired", context);
 ```
 
 ### 2. **AIError** - AI Service Operations
+
 ```typescript
 throw AIError.serviceError("DeepSeek API failed", context);
 throw AIError.quotaExceeded("API quota exceeded", context);
@@ -27,6 +29,7 @@ throw AIError.modelUnavailable("Model not available", context);
 ```
 
 ### 3. **ValidationError** - Input Validation
+
 ```typescript
 throw ValidationError.general("Validation error", context);
 throw ValidationError.fileTooLarge(100, context); // 100MB limit
@@ -39,6 +42,7 @@ throw ValidationError.duplicateValue("name", "Already exists", context);
 ```
 
 ### 4. **StorageError** - Cloud Storage Operations
+
 ```typescript
 throw StorageError.general("Upload failed", context);
 throw StorageError.quotaExceeded("Storage quota exceeded", context);
@@ -47,6 +51,7 @@ throw StorageError.accessDenied("Access denied", context);
 ```
 
 ### 5. **FileError** - File Operations
+
 ```typescript
 throw FileError.general("File operation failed", context);
 throw FileError.notFound("File not found", context);
@@ -55,6 +60,7 @@ throw FileError.loadingError("Failed to load file", context);
 ```
 
 ### 6. **DatabaseError** - Database Operations
+
 ```typescript
 throw DatabaseError.general("Query failed", context);
 throw DatabaseError.connectionError("Connection failed", context);
@@ -73,6 +79,7 @@ throw DatabaseError.mapSupabaseErrorCodeToDatabaseError(
 ```
 
 ### 7. **NetworkError** - Network Operations
+
 ```typescript
 throw NetworkError.general("Request failed", context);
 throw NetworkError.timeout("Request timeout", context);
@@ -80,6 +87,7 @@ throw NetworkError.connectionFailed("Connection failed", context);
 ```
 
 ### 8. **GeneralError** - General/Unknown Errors
+
 ```typescript
 throw GeneralError.unknown("Unexpected error", context);
 throw GeneralError.internalServer("Internal server error", context);
@@ -121,6 +129,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 ```
 
 **Response Format:**
+
 ```json
 {
   "success": false,
@@ -153,6 +162,7 @@ export const POST = withValidation(createFolderSchema, handlePOST);
 ```
 
 **Validation Error Response:**
+
 ```json
 {
   "success": false,
@@ -178,11 +188,14 @@ const schema = z.object({
   name: z.string().min(1).max(255),
 });
 
-export const POST = withValidatedHandler(schema, async (request: NextRequest) => {
-  // Request body already validated
-  const body = await request.json();
-  // Your logic here
-});
+export const POST = withValidatedHandler(
+  schema,
+  async (request: NextRequest) => {
+    // Request body already validated
+    const body = await request.json();
+    // Your logic here
+  }
+);
 ```
 
 ## Logging
@@ -199,6 +212,7 @@ Logger.success("✅ Operation completed", { count: 5 });
 ```
 
 **Log Levels:**
+
 - `info()` - General operations
 - `warn()` - Warnings and suspicious activity
 - `error()` - Error states
@@ -212,7 +226,6 @@ Logger.success("✅ Operation completed", { count: 5 });
 import { withValidatedHandler } from "@/lib/wrappers/withErrorHandling";
 import { AuthError, DatabaseError } from "@/lib/utils/error-handling";
 import { Logger } from "@/lib/utils/logger";
-import { auth } from "@clerk/nextjs/server";
 
 // Schema validation
 const createSchema = z.object({
@@ -221,15 +234,19 @@ const createSchema = z.object({
 
 async function handlePOST(request: NextRequest) {
   const context = { operation: "create_resource" };
-  
+
   Logger.info("📝 Creating resource", { endpoint: "/api/resource" });
 
   // Authentication
-  const { userId } = await auth();
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
     Logger.warn("🔐 Unauthorized access");
     throw AuthError.authenticationRequired("Auth required", context);
   }
+  const userId = user.id;
 
   // Parse validated body
   const body = await request.json();
@@ -260,10 +277,10 @@ Always pass context to errors for better debugging:
 
 ```typescript
 const context = {
-  operation: "fetch_user_folders",      // What operation failed
-  userId: userId,                       // Who it affected
-  resourceId: folderId,                 // What resource
-  additionalInfo: "custom data"         // Any other relevant info
+  operation: "fetch_user_folders", // What operation failed
+  userId: userId, // Who it affected
+  resourceId: folderId, // What resource
+  additionalInfo: "custom data", // Any other relevant info
 };
 
 throw DatabaseError.general("Query failed", context);
@@ -283,6 +300,7 @@ throw DatabaseError.general("Query failed", context);
 ## Migration Guide
 
 **Old Pattern (❌ Don't use):**
+
 ```typescript
 try {
   // logic
@@ -293,6 +311,7 @@ try {
 ```
 
 **New Pattern (✅ Use this):**
+
 ```typescript
 export const GET = withErrorHandler(async (request: NextRequest) => {
   Logger.info("Starting operation");
@@ -303,16 +322,17 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 
 ## Common Error Codes
 
-| Error Type | HTTP Status | Example |
-|-----------|-----------|---------|
-| AuthenticationRequired | 401 | User not logged in |
-| AuthorizationDenied | 403 | No permission |
-| ValidationError | 400 | Invalid input |
-| NotFound | 404 | Resource not found |
-| ConflictError | 409 | Duplicate value |
-| RateLimitExceeded | 429 | Too many requests |
-| InternalServerError | 500 | Database query failed |
-| ServiceUnavailable | 503 | External service down |
+| Error Type             | HTTP Status | Example               |
+| ---------------------- | ----------- | --------------------- |
+| AuthenticationRequired | 401         | User not logged in    |
+| AuthorizationDenied    | 403         | No permission         |
+| ValidationError        | 400         | Invalid input         |
+| NotFound               | 404         | Resource not found    |
+| ConflictError          | 409         | Duplicate value       |
+| RateLimitExceeded      | 429         | Too many requests     |
+| InternalServerError    | 500         | Database query failed |
+| ServiceUnavailable     | 503         | External service down |
+
 ````
   throw createServerError(
     ServerErrorType.DATABASE_ERROR,
@@ -452,6 +472,7 @@ const context = {
 
 ---
 
-**Last Updated**: January 2025  
-**Version**: 2.0.0  
+**Last Updated**: January 2025
+**Version**: 2.0.0
 **Status**: Production Ready ✅ - Complete error handling implementation across all systems
+````

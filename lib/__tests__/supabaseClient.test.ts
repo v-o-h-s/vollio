@@ -14,15 +14,6 @@ import {
   withRetry,
 } from "../../supabase/supabase";
 
-// Mock Clerk
-vi.mock("@clerk/nextjs/server", () => ({
-  auth: vi.fn(),
-}));
-
-vi.mock("@clerk/nextjs", () => ({
-  useAuth: vi.fn(),
-}));
-
 describe("Supabase Client Configuration", () => {
   beforeEach(() => {
     vi.clearAllMocks();

@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   // if "next" is in param, use it as the redirect URL
-  let next = searchParams.get("next") ?? "/";
+  let next = searchParams.get("next") ?? "/dashboard/pdfs";
 
   console.log("Auth callback params:", {
     code: code ? "***" : null,
@@ -17,8 +17,8 @@ export async function GET(request: Request) {
 
   if (!next.startsWith("/")) {
     // if "next" is not a relative URL, use the default
-    console.log("Invalid next param, resetting to /");
-    next = "/";
+    console.log("Invalid next param, resetting to /dashboard/pdfs");
+    next = "/dashboard/pdfs";
   }
 
   if (code) {
@@ -28,8 +28,9 @@ export async function GET(request: Request) {
     if (!error) {
       console.log("Session exchange successful");
       const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
-      const isLocalEnv = process.env.NODE_ENV === "development";
-
+      //todo update this later
+      //const isLocalEnv = process.env.NODE_ENV === "development";
+      const isLocalEnv = true;
       console.log("Environment check:", { isLocalEnv, forwardedHost });
 
       if (isLocalEnv) {

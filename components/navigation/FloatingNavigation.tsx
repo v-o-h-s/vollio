@@ -1,10 +1,9 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useUser, SignOutButton } from "@clerk/nextjs";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
   Home,
   FileText,
@@ -83,7 +82,10 @@ interface FloatingNavigationProps {
 }
 
 export function FloatingNavigation({ className }: FloatingNavigationProps) {
-  const { user, isLoaded } = useUser();
+  const supabase = createClient();
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   const { theme, setTheme } = useTheme();
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -91,10 +93,22 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Ensure component is mounted before rendering user-dependent content
   useEffect(() => {
     setIsMounted(true);
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+      setIsLoaded(true);
+    };
+    getUser();
   }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
 
   // Auto-hide on scroll
   useEffect(() => {
@@ -119,41 +133,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
 
   // Prevent hydration mismatch by not rendering until mounted
   if (!isMounted) {
-    return (
-      <div
-        className={cn(
-          "fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-out",
-          "translate-y-0 opacity-100",
-          className
-        )}
-      >
-        <div className="relative floating-nav-glass rounded-2xl shadow-2xl px-3 py-2">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10">
-              <div className="w-6 h-6 bg-muted rounded-lg animate-pulse" />
-              <span className="font-semibold text-sm text-foreground">
-                Noto
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              {navigationItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="p-2.5 rounded-xl bg-muted/50 animate-pulse"
-                >
-                  <div className="w-5 h-5 bg-muted-foreground/20 rounded" />
-                </div>
-              ))}
-            </div>
-            <div className="p-1 rounded-xl bg-muted/50">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <User className="w-4 h-4 text-primary-foreground" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -230,13 +210,13 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="relative p-1 rounded-xl bg-muted/50 hover:bg-muted transition-all duration-200 group">
-                  {!isMounted || !isLoaded ? (
+                  {!isLoaded ? (
                     <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                       <User className="w-4 h-4 text-primary-foreground" />
                     </div>
-                  ) : user?.imageUrl ? (
+                  ) : user?.user_metadata?.avatar_url ? (
                     <Image
-                      src={user.imageUrl}
+                      src={user.user_metadata.avatar_url}
                       width={32}
                       height={32}
                       alt="Profile"
@@ -257,14 +237,12 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                 <DropdownMenuLabel className="font-normal p-4 border-b border-border">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium text-foreground">
-                      {!isMounted || !isLoaded
+                      {!isLoaded
                         ? "Loading..."
-                        : user?.fullName || "User"}
+                        : user?.user_metadata?.full_name || "User"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {!isMounted || !isLoaded
-                        ? ""
-                        : user?.emailAddresses[0]?.emailAddress || ""}
+                      {!isLoaded ? "" : user?.email || ""}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -319,13 +297,11 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <div className="border-t border-border p-2">
-                  <DropdownMenuItem asChild>
-                    <SignOutButton redirectUrl="/">
-                      <div className="flex items-center text-red-400 hover:text-red-300 cursor-pointer rounded-lg hover:bg-red-500/10 focus:bg-red-500/10 transition-all duration-200 p-3 w-full">
-                        <LogOut className="mr-3 h-4 w-4" />
-                        <span>Log out</span>
-                      </div>
-                    </SignOutButton>
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <div className="flex items-center text-red-400 hover:text-red-300 cursor-pointer rounded-lg hover:bg-red-500/10 focus:bg-red-500/10 transition-all duration-200 p-3 w-full">
+                      <LogOut className="mr-3 h-4 w-4" />
+                      <span>Log out</span>
+                    </div>
                   </DropdownMenuItem>
                 </div>
               </DropdownMenuContent>
@@ -438,13 +414,13 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
             {/* User Section */}
             <div className="border-t border-border/50 pt-4">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
-                {!isMounted || !isLoaded ? (
+                {!isLoaded ? (
                   <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
                     <User className="w-5 h-5 text-primary-foreground" />
                   </div>
-                ) : user?.imageUrl ? (
+                ) : user?.user_metadata?.avatar_url ? (
                   <Image
-                    src={user.imageUrl}
+                    src={user.user_metadata.avatar_url}
                     width={40}
                     height={40}
                     alt="Profile"
@@ -457,14 +433,12 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm text-foreground truncate">
-                    {!isMounted || !isLoaded
+                    {!isLoaded
                       ? "Loading..."
-                      : user?.fullName || "User"}
+                      : user?.user_metadata?.full_name || "User"}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {!isMounted || !isLoaded
-                      ? ""
-                      : user?.emailAddresses[0]?.emailAddress || ""}
+                    {!isLoaded ? "" : user?.email || ""}
                   </p>
                 </div>
                 <DropdownMenu>
@@ -528,13 +502,11 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <div className="border-t border-border p-2">
-                      <DropdownMenuItem asChild>
-                        <SignOutButton redirectUrl="/">
-                          <div className="flex items-center text-red-400 hover:text-red-300 cursor-pointer rounded-lg hover:bg-red-500/10 focus:bg-red-500/10 transition-all duration-200 p-3 w-full">
-                            <LogOut className="mr-3 h-4 w-4" />
-                            <span>Log out</span>
-                          </div>
-                        </SignOutButton>
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        <div className="flex items-center text-red-400 hover:text-red-300 cursor-pointer rounded-lg hover:bg-red-500/10 focus:bg-red-500/10 transition-all duration-200 p-3 w-full">
+                          <LogOut className="mr-3 h-4 w-4" />
+                          <span>Log out</span>
+                        </div>
                       </DropdownMenuItem>
                     </div>
                   </DropdownMenuContent>

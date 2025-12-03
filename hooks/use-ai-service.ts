@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 // Types for the AI service hook
 interface ChatMessage {
@@ -28,31 +28,37 @@ interface AIResponse {
 
 interface UseAIServiceReturn {
   // Simple completion
-  completion: (message: string, options?: CompletionOptions) => Promise<AIResponse>;
+  completion: (
+    message: string,
+    options?: CompletionOptions
+  ) => Promise<AIResponse>;
   completionLoading: boolean;
   completionError: string | null;
-  
+
   // Streaming completion
   streamCompletion: (
-    message: string, 
+    message: string,
     options?: CompletionOptions,
     onChunk?: (chunk: string) => void
   ) => Promise<void>;
   streamingLoading: boolean;
   streamingError: string | null;
   streamingResponse: string;
-  
+
   // Chat functionality
-  sendChatMessage: (message: string, options?: CompletionOptions) => Promise<void>;
+  sendChatMessage: (
+    message: string,
+    options?: CompletionOptions
+  ) => Promise<void>;
   chatHistory: ChatMessage[];
   chatLoading: boolean;
   chatError: string | null;
   clearChat: () => void;
-  
+
   // Service info
   getServiceInfo: () => Promise<any>;
   serviceInfo: any;
-  
+
   // Utility functions
   clearErrors: () => void;
   isAuthenticated: boolean;
@@ -62,22 +68,33 @@ interface UseAIServiceReturn {
  * Custom hook for AI service integration with comprehensive error handling
  */
 export function useAIService(): UseAIServiceReturn {
-  const { isSignedIn, userId } = useAuth();
-  
+  const supabase = createClient();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    checkAuth();
+  }, []);
+
   // State management
   const [completionLoading, setCompletionLoading] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
-  
+
   const [streamingLoading, setStreamingLoading] = useState(false);
   const [streamingError, setStreamingError] = useState<string | null>(null);
   const [streamingResponse, setStreamingResponse] = useState("");
-  
+
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatLoading, setChatLoading] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
-  
+
   const [serviceInfo, setServiceInfo] = useState<any>(null);
-  
+
   // Refs for cleanup
   const abortControllerRef = useRef<AbortController | null>(null);
   const streamReaderRef = useRef<ReadableStreamDefaultReader | null>(null);
@@ -85,245 +102,258 @@ export function useAIService(): UseAIServiceReturn {
   /**
    * Simple completion function
    */
-  const completion = useCallback(async (
-    message: string, 
-    options: CompletionOptions = {}
-  ): Promise<AIResponse> => {
-    if (!message.trim()) {
-      throw new Error("Message cannot be empty");
-    }
-
-    setCompletionLoading(true);
-    setCompletionError(null);
-
-    // Cancel any ongoing requests
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    abortControllerRef.current = new AbortController();
-
-    try {
-      const response = await fetch("/api/deepseek", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: message.trim(),
-          systemPrompt: options.systemPrompt,
-          options: {
-            model: options.model,
-            maxTokens: options.maxTokens,
-            temperature: options.temperature,
-          },
-        }),
-        signal: abortControllerRef.current.signal,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+  const completion = useCallback(
+    async (
+      message: string,
+      options: CompletionOptions = {}
+    ): Promise<AIResponse> => {
+      if (!message.trim()) {
+        throw new Error("Message cannot be empty");
       }
 
-      const result = await response.json();
+      setCompletionLoading(true);
+      setCompletionError(null);
 
-      if (!result.success) {
-        throw new Error(result.error || "Completion failed");
+      // Cancel any ongoing requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
 
-      return result.data;
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        throw new Error("Request was cancelled");
+      abortControllerRef.current = new AbortController();
+
+      try {
+        const response = await fetch("/api/deepseek", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: message.trim(),
+            systemPrompt: options.systemPrompt,
+            options: {
+              model: options.model,
+              maxTokens: options.maxTokens,
+              temperature: options.temperature,
+            },
+          }),
+          signal: abortControllerRef.current.signal,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error || `HTTP error! status: ${response.status}`
+          );
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || "Completion failed");
+        }
+
+        return result.data;
+      } catch (error: any) {
+        if (error.name === "AbortError") {
+          throw new Error("Request was cancelled");
+        }
+
+        const errorMessage = error.message || "Failed to get completion";
+        setCompletionError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setCompletionLoading(false);
+        abortControllerRef.current = null;
       }
-      
-      const errorMessage = error.message || "Failed to get completion";
-      setCompletionError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setCompletionLoading(false);
-      abortControllerRef.current = null;
-    }
-  }, []);
+    },
+    []
+  );
 
   /**
    * Streaming completion function
    */
-  const streamCompletion = useCallback(async (
-    message: string,
-    options: CompletionOptions = {},
-    onChunk?: (chunk: string) => void
-  ): Promise<void> => {
-    if (!message.trim()) {
-      throw new Error("Message cannot be empty");
-    }
-
-    setStreamingLoading(true);
-    setStreamingError(null);
-    setStreamingResponse("");
-
-    // Cancel any ongoing requests
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    if (streamReaderRef.current) {
-      streamReaderRef.current.cancel();
-    }
-
-    abortControllerRef.current = new AbortController();
-
-    try {
-      const response = await fetch("/api/deepseek", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: message.trim(),
-          systemPrompt: options.systemPrompt,
-          stream: true,
-          options: {
-            model: options.model,
-            maxTokens: options.maxTokens,
-            temperature: options.temperature,
-          },
-        }),
-        signal: abortControllerRef.current.signal,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+  const streamCompletion = useCallback(
+    async (
+      message: string,
+      options: CompletionOptions = {},
+      onChunk?: (chunk: string) => void
+    ): Promise<void> => {
+      if (!message.trim()) {
+        throw new Error("Message cannot be empty");
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error("No response body reader available");
+      setStreamingLoading(true);
+      setStreamingError(null);
+      setStreamingResponse("");
+
+      // Cancel any ongoing requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (streamReaderRef.current) {
+        streamReaderRef.current.cancel();
       }
 
-      streamReaderRef.current = reader;
-      const decoder = new TextDecoder();
-      let fullResponse = "";
+      abortControllerRef.current = new AbortController();
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      try {
+        const response = await fetch("/api/deepseek", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: message.trim(),
+            systemPrompt: options.systemPrompt,
+            stream: true,
+            options: {
+              model: options.model,
+              maxTokens: options.maxTokens,
+              temperature: options.temperature,
+            },
+          }),
+          signal: abortControllerRef.current.signal,
+        });
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error || `HTTP error! status: ${response.status}`
+          );
+        }
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              
-              if (data.type === 'content' && data.chunk) {
-                fullResponse += data.chunk;
-                setStreamingResponse(fullResponse);
-                
-                // Call chunk callback if provided
-                if (onChunk) {
-                  onChunk(data.chunk);
+        const reader = response.body?.getReader();
+        if (!reader) {
+          throw new Error("No response body reader available");
+        }
+
+        streamReaderRef.current = reader;
+        const decoder = new TextDecoder();
+        let fullResponse = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                if (data.type === "content" && data.chunk) {
+                  fullResponse += data.chunk;
+                  setStreamingResponse(fullResponse);
+
+                  // Call chunk callback if provided
+                  if (onChunk) {
+                    onChunk(data.chunk);
+                  }
+                } else if (data.type === "error") {
+                  throw new Error(data.error);
+                } else if (data.type === "done") {
+                  break;
                 }
-              } else if (data.type === 'error') {
-                throw new Error(data.error);
-              } else if (data.type === 'done') {
-                break;
+              } catch (parseError) {
+                console.warn("Failed to parse streaming data:", parseError);
               }
-            } catch (parseError) {
-              console.warn("Failed to parse streaming data:", parseError);
             }
           }
         }
+      } catch (error: any) {
+        if (error.name === "AbortError") {
+          setStreamingError("Request was cancelled");
+          return;
+        }
+
+        const errorMessage =
+          error.message || "Failed to get streaming response";
+        setStreamingError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setStreamingLoading(false);
+        abortControllerRef.current = null;
+        streamReaderRef.current = null;
       }
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        setStreamingError("Request was cancelled");
-        return;
-      }
-      
-      const errorMessage = error.message || "Failed to get streaming response";
-      setStreamingError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setStreamingLoading(false);
-      abortControllerRef.current = null;
-      streamReaderRef.current = null;
-    }
-  }, []);
+    },
+    []
+  );
 
   /**
    * Send chat message function
    */
-  const sendChatMessage = useCallback(async (
-    message: string,
-    options: CompletionOptions = {}
-  ): Promise<void> => {
-    if (!message.trim()) {
-      throw new Error("Message cannot be empty");
-    }
-
-    setChatLoading(true);
-    setChatError(null);
-
-    const userMessage: ChatMessage = {
-      role: "user",
-      content: message.trim(),
-      timestamp: new Date(),
-    };
-
-    // Cancel any ongoing requests
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    abortControllerRef.current = new AbortController();
-
-    try {
-      const response = await fetch("/api/deepseek/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          conversationHistory: chatHistory,
-          newMessage: message.trim(),
-          options: {
-            model: options.model,
-            maxTokens: options.maxTokens,
-            temperature: options.temperature,
-          },
-        }),
-        signal: abortControllerRef.current.signal,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+  const sendChatMessage = useCallback(
+    async (message: string, options: CompletionOptions = {}): Promise<void> => {
+      if (!message.trim()) {
+        throw new Error("Message cannot be empty");
       }
 
-      const result = await response.json();
+      setChatLoading(true);
+      setChatError(null);
 
-      if (!result.success) {
-        throw new Error(result.error || "Chat message failed");
-      }
-
-      const assistantMessage: ChatMessage = {
-        role: "assistant",
-        content: result.data.message.content,
+      const userMessage: ChatMessage = {
+        role: "user",
+        content: message.trim(),
         timestamp: new Date(),
       };
 
-      setChatHistory(prev => [...prev, userMessage, assistantMessage]);
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        setChatError("Request was cancelled");
-        return;
+      // Cancel any ongoing requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
-      
-      const errorMessage = error.message || "Failed to send chat message";
-      setChatError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setChatLoading(false);
-      abortControllerRef.current = null;
-    }
-  }, [chatHistory]);
+
+      abortControllerRef.current = new AbortController();
+
+      try {
+        const response = await fetch("/api/deepseek/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            conversationHistory: chatHistory,
+            newMessage: message.trim(),
+            options: {
+              model: options.model,
+              maxTokens: options.maxTokens,
+              temperature: options.temperature,
+            },
+          }),
+          signal: abortControllerRef.current.signal,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error || `HTTP error! status: ${response.status}`
+          );
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || "Chat message failed");
+        }
+
+        const assistantMessage: ChatMessage = {
+          role: "assistant",
+          content: result.data.message.content,
+          timestamp: new Date(),
+        };
+
+        setChatHistory((prev) => [...prev, userMessage, assistantMessage]);
+      } catch (error: any) {
+        if (error.name === "AbortError") {
+          setChatError("Request was cancelled");
+          return;
+        }
+
+        const errorMessage = error.message || "Failed to send chat message";
+        setChatError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setChatLoading(false);
+        abortControllerRef.current = null;
+      }
+    },
+    [chatHistory]
+  );
 
   /**
    * Get service information
@@ -331,11 +361,11 @@ export function useAIService(): UseAIServiceReturn {
   const getServiceInfo = useCallback(async () => {
     try {
       const response = await fetch("/api/deepseek");
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const result = await response.json();
       setServiceInfo(result);
       return result;
@@ -380,27 +410,27 @@ export function useAIService(): UseAIServiceReturn {
     completion,
     completionLoading,
     completionError,
-    
+
     // Streaming completion
     streamCompletion,
     streamingLoading,
     streamingError,
     streamingResponse,
-    
+
     // Chat functionality
     sendChatMessage,
     chatHistory,
     chatLoading,
     chatError,
     clearChat,
-    
+
     // Service info
     getServiceInfo,
     serviceInfo,
-    
+
     // Utility functions
     clearErrors,
-    isAuthenticated: !!isSignedIn,
+    isAuthenticated,
   };
 }
 
@@ -408,8 +438,9 @@ export function useAIService(): UseAIServiceReturn {
  * Hook for simple AI completions (convenience wrapper)
  */
 export function useAICompletion() {
-  const { completion, completionLoading, completionError, clearErrors } = useAIService();
-  
+  const { completion, completionLoading, completionError, clearErrors } =
+    useAIService();
+
   return {
     complete: completion,
     loading: completionLoading,
@@ -422,14 +453,14 @@ export function useAICompletion() {
  * Hook for AI streaming (convenience wrapper)
  */
 export function useAIStreaming() {
-  const { 
-    streamCompletion, 
-    streamingLoading, 
-    streamingError, 
+  const {
+    streamCompletion,
+    streamingLoading,
+    streamingError,
     streamingResponse,
-    clearErrors 
+    clearErrors,
   } = useAIService();
-  
+
   return {
     stream: streamCompletion,
     loading: streamingLoading,
@@ -443,15 +474,15 @@ export function useAIStreaming() {
  * Hook for AI chat (convenience wrapper)
  */
 export function useAIChat() {
-  const { 
-    sendChatMessage, 
-    chatHistory, 
-    chatLoading, 
-    chatError, 
+  const {
+    sendChatMessage,
+    chatHistory,
+    chatLoading,
+    chatError,
     clearChat,
-    clearErrors 
+    clearErrors,
   } = useAIService();
-  
+
   return {
     sendMessage: sendChatMessage,
     messages: chatHistory,

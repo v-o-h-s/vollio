@@ -5,9 +5,9 @@ This directory contains the database schema, storage policies, and Row Level Sec
 ## Prerequisites
 
 1. Supabase project created
-2. Clerk authentication configured with JWT template
-3. Environment variables set in `.env.local`
-4. Understanding of Row Level Security (RLS) concepts
+
+2. Environment variables set in `.env.local`
+3. Understanding of Row Level Security (RLS) concepts
 
 ## Setup Steps
 
@@ -31,31 +31,6 @@ Run the migration file in your Supabase SQL editor:
 -- into the Supabase SQL editor and execute
 ```
 
-### 3. Clerk Integration Setup
-
-1. In Clerk Dashboard, go to JWT Templates
-2. Create a new template named "supabase"
-3. Use this configuration:
-
-```json
-{
-  "aud": "authenticated",
-  "exp": "{{exp}}",
-  "iat": "{{iat}}",
-  "iss": "https://sgihxxokwpsahogqrlla.supabase.co/auth/v1",
-  "sub": "{{user.id}}",
-  "email": "{{user.primary_email_address.email_address}}",
-  "phone": "{{user.primary_phone_number.phone_number}}",
-  "app_metadata": {
-    "provider": "clerk",
-    "providers": ["clerk"]
-  },
-  "user_metadata": {
-    "user_id": "{{user.id}}"
-  }
-}
-```
-
 ### 4. Environment Variables
 
 Ensure these variables are set in `.env.local`:
@@ -65,9 +40,7 @@ Ensure these variables are set in `.env.local`:
 PROJECT_URL=https://your-project.supabase.co
 SUPABASE_KEY=your-anon-key
 
-# Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your-publishable-key
-CLERK_SECRET_KEY=your-secret-key
+
 ```
 
 ## Verification
@@ -89,8 +62,7 @@ After setup, you can verify the configuration by:
 
 ### Functions
 
-- `requesting_user_id()`: Extracts Clerk user ID from JWT for RLS policies
-- `get_jwt_claims()`: Debug function to inspect JWT token claims
+- `auth.uid()`: Supabase Auth function to get current user ID
 
 ### Row Level Security (RLS)
 
@@ -99,7 +71,7 @@ All tables have RLS enabled with policies that automatically filter data by user
 ```sql
 -- Example RLS policy for pdfs table
 CREATE POLICY "Users can only access their own PDFs" ON pdfs
-FOR ALL USING (user_id = requesting_user_id());
+FOR ALL USING (user_id = auth.uid());
 ```
 
 ### Storage

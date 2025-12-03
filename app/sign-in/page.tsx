@@ -21,7 +21,7 @@ export default function SignInPage() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `http://localhost:3001/api/auth/v1/callback`,
+        redirectTo: `http://localhost:3001/api/auth/v1/callback?next=/dashboard/pdfs`,
       },
     });
   };
