@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
-import { withErrorHandling } from "@/lib/utils/error-handling";
+import { withErrorHandling } from "@/lib/error-handling";
 
 interface RenameRequest {
   filename: string;

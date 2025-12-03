@@ -9,7 +9,7 @@ export * from "./dashboard";
 export * from "./database";
 export * from "./document-processing";
 export * from "./editor";
-export * from "../utils/error-handling/errors";
+export * from "../error-handling/errors";
 export * from "./pdf";
 export * from "./theme";
 

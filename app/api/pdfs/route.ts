@@ -8,7 +8,7 @@ import {
 } from "@/lib/utils/supabase-helpers";
 import type { SupabasePDFListResponse } from "@/lib/types/pdf";
 
-import { AuthError, DatabaseError } from "@/lib/utils/error-handling";
+import { AuthError, DatabaseError } from "@/lib/error-handling";
 import { withErrorHandling } from "@/lib/wrappers/withErrorHandling";
 import { Logger } from "@/lib/utils/logger";
 

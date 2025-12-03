@@ -6,7 +6,7 @@ import {
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
-import { DatabaseError, AuthError } from "@/lib/utils/error-handling";
+import { DatabaseError, AuthError } from "@/lib/error-handling";
 import { Logger } from "@/lib/utils/logger";
 
 export const createSummaryHandler = async (

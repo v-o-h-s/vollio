@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { AIError } from "@/lib/utils/error-handling/AIError";
+import { AIError } from "@/lib/error-handling/AIError";
 import { PromptTemplates } from "./lib/promptTemplates";
 import { AiPromptType } from "./lib/types";
 class AiService {

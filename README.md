@@ -13,10 +13,10 @@
 
 ### 📄 Advanced PDF Management
 
-- **Enterprise PDF Viewer**: Syncfusion-powered PDF viewer with text selection, zoom, search, and navigation
+- **PDF Viewer**: React PDF viewer with text selection, zoom, search, and navigation
 - **Multi-Mode Highlighting**: Three distinct annotation modes (Quick Highlight, Inline Comment, Linked Note)
 - **Intelligent Coordinate System**: Advanced PDF-to-screen coordinate conversion with viewport boundary handling
-- **Document Processing**: Syncfusion text extraction with OCR fallback for scanned documents
+- **Document Processing**: OCR text extraction for scanned documents
 - **Secure File Storage**: Supabase Storage integration with signed URLs and automatic cleanup
 - **Folder Organization**: Hierarchical folder system with drag & drop support for PDF organization
 
@@ -60,7 +60,6 @@
 - **Styling**: Tailwind CSS + shadcn/ui components
 - **State Management**: Redux Toolkit with RTK Query
 - **Rich Text**: TipTap editor with custom extensions
-- **PDF Viewer**: Syncfusion PDF Viewer (licensed)
 
 ### Backend & Database
 
@@ -68,7 +67,7 @@
 - **Authentication**: Supabase Auth with Google OAuth and email/password support
 - **File Storage**: Supabase Storage with signed URLs and automatic cleanup
 - **API**: Next.js API routes with comprehensive error handling and rate limiting
-- **Document Processing**: Syncfusion + node-tesseract-ocr fallback with semantic chunking
+- **Document Processing**: node-tesseract-ocr with semantic chunking
 - **LMS Integration**: Secure OAuth integration with encrypted token storage
 
 ### Development Tools
@@ -84,8 +83,6 @@
 
 - Node.js 18+ and npm/yarn
 - Supabase account and project
-
-- Syncfusion license (for PDF viewer)
 
 ### Installation
 
@@ -112,21 +109,6 @@
 
    ```env
    # Supabase Configuration
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-
-
-   # Syncfusion License
-   SYNCFUSION_LICENSE_KEY=your_syncfusion_license
-
-   # Encryption for OAuth tokens
-   ENCRYPTION_KEY=your_256_bit_encryption_key
-
-   # Google LMS Integration (Optional)
-   GOOGLE_CLIENT_ID=your_google_client_id
-   GOOGLE_CLIENT_SECRET=your_google_client_secret
    GOOGLE_REDIRECT_URI=your_redirect_uri
 
    # AI Services (Optional)
@@ -213,7 +195,7 @@ noto/
 
 ### Document Processing
 
-- **Text Extraction**: Syncfusion primary extraction with OCR fallback
+- **Text Extraction**: OCR-based text extraction
 - **Semantic Chunking**: Intelligent text segmentation for AI processing
 - **Multi-Language Support**: Comprehensive language detection and processing
 - **Background Processing**: Asynchronous document processing with progress tracking
@@ -417,7 +399,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### Common Issues
 
-- **Syncfusion License**: Ensure valid Syncfusion license is configured
 - **Database Connection**: Check Supabase configuration and RLS policies
 - **Authentication**: Verify Supabase Auth configuration and OAuth settings
 - **File Upload**: Check file size limits and storage configuration

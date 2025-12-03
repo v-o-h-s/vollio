@@ -5,7 +5,7 @@ import {
   mapSupabaseHighlightResponseToHighlight,
   HighlightServerResponse,
 } from "@/lib/types/highlight";
-import { DatabaseError, AuthError } from "@/lib/utils/error-handling";
+import { DatabaseError, AuthError } from "@/lib/error-handling";
 import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
 import { Logger } from "@/lib/utils/logger";
 

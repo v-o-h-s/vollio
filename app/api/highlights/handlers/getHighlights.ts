@@ -5,7 +5,7 @@ import {
   mapSupabaseHighlightResponseToHighlight,
   HighlightwithDetails,
 } from "@/lib/types/highlight";
-import { DatabaseError, AuthError } from "@/lib/utils/error-handling";
+import { DatabaseError, AuthError } from "@/lib/error-handling";
 import { Logger } from "@/lib/utils/logger";
 
 export const getHighlightsHandler = async (request: NextRequest) => {

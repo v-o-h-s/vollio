@@ -34,7 +34,7 @@ import {
   ErrorType,
   ErrorSeverity,
   AppError,
-} from "@/lib/utils/error-handling/errors";
+} from "@/lib/error-handling/errors";
 import { PDFDocument, Folder } from "@/lib/types/pdf";
 import { PDFUploadZone } from "./PDFUploadZone";
 import { PDFContextMenu } from "./PDFContextMenu";
@@ -787,7 +787,6 @@ export function PDFDirectoryView({
             />
           ) : null}
         </DragOverlay>
-
       </div>
     </DndContext>
   );

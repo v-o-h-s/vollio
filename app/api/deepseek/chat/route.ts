@@ -9,8 +9,8 @@ import {
   validateRequired,
   checkRateLimit,
   createServerError,
-} from "@/lib/utils/error-handling";
-import { ErrorType } from "@/lib/utils/error-handling/errors";
+} from "@/lib/error-handling";
+import { ErrorType } from "@/lib/error-handling/errors";
 
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";

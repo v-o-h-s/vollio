@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ZodSchema } from "zod";
-import { ValidationError } from "../utils/error-handling/ValidationError";
+import { ValidationError } from "../error-handling/ValidationError";
 import { Logger } from "../utils/logger";
 export function withValidation<T, Targs extends unknown[] = []>(
   schema: ZodSchema<T>,

@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ZodSchema } from "zod";
-import { BaseAppError } from "../utils/error-handling/BaseAppError";
-import { GeneralError } from "../utils/error-handling/GeneralError";
-import { AuthError } from "../utils/error-handling/AuthError";
-import { AIError } from "../utils/error-handling/AIError";
-import { FileValidationError } from "../utils/error-handling/files/FileValidationError";
-import { StorageError } from "../utils/error-handling/StorageError";
-import { FileError } from "../utils/error-handling/files/FileError";
-import { DatabaseError } from "../utils/error-handling/DatabaseError";
-import { NetworkError } from "../utils/error-handling/NetworkError";
-import { ValidationError } from "../utils/error-handling/ValidationError";
+import { BaseAppError } from "../error-handling/BaseAppError";
+import { GeneralError } from "../error-handling/GeneralError";
+import { AuthError } from "../error-handling/AuthError";
+import { AIError } from "../error-handling/AIError";
+import { FileValidationError } from "../error-handling/files/FileValidationError";
+import { StorageError } from "../error-handling/StorageError";
+import { FileError } from "../error-handling/files/FileError";
+import { DatabaseError } from "../error-handling/DatabaseError";
+import { NetworkError } from "../error-handling/NetworkError";
+import { ValidationError } from "../error-handling/ValidationError";
 import { withValidation } from "./withValidation";
 import { Logger } from "../utils/logger";
 

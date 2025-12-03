@@ -15,9 +15,9 @@ import {
   STORAGE_CONFIG,
 } from "../../supabase/supabase";
 import type { Database } from "../types/database";
-import { AppError } from "./error-handling/errors";
+import { AppError } from "../error-handling/errors";
 import { Logger } from "./logger";
-import { DatabaseError } from "./error-handling";
+import { DatabaseError } from "../error-handling";
 
 /**
  * Type guard for database row types

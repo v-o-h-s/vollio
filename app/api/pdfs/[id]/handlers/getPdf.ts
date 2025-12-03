@@ -3,8 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
 import { Logger } from "@/lib/utils/logger";
-import { DatabaseError, AuthError } from "@/lib/utils/error-handling";
-import { ValidationError } from "@/lib/utils/error-handling/ValidationError";
+import { DatabaseError, AuthError } from "@/lib/error-handling";
+import { ValidationError } from "@/lib/error-handling/ValidationError";
 import { SupabasePDFAccessResponse } from "@/lib/types/pdf";
 import { fetchPDFById } from "./common";
 

@@ -4,7 +4,7 @@ import { Logger } from "@/lib/utils/logger";
 import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
 import { NextResponse } from "next/server";
 import { SupabaseNoteResponse } from "@/lib/types/editor";
-import { DatabaseError } from "@/lib/utils/error-handling";
+import { DatabaseError } from "@/lib/error-handling";
 
 import { CreateNoteDto } from "@/lib/dto/createNoteDto";
 

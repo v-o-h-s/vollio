@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Poppins, Outfit } from "next/font/google";
 import "./globals.css";
-import "./syncfusion.css";
 
 import { ReduxProvider } from "@/lib/store/provider";
-import SyncfusionLicenseProvider from "@/components/SyncfusionLicenseProvider";
+
 import { EditorProvider } from "@/components/editor";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { Toaster } from "react-hot-toast";
@@ -68,11 +67,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable}  ${poppins.variable} ${outfit.variable} antialiased`}
       >
         <ThemeProvider defaultTheme="light" storageKey="noto-theme">
-          <SyncfusionLicenseProvider>
-            <ReduxProvider>
-              <EditorProvider>{children}</EditorProvider>
-            </ReduxProvider>
-          </SyncfusionLicenseProvider>
+          <ReduxProvider>
+            <EditorProvider>{children}</EditorProvider>
+          </ReduxProvider>
         </ThemeProvider>
         <Toaster />
       </body>

@@ -7,10 +7,10 @@ import {
 } from "@/supabase/supabase";
 import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types/pdf";
 import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
-import { StorageError } from "@/lib/utils/error-handling/StorageError";
-import { DatabaseError } from "@/lib/utils/error-handling/DatabaseError";
-import { AuthError } from "@/lib/utils/error-handling/AuthError";
-import { FileValidationError } from "@/lib/utils/error-handling/files/FileValidationError";
+import { StorageError } from "@/lib/error-handling/StorageError";
+import { DatabaseError } from "@/lib/error-handling/DatabaseError";
+import { AuthError } from "@/lib/error-handling/AuthError";
+import { FileValidationError } from "@/lib/error-handling/files/FileValidationError";
 import { randomUUID } from "crypto";
 
 /**

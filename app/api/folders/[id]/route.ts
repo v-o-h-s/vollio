@@ -5,7 +5,7 @@ import {
   extractRequestContext,
   createServerError,
   ServerErrorType,
-} from "@/lib/utils/error-handling";
+} from "@/lib/error-handling";
 import { requireAuthentication } from "@/lib/utils/auth-validation";
 import { checkEnhancedRateLimit } from "@/lib/utils/security-validation";
 

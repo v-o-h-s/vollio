@@ -1,6 +1,6 @@
 import { Logger } from "@/lib/utils/logger";
 import { STORAGE_CONFIG } from "@/supabase/supabase";
-import { DatabaseError, StorageError } from "@/lib/utils/error-handling";
+import { DatabaseError, StorageError } from "@/lib/error-handling";
 
 export async function fetchPDFById(supabaseClient: any, pdfId: string) {
   const { data, error } = await supabaseClient
