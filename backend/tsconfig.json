@@ -1,0 +1,24 @@
+{
+    "compilerOptions": {
+        "types": [
+            "@fastify/cookie",
+            "./src/shared/types/fastify"
+        ],
+        "target": "ES2020",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext", // must match module
+        "lib": [
+            "ES2020"
+        ],
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "outDir": "dist",
+        "resolveJsonModule": true
+    },
+    "include": [
+        "src"
+    ]
+}
