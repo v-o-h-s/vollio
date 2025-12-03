@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+
 import { Logger } from "@/lib/utils/logger";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
+import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { SupabaseNoteResponse } from "@/lib/types/editor";
 import { DatabaseError } from "@/lib/error-handling";
@@ -14,42 +14,31 @@ export const createNoteHandler = async (
 ) => {
   Logger.info("📝 Creating new note");
 
-  const { userId } = await auth();
-
-  if (!userId) {
-    Logger.warn("🔐 Unauthorized access attempt to create note");
-    return NextResponse.json(
-      { success: false, error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
-  Logger.info(`👤 Creating note for user: ${userId}`);
-
   const { title, content, pdfId } = data;
 
-  const supabase = await getAuthenticatedSupabaseClient();
+  const supabase = await createClient();
+
+  Logger.info(`👤 Creating note for user`);
 
   const { data: noteData, error } = await supabase
     .from("notes")
     .insert({
       title,
       content,
-      user_id: userId,
       pdf_id: pdfId,
+      // user_id is automatically set by database trigger
     })
     .select()
     .single();
 
   if (error) {
-    Logger.error(`❌ Database error creating note for user ${userId}`, error);
+    Logger.error(`❌ Database error creating note for user`, error);
     throw DatabaseError.mapSupabaseErrorCodeToDatabaseError(error.code);
   }
 
   Logger.success(`📝 Note created successfully`, {
     noteId: noteData.id,
     title,
-    userId,
   });
 
   // Transform database format to API format

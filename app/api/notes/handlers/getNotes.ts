@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
+import { createClient } from "@/lib/supabase/server";
 import { Logger } from "@/lib/utils/logger";
 import {
   SupabaseNotesListResponse,
@@ -13,16 +12,7 @@ export const getNotesHandler = async (request: NextRequest) => {
 
   Logger.info("📝 Fetching all notes");
 
-  const { userId } = await auth();
-
-  if (!userId) {
-    Logger.warn("🔐 Unauthorized access attempt to fetch notes");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  Logger.info(`👤 Fetching notes for user: ${userId}`);
-
-  const supabase = await getAuthenticatedSupabaseClient();
+  const supabase = await createClient();
 
   Logger.info("💾 Querying notes from database");
   let query = supabase.from("notes").select("*");
@@ -36,16 +26,14 @@ export const getNotesHandler = async (request: NextRequest) => {
   });
 
   if (error) {
-    Logger.error(`❌ Database error fetching notes for user ${userId}`, error);
+    Logger.error(`❌ Database error fetching notes`, error);
     return NextResponse.json(
       { error: "Failed to fetch notes" },
       { status: 500 }
     );
   }
 
-  Logger.info(
-    `✅ Retrieved ${notesData?.length || 0} notes for user ${userId}`
-  );
+  Logger.info(`✅ Retrieved ${notesData?.length || 0} notes`);
 
   // Transform database format to API format
   const notes: SupabaseSingleNoteFromListRepsonse[] = notesData.map(

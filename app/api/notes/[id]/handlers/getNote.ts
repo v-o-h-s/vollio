@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
+import { createClient } from "@/lib/supabase/server";
 import { AuthError, DatabaseError } from "@/lib/error-handling";
 import { Logger } from "@/lib/utils/logger";
 import { SupabaseNoteResponse } from "@/lib/types/editor";
@@ -9,15 +8,9 @@ export const getNoteHandler = async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) => {
-  const { userId } = await auth();
-
-  if (!userId) {
-    Logger.error("Unauthorized");
-    throw AuthError.authenticationRequired();
-  }
 
   const { id } = await params;
-  const supabase = await getAuthenticatedSupabaseClient();
+  const supabase = await createClient();
 
   const { data: noteData, error } = await supabase
     .from("notes")

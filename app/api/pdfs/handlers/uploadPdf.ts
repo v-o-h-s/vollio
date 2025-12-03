@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { Logger } from "@/lib/utils/logger";
-import {
-  getAuthenticatedSupabaseClient,
-  STORAGE_CONFIG,
-} from "@/supabase/supabase";
+import { STORAGE_CONFIG } from "@/supabase/supabase";
 import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types/pdf";
 import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
 import { StorageError } from "@/lib/error-handling/StorageError";
