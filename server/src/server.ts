@@ -1,11 +1,13 @@
+import "reflect-metadata"; // Required for tsyringe
 import "dotenv/config";
 import fastifyCookie from "@fastify/cookie";
 import Fastify from "fastify";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { createUserClient } from "./infrastructure/supabase";
+
 import { loggerConfig } from "./shared/utils/logger";
 import { authPlugin } from "./plugins/auth";
 import { errorHandler } from "./shared/utils/errorHanlder";
+import { noteRoutes } from "./interface/routes/note.route";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -19,21 +21,19 @@ app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || "dev-secret",
 });
 
-
 // Register auth plugin globally (it will handle public vs protected routes)
 app.register(authPlugin);
+
 // Error handler
 app.setErrorHandler(errorHandler);
-
-
 
 // PUBLIC ROUTES
 app.get("/", async () => {
   return { ok: true, message: "Hello from Fastify" };
 });
 
-
-
+// API ROUTES
+app.register(noteRoutes, { prefix: "/api/notes" });
 
 // SERVER STARTUP
 async function start(): Promise<void> {

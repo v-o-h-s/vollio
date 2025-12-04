@@ -1,10 +1,11 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { type SupabaseClient } from "@supabase/supabase-js";
+
 import { Note } from "../../domain/Note";
 import { INoteRepository } from "../../domain/repositories/INoteRepository";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 
 export class NoteRepository implements INoteRepository {
-  constructor(private supabase: SupabaseClient) {}
+  constructor(private supabase: SupabaseClient) { }
 
   async createNote(note: Note): Promise<Note> {
     const { data, error } = await this.supabase
