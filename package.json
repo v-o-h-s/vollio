@@ -4,19 +4,19 @@
   "private": true,
   "description": "Noto - A full-stack note-taking application",
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
     "build": "npm run build --workspaces",
-    "start": "npm start --workspace=backend",
+    "start": "npm start --workspace=server",
     "lint": "npm run lint --workspaces",
     "test": "npm test --workspaces",
-    "backend:dev": "npm run dev --workspace=backend",
+    "server:dev": "npm run dev --workspace=server",
     "backend:build": "npm run build --workspace=backend",
     "frontend:dev": "npm run dev --workspace=frontend",
     "frontend:build": "npm run build --workspace=frontend"
   },
   "workspaces": [
-    "backend",
-    "frontend"
+    "server",
+    "client"
   ],
   "devDependencies": {
     "concurrently": "^9.0.0"
