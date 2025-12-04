@@ -2,20 +2,29 @@ import { JSONContent } from "../shared/types/note";
 
 export class Note {
   private id: string;
+  private userId: string;
   private title?: string;
   private content?: JSONContent;
   private pdfId?: string;
+  private createdAt: Date;
+  private updatedAt: Date;
 
   constructor(
     id: string,
+    userId: string,
     title?: string,
     content?: JSONContent,
-    pdfId?: string
+    pdfId?: string,
+    createdAt?: Date,
+    updatedAt?: Date
   ) {
     this.id = id;
     this.title = title;
     this.content = content;
     this.pdfId = pdfId;
+    this.userId = userId;
+    this.createdAt = createdAt || new Date();
+    this.updatedAt = updatedAt || new Date();
   }
   public getId(): string {
     return this.id;
@@ -32,12 +41,27 @@ export class Note {
   public getPdfId(): string | undefined {
     return this.pdfId;
   }
+  public getUserId(): string {
+    return this.userId;
+  }
+
+  public getCreatedAt(): Date {
+    return this.createdAt;
+  }
+
+  public getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
+
   public toJSON() {
     return {
       id: this.id,
       title: this.title,
       content: this.content,
+      userId: this.userId,
       pdfId: this.pdfId,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
     };
   }
 }
