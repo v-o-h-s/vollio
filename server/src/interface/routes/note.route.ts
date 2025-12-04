@@ -1,6 +1,10 @@
-import { FastifyInstance, FastifyPluginOptions } from "fastify";
-import { TOKENS } from "../../infrastructure/di/container";
-import { NoteController } from "../controllers/note.controller";
+import {
+  FastifyInstance,
+  FastifyPluginOptions,
+  FastifyPlugin,
+  FastifyPluginAsync,
+} from "fastify";
+import fp from "fastify-plugin";
 import {
   validateBody,
   validateParams,
@@ -14,44 +18,43 @@ import {
   NoteIdParams,
 } from "../../shared/validation/noteSchemas";
 
-export async function noteRoutes(
+const noteRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
   options: FastifyPluginOptions
-): Promise<void> {
+): Promise<void> => {
   // Create a new note
   fastify.post<{ Body: CreateNoteDTO }>(
-    "/",
+    `${options.prefix}`,
     {
       preHandler: validateBody(createNoteSchema),
     },
     async (request, reply) => {
-      // Get controller from request-scoped container
-      const noteController = (request as any).container.resolve(TOKENS.NoteController) as NoteController;
+      const noteController = request.diScope.resolve("noteController");
       return noteController.createNote(request, reply);
     }
   );
 
   // Get all notes for the authenticated user
-  fastify.get("/", async (request, reply) => {
-    const noteController = (request as any).container.resolve(TOKENS.NoteController) as NoteController;
+  fastify.get(`${options.prefix}`, async (request, reply) => {
+    const noteController = request.diScope.resolve("noteController");
     return noteController.getAllNotes(request, reply);
   });
 
   // Get a specific note by ID
   fastify.get<{ Params: NoteIdParams }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: validateParams(noteIdParamsSchema),
     },
     async (request, reply) => {
-      const noteController = (request as any).container.resolve(TOKENS.NoteController) as NoteController;
+      const noteController = request.diScope.resolve("noteController");
       return noteController.getNoteById(request, reply);
     }
   );
 
   // Update a note
   fastify.put<{ Params: NoteIdParams; Body: UpdateNoteDTO }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: [
         validateParams(noteIdParamsSchema),
@@ -59,20 +62,25 @@ export async function noteRoutes(
       ],
     },
     async (request, reply) => {
-      const noteController = (request as any).container.resolve(TOKENS.NoteController) as NoteController;
+      const noteController = request.diScope.resolve("noteController");
       return noteController.updateNote(request, reply);
     }
   );
 
   // Delete a note
   fastify.delete<{ Params: NoteIdParams }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: validateParams(noteIdParamsSchema),
     },
     async (request, reply) => {
-      const noteController = (request as any).container.resolve(TOKENS.NoteController) as NoteController;
+      const noteController = request.diScope.resolve("noteController");
       return noteController.deleteNote(request, reply);
     }
   );
-}
+};
+
+export const noteRoutes = fp(noteRoutesHandler, {
+  name: "note-routes",
+  fastify: "5.x",
+});

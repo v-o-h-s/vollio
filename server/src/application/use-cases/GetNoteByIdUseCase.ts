@@ -1,31 +1,31 @@
 import { INoteRepository } from "../../domain/repositories/INoteRepository";
+import { Note } from "../../domain/Note";
 import { NotFoundError } from "../../shared/errors/NotFoundError";
 import { AuthError, AuthErrorSubType } from "../../shared/errors/AuthError";
 
-interface DeleteNoteInput {
+interface GetNoteInput {
   noteId: string;
   userId: string;
 }
 
-export class DeleteNoteUseCase {
+export class GetNoteUseCase {
   constructor(private noteRepository: INoteRepository) {}
 
-  async execute(input: DeleteNoteInput): Promise<void> {
-    // Fetch existing note
-    const existingNote = await this.noteRepository.getNoteById(input.noteId);
+  async execute(input: GetNoteInput): Promise<Note> {
+    const note = await this.noteRepository.getNoteById(input.noteId);
 
-    if (!existingNote) {
+    if (!note) {
       throw new NotFoundError("Note not found");
     }
 
     // Verify ownership
-    if (existingNote.getUserId() !== input.userId) {
+    if (note.getUserId() !== input.userId) {
       throw new AuthError(
         "Forbidden: You don't own this note",
         AuthErrorSubType.FORBIDDEN
       );
     }
 
-    return this.noteRepository.deleteNote(input.noteId);
+    return note;
   }
 }

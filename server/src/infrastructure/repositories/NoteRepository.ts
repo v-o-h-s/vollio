@@ -5,7 +5,11 @@ import { INoteRepository } from "../../domain/repositories/INoteRepository";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 
 export class NoteRepository implements INoteRepository {
-  constructor(private supabase: SupabaseClient) { }
+  private supabase: SupabaseClient;
+
+  constructor(supabaseClient: SupabaseClient) {
+    this.supabase = supabaseClient;
+  }
 
   async createNote(note: Note): Promise<Note> {
     const { data, error } = await this.supabase

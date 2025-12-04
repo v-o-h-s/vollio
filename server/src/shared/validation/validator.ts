@@ -15,6 +15,9 @@ export function validateBody<T>(schema: JSONSchemaType<T>) {
 
     if (!valid) {
       return reply.status(400).send({
+        sucess: false,
+        data:null,
+
         error: "Validation error",
         details: validate.errors,
       });
@@ -30,6 +33,9 @@ export function validateParams<T>(schema: JSONSchemaType<T>) {
 
     if (!valid) {
       return reply.status(400).send({
+        sucess: false,
+        data:null,
+
         error: "Validation error",
         details: validate.errors,
       });
@@ -45,6 +51,8 @@ export function validateQuery<T>(schema: JSONSchemaType<T>) {
 
     if (!valid) {
       return reply.status(400).send({
+        sucess: false,
+        data:null,
         error: "Validation error",
         details: validate.errors,
       });

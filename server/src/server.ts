@@ -1,13 +1,14 @@
-import "reflect-metadata"; // Required for tsyringe
 import "dotenv/config";
 import fastifyCookie from "@fastify/cookie";
+import fastifyCors from "@fastify/cors";
 import Fastify from "fastify";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-
+import { containerPlugin } from "./plugins/container";
 import { loggerConfig } from "./shared/utils/logger";
 import { authPlugin } from "./plugins/auth";
 import { errorHandler } from "./shared/utils/errorHanlder";
 import { noteRoutes } from "./interface/routes/note.route";
+import { fastifyAwilixPlugin } from "@fastify/awilix";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -21,19 +22,31 @@ app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || "dev-secret",
 });
 
+// Enable CORS for frontend
+app.register(fastifyCors, {
+  origin: process.env.FRONTEND_URL || "http://localhost:3001",
+  credentials: true,
+});
+
+// Register Awilix DI plugin first
+app.register(fastifyAwilixPlugin, {
+  disposeOnClose: true,
+  disposeOnResponse: true,
+  strictBooleanEnforced: true,
+});
+
+// Register our container configuration after Awilix
+
+app.register(containerPlugin);
+
 // Register auth plugin globally (it will handle public vs protected routes)
 app.register(authPlugin);
 
 // Error handler
 app.setErrorHandler(errorHandler);
 
-// PUBLIC ROUTES
-app.get("/", async () => {
-  return { ok: true, message: "Hello from Fastify" };
-});
-
 // API ROUTES
-app.register(noteRoutes, { prefix: "/api/notes" });
+app.register(noteRoutes, { prefix: "/api/v1/notes" });
 
 // SERVER STARTUP
 async function start(): Promise<void> {

@@ -2,6 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { ServerError } from "../errors/ServerError";
 import { DatabaseError } from "../errors/DatabaseError";
 import { ErrorObject } from "../types/error";
+import { NotFoundError } from "../errors/NotFoundError";
 
 export function errorHandler(
   error: any,
@@ -51,6 +52,25 @@ export function errorHandler(
     return res.status(statusCode).send({
       success: false,
       status: statusCode,
+      data: null,
+      error: errorObj,
+    });
+  }
+  if (error instanceof NotFoundError) {
+    const errorObj: ErrorObject = {
+      name: error.name,
+      subType: error.subType,
+      message: error.message,
+      details: error.details,
+      statusCode: error.statusCode,
+      extra: {},
+    };
+
+    req.log.error({ err: error }, "Not Found Error Occurred");
+
+    return res.status(error.statusCode).send({
+      success: false,
+      status: error.statusCode,
       data: null,
       error: errorObj,
     });
