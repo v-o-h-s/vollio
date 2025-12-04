@@ -12,7 +12,7 @@ import {
   generateStoragePath,
   handleSupabaseError,
   withRetry,
-} from "../../supabase/supabase";
+} from "../../supabase";
 
 describe("Supabase Client Configuration", () => {
   beforeEach(() => {

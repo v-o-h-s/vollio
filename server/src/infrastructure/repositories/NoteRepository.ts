@@ -1,6 +1,6 @@
 import { type SupabaseClient } from "@supabase/supabase-js";
 
-import { Note } from "../../domain/Note";
+import { Note } from "../../domain/entities/Note";
 import { INoteRepository } from "../../domain/repositories/INoteRepository";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 

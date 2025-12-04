@@ -1,5 +1,5 @@
 import { INoteRepository } from "../../domain/repositories/INoteRepository";
-import { Note } from "../../domain/Note";
+import { Note } from "../../domain/entities/Note";
 import { CreateNoteDTO } from "../../shared/validation/noteSchemas";
 import { randomUUID } from "crypto";
 

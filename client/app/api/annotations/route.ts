@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
+import { getAuthenticatedSupabaseClient } from "@/supabase";
 import { withErrorHandling } from "@/lib/error-handling";
 import { z } from "zod";
 import { Content } from "next/font/google";

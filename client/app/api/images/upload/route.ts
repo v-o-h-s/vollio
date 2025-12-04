@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAuthenticatedSupabaseClient } from "@/supabase/supabase";
+import { getAuthenticatedSupabaseClient } from "@/supabase";
 import { withErrorHandling } from "@/lib/utils/error-handling/errorHandling";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

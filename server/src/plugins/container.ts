@@ -1,7 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 import { asClass, asFunction, Lifetime, InjectionMode, asValue } from "awilix";
-import { createUserClient } from "../infrastructure/supabase";
+import { createUserClient } from "../infrastructure/database/supabase/supabase";
 import { NoteRepository } from "../infrastructure/repositories/NoteRepository";
 import { CreateNoteUseCase } from "../application/use-cases/CreateNoteUseCase";
 import { UpdateNoteUseCase } from "../application/use-cases/UpdateNoteUseCase";

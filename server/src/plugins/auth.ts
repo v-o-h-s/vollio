@@ -1,6 +1,6 @@
 // plugins/auth.ts
 import fp from "fastify-plugin";
-import { createUserClient } from "../infrastructure/supabase";
+import { createUserClient } from "../infrastructure/database/supabase/supabase";
 import { User } from "../shared/types/fastify";
 
 export const authPlugin = fp(async (fastify) => {
@@ -13,7 +13,6 @@ export const authPlugin = fp(async (fastify) => {
     }
 
     const { supabase } = await createUserClient(req);
-
 
     // Verify the JWT token from the cookies
     const { data, error } = await supabase.auth.getClaims();

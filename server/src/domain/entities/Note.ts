@@ -1,4 +1,4 @@
-import { JSONContent } from "../shared/types/note";
+import { JSONContent } from "../../shared/types/note";
 
 export class Note {
   private id: string;

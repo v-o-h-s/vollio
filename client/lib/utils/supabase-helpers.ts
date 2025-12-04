@@ -10,10 +10,7 @@ import type {
   PDFDocument,
 } from "../types/pdf";
 import type { PDFRow, UserActivityRow, FolderRow } from "../types/database";
-import {
-  getAuthenticatedSupabaseClient,
-  STORAGE_CONFIG,
-} from "../../supabase/supabase";
+import { getAuthenticatedSupabaseClient, STORAGE_CONFIG } from "../../supabase";
 import type { Database } from "../types/database";
 import { AppError } from "../error-handling/errors";
 import { Logger } from "./logger";

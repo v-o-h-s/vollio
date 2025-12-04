@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Logger } from "@/lib/utils/logger";
-import { STORAGE_CONFIG } from "@/supabase/supabase";
+import { STORAGE_CONFIG } from "@/supabase";
 import { SupabaseUploadResponse, StorageUploadResult } from "@/lib/types/pdf";
 import { generateSignedUrl } from "@/lib/utils/supabase-helpers";
 import { StorageError } from "@/lib/error-handling/StorageError";
@@ -154,9 +154,7 @@ async function storePDFMetadata(
     }
 
     if (!data?.id) {
-      throw DatabaseError.general(
-        "PDF metadata stored but no ID returned",
-      );
+      throw DatabaseError.general("PDF metadata stored but no ID returned");
     }
 
     Logger.success(`✅ PDF metadata stored with ID: ${data.id}`);

@@ -9,6 +9,7 @@ import { authPlugin } from "./plugins/auth";
 import { errorHandler } from "./shared/utils/errorHanlder";
 import { noteRoutes } from "./interface/routes/note.route";
 import { fastifyAwilixPlugin } from "@fastify/awilix";
+import qs from "querystring";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -47,6 +48,73 @@ app.setErrorHandler(errorHandler);
 
 // API ROUTES
 app.register(noteRoutes, { prefix: "/api/v1/notes" });
+
+// //testing
+// app.get("/auth/google-classroom", (req, reply) => {
+//   const params = qs.stringify({
+//     client_id: process.env.GOOGLE_CLIENT_ID,
+//     redirect_uri: process.env.GOOGLE_CLASSROOM_REDIRECT_URI,
+//     response_type: "code",
+//     scope: [
+//       "https://www.googleapis.com/auth/classroom.courses.readonly",
+//       "https://www.googleapis.com/auth/drive.readonly",
+//     ].join(" "),
+//     access_type: "offline",
+//     prompt: "consent",
+//   }); 
+
+//   reply.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
+// });
+// app.get("/auth/google-classroom/callback", async (req, reply) => {
+//     const code = req.query.code;
+//   if (!code) {
+//     return reply.status(400).send({ error: "Missing code" });
+//   }
+
+//   try {
+//     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//       body: new URLSearchParams({
+//         code,
+//         client_id: process.env.GOOGLE_CLIENT_ID!,
+//         client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+//         redirect_uri: process.env.GOOGLE_CLASSROOM_REDIRECT_URI!,
+//         grant_type: "authorization_code",
+//       }),
+//     });
+
+//     const tokens = await tokenRes.json();
+
+//     if (tokens.error) {
+//       console.error("Google token error:", tokens);
+//       return reply.status(400).send(tokens);
+//     }
+
+//     // Decode email from id_token
+//     const email =
+//       JSON.parse(
+//         Buffer.from(tokens.id_token.split(".")[1], "base64").toString()
+//       ).email;
+
+//     // Save tokens to DB
+//     await fastify.supabase
+//       .from("user_google_classroom")
+//       .upsert({
+//         user_id: req.user.userId, // clerk user
+//         google_email: email,
+//         access_token: tokens.access_token,
+//         refresh_token: tokens.refresh_token,
+//         token_expiry: new Date(Date.now() + tokens.expires_in * 1000),
+//       })
+//       .select();
+
+//     return reply.redirect("/dashboard?classroom=connected");
+//   } catch (err) {
+//     console.error(err);
+//     return reply.status(500).send({ error: "Failed to exchange code" });
+//   }
+// });
 
 // SERVER STARTUP
 async function start(): Promise<void> {

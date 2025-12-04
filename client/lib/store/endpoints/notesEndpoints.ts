@@ -1,35 +1,50 @@
 import type {
   CreateNoteRequest,
   Note,
-  SupabaseNoteResponse,
-  SupabaseNotesListResponse,
-  SupabaseSingleNoteFromListRepsonse,
   UpdateNoteRequest,
 } from "@/lib/types/editor";
 import type { ApiBuilder } from "./types";
 
-const transformNote = (
-  note: NonNullable<SupabaseNoteResponse["data"]>
-): Note => ({
-  ...note,
+interface BackendResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+  message?: string;
+}
+
+const transformNote = (note: any): Note => ({
+  id: note.id,
+  userId: note.userId,
+  title: note.title || "",
   content:
-    typeof note.content === "string" ? JSON.parse(note.content) : note.content,
+    typeof note.content === "string"
+      ? JSON.parse(note.content)
+      : note.content || null,
+  pdfAnnotationId: note.pdfAnnotationId || null,
+  createdAt: note.createdAt,
+  updatedAt: note.updatedAt,
+  isDeleted: note.isDeleted || false,
+  pdfId: note.pdfId || null,
 });
 
 export const notesEndpoints = (builder: ApiBuilder) => ({
-  getNotes: builder.query<
-    SupabaseSingleNoteFromListRepsonse[],
-    { pdfId?: string } | void
-  >({
+  getNotes: builder.query<Note[], { pdfId?: string } | void>({
     query: (params) => ({
-      url: "notes",
+      url: "v1/notes",
       params: params?.pdfId ? { pdfId: params.pdfId } : undefined,
     }),
-    transformResponse: (response: SupabaseNotesListResponse) => {
+    transformResponse: (response: BackendResponse<any[]>, meta, arg) => {
       if (!response.success || !response.data) {
         throw new Error(response.error || "Failed to fetch notes");
       }
-      return response.data;
+      let notes = response.data.map(transformNote);
+
+      // Client-side filtering for pdfId since backend doesn't support it yet
+      if (arg?.pdfId) {
+        notes = notes.filter((n) => n.pdfId === arg.pdfId);
+      }
+
+      return notes;
     },
     providesTags: (result) => [
       { type: "Note", id: "LIST" },
@@ -39,8 +54,8 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
   }),
 
   getNote: builder.query<Note, string>({
-    query: (noteId) => `notes/${noteId}`,
-    transformResponse: (response: SupabaseNoteResponse) => {
+    query: (noteId) => `v1/notes/${noteId}`,
+    transformResponse: (response: BackendResponse<any>) => {
       if (!response.success || !response.data) {
         throw new Error(response.error || "Failed to fetch note");
       }
@@ -51,11 +66,11 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
 
   createNote: builder.mutation<Note, CreateNoteRequest>({
     query: (noteData) => ({
-      url: "notes",
+      url: "v1/notes",
       method: "POST",
       body: noteData,
     }),
-    transformResponse: (response: SupabaseNoteResponse) => {
+    transformResponse: (response: BackendResponse<any>) => {
       if (!response.success || !response.data) {
         throw new Error(response.error || "Failed to create note");
       }
@@ -69,11 +84,11 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
     { id: string; updates: UpdateNoteRequest }
   >({
     query: ({ id, updates }) => ({
-      url: `notes/${id}`,
+      url: `v1/notes/${id}`,
       method: "PUT",
       body: updates,
     }),
-    transformResponse: (response: SupabaseNoteResponse) => {
+    transformResponse: (response: BackendResponse<any>) => {
       if (!response.success || !response.data) {
         throw new Error(response.error || "Failed to update note");
       }
@@ -87,9 +102,12 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
 
   deleteNote: builder.mutation<{ success: boolean }, string>({
     query: (noteId) => ({
-      url: `notes/${noteId}`,
+      url: `v1/notes/${noteId}`,
       method: "DELETE",
     }),
+    transformResponse: (response: BackendResponse<any>) => {
+      return { success: response.success };
+    },
     invalidatesTags: (_result, _error, noteId) => [
       { type: "Note", id: "LIST" },
       { type: "Note", id: noteId },
