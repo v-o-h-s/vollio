@@ -1,4 +1,4 @@
-  import type { NextConfig } from "next";
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
       {
         source: "/api/v1/notes/:path*",
         destination: "http://localhost:3000/api/v1/notes/:path*",
+      },
+      {
+        source: "/api/v1/integrations/:path*",
+        destination: "http://localhost:3000/api/v1/integrations/:path*",
       },
     ];
   },

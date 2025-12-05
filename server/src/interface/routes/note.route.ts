@@ -1,9 +1,4 @@
-import {
-  FastifyInstance,
-  FastifyPluginOptions,
-  FastifyPlugin,
-  FastifyPluginAsync,
-} from "fastify";
+import { FastifyInstance, FastifyPluginOptions, FastifyPlugin, FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import {
   validateBody,
@@ -24,7 +19,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
 ): Promise<void> => {
   // Create a new note
   fastify.post<{ Body: CreateNoteDTO }>(
-    `${options.prefix}`,
+    "/",
     {
       preHandler: validateBody(createNoteSchema),
     },
@@ -35,14 +30,14 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   );
 
   // Get all notes for the authenticated user
-  fastify.get(`${options.prefix}`, async (request, reply) => {
+  fastify.get("/", async (request, reply) => {
     const noteController = request.diScope.resolve("noteController");
     return noteController.getAllNotes(request, reply);
   });
 
   // Get a specific note by ID
   fastify.get<{ Params: NoteIdParams }>(
-    `${options.prefix}/:id`,
+    "/:id",
     {
       preHandler: validateParams(noteIdParamsSchema),
     },
@@ -54,7 +49,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
 
   // Update a note
   fastify.put<{ Params: NoteIdParams; Body: UpdateNoteDTO }>(
-    `${options.prefix}/:id`,
+    "/:id",
     {
       preHandler: [
         validateParams(noteIdParamsSchema),
@@ -69,7 +64,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
 
   // Delete a note
   fastify.delete<{ Params: NoteIdParams }>(
-    `${options.prefix}/:id`,
+    "/:id",
     {
       preHandler: validateParams(noteIdParamsSchema),
     },

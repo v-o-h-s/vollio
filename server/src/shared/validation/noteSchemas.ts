@@ -43,7 +43,11 @@ export interface NoteIdParams {
 export const noteIdParamsSchema: JSONSchemaType<NoteIdParams> = {
   type: "object",
   properties: {
-    id: { type: "string" },
+    id: {
+      type: "string",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+    },
   },
   required: ["id"],
   additionalProperties: false,

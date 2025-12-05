@@ -3,16 +3,15 @@
  * Simplified version using basic fetchBaseQuery without custom error handling
  */
 
-import {
-  createApi,
-  fetchBaseQuery,
-} from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { annotationEndpoints } from "./endpoints/annotationEndpoints";
 import { folderEndpoints } from "./endpoints/folderEndpoints";
 import { highlightEndpoints } from "./endpoints/highlightEndpoints";
 import { notesEndpoints } from "./endpoints/notesEndpoints";
 import { pdfEndpoints } from "./endpoints/pdfEndpoints";
 import { summaryEndpoints } from "./endpoints/summaryEndpoints";
+
+import { googleClassroomEndpoints } from "./endpoints/googleClassroomEndpoints";
 
 // Simple base query configuration
 const baseQuery = fetchBaseQuery({
@@ -39,6 +38,7 @@ export const apiSlice = createApi({
     ...highlightEndpoints(builder),
     ...folderEndpoints(builder),
     ...summaryEndpoints(builder),
+    ...googleClassroomEndpoints(builder),
   }),
 });
 
@@ -70,6 +70,7 @@ export const {
   useCreateOrUpdateSummaryMutation,
   useUpdateSummaryMutation,
   useDeleteSummaryMutation,
+  useConnectGoogleClassroomMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

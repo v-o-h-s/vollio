@@ -50,7 +50,7 @@ import { DraggableFolder } from "./DraggableFolder";
 import { DragOverlayContent } from "./DragOverlay";
 import { TreeView } from "./TreeView";
 import { RenameDialog } from "./RenameDialog";
-import { FileText, FolderOpen, Upload } from "lucide-react";
+import { FileText, FolderOpen, Upload, GraduationCap } from "lucide-react";
 import { Logger } from "@/lib/utils/logger";
 import { PDFDirectoryLoadingState } from "./PDFDirectoryLoadingState";
 
@@ -527,6 +527,17 @@ export function PDFDirectoryView({
             <Button
               variant="outline"
               size="sm"
+              onClick={() => {
+                window.location.href =
+                  "/api/v1/integrations/lms/google-classroom/connect";
+              }}
+            >
+              <GraduationCap className="h-4 w-4 mr-2" />
+              Add Classroom
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => fileInputRef.current?.click()}
             >
               <Upload className="h-4 w-4 mr-2" />
@@ -787,7 +798,6 @@ export function PDFDirectoryView({
             />
           ) : null}
         </DragOverlay>
-
       </div>
     </DndContext>
   );

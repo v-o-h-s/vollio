@@ -1,3 +1,4 @@
+import "dotenv/config";
 import qs from "querystring";
 import { randomBytes } from "crypto";
 import { IGoogleClassroomService } from "../../domain/services/IGoogleClassroomService";
@@ -6,8 +7,11 @@ import { ServerError } from "../../shared/errors/ServerError";
 
 export class GoogleClassroomService implements IGoogleClassroomService {
   private clientId = process.env.GOOGLE_CLIENT_ID!;
-  private redirectUri = process.env.GOOGLE_REDIRECT_URI!;
+  private redirectUri =
+    process.env.GOOGLE_CLASSROOM_REDIRECT_URI! ||
+    "http://localhost:3000/api/v1/integrations/lms/google-classroom/callback";
   private clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
+
   private scopes = [
     "https://www.googleapis.com/auth/classroom.courses.readonly",
     "https://www.googleapis.com/auth/drive.readonly",
