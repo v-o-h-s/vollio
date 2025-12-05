@@ -6,6 +6,8 @@ import { CheckTokenStatusUseCase } from "../../application/use-cases/google-Clas
 import { RefreshTokenAndUpdateTheDatabaseUseCase } from "../../application/use-cases/google-Classroom/RefreshTokenAndUpdateTheDatabaseUseCase";
 import { DisconnectGoogleClassroomUseCase } from "../../application/use-cases/google-Classroom/DisconnectGoogleClassroomUseCase";
 import { GetCoursesUseCase } from "../../application/use-cases/google-Classroom/GetCoursesUseCase";
+import { IsConnectedToGoogleClassroomUseCase } from "../../application/use-cases/google-Classroom/IsConnectedToGoogleClassroomUseCase";
+import { GetFilesByCourseIdUseCase } from "../../application/use-cases/google-Classroom/GetFilesByCourseIdUseCase";
 
 export class GoogleClassroomController {
   private googleClassroomService: GoogleClassroomService;
@@ -14,13 +16,18 @@ export class GoogleClassroomController {
   private refreshTokenUseCase: RefreshTokenAndUpdateTheDatabaseUseCase;
   private disconnectUseCase: DisconnectGoogleClassroomUseCase;
   private getCoursesUseCase: GetCoursesUseCase;
+  private isConnectedUseCase: IsConnectedToGoogleClassroomUseCase;
+  private getFilesByCourseIdUseCase: GetFilesByCourseIdUseCase;
+  
   constructor(
     googleClassroomService: GoogleClassroomService,
     fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase,
     checkTokenStatusUseCase: CheckTokenStatusUseCase,
     refreshTokenUseCase: RefreshTokenAndUpdateTheDatabaseUseCase,
     disconnectUseCase: DisconnectGoogleClassroomUseCase,
-    getCoursesUseCase: GetCoursesUseCase
+    getCoursesUseCase: GetCoursesUseCase,
+    isConnectedUseCase: IsConnectedToGoogleClassroomUseCase,
+    getFilesByCourseIdUseCase: GetFilesByCourseIdUseCase
   ) {
     this.googleClassroomService = googleClassroomService;
     this.fromCodeToDatabaseUseCase = fromCodeToDatabaseUseCase;
@@ -28,6 +35,8 @@ export class GoogleClassroomController {
     this.refreshTokenUseCase = refreshTokenUseCase;
     this.disconnectUseCase = disconnectUseCase;
     this.getCoursesUseCase = getCoursesUseCase;
+    this.isConnectedUseCase = isConnectedUseCase;
+    this.getFilesByCourseIdUseCase = getFilesByCourseIdUseCase;
   }
 
   async connect(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -168,7 +177,33 @@ export class GoogleClassroomController {
       error: null,
     });
   }
-  async getCourses(
+ 
+
+  async getConnectionStatus(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        message: "User not authenticated",
+        data: null,
+        error: "Unauthorized",
+      });
+      return;
+    }
+
+    const isConnected = await this.isConnectedUseCase.execute();
+    reply.status(200).send({
+      success: true,
+      message: "Connection status retrieved successfully",
+      data: { isConnected },
+      error: null,
+    });
+  }
+
+   async getCourses(
     request: FastifyRequest,
     reply: FastifyReply
   ): Promise<any> {
@@ -188,6 +223,32 @@ export class GoogleClassroomController {
       success: true,
       message: "Courses retrieved successfully",
       data: courses,
+      error: null,
+    });
+  }
+
+  async getFilesByCourseId(
+    request: FastifyRequest<{ Params: { courseId: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        message: "User not authenticated",
+        data: null,
+        error: "Unauthorized",
+      });
+      return;
+    }
+
+    const { courseId } = request.params;
+
+    const files = await this.getFilesByCourseIdUseCase.execute(courseId);
+    reply.status(200).send({
+      success: true,
+      message: "Course materials retrieved successfully",
+      data: files,
       error: null,
     });
   }

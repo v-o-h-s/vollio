@@ -61,6 +61,23 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     );
     return googleClassroomController.getCourses(request, reply);
   });
+
+  fastify.get(`${opts.prefix}/status`, async (request, reply) => {
+    const googleClassroomController = request.diScope.resolve(
+      "googleClassroomController"
+    );
+    return googleClassroomController.getConnectionStatus(request, reply);
+  });
+
+  fastify.get<{ Params: { courseId: string } }>(
+    `${opts.prefix}/courses/:courseId/files`,
+    async (request, reply) => {
+      const googleClassroomController = request.diScope.resolve(
+        "googleClassroomController"
+      );
+      return googleClassroomController.getFilesByCourseId(request, reply);
+    }
+  );
 };
 
 export const googleClassroomRoutes = fp(googleClassroomRoutesHandler, {

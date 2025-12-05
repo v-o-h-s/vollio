@@ -25,19 +25,21 @@ export class UserGoogleClassroomRepository
   }
 
   async updateTokens(tokens: Partial<GoogleOAuthTokenResponse>): Promise<void> {
-    const updateData: Record<string, any> = {};
+    // Build upsert payload with only the fields to update
+    const upsertData: Record<string, any> = {};
     
-    if (tokens.access_token) updateData.access_token = tokens.access_token;
-    if (tokens.expires_in !== undefined) updateData.expires_in = tokens.expires_in;
-    if (tokens.token_expiry) updateData.token_expiry = tokens.token_expiry;
-    if (tokens.scope) updateData.scope = tokens.scope;
-    if (tokens.token_type) updateData.token_type = tokens.token_type;
-    // Only update refresh_token if explicitly provided
-    if (tokens.refresh_token) updateData.refresh_token = tokens.refresh_token;
+    if (tokens.access_token) upsertData.access_token = tokens.access_token;
+    if (tokens.expires_in !== undefined) upsertData.expires_in = tokens.expires_in;
+    if (tokens.token_expiry) upsertData.token_expiry = tokens.token_expiry;
+    if (tokens.scope) upsertData.scope = tokens.scope;
+    if (tokens.token_type) upsertData.token_type = tokens.token_type;
+    if (tokens.refresh_token) upsertData.refresh_token = tokens.refresh_token;
 
+    // Use upsert to safely update without needing explicit WHERE clause
+    // Supabase RLS will still ensure user isolation
     const { error } = await this.supabaseClient
       .from("user_google_classroom")
-      .update(updateData);
+      .upsert(upsertData);
       
     if (error) throw new DatabaseError(error);
   }

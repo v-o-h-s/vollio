@@ -5,6 +5,7 @@ import { IGoogleClassroomService } from "../../domain/services/IGoogleClassroomS
 import {
   GoogleOAuthTokenResponse,
   GoogleOAuthRawResponse,
+  ClassroomCourse,
 } from "../../shared/types/lms";
 import { ServerError } from "../../shared/errors/ServerError";
 
@@ -16,9 +17,11 @@ export class GoogleClassroomService implements IGoogleClassroomService {
   private clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
 
   private scopes = [
-    "https://www.googleapis.com/auth/classroom.courses.readonly",
-    "https://www.googleapis.com/auth/drive.readonly",
-  ];
+  "https://www.googleapis.com/auth/classroom.courses.readonly", // list courses
+  "https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly", // list posted files
+  "https://www.googleapis.com/auth/drive.readonly", // read file content or metadata
+];
+
 
   getOAuthUrl(): { url: string; state: string } {
     // Generate a cryptographically secure random state for CSRF protection
@@ -103,7 +106,7 @@ export class GoogleClassroomService implements IGoogleClassroomService {
       token_expiry: tokenExpiry,
     };
   }
-  async getCourses(accessToken: string): Promise<any> {
+  async getCourses(accessToken: string): Promise<ClassroomCourse[]> {
     const res = await fetch("https://classroom.googleapis.com/v1/courses", {
       headers: {
         "Authorization": `Bearer ${accessToken}`,
@@ -119,5 +122,26 @@ export class GoogleClassroomService implements IGoogleClassroomService {
     }
 
     return data.courses ?? [];
+  }
+  async getFilesByCourseId(accessToken: string, courseId: string): Promise<any[]> {
+    const res = await fetch(
+      `https://classroom.googleapis.com/v1/courses/${courseId}/courseWorkMaterials`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const data = await res.json() as any;
+
+    if (!res.ok) {
+      throw new ServerError(
+        `Failed to fetch course materials: ${JSON.stringify(data)}`
+      );
+    }
+
+    // Google Classroom API returns materials in 'materials' array
+    return data.materials ?? [];
   }
 }
