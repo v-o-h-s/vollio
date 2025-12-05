@@ -1,7 +1,6 @@
-import { INoteRepository } from "../../domain/repositories/INoteRepository";
-import { NotFoundError } from "../../shared/errors/NotFoundError";
-import { AuthError, AuthErrorSubType } from "../../shared/errors/AuthError";
-
+import { INoteRepository } from "../../../domain/repositories/INoteRepository";
+import { NotFoundError } from "../../../shared/errors/NotFoundError";
+import { AuthError, AuthErrorSubType } from "../../../shared/errors/AuthError";
 interface DeleteNoteInput {
   noteId: string;
   userId: string;

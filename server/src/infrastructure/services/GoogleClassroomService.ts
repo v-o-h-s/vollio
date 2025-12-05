@@ -1,4 +1,5 @@
 import qs from "querystring";
+import { randomBytes } from "crypto";
 import { IGoogleClassroomService } from "../../domain/services/IGoogleClassroomService";
 import { GoogleOAuthTokenResponse } from "../../shared/types/lms";
 import { ServerError } from "../../shared/errors/ServerError";
@@ -11,7 +12,11 @@ export class GoogleClassroomService implements IGoogleClassroomService {
     "https://www.googleapis.com/auth/classroom.courses.readonly",
     "https://www.googleapis.com/auth/drive.readonly",
   ];
-  getOAuthUrl(): string {
+
+  getOAuthUrl(): { url: string; state: string } {
+    // Generate a cryptographically secure random state for CSRF protection
+    const state = randomBytes(32).toString("hex");
+
     const params = qs.stringify({
       client_id: this.clientId,
       redirect_uri: this.redirectUri,
@@ -19,10 +24,15 @@ export class GoogleClassroomService implements IGoogleClassroomService {
       scope: this.scopes.join(" "),
       access_type: "offline",
       prompt: "consent",
+      state, // Include state parameter for CSRF protection
     });
-    return `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+
+    return {
+      url: `https://accounts.google.com/o/oauth2/v2/auth?${params}`,
+      state,
+    };
   }
-  async exchangeCode(code: string): Promise<GoogleOAuthTokenResponse> {
+  async exchangeCodeForTokens(code: string): Promise<GoogleOAuthTokenResponse> {
     const res = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },

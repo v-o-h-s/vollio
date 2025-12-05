@@ -1,8 +1,8 @@
-import { INoteRepository } from "../../domain/repositories/INoteRepository";
-import { Note } from "../../domain/entities/Note";
-import { UpdateNoteDTO } from "../../shared/validation/noteSchemas";
-import { NotFoundError } from "../../shared/errors/NotFoundError";
-import { AuthError, AuthErrorSubType } from "../../shared/errors/AuthError";
+import { INoteRepository } from "../../../domain/repositories/INoteRepository";
+import { Note } from "../../../domain/entities/Note";
+import { UpdateNoteDTO } from "../../../shared/validation/noteSchemas";
+import { NotFoundError } from "../../../shared/errors/NotFoundError";
+import { AuthError, AuthErrorSubType } from "../../../shared/errors/AuthError";
 
 interface UpdateNoteInput {
   noteId: string;

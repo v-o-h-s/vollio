@@ -1,9 +1,9 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { CreateNoteUseCase } from "../../application/use-cases/CreateNoteUseCase";
-import { UpdateNoteUseCase } from "../../application/use-cases/UpdateNoteUseCase";
-import { DeleteNoteUseCase } from "../../application/use-cases/DeleteNoteUseCase";
-import { GetNoteUseCase } from "../../application/use-cases/GetNoteByIdUseCase";
-import { GetAllUserNotesUseCase } from "../../application/use-cases/GetAllUserNotesUseCase";
+import { CreateNoteUseCase } from "../../application/use-cases/notes/CreateNoteUseCase";
+import { UpdateNoteUseCase } from "../../application/use-cases/notes/UpdateNoteUseCase";
+import { DeleteNoteUseCase } from "../../application/use-cases/notes/DeleteNoteUseCase";
+import { GetNoteUseCase } from "../../application/use-cases/notes/GetNoteByIdUseCase";
+import { GetAllUserNotesUseCase } from "../../application/use-cases/notes/GetAllUserNotesUseCase";
 import {
   CreateNoteDTO,
   UpdateNoteDTO,

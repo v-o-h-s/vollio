@@ -1,6 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { IUserGoogleClassroomRepository } from "../../domain/repositories/IUserGoogleClassroomRepository";
 import { GoogleOAuthTokenResponse } from "../../shared/types/lms";
+import { DatabaseError } from "../../shared/errors/DatabaseError";
 
 export class UserGoogleClassroomRepository
   implements IUserGoogleClassroomRepository
@@ -10,10 +11,7 @@ export class UserGoogleClassroomRepository
     this.supabaseClient = supabaseClient;
   }
 
-  async saveTokens(
-    userId: string,
-    tokens: GoogleOAuthTokenResponse
-  ): Promise<void> {
+  async saveTokens(tokens: GoogleOAuthTokenResponse): Promise<void> {
     const { data, error } = await this.supabaseClient
       .from("user_google_classroom")
       .upsert({
@@ -23,15 +21,14 @@ export class UserGoogleClassroomRepository
         scope: tokens.scope,
         token_type: tokens.token_type,
       });
-    if (error) throw error;
+    if (error) throw new DatabaseError(error);
   }
-  async getTokens(userId: string): Promise<GoogleOAuthTokenResponse | null> {
+  async getTokens(): Promise<GoogleOAuthTokenResponse | null> {
     const { data, error } = await this.supabaseClient
       .from("user_google_classroom")
       .select()
-      .eq("user_id", userId)
       .single();
-    if (error) throw error;
+    if (error) throw new DatabaseError(error);
     return data;
   }
 }

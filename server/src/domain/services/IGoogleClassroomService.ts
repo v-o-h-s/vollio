@@ -1,6 +1,6 @@
 import { GoogleOAuthTokenResponse } from "../../shared/types/lms";
 
 export interface IGoogleClassroomService {
-  getOAuthUrl(): string;
-  exchangeCode(code: string): Promise<GoogleOAuthTokenResponse>;
+  getOAuthUrl(): { url: string; state: string };
+  exchangeCodeForTokens(code: string): Promise<GoogleOAuthTokenResponse>;
 }

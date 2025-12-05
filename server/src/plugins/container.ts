@@ -3,14 +3,16 @@ import fastifyPlugin from "fastify-plugin";
 import { asClass, asFunction, Lifetime, InjectionMode, asValue } from "awilix";
 import { createUserClient } from "../infrastructure/database/supabase/supabase";
 import { NoteRepository } from "../infrastructure/repositories/NoteRepository";
-import { CreateNoteUseCase } from "../application/use-cases/CreateNoteUseCase";
-import { UpdateNoteUseCase } from "../application/use-cases/UpdateNoteUseCase";
-import { DeleteNoteUseCase } from "../application/use-cases/DeleteNoteUseCase";
-import { GetNoteUseCase } from "../application/use-cases/GetNoteByIdUseCase";
-import { GetAllUserNotesUseCase } from "../application/use-cases/GetAllUserNotesUseCase";
-
+import { CreateNoteUseCase } from "../application/use-cases/notes/CreateNoteUseCase";
+import { UpdateNoteUseCase } from "../application/use-cases/notes/UpdateNoteUseCase";
+import { DeleteNoteUseCase } from "../application/use-cases/notes/DeleteNoteUseCase";
+import { GetNoteUseCase } from "../application/use-cases/notes/GetNoteByIdUseCase";
+import { GetAllUserNotesUseCase } from "../application/use-cases/notes/GetAllUserNotesUseCase";
 import { NoteController } from "../interface/controllers/note.controller";
-
+import { GoogleClassroomService } from "../infrastructure/services/GoogleClassroomService";
+import { UserGoogleClassroomRepository } from "../infrastructure/repositories/UserGoogleClassroomRepository";
+import { GoogleClassroomController } from "../interface/controllers/googleClassroom.controller";
+import { FromCodeToDatabaseUseCase } from "../application/use-cases/google-Classroom/FromCodeToDatabaseUseCase";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.addHook("onRequest", async (request, reply) => {
     const { supabase } = await createUserClient(request);
@@ -20,13 +22,29 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.diContainer.register({
-    noteRepository: asClass(NoteRepository, {
+    userGoogleClassroomRepository: asClass(UserGoogleClassroomRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    googleClassroomService: asClass(GoogleClassroomService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    googleClassroomController: asClass(GoogleClassroomController, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    fromCodeToDatabaseUseCase: asClass(FromCodeToDatabaseUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
   });
 
   fastify.diContainer.register({
+    noteRepository: asClass(NoteRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
     createNoteUseCase: asClass(CreateNoteUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
