@@ -30,7 +30,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   );
 
   // Get all notes for the authenticated user
-  fastify.get("/", async (request, reply) => {
+  fastify.get("/api/v1/notes/", async (request, reply) => {
     const noteController = request.diScope.resolve("noteController");
     return noteController.getAllNotes(request, reply);
   });

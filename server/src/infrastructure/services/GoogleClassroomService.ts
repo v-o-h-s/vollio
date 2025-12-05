@@ -103,4 +103,21 @@ export class GoogleClassroomService implements IGoogleClassroomService {
       token_expiry: tokenExpiry,
     };
   }
+  async getCourses(accessToken: string): Promise<any> {
+    const res = await fetch("https://classroom.googleapis.com/v1/courses", {
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+      },
+    });
+
+    const data = await res.json() as any;
+
+    if (!res.ok) {
+      throw new ServerError(
+        `Failed to fetch Google Classroom courses: ${JSON.stringify(data)}`
+      );
+    }
+
+    return data.courses ?? [];
+  }
 }

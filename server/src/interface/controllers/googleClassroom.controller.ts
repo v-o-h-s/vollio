@@ -5,6 +5,7 @@ import { FromCodeToDatabaseUseCase } from "../../application/use-cases/google-Cl
 import { CheckTokenStatusUseCase } from "../../application/use-cases/google-Classroom/CheckTokenStatusUseCase";
 import { RefreshTokenAndUpdateTheDatabaseUseCase } from "../../application/use-cases/google-Classroom/RefreshTokenAndUpdateTheDatabaseUseCase";
 import { DisconnectGoogleClassroomUseCase } from "../../application/use-cases/google-Classroom/DisconnectGoogleClassroomUseCase";
+import { GetCoursesUseCase } from "../../application/use-cases/google-Classroom/GetCoursesUseCase";
 
 export class GoogleClassroomController {
   private googleClassroomService: GoogleClassroomService;
@@ -12,19 +13,21 @@ export class GoogleClassroomController {
   private checkTokenStatusUseCase: CheckTokenStatusUseCase;
   private refreshTokenUseCase: RefreshTokenAndUpdateTheDatabaseUseCase;
   private disconnectUseCase: DisconnectGoogleClassroomUseCase;
-
+  private getCoursesUseCase: GetCoursesUseCase;
   constructor(
     googleClassroomService: GoogleClassroomService,
     fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase,
     checkTokenStatusUseCase: CheckTokenStatusUseCase,
     refreshTokenUseCase: RefreshTokenAndUpdateTheDatabaseUseCase,
-    disconnectUseCase: DisconnectGoogleClassroomUseCase
+    disconnectUseCase: DisconnectGoogleClassroomUseCase,
+    getCoursesUseCase: GetCoursesUseCase
   ) {
     this.googleClassroomService = googleClassroomService;
     this.fromCodeToDatabaseUseCase = fromCodeToDatabaseUseCase;
     this.checkTokenStatusUseCase = checkTokenStatusUseCase;
     this.refreshTokenUseCase = refreshTokenUseCase;
     this.disconnectUseCase = disconnectUseCase;
+    this.getCoursesUseCase = getCoursesUseCase;
   }
 
   async connect(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -162,6 +165,29 @@ export class GoogleClassroomController {
       success: true,
       message: "Disconnected from Google Classroom successfully",
       data: null,
+      error: null,
+    });
+  }
+  async getCourses(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<any> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        message: "User not authenticated",
+        data: null,
+        error: "Unauthorized",
+      });
+      return;
+    }
+
+    const courses = await this.getCoursesUseCase.execute();
+    reply.status(200).send({
+      success: true,
+      message: "Courses retrieved successfully",
+      data: courses,
       error: null,
     });
   }

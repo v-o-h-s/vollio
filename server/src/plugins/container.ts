@@ -16,6 +16,8 @@ import { FromCodeToDatabaseUseCase } from "../application/use-cases/google-Class
 import { RefreshTokenAndUpdateTheDatabaseUseCase } from "../application/use-cases/google-Classroom/RefreshTokenAndUpdateTheDatabaseUseCase";
 import { CheckTokenStatusUseCase } from "../application/use-cases/google-Classroom/CheckTokenStatusUseCase";
 import { DisconnectGoogleClassroomUseCase } from "../application/use-cases/google-Classroom/DisconnectGoogleClassroomUseCase";
+import { GetCoursesUseCase } from "../application/use-cases/google-Classroom/GetCoursesUseCase";
+import { EnsureValidTokenUseCase } from "../application/use-cases/google-Classroom/EnsureValidTokenUseCase";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.addHook("onRequest", async (request, reply) => {
     const { supabase } = await createUserClient(request);
@@ -53,6 +55,15 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
+    getCoursesUseCase: asClass(GetCoursesUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    ensureValidTokenUseCase: asClass(EnsureValidTokenUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    
   });
 
   fastify.diContainer.register({

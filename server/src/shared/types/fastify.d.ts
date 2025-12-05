@@ -9,6 +9,7 @@ import { UpdateNoteUseCase } from "../../application/use-cases/notes/UpdateNoteU
 import { DeleteNoteUseCase } from "../../application/use-cases/DeleteNoteUseCase";
 import { GetNoteUseCase } from "../../application/use-cases/GetNoteByIdUseCase";
 import { GetAllUserNotesUseCase } from "../../application/use-cases/GetAllUserNotesUseCase";
+import { EnsureValidTokenUseCase } from "../../application/use-cases/google-Classroom/EnsureValidTokenUseCase";
 
 export interface User {
   id: string;
@@ -39,6 +40,11 @@ export interface DIContainer {
   googleClassroomService: GoogleClassroomService;
   googleClassroomController: GoogleClassroomController;
   fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase;
+  refreshTokenAndUpdateTheDatabaseUseCase: RefreshTokenAndUpdateTheDatabaseUseCase;
+  checkTokenStatusUseCase: CheckTokenStatusUseCase;
+  disconnectGoogleClassroomUseCase: DisconnectGoogleClassroomUseCase;
+  getCoursesUseCase: GetCoursesUseCase;
+  ensureValidTokenUseCase: EnsureValidTokenUseCase;
 }
 
 declare module "fastify" {
