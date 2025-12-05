@@ -1,4 +1,3 @@
-import { FastifyAwilixOptions } from "@fastify/awilix";
 import {
   FastifyInstance,
   FastifyPluginAsync,
@@ -15,7 +14,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
   opts: FastifyPluginOptions
 ): Promise<void> => {
-  fastify.get(`${opts.prefix}/connect`, async (request, reply) => {
+  fastify.get("/connect", async (request, reply) => {
     const googleClassroomController = request.diScope.resolve(
       "googleClassroomController"
     );
@@ -23,7 +22,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   });
 
   fastify.get<{ Querystring: GoogleCallbackQuery }>(
-    `${opts.prefix}/callback`,
+    "/callback",
     {
       preHandler: validateQuery(GoogleCallbackQuerySchema),
     },
@@ -34,6 +33,27 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
       return googleClassroomController.callback(request, reply);
     }
   );
+
+  fastify.get("/refresh", async (request, reply) => {
+    const googleClassroomController = request.diScope.resolve(
+      "googleClassroomController"
+    );
+    return googleClassroomController.refreshAccessToken(request, reply);
+  });
+
+  fastify.get("/check", async (request, reply) => {
+    const googleClassroomController = request.diScope.resolve(
+      "googleClassroomController"
+    );
+    return googleClassroomController.checkTokenStatus(request, reply);
+  });
+
+  fastify.delete("/disconnect", async (request, reply) => {
+    const googleClassroomController = request.diScope.resolve(
+      "googleClassroomController"
+    );
+    return googleClassroomController.disconnect(request, reply);
+  });
 };
 
 export const googleClassroomRoutes = fp(googleClassroomRoutesHandler, {

@@ -2,7 +2,10 @@ import "dotenv/config";
 import qs from "querystring";
 import { randomBytes } from "crypto";
 import { IGoogleClassroomService } from "../../domain/services/IGoogleClassroomService";
-import { GoogleOAuthTokenResponse } from "../../shared/types/lms";
+import {
+  GoogleOAuthTokenResponse,
+  GoogleOAuthRawResponse,
+} from "../../shared/types/lms";
 import { ServerError } from "../../shared/errors/ServerError";
 
 export class GoogleClassroomService implements IGoogleClassroomService {
@@ -55,5 +58,49 @@ export class GoogleClassroomService implements IGoogleClassroomService {
         `Google token exchange failed: ${JSON.stringify(data)}`
       );
     return data;
+  }
+  async refreshAccessToken(
+    refreshToken: string
+  ): Promise<GoogleOAuthTokenResponse> {
+    const res = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        refresh_token: refreshToken,
+        client_id: this.clientId,
+        client_secret: this.clientSecret,
+        grant_type: "refresh_token",
+      }),
+    });
+
+    const data = (await res.json()) as GoogleOAuthRawResponse;
+
+    if (!res.ok || "error" in data) {
+      if ("error" in data && data.error === "invalid_grant") {
+        // refresh token is dead — user must reconnect Google Classroom
+        throw new ServerError("Google refresh token expired or revoked.");
+      }
+
+      throw new ServerError(
+        `Google token refresh failed: ${JSON.stringify(data)}`
+      );
+    }
+
+    // Calculate token expiry timestamp
+    const tokenExpiry = new Date(
+      Date.now() + data.expires_in * 1000
+    ).toISOString();
+
+    // refresh_token is usually NOT returned again
+    return {
+      access_token: data.access_token,
+      expires_in: data.expires_in,
+      refresh_token: refreshToken, // keep the old one
+      scope: data.scope,
+      token_type: data.token_type,
+      token_expiry: tokenExpiry,
+    };
   }
 }

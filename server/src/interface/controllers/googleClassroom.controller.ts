@@ -2,16 +2,29 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { GoogleCallbackQuery } from "../../shared/validation/googleClassroomSchemas";
 import { GoogleClassroomService } from "../../infrastructure/services/GoogleClassroomService";
 import { FromCodeToDatabaseUseCase } from "../../application/use-cases/google-Classroom/FromCodeToDatabaseUseCase";
+import { CheckTokenStatusUseCase } from "../../application/use-cases/google-Classroom/CheckTokenStatusUseCase";
+import { RefreshTokenAndUpdateTheDatabaseUseCase } from "../../application/use-cases/google-Classroom/RefreshTokenAndUpdateTheDatabaseUseCase";
+import { DisconnectGoogleClassroomUseCase } from "../../application/use-cases/google-Classroom/DisconnectGoogleClassroomUseCase";
 
 export class GoogleClassroomController {
   private googleClassroomService: GoogleClassroomService;
   private fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase;
+  private checkTokenStatusUseCase: CheckTokenStatusUseCase;
+  private refreshTokenUseCase: RefreshTokenAndUpdateTheDatabaseUseCase;
+  private disconnectUseCase: DisconnectGoogleClassroomUseCase;
+
   constructor(
     googleClassroomService: GoogleClassroomService,
-    fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase
+    fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase,
+    checkTokenStatusUseCase: CheckTokenStatusUseCase,
+    refreshTokenUseCase: RefreshTokenAndUpdateTheDatabaseUseCase,
+    disconnectUseCase: DisconnectGoogleClassroomUseCase
   ) {
     this.googleClassroomService = googleClassroomService;
     this.fromCodeToDatabaseUseCase = fromCodeToDatabaseUseCase;
+    this.checkTokenStatusUseCase = checkTokenStatusUseCase;
+    this.refreshTokenUseCase = refreshTokenUseCase;
+    this.disconnectUseCase = disconnectUseCase;
   }
 
   async connect(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -74,6 +87,80 @@ export class GoogleClassroomController {
     reply.status(200).send({
       success: true,
       message: "Connected to Google Classroom successfully",
+      data: null,
+      error: null,
+    });
+  }
+
+  async refreshAccessToken(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        message: "User not authenticated",
+        data: null,
+        error: "Unauthorized",
+      });
+      return;
+    }
+    await this.refreshTokenUseCase.execute();
+
+    reply.status(200).send({
+      success: true,
+      message: "Access token refreshed successfully",
+      data: null,
+      error: null,
+    });
+  }
+
+  async checkTokenStatus(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        message: "User not authenticated",
+        data: null,
+        error: "Unauthorized",
+      });
+      return;
+    }
+
+    const isValid = await this.checkTokenStatusUseCase.execute();
+
+    reply.status(200).send({
+      success: true,
+      message: "Token status retrieved successfully",
+      data: { isValid: isValid },
+      error: null,
+    });
+  }
+
+  async disconnect(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        message: "User not authenticated",
+        data: null,
+        error: "Unauthorized",
+      });
+      return;
+    }
+
+    await this.disconnectUseCase.execute();
+
+    reply.status(200).send({
+      success: true,
+      message: "Disconnected from Google Classroom successfully",
       data: null,
       error: null,
     });

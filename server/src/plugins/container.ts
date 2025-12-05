@@ -13,6 +13,9 @@ import { GoogleClassroomService } from "../infrastructure/services/GoogleClassro
 import { UserGoogleClassroomRepository } from "../infrastructure/repositories/UserGoogleClassroomRepository";
 import { GoogleClassroomController } from "../interface/controllers/googleClassroom.controller";
 import { FromCodeToDatabaseUseCase } from "../application/use-cases/google-Classroom/FromCodeToDatabaseUseCase";
+import { RefreshTokenAndUpdateTheDatabaseUseCase } from "../application/use-cases/google-Classroom/RefreshTokenAndUpdateTheDatabaseUseCase";
+import { CheckTokenStatusUseCase } from "../application/use-cases/google-Classroom/CheckTokenStatusUseCase";
+import { DisconnectGoogleClassroomUseCase } from "../application/use-cases/google-Classroom/DisconnectGoogleClassroomUseCase";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.addHook("onRequest", async (request, reply) => {
     const { supabase } = await createUserClient(request);
@@ -35,6 +38,18 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     fromCodeToDatabaseUseCase: asClass(FromCodeToDatabaseUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    refreshTokenAndUpdateTheDatabaseUseCase: asClass(RefreshTokenAndUpdateTheDatabaseUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    checkTokenStatusUseCase: asClass(CheckTokenStatusUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    disconnectGoogleClassroomUseCase: asClass(DisconnectGoogleClassroomUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
