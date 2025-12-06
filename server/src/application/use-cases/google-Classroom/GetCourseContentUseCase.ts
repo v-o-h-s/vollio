@@ -25,16 +25,31 @@ export class GetCourseContentUseCase {
       throw new Error("No access token available");
     }
 
-    const [announcements, courseWork] = await Promise.all([
-      this.googleClassroomService.getAnnouncementsByCourseId(
+    // Fetch announcements and course work with error handling
+    let announcements: any[] = [];
+    let courseWork: any[] = [];
+
+    try {
+      announcements = await this.googleClassroomService.getAnnouncementsByCourseId(
         tokens.access_token,
         courseId
-      ),
-      this.googleClassroomService.getCourseWorkMaterialsByCourseId(
+      );
+    } catch (error: any) {
+      console.warn(`Failed to fetch announcements for course ${courseId}:`, error.message);
+      // Gracefully handle 404 or other errors - return empty array
+      announcements = [];
+    }
+
+    try {
+      courseWork = await this.googleClassroomService.getCourseWorkMaterialsByCourseId(
         tokens.access_token,
         courseId
-      ),
-    ]);
+      );
+    } catch (error: any) {
+      console.warn(`Failed to fetch course work for course ${courseId}:`, error.message);
+      // Gracefully handle 404 or other errors - return empty array
+      courseWork = [];
+    }
 
     const formattedAnnouncements = (announcements || [])
       .map((announcement) => {

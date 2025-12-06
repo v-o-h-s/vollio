@@ -44,16 +44,28 @@ export class GetCoursesWithContentUseCase {
         if (!course.id)
           return { ...course, content: { announcements: [], materials: [] } };
 
-        const [announcements, courseWork] = await Promise.all([
-          this.googleClassroomService.getAnnouncementsByCourseId(
+        let announcements: any[] = [];
+        let courseWork: any[] = [];
+
+        try {
+          announcements = await this.googleClassroomService.getAnnouncementsByCourseId(
             tokens.access_token,
             course.id
-          ),
-          this.googleClassroomService.getCourseWorkMaterialsByCourseId(
+          );
+        } catch (error: any) {
+          console.warn(`Failed to fetch announcements for course ${course.id}:`, error.message);
+          announcements = [];
+        }
+
+        try {
+          courseWork = await this.googleClassroomService.getCourseWorkMaterialsByCourseId(
             tokens.access_token,
             course.id
-          ),
-        ]);
+          );
+        } catch (error: any) {
+          console.warn(`Failed to fetch course work for course ${course.id}:`, error.message);
+          courseWork = [];
+        }
 
         const formattedAnnouncements = (announcements || [])
           .map((announcement) => {
