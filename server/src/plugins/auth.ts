@@ -18,7 +18,12 @@ export const authPlugin = fp(async (fastify) => {
     const { data, error } = await supabase.auth.getClaims();
 
     if (error || !data || !data.claims) {
-      reply.status(401).send({ error: "Not authenticated" });
+      reply.status(401).send({
+        success: false,
+        status: 401,
+        data: null,
+        error: { message: "Not authenticated" },
+      });
       return;
     }
 
