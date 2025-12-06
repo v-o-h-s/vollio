@@ -32,10 +32,14 @@ export class GoogleDriveService implements IGoogleDriveService {
       }
       return null;
     } catch (error: any) {
-      if (error.code === 404) {
+      console.error("Google Drive API Error:", JSON.stringify(error, null, 2));
+      // Check for 404 in various properties as googleapis error structure can vary
+      if (error.code === 404 || error.status === 404 || (error.errors && error.errors[0]?.reason === 'notFound')) {
         return null;
       }
-      throw new ServerError("Failed to fetch file metadata from Google Drive");
+      throw new ServerError(
+        `Failed to fetch file metadata from Google Drive: ${error.message}`
+      );
     }
   }
   downloadFile(
