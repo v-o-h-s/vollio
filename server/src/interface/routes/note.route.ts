@@ -1,4 +1,9 @@
-import { FastifyInstance, FastifyPluginOptions, FastifyPlugin, FastifyPluginAsync } from "fastify";
+import {
+  FastifyInstance,
+  FastifyPluginOptions,
+  FastifyPlugin,
+  FastifyPluginAsync,
+} from "fastify";
 import fp from "fastify-plugin";
 import {
   validateBody,
