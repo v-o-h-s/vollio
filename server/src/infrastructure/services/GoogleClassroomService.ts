@@ -5,7 +5,7 @@ import { IGoogleClassroomService } from "../../domain/services/IGoogleClassroomS
 import {
   GoogleOAuthTokenResponse,
   GoogleOAuthRawResponse,
-  ClassroomCourse,
+  Course,
 } from "../../shared/types/lms/classroom";
 import { ServerError } from "../../shared/errors/ServerError";
 
@@ -106,7 +106,7 @@ export class GoogleClassroomService implements IGoogleClassroomService {
       token_expiry: tokenExpiry,
     };
   }
-  async getCourses(accessToken: string): Promise<ClassroomCourse[]> {
+  async getCourses(accessToken: string): Promise<Course[]> {
     const res = await fetch("https://classroom.googleapis.com/v1/courses", {
       headers: {
         Authorization: `Bearer ${accessToken}`,

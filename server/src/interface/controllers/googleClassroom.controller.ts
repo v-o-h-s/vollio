@@ -10,6 +10,7 @@ import { IsConnectedToGoogleClassroomUseCase } from "../../application/use-cases
 import { GetCourseContentUseCase } from "../../application/use-cases/google-Classroom/GetCourseContentUseCase";
 import { GetCoursesWithContentUseCase } from "../../application/use-cases/google-Classroom/GetCoursesWithContentUseCase";
 import { ClassroomAnnouncementResponse } from "../../shared/types/lms/classroom";
+import { AddFileFromGoogleDriveUseCase } from "../../application/use-cases/files/AddFileFromGoogleDriveUseCase";
 
 export class GoogleClassroomController {
   private googleClassroomService: GoogleClassroomService;
@@ -21,6 +22,7 @@ export class GoogleClassroomController {
   private isConnectedUseCase: IsConnectedToGoogleClassroomUseCase;
   private getCourseContentUseCase: GetCourseContentUseCase;
   private getCoursesWithContentUseCase: GetCoursesWithContentUseCase;
+  private addFileFromGoogleDriveUseCase: AddFileFromGoogleDriveUseCase;
 
   constructor(
     googleClassroomService: GoogleClassroomService,
@@ -31,7 +33,8 @@ export class GoogleClassroomController {
     getCoursesUseCase: GetCoursesUseCase,
     isConnectedUseCase: IsConnectedToGoogleClassroomUseCase,
     getCourseContentUseCase: GetCourseContentUseCase,
-    getCoursesWithContentUseCase: GetCoursesWithContentUseCase
+    getCoursesWithContentUseCase: GetCoursesWithContentUseCase,
+    addFileFromGoogleDriveUseCase: AddFileFromGoogleDriveUseCase
   ) {
     this.googleClassroomService = googleClassroomService;
     this.fromCodeToDatabaseUseCase = fromCodeToDatabaseUseCase;
@@ -42,6 +45,7 @@ export class GoogleClassroomController {
     this.isConnectedUseCase = isConnectedUseCase;
     this.getCourseContentUseCase = getCourseContentUseCase;
     this.getCoursesWithContentUseCase = getCoursesWithContentUseCase;
+    this.addFileFromGoogleDriveUseCase = addFileFromGoogleDriveUseCase;
   }
 
   async connect(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -275,6 +279,33 @@ export class GoogleClassroomController {
       success: true,
       message: "Course content retrieved successfully",
       data: content,
+      error: null,
+    });
+  }
+  async addFileFromGoogleDrive(
+    request: FastifyRequest<{
+      Body: { fileGoogleDriveId: string };
+    }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        message: "User not authenticated",
+        data: null,
+        error: "Unauthorized",
+      });
+      return;
+    }
+
+    const { fileGoogleDriveId } = request.body;
+
+    await this.addFileFromGoogleDriveUseCase.execute(fileGoogleDriveId);
+    reply.status(200).send({
+      success: true,
+      message: "File added successfully",
+      data: null,
       error: null,
     });
   }

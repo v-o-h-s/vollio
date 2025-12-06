@@ -21,7 +21,10 @@ import { EnsureValidTokenUseCase } from "../application/use-cases/google-Classro
 import { IsConnectedToGoogleClassroomUseCase } from "../application/use-cases/google-Classroom/IsConnectedToGoogleClassroomUseCase";
 import { GetCourseContentUseCase } from "../application/use-cases/google-Classroom/GetCourseContentUseCase";
 import { GetCoursesWithContentUseCase } from "../application/use-cases/google-Classroom/GetCoursesWithContentUseCase";
-
+import { AddFileFromGoogleDriveUseCase } from "../application/use-cases/files/AddFileFromGoogleDriveUseCase";
+import { GoogleDriveService } from "../infrastructure/services/GoogleDriveService";
+import { FileRepository } from "../infrastructure/repositories/FileRepository";
+import { IGoogleDriveService } from "../domain/services/IGoogleDriveService";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.addHook("onRequest", async (request, reply) => {
     const { supabase } = await createUserClient(request);
@@ -91,6 +94,18 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     isConnectedUseCase: asClass(IsConnectedToGoogleClassroomUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    fileRepository: asClass(FileRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    googleDriveService: asClass(GoogleDriveService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    addFileFromGoogleDriveUseCase: asClass(AddFileFromGoogleDriveUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

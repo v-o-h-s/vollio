@@ -4,8 +4,7 @@ import { GoogleOAuthTokenResponse } from "../../shared/types/lms/classroom";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 
 export class UserGoogleClassroomRepository
-  implements IUserGoogleClassroomRepository
-{
+  implements IUserGoogleClassroomRepository {
   private supabaseClient: SupabaseClient;
   constructor(supabaseClient: SupabaseClient) {
     this.supabaseClient = supabaseClient;
@@ -73,4 +72,5 @@ export class UserGoogleClassroomRepository
     const tokenExpiry = new Date(tokens.token_expiry);
     return tokenExpiry > new Date();
   }
+  
 }
