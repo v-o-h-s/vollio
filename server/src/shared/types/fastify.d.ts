@@ -10,7 +10,7 @@ import { DeleteNoteUseCase } from "../../application/use-cases/DeleteNoteUseCase
 import { GetNoteUseCase } from "../../application/use-cases/GetNoteByIdUseCase";
 import { GetAllUserNotesUseCase } from "../../application/use-cases/GetAllUserNotesUseCase";
 import { EnsureValidTokenUseCase } from "../../application/use-cases/google-Classroom/EnsureValidTokenUseCase";
-
+import { FileController } from "../../interface/controllers/file.controller";
 export interface User {
   id: string;
   email?: string;
@@ -28,6 +28,8 @@ declare module "@fastify/session" {
 
 // Define the shape of our DI container
 export interface DIContainer {
+  fileController: FileController;
+  getFileFromGoogleDriveUseCase: GetFileFromGoogleDriveUseCase;
   supabaseClient: SupabaseClient;
   noteRepository: NoteRepository;
   createNoteUseCase: CreateNoteUseCase;

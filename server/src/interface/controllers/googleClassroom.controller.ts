@@ -282,31 +282,5 @@ export class GoogleClassroomController {
       error: null,
     });
   }
-  async addFileFromGoogleDrive(
-    request: FastifyRequest<{
-      Body: { fileGoogleDriveId: string };
-    }>,
-    reply: FastifyReply
-  ): Promise<void> {
-    const userId = request.user?.id;
-    if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "User not authenticated",
-        data: null,
-        error: "Unauthorized",
-      });
-      return;
-    }
-
-    const { fileGoogleDriveId } = request.body;
-
-    await this.addFileFromGoogleDriveUseCase.execute(fileGoogleDriveId);
-    reply.status(200).send({
-      success: true,
-      message: "File added successfully",
-      data: null,
-      error: null,
-    });
-  }
+  
 }

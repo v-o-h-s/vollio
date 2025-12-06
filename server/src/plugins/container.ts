@@ -24,7 +24,8 @@ import { GetCoursesWithContentUseCase } from "../application/use-cases/google-Cl
 import { AddFileFromGoogleDriveUseCase } from "../application/use-cases/files/AddFileFromGoogleDriveUseCase";
 import { GoogleDriveService } from "../infrastructure/services/GoogleDriveService";
 import { FileRepository } from "../infrastructure/repositories/FileRepository";
-import { IGoogleDriveService } from "../domain/services/IGoogleDriveService";
+import { FileController } from "../interface/controllers/file.controller";
+import { GetFileFromGoogleDriveUseCase } from "../application/use-cases/files/GetFileFromGoogleDriveUseCase";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.addHook("onRequest", async (request, reply) => {
     const { supabase } = await createUserClient(request);
@@ -133,6 +134,16 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     getAllUserNotesUseCase: asClass(GetAllUserNotesUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+  fastify.diContainer.register({
+    getFileFromGoogleDriveUseCase: asClass(GetFileFromGoogleDriveUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    fileController: asClass(FileController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

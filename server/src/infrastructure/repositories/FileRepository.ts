@@ -24,8 +24,29 @@ export class FileRepository implements IFileRepository {
   }
 
   async getFileById(id: string): Promise<File | null> {
-    // Implementation for retrieving a file by its ID
-    throw new ServerError("not implemented yet");
+    const { data, error } = await this.supabaseClient
+      .from("pdfs")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) {
+      if (error.code === "PGRST116") {
+        return null;
+      }
+      throw new DatabaseError(error);
+    }
+    if (!data) {
+      return null;
+    }
+    return new File(
+      data.id,
+      data.filename,
+      data.file_size,
+      data.storage_path,
+      data.google_file_id,
+      data.mime_type,
+      data.folder_id
+    );
   }
 
   async deleteFile(id: string): Promise<void> {

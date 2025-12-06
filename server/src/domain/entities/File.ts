@@ -4,18 +4,18 @@ export class File {
   private id: UUID;
   private fileName: string;
   private fileSize: number;
-  private storagePath: string|null;
-  private googleFileId: string|null;
+  private storagePath: string | null;
+  private googleFileId: string | null;
   private mimeType: string;
-  private folderId: string|null;
+  private folderId: string | null;
   constructor(
     id: UUID,
     fileName: string,
     fileSize: number,
-    storagePath: string|null,
-    googleFileId: string|null,
+    storagePath: string | null,
+    googleFileId: string | null,
     mimeType: string = "application/pdf",
-    folderId: string|null
+    folderId: string | null
   ) {
     // Validate that at least one of storagePath or googleFileId is provided
     if (!storagePath && !googleFileId) {
@@ -46,6 +46,9 @@ export class File {
       storagePath: this.storagePath,
       googleFileId: this.googleFileId,
     };
+  }
+  getGoogleFileId(): string | null {
+    return this.googleFileId;
   }
   getMimeType(): string {
     return this.mimeType;

@@ -12,6 +12,7 @@ import { noteRoutes } from "./interface/routes/note.route";
 import { fastifyAwilixPlugin } from "@fastify/awilix";
 import qs from "querystring";
 import { googleClassroomRoutes } from "./interface/routes/googleClassroom.route";
+import { fileRoutes } from "./interface/routes/file.route";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -25,7 +26,7 @@ app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || "dev-secret",
 });
 
-// Register session (depends on cookie)
+// Register sessio8n (depends on cookie)
 app.register(fastifySession, {
   secret:
     process.env.SESSION_SECRET ||
@@ -66,6 +67,9 @@ app.setErrorHandler(errorHandler);
 app.register(noteRoutes, { prefix: "/api/v1/notes" });
 app.register(googleClassroomRoutes, {
   prefix: "/api/v1/integrations/lms/google-classroom",
+});
+app.register(fileRoutes, {
+  prefix: "/api/v1/files",
 });
 
 async function start(): Promise<void> {

@@ -109,14 +109,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
       return googleClassroomController.getCourseContent(request, reply);
     }
   );
-  fastify.post<{
-    Body: { fileGoogleDriveId: string };
-  }>(`${opts.prefix}/files`, async (request, reply) => {
-    const googleClassroomController = request.diScope.resolve(
-      "googleClassroomController"
-    );
-    return googleClassroomController.addFileFromGoogleDrive(request, reply);
-  });
+  
 };
 
 export const googleClassroomRoutes = fp(googleClassroomRoutesHandler, {

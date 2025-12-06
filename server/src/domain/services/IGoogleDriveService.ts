@@ -8,13 +8,5 @@ export interface IGoogleDriveService {
     mimeType: string;
     size: number;
   } | null>;
-
-  downloadFile(
-    accessToken: string,
-    fileId: string
-  ): Promise<NodeJS.ReadableStream>;
-
-  generateFileViewUrl(fileId: string): string;
-
-  generateFileDownloadUrl(fileId: string): string;
+  getFileById(accessToken: string, fileId: string): Promise<Buffer>;
 }
