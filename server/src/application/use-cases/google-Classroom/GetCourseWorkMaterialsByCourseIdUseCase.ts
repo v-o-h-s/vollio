@@ -2,7 +2,7 @@ import { IUserGoogleClassroomRepository } from "../../../domain/repositories/IUs
 import { IGoogleClassroomService } from "../../../domain/services/IGoogleClassroomService";
 import { EnsureValidTokenUseCase } from "./EnsureValidTokenUseCase";
 
-export class GetFilesByCourseIdUseCase {
+export class GetCourseWorkMaterialsByCourseIdUseCase {
     private googleClassroomService: IGoogleClassroomService;
     private userGoogleClassroomRepository: IUserGoogleClassroomRepository;
     private ensureValidTokenUseCase: EnsureValidTokenUseCase;
@@ -26,7 +26,7 @@ export class GetFilesByCourseIdUseCase {
             throw new Error("No access token available");
         }
 
-        return this.googleClassroomService.getFilesByCourseId(
+        return this.googleClassroomService.getCourseWorkMaterialsByCourseId(
             tokens.access_token,
             courseId
         );

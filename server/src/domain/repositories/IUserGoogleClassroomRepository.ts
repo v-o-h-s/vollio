@@ -1,4 +1,4 @@
-import { GoogleOAuthTokenResponse } from "../../shared/types/lms";
+import { GoogleOAuthTokenResponse } from "../../shared/types/lms/classroom";
 
 export interface IUserGoogleClassroomRepository {
   saveTokens(tokens: GoogleOAuthTokenResponse): Promise<void>;

@@ -1,10 +1,11 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { IUserGoogleClassroomRepository } from "../../domain/repositories/IUserGoogleClassroomRepository";
-import { GoogleOAuthTokenResponse } from "../../shared/types/lms";
+import { GoogleOAuthTokenResponse } from "../../shared/types/lms/classroom";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 
 export class UserGoogleClassroomRepository
-  implements IUserGoogleClassroomRepository {
+  implements IUserGoogleClassroomRepository
+{
   private supabaseClient: SupabaseClient;
   constructor(supabaseClient: SupabaseClient) {
     this.supabaseClient = supabaseClient;
@@ -27,9 +28,10 @@ export class UserGoogleClassroomRepository
   async updateTokens(tokens: Partial<GoogleOAuthTokenResponse>): Promise<void> {
     // Build upsert payload with only the fields to update
     const upsertData: Record<string, any> = {};
-    
+
     if (tokens.access_token) upsertData.access_token = tokens.access_token;
-    if (tokens.expires_in !== undefined) upsertData.expires_in = tokens.expires_in;
+    if (tokens.expires_in !== undefined)
+      upsertData.expires_in = tokens.expires_in;
     if (tokens.token_expiry) upsertData.token_expiry = tokens.token_expiry;
     if (tokens.scope) upsertData.scope = tokens.scope;
     if (tokens.token_type) upsertData.token_type = tokens.token_type;
@@ -40,7 +42,7 @@ export class UserGoogleClassroomRepository
     const { error } = await this.supabaseClient
       .from("user_google_classroom")
       .upsert(upsertData);
-      
+
     if (error) throw new DatabaseError(error);
   }
 
@@ -51,7 +53,7 @@ export class UserGoogleClassroomRepository
       .single();
     if (error) {
       // Handle case where no tokens exist for this user
-      if (error.code === 'PGRST116') return null;
+      if (error.code === "PGRST116") return null;
       throw new DatabaseError(error);
     }
     return data;

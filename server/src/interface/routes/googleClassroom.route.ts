@@ -8,6 +8,8 @@ import { validateQuery } from "../../shared/validation/validator";
 import {
   GoogleCallbackQuerySchema,
   GoogleCallbackQuery,
+  ClassroomAnnouncementResponseSchema,
+  createApiResponseSchema,
 } from "../../shared/validation/googleClassroomSchemas";
 
 const googleClassroomRoutesHandler: FastifyPluginAsync = async (
@@ -76,6 +78,29 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
         "googleClassroomController"
       );
       return googleClassroomController.getFilesByCourseId(request, reply);
+    }
+  );
+
+  fastify.get<{ Params: { courseId: string } }>(
+    `${opts.prefix}/courses/:courseId/announcements`,
+    {
+      schema: {
+        response: {
+          200: createApiResponseSchema({
+            type: "array",
+            items: ClassroomAnnouncementResponseSchema,
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const googleClassroomController = request.diScope.resolve(
+        "googleClassroomController"
+      );
+      return googleClassroomController.getAnnouncementsByCourseId(
+        request,
+        reply
+      );
     }
   );
 };
