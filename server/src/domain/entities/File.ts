@@ -1,4 +1,5 @@
 export class File {
+   
     private id: string;
     private fileName: string;
     private fileSize: number;
@@ -27,6 +28,9 @@ export class File {
         this.googleFileId = googleFileId;
         this.mimeType = mimeType;
         this.folderId = folderId;
+    }
+     getGoogleFileId() {
+      return this.googleFileId;
     }
     getId(): string {
         return this.id;

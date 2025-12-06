@@ -10,8 +10,8 @@ import { highlightEndpoints } from "./endpoints/highlightEndpoints";
 import { notesEndpoints } from "./endpoints/notesEndpoints";
 import { pdfEndpoints } from "./endpoints/pdfEndpoints";
 import { summaryEndpoints } from "./endpoints/summaryEndpoints";
-
 import { googleClassroomEndpoints } from "./endpoints/googleClassroomEndpoints";
+import { fileEndpoints } from "./endpoints/fileEndpoint";
 
 // Simple base query configuration
 const baseQuery = fetchBaseQuery({
@@ -39,6 +39,7 @@ export const apiSlice = createApi({
     ...folderEndpoints(builder),
     ...summaryEndpoints(builder),
     ...googleClassroomEndpoints(builder),
+    ...fileEndpoints(builder),
   }),
 });
 
@@ -71,6 +72,8 @@ export const {
   useUpdateSummaryMutation,
   useDeleteSummaryMutation,
   useConnectGoogleClassroomMutation,
+  useAddFileFromGoogleDriveMutation,
+  useGetFileFromGoogleDriveQuery,
 } = apiSlice;
 
 // Export the reducer and middleware
