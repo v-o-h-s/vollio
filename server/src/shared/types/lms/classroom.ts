@@ -22,7 +22,6 @@ export type GoogleOAuthRawResponse =
   | Omit<GoogleOAuthTokenResponse, "token_expiry">
   | GoogleOAuthErrorResponse;
 
-
 export interface ClassroomCourse {
   id?: string;
   name?: string;
@@ -33,7 +32,12 @@ export interface ClassroomCourse {
   creationTime?: string;
   updateTime?: string;
   enrollmentCode?: string;
-  courseState?: "ACTIVE" | "ARCHIVED" | "PROVISIONED" | "DECLINED" | "SUSPENDED";
+  courseState?:
+    | "ACTIVE"
+    | "ARCHIVED"
+    | "PROVISIONED"
+    | "DECLINED"
+    | "SUSPENDED";
   alternateLink?: string;
   teacherGroupEmail?: string;
   courseGroupEmail?: string;
@@ -67,18 +71,18 @@ export interface ClassroomAnnouncement {
 }
 
 export interface Announcement {
-  courseId: string;                     // read-only
-  id: string;                           // read-only
+  courseId: string; // read-only
+  id: string; // read-only
   text?: string;
   materials?: Material[];
   state?: AnnouncementState;
-  alternateLink?: string;               // read-only
-  creationTime?: string;                // read-only (RFC 3339)
-  updateTime?: string;                  // read-only (RFC 3339)
-  scheduledTime?: string;               // RFC 3339
+  alternateLink?: string; // read-only
+  creationTime?: string; // read-only (RFC 3339)
+  updateTime?: string; // read-only (RFC 3339)
+  scheduledTime?: string; // RFC 3339
   assigneeMode?: AssigneeMode;
   individualStudentsOptions?: IndividualStudentsOptions;
-  creatorUserId?: string;               // read-only
+  creatorUserId?: string; // read-only
 }
 
 // --------------------------------------
@@ -136,7 +140,6 @@ export interface IndividualStudentsOptions {
   studentIds?: string[];
 }
 
-
 // server response
 export interface ClassroomAnnouncementResponse {
   id: string;
@@ -149,6 +152,122 @@ export interface ClassroomAnnouncementResponse {
     driveFiles: {
       id: string;
       title: string;
+    }[];
+  };
+}
+////////////////////////////////////////////////////
+// course work
+////////////////////////////////////////////////////
+export interface CourseWork {
+  courseId: string;
+  id: string;
+
+  title: string;
+  description?: string;
+
+  materials?: Material[];
+
+  state: CourseWorkState;
+  alternateLink: string;
+
+  creationTime: string;
+  updateTime: string;
+
+  dueDate?: DateObject;
+  dueTime?: TimeOfDay;
+
+  scheduledTime?: string;
+
+  maxPoints?: number;
+  workType: CourseWorkType;
+
+  associatedWithDeveloper: boolean;
+
+  assigneeMode: AssigneeMode;
+  individualStudentsOptions?: IndividualStudentsOptions;
+
+  submissionModificationMode: SubmissionModificationMode;
+
+  creatorUserId: string;
+
+  topicId?: string;
+
+  gradeCategory?: GradeCategory;
+
+  previewVersion?: PreviewVersion;
+
+  // union
+  assignment?: AssignmentDetails;
+  multipleChoiceQuestion?: MultipleChoiceQuestion;
+
+  gradingPeriodId?: string;
+}
+
+export interface DateObject {
+  year: number;
+  month: number;
+  day: number;
+}
+
+export interface TimeOfDay {
+  hours: number;
+  minutes: number;
+  seconds: number;
+  nanos: number;
+}
+
+export enum CourseWorkState {
+  UNSPECIFIED = "COURSE_WORK_STATE_UNSPECIFIED",
+  PUBLISHED = "PUBLISHED",
+  DRAFT = "DRAFT",
+  DELETED = "DELETED",
+}
+
+export enum CourseWorkType {
+  ASSIGNMENT = "ASSIGNMENT",
+  SHORT_ANSWER = "SHORT_ANSWER_QUESTION",
+  MULTIPLE_CHOICE = "MULTIPLE_CHOICE_QUESTION",
+  MATERIAL = "MATERIAL",
+}
+
+export enum SubmissionModificationMode {
+  UNSPECIFIED = "SUBMISSION_MODIFICATION_MODE_UNSPECIFIED",
+  MODIFIABLE_UNTIL_TURNED_IN = "MODIFIABLE_UNTIL_TURNED_IN",
+  MODIFIABLE = "MODIFIABLE",
+}
+
+export interface GradeCategory {
+  id: string;
+  name?: string;
+}
+
+export enum PreviewVersion {
+  PREVIEW_V1 = "PREVIEW_V1",
+}
+
+export interface AssignmentDetails {
+  studentWorkFolder?: {
+    id: string;
+    title?: string;
+  };
+}
+
+export interface MultipleChoiceQuestion {
+  choices: string[];
+}
+
+export interface ClassroomCourseWorkResponse {
+  id: string;
+  courseId: string;
+  title: string;
+  state: CourseWorkState;
+  alternateLink: string;
+  updatedAt: string;
+  materials: {
+    driveFiles: {
+      id: string;
+      title: string;
+      thumbnailUrl?: string;
     }[];
   };
 }

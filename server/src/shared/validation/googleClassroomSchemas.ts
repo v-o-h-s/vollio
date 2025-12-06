@@ -2,6 +2,8 @@ import { JSONSchemaType } from "ajv";
 import {
   ClassroomAnnouncementResponse,
   AnnouncementState,
+  ClassroomCourseWorkResponse,
+  CourseWorkState,
 } from "../types/lms/classroom";
 
 export interface GoogleCallbackQuery {
@@ -66,6 +68,31 @@ export const ClassroomAnnouncementResponseSchema: JSONSchemaType<ClassroomAnnoun
     additionalProperties: true,
   };
 
+// Schema for ClassroomCourseWorkResponse
+export const ClassroomCourseWorkResponseSchema: JSONSchemaType<ClassroomCourseWorkResponse> =
+  {
+    type: "object",
+    properties: {
+      id: { type: "string" },
+      courseId: { type: "string" },
+      title: { type: "string" },
+      state: { type: "string", enum: Object.values(CourseWorkState) },
+      alternateLink: { type: "string" },
+      updatedAt: { type: "string" },
+      materials: MaterialsSchema as any,
+    },
+    required: [
+      "id",
+      "courseId",
+      "title",
+      "state",
+      "alternateLink",
+      "updatedAt",
+      "materials",
+    ],
+    additionalProperties: true,
+  };
+
 // Schema for Course Content
 export const ClassroomContentResponseSchema = {
   type: "object",
@@ -76,7 +103,7 @@ export const ClassroomContentResponseSchema = {
     },
     materials: {
       type: "array",
-      items: { type: "object", additionalProperties: true }, // Relaxed schema for now as materials are 'any'
+      items: ClassroomCourseWorkResponseSchema,
     },
   },
   required: ["announcements", "materials"],

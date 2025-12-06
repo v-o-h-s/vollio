@@ -1,6 +1,9 @@
 import { IUserGoogleClassroomRepository } from "../../../domain/repositories/IUserGoogleClassroomRepository";
 import { IGoogleClassroomService } from "../../../domain/services/IGoogleClassroomService";
-import { ClassroomAnnouncementResponse } from "../../../shared/types/lms/classroom";
+import {
+  ClassroomAnnouncementResponse,
+  ClassroomCourseWorkResponse,
+} from "../../../shared/types/lms/classroom";
 import { EnsureValidTokenUseCase } from "./EnsureValidTokenUseCase";
 
 export class GetCourseContentUseCase {
@@ -12,7 +15,7 @@ export class GetCourseContentUseCase {
 
   async execute(courseId: string): Promise<{
     announcements: ClassroomAnnouncementResponse[];
-    materials: any[];
+    materials: ClassroomCourseWorkResponse[];
   }> {
     // Ensure token is valid and refresh if needed
     await this.ensureValidTokenUseCase.execute();
@@ -22,7 +25,7 @@ export class GetCourseContentUseCase {
       throw new Error("No access token available");
     }
 
-    const [announcements, materials] = await Promise.all([
+    const [announcements, courseWork] = await Promise.all([
       this.googleClassroomService.getAnnouncementsByCourseId(
         tokens.access_token,
         courseId
@@ -53,9 +56,31 @@ export class GetCourseContentUseCase {
       };
     });
 
+    const formattedCourseWork = (courseWork || []).map((work) => {
+      const driveFiles = (work.materials || [])
+        .filter((m: any) => m.driveFile && m.driveFile.driveFile)
+        .map((m: any) => ({
+          id: m.driveFile.driveFile.id,
+          title: m.driveFile.driveFile.title,
+          thumbnailUrl: m.driveFile.driveFile.thumbnailUrl,
+        }));
+
+      return {
+        id: work.id,
+        courseId: work.courseId,
+        title: work.title,
+        state: work.state,
+        alternateLink: work.alternateLink,
+        updatedAt: work.updateTime,
+        materials: {
+          driveFiles: driveFiles,
+        },
+      };
+    });
+
     return {
       announcements: formattedAnnouncements,
-      materials: materials || [],
+      materials: formattedCourseWork,
     };
   }
 }
