@@ -75,7 +75,7 @@ export const ClassroomCourseWorkResponseSchema: JSONSchemaType<ClassroomCourseWo
     properties: {
       id: { type: "string" },
       courseId: { type: "string" },
-      title: { type: "string" },
+      title: { type: "string", nullable: true },
       state: { type: "string", enum: Object.values(CourseWorkState) },
       alternateLink: { type: "string" },
       updatedAt: { type: "string" },
@@ -84,14 +84,13 @@ export const ClassroomCourseWorkResponseSchema: JSONSchemaType<ClassroomCourseWo
     required: [
       "id",
       "courseId",
-      "title",
       "state",
       "alternateLink",
       "updatedAt",
       "materials",
     ],
     additionalProperties: true,
-  };
+  } as any;
 
 // Schema for Course Content
 export const ClassroomContentResponseSchema = {
@@ -108,6 +107,35 @@ export const ClassroomContentResponseSchema = {
   },
   required: ["announcements", "materials"],
   additionalProperties: false,
+};
+
+// Schema for Course without Content (Basic Course Info)
+export const ClassroomCourseResponseSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string" },
+    name: { type: "string" },
+    updateTime: { type: "string" },
+    courseState: { type: "string" },
+    alternateLink: { type: "string", nullable: true },
+  },
+  required: ["id", "name", "updateTime", "courseState"],
+  additionalProperties: false,
+};
+
+// Schema for Course with Content (Full Sync)
+export const ClassroomCourseWithContentResponseSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string" },
+    name: { type: "string" },
+    updateTime: { type: "string" },
+    courseState: { type: "string" },
+    alternateLink: { type: "string" },
+    content: ClassroomContentResponseSchema,
+  },
+  required: ["id", "name", "content"], // Add other required fields as needed based on ClassroomCourse
+  additionalProperties: true,
 };
 
 // Generic API Response Schema Wrapper

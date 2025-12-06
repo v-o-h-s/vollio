@@ -36,47 +36,51 @@ export class GetCourseContentUseCase {
       ),
     ]);
 
-    const formattedAnnouncements = (announcements || []).map((announcement) => {
-      const driveFiles = (announcement.materials || [])
-        .filter((m: any) => m.driveFile && m.driveFile.driveFile)
-        .map((m: any) => ({
-          id: m.driveFile.driveFile.id,
-          title: m.driveFile.driveFile.title,
-        }));
+    const formattedAnnouncements = (announcements || [])
+      .map((announcement) => {
+        const driveFiles = (announcement.materials || [])
+          .filter((m: any) => m.driveFile && m.driveFile.driveFile)
+          .map((m: any) => ({
+            id: m.driveFile.driveFile.id,
+            title: m.driveFile.driveFile.title,
+          }));
 
-      return {
-        id: announcement.id,
-        courseId: announcement.courseId,
-        state: announcement.state,
-        alternateLink: announcement.alternateLink,
-        updatedAt: announcement.updateTime,
-        materials: {
-          driveFiles: driveFiles,
-        },
-      };
-    });
+        return {
+          id: announcement.id,
+          courseId: announcement.courseId,
+          state: announcement.state,
+          alternateLink: announcement.alternateLink,
+          updatedAt: announcement.updateTime,
+          materials: {
+            driveFiles: driveFiles,
+          },
+        };
+      })
+      .filter((item) => item.materials.driveFiles.length > 0);
 
-    const formattedCourseWork = (courseWork || []).map((work) => {
-      const driveFiles = (work.materials || [])
-        .filter((m: any) => m.driveFile && m.driveFile.driveFile)
-        .map((m: any) => ({
-          id: m.driveFile.driveFile.id,
-          title: m.driveFile.driveFile.title,
-          thumbnailUrl: m.driveFile.driveFile.thumbnailUrl,
-        }));
+    const formattedCourseWork = (courseWork || [])
+      .map((work) => {
+        const driveFiles = (work.materials || [])
+          .filter((m: any) => m.driveFile && m.driveFile.driveFile)
+          .map((m: any) => ({
+            id: m.driveFile.driveFile.id,
+            title: m.driveFile.driveFile.title,
+            thumbnailUrl: m.driveFile.driveFile.thumbnailUrl,
+          }));
 
-      return {
-        id: work.id,
-        courseId: work.courseId,
-        title: work.title,
-        state: work.state,
-        alternateLink: work.alternateLink,
-        updatedAt: work.updateTime,
-        materials: {
-          driveFiles: driveFiles,
-        },
-      };
-    });
+        return {
+          id: work.id,
+          courseId: work.courseId,
+          title: work.title,
+          state: work.state,
+          alternateLink: work.alternateLink,
+          updatedAt: work.updateTime,
+          materials: {
+            driveFiles: driveFiles,
+          },
+        };
+      })
+      .filter((item) => item.materials.driveFiles.length > 0);
 
     return {
       announcements: formattedAnnouncements,

@@ -8,6 +8,7 @@ import { DisconnectGoogleClassroomUseCase } from "../../application/use-cases/go
 import { GetCoursesUseCase } from "../../application/use-cases/google-Classroom/GetCoursesUseCase";
 import { IsConnectedToGoogleClassroomUseCase } from "../../application/use-cases/google-Classroom/IsConnectedToGoogleClassroomUseCase";
 import { GetCourseContentUseCase } from "../../application/use-cases/google-Classroom/GetCourseContentUseCase";
+import { GetCoursesWithContentUseCase } from "../../application/use-cases/google-Classroom/GetCoursesWithContentUseCase";
 import { ClassroomAnnouncementResponse } from "../../shared/types/lms/classroom";
 
 export class GoogleClassroomController {
@@ -19,6 +20,7 @@ export class GoogleClassroomController {
   private getCoursesUseCase: GetCoursesUseCase;
   private isConnectedUseCase: IsConnectedToGoogleClassroomUseCase;
   private getCourseContentUseCase: GetCourseContentUseCase;
+  private getCoursesWithContentUseCase: GetCoursesWithContentUseCase;
 
   constructor(
     googleClassroomService: GoogleClassroomService,
@@ -28,7 +30,8 @@ export class GoogleClassroomController {
     disconnectUseCase: DisconnectGoogleClassroomUseCase,
     getCoursesUseCase: GetCoursesUseCase,
     isConnectedUseCase: IsConnectedToGoogleClassroomUseCase,
-    getCourseContentUseCase: GetCourseContentUseCase
+    getCourseContentUseCase: GetCourseContentUseCase,
+    getCoursesWithContentUseCase: GetCoursesWithContentUseCase
   ) {
     this.googleClassroomService = googleClassroomService;
     this.fromCodeToDatabaseUseCase = fromCodeToDatabaseUseCase;
@@ -38,6 +41,7 @@ export class GoogleClassroomController {
     this.getCoursesUseCase = getCoursesUseCase;
     this.isConnectedUseCase = isConnectedUseCase;
     this.getCourseContentUseCase = getCourseContentUseCase;
+    this.getCoursesWithContentUseCase = getCoursesWithContentUseCase;
   }
 
   async connect(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -220,6 +224,31 @@ export class GoogleClassroomController {
       success: true,
       message: "Courses retrieved successfully",
       data: courses,
+      error: null,
+    });
+  }
+
+  async getCoursesWithContent(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<any> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        message: "User not authenticated",
+        data: null,
+        error: "Unauthorized",
+      });
+      return;
+    }
+
+    const coursesWithContent =
+      await this.getCoursesWithContentUseCase.execute();
+    reply.status(200).send({
+      success: true,
+      message: "Courses with content retrieved successfully",
+      data: coursesWithContent,
       error: null,
     });
   }

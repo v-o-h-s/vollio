@@ -46,6 +46,7 @@ export interface DIContainer {
   getCoursesUseCase: GetCoursesUseCase;
   ensureValidTokenUseCase: EnsureValidTokenUseCase;
   isConnectedUseCase: IsConnectedToGoogleClassroomUseCase;
+  getCourseContentUseCase: GetCourseContentUseCase;
 }
 
 declare module "fastify" {

@@ -22,32 +22,113 @@ export type GoogleOAuthRawResponse =
   | Omit<GoogleOAuthTokenResponse, "token_expiry">
   | GoogleOAuthErrorResponse;
 
-export interface ClassroomCourse {
-  id?: string;
-  name?: string;
+export interface Course {
+  id: string;
+  name: string;
   section?: string;
+  descriptionHeading?: string;
   description?: string;
   room?: string;
-  ownerId?: string;
-  creationTime?: string;
-  updateTime?: string;
+  ownerId: string;
+  creationTime: string;
+  updateTime: string;
   enrollmentCode?: string;
-  courseState?:
-    | "ACTIVE"
-    | "ARCHIVED"
-    | "PROVISIONED"
-    | "DECLINED"
-    | "SUSPENDED";
+  courseState: CourseState;
   alternateLink?: string;
   teacherGroupEmail?: string;
   courseGroupEmail?: string;
+  teacherFolder?: DriveFolder;
   guardiansEnabled?: boolean;
   calendarId?: string;
-  gradebookSettings?: {
-    calculationType?: "TOTAL_POINTS" | "WEIGHTED_BY_CATEGORY";
-    displaySetting?: "SHOW_OVERALL_GRADE" | "HIDE_OVERALL_GRADE";
-  };
+  gradebookSettings?: GradebookSettings;
 }
+
+// Lightweight course response for list endpoints
+export interface CourseListResponse {
+  id: string;
+  name: string;
+  updateTime: string;
+  courseState: CourseState;
+  alternateLink?: string;
+}
+
+export interface DriveFolder {
+  id: string;
+  title?: string;
+  alternateLink?: string;
+}
+
+export interface GradebookSettings {
+  calculationType: CalculationType;
+  displaySetting: DisplaySetting;
+  gradeCategories?: GradeCategory[];
+}
+
+export interface GradeCategory {
+  id: string;
+  name?: string;
+}
+
+export enum CourseState {
+  UNSPECIFIED = "COURSE_STATE_UNSPECIFIED",
+  ACTIVE = "ACTIVE",
+  ARCHIVED = "ARCHIVED",
+  PROVISIONED = "PROVISIONED",
+  DECLINED = "DECLINED",
+  SUSPENDED = "SUSPENDED",
+}
+
+export enum CalculationType {
+  UNSPECIFIED = "CALCULATION_TYPE_UNSPECIFIED",
+  TOTAL_POINTS = "TOTAL_POINTS",
+  WEIGHTED_CATEGORIES = "WEIGHTED_CATEGORIES",
+}
+
+export enum DisplaySetting {
+  UNSPECIFIED = "DISPLAY_SETTING_UNSPECIFIED",
+  SHOW_OVERALL_GRADE = "SHOW_OVERALL_GRADE",
+  HIDE_OVERALL_GRADE = "HIDE_OVERALL_GRADE",
+  SHOW_TEACHERS_ONLY = "SHOW_TEACHERS_ONLY",
+}
+
+// Optional: Deprecated courseMaterialSets
+export interface CourseMaterialSet {
+  title: string;
+  materials?: CourseMaterial[];
+}
+
+export interface CourseMaterial {
+  driveFile?: DriveFile;
+  youTubeVideo?: YouTubeVideo;
+  link?: Link;
+  form?: Form;
+}
+
+export interface DriveFile {
+  id: string;
+  title: string;
+  alternateLink?: string;
+  thumbnailUrl?: string;
+}
+
+export interface YouTubeVideo {
+  id: string;
+  title: string;
+  alternateLink: string;
+}
+
+export interface Link {
+  url: string;
+  title?: string;
+  thumbnailUrl?: string;
+}
+
+export interface Form {
+  formUrl: string;
+  title?: string;
+  alternateLink?: string;
+}
+
 
 export interface ClassroomCourseResponse {
   id: string;
@@ -259,7 +340,7 @@ export interface MultipleChoiceQuestion {
 export interface ClassroomCourseWorkResponse {
   id: string;
   courseId: string;
-  title: string;
+  title?: string;
   state: CourseWorkState;
   alternateLink: string;
   updatedAt: string;

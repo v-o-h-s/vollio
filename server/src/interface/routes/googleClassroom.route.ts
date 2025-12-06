@@ -9,6 +9,8 @@ import {
   GoogleCallbackQuerySchema,
   GoogleCallbackQuery,
   ClassroomContentResponseSchema,
+  ClassroomCourseResponseSchema,
+  ClassroomCourseWithContentResponseSchema,
   createApiResponseSchema,
 } from "../../shared/validation/googleClassroomSchemas";
 
@@ -57,19 +59,42 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     return googleClassroomController.disconnect(request, reply);
   });
 
-  fastify.get(`${opts.prefix}/courses`, async (request, reply) => {
-    const googleClassroomController = request.diScope.resolve(
-      "googleClassroomController"
-    );
-    return googleClassroomController.getCourses(request, reply);
-  });
-
   fastify.get(`${opts.prefix}/status`, async (request, reply) => {
     const googleClassroomController = request.diScope.resolve(
       "googleClassroomController"
     );
     return googleClassroomController.getConnectionStatus(request, reply);
   });
+
+  fastify.get(
+    `${opts.prefix}/courses/list`,
+    {
+      schema: {
+        response: {
+          200: createApiResponseSchema({
+            type: "array",
+            items: ClassroomCourseResponseSchema,
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const googleClassroomController = request.diScope.resolve(
+        "googleClassroomController"
+      );
+      return googleClassroomController.getCourses(request, reply);
+    }
+  );
+  // will not be used in production lol , bro using promise.all lol
+  fastify.get(
+    `${opts.prefix}/courses`,
+    async (request, reply) => {
+      const googleClassroomController = request.diScope.resolve(
+        "googleClassroomController"
+      );
+      return googleClassroomController.getCoursesWithContent(request, reply);
+    }
+  );
 
   fastify.get<{ Params: { courseId: string } }>(
     `${opts.prefix}/courses/:courseId/content`,

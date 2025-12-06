@@ -1,6 +1,6 @@
 import { IUserGoogleClassroomRepository } from "../../../domain/repositories/IUserGoogleClassroomRepository";
 import { IGoogleClassroomService } from "../../../domain/services/IGoogleClassroomService";
-import { ClassroomCourse } from "../../../shared/types/lms/classroom";
+import { Course, CourseListResponse } from "../../../shared/types/lms/classroom";
 import { EnsureValidTokenUseCase } from "./EnsureValidTokenUseCase";
 
 export class GetCoursesUseCase {
@@ -18,7 +18,7 @@ export class GetCoursesUseCase {
     this.ensureValidTokenUseCase = ensureValidTokenUseCase;
   }
 
-  async execute(): Promise<ClassroomCourse[]> {
+  async execute(): Promise<CourseListResponse[]> {
     // Ensure token is valid and refresh if needed
     await this.ensureValidTokenUseCase.execute();
 
@@ -27,6 +27,15 @@ export class GetCoursesUseCase {
       throw new Error("No access token available");
     }
 
-    return this.googleClassroomService.getCourses(tokens.access_token);
+    const courses = await this.googleClassroomService.getCourses(tokens.access_token);
+
+    // Map to CourseListResponse with only required fields
+    return courses.map((course: Course) => ({
+      id: course.id,
+      name: course.name,
+      updateTime: course.updateTime,
+      courseState: course.courseState,
+      alternateLink: course.alternateLink,
+    }));
   }
 }

@@ -20,6 +20,7 @@ import { GetCoursesUseCase } from "../application/use-cases/google-Classroom/Get
 import { EnsureValidTokenUseCase } from "../application/use-cases/google-Classroom/EnsureValidTokenUseCase";
 import { IsConnectedToGoogleClassroomUseCase } from "../application/use-cases/google-Classroom/IsConnectedToGoogleClassroomUseCase";
 import { GetCourseContentUseCase } from "../application/use-cases/google-Classroom/GetCourseContentUseCase";
+import { GetCoursesWithContentUseCase } from "../application/use-cases/google-Classroom/GetCoursesWithContentUseCase";
 
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.addHook("onRequest", async (request, reply) => {
@@ -73,6 +74,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     getCourseContentUseCase: asClass(GetCourseContentUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getCoursesWithContentUseCase: asClass(GetCoursesWithContentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
