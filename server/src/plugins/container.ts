@@ -19,8 +19,8 @@ import { DisconnectGoogleClassroomUseCase } from "../application/use-cases/googl
 import { GetCoursesUseCase } from "../application/use-cases/google-Classroom/GetCoursesUseCase";
 import { EnsureValidTokenUseCase } from "../application/use-cases/google-Classroom/EnsureValidTokenUseCase";
 import { IsConnectedToGoogleClassroomUseCase } from "../application/use-cases/google-Classroom/IsConnectedToGoogleClassroomUseCase";
-import { GetCourseWorkMaterialsByCourseIdUseCase } from "../application/use-cases/google-Classroom/GetCourseWorkMaterialsByCourseIdUseCase";
-import { GetAnnouncementsByCourseIdUseCase } from "../application/use-cases/google-Classroom/GetAnnouncementsByCourseIdUseCase";
+import { GetCourseContentUseCase } from "../application/use-cases/google-Classroom/GetCourseContentUseCase";
+
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.addHook("onRequest", async (request, reply) => {
     const { supabase } = await createUserClient(request);
@@ -72,13 +72,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    getAnnouncementsByCourseIdUseCase: asClass(
-      GetAnnouncementsByCourseIdUseCase,
-      {
-        lifetime: Lifetime.SCOPED,
-        injectionMode: InjectionMode.CLASSIC,
-      }
-    ),
+    getCourseContentUseCase: asClass(GetCourseContentUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
     // Alias for controller dependency injection
     refreshTokenUseCase: asClass(RefreshTokenAndUpdateTheDatabaseUseCase, {
       lifetime: Lifetime.SCOPED,
@@ -92,13 +89,6 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    getCourseWorkMaterialsByCourseIdUseCase: asClass(
-      GetCourseWorkMaterialsByCourseIdUseCase,
-      {
-        lifetime: Lifetime.SCOPED,
-        injectionMode: InjectionMode.CLASSIC,
-      }
-    ),
   });
 
   fastify.diContainer.register({

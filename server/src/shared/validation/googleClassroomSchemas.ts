@@ -66,6 +66,23 @@ export const ClassroomAnnouncementResponseSchema: JSONSchemaType<ClassroomAnnoun
     additionalProperties: true,
   };
 
+// Schema for Course Content
+export const ClassroomContentResponseSchema = {
+  type: "object",
+  properties: {
+    announcements: {
+      type: "array",
+      items: ClassroomAnnouncementResponseSchema,
+    },
+    materials: {
+      type: "array",
+      items: { type: "object", additionalProperties: true }, // Relaxed schema for now as materials are 'any'
+    },
+  },
+  required: ["announcements", "materials"],
+  additionalProperties: false,
+};
+
 // Generic API Response Schema Wrapper
 export const createApiResponseSchema = <T>(dataSchema: any) => ({
   type: "object",

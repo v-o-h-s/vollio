@@ -8,7 +8,7 @@ import { validateQuery } from "../../shared/validation/validator";
 import {
   GoogleCallbackQuerySchema,
   GoogleCallbackQuery,
-  ClassroomAnnouncementResponseSchema,
+  ClassroomContentResponseSchema,
   createApiResponseSchema,
 } from "../../shared/validation/googleClassroomSchemas";
 
@@ -72,24 +72,11 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   });
 
   fastify.get<{ Params: { courseId: string } }>(
-    `${opts.prefix}/courses/:courseId/files`,
-    async (request, reply) => {
-      const googleClassroomController = request.diScope.resolve(
-        "googleClassroomController"
-      );
-      return googleClassroomController.getFilesByCourseId(request, reply);
-    }
-  );
-
-  fastify.get<{ Params: { courseId: string } }>(
-    `${opts.prefix}/courses/:courseId/announcements`,
+    `${opts.prefix}/courses/:courseId/content`,
     {
       schema: {
         response: {
-          200: createApiResponseSchema({
-            type: "array",
-            items: ClassroomAnnouncementResponseSchema,
-          }),
+          200: createApiResponseSchema(ClassroomContentResponseSchema),
         },
       },
     },
@@ -97,10 +84,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
       const googleClassroomController = request.diScope.resolve(
         "googleClassroomController"
       );
-      return googleClassroomController.getAnnouncementsByCourseId(
-        request,
-        reply
-      );
+      return googleClassroomController.getCourseContent(request, reply);
     }
   );
 };

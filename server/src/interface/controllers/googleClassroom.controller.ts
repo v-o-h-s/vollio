@@ -7,8 +7,7 @@ import { RefreshTokenAndUpdateTheDatabaseUseCase } from "../../application/use-c
 import { DisconnectGoogleClassroomUseCase } from "../../application/use-cases/google-Classroom/DisconnectGoogleClassroomUseCase";
 import { GetCoursesUseCase } from "../../application/use-cases/google-Classroom/GetCoursesUseCase";
 import { IsConnectedToGoogleClassroomUseCase } from "../../application/use-cases/google-Classroom/IsConnectedToGoogleClassroomUseCase";
-import { GetAnnouncementsByCourseIdUseCase } from "../../application/use-cases/google-Classroom/GetAnnouncementsByCourseIdUseCase";
-import { GetCourseWorkMaterialsByCourseIdUseCase } from "../../application/use-cases/google-Classroom/GetCourseWorkMaterialsByCourseIdUseCase";
+import { GetCourseContentUseCase } from "../../application/use-cases/google-Classroom/GetCourseContentUseCase";
 import { ClassroomAnnouncementResponse } from "../../shared/types/lms/classroom";
 
 export class GoogleClassroomController {
@@ -19,8 +18,7 @@ export class GoogleClassroomController {
   private disconnectUseCase: DisconnectGoogleClassroomUseCase;
   private getCoursesUseCase: GetCoursesUseCase;
   private isConnectedUseCase: IsConnectedToGoogleClassroomUseCase;
-  private getAnnouncementsByCourseIdUseCase: GetAnnouncementsByCourseIdUseCase;
-  private getCourseWorkMaterialsByCourseIdUseCase: GetCourseWorkMaterialsByCourseIdUseCase;
+  private getCourseContentUseCase: GetCourseContentUseCase;
 
   constructor(
     googleClassroomService: GoogleClassroomService,
@@ -30,8 +28,7 @@ export class GoogleClassroomController {
     disconnectUseCase: DisconnectGoogleClassroomUseCase,
     getCoursesUseCase: GetCoursesUseCase,
     isConnectedUseCase: IsConnectedToGoogleClassroomUseCase,
-    getCourseWorkMaterialsByCourseIdUseCase: GetCourseWorkMaterialsByCourseIdUseCase,
-    getAnnouncementsByCourseIdUseCase: GetAnnouncementsByCourseIdUseCase
+    getCourseContentUseCase: GetCourseContentUseCase
   ) {
     this.googleClassroomService = googleClassroomService;
     this.fromCodeToDatabaseUseCase = fromCodeToDatabaseUseCase;
@@ -40,9 +37,7 @@ export class GoogleClassroomController {
     this.disconnectUseCase = disconnectUseCase;
     this.getCoursesUseCase = getCoursesUseCase;
     this.isConnectedUseCase = isConnectedUseCase;
-    this.getAnnouncementsByCourseIdUseCase = getAnnouncementsByCourseIdUseCase;
-    this.getCourseWorkMaterialsByCourseIdUseCase =
-      getCourseWorkMaterialsByCourseIdUseCase;
+    this.getCourseContentUseCase = getCourseContentUseCase;
   }
 
   async connect(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -229,7 +224,7 @@ export class GoogleClassroomController {
     });
   }
 
-  async getCourseWorkMaterialsByCourseId(
+  async getCourseContent(
     request: FastifyRequest<{ Params: { courseId: string } }>,
     reply: FastifyReply
   ): Promise<void> {
@@ -246,41 +241,11 @@ export class GoogleClassroomController {
 
     const { courseId } = request.params;
 
-    const files = await this.getCourseWorkMaterialsByCourseIdUseCase.execute(
-      courseId
-    );
+    const content = await this.getCourseContentUseCase.execute(courseId);
     reply.status(200).send({
       success: true,
-      message: "Course materials retrieved successfully",
-      data: files,
-      error: null,
-    });
-  }
-
-  async getAnnouncementsByCourseId(
-    request: FastifyRequest<{ Params: { courseId: string } }>,
-    reply: FastifyReply
-  ): Promise<void> {
-    const userId = request.user?.id;
-    if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "User not authenticated",
-        data: null,
-        error: "Unauthorized",
-      });
-      return;
-    }
-
-    const { courseId } = request.params;
-
-    const announcements = await this.getAnnouncementsByCourseIdUseCase.execute(
-      courseId
-    );
-    reply.status(200).send({
-      success: true,
-      message: "Course announcements retrieved successfully",
-      data: announcements as ClassroomAnnouncementResponse[],
+      message: "Course content retrieved successfully",
+      data: content,
       error: null,
     });
   }
