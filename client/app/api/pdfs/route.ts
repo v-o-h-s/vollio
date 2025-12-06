@@ -117,17 +117,60 @@ async function attachFileWithUrls(supabaseClient: any, pdfs: any[]) {
   try {
     const result = await Promise.all(
       pdfs.map(async (pdf, index) => {
-        const signedUrl = await generateSignedUrl(
-          supabaseClient,
-          pdf.storage_path
-        );
-        return {
-          ...pdf,
-          fileUrl: signedUrl,
-        };
+        // Handle Google Drive files (they have google_file_id but no storage_path)
+        if (!pdf.storage_path) {
+          if (pdf.google_file_id) {
+            Logger.debug(`PDF ${pdf.id} is a Google Drive file`, {
+              pdfId: pdf.id,
+              filename: pdf.filename,
+              googleFileId: pdf.google_file_id,
+            });
+            // For Google Drive files, we'll use a special URL or fetch it via API
+            return {
+              ...pdf,
+              fileUrl: `/api/files/google-drive/${pdf.google_file_id}`,
+              isGoogleDriveFile: true,
+            };
+          } else {
+            Logger.warn(`PDF ${pdf.id} has null storage_path and no google_file_id`, {
+              pdfId: pdf.id,
+              filename: pdf.filename,
+            });
+            return {
+              ...pdf,
+              fileUrl: null,
+            };
+          }
+        }
+
+        try {
+          const signedUrl = await generateSignedUrl(
+            supabaseClient,
+            pdf.storage_path
+          );
+          return {
+            ...pdf,
+            fileUrl: signedUrl,
+            isGoogleDriveFile: false,
+          };
+        } catch (error) {
+          Logger.error(`Failed to generate signed URL for PDF ${pdf.id}`, {
+            error,
+            pdfId: pdf.id,
+            filename: pdf.filename,
+            storagePath: pdf.storage_path,
+          });
+          // Return the PDF without a signed URL rather than failing entirely
+          return {
+            ...pdf,
+            fileUrl: null,
+          };
+        }
       })
     );
 
+    const duration = performance.now() - startTime;
+    Logger.debug(`Generated signed URLs in ${duration}ms`);
     return result;
   } catch (error) {
     Logger.error("Failed to attach file URLs", {

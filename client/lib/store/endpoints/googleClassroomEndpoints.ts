@@ -34,6 +34,7 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: "v1/integrations/lms/google-classroom/check",
       method: "GET",
     }),
+    providesTags: [{ type: "GoogleClassroom", id: "TOKEN_STATUS" }],
   }),
 
   // 5. Disconnect from Google Classroom
@@ -42,6 +43,10 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: "v1/integrations/lms/google-classroom/disconnect",
       method: "DELETE",
     }),
+    invalidatesTags: [
+      { type: "GoogleClassroom", id: "TOKEN_STATUS" },
+      { type: "GoogleClassroom", id: "COURSES" },
+    ],
   }),
 
 
@@ -52,6 +57,7 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: "v1/integrations/lms/google-classroom/courses/list",
       method: "GET",
     }),
+    providesTags: [{ type: "GoogleClassroom", id: "COURSES" }],
   }),
 
 
@@ -62,5 +68,8 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: `v1/integrations/lms/google-classroom/courses/${courseId}/content`,
       method: "GET",
     }),
+    providesTags: (_result, _error, courseId) => [
+      { type: "GoogleClassroom", id: courseId },
+    ],
   }),
 });

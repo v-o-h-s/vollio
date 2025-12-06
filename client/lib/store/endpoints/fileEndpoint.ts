@@ -13,6 +13,10 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
       method: "POST",
       body,
     }),
+    invalidatesTags: [
+      { type: "PDF", id: "LIST" },
+      { type: "File", id: "LIST" },
+    ],
   }),
 
   // 2. Get File from Google Drive (returns Blob for PDF viewing)
@@ -38,5 +42,6 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
         };
       }
     },
+    providesTags: (_result, _error, fileId) => [{ type: "File", id: fileId }],
   }),
 });

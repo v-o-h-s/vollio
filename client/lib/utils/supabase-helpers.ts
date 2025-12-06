@@ -10,7 +10,7 @@ import type {
   PDFDocument,
 } from "../types/pdf";
 import type { PDFRow, UserActivityRow, FolderRow } from "../types/database";
-import { getAuthenticatedSupabaseClient, STORAGE_CONFIG } from "../../supabase";
+import {  STORAGE_CONFIG } from "../../supabase";
 import type { Database } from "../types/database";
 import { AppError } from "../error-handling/errors";
 import { Logger } from "./logger";
@@ -28,7 +28,7 @@ export const isPDFRow = (
     typeof row.user_id === "string" &&
     typeof row.filename === "string" &&
     typeof row.file_size === "number" &&
-    typeof row.storage_path === "string"
+    (typeof row.storage_path === "string" || row.storage_path === null)
   );
 };
 
@@ -256,8 +256,13 @@ export function validateFile(file: File): FileValidationResult {
 
 export async function generateSignedUrl(
   supabaseClient: any,
-  storagePath: string
-): Promise<string> {
+  storagePath: string | null
+): Promise<string | null> {
+  if (!storagePath) {
+    Logger.debug("Cannot generate signed URL: storagePath is null (likely a Google Drive file)");
+    return null;
+  }
+
   const { data, error } = await supabaseClient.storage
     .from(STORAGE_CONFIG.BUCKET_NAME)
     .createSignedUrl(storagePath, STORAGE_CONFIG.SIGNED_URL_EXPIRY);

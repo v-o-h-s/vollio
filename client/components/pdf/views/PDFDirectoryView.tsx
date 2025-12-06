@@ -53,6 +53,7 @@ import { RenameDialog } from "./RenameDialog";
 import { FileText, FolderOpen, Upload, GraduationCap } from "lucide-react";
 import { Logger } from "@/lib/utils/logger";
 import { PDFDirectoryLoadingState } from "./PDFDirectoryLoadingState";
+import { GoogleClassroomButton } from "../GoogleClassroomButton";
 
 export type ViewMode = "grid" | "list" | "compact" | "details";
 export type SortBy = "name" | "date" | "size" | "type";
@@ -142,6 +143,7 @@ export function PDFDirectoryView({
   const {
     data: folderData,
     isLoading: isFoldersLoading,
+    error: foldersError,
     refetch: refetchFolders,
   } = useGetFoldersQuery();
   const [uploadPDF, { isLoading: isUploading }] = useUploadPDFMutation();
@@ -481,8 +483,40 @@ export function PDFDirectoryView({
     return <PDFDirectoryLoadingState />;
   }
 
-  if (error) {
-    Logger.error("Failed to load PDFs or folders", { error });
+  if (error || foldersError) {
+    const errorToLog = error || foldersError;
+    
+    // More detailed error logging
+    console.error("PDF/Folder Error Details:", {
+      hasError: !!error,
+      hasFoldersError: !!foldersError,
+      error: error,
+      foldersError: foldersError,
+      errorString: JSON.stringify(error, null, 2),
+      foldersErrorString: JSON.stringify(foldersError, null, 2),
+    });
+    
+    Logger.error("Failed to load PDFs or folders", errorToLog);
+    
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+        <FileText className="w-12 h-12 text-muted-foreground mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Failed to load PDFs</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          There was an error loading your PDF files{foldersError ? ' and folders' : ''}. Please try again.
+        </p>
+        {/* Show error details in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-xs text-left bg-muted p-4 rounded-md mb-4 max-w-2xl overflow-auto">
+            <pre>{JSON.stringify(errorToLog, null, 2)}</pre>
+          </div>
+        )}
+        <div className="flex gap-2">
+          {error && <Button onClick={() => refetch()}>Retry PDFs</Button>}
+          {foldersError && <Button onClick={() => refetchFolders()}>Retry Folders</Button>}
+        </div>
+      </div>
+    );
   }
 
   const allItems = [
@@ -524,17 +558,7 @@ export function PDFDirectoryView({
               <FolderOpen className="h-4 w-4 mr-2" />
               New Folder
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                window.location.href =
-                  "/api/v1/integrations/lms/google-classroom/connect";
-              }}
-            >
-              <GraduationCap className="h-4 w-4 mr-2" />
-              Add Classroom
-            </Button>
+            <GoogleClassroomButton />
             <Button
               variant="outline"
               size="sm"

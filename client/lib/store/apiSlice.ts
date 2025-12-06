@@ -30,7 +30,16 @@ const baseQuery = fetchBaseQuery({
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Annotation", "Highlight", "PDF", "Note", "Folder", "Summary"],
+  tagTypes: [
+    "Annotation",
+    "Highlight",
+    "PDF",
+    "Note",
+    "Folder",
+    "Summary",
+    "GoogleClassroom",
+    "File",
+  ],
   endpoints: (builder) => ({
     ...pdfEndpoints(builder),
     ...notesEndpoints(builder),
@@ -72,6 +81,10 @@ export const {
   useUpdateSummaryMutation,
   useDeleteSummaryMutation,
   useConnectGoogleClassroomMutation,
+  useCheckGoogleClassroomTokenStatusQuery,
+  useDisconnectGoogleClassroomMutation,
+  useGetGoogleClassroomCoursesListQuery,
+  useGetGoogleClassroomCourseContentQuery,
   useAddFileFromGoogleDriveMutation,
   useGetFileFromGoogleDriveQuery,
 } = apiSlice;

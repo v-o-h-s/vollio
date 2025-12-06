@@ -68,13 +68,15 @@ export const pdfEndpoints = (builder: ApiBuilder) => ({
         userId: "",
         filename: pdf.filename,
         fileSize: pdf.fileSize,
-        storagePath: "",
+        storagePath: pdf.storagePath || pdf.storage_path || null,
         mimeType: pdf.mimeType,
         uploadedAt: pdf.uploadedAt,
         updatedAt: pdf.uploadedAt,
-        fileUrl: pdf.fileUrl,
+        fileUrl: pdf.fileUrl || null,
         folderId: pdf.folderId,
         folder: pdf.folder,
+        googleFileId: pdf.googleFileId || pdf.google_file_id || null,
+        isGoogleDriveFile: pdf.isGoogleDriveFile || !!pdf.google_file_id,
       }));
 
      

@@ -1,5 +1,5 @@
 "use client";
-import "@/app/styles/components/viewer.css";
+import "@/app/styles/components/betterViewer.css";
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import {

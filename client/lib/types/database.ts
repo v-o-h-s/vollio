@@ -12,33 +12,36 @@ export interface Database {
           user_id: string;
           filename: string;
           file_size: number;
-          storage_path: string;
+          storage_path: string | null;
           mime_type: string;
           folder_id: string | null;
           uploaded_at: string;
           updated_at: string;
+          google_file_id?: string | null;
         };
         Insert: {
           id?: string;
           user_id: string;
           filename: string;
           file_size: number;
-          storage_path: string;
+          storage_path?: string | null;
           mime_type?: string;
           folder_id?: string | null;
           uploaded_at?: string;
           updated_at?: string;
+          google_file_id?: string | null;
         };
         Update: {
           id?: string;
           user_id?: string;
           filename?: string;
           file_size?: number;
-          storage_path?: string;
+          storage_path?: string | null;
           mime_type?: string;
           folder_id?: string | null;
           uploaded_at?: string;
           updated_at?: string;
+          google_file_id?: string | null;
         };
       };
       folders: {

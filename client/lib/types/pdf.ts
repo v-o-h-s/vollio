@@ -81,17 +81,19 @@ export interface PDFDocument {
   userId: string;
   filename: string;
   fileSize: number;
-  storagePath: string;
+  storagePath: string | null;
   mimeType: string;
   uploadedAt: string; // ISO string for Redux serialization
   updatedAt: string; // ISO string for Redux serialization
-  fileUrl?: string; // Signed URL for frontend use
+  fileUrl?: string | null; // Signed URL for frontend use
   folderId?: string | null; // Folder association
   folder?: {
     id: string;
     name: string;
     parent_id: string | null;
   } | null; // Folder details from join
+  googleFileId?: string | null; // Google Drive file ID for Classroom integration
+  isGoogleDriveFile?: boolean; // Flag to indicate if this is a Google Drive file
 }
 
 /**
@@ -210,7 +212,7 @@ export interface SupabasePDFListResponse {
       filename: string;
       fileSize: number;
       uploadedAt: string;
-      fileUrl: string;
+      fileUrl: string | null;
       mimeType: string;
       folderId?: string | null;
       folder?: {
@@ -218,6 +220,11 @@ export interface SupabasePDFListResponse {
         name: string;
         parent_id: string | null;
       } | null;
+      storage_path?: string | null;
+      storagePath?: string | null;
+      google_file_id?: string | null;
+      googleFileId?: string | null;
+      isGoogleDriveFile?: boolean;
     }>;
     recentActivity?: {
       pdfId: string;
