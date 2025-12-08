@@ -17,7 +17,7 @@ const fileRoutesHandler: FastifyPluginAsync = async (
   );
   fastify.post<{
     Body: { fileGoogleDriveId: string };
-  }>(`${opts.prefix}`, async (request, reply) => {
+  }>(`${opts.prefix}/classroom`, async (request, reply) => {
     const fileController = request.diScope.resolve("fileController");
     return fileController.addFileFromGoogleDrive(request, reply);
   });

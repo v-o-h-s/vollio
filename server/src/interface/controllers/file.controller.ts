@@ -5,7 +5,7 @@ export class FileController {
   constructor(
     private addFileFromGoogleDriveUseCase: AddFileFromGoogleDriveUseCase,
     private getFileFromGoogleDriveUseCase: GetFileFromGoogleDriveUseCase
-  ) {}
+  ) { }
   async addFileFromGoogleDrive(
     request: FastifyRequest<{
       Body: { fileGoogleDriveId: string };
@@ -58,5 +58,19 @@ export class FileController {
       `inline; filename="${file.getFileName()}"`
     );
     res.send(content);
+  }
+  async uploadFile(req: FastifyRequest<{ Body: { file: Buffer } }>, res: FastifyReply): Promise<void> {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).send({
+        success: false,
+        message: "User not authenticated",
+        data: null,
+        error: "Unauthorized",
+      });
+      return;
+    }
+    const {file}=req.body
+    
   }
 }

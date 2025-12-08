@@ -13,6 +13,7 @@ import { fastifyAwilixPlugin } from "@fastify/awilix";
 import qs from "querystring";
 import { googleClassroomRoutes } from "./interface/routes/googleClassroom.route";
 import { fileRoutes } from "./interface/routes/file.route";
+import { testRoutes } from "./interface/routes/test.route";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -70,6 +71,9 @@ app.register(googleClassroomRoutes, {
 });
 app.register(fileRoutes, {
   prefix: "/api/v1/files",
+});
+app.register(testRoutes, {
+  prefix: "/api/v1/test",
 });
 
 async function start(): Promise<void> {

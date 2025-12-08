@@ -50,7 +50,11 @@ export class FileRepository implements IFileRepository {
   }
 
   async deleteFile(id: string): Promise<void> {
-    // Implementation for deleting a file by its ID
     throw new ServerError("not implemented yet");
   }
+  async uploadFile(file: Buffer): Promise<void> {
+    throw new ServerError("not implemented yet");
+
+  }
+ 
 }
