@@ -53,7 +53,6 @@ export class FileRepository implements IFileRepository {
     throw new ServerError("not implemented yet");
   }
   async uploadFile(file: Buffer): Promise<void> {
-    throw new ServerError("not implemented yet");
 
   }
  

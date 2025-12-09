@@ -26,11 +26,15 @@ import { GoogleDriveService } from "../infrastructure/services/GoogleDriveServic
 import { FileRepository } from "../infrastructure/repositories/FileRepository";
 import { FileController } from "../interface/controllers/file.controller";
 import { GetFileFromGoogleDriveUseCase } from "../application/use-cases/files/GetFileFromGoogleDriveUseCase";
-import { FileProcessor } from "../infrastructure/services/FileProcessor";
 import { UploadFileUseCase } from "../application/use-cases/files/UploadFileUseCase";
 import { testChunks } from "../application/use-cases/testChanks";
 import { testController } from "../interface/controllers/test.controller";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
+  // Register singleton logger
+  fastify.diContainer.register({
+    logger: asValue(fastify.log),
+  });
+
   fastify.addHook("onRequest", async (request, reply) => {
     const { supabase } = await createUserClient(request);
     request.diScope.register({
@@ -162,10 +166,6 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   // will be deleted
   fastify.diContainer.register({
-    fileProcessor: asClass(FileProcessor, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
     uploadFileUseCase: asClass(UploadFileUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
