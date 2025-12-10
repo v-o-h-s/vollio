@@ -116,6 +116,7 @@ const fileRoutesHandler: FastifyPluginAsync = async (
         validateParams(fileIdParamsSchema),
         validateBody(renameFileSchema),
       ],
+      
     },
     async (request, reply) => {
       const fileController = request.diScope.resolve("fileController");

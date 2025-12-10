@@ -57,8 +57,8 @@ Handles the OAuth2 callback from Google.
 
 Manually refreshes the Google Classroom access token.
 
-- **URL**: `/refresh`
-- **Method**: `GET`
+- **URL**: `/refresh-token`
+- **Method**: `POST`
 - **Auth Required**: Yes
 
 - **Success Response**:
@@ -80,7 +80,7 @@ Manually refreshes the Google Classroom access token.
 
 Checks if the current Google Classroom token is valid.
 
-- **URL**: `/check`
+- **URL**: `/check-token`
 - **Method**: `GET`
 - **Auth Required**: Yes
 
@@ -106,7 +106,7 @@ Checks if the current Google Classroom token is valid.
 Disconnects the user from Google Classroom (removes tokens).
 
 - **URL**: `/disconnect`
-- **Method**: `DELETE`
+- **Method**: `POST`
 - **Auth Required**: Yes
 
 - **Success Response**:
@@ -128,7 +128,7 @@ Disconnects the user from Google Classroom (removes tokens).
 
 Checks if the user is currently connected to Google Classroom.
 
-- **URL**: `/status`
+- **URL**: `/connection-status`
 - **Method**: `GET`
 - **Auth Required**: Yes
 
@@ -153,7 +153,7 @@ Checks if the user is currently connected to Google Classroom.
 
 Retrieves a lightweight list of courses from Google Classroom (without content).
 
-- **URL**: `/courses/list`
+- **URL**: `/courses`
 - **Method**: `GET`
 - **Auth Required**: Yes
 
@@ -184,7 +184,7 @@ Retrieves a lightweight list of courses from Google Classroom (without content).
 
 Retrieves courses along with their content (announcements and materials). **Note**: This is a heavy operation that fetches all content for all courses.
 
-- **URL**: `/courses`
+- **URL**: `/courses-with-content`
 - **Method**: `GET`
 - **Auth Required**: Yes
 
@@ -201,45 +201,7 @@ Retrieves courses along with their content (announcements and materials). **Note
           "name": "string",
           "updateTime": "string",
           "courseState": "string",
-          "alternateLink": "string",
-          "content": {
-            "announcements": [
-              {
-                "id": "string",
-                "courseId": "string",
-                "state": "PUBLISHED | DRAFT | DELETED",
-                "alternateLink": "string",
-                "updatedAt": "string",
-                "materials": {
-                  "driveFiles": [
-                    {
-                      "id": "string",
-                      "title": "string"
-                    }
-                  ]
-                }
-              }
-            ],
-            "materials": [
-              {
-                "id": "string",
-                "courseId": "string",
-                "title": "string (optional)",
-                "state": "PUBLISHED | DRAFT | DELETED",
-                "alternateLink": "string",
-                "updatedAt": "string",
-                "materials": {
-                  "driveFiles": [
-                    {
-                      "id": "string",
-                      "title": "string",
-                      "thumbnailUrl": "string (optional)"
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+          "alternateLink": "string"
         }
       ],
       "error": null

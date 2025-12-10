@@ -9,6 +9,13 @@ import {
   UpdateNoteDTO,
   NoteIdParams,
 } from "../../shared/validation/noteSchemas";
+import {
+  CreateNoteResponse,
+  GetAllNotesResponse,
+  GetNoteByIdResponse,
+  UpdateNoteResponse,
+  DeleteNoteResponse,
+} from "../../shared/types/responses/noteRoutes";
 
 export class NoteController {
   constructor(
@@ -17,7 +24,7 @@ export class NoteController {
     private deleteNoteUseCase: DeleteNoteUseCase,
     private getNoteUseCase: GetNoteUseCase,
     private getAllUserNotesUseCase: GetAllUserNotesUseCase
-  ) {}
+  ) { }
 
   /**
    * Create a new note
@@ -39,8 +46,10 @@ export class NoteController {
 
     reply.status(201).send({
       success: true,
+      message: "Note created successfully",
       data: createdNote.toJSON(),
-    });
+      error: null,
+    } satisfies CreateNoteResponse);
   }
 
   /**
@@ -60,8 +69,10 @@ export class NoteController {
 
     reply.status(200).send({
       success: true,
+      message: "Notes retrieved successfully",
       data: notes.map((note) => note.toJSON()),
-    });
+      error: null,
+    } satisfies GetAllNotesResponse);
   }
 
   /**
@@ -86,8 +97,10 @@ export class NoteController {
 
     reply.status(200).send({
       success: true,
+      message: "Note retrieved successfully",
       data: note.toJSON(),
-    });
+      error: null,
+    } satisfies GetNoteByIdResponse);
   }
 
   /**
@@ -113,8 +126,10 @@ export class NoteController {
 
     reply.status(200).send({
       success: true,
+      message: "Note updated successfully",
       data: result.toJSON(),
-    });
+      error: null,
+    } satisfies UpdateNoteResponse);
   }
 
   /**
@@ -140,6 +155,8 @@ export class NoteController {
     reply.status(200).send({
       success: true,
       message: "Note deleted successfully",
-    });
+      data: null,
+      error: null,
+    } satisfies DeleteNoteResponse);
   }
 }

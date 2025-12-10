@@ -19,7 +19,8 @@ import {
   RenameFileResponse,
   StreamFileResponse,
   UploadFileResponse,
-} from "../../shared/types/responses/file.route";
+} from "../../shared/types/responses/fileRoutes";
+import { error } from "console";
 
 export class FileController {
   constructor(
@@ -125,7 +126,7 @@ export class FileController {
     if (!userId) {
       reply.status(401).send({
         success: false,
-        message:" Not authenticated",
+        message: " Not authenticated",
         data: null,
         error: { message: "Not authenticated" },
       });
@@ -182,7 +183,7 @@ export class FileController {
       }
     }
 
-     await this.uploadFileUseCase.execute({
+    await this.uploadFileUseCase.execute({
       fileBuffer,
       filename: data.filename,
       fileSize: fileBuffer.length,
@@ -248,8 +249,8 @@ export class FileController {
       success: true,
       message: "File moved successfully",
       data: null,
-    }) satisfies MoveFileResponse;
-      
+      error: null
+    } satisfies MoveFileResponse);
   }
 
   async renameFile(

@@ -1,5 +1,5 @@
 import { IFileRepository } from "../../../domain/repositories/IFileRepository";
-import { PdfDetails } from "../../../shared/types/responses/file.route";
+import { PdfDetails } from "../../../shared/types/responses/fileRoutes";
 
 export class GetAllFilesUseCase {
   constructor(private fileRepository: IFileRepository) { }
