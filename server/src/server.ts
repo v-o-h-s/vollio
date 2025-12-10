@@ -15,6 +15,7 @@ import { googleClassroomRoutes } from "./interface/routes/googleClassroom.route"
 import { fileRoutes } from "./interface/routes/file.route";
 import { testRoutes } from "./interface/routes/test.route";
 import { folderRoutes } from "./interface/routes/folder.route";
+import { highlightRoutes } from "./interface/routes/highlight.route";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -82,6 +83,9 @@ app.register(fileRoutes, {
 });
 app.register(folderRoutes, {
   prefix: "/api/v1/folders",
+});
+app.register(highlightRoutes, {
+  prefix: "/api/v1/highlights",
 });
 app.register(testRoutes, {
   prefix: "/api/v1/test",

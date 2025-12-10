@@ -42,6 +42,13 @@ import { GetFolderByIdUseCase } from "../application/use-cases/folders/GetFolder
 import { UpdateFolderUseCase } from "../application/use-cases/folders/UpdateFolderUseCase";
 import { DeleteFolderUseCase } from "../application/use-cases/folders/DeleteFolderUseCase";
 import { FolderController } from "../interface/controllers/folder.controller";
+import { GetAllHighlightsUseCase } from "../application/use-cases/highlights/GetAllHighlightsUseCase";
+import { CreateHighlightUseCase } from "../application/use-cases/highlights/CreateHighlightUseCase";
+import { GetHighlightByIdUseCase } from "../application/use-cases/highlights/GetHighlightByIdUseCase";
+import { UpdateHighlightUseCase } from "../application/use-cases/highlights/UpdateHighlightUseCase";
+import { DeleteHighlightUseCase } from "../application/use-cases/highlights/DeleteHighlightUseCase";
+import { HighlightRepository } from "../infrastructure/repositories/HighlightRepository";
+import { HighlightController } from "../interface/controllers/highlight.controller";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -232,6 +239,38 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     folderController: asClass(FolderController, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+
+  // Highlight use cases, repository and controller
+  fastify.diContainer.register({
+    highlightRepository: asClass(HighlightRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getAllHighlightsUseCase: asClass(GetAllHighlightsUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    createHighlightUseCase: asClass(CreateHighlightUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getHighlightByIdUseCase: asClass(GetHighlightByIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    updateHighlightUseCase: asClass(UpdateHighlightUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    deleteHighlightUseCase: asClass(DeleteHighlightUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    highlightController: asClass(HighlightController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
