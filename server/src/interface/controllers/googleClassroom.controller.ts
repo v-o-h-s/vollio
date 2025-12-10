@@ -11,6 +11,16 @@ import { GetCourseContentUseCase } from "../../application/use-cases/google-Clas
 import { GetCoursesWithContentUseCase } from "../../application/use-cases/google-Classroom/GetCoursesWithContentUseCase";
 import { ClassroomAnnouncementResponse } from "../../shared/types/lms/classroom";
 import { AddFileFromGoogleDriveUseCase } from "../../application/use-cases/files/AddFileFromGoogleDriveUseCase";
+import {
+  ConnectCallbackResponse,
+  RefreshAccessTokenResponse,
+  CheckTokenStatusResponse,
+  DisconnectResponse,
+  GetConnectionStatusResponse,
+  GetCoursesResponse,
+  GetCoursesWithContentResponse,
+  GetCourseContentResponse,
+} from "../../shared/types/responses/googleClassroomRoutes";
 
 export class GoogleClassroomController {
   private googleClassroomService: GoogleClassroomService;
@@ -21,7 +31,6 @@ export class GoogleClassroomController {
   private getCoursesUseCase: GetCoursesUseCase;
   private isConnectedUseCase: IsConnectedToGoogleClassroomUseCase;
   private getCourseContentUseCase: GetCourseContentUseCase;
-  private getCoursesWithContentUseCase: GetCoursesWithContentUseCase;
   private addFileFromGoogleDriveUseCase: AddFileFromGoogleDriveUseCase;
 
   constructor(
@@ -33,7 +42,6 @@ export class GoogleClassroomController {
     getCoursesUseCase: GetCoursesUseCase,
     isConnectedUseCase: IsConnectedToGoogleClassroomUseCase,
     getCourseContentUseCase: GetCourseContentUseCase,
-    getCoursesWithContentUseCase: GetCoursesWithContentUseCase,
     addFileFromGoogleDriveUseCase: AddFileFromGoogleDriveUseCase
   ) {
     this.googleClassroomService = googleClassroomService;
@@ -44,7 +52,6 @@ export class GoogleClassroomController {
     this.getCoursesUseCase = getCoursesUseCase;
     this.isConnectedUseCase = isConnectedUseCase;
     this.getCourseContentUseCase = getCourseContentUseCase;
-    this.getCoursesWithContentUseCase = getCoursesWithContentUseCase;
     this.addFileFromGoogleDriveUseCase = addFileFromGoogleDriveUseCase;
   }
 
@@ -110,7 +117,7 @@ export class GoogleClassroomController {
       message: "Connected to Google Classroom successfully",
       data: null,
       error: null,
-    });
+    } satisfies ConnectCallbackResponse);
   }
 
   async refreshAccessToken(
@@ -134,7 +141,7 @@ export class GoogleClassroomController {
       message: "Access token refreshed successfully",
       data: null,
       error: null,
-    });
+    } satisfies RefreshAccessTokenResponse);
   }
 
   async checkTokenStatus(
@@ -159,7 +166,7 @@ export class GoogleClassroomController {
       message: "Token status retrieved successfully",
       data: { isValid: isValid },
       error: null,
-    });
+    } satisfies CheckTokenStatusResponse);
   }
 
   async disconnect(
@@ -184,7 +191,7 @@ export class GoogleClassroomController {
       message: "Disconnected from Google Classroom successfully",
       data: null,
       error: null,
-    });
+    } satisfies DisconnectResponse);
   }
 
   async getConnectionStatus(
@@ -208,7 +215,7 @@ export class GoogleClassroomController {
       message: "Connection status retrieved successfully",
       data: { isConnected },
       error: null,
-    });
+    } satisfies GetConnectionStatusResponse);
   }
 
   async getCourses(request: FastifyRequest, reply: FastifyReply): Promise<any> {
@@ -229,34 +236,8 @@ export class GoogleClassroomController {
       message: "Courses retrieved successfully",
       data: courses,
       error: null,
-    });
+    } satisfies GetCoursesResponse);
   }
-
-  async getCoursesWithContent(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<any> {
-    const userId = request.user?.id;
-    if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "User not authenticated",
-        data: null,
-        error: "Unauthorized",
-      });
-      return;
-    }
-
-    const coursesWithContent =
-      await this.getCoursesWithContentUseCase.execute();
-    reply.status(200).send({
-      success: true,
-      message: "Courses with content retrieved successfully",
-      data: coursesWithContent,
-      error: null,
-    });
-  }
-
   async getCourseContent(
     request: FastifyRequest<{ Params: { courseId: string } }>,
     reply: FastifyReply
@@ -280,7 +261,7 @@ export class GoogleClassroomController {
       message: "Course content retrieved successfully",
       data: content,
       error: null,
-    });
+    } satisfies GetCourseContentResponse);
   }
   
 }

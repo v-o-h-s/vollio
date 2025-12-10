@@ -20,15 +20,17 @@ Creates a new note.
     ```json
     {
       "success": true,
+      "message": "Note created successfully",
       "data": {
         "id": "string (UUID)",
         "title": "string",
-        "content": "string",
+        "content": "object",
         "userId": "string (UUID)",
         "pdfId": "string (UUID, optional)",
         "createdAt": "string (ISO 8601 timestamp)",
         "updatedAt": "string (ISO 8601 timestamp)"
-      }
+      },
+      "error": null
     }
     ```
 
@@ -36,7 +38,10 @@ Creates a new note.
   - **Code**: 401 Unauthorized
     ```json
     {
-      "error": "Unauthorized"
+      "success": false,
+      "message": "Not authenticated",
+      "data": null,
+      "error": { "message": "Not authenticated" }
     }
     ```
 
@@ -54,17 +59,19 @@ Retrieves all notes for the authenticated user.
     ```json
     {
       "success": true,
+      "message": "Notes retrieved successfully",
       "data": [
         {
           "id": "string (UUID)",
           "title": "string",
-          "content": "string",
+          "content": "object",
           "userId": "string (UUID)",
           "pdfId": "string (UUID, optional)",
           "createdAt": "string (ISO 8601 timestamp)",
           "updatedAt": "string (ISO 8601 timestamp)"
         }
-      ]
+      ],
+      "error": null
     }
     ```
 
@@ -87,15 +94,17 @@ Retrieves a specific note.
     ```json
     {
       "success": true,
+      "message": "Note retrieved successfully",
       "data": {
         "id": "string (UUID)",
         "title": "string",
-        "content": "string",
+        "content": "object",
         "userId": "string (UUID)",
         "pdfId": "string (UUID, optional)",
         "createdAt": "string (ISO 8601 timestamp)",
         "updatedAt": "string (ISO 8601 timestamp)"
-      }
+      },
+      "error": null
     }
     ```
 
@@ -107,7 +116,7 @@ Retrieves a specific note.
 Updates an existing note.
 
 - **URL**: `/:id`
-- **Method**: `PUT`
+- **Method**: `PATCH`
 - **Auth Required**: Yes
 - **URL Parameters**:
   - `id` (string): The UUID of the note
@@ -121,15 +130,17 @@ Updates an existing note.
     ```json
     {
       "success": true,
+      "message": "Note updated successfully",
       "data": {
         "id": "string (UUID)",
         "title": "string",
-        "content": "string",
+        "content": "object",
         "userId": "string (UUID)",
         "pdfId": "string (UUID, optional)",
         "createdAt": "string (ISO 8601 timestamp)",
         "updatedAt": "string (ISO 8601 timestamp)"
-      }
+      },
+      "error": null
     }
     ```
 
