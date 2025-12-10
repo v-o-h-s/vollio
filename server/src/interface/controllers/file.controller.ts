@@ -1,11 +1,28 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { AddFileFromGoogleDriveUseCase } from "../../application/use-cases/files/AddFileFromGoogleDriveUseCase";
 import { GetFileFromGoogleDriveUseCase } from "../../application/use-cases/files/GetFileFromGoogleDriveUseCase";
+import { GetAllFilesUseCase } from "../../application/use-cases/files/GetAllFilesUseCase";
+import { GetFileByIdUseCase } from "../../application/use-cases/files/GetFileByIdUseCase";
+import { UploadFileUseCase } from "../../application/use-cases/files/UploadFileUseCase";
+import { DeleteFileUseCase } from "../../application/use-cases/files/DeleteFileUseCase";
+import { MoveFileUseCase } from "../../application/use-cases/files/MoveFileUseCase";
+import { RenameFileUseCase } from "../../application/use-cases/files/RenameFileUseCase";
+import { MoveFileDTO, RenameFileDTO, FileIdParams } from "../../shared/validation/fileSchemas";
+import { StreamFileUseCase } from "../../application/use-cases/files/StreamFileUseCase";
+
 export class FileController {
   constructor(
     private addFileFromGoogleDriveUseCase: AddFileFromGoogleDriveUseCase,
-    private getFileFromGoogleDriveUseCase: GetFileFromGoogleDriveUseCase
+    private getFileFromGoogleDriveUseCase: GetFileFromGoogleDriveUseCase,
+    private getAllFilesUseCase: GetAllFilesUseCase,
+    private getFileByIdUseCase: GetFileByIdUseCase,
+    private uploadFileUseCase: UploadFileUseCase,
+    private deleteFileUseCase: DeleteFileUseCase,
+    private moveFileUseCase: MoveFileUseCase,
+    private renameFileUseCase: RenameFileUseCase,
+    private streamFileUseCase: StreamFileUseCase
   ) { }
+
   async addFileFromGoogleDrive(
     request: FastifyRequest<{
       Body: { fileGoogleDriveId: string };
@@ -33,6 +50,7 @@ export class FileController {
       error: null,
     });
   }
+
   async getFileFromGoogleDrive(
     req: FastifyRequest<{ Params: { fileId: string } }>,
     res: FastifyReply
@@ -59,5 +77,221 @@ export class FileController {
     );
     res.send(content);
   }
-  
+
+  async getAllFiles(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        status: 401,
+        data: null,
+        error: { message: "Not authenticated" },
+      });
+      return;
+    }
+
+    const files = await this.getAllFilesUseCase.execute(userId);
+
+    const pdfs = files.map((file) => ({
+      id: file.id,
+      filename: file.filename,
+      file_size: file.fileSize,
+      storage_path: file.storagePath,
+      google_file_id: file.googleFileId,
+      mime_type: file.mimeType,
+      folder_id: file.folderId,
+      isGoogleDriveFile: file.isGoogleDriveFile,
+    }));
+
+    reply.status(200).send({
+      success: true,
+      data: {
+        pdfs,
+        totalCount: pdfs.length,
+      },
+    });
+  }
+
+  async getFileById(
+    request: FastifyRequest<{ Params: FileIdParams }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        status: 401,
+        data: null,
+        error: { message: "Not authenticated" },
+      });
+      return;
+    }
+
+    const result = await this.getFileByIdUseCase.execute(request.params.id);
+
+    reply.status(200).send({
+      success: true,
+      data: result,
+    });
+  }
+
+  async uploadFile(
+    request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        status: 401,
+        data: null,
+        error: { message: "Not authenticated" },
+      });
+      return;
+    }
+
+    const data = await request.file();
+    if (!data) {
+      reply.status(400).send({
+        success: false,
+        status: 400,
+        data: null,
+        error: { message: "No file provided" },
+      });
+      return;
+    }
+
+    const fileBuffer = await data.toBuffer();
+
+    // Get folderId from form fields
+    let folderId: string | null = null;
+    const folderIdField = data.fields.folderId;
+    if (folderIdField) {
+      if (Array.isArray(folderIdField)) {
+        folderId = (folderIdField[0] as any).value || null;
+      } else {
+        folderId = (folderIdField as any).value || null;
+      }
+    }
+
+    const result = await this.uploadFileUseCase.execute({
+      fileBuffer,
+      filename: data.filename,
+      fileSize: fileBuffer.length,
+      userId,
+      folderId,
+    });
+
+    reply.status(200).send({
+      success: true,
+      data: result,
+    });
+  }
+
+  async deleteFile(
+    request: FastifyRequest<{ Params: FileIdParams }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        status: 401,
+        data: null,
+        error: { message: "Not authenticated" },
+      });
+      return;
+    }
+
+    await this.deleteFileUseCase.execute(request.params.id);
+
+    reply.status(200).send({
+      success: true,
+      message: "File deleted successfully",
+    });
+  }
+
+  async moveFile(
+    request: FastifyRequest<{ Params: FileIdParams; Body: MoveFileDTO }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        status: 401,
+        data: null,
+        error: { message: "Not authenticated" },
+      });
+      return;
+    }
+
+    const updatedFile = await this.moveFileUseCase.execute({
+      fileId: request.params.id,
+      folderId: request.body.folderId ?? null,
+      userId,
+    });
+
+    reply.status(200).send({
+      success: true,
+      data: updatedFile,
+      message: "PDF moved successfully",
+    });
+  }
+
+  async renameFile(
+    request: FastifyRequest<{ Params: FileIdParams; Body: RenameFileDTO }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        status: 401,
+        data: null,
+        error: { message: "Not authenticated" },
+      });
+      return;
+    }
+
+    const updatedFile = await this.renameFileUseCase.execute({
+      fileId: request.params.id,
+      filename: request.body.filename,
+    });
+
+    reply.status(200).send({
+      success: true,
+      pdf: {
+        id: updatedFile.getId(),
+        filename: updatedFile.getFileName(),
+        fileSize: updatedFile.getFileSize(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    });
+  }
+
+  async streamFile(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        status: 401,
+        data: null,
+        error: { message: "Not authenticated" },
+      });
+      return;
+    }
+
+    const { id } = request.params;
+    const stream = await this.streamFileUseCase.execute(id);
+
+    reply.type("application/pdf");
+    return reply.send(stream);
+
+  }
+
 }

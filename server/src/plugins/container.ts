@@ -27,6 +27,13 @@ import { FileRepository } from "../infrastructure/repositories/FileRepository";
 import { FileController } from "../interface/controllers/file.controller";
 import { GetFileFromGoogleDriveUseCase } from "../application/use-cases/files/GetFileFromGoogleDriveUseCase";
 import { UploadFileUseCase } from "../application/use-cases/files/UploadFileUseCase";
+import { GetAllFilesUseCase } from "../application/use-cases/files/GetAllFilesUseCase";
+import { GetFileByIdUseCase } from "../application/use-cases/files/GetFileByIdUseCase";
+import { DeleteFileUseCase } from "../application/use-cases/files/DeleteFileUseCase";
+import { MoveFileUseCase } from "../application/use-cases/files/MoveFileUseCase";
+import { RenameFileUseCase } from "../application/use-cases/files/RenameFileUseCase";
+import { StorageService } from "../infrastructure/services/StorageService";
+import { FolderRepository } from "../infrastructure/repositories/FolderRepository";
 import { testChunks } from "../application/use-cases/testChanks";
 import { testController } from "../interface/controllers/test.controller";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
@@ -151,6 +158,38 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
+    getAllFilesUseCase: asClass(GetAllFilesUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getFileByIdUseCase: asClass(GetFileByIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    uploadFileUseCase: asClass(UploadFileUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    deleteFileUseCase: asClass(DeleteFileUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    moveFileUseCase: asClass(MoveFileUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    renameFileUseCase: asClass(RenameFileUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    storageService: asClass(StorageService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    folderRepository: asClass(FolderRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
     fileController: asClass(FileController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -166,15 +205,11 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   // will be deleted
   fastify.diContainer.register({
-    uploadFileUseCase: asClass(UploadFileUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
     testChunks: asClass(testChunks, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    testController  : asClass(testController, {
+    testController: asClass(testController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

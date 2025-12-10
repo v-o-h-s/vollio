@@ -2,6 +2,7 @@ import "dotenv/config";
 import fastifyCookie from "@fastify/cookie";
 import fastifySession from "@fastify/session";
 import fastifyCors from "@fastify/cors";
+import fastifyMultipart from "@fastify/multipart";
 import Fastify from "fastify";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { containerPlugin } from "./plugins/container";
@@ -45,6 +46,13 @@ app.register(fastifySession, {
 app.register(fastifyCors, {
   origin: process.env.FRONTEND_URL || "http://localhost:3001",
   credentials: true,
+});
+
+// Register multipart for file uploads
+app.register(fastifyMultipart, {
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB
+  },
 });
 
 // Register Awilix DI plugin first

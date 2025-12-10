@@ -47,4 +47,23 @@ export class GoogleDriveService implements IGoogleDriveService {
 
     return Buffer.from(arrayBuf);
   }
+  async streamFile(accessToken: string, fileId: string) {
+    const auth = new google.auth.OAuth2();
+    auth.setCredentials({ access_token: accessToken });
+    const drive = google.drive({ version: "v3", auth });
+    const driveRes = await drive.files.get(
+      { fileId: fileId, alt: "media" },
+      { responseType: "stream" }
+    );
+    return driveRes.data;
+    /*
+    No access_token is sent to the client
+     No Drive link is exposed
+     No auth leak
+     Private Google Drive stays private
+     Client simply gets bytes
+     PDF.js / react-highlighter-extended loads it just fine
+    */
+
+  }
 }
