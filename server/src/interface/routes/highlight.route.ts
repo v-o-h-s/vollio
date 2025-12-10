@@ -26,7 +26,7 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
 ): Promise<void> => {
   // Get all highlights
   fastify.get<{ Querystring: GetHighlightsQuery }>(
-    "/",
+    `${options.prefix}/`,
     {
       preHandler: validateQuery(getHighlightsQuerySchema),
     },
@@ -38,7 +38,7 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
 
   // Create a new highlight
   fastify.post<{ Body: CreateHighlightDTO }>(
-    "/",
+    `${options.prefix}/`,
     {
       preHandler: validateBody(createHighlightSchema),
     },
@@ -50,7 +50,7 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
 
   // Get a specific highlight by ID
   fastify.get<{ Params: HighlightIdParams }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: validateParams(highlightIdParamsSchema),
     },
@@ -65,7 +65,7 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     Params: HighlightIdParams;
     Body: UpdateHighlightDTO;
   }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: [
         validateParams(highlightIdParamsSchema),
@@ -80,7 +80,7 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
 
   // Delete a highlight
   fastify.delete<{ Params: HighlightIdParams }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: validateParams(highlightIdParamsSchema),
     },

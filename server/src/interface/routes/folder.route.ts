@@ -33,7 +33,7 @@ const folderRoutesHandler: FastifyPluginAsync = async (
   // Create a new folder
   // /api/v1/folders/
   fastify.post<{ Body: CreateFolderDTO }>(
-    "/",
+    `${options.prefix}/`,
     {
       preHandler: validateBody(createFolderSchema),
     },
@@ -46,7 +46,7 @@ const folderRoutesHandler: FastifyPluginAsync = async (
   // Get a specific folder by ID
   // /api/v1/folders/:id
   fastify.get<{ Params: FolderIdParams }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: validateParams(folderIdParamsSchema),
     },
@@ -59,7 +59,7 @@ const folderRoutesHandler: FastifyPluginAsync = async (
   // Update a folder
   // /api/v1/folders/:id
   fastify.put<{ Params: FolderIdParams; Body: UpdateFolderDTO }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: [
         validateParams(folderIdParamsSchema),
@@ -78,7 +78,7 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     Params: FolderIdParams;
     Querystring: DeleteFolderQuery;
   }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: [
         validateParams(folderIdParamsSchema),

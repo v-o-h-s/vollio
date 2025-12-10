@@ -24,7 +24,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
 ): Promise<void> => {
   // Create a new note
   fastify.post<{ Body: CreateNoteDTO }>(
-    "/",
+    `${options.prefix}/`,
     {
       preHandler: validateBody(createNoteSchema),
     },
@@ -42,7 +42,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
 
   // Get a specific note by ID
   fastify.get<{ Params: NoteIdParams }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: validateParams(noteIdParamsSchema),
     },
@@ -54,7 +54,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
 
   // Update a note
   fastify.put<{ Params: NoteIdParams; Body: UpdateNoteDTO }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: [
         validateParams(noteIdParamsSchema),
@@ -69,7 +69,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
 
   // Delete a note
   fastify.delete<{ Params: NoteIdParams }>(
-    "/:id",
+    `${options.prefix}/:id`,
     {
       preHandler: validateParams(noteIdParamsSchema),
     },

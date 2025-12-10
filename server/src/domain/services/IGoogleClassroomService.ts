@@ -13,5 +13,4 @@ export interface IGoogleClassroomService {
     accessToken: string,
     courseId: string
   ): Promise<any[]>;
-  streamFile(accessToken: string, fileId: string): Promise<Readable>;
 }
