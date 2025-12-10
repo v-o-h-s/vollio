@@ -21,15 +21,28 @@ const fileRoutesHandler: FastifyPluginAsync = async (
   opts: FastifyPluginOptions
 ): Promise<void> => {
 
-  // Google Drive routes (existing)
+  // used like when you click on some pdf from google drive (but return like general file fetch)
+  // /api/v1/files/google-drive/:id
   fastify.get<{ Params: { fileId: string } }>(
-    `${opts.prefix}/google-drive/:fileId`,
+    `${opts.prefix}/google-drive/:id`,
     async (request, reply) => {
       const fileController = request.diScope.resolve("fileController");
       return fileController.getFileFromGoogleDrive(request, reply);
     }
   );
-
+  // used to stream file content
+  // /api/v1/files/google-drive/:id/stream
+  fastify.get<{ Params: FileIdParams }>(
+    `${opts.prefix}/google-drive/:id/stream`,
+    {
+      preHandler: validateParams(fileIdParamsSchema),
+    },
+    async (request, reply) => {
+      const fileController = request.diScope.resolve("fileController");
+      return fileController.streamFile(request, reply);
+    }
+  );
+  // add file from google drive
   fastify.post<{ Body: { fileGoogleDriveId: string } }>(
     `${opts.prefix}/google-drive`,
     async (request, reply) => {
@@ -110,16 +123,7 @@ const fileRoutesHandler: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Params: FileIdParams }>(
-    `${opts.prefix}/:id/stream`,
-    {
-      preHandler: validateParams(fileIdParamsSchema),
-    },
-    async (request, reply) => {
-      const fileController = request.diScope.resolve("fileController");
-      return fileController.streamFile(request, reply);
-    }
-  );
+  
 };
 
 export const fileRoutes = fp(fileRoutesHandler, {

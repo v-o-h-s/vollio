@@ -9,6 +9,17 @@ import { MoveFileUseCase } from "../../application/use-cases/files/MoveFileUseCa
 import { RenameFileUseCase } from "../../application/use-cases/files/RenameFileUseCase";
 import { MoveFileDTO, RenameFileDTO, FileIdParams } from "../../shared/validation/fileSchemas";
 import { StreamFileUseCase } from "../../application/use-cases/files/StreamFileUseCase";
+import {
+  AddFileFromGoogleDriveResponse,
+  DeleteFileResponse,
+  GetAllFilesResponse,
+  GetFileByIdResponse,
+  GetFileFromGoogleDriveResponse,
+  MoveFileResponse,
+  RenameFileResponse,
+  StreamFileResponse,
+  UploadFileResponse,
+} from "../../shared/types/responses/file.route";
 
 export class FileController {
   constructor(
@@ -22,7 +33,7 @@ export class FileController {
     private renameFileUseCase: RenameFileUseCase,
     private streamFileUseCase: StreamFileUseCase
   ) { }
-
+  // add pdf from google drive
   async addFileFromGoogleDrive(
     request: FastifyRequest<{
       Body: { fileGoogleDriveId: string };
@@ -48,9 +59,9 @@ export class FileController {
       message: "File added successfully",
       data: null,
       error: null,
-    });
+    } satisfies AddFileFromGoogleDriveResponse);
   }
-
+  // get pdf from google drive
   async getFileFromGoogleDrive(
     req: FastifyRequest<{ Params: { fileId: string } }>,
     res: FastifyReply
@@ -86,35 +97,26 @@ export class FileController {
     if (!userId) {
       reply.status(401).send({
         success: false,
-        status: 401,
+        message: "Not authenticated",
         data: null,
         error: { message: "Not authenticated" },
       });
       return;
     }
 
-    const files = await this.getAllFilesUseCase.execute(userId);
-
-    const pdfs = files.map((file) => ({
-      id: file.id,
-      filename: file.filename,
-      file_size: file.fileSize,
-      storage_path: file.storagePath,
-      google_file_id: file.googleFileId,
-      mime_type: file.mimeType,
-      folder_id: file.folderId,
-      isGoogleDriveFile: file.isGoogleDriveFile,
-    }));
+    const pdfs = await this.getAllFilesUseCase.execute(userId);
 
     reply.status(200).send({
       success: true,
+      message: "Files fetched successfully",
       data: {
         pdfs,
         totalCount: pdfs.length,
       },
-    });
+      error: null,
+    } satisfies GetAllFilesResponse);
   }
-
+  // you may use this one when like click on pdf from supabase storage
   async getFileById(
     request: FastifyRequest<{ Params: FileIdParams }>,
     reply: FastifyReply
@@ -123,7 +125,7 @@ export class FileController {
     if (!userId) {
       reply.status(401).send({
         success: false,
-        status: 401,
+        message:" Not authenticated",
         data: null,
         error: { message: "Not authenticated" },
       });
@@ -134,10 +136,13 @@ export class FileController {
 
     reply.status(200).send({
       success: true,
+      message: "File fetched successfully",
       data: result,
-    });
+      error: null,
+    } satisfies GetFileByIdResponse);
   }
-
+  // upload file to supabase storage
+  // pls use formdata in the frontend to send the file
   async uploadFile(
     request: FastifyRequest,
     reply: FastifyReply
@@ -146,7 +151,7 @@ export class FileController {
     if (!userId) {
       reply.status(401).send({
         success: false,
-        status: 401,
+        message: "Not authenticated",
         data: null,
         error: { message: "Not authenticated" },
       });
@@ -157,7 +162,7 @@ export class FileController {
     if (!data) {
       reply.status(400).send({
         success: false,
-        status: 400,
+        message: "No file provided",
         data: null,
         error: { message: "No file provided" },
       });
@@ -177,7 +182,7 @@ export class FileController {
       }
     }
 
-    const result = await this.uploadFileUseCase.execute({
+     await this.uploadFileUseCase.execute({
       fileBuffer,
       filename: data.filename,
       fileSize: fileBuffer.length,
@@ -187,7 +192,9 @@ export class FileController {
 
     reply.status(200).send({
       success: true,
-      data: result,
+      message: "File uploaded successfully",
+      data: null,
+      error: null,
     });
   }
 
@@ -199,7 +206,7 @@ export class FileController {
     if (!userId) {
       reply.status(401).send({
         success: false,
-        status: 401,
+        message: "Not authenticated",
         data: null,
         error: { message: "Not authenticated" },
       });
@@ -211,7 +218,9 @@ export class FileController {
     reply.status(200).send({
       success: true,
       message: "File deleted successfully",
-    });
+      data: null,
+      error: null,
+    } satisfies DeleteFileResponse);
   }
 
   async moveFile(
@@ -222,14 +231,14 @@ export class FileController {
     if (!userId) {
       reply.status(401).send({
         success: false,
-        status: 401,
+        message: "Not authenticated",
         data: null,
         error: { message: "Not authenticated" },
       });
       return;
     }
 
-    const updatedFile = await this.moveFileUseCase.execute({
+    await this.moveFileUseCase.execute({
       fileId: request.params.id,
       folderId: request.body.folderId ?? null,
       userId,
@@ -237,9 +246,10 @@ export class FileController {
 
     reply.status(200).send({
       success: true,
-      data: updatedFile,
-      message: "PDF moved successfully",
-    });
+      message: "File moved successfully",
+      data: null,
+    }) satisfies MoveFileResponse;
+      
   }
 
   async renameFile(
@@ -250,7 +260,7 @@ export class FileController {
     if (!userId) {
       reply.status(401).send({
         success: false,
-        status: 401,
+        message: "Not authenticated",
         data: null,
         error: { message: "Not authenticated" },
       });
@@ -264,17 +274,16 @@ export class FileController {
 
     reply.status(200).send({
       success: true,
-      pdf: {
-        id: updatedFile.getId(),
-        filename: updatedFile.getFileName(),
-        fileSize: updatedFile.getFileSize(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    });
+      message: "File renamed successfully",
+      data: null,
+      error: null,
+    } satisfies RenameFileResponse);
   }
 
-  async streamFile(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void> {
+  async streamFile(
+    request: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
       reply.status(401).send({
