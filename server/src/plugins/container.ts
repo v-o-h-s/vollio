@@ -36,6 +36,12 @@ import { StorageService } from "../infrastructure/services/StorageService";
 import { FolderRepository } from "../infrastructure/repositories/FolderRepository";
 import { testChunks } from "../application/use-cases/testChanks";
 import { testController } from "../interface/controllers/test.controller";
+import { GetAllUserFoldersUseCase } from "../application/use-cases/folders/GetAllUserFoldersUseCase";
+import { CreateFolderUseCase } from "../application/use-cases/folders/CreateFolderUseCase";
+import { GetFolderByIdUseCase } from "../application/use-cases/folders/GetFolderByIdUseCase";
+import { UpdateFolderUseCase } from "../application/use-cases/folders/UpdateFolderUseCase";
+import { DeleteFolderUseCase } from "../application/use-cases/folders/DeleteFolderUseCase";
+import { FolderController } from "../interface/controllers/folder.controller";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -198,6 +204,34 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   fastify.diContainer.register({
     noteController: asClass(NoteController, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+
+  // Folder use cases and controller
+  fastify.diContainer.register({
+    getAllUserFoldersUseCase: asClass(GetAllUserFoldersUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    createFolderUseCase: asClass(CreateFolderUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getFolderByIdUseCase: asClass(GetFolderByIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    updateFolderUseCase: asClass(UpdateFolderUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    deleteFolderUseCase: asClass(DeleteFolderUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    folderController: asClass(FolderController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
