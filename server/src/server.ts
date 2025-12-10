@@ -2,6 +2,7 @@ import "dotenv/config";
 import fastifyCookie from "@fastify/cookie";
 import fastifySession from "@fastify/session";
 import fastifyCors from "@fastify/cors";
+import fastifyMultipart from "@fastify/multipart";
 import Fastify from "fastify";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { containerPlugin } from "./plugins/container";
@@ -13,6 +14,7 @@ import { fastifyAwilixPlugin } from "@fastify/awilix";
 import qs from "querystring";
 import { googleClassroomRoutes } from "./interface/routes/googleClassroom.route";
 import { fileRoutes } from "./interface/routes/file.route";
+import { testRoutes } from "./interface/routes/test.route";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -46,6 +48,13 @@ app.register(fastifyCors, {
   credentials: true,
 });
 
+// Register multipart for file uploads
+app.register(fastifyMultipart, {
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB
+  },
+});
+
 // Register Awilix DI plugin first
 app.register(fastifyAwilixPlugin, {
   disposeOnClose: true,
@@ -70,6 +79,9 @@ app.register(googleClassroomRoutes, {
 });
 app.register(fileRoutes, {
   prefix: "/api/v1/files",
+});
+app.register(testRoutes, {
+  prefix: "/api/v1/test",
 });
 
 async function start(): Promise<void> {

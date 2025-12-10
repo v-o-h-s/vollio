@@ -1,20 +1,20 @@
 export class File {
-   
+
     private id: string;
     private fileName: string;
     private fileSize: number;
-    private storagePath?: string;
-    private googleFileId?: string;
+    private storagePath: string | null;
+    private googleFileId: string | null;
     private mimeType: string;
-    private folderId?: string;
+    private folderId: string | null;
     constructor(
         id: string,
         fileName: string,
         fileSize: number,
-        storagePath?: string,
-        googleFileId?: string,
+        storagePath: string | null,
+        googleFileId: string | null,
         mimeType: string = "application/pdf",
-        folderId?: string
+        folderId: string | null = null
     ) {
         // Validate that at least one of storagePath or googleFileId is provided
         if (!storagePath && !googleFileId) {
@@ -24,13 +24,13 @@ export class File {
         this.id = id;
         this.fileName = fileName;
         this.fileSize = fileSize;
-        this.storagePath = storagePath;
-        this.googleFileId = googleFileId;
+        this.storagePath = storagePath ?? null;
+        this.googleFileId = googleFileId ?? null;
         this.mimeType = mimeType;
-        this.folderId = folderId;
+        this.folderId = folderId ?? null;
     }
-     getGoogleFileId() {
-      return this.googleFileId;
+    getGoogleFileId() {
+        return this.googleFileId;
     }
     getId(): string {
         return this.id;
@@ -41,7 +41,7 @@ export class File {
     getFileSize(): number {
         return this.fileSize;
     }
-    getSource(): { storagePath?: string; googleFileId?: string } {
+    getSource(): { storagePath?: string | null; googleFileId?: string | null } {
         return {
             storagePath: this.storagePath,
             googleFileId: this.googleFileId,
@@ -50,7 +50,7 @@ export class File {
     getMimeType(): string {
         return this.mimeType;
     }
-    getFolderId(): string | undefined {
+    getFolderId(): string | null {
         return this.folderId;
     }
     getSizeInMB(): number {
