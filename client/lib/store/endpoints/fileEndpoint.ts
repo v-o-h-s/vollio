@@ -55,6 +55,10 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
     query: (id) => ({
       url: `files/${id}`,
       method: "DELETE",
+      body: undefined,
+      headers: {
+        "Content-Type": undefined,
+      },
     }),
     invalidatesTags: (_result, _error, id) => [
       { type: "File", id: "LIST" },

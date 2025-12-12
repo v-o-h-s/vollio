@@ -1,6 +1,7 @@
 import { IFolderRepository } from "../../../domain/repositories/IFolderRepository";
 import { Folder } from "../../../domain/entities/Folder";
 import { randomUUID } from "crypto";
+import { FastifyBaseLogger } from "fastify";
 
 interface CreateFolderInput {
   userId: string;
@@ -9,7 +10,8 @@ interface CreateFolderInput {
 }
 
 export class CreateFolderUseCase {
-  constructor(private folderRepository: IFolderRepository) {}
+
+  constructor(private folderRepository: IFolderRepository, private logger: FastifyBaseLogger) {}
 
   async execute(input: CreateFolderInput): Promise<Folder> {
     // Validate folder name
@@ -54,7 +56,7 @@ export class CreateFolderUseCase {
       folderName,
       input.parentId || null
     );
-
+   this.logger.info(`Creating folder ${folder}`);
     return this.folderRepository.createFolder(folder);
   }
 }

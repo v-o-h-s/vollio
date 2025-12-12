@@ -2,12 +2,14 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { IFolderRepository } from "../../domain/repositories/IFolderRepository";
 import { Folder } from "../../domain/entities/Folder";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
-
+import type { FastifyBaseLogger, } from "fastify";
 export class FolderRepository implements IFolderRepository {
   private supabaseClient: SupabaseClient;
+  private logger: FastifyBaseLogger;
 
-  constructor(supabaseClient: SupabaseClient) {
+  constructor(supabaseClient: SupabaseClient, logger: FastifyBaseLogger) {
     this.supabaseClient = supabaseClient;
+    this.logger = logger;
   }
 
   async getFolderById(
@@ -113,18 +115,21 @@ export class FolderRepository implements IFolderRepository {
   }
 
   async createFolder(folder: Folder): Promise<Folder> {
+ 
+    console.log(`Creating folder ${folder}`);
     const { data, error } = await this.supabaseClient
       .from("folders")
       .insert({
         id: folder.getId(),
-        user_id: folder.getUserId(),
         name: folder.getName(),
         parent_id: folder.getParentId(),
+        user_id: folder.getUserId(),
       })
       .select("*")
       .single();
 
     if (error) {
+      this.logger.error(`Error creating folder: ${error.message}`);
       throw new DatabaseError(error);
     }
 
@@ -186,8 +191,14 @@ export class FolderRepository implements IFolderRepository {
       .from("folders")
       .select("id")
       .eq("name", name.trim())
-      .eq("parent_id", parentId || null)
       .eq("user_id", userId);
+
+    // Use isNull() for null comparisons, eq() for actual values
+    if (parentId === null) {
+      query = query.is("parent_id", null);
+    } else {
+      query = query.eq("parent_id", parentId);
+    }
 
     if (excludeFolderId) {
       query = query.neq("id", excludeFolderId);

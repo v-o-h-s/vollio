@@ -21,7 +21,8 @@ const baseQuery = fetchBaseQuery({
   credentials: 'include', // Include cookies for Supabase authentication
   prepareHeaders: (headers, { endpoint }) => {
     // Don't set Content-Type for FormData uploads (let browser set it with boundary)
-    if (endpoint !== "uploadPDF" && endpoint !== "uploadFile") {
+    // fasity does not like it when you send him post like request without body
+    if (endpoint !== "uploadPDF" && endpoint !== "uploadFile" ) {
       headers.set("Content-Type", "application/json");
     }
     return headers;

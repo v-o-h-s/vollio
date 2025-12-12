@@ -58,11 +58,9 @@ export function useFolder() {
   const deleteFolder = async (id: string, cascade: boolean = true) => {
     try {
       await deleteFolderMutation({ id, cascade }).unwrap();
-      toast.success("Folder deleted successfully");
-      return true;
+      return { success: true };
     } catch (error) {
-      toast.error("Failed to delete folder");
-      throw error;
+      return { error };
     }
   };
 

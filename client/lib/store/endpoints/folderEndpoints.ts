@@ -110,9 +110,12 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
 
   deleteFolder: builder.mutation<{ success: boolean }, { id: string; cascade?: boolean }>({
     query: ({ id, cascade }) => ({
-      url: `folders/${id}`,
+      url: `folders/${id}${cascade !== undefined ? `?cascade=${cascade}` : ""}`,
       method: "DELETE",
-      params: cascade !== undefined ? { cascade } : undefined,
+      body: undefined,
+      headers: {
+        "Content-Type": undefined,
+      },
     }),
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Folder", id: "LIST" },

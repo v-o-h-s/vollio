@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, MoreVertical, Edit, Trash2, MoveRight } from "lucide-react";
+import { FileText, MoreVertical, Edit, Trash2, MoveRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,8 +13,7 @@ import {
 import { useFile } from "../hooks/useFile";
 import { RenameDialog } from "./dialogs/RenameDialog";
 import { MoveItemDialog } from "./dialogs/MoveItemDialog";
-import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
-
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 interface FileCardProps {
   id: string;
   filename: string;
@@ -34,16 +33,32 @@ export function FileCard({
   onOpen,
   allFolders,
 }: FileCardProps) {
-  const { renameFile, moveFile, deleteFile } = useFile();
+  const { renameFile, moveFile, deleteFile, refetch } = useFile();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteFileHandler = async () => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteFile(id);
+      if (result.error) {
+        console.error("Failed to delete file:", result.error);
+      } else {
+        await refetch();
+        setDeleteDialogOpen(false);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
   return (
     <>
       <div
-        className={`relative group flex flex-col justify-center h-[140px] w-[140px] cursor-pointer transition-all hover:shadow-md hover:bg-muted/5 rounded-2xl ${
-          isSelected ? "bg-blue-50 dark:bg-blue-950 border-blue-500 " : ""
-        }`}
+        className={`relative group flex flex-col justify-center h-[140px] w-[140px] cursor-pointer transition-all hover:shadow-md hover:bg-muted/5 rounded-2xl ${isSelected ? "bg-blue-50 dark:bg-blue-950 border-blue-500 " : ""
+          }`}
         onClick={onSelect}
         onDoubleClick={onOpen}
       >
@@ -108,13 +123,20 @@ export function FileCard({
         itemName={filename}
       />
 
-      <DeleteConfirmationDialog
-        isOpen={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
-        onConfirm={async () => {
-          await deleteFile(id);
+      <ConfirmationDialog
+        open={deleteDialogOpen}
+        title="Delete File"
+        message={`Are you sure you want to delete the file "${filename}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        style="destructive"
+        isLoading={isDeleting}
+        onConfirm={() => deleteFileHandler()}
+        onCancel={() => {
+          if (!isDeleting) {
+            setDeleteDialogOpen(false);
+          }
         }}
-        noteTitle={filename}
       />
     </>
   );
