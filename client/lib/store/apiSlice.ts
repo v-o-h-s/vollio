@@ -12,6 +12,7 @@ import { pdfEndpoints } from "./endpoints/pdfEndpoints";
 import { summaryEndpoints } from "./endpoints/summaryEndpoints";
 import { googleClassroomEndpoints } from "./endpoints/googleClassroomEndpoints";
 import { fileEndpoints } from "./endpoints/fileEndpoint";
+import { testEndpoints } from "./endpoints/testEndpoints";
 
 // Simple base query configuration
 const baseQuery = fetchBaseQuery({
@@ -49,6 +50,7 @@ export const apiSlice = createApi({
     ...summaryEndpoints(builder),
     ...googleClassroomEndpoints(builder),
     ...fileEndpoints(builder),
+    ...testEndpoints(builder),
   }),
 });
 
@@ -59,6 +61,7 @@ export const {
   useGetPDFQuery,
   useDeletePDFMutation,
   useRenamePDFMutation,
+  useMovePDFMutation,
   useGetNotesQuery,
   useGetNoteQuery,
   useCreateNoteMutation,
@@ -71,21 +74,33 @@ export const {
   useCreateHighlightMutation,
   useUpdateHighlightMutation,
   useDeleteHighlightMutation,
-  useGetFoldersQuery,
+  useGetAllFoldersQuery,
+  useGetFolderByIdQuery,
   useCreateFolderMutation,
   useUpdateFolderMutation,
   useDeleteFolderMutation,
-  useMovePDFMutation,
   useGetSummaryByPdfIdQuery,
   useCreateOrUpdateSummaryMutation,
   useUpdateSummaryMutation,
   useDeleteSummaryMutation,
   useConnectGoogleClassroomMutation,
+  useRefreshGoogleClassroomTokenMutation,
   useCheckGoogleClassroomTokenStatusQuery,
   useDisconnectGoogleClassroomMutation,
+  useGetGoogleClassroomConnectionStatusQuery,
   useGetGoogleClassroomCoursesListQuery,
+  useGetGoogleClassroomCoursesWithContentQuery,
   useGetGoogleClassroomCourseContentQuery,
-
+  useGetAllFilesQuery,
+  useGetFileByIdQuery,
+  useUploadFileMutation,
+  useDeleteFileMutation,
+  useRenameFileMutation,
+  useMoveFileMutation,
+  useGetFileFromGoogleDriveQuery,
+  useStreamFileQuery,
+  useAddFileFromGoogleDriveMutation,
+  useProcessTestMutation,
 } = apiSlice;
 
 // Export the reducer and middleware
