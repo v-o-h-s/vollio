@@ -25,8 +25,6 @@ interface GridViewProps {
   onItemSelect: (type: "file" | "folder", id: string, e: React.MouseEvent) => void;
   onFolderOpen: (folderId: string) => void;
   onFileOpen: (fileId: string) => void;
-  onContextMenu: (type: "file" | "folder", id: string, e: React.MouseEvent) => void;
-  onOptionsClick: (type: "file" | "folder", id: string, e: React.MouseEvent) => void;
   onEmptyAreaClick: () => void;
   dragOverFolderId: string | null;
 }
@@ -37,16 +35,14 @@ function DraggableFolder({
   isDraggedOver,
   onSelect,
   onOpen,
-  onContextMenu,
-  onOptionsClick,
+  allFolders,
 }: {
   folder: Folder;
   isSelected: boolean;
   isDraggedOver: boolean;
   onSelect: (e: React.MouseEvent) => void;
   onOpen: () => void;
-  onContextMenu: (e: React.MouseEvent) => void;
-  onOptionsClick: (e: React.MouseEvent) => void;
+  allFolders: Folder[];
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `folder-${folder.id}`,
@@ -71,12 +67,12 @@ function DraggableFolder({
       <FolderCard
         id={folder.id}
         name={folder.name}
+        parentId={folder.parent_id}
         isSelected={isSelected}
         isDraggedOver={isDraggedOver}
         onSelect={onSelect}
         onOpen={onOpen}
-        onContextMenu={onContextMenu}
-        onOptionsClick={onOptionsClick}
+        allFolders={allFolders}
       />
     </div>
   );
@@ -87,15 +83,13 @@ function DraggableFile({
   isSelected,
   onSelect,
   onOpen,
-  onContextMenu,
-  onOptionsClick,
+  allFolders,
 }: {
   file: File;
   isSelected: boolean;
   onSelect: (e: React.MouseEvent) => void;
   onOpen: () => void;
-  onContextMenu: (e: React.MouseEvent) => void;
-  onOptionsClick: (e: React.MouseEvent) => void;
+  allFolders: Folder[];
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `file-${file.id}`,
@@ -112,11 +106,11 @@ function DraggableFile({
       <FileCard
         id={file.id}
         filename={file.filename}
+        folderId={file.folderId}
         isSelected={isSelected}
         onSelect={onSelect}
         onOpen={onOpen}
-        onContextMenu={onContextMenu}
-        onOptionsClick={onOptionsClick}
+        allFolders={allFolders}
       />
     </div>
   );
@@ -129,8 +123,6 @@ export function GridView({
   onItemSelect,
   onFolderOpen,
   onFileOpen,
-  onContextMenu,
-  onOptionsClick,
   onEmptyAreaClick,
   dragOverFolderId,
 }: GridViewProps) {
@@ -158,8 +150,7 @@ export function GridView({
           isDraggedOver={dragOverFolderId === folder.id}
           onSelect={(e) => onItemSelect("folder", folder.id, e)}
           onOpen={() => onFolderOpen(folder.id)}
-          onContextMenu={(e) => onContextMenu("folder", folder.id, e)}
-          onOptionsClick={(e) => onOptionsClick("folder", folder.id, e)}
+          allFolders={folders}
         />
       ))}
       {files.map((file) => (
@@ -169,8 +160,7 @@ export function GridView({
           isSelected={isItemSelected("file", file.id)}
           onSelect={(e) => onItemSelect("file", file.id, e)}
           onOpen={() => onFileOpen(file.id)}
-          onContextMenu={(e) => onContextMenu("file", file.id, e)}
-          onOptionsClick={(e) => onOptionsClick("file", file.id, e)}
+          allFolders={folders}
         />
       ))}
     </div>

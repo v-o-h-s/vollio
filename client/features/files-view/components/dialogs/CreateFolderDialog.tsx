@@ -47,14 +47,14 @@ export function CreateFolderDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <DialogHeader>
             <DialogTitle>Create New Folder</DialogTitle>
             <DialogDescription>
               Enter a name for your new folder.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
+          <div className="flex flex-col gap-4">
             <Label htmlFor="folder-name">Folder Name</Label>
             <Input
               id="folder-name"

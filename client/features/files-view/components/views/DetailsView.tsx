@@ -1,7 +1,7 @@
 "use client";
 
-import { FileText, Folder, MoreVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FolderCard } from "../FolderCard";
+import { FileCard } from "../FileCard";
 import {
   Table,
   TableBody,
@@ -36,8 +36,6 @@ interface DetailsViewProps {
   onItemSelect: (type: "file" | "folder", id: string, e: React.MouseEvent) => void;
   onFolderOpen: (folderId: string) => void;
   onFileOpen: (fileId: string) => void;
-  onContextMenu: (type: "file" | "folder", id: string, e: React.MouseEvent) => void;
-  onOptionsClick: (type: "file" | "folder", id: string, e: React.MouseEvent) => void;
   onEmptyAreaClick: () => void;
   dragOverFolderId: string | null;
 }
@@ -48,16 +46,14 @@ function DraggableFolderRow({
   isDraggedOver,
   onSelect,
   onOpen,
-  onContextMenu,
-  onOptionsClick,
+  allFolders,
 }: {
   folder: Folder;
   isSelected: boolean;
   isDraggedOver: boolean;
   onSelect: (e: React.MouseEvent) => void;
   onOpen: () => void;
-  onContextMenu: (e: React.MouseEvent) => void;
-  onOptionsClick: (e: React.MouseEvent) => void;
+  allFolders: Folder[];
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `folder-${folder.id}`,
@@ -88,40 +84,21 @@ function DraggableFolderRow({
       }}
       {...listeners}
       {...attributes}
-      className={`cursor-pointer transition-colors ${
-        isDragging
-          ? "opacity-50"
-          : isSelected
-          ? "bg-blue-50 dark:bg-blue-950"
-          : isDraggedOver
-          ? "bg-blue-100 dark:bg-blue-900"
-          : "hover:bg-muted/50"
-      }`}
+      className={isDragging ? "opacity-50" : ""}
       onClick={onSelect}
       onDoubleClick={onOpen}
-      onContextMenu={onContextMenu}
     >
-      <TableCell className="font-medium">
-        <div className="flex items-center gap-2">
-          <Folder className="h-4 w-4 text-blue-600 flex-shrink-0" />
-          <span className="truncate">{folder.name}</span>
-        </div>
-      </TableCell>
-      <TableCell className="text-muted-foreground">Folder</TableCell>
-      <TableCell className="text-muted-foreground">-</TableCell>
-      <TableCell className="text-muted-foreground">{formatDate(folder.updatedAt)}</TableCell>
-      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOptionsClick(e);
-          }}
-          className="h-8 w-8 p-0"
-        >
-          <MoreVertical className="h-4 w-4" />
-        </Button>
+      <TableCell colSpan={5} className="p-0">
+        <FolderCard
+          id={folder.id}
+          name={folder.name}
+          parentId={folder.parent_id}
+          isSelected={isSelected}
+          isDraggedOver={isDraggedOver}
+          onSelect={(e) => e.stopPropagation()}
+          onOpen={() => {}}
+          allFolders={allFolders}
+        />
       </TableCell>
     </TableRow>
   );
@@ -132,15 +109,13 @@ function DraggableFileRow({
   isSelected,
   onSelect,
   onOpen,
-  onContextMenu,
-  onOptionsClick,
+  allFolders,
 }: {
   file: File;
   isSelected: boolean;
   onSelect: (e: React.MouseEvent) => void;
   onOpen: () => void;
-  onContextMenu: (e: React.MouseEvent) => void;
-  onOptionsClick: (e: React.MouseEvent) => void;
+  allFolders: Folder[];
 }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `file-${file.id}`,
@@ -172,34 +147,20 @@ function DraggableFileRow({
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`cursor-pointer transition-colors ${
-        isDragging ? "opacity-50" : isSelected ? "bg-blue-50 dark:bg-blue-950" : "hover:bg-muted/50"
-      }`}
+      className={isDragging ? "opacity-50" : ""}
       onClick={onSelect}
       onDoubleClick={onOpen}
-      onContextMenu={onContextMenu}
     >
-      <TableCell className="font-medium">
-        <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-gray-600 flex-shrink-0" />
-          <span className="truncate">{file.filename}</span>
-        </div>
-      </TableCell>
-      <TableCell className="text-muted-foreground">File</TableCell>
-      <TableCell className="text-muted-foreground">{formatSize(file.size)}</TableCell>
-      <TableCell className="text-muted-foreground">{formatDate(file.updatedAt)}</TableCell>
-      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOptionsClick(e);
-          }}
-          className="h-8 w-8 p-0"
-        >
-          <MoreVertical className="h-4 w-4" />
-        </Button>
+      <TableCell colSpan={5} className="p-0">
+        <FileCard
+          id={file.id}
+          filename={file.filename}
+          folderId={file.folderId}
+          isSelected={isSelected}
+          onSelect={(e) => e.stopPropagation()}
+          onOpen={() => {}}
+          allFolders={allFolders}
+        />
       </TableCell>
     </TableRow>
   );
@@ -212,8 +173,6 @@ export function DetailsView({
   onItemSelect,
   onFolderOpen,
   onFileOpen,
-  onContextMenu,
-  onOptionsClick,
   onEmptyAreaClick,
   dragOverFolderId,
 }: DetailsViewProps) {
@@ -249,8 +208,7 @@ export function DetailsView({
               isDraggedOver={dragOverFolderId === folder.id}
               onSelect={(e) => onItemSelect("folder", folder.id, e)}
               onOpen={() => onFolderOpen(folder.id)}
-              onContextMenu={(e) => onContextMenu("folder", folder.id, e)}
-              onOptionsClick={(e) => onOptionsClick("folder", folder.id, e)}
+              allFolders={folders}
             />
           ))}
           {files.map((file) => (
@@ -260,8 +218,7 @@ export function DetailsView({
               isSelected={isItemSelected("file", file.id)}
               onSelect={(e) => onItemSelect("file", file.id, e)}
               onOpen={() => onFileOpen(file.id)}
-              onContextMenu={(e) => onContextMenu("file", file.id, e)}
-              onOptionsClick={(e) => onOptionsClick("file", file.id, e)}
+              allFolders={folders}
             />
           ))}
         </TableBody>

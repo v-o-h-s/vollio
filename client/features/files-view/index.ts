@@ -30,6 +30,8 @@ export { useBreadcrumbNavigation } from "./hooks/useBreadcrumbNavigation";
 export { useContextMenu } from "./hooks/useContextMenu";
 export { useDragAndDrop } from "./hooks/useDragAndDrop";
 export { useFileExplorerShortcuts } from "./hooks/useFileExplorerShortcuts";
+export { useFolder } from "./hooks/useFolder";
+export { useFile } from "./hooks/useFile";
 
 // Types
 export type { File, Folder, SelectedItem } from "./hooks/useFilesViewState";
