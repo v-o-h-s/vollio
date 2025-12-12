@@ -85,7 +85,7 @@ export class FolderController {
    await this.createFolderUseCase.execute({
       userId,
       name: request.body.name,
-      parentId: request.body.parent_id,
+      parentId: request.body.parentId,
     });
 
    
@@ -153,7 +153,7 @@ export class FolderController {
       userId,
       folderId: request.params.id,
       name: request.body.name,
-      parentId: request.body.parent_id,
+      parentId: request.body.parentId,
     });
 
     reply.status(200).send({

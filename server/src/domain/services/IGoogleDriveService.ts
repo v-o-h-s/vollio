@@ -1,3 +1,5 @@
+import { Readable } from "stream";
+
 export interface IGoogleDriveService {
   getFileMetadata(
     accessToken: string,
@@ -9,4 +11,5 @@ export interface IGoogleDriveService {
     size: number;
   } | null>;
   getFileById(accessToken: string, fileId: string): Promise<Buffer>;
+  streamFile(accessToken: string, fileId: string): Promise<Readable>;
 }

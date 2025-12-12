@@ -25,7 +25,7 @@ const folderRoutesHandler: FastifyPluginAsync = async (
   options: FastifyPluginOptions
 ): Promise<void> => {
   // Get all folders for authenticated user
-  fastify.get("/", async (request, reply) => {
+  fastify.get(`${options.prefix}/`, async (request, reply) => {
     const folderController = request.diScope.resolve("folderController") as any;
     return folderController.getAllFolders(request, reply);
   });

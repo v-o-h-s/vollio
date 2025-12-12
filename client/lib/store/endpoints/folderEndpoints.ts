@@ -38,20 +38,7 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
       }));
       return { folders, count };
     },
-    transformErrorResponse: (baseQueryReturnValue) => {
-      const errorData = baseQueryReturnValue?.data as ServerErrorResponse;
-      const errorMessage = errorData?.message || 'An error occurred';
-      
-      // In development, include full error object for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Folder endpoint error:', {
-          message: errorMessage,
-          error: errorData?.error,
-        });
-      }
-      
-      return errorMessage;
-    },
+    
     providesTags: ["Folder"],
   }),
 

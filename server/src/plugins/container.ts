@@ -49,6 +49,7 @@ import { UpdateHighlightUseCase } from "../application/use-cases/highlights/Upda
 import { DeleteHighlightUseCase } from "../application/use-cases/highlights/DeleteHighlightUseCase";
 import { HighlightRepository } from "../infrastructure/repositories/HighlightRepository";
 import { HighlightController } from "../interface/controllers/highlight.controller";
+import { StreamFileUseCase } from "../application/use-cases/files/StreamFileUseCase";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -63,6 +64,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.diContainer.register({
+    streamFileUseCase: asClass(StreamFileUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }), 
     userGoogleClassroomRepository: asClass(UserGoogleClassroomRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,

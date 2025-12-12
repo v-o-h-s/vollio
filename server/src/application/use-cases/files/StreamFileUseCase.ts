@@ -1,19 +1,18 @@
 import { IFileRepository } from "../../../domain/repositories/IFileRepository";
 import { IUserGoogleClassroomRepository } from "../../../domain/repositories/IUserGoogleClassroomRepository";
-import { IGoogleClassroomService } from "../../../domain/services/IGoogleClassroomService";
+import { IGoogleDriveService } from "../../../domain/services/IGoogleDriveService";
 import { CheckTokenStatusUseCase } from "../google-Classroom/CheckTokenStatusUseCase";
 import { File } from "../../../domain/entities/File";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
 export class StreamFileUseCase {
     constructor(private ensureValidTokenUseCase: CheckTokenStatusUseCase,
-        private googleDriveService: IGoogleClassroomService,
+        private googleDriveService: IGoogleDriveService,
         private userGoogleClassroomRepository: IUserGoogleClassroomRepository,
-        private fileRepo: IFileRepository
+        private fileRepository: IFileRepository
     ) { }
 
     async execute(fileId: string): Promise<import("stream").Readable> {
-        const file = await this.fileRepo.getFileById(fileId);
-
+        const file = await this.fileRepository.getFileById(fileId);
         if (!file) {
             throw new NotFoundError("File not found");
         }
