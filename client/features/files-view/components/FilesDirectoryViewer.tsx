@@ -24,6 +24,7 @@ import { ListView } from "./views/ListView";
 import { CompactView } from "./views/CompactView";
 import { DetailsView } from "./views/DetailsView";
 import { CreateFolderDialog } from "./dialogs/CreateFolderDialog";
+import { ClassroomImportDialog } from "./dialogs/ClassroomImportDialog";
 import { useFilesViewState } from "../hooks/useFilesViewState";
 import { useBreadcrumbNavigation } from "../hooks/useBreadcrumbNavigation";
 import { useDragAndDrop } from "../hooks/useDragAndDrop";
@@ -32,6 +33,7 @@ import { useFile } from "../hooks/useFile";
 import { useFileExplorerShortcuts } from "../hooks/useFileExplorerShortcuts";
 import { Loader2, FolderOpen, FileText, FolderPlus, Upload } from "lucide-react";
 import { RTKQueryError } from "@/lib/error-handling/rtk-query-error";
+import { useGetGoogleClassroomConnectionStatusQuery } from "@/lib/store/apiSlice";
 
 export default function FilesDirectoryViewer() {
   // Use custom hooks for data management
@@ -93,7 +95,15 @@ export default function FilesDirectoryViewer() {
   // Dialog states
   const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [classroomDialogOpen, setClassroomDialogOpen] = useState(false);
 
+  // Classroom status (connection-level)
+  const { data: classroomStatus, isLoading: isClassroomChecking } = useGetGoogleClassroomConnectionStatusQuery();
+  const classroomLabel = isClassroomChecking
+    ? "Checking..."
+    : classroomStatus?.data?.isConnected
+      ? "Add from Classroom"
+      : "Connect Classroom";
   // Keyboard shortcuts
   useFileExplorerShortcuts({
     onSelectAll: selectAll,
@@ -264,6 +274,8 @@ export default function FilesDirectoryViewer() {
           onViewModeChange={setViewMode}
           filters={filters}
           onFiltersChange={setFilters}
+          classroomLabel={classroomLabel}
+          onClassroomClick={() => setClassroomDialogOpen(true)}
         />
 
         {/* Breadcrumb Navigation */}
@@ -325,6 +337,12 @@ export default function FilesDirectoryViewer() {
         onOpenChange={setCreateFolderDialogOpen}
         onSubmit={handleCreateFolder}
         parentFolderId={currentFolder}
+      />
+
+      <ClassroomImportDialog
+        open={classroomDialogOpen}
+        onOpenChange={setClassroomDialogOpen}
+        onImported={refetchFiles}
       />
 
       {/* Drag Overlay */}

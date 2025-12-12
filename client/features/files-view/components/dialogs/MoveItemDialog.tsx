@@ -60,7 +60,7 @@ export function MoveItemDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] lg:w-[40vw] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Move {itemType === "folder" ? "Folder" : "File"}</DialogTitle>

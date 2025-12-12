@@ -11,7 +11,10 @@ export class UserGoogleClassroomRepository
   }
 
   async saveTokens(tokens: GoogleOAuthTokenResponse): Promise<void> {
-    const { data, error } = await this.supabaseClient
+    const tokenExpiry = new Date();
+    tokenExpiry.setSeconds(tokenExpiry.getSeconds() + tokens.expires_in);
+    const { error } = await this.supabaseClient
+
       .from("user_google_classroom")
       .upsert({
         access_token: tokens.access_token,
@@ -19,7 +22,7 @@ export class UserGoogleClassroomRepository
         refresh_token: tokens.refresh_token,
         scope: tokens.scope,
         token_type: tokens.token_type,
-        token_expiry: tokens.token_expiry,
+        token_expiry: tokenExpiry.toISOString(),
       });
     if (error) throw new DatabaseError(error);
   }
@@ -72,5 +75,5 @@ export class UserGoogleClassroomRepository
     const tokenExpiry = new Date(tokens.token_expiry);
     return tokenExpiry > new Date();
   }
-  
+
 }

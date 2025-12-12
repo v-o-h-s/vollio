@@ -87,7 +87,6 @@ export const {
   useDeleteSummaryMutation,
   useConnectGoogleClassroomMutation,
   useRefreshGoogleClassroomTokenMutation,
-  useCheckGoogleClassroomTokenStatusQuery,
   useDisconnectGoogleClassroomMutation,
   useGetGoogleClassroomConnectionStatusQuery,
   useGetGoogleClassroomCoursesListQuery,
