@@ -1,47 +1,48 @@
-import { ApiBuilder } from "./types";
-import {
-  AddFileResponse,
-  GetFileResponse,
-  AddFileFromGoogleDriveRequest,
-} from "@/lib/types/server-respones/fileRouteResponses";
+import { ApiBuilder } from "@/lib/store/endpoints/types";
+import { GetAllFilesResponse } from "../../../../server/src/shared/types/responses/fileRoutes";
+import { ServerErrorResponse } from "../../../../server/src/shared/types/responses/general";
+
+interface TransformedFile {
+  id: string;
+  filename: string;
+  fileSize: number;
+  mimeType: string;
+  folderId: string | null;
+  isGoogleDriveFile: boolean;
+}
 
 export const fileEndpoints = (builder: ApiBuilder) => ({
-  // 1. Add File from Google Drive
-  addFileFromGoogleDrive: builder.mutation<AddFileResponse, AddFileFromGoogleDriveRequest>({
-    query: (body) => ({
-      url: "v1/files",
-      method: "POST",
-      body,
+  getAllFiles: builder.query<TransformedFile[], void>({
+    query: () => ({
+      url: "files/",
+      method: "GET",
     }),
-    invalidatesTags: [
-      { type: "PDF", id: "LIST" },
-      { type: "File", id: "LIST" },
-    ],
-  }),
+    transformResponse: (response: GetAllFilesResponse) => {
+      if (!response.data) return [];
 
-  // 2. Get File from Google Drive (returns Blob for PDF viewing)
-  getFileFromGoogleDrive: builder.query<Blob, string>({
-    queryFn: async (fileId, _queryApi, _extraOptions, baseQuery) => {
-      try {
-        const response = await fetch(`/api/v1/files/classroom/${fileId}`, {
-          method: "GET",
-        });
-        
-        if (!response.ok) {
-          return { error: { status: response.status, data: `Failed to fetch file: ${response.statusText}` } };
-        }
-        
-        const blob = await response.blob();
-        return { data: blob };
-      } catch (error) {
-        return { 
-          error: { 
-            status: 500, 
-            data: error instanceof Error ? error.message : "Unknown error fetching file" 
-          } 
-        };
-      }
+      return response.data.pdfs.map(pdf => ({
+        id: pdf.id,
+        filename: pdf.filename,
+        fileSize: pdf.file_size,
+        mimeType: pdf.mime_type,
+        folderId: pdf.folder_id,
+        isGoogleDriveFile: pdf.isGoogleDriveFile,
+      }));
     },
-    providesTags: (_result, _error, fileId) => [{ type: "File", id: fileId }],
+    transformErrorResponse: (baseQueryReturnValue) => {
+      const errorData = baseQueryReturnValue?.data as ServerErrorResponse;
+      const errorMessage = errorData?.message || 'An error occurred';
+      
+      // In development, include full error object for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.error('File endpoint error:', {
+          message: errorMessage,
+          error: errorData?.error,
+        });
+      }
+      
+      return errorMessage;
+    },
+    providesTags: ["File"],
   }),
 });

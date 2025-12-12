@@ -197,6 +197,10 @@ export function PDFContextMenu({
             }
 
             const Icon = item.icon;
+            if (!Icon) {
+              return null;
+            }
+
             return (
               <Button
                 key={index}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import { PDFDirectoryView } from "@/components/pdf/views/PDFDirectoryView";
+import { PDFDirectoryView } from "@/features/files-view/components/views/PDFDirectoryView";
 import { Search } from "lucide-react";
 import { useFloatingSidebarIntegration } from "@/hooks/use-floating-sidebar";
 

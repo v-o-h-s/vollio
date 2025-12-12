@@ -15,7 +15,7 @@ import { fileEndpoints } from "./endpoints/fileEndpoint";
 
 // Simple base query configuration
 const baseQuery = fetchBaseQuery({
-  baseUrl: "/api",
+  baseUrl: "http://localhost:3000/api/v1/",
   timeout: 30000, // 30 second timeout
   prepareHeaders: (headers, { endpoint }) => {
     // Don't set Content-Type for FormData uploads (let browser set it with boundary)
@@ -71,10 +71,7 @@ export const {
   useCreateHighlightMutation,
   useUpdateHighlightMutation,
   useDeleteHighlightMutation,
-  useGetFoldersQuery,
-  useCreateFolderMutation,
-  useUpdateFolderMutation,
-  useDeleteFolderMutation,
+
   useMovePDFMutation,
   useGetSummaryByPdfIdQuery,
   useCreateOrUpdateSummaryMutation,
@@ -85,8 +82,7 @@ export const {
   useDisconnectGoogleClassroomMutation,
   useGetGoogleClassroomCoursesListQuery,
   useGetGoogleClassroomCourseContentQuery,
-  useAddFileFromGoogleDriveMutation,
-  useGetFileFromGoogleDriveQuery,
+
 } = apiSlice;
 
 // Export the reducer and middleware

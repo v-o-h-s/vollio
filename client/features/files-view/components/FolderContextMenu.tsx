@@ -188,6 +188,10 @@ export function FolderContextMenu({
             }
 
             const Icon = item.icon;
+            if (!Icon) {
+              return null;
+            }
+
             return (
               <Button
                 key={index}
