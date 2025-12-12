@@ -41,9 +41,7 @@ export default function FilesDirectoryViewer() {
     error: foldersError,
     refetch: refetchFolders,
     createFolder,
-    renameFolder,
     moveFolder,
-    deleteFolder,
   } = useFolder();
 
   const {
@@ -51,9 +49,7 @@ export default function FilesDirectoryViewer() {
     isLoading: isLoadingFiles,
     error: filesError,
     refetch: refetchFiles,
-    renameFile,
     moveFile,
-    deleteFile,
     openFile,
     uploadFile,
     isUploading,
@@ -145,10 +141,11 @@ export default function FilesDirectoryViewer() {
 
   const handleDragEndWithMove = (event: any) => {
     handleDragEnd(event, async (itemType, itemId, targetFolderId) => {
-      if (itemType === "file") {
-        await moveFile(itemId, targetFolderId);
-      } else {
-        await moveFolder(itemId, targetFolderId);
+      if (targetFolderId) {
+        const cleanTargetFolderId = targetFolderId.replace(/^folder-/, "");
+        console.log("moving ", itemType, " from ", itemId, " to ", cleanTargetFolderId)
+        await moveFile(itemId, cleanTargetFolderId);
+        await Promise.all([refetchFiles(), refetchFolders()]);
       }
     });
   };
@@ -169,7 +166,7 @@ export default function FilesDirectoryViewer() {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
-    
+
     if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
       setIsDraggingFile(false);
     }
@@ -281,8 +278,8 @@ export default function FilesDirectoryViewer() {
           onDrop={handleFileDrop}
         >
           {renderView()}
-          
-          {/* Drag overlay - Full screen popup */}
+
+          {/* Drag overlay - Full screen popup for upload only*/}
           {isDraggingFile && (
             <div className="fixed inset-0 bg-background/95 backdrop-blur-sm flex items-center justify-center z-[100]">
               <div className="max-w-md w-full mx-4 bg-card border-2 border-dashed border-primary rounded-2xl p-12 shadow-2xl">
@@ -294,8 +291,8 @@ export default function FilesDirectoryViewer() {
                   <div className="space-y-2">
                     <h3 className="text-2xl font-bold text-foreground">Drop your files here</h3>
                     <p className="text-sm text-muted-foreground">
-                      {currentFolder 
-                        ? "Files will be uploaded to the current folder" 
+                      {currentFolder
+                        ? "Files will be uploaded to the current folder"
                         : "Files will be uploaded to the root directory"}
                     </p>
                   </div>
@@ -306,7 +303,7 @@ export default function FilesDirectoryViewer() {
               </div>
             </div>
           )}
-          
+
           {/* Upload indicator */}
           {isUploading && (
             <div className="fixed bottom-4 right-4 bg-card border rounded-lg p-4 shadow-lg z-50 min-w-[200px]">
@@ -333,14 +330,16 @@ export default function FilesDirectoryViewer() {
       {/* Drag Overlay */}
       <DragOverlay>
         {activeItem && (
-          <div className="bg-card border-2 border-primary rounded-lg p-3 shadow-lg">
-            <div className="flex items-center gap-2">
-              {activeItem.type === "folder" ? (
-                <FolderOpen className="h-5 w-5 text-blue-600" />
-              ) : (
-                <FileText className="h-5 w-5 text-gray-600" />
-              )}
-              <span className="text-sm font-medium">{activeItem.name}</span>
+          <div className=" flex flex-col justify-center items-center    rounded-lg shadow-lg w-[140px] opacity-90">
+            <div >
+              <div className="aspect-square  w-[90px] h-[90px] rounded-lg flex flex-col items-center justify-center  ">
+                {activeItem.type === "folder" ? (
+                  <FolderOpen className="h-12 w-12 text-white" />
+                ) : (
+                  <FileText className="h-12 w-12 text-white" />
+                )}
+              </div>
+              <p className="text-sm font-medium text-center truncate">{activeItem.name}</p>
             </div>
           </div>
         )}

@@ -45,7 +45,8 @@ export function useDragAndDrop() {
     const draggedItem = active.data.current as DragItem;
     const overData = over.data.current;
 
-    // Only allow dropping on folders or empty area (root)
+    // Only allow dropping on folders
+    // Files cannot be drop targets
     if (overData?.type === "folder") {
       const targetFolderId = over.id as string;
       
@@ -54,6 +55,7 @@ export function useDragAndDrop() {
       
       onMove(draggedItem.type, draggedItem.id, targetFolderId);
     }
+    // Silently ignore drops on files or other non-folder targets
   };
 
   const handleDragCancel = () => {

@@ -14,6 +14,7 @@ import { useFolder } from "../hooks/useFolder";
 import { RenameDialog } from "./dialogs/RenameDialog";
 import { MoveItemDialog } from "./dialogs/MoveItemDialog";
 import { ConfirmationDialog } from "@/components/ConfirmationDialog";
+import { cn } from "@/lib/utils";
 
 interface FolderCardProps {
   id: string;
@@ -41,12 +42,11 @@ export function FolderCard({
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
   return (
     <>
       <div
-        className={`relative group flex flex-col justify-center h-[140px] w-[140px] cursor-pointer transition-all hover:shadow-md hover:bg-muted/5 rounded-2xl ${isSelected ? "bg-blue-50 dark:bg-blue-950 border-blue-500 " : ""
-          }`}
+        className={cn(`relative group flex flex-col justify-center h-[140px] w-[140px] cursor-pointer transition-all hover:shadow-md hover:bg-muted/5 rounded-2xl ${isSelected ? "bg-blue-50 dark:bg-blue-950 border-blue-500 " : ""}`,
+          )}
         onClick={onSelect}
         onDoubleClick={onOpen}
       >
@@ -110,7 +110,7 @@ export function FolderCard({
         itemName={name}
       />
 
-      <ConfirmationDialog 
+      <ConfirmationDialog
         open={deleteDialogOpen}
         title="Delete Folder"
         message={`Are you sure you want to delete the folder "${name}"? This action cannot be undone.`}

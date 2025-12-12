@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Folder, Home } from "lucide-react";
+import { Folder, Home, Loader2 } from "lucide-react";
 
 interface Folder {
   id: string;
@@ -108,7 +108,7 @@ export function MoveItemDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Moving..." : "Move"}
+              {isSubmitting ? <><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /> Moving...</> : "Move"}
             </Button>
           </DialogFooter>
         </form>
