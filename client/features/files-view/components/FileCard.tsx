@@ -38,12 +38,11 @@ export function FileCard({
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
   return (
     <>
       <div
         className={`relative group flex flex-col justify-center h-[140px] w-[140px] cursor-pointer transition-all hover:shadow-md hover:bg-muted/5 rounded-2xl ${
-          isSelected ? "bg-blue-50 dark:bg-blue-950 border-blue-500" : ""
+          isSelected ? "bg-blue-50 dark:bg-blue-950 border-blue-500 " : ""
         }`}
         onClick={onSelect}
         onDoubleClick={onOpen}

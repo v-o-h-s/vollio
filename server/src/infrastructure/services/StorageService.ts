@@ -5,7 +5,7 @@ import { PDFDocument } from "pdf-lib";
 import sharp from "sharp";
 
 const STORAGE_BUCKET = "pdfs";
-const MAX_FILE_SIZE = 0 * 1024 * 1024; // 50MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
 export class StorageService implements IStorageService {
   constructor(private supabaseClient: SupabaseClient) {}

@@ -1,13 +1,14 @@
 "use client";
 
-import { FolderCard } from "../FolderCard";
-import { FileCard } from "../FileCard";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { Cloud, HardDrive, BookOpen, Folder, FileIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface File {
   id: string;
   filename: string;
   folderId?: string | null;
+  source?: "local" | "cloud" | "classroom";
 }
 
 interface Folder {
@@ -27,91 +28,16 @@ interface CompactViewProps {
   dragOverFolderId: string | null;
 }
 
-function DraggableFolderRow({
-  folder,
-  isSelected,
-  isDraggedOver,
-  onSelect,
-  onOpen,
-  allFolders,
-}: {
-  folder: Folder;
-  isSelected: boolean;
-  isDraggedOver: boolean;
-  onSelect: (e: React.MouseEvent) => void;
-  onOpen: () => void;
-  allFolders: Folder[];
-}) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `folder-${folder.id}`,
-    data: { type: "folder", id: folder.id, name: folder.name },
-  });
-
-  const { setNodeRef: setDroppableRef } = useDroppable({
-    id: `folder-${folder.id}`,
-    data: { type: "folder", id: folder.id },
-  });
-
-  return (
-    <div
-      ref={(node) => {
-        setNodeRef(node);
-        setDroppableRef(node);
-      }}
-      {...listeners}
-      {...attributes}
-      className={isDragging ? "opacity-50" : ""}
-    >
-      <FolderCard
-        id={folder.id}
-        name={folder.name}
-        parentId={folder.parent_id}
-        isSelected={isSelected}
-        isDraggedOver={isDraggedOver}
-        onSelect={onSelect}
-        onOpen={onOpen}
-        allFolders={allFolders}
-      />
-    </div>
-  );
-}
-
-function DraggableFileRow({
-  file,
-  isSelected,
-  onSelect,
-  onOpen,
-  allFolders,
-}: {
-  file: File;
-  isSelected: boolean;
-  onSelect: (e: React.MouseEvent) => void;
-  onOpen: () => void;
-  allFolders: Folder[];
-}) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `file-${file.id}`,
-    data: { type: "file", id: file.id, name: file.filename },
-  });
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className={isDragging ? "opacity-50" : ""}
-    >
-      <FileCard
-        id={file.id}
-        filename={file.filename}
-        folderId={file.folderId}
-        isSelected={isSelected}
-        onSelect={onSelect}
-        onOpen={onOpen}
-        allFolders={allFolders}
-      />
-    </div>
-  );
+function getSourceIcon(source?: string) {
+  switch (source) {
+    case "cloud":
+      return <Cloud className="w-3 h-3 text-blue-500" />;
+    case "classroom":
+      return <BookOpen className="w-3 h-3 text-purple-500" />;
+    case "local":
+    default:
+      return <HardDrive className="w-3 h-3 text-gray-500" />;
+  }
 }
 
 export function CompactView({
@@ -136,28 +62,83 @@ export function CompactView({
   }
 
   return (
-    <div className="space-y-0.5 p-2" onClick={onEmptyAreaClick}>
-      {folders.map((folder) => (
-        <DraggableFolderRow
-          key={folder.id}
-          folder={folder}
-          isSelected={isItemSelected("folder", folder.id)}
-          isDraggedOver={dragOverFolderId === folder.id}
-          onSelect={(e) => onItemSelect("folder", folder.id, e)}
-          onOpen={() => onFolderOpen(folder.id)}
-          allFolders={folders}
-        />
-      ))}
-      {files.map((file) => (
-        <DraggableFileRow
-          key={file.id}
-          file={file}
-          isSelected={isItemSelected("file", file.id)}
-          onSelect={(e) => onItemSelect("file", file.id, e)}
-          onOpen={() => onFileOpen(file.id)}
-          allFolders={folders}
-        />
-      ))}
+    <div className="w-full p-2" onClick={onEmptyAreaClick}>
+      {/* Folders */}
+      <div className="space-y-0.5">
+        {folders.map((folder) => {
+          const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+            id: `folder-${folder.id}`,
+            data: { type: "folder", id: folder.id, name: folder.name },
+          });
+
+          const { setNodeRef: setDroppableRef } = useDroppable({
+            id: `folder-${folder.id}`,
+            data: { type: "folder", id: folder.id },
+          });
+
+          const isSelected = isItemSelected("folder", folder.id);
+          const isDraggedOver = dragOverFolderId === folder.id;
+
+          return (
+            <div
+              key={folder.id}
+              ref={(node) => {
+                setNodeRef(node);
+                setDroppableRef(node);
+              }}
+              {...listeners}
+              {...attributes}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded cursor-pointer text-sm transition-all",
+                "hover:bg-muted/50",
+                isSelected && "bg-primary/10 border border-primary/50",
+                isDraggedOver && "bg-primary/20 border border-primary",
+                isDragging && "opacity-50"
+              )}
+              onClick={(e) => onItemSelect("folder", folder.id, e)}
+              onDoubleClick={() => onFolderOpen(folder.id)}
+            >
+              <Folder className="w-4 h-4 text-blue-500 flex-shrink-0" />
+              <span className="truncate">{folder.name}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Files */}
+      <div className="space-y-0.5">
+        {files.map((file) => {
+          const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+            id: `file-${file.id}`,
+            data: { type: "file", id: file.id, name: file.filename },
+          });
+
+          const isSelected = isItemSelected("file", file.id);
+
+          return (
+            <div
+              key={file.id}
+              ref={setNodeRef}
+              {...listeners}
+              {...attributes}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded cursor-pointer text-sm transition-all",
+                "hover:bg-muted/50",
+                isSelected && "bg-primary/10 border border-primary/50",
+                isDragging && "opacity-50"
+              )}
+              onClick={(e) => onItemSelect("file", file.id, e)}
+              onDoubleClick={() => onFileOpen(file.id)}
+            >
+              <FileIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <span className="truncate flex-1">{file.filename}</span>
+              <div className="flex items-center opacity-70 flex-shrink-0">
+                {getSourceIcon(file.source)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

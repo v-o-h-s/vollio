@@ -32,7 +32,6 @@ import { useFile } from "../hooks/useFile";
 import { useFileExplorerShortcuts } from "../hooks/useFileExplorerShortcuts";
 import { Loader2, FolderOpen, FileText, FolderPlus, Upload } from "lucide-react";
 import { RTKQueryError } from "@/lib/error-handling/rtk-query-error";
-import { toast } from "react-hot-toast";
 
 export default function FilesDirectoryViewer() {
   // Use custom hooks for data management
@@ -56,6 +55,8 @@ export default function FilesDirectoryViewer() {
     moveFile,
     deleteFile,
     openFile,
+    uploadFile,
+    isUploading,
   } = useFile();
 
   // Local state management with custom hook
@@ -95,6 +96,7 @@ export default function FilesDirectoryViewer() {
 
   // Dialog states
   const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
 
   // Keyboard shortcuts
   useFileExplorerShortcuts({
@@ -149,6 +151,51 @@ export default function FilesDirectoryViewer() {
         await moveFolder(itemId, targetFolderId);
       }
     });
+  };
+
+  // File drag and drop upload handlers
+  const handleFileDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsDraggingFile(true);
+    }
+  };
+
+  const handleFileDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only hide if leaving the main container
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+      setIsDraggingFile(false);
+    }
+  };
+
+  const handleFileDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleFileDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingFile(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length === 0) return;
+
+    for (const file of files) {
+      const result = await uploadFile(file, currentFolder);
+      if (result.error) {
+        console.error("Failed to upload file:", file.name);
+      }
+    }
+
+    refetchFiles();
   };
 
   // Render view based on viewMode
@@ -225,15 +272,53 @@ export default function FilesDirectoryViewer() {
         {/* Breadcrumb Navigation */}
         <Breadcrumb path={breadcrumbPath} onNavigate={handleBreadcrumbNavigate} />
 
-        {/* Files and folders content */}
+        {/* Files and folders content with drag-drop upload */}
         <div
-          className="rounded-lg  overflow-hidden"
-          onContextMenu={(e) => {
-            e.preventDefault();
-            toast("Right-click  on items for more options");
-          }}
+          className="rounded-lg overflow-hidden relative"
+          onDragEnter={handleFileDragEnter}
+          onDragLeave={handleFileDragLeave}
+          onDragOver={handleFileDragOver}
+          onDrop={handleFileDrop}
         >
           {renderView()}
+          
+          {/* Drag overlay - Full screen popup */}
+          {isDraggingFile && (
+            <div className="fixed inset-0 bg-background/95 backdrop-blur-sm flex items-center justify-center z-[100]">
+              <div className="max-w-md w-full mx-4 bg-card border-2 border-dashed border-primary rounded-2xl p-12 shadow-2xl">
+                <div className="text-center space-y-4">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+                    <Upload className="h-20 w-20 text-primary mx-auto relative animate-bounce" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-bold text-foreground">Drop your files here</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {currentFolder 
+                        ? "Files will be uploaded to the current folder" 
+                        : "Files will be uploaded to the root directory"}
+                    </p>
+                  </div>
+                  <div className="pt-4 border-t border-border">
+                    <p className="text-xs text-muted-foreground">Multiple files supported</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Upload indicator */}
+          {isUploading && (
+            <div className="fixed bottom-4 right-4 bg-card border rounded-lg p-4 shadow-lg z-50 min-w-[200px]">
+              <div className="flex items-center gap-3">
+                <Loader2 className="h-5 w-5 animate-spin text-primary flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">Uploading files...</p>
+                  <p className="text-xs text-muted-foreground">Please wait</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

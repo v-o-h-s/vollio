@@ -1,7 +1,5 @@
 "use client";
 
-import { FolderCard } from "../FolderCard";
-import { FileCard } from "../FileCard";
 import {
   Table,
   TableBody,
@@ -11,6 +9,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { Cloud, HardDrive, BookOpen, Folder, FileIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface File {
   id: string;
@@ -19,6 +19,7 @@ interface File {
   createdAt?: string;
   updatedAt?: string;
   size?: number;
+  source?: "local" | "cloud" | "classroom";
 }
 
 interface Folder {
@@ -40,130 +41,48 @@ interface DetailsViewProps {
   dragOverFolderId: string | null;
 }
 
-function DraggableFolderRow({
-  folder,
-  isSelected,
-  isDraggedOver,
-  onSelect,
-  onOpen,
-  allFolders,
-}: {
-  folder: Folder;
-  isSelected: boolean;
-  isDraggedOver: boolean;
-  onSelect: (e: React.MouseEvent) => void;
-  onOpen: () => void;
-  allFolders: Folder[];
-}) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `folder-${folder.id}`,
-    data: { type: "folder", id: folder.id, name: folder.name },
-  });
-
-  const { setNodeRef: setDroppableRef } = useDroppable({
-    id: `folder-${folder.id}`,
-    data: { type: "folder", id: folder.id },
-  });
-
-  const formatDate = (date: string | undefined) => {
-    if (!date) return "-";
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  return (
-    <TableRow
-      ref={(node) => {
-        setNodeRef(node);
-        setDroppableRef(node);
-      }}
-      {...listeners}
-      {...attributes}
-      className={isDragging ? "opacity-50" : ""}
-      onClick={onSelect}
-      onDoubleClick={onOpen}
-    >
-      <TableCell colSpan={5} className="p-0">
-        <FolderCard
-          id={folder.id}
-          name={folder.name}
-          parentId={folder.parent_id}
-          isSelected={isSelected}
-          isDraggedOver={isDraggedOver}
-          onSelect={(e) => e.stopPropagation()}
-          onOpen={() => {}}
-          allFolders={allFolders}
-        />
-      </TableCell>
-    </TableRow>
-  );
+function getSourceIcon(source?: string) {
+  switch (source) {
+    case "cloud":
+      return <Cloud className="w-4 h-4 text-blue-500" />;
+    case "classroom":
+      return <BookOpen className="w-4 h-4 text-purple-500" />;
+    case "local":
+    default:
+      return <HardDrive className="w-4 h-4 text-gray-500" />;
+  }
 }
 
-function DraggableFileRow({
-  file,
-  isSelected,
-  onSelect,
-  onOpen,
-  allFolders,
-}: {
-  file: File;
-  isSelected: boolean;
-  onSelect: (e: React.MouseEvent) => void;
-  onOpen: () => void;
-  allFolders: Folder[];
-}) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `file-${file.id}`,
-    data: { type: "file", id: file.id, name: file.filename },
+function getSourceLabel(source?: string) {
+  switch (source) {
+    case "cloud":
+      return "Cloud";
+    case "classroom":
+      return "Classroom";
+    case "local":
+    default:
+      return "Local";
+  }
+}
+
+function formatDate(date: string | undefined) {
+  if (!date) return "-";
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
+}
 
-  const formatDate = (date: string | undefined) => {
-    if (!date) return "-";
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const formatSize = (bytes: number | undefined) => {
-    if (!bytes) return "-";
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
-  };
-
-  return (
-    <TableRow
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className={isDragging ? "opacity-50" : ""}
-      onClick={onSelect}
-      onDoubleClick={onOpen}
-    >
-      <TableCell colSpan={5} className="p-0">
-        <FileCard
-          id={file.id}
-          filename={file.filename}
-          folderId={file.folderId}
-          isSelected={isSelected}
-          onSelect={(e) => e.stopPropagation()}
-          onOpen={() => {}}
-          allFolders={allFolders}
-        />
-      </TableCell>
-    </TableRow>
-  );
+function formatSize(bytes: number | undefined) {
+  if (!bytes) return "-";
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 }
 
 export function DetailsView({
@@ -194,33 +113,100 @@ export function DetailsView({
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Type</TableHead>
+            <TableHead>Source</TableHead>
             <TableHead>Size</TableHead>
             <TableHead>Modified</TableHead>
-            <TableHead className="text-right w-[50px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {folders.map((folder) => (
-            <DraggableFolderRow
-              key={folder.id}
-              folder={folder}
-              isSelected={isItemSelected("folder", folder.id)}
-              isDraggedOver={dragOverFolderId === folder.id}
-              onSelect={(e) => onItemSelect("folder", folder.id, e)}
-              onOpen={() => onFolderOpen(folder.id)}
-              allFolders={folders}
-            />
-          ))}
-          {files.map((file) => (
-            <DraggableFileRow
-              key={file.id}
-              file={file}
-              isSelected={isItemSelected("file", file.id)}
-              onSelect={(e) => onItemSelect("file", file.id, e)}
-              onOpen={() => onFileOpen(file.id)}
-              allFolders={folders}
-            />
-          ))}
+          {/* Folders */}
+          {folders.map((folder) => {
+            const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+              id: `folder-${folder.id}`,
+              data: { type: "folder", id: folder.id, name: folder.name },
+            });
+
+            const { setNodeRef: setDroppableRef } = useDroppable({
+              id: `folder-${folder.id}`,
+              data: { type: "folder", id: folder.id },
+            });
+
+            const isSelected = isItemSelected("folder", folder.id);
+            const isDraggedOver = dragOverFolderId === folder.id;
+
+            return (
+              <TableRow
+                key={folder.id}
+                ref={(node) => {
+                  setNodeRef(node);
+                  setDroppableRef(node);
+                }}
+                {...listeners}
+                {...attributes}
+                className={cn(
+                  "cursor-pointer transition-all",
+                  isSelected && "bg-primary/10",
+                  isDraggedOver && "bg-primary/20",
+                  isDragging && "opacity-50"
+                )}
+                onClick={(e) => onItemSelect("folder", folder.id, e)}
+                onDoubleClick={() => onFolderOpen(folder.id)}
+              >
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Folder className="w-4 h-4 text-blue-500" />
+                    <span>{folder.name}</span>
+                  </div>
+                </TableCell>
+                <TableCell>Folder</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>{formatDate(folder.updatedAt)}</TableCell>
+              </TableRow>
+            );
+          })}
+
+          {/* Files */}
+          {files.map((file) => {
+            const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+              id: `file-${file.id}`,
+              data: { type: "file", id: file.id, name: file.filename },
+            });
+
+            const isSelected = isItemSelected("file", file.id);
+
+            return (
+              <TableRow
+                key={file.id}
+                ref={setNodeRef}
+                {...listeners}
+                {...attributes}
+                className={cn(
+                  "cursor-pointer transition-all",
+                  isSelected && "bg-primary/10",
+                  isDragging && "opacity-50"
+                )}
+                onClick={(e) => onItemSelect("file", file.id, e)}
+                onDoubleClick={() => onFileOpen(file.id)}
+              >
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <FileIcon className="w-4 h-4 text-gray-400" />
+                    <span>{file.filename}</span>
+                  </div>
+                </TableCell>
+                <TableCell>File</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    {getSourceIcon(file.source)}
+                    <span className="text-xs">{getSourceLabel(file.source)}</span>
+                  </div>
+                </TableCell>
+                <TableCell>{formatSize(file.size)}</TableCell>
+                <TableCell>{formatDate(file.updatedAt)}</TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
