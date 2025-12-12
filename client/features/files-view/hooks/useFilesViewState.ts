@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { ViewMode } from "../components/ViewToggle";
 import { FileFilters } from "../components/FilterDropdown";
 
@@ -19,6 +19,11 @@ export interface Folder {
   parent_id: string | null;
 }
 
+export type SelectedItem = {
+  type: "file" | "folder";
+  id: string;
+};
+
 export function useFilesViewState(files: File[], folders: Folder[]) {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -30,6 +35,7 @@ export function useFilesViewState(files: File[], folders: Folder[]) {
     showLocal: true,
   });
   const [currentFolder, setCurrentFolder] = useState<string | null>(null);
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
 
   // Filter files based on search, filters, and current folder
   const filteredFiles = useMemo(() => {
@@ -74,6 +80,73 @@ export function useFilesViewState(files: File[], folders: Folder[]) {
     });
   }, [folders, searchQuery, currentFolder]);
 
+  // Selection management
+  const isItemSelected = useCallback(
+    (type: "file" | "folder", id: string) => {
+      return selectedItems.some((item) => item.type === type && item.id === id);
+    },
+    [selectedItems]
+  );
+
+  const toggleItemSelection = useCallback(
+    (type: "file" | "folder", id: string, multiSelect = false) => {
+      setSelectedItems((prev) => {
+        const isSelected = prev.some((item) => item.type === type && item.id === id);
+        
+        if (multiSelect) {
+          // Multi-select: toggle the item
+          if (isSelected) {
+            return prev.filter((item) => !(item.type === type && item.id === id));
+          } else {
+            return [...prev, { type, id }];
+          }
+        } else {
+          // Single select: replace selection
+          if (isSelected && prev.length === 1) {
+            return []; // Deselect if it's the only selected item
+          }
+          return [{ type, id }];
+        }
+      });
+    },
+    []
+  );
+
+  const selectRange = useCallback(
+    (type: "file" | "folder", fromId: string, toId: string) => {
+      const items = type === "file" ? filteredFiles : filteredFolders;
+      const fromIndex = items.findIndex((item) => item.id === fromId);
+      const toIndex = items.findIndex((item) => item.id === toId);
+      
+      if (fromIndex === -1 || toIndex === -1) return;
+      
+      const start = Math.min(fromIndex, toIndex);
+      const end = Math.max(fromIndex, toIndex);
+      const rangeItems = items.slice(start, end + 1).map((item) => ({ type, id: item.id }));
+      
+      setSelectedItems((prev) => {
+        // Remove duplicates and merge with existing selection
+        const newItems = [...prev, ...rangeItems];
+        return newItems.filter((item, index, self) => 
+          index === self.findIndex((t) => t.type === item.type && t.id === item.id)
+        );
+      });
+    },
+    [filteredFiles, filteredFolders]
+  );
+
+  const clearSelection = useCallback(() => {
+    setSelectedItems([]);
+  }, []);
+
+  const selectAll = useCallback(() => {
+    const allItems: SelectedItem[] = [
+      ...filteredFolders.map((folder) => ({ type: "folder" as const, id: folder.id })),
+      ...filteredFiles.map((file) => ({ type: "file" as const, id: file.id })),
+    ];
+    setSelectedItems(allItems);
+  }, [filteredFiles, filteredFolders]);
+
   return {
     searchQuery,
     setSearchQuery,
@@ -85,5 +158,11 @@ export function useFilesViewState(files: File[], folders: Folder[]) {
     setCurrentFolder,
     filteredFiles,
     filteredFolders,
+    selectedItems,
+    isItemSelected,
+    toggleItemSelection,
+    selectRange,
+    clearSelection,
+    selectAll,
   };
 }

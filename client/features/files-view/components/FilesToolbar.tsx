@@ -4,7 +4,6 @@ import React from "react";
 import { SearchBar } from "./SearchBar";
 import { ViewToggle, ViewMode } from "./ViewToggle";
 import { FilterDropdown, FileFilters } from "./FilterDropdown";
-import { GoogleClassroomButton } from "@/components/pdf/GoogleClassroomButton";
 
 interface FilesToolbarProps {
   searchQuery: string;
@@ -34,7 +33,6 @@ export function FilesToolbar({
       <div className="flex items-center gap-2">
         <ViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
         <FilterDropdown filters={filters} onFiltersChange={onFiltersChange} />
-        <GoogleClassroomButton />
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import FilesDirectoryViewer from "@/features/files-view/FilesDirectoryViewer";
+import FilesDirectoryViewer from "@/features/files-view/components/FilesDirectoryViewer";
 
 export default function PDFsPage() {
   return (
