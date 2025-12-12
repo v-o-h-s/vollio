@@ -19,7 +19,7 @@ export class UploadFileUseCase {
   constructor(
     private fileRepository: IFileRepository,
     private folderRepository: IFolderRepository,
-    private storageService: IStorageService
+    private storageService: IStorageService,
   ) { }
 
   async execute(input: UploadFileInput): Promise<void> {

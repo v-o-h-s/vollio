@@ -20,6 +20,14 @@ const fileRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
   opts: FastifyPluginOptions
 ): Promise<void> => {
+  // Get all files - Must be before /:id route to avoid route matching issues
+  fastify.get(
+    `${opts.prefix}/`,
+    async (request, reply) => {
+      const fileController = request.diScope.resolve("fileController");
+      return fileController.getAllFiles(request, reply);
+    }
+  );
 
   // used like when you click on some pdf from google drive (but return like general file fetch)
   // /api/v1/files/google-drive/:id
@@ -51,14 +59,7 @@ const fileRoutesHandler: FastifyPluginAsync = async (
     }
   );
 
-  // Get all files
-  fastify.get(
-    `${opts.prefix}`,
-    async (request, reply) => {
-      const fileController = request.diScope.resolve("fileController");
-      return fileController.getAllFiles(request, reply);
-    }
-  );
+
 
   // Upload file
   fastify.post(
@@ -116,7 +117,7 @@ const fileRoutesHandler: FastifyPluginAsync = async (
         validateParams(fileIdParamsSchema),
         validateBody(renameFileSchema),
       ],
-      
+
     },
     async (request, reply) => {
       const fileController = request.diScope.resolve("fileController");
@@ -124,7 +125,7 @@ const fileRoutesHandler: FastifyPluginAsync = async (
     }
   );
 
-  
+
 };
 
 export const fileRoutes = fp(fileRoutesHandler, {

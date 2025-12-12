@@ -5,7 +5,7 @@ import { JSONSchemaType } from "ajv";
  */
 export interface CreateFolderDTO {
   name: string;
-  parent_id?: string | null;
+  parentId?: string | null;
 }
 
 export const createFolderSchema: JSONSchemaType<CreateFolderDTO> = {
@@ -16,7 +16,7 @@ export const createFolderSchema: JSONSchemaType<CreateFolderDTO> = {
       minLength: 1,
       maxLength: 255,
     },
-    parent_id: {
+    parentId: {
       type: "string",
       nullable: true,
       pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
@@ -31,7 +31,7 @@ export const createFolderSchema: JSONSchemaType<CreateFolderDTO> = {
  */
 export interface UpdateFolderDTO {
   name?: string;
-  parent_id?: string | null;
+  parentId?: string | null;
 }
 
 export const updateFolderSchema: JSONSchemaType<UpdateFolderDTO> = {
@@ -43,7 +43,7 @@ export const updateFolderSchema: JSONSchemaType<UpdateFolderDTO> = {
       maxLength: 255,
       nullable: true,
     },
-    parent_id: {
+    parentId: {
       type: "string",
       nullable: true,
       pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",

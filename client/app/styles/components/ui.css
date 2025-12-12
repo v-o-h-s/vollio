@@ -145,7 +145,6 @@ html {
 
 /* Toast solid background overrides - Light mode */
 .toast-solid-bg,
-[data-sonner-toast],
 [data-hot-toast] {
   background: #ffffff !important;
   color: #000000 !important;
@@ -157,7 +156,6 @@ html {
 
 /* Dark mode toast overrides */
 .dark .toast-solid-bg,
-.dark [data-sonner-toast],
 .dark [data-hot-toast] {
   background: #000000 !important;
   color: #ffffff !important;

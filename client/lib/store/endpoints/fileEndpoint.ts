@@ -1,6 +1,7 @@
 import { ApiBuilder } from "@/lib/store/endpoints/types";
 import { GetAllFilesResponse } from "../../../../server/src/shared/types/responses/fileRoutes";
 import { ServerErrorResponse } from "../../../../server/src/shared/types/responses/general";
+import { UUID } from "crypto";
 
 interface TransformedFile {
   id: string;
@@ -29,20 +30,7 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
         isGoogleDriveFile: pdf.isGoogleDriveFile,
       }));
     },
-    transformErrorResponse: (baseQueryReturnValue) => {
-      const errorData = baseQueryReturnValue?.data as ServerErrorResponse;
-      const errorMessage = errorData?.message || 'An error occurred';
-      
-      // In development, include full error object for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.error('File endpoint error:', {
-          message: errorMessage,
-          error: errorData?.error,
-        });
-      }
-      
-      return errorMessage;
-    },
+    
     providesTags: ["File"],
   }),
 
@@ -67,6 +55,10 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
     query: (id) => ({
       url: `files/${id}`,
       method: "DELETE",
+      body: undefined,
+      headers: {
+        "Content-Type": undefined,
+      },
     }),
     invalidatesTags: (_result, _error, id) => [
       { type: "File", id: "LIST" },

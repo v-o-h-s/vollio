@@ -38,20 +38,7 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
       }));
       return { folders, count };
     },
-    transformErrorResponse: (baseQueryReturnValue) => {
-      const errorData = baseQueryReturnValue?.data as ServerErrorResponse;
-      const errorMessage = errorData?.message || 'An error occurred';
-      
-      // In development, include full error object for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Folder endpoint error:', {
-          message: errorMessage,
-          error: errorData?.error,
-        });
-      }
-      
-      return errorMessage;
-    },
+    
     providesTags: ["Folder"],
   }),
 
@@ -123,9 +110,12 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
 
   deleteFolder: builder.mutation<{ success: boolean }, { id: string; cascade?: boolean }>({
     query: ({ id, cascade }) => ({
-      url: `folders/${id}`,
+      url: `folders/${id}${cascade !== undefined ? `?cascade=${cascade}` : ""}`,
       method: "DELETE",
-      params: cascade !== undefined ? { cascade } : undefined,
+      body: undefined,
+      headers: {
+        "Content-Type": undefined,
+      },
     }),
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Folder", id: "LIST" },
