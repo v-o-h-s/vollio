@@ -20,15 +20,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
-  useGetPDFsQuery,
-  useUploadPDFMutation,
-  useDeletePDFMutation,
-  useRenamePDFMutation,
-  useGetFoldersQuery,
-  useCreateFolderMutation,
-  useUpdateFolderMutation,
-  useDeleteFolderMutation,
-  useMovePDFMutation,
+  useGetPDFsQuery, useGetFoldersQuery
 } from "@/lib/store/apiSlice";
 import {
   ErrorType,
@@ -53,7 +45,7 @@ import { RenameDialog } from "./RenameDialog";
 import { FileText, FolderOpen, Upload, GraduationCap } from "lucide-react";
 import { Logger } from "@/lib/utils/logger";
 import { PDFDirectoryLoadingState } from "./PDFDirectoryLoadingState";
-import { GoogleClassroomButton } from "../GoogleClassroomButton";
+import { GoogleClassroomButton } from "@/components/pdf/GoogleClassroomButton";
 
 export type ViewMode = "grid" | "list" | "compact" | "details";
 export type SortBy = "name" | "date" | "size" | "type";
@@ -146,16 +138,16 @@ export function PDFDirectoryView({
     error: foldersError,
     refetch: refetchFolders,
   } = useGetFoldersQuery();
-  const [uploadPDF, { isLoading: isUploading }] = useUploadPDFMutation();
-  const [deletePDF, { isLoading: isDeleting }] = useDeletePDFMutation();
-  const [renamePDF, { isLoading: isRenaming }] = useRenamePDFMutation();
-  const [createFolderMutation, { isLoading: isCreatingFolderMutation }] =
-    useCreateFolderMutation();
-  const [updateFolderMutation, { isLoading: isUpdatingFolder }] =
-    useUpdateFolderMutation();
-  const [deleteFolderMutation, { isLoading: isDeletingFolder }] =
-    useDeleteFolderMutation();
-  const [movePDFMutation, { isLoading: isMovingPDF }] = useMovePDFMutation();
+  // const [uploadPDF, { isLoading: isUploading }] = useUploadPDFMutation();
+  // const [deletePDF, { isLoading: isDeleting }] = useDeletePDFMutation();
+  // const [renamePDF, { isLoading: isRenaming }] = useRenamePDFMutation();
+  // const [createFolderMutation, { isLoading: isCreatingFolderMutation }] =
+  //   useCreateFolderMutation();
+  // const [updateFolderMutation, { isLoading: isUpdatingFolder }] =
+  //   useUpdateFolderMutation();
+  // const [deleteFolderMutation, { isLoading: isDeletingFolder }] =
+  //   useDeleteFolderMutation();
+  // const [movePDFMutation, { isLoading: isMovingPDF }] = useMovePDFMutation();
 
   // Event listeners for floating sidebar integration
   useEffect(() => {
@@ -485,7 +477,7 @@ export function PDFDirectoryView({
 
   if (error || foldersError) {
     const errorToLog = error || foldersError;
-    
+
     // More detailed error logging
     console.error("PDF/Folder Error Details:", {
       hasError: !!error,
@@ -495,9 +487,9 @@ export function PDFDirectoryView({
       errorString: JSON.stringify(error, null, 2),
       foldersErrorString: JSON.stringify(foldersError, null, 2),
     });
-    
+
     Logger.error("Failed to load PDFs or folders", errorToLog);
-    
+
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center">
         <FileText className="w-12 h-12 text-muted-foreground mb-4" />
@@ -581,18 +573,17 @@ export function PDFDirectoryView({
 
         {/* Content area */}
         <div
-          className={`min-h-[400px] ${
-            isDragOver
+          className={`min-h-[400px] ${isDragOver
               ? "bg-primary/5 border-2 border-dashed border-primary"
               : ""
-          }`}
+            }`}
           onDragOver={handleFileDragOver}
           onDragLeave={handleFileDragLeave}
           onDrop={handleFileDrop}
         >
           {filteredAndSortedPDFs.length === 0 &&
-          folders.filter((f) => f.parent_id === currentFolder).length === 0 &&
-          !isCreatingFolder ? (
+            folders.filter((f) => f.parent_id === currentFolder).length === 0 &&
+            !isCreatingFolder ? (
             <div className="flex flex-col items-center justify-center py-12">
               <FileText className="h-16 w-16 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No items found</h3>
@@ -674,7 +665,7 @@ export function PDFDirectoryView({
                           folder={folder}
                           viewMode={viewMode}
                           onOpen={() => handleFolderNavigation(folder.id)}
-                          onSelect={() => {}}
+                          onSelect={() => { }}
                           onContextMenu={(e) =>
                             handleFolderContextMenu(e, folder.id)
                           }

@@ -38,7 +38,7 @@ import { useGetPDFsQuery, useUploadPDFMutation } from '@/lib/store/apiSlice'
 import { PDFDocument, AppError } from '@/lib/types'
 import { pdfNotifications } from '@/lib/utils/notifications'
 import { formatRelativeTime } from '@/lib/utils/dates'
-import { useUploadErrorHandler } from '@/hooks/use-error-handling'
+// import { useUploadErrorHandler } from '@/hooks/use-error-handling' // TODO: Create this hook
 import { ErrorBoundary, UploadErrorBoundary } from '@/components/ErrorBoundary'
 import { Button } from '@/components/ui/button'
 
@@ -102,12 +102,25 @@ export default function PDFListDisplay({
   // Enhanced error handling
   const {
     error: uploadError,
+  // TODO: Re-enable when use-error-handling hook is created
+  /*
+  const {
+    error: uploadError,
     isRetrying: isRetryingUpload,
     handleUploadError,
     getRecoveryActions,
     clearError: clearUploadError,
     retry: retryUpload
   } = useUploadErrorHandler()
+  */
+
+  // Temporary error handling - to be replaced with useUploadErrorHandler
+  const uploadError = null;
+  const isRetryingUpload = false;
+  const handleUploadError = () => {};
+  const getRecoveryActions = () => [];
+  const clearUploadError = () => {};
+  const retryUpload = () => {};
 
   // RTK Query hooks
   const {

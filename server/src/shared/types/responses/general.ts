@@ -9,6 +9,7 @@ export interface ServerSuccessResponse<T> {
 }
 export interface ServerErrorResponse {
     success: false;
+    message: string;
     data: null;
     error: ErrorObject
 }

@@ -71,7 +71,10 @@ export const {
   useCreateHighlightMutation,
   useUpdateHighlightMutation,
   useDeleteHighlightMutation,
-
+  useGetFoldersQuery,
+  useCreateFolderMutation,
+  useUpdateFolderMutation,
+  useDeleteFolderMutation,
   useMovePDFMutation,
   useGetSummaryByPdfIdQuery,
   useCreateOrUpdateSummaryMutation,
