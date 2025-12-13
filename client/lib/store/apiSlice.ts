@@ -99,7 +99,7 @@ export const {
   useRenameFileMutation,
   useMoveFileMutation,
   useGetFileFromGoogleDriveQuery,
-  useStreamFileQuery,
+
   useAddFileFromGoogleDriveMutation,
   useProcessTestMutation,
 } = apiSlice;

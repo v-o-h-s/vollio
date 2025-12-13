@@ -1,5 +1,5 @@
 // for dev and for fast dev we will use console.err
-
+import { redirect } from "next/navigation";
 import {
     useGetAllFilesQuery,
     useRenameFileMutation,
@@ -55,7 +55,7 @@ export function useFile() {
     const openFile = (id: string) => {
         const file = filesData?.find((f) => f.id === id);
         if (file) {
-            // TODO: Implement file opening logic
+            redirect(`/dashboard/pdfs/${file.id}`);
         }
     };
 
