@@ -6,14 +6,15 @@ import {
   FastifyRequest,
 } from "fastify";
 import fp from "fastify-plugin";
-import { validateBody, validateParams } from "../../shared/validation/validator";
+import { validateBody, validateParams, validateQuery } from "../../shared/validation/validator";
 import {
   fileIdParamsSchema,
   moveFileSchema,
   renameFileSchema,
   FileIdParams,
   MoveFileDTO,
-  RenameFileDTO
+  RenameFileDTO,
+  validateQuerySchema
 } from "../../shared/validation/fileSchemas";
 
 const fileRoutesHandler: FastifyPluginAsync = async (
@@ -39,17 +40,17 @@ const fileRoutesHandler: FastifyPluginAsync = async (
     }
   );
   // used to stream file content
-  // /api/v1/files/google-drive/:id/stream
-  fastify.get<{ Params: FileIdParams }>(
-    `${opts.prefix}/google-drive/:id/stream`,
-    {
-      preHandler: validateParams(fileIdParamsSchema),
-    },
-    async (request, reply) => {
+  // /api/v1/files/stream
+  // Supports both GET (stream) and HEAD (headers only) requests
+  fastify.route<{ Querystring: { token: string } }>({
+    method: ["GET", "HEAD"],
+    url: `${opts.prefix}/stream`,
+    preHandler: validateQuery(validateQuerySchema),
+    handler: async (request, reply) => {
       const fileController = request.diScope.resolve("fileController");
       return fileController.streamFile(request, reply);
-    }
-  );
+    },
+  });
   // add file from google drive
   fastify.post<{ Body: { fileGoogleDriveId: string } }>(
     `${opts.prefix}/google-drive`,
@@ -124,9 +125,18 @@ const fileRoutesHandler: FastifyPluginAsync = async (
       return fileController.renameFile(request, reply);
     }
   );
-
+  fastify.get<{ Params: FileIdParams }>(
+    `${opts.prefix}/:id/signed-url`,
+  
+    async (request, reply) => {
+      const fileController = request.diScope.resolve("fileController");
+      return fileController.createSignedUrl(request, reply);
+    }
+  );
 
 };
+
+
 
 export const fileRoutes = fp(fileRoutesHandler, {
   name: "file-routes",

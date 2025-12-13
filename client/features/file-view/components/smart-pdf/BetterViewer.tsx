@@ -31,6 +31,7 @@ export const BetterViewer = ({
   file: FileDetails;
   onToggleNoter?: () => void;
 }) => {
+  console.log("BetterViewer rendering for file:", file);
   // Fetch highlights for this PDF from API
   const { data: apiHighlights, isLoading: isLoadingHighlights } =
     useGetPDFHighlightsQuery(file.id);

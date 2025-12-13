@@ -21,6 +21,7 @@ import {
   UploadFileResponse,
 } from "../../shared/types/responses/fileRoutes";
 import { error } from "console";
+import { CreateSignedUrlUseCase } from "../../application/use-cases/files/CreateSignedUrlUseCase";
 
 export class FileController {
   constructor(
@@ -32,7 +33,8 @@ export class FileController {
     private deleteFileUseCase: DeleteFileUseCase,
     private moveFileUseCase: MoveFileUseCase,
     private renameFileUseCase: RenameFileUseCase,
-    private streamFileUseCase: StreamFileUseCase
+    private streamFileUseCase: StreamFileUseCase,
+    private createSignedUrlUseCase: CreateSignedUrlUseCase
   ) { }
   // add pdf from google drive
   async addFileFromGoogleDrive(
@@ -133,7 +135,7 @@ export class FileController {
       return;
     }
 
-    const result = await this.getFileByIdUseCase.execute(request.params.id);
+    const result = await this.getFileByIdUseCase.execute(request.params.id, userId);
 
     reply.status(200).send({
       success: true,
@@ -281,26 +283,85 @@ export class FileController {
     } satisfies RenameFileResponse);
   }
 
-  async streamFile(
-    request: FastifyRequest<{ Params: { id: string } }>,
+
+  async createSignedUrl(
+    request: FastifyRequest<{ Params: FileIdParams }>,
     reply: FastifyReply
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
       reply.status(401).send({
         success: false,
-        status: 401,
+        message: " Not authenticated",
         data: null,
         error: { message: "Not authenticated" },
       });
       return;
     }
 
-    const { id } = request.params;
-    const stream = await this.streamFileUseCase.execute(id);
-    reply.type("application/pdf");
-    return reply.send(stream);
+    const fileId = request.params.id;
+    const signedUrl = await this.createSignedUrlUseCase.execute(fileId, userId);
+    reply.status(200).send({
+      success: true,
+      message: "Signed URL created successfully",
+      data: signedUrl,
+      error: null,
+    });
+  }
+  async streamFile(
+    request: FastifyRequest<{ Querystring: { token: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const { token } = request.query;
 
+    if (!token) {
+      reply.status(400).send({
+        success: false,
+        message: "Token is required",
+        data: null,
+        error: { message: "Token is required" },
+      });
+      return;
+    }
+
+    try {
+      // Token validation happens inside StreamFileUseCase.execute()
+      const stream = await this.streamFileUseCase.execute(token);
+
+      // Set CORS headers explicitly for PDF.js
+      reply
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
+        .header("Access-Control-Allow-Headers", "Content-Type, Range")
+        .header("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges")
+        .header("Content-Type", "application/pdf")
+        .header("Content-Disposition", "inline; filename=file.pdf")
+        .header("Accept-Ranges", "bytes")
+        .header("Cache-Control", "no-cache, no-store, must-revalidate");
+
+      // Handle HEAD requests: just send headers
+      if (request.method === "HEAD") {
+        reply
+          .header("Content-Type", "application/pdf")
+          .header("Content-Disposition", "inline; filename=file.pdf")
+          .header("Accept-Ranges", "bytes")
+          .header("Cache-Control", "no-cache, no-store, must-revalidate");
+        return reply.send();
+      }
+
+      // GET request: stream file
+      return reply.send(stream);
+    } catch (err: any) {
+      const statusCode = err.statusCode || 500;
+      const message = err.message || "Failed to stream file";
+
+      reply.status(statusCode).send({
+        success: false,
+        message,
+        data: null,
+        error: { message },
+      });
+    }
   }
 
 }

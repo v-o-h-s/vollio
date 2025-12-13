@@ -53,3 +53,19 @@ export const renameFileSchema: JSONSchemaType<RenameFileDTO> = {
   required: ["filename"],
   additionalProperties: false,
 };
+
+// Validate query schema (for Google Drive streaming)
+export interface QuerySchema {
+  token: string;
+}
+export const validateQuerySchema: JSONSchemaType<QuerySchema> = {
+  type: "object",
+  properties: {
+    token: {
+      type: "string",
+      minLength: 1,
+    },
+  },
+  required: ["token"],
+  additionalProperties: false,
+};
