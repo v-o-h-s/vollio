@@ -1,10 +1,10 @@
 import fn from "fastify-plugin";
 import { FastifyInstance, FastifyPluginAsync, FastifyPluginOptions } from "fastify";
 const testRoute: FastifyPluginAsync = async (fastify: FastifyInstance, opts: FastifyPluginOptions) => {
-    fastify.post<{ Body: { link: string } }>(`${opts.prefix}`, async (request, reply) => {
+    fastify.get<{ Params: { id: string } }>(`${opts.prefix}/:id`, async (request, reply) => {
         const testController = request.diScope.resolve("testController");
-        return testController.processTest(request, reply);
-
+        // return testController.chunkFile(request, reply);
+        return testController.chunkFile(request, reply);
     });
 };
 

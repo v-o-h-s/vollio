@@ -308,6 +308,50 @@ export class FileController {
       error: null,
     });
   }
+  async streamFileHead(
+    request: FastifyRequest<{ Querystring: { token: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const { token } = request.query;
+
+    if (!token) {
+      reply.status(400).send({
+        success: false,
+        message: "Token is required",
+        data: null,
+        error: { message: "Token is required" },
+      });
+      return;
+    }
+
+    try {
+      // Token validation (we don't need the stream, just validate access)
+      await this.streamFileUseCase.execute(token);
+
+      // Send headers only with 200 OK for HEAD requests
+      reply
+        .header("Access-Control-Allow-Origin", "*")
+        .header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
+        .header("Access-Control-Allow-Headers", "Content-Type, Range")
+        .header("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges")
+        .header("Content-Type", "application/pdf")
+        .header("Content-Disposition", "inline; filename=file.pdf")
+        .header("Accept-Ranges", "bytes")
+        .header("Cache-Control", "no-cache, no-store, must-revalidate")
+        .send();
+    } catch (err: any) {
+      const statusCode = err.statusCode || 500;
+      const message = err.message || "Failed to access file";
+
+      reply.status(statusCode).send({
+        success: false,
+        message,
+        data: null,
+        error: { message },
+      });
+    }
+  }
+
   async streamFile(
     request: FastifyRequest<{ Querystring: { token: string } }>,
     reply: FastifyReply
@@ -328,8 +372,9 @@ export class FileController {
       // Token validation happens inside StreamFileUseCase.execute()
       const stream = await this.streamFileUseCase.execute(token);
 
-      // Set CORS headers explicitly for PDF.js
+      // Set CORS headers explicitly for PDF.js and use 206 Partial Content for streaming
       reply
+        .status(206)
         .header("Access-Control-Allow-Origin", "*")
         .header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
         .header("Access-Control-Allow-Headers", "Content-Type, Range")
@@ -339,17 +384,7 @@ export class FileController {
         .header("Accept-Ranges", "bytes")
         .header("Cache-Control", "no-cache, no-store, must-revalidate");
 
-      // Handle HEAD requests: just send headers
-      if (request.method === "HEAD") {
-        reply
-          .header("Content-Type", "application/pdf")
-          .header("Content-Disposition", "inline; filename=file.pdf")
-          .header("Accept-Ranges", "bytes")
-          .header("Cache-Control", "no-cache, no-store, must-revalidate");
-        return reply.send();
-      }
-
-      // GET request: stream file
+      // Pipe stream directly without JSON wrapper
       return reply.send(stream);
     } catch (err: any) {
       const statusCode = err.statusCode || 500;

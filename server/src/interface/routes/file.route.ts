@@ -39,18 +39,24 @@ const fileRoutesHandler: FastifyPluginAsync = async (
       return fileController.getFileFromGoogleDrive(request, reply);
     }
   );
-  // used to stream file content
-  // /api/v1/files/stream
-  // Supports both GET (stream) and HEAD (headers only) requests
-  fastify.route<{ Querystring: { token: string } }>({
-    method: ["GET", "HEAD"],
-    url: `${opts.prefix}/stream`,
-    preHandler: validateQuery(validateQuerySchema),
-    handler: async (request, reply) => {
+  // HEAD request for PDF metadata (used by PDF.js before streaming)
+  fastify.head<{ Querystring: { token: string } }>(
+    `${opts.prefix}/stream`,
+    async (request, reply) => {
+      const fileController = request.diScope.resolve("fileController");
+      return fileController.streamFileHead(request, reply);
+    }
+  );
+
+  // GET request to stream file content
+  fastify.get<{ Querystring: { token: string } }>(
+    `${opts.prefix}/stream`,
+    // preHandler: validateQuery(validateQuerySchema),
+    async (request, reply) => {
       const fileController = request.diScope.resolve("fileController");
       return fileController.streamFile(request, reply);
-    },
-  });
+    }
+  );
   // add file from google drive
   fastify.post<{ Body: { fileGoogleDriveId: string } }>(
     `${opts.prefix}/google-drive`,

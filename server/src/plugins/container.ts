@@ -51,6 +51,11 @@ import { HighlightRepository } from "../infrastructure/repositories/HighlightRep
 import { HighlightController } from "../interface/controllers/highlight.controller";
 import { StreamFileUseCase } from "../application/use-cases/files/StreamFileUseCase";
 import { CreateSignedUrlUseCase } from "../application/use-cases/files/CreateSignedUrlUseCase";
+import { GetFileContentUseCase } from "../application/use-cases/files/GetFileContentUseCase";
+import { ChunkingFileByIdUseCase } from "../application/use-cases/chunking/ChunkingFileByIdUseCase";
+import { ChunkingService } from "../infrastructure/services/ChunkingService";
+import { EmbeddFileBYIdUseCase } from "../application/use-cases/embedding/EmbeddFileByIdUseCase";
+import { EmbeddingService } from "../infrastructure/services/EmbeddingService";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -217,9 +222,11 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
     createSignedUrlUseCase: asClass(CreateSignedUrlUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
-    }
-
-    ),
+    }),
+    getFileContentUseCase: asClass(GetFileContentUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
   });
 
   fastify.diContainer.register({
@@ -300,8 +307,32 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
   });
-};
+  // chunking
+  fastify.diContainer.register({
+    chunkingFileByIdUseCase: asClass(ChunkingFileByIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    chunkingService: asClass(ChunkingService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
 
+
+  // embedding
+  fastify.diContainer.register({
+    embeddFileBYIdUseCase: asClass(EmbeddFileBYIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    embeddingService: asClass(EmbeddingService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+
+};
 export const containerPlugin = fastifyPlugin(diPlugin, {
   name: "di-container-plugin",
   fastify: "5.x",
