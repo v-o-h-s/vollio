@@ -1,10 +1,10 @@
-import { PDFDocument } from "@/lib/types/pdf";
+import { FileDetails } from "@/features/file-view/types/file";
 
 export interface PDFViewerHeaderProps {
   /** Function to toggle noter */
   onToggleNoter?: () => void;
   /** PDF document being viewed */
-  pdfDocument: PDFDocument;
+  file: FileDetails;
   /** Whether the header is visible */
   isHeaderVisible: boolean;
   /** Function to set header visibility */

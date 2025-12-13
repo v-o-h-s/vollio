@@ -21,7 +21,7 @@ import {
   GetCoursesWithContentResponse,
   GetCourseContentResponse,
 } from "../../shared/types/responses/googleClassroomRoutes";
-
+import "dotenv/config"
 export class GoogleClassroomController {
   private googleClassroomService: GoogleClassroomService;
   private fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase;
@@ -112,12 +112,8 @@ export class GoogleClassroomController {
     // Exchange code for tokens and save to database
     await this.fromCodeToDatabaseUseCase.execute(code);
 
-    reply.status(200).send({
-      success: true,
-      message: "Connected to Google Classroom successfully",
-      data: null,
-      error: null,
-    } satisfies ConnectCallbackResponse);
+    // Redirect back to client after successful connect
+    reply.redirect(`${process.env.FRONTEND_URL}/dashboard/pdfs`);
   }
 
   async refreshAccessToken(

@@ -3,7 +3,7 @@
 import { IFileRepository } from "../../../domain/repositories/IFileRepository";
 import { IStorageService } from "../../../domain/services/IStorageService";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
-
+import "dotenv/config";
 export interface GetFileByIdResult {
   id: string;
   filename: string;
@@ -11,6 +11,8 @@ export interface GetFileByIdResult {
   fileSize: number;
   mimeType: string;
   uploadedAt: string;
+  folderId: string | null;
+  isGoogleDriveFile: boolean;
 }
 
 export class GetFileByIdUseCase {
@@ -27,7 +29,17 @@ export class GetFileByIdUseCase {
     }
     const storagePath = file.getSource().storagePath;
     if (!storagePath) {
-      throw new NotFoundError("File not found in storage");
+      const fileUrl = `${process.env.BACKEND_BASE_URL}/api/files/google-drive/${file.getId()}/stream`;
+      return {
+        id: file.getId(),
+        filename: file.getFileName(),
+        fileUrl,
+        fileSize: file.getFileSize(),
+        mimeType: file.getMimeType(),
+        uploadedAt: new Date().toISOString(), // This should come from the entity if needed
+        folderId: file.getFolderId(),
+        isGoogleDriveFile: true,
+      };
     }
 
 
@@ -41,6 +53,8 @@ export class GetFileByIdUseCase {
       fileSize: file.getFileSize(),
       mimeType: file.getMimeType(),
       uploadedAt: new Date().toISOString(), // This should come from the entity if needed
+      folderId: file.getFolderId(),
+      isGoogleDriveFile: false,
     };
   }
 }

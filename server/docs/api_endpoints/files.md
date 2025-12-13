@@ -69,10 +69,11 @@ Retrieves a specific file's metadata by ID.
         "fileSize": "number",
         "mimeType": "string",
         "uploadedAt": "string (ISO 8601)"
+        "folderId": "string | null",
+        "isGoogleDriveFile": "boolean"
       },
       "error": null
     }
-    ```
 
 - **Error Responses**:
   - **Code**: 401 Unauthorized

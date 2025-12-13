@@ -1,13 +1,13 @@
 import { ApiBuilder } from "@/lib/store/endpoints/types";
 import { GetAllFilesResponse } from "../../../../server/src/shared/types/responses/fileRoutes";
-import { ServerErrorResponse } from "../../../../server/src/shared/types/responses/general";
-import { UUID } from "crypto";
-
-interface TransformedFile {
+import { GetFileByIdResponse } from "../../../../server/src/shared/types/responses/fileRoutes";
+export interface TransformedFile {
   id: string;
   filename: string;
+  fileUrl?: string;
   fileSize: number;
   mimeType: string;
+  uploadedAt?: string;
   folderId: string | null;
   isGoogleDriveFile: boolean;
 }
@@ -18,19 +18,19 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
       url: "files/",
       method: "GET",
     }),
-    transformResponse: (response: GetAllFilesResponse) => {
+    transformResponse: (response: GetAllFilesResponse): TransformedFile[] => {
       if (!response.data) return [];
 
-      return response.data.pdfs.map(pdf => ({
+      return response.data.pdfs.map((pdf) => ({
         id: pdf.id,
         filename: pdf.filename,
-        fileSize: pdf.file_size,
-        mimeType: pdf.mime_type,
-        folderId: pdf.folder_id,
+        fileSize: pdf.fileSize,
+        mimeType: pdf.mimeType,
+        folderId: pdf.folderId,
         isGoogleDriveFile: pdf.isGoogleDriveFile,
       }));
     },
-    
+
     providesTags: ["File"],
   }),
 
@@ -39,6 +39,22 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
       url: `files/${id}`,
       method: "GET",
     }),
+    transformResponse: (baseQueryReturnValue: GetFileByIdResponse) => {
+      const file = baseQueryReturnValue.data;
+      if (!file) {
+        throw new Error("File not found");
+      }
+      return {
+        id: file.id,
+        filename: file.filename,
+        fileSize: file.fileSize,
+        mimeType: file.mimeType,
+        fileUrl: file.fileUrl,
+        uploadedAt: file.uploadedAt,
+        folderId: null,
+        isGoogleDriveFile: false,
+      };
+    },
     providesTags: (_result, _error, id) => [{ type: "File", id }],
   }),
 
@@ -99,13 +115,7 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
     providesTags: (_result, _error, id) => [{ type: "File", id }],
   }),
 
-  streamFile: builder.query<Blob, string>({
-    query: (id) => ({
-      url: `files/google-drive/${id}/stream`,
-      method: "GET",
-      responseHandler: (response) => response.blob(),
-    }),
-  }),
+
 
   addFileFromGoogleDrive: builder.mutation<any, { fileGoogleDriveId: string }>({
     query: (data) => ({

@@ -16,12 +16,13 @@ import {
   GetCourseContentResponse,
   ListCoursesResponse,
 } from "@/lib/types/server-respones/classroomRouteResponses";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
   // 1. Connect to Google Classroom (OAuth)
   connectGoogleClassroom: builder.mutation<void, void>({
     query: () => ({
-      url: "v1/integrations/lms/google-classroom/connect",
+      url: "/integrations/lms/google-classroom/connect",
       method: "GET",
     }),
   }),
@@ -31,25 +32,18 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
   // 3. Refresh Access Token
   refreshGoogleClassroomToken: builder.mutation<RefreshTokenResponse, void>({
     query: () => ({
-      url: "v1/integrations/lms/google-classroom/refresh",
+      url: "/integrations/lms/google-classroom/refresh",
       method: "GET",
     }),
     invalidatesTags: [{ type: "GoogleClassroom", id: "TOKEN_STATUS" }],
   }),
 
-  // 4. Check Token Status
-  checkGoogleClassroomTokenStatus: builder.query<CheckTokenStatusResponse, void>({
-    query: () => ({
-      url: "v1/integrations/lms/google-classroom/check",
-      method: "GET",
-    }),
-    providesTags: [{ type: "GoogleClassroom", id: "TOKEN_STATUS" }],
-  }),
+
 
   // 5. Disconnect from Google Classroom
   disconnectGoogleClassroom: builder.mutation<DisconnectResponse, void>({
     query: () => ({
-      url: "v1/integrations/lms/google-classroom/disconnect",
+      url: "/integrations/lms/google-classroom/disconnect",
       method: "DELETE",
     }),
     invalidatesTags: [
@@ -63,7 +57,7 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
   // 6. Get Connection Status
   getGoogleClassroomConnectionStatus: builder.query<GetConnectionStatusResponse, void>({
     query: () => ({
-      url: "v1/integrations/lms/google-classroom/status",
+      url: "/integrations/lms/google-classroom/status",
       method: "GET",
     }),
     providesTags: [{ type: "GoogleClassroom", id: "CONNECTION_STATUS" }],
@@ -72,7 +66,7 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
   // 7. List Courses (lightweight, without content)
   getGoogleClassroomCoursesList: builder.query<ListCoursesResponse, void>({
     query: () => ({
-      url: "v1/integrations/lms/google-classroom/courses/list",
+      url: "/integrations/lms/google-classroom/courses/list",
       method: "GET",
     }),
     providesTags: [{ type: "GoogleClassroom", id: "COURSES" }],
@@ -81,7 +75,7 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
   // 8. Get Courses with Content (deprecated, uses Promise.all)
   getGoogleClassroomCoursesWithContent: builder.query<GetCoursesWithContentResponse, void>({
     query: () => ({
-      url: "v1/integrations/lms/google-classroom/courses",
+      url: "/integrations/lms/google-classroom/courses",
       method: "GET",
     }),
     providesTags: [{ type: "GoogleClassroom", id: "COURSES_CONTENT" }],
@@ -92,7 +86,7 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
   // 10. Get Course Content by Course ID
   getGoogleClassroomCourseContent: builder.query<GetCourseContentResponse, string>({
     query: (courseId) => ({
-      url: `v1/integrations/lms/google-classroom/courses/${courseId}/content`,
+      url: `/integrations/lms/google-classroom/courses/${courseId}/content`,
       method: "GET",
     }),
     providesTags: (_result, _error, courseId) => [

@@ -298,7 +298,6 @@ export class FileController {
 
     const { id } = request.params;
     const stream = await this.streamFileUseCase.execute(id);
-
     reply.type("application/pdf");
     return reply.send(stream);
 

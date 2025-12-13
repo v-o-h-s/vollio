@@ -9,43 +9,31 @@ import {
   PdfScaleValue,
 } from "react-pdf-highlighter-extended";
 import { useRef } from "react";
-import { PDFDocument } from "@/lib/types/pdf";
 import { ExpandableTip } from "./highlight/ExpandableTip";
 import { TagSelectionDialog } from "./tags/TagSelectionDialog";
 import { HighlightContainer } from "./highlight/HighlightContainer";
 import { TagSidebar } from "./tags/TagSidebar";
 import { PDFLoading } from "@/components/ui/PDFLoading";
-import { useGetPDFHighlightsQuery, useGetFileFromGoogleDriveQuery } from "@/lib/store/apiSlice";
-import { useSelection } from "@/hooks/useTextSelection";
-import { useHighlightActions } from "@/hooks/useHighlightActions";
+import { useGetPDFHighlightsQuery } from "@/lib/store/apiSlice";
+import { useSelection } from "@/features/file-view/hooks/useTextSelection";
+import { useHighlightActions } from "@/features/file-view/hooks/useHighlightActions";
 import { MyHighlight } from "@/lib/types/highlight";
 import { ViewerHeader } from "./viewheader";
-import { useSummaryActions } from "@/hooks/useSummaryActions";
+import { useSummaryActions } from "@/features/file-view/hooks/useSummaryActions";
 import { SummarySidebar } from "./summary/SummarySidebar";
-import { useBlobUrl } from "@/lib/utils/blobUrlUtils";
+
+import { FileDetails } from "../../types/file"
+
 export const BetterViewer = ({
-  pdfDocument,
+  file,
   onToggleNoter,
 }: {
-  pdfDocument: PDFDocument;
+  file: FileDetails;
   onToggleNoter?: () => void;
 }) => {
   // Fetch highlights for this PDF from API
   const { data: apiHighlights, isLoading: isLoadingHighlights } =
-    useGetPDFHighlightsQuery(pdfDocument.id);
-  
-  // Determine if we should fetch from Google Drive or use signed URL
-  const isGoogleDriveFile = pdfDocument.storagePath?.includes("google") || false;
-  const { data: fileBlob, isLoading: isLoadingBlob } = useGetFileFromGoogleDriveQuery(
-    pdfDocument.id,
-    { skip: !isGoogleDriveFile } // Skip if not a Google Drive file
-  );
-  
-  const { url: blobUrl, cleanup: cleanupBlobUrl } = useBlobUrl(fileBlob || null);
-  
-  // Use blob URL if available, otherwise fall back to signed URL
-  const documentUrl = isGoogleDriveFile && blobUrl ? blobUrl : (pdfDocument.fileUrl as string);
-  const isLoadingDocument = isGoogleDriveFile ? isLoadingBlob : false;
+    useGetPDFHighlightsQuery(file.id);
 
   const { handleUpdateAllHighlight, handleDeleteAllHighlight } =
     useHighlightActions();
@@ -59,16 +47,11 @@ export const BetterViewer = ({
   /** Refs for PdfHighlighter utilities */
   const highlighterUtilsRef = useRef<PdfHighlighterUtils | null>(null);
 
-  // Cleanup blob URL on unmount
-  useEffect(() => {
-    return () => {
-      cleanupBlobUrl();
-    };
-  }, [cleanupBlobUrl]);
+
 
   // Summary actions hook
   const { summary, addMainPoint, removeMainPoint } = useSummaryActions(
-    pdfDocument.id
+    file.id
   );
 
   const {
@@ -81,7 +64,7 @@ export const BetterViewer = ({
     handleAddNote,
   } = useSelection({
     highlighterUtilsRef,
-    pdfDocument,
+    file,
     currentHighlightColor,
   });
 
@@ -193,7 +176,7 @@ export const BetterViewer = ({
     <div className="relative h-full w-full flex flex-col overflow-hidden ">
       {isHeaderVisible ? (
         <ViewerHeader
-          pdfDocument={pdfDocument}
+          file={file}
           isHeaderVisible={isHeaderVisible}
           setIsHeaderVisible={setIsHeaderVisible}
           pdfViewerRef={pdfViewerAdapter}
@@ -228,7 +211,7 @@ export const BetterViewer = ({
       <div className="flex-1 relative overflow-hidden [&_*::-webkit-scrollbar]:w-2 [&_*::-webkit-scrollbar]:h-2 [&_*::-webkit-scrollbar-track]:bg-transparent [&_*::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&_*::-webkit-scrollbar-thumb]:rounded-full hover:[&_*::-webkit-scrollbar-thumb]:bg-muted-foreground/40 transition-colors">
         <PdfLoader
           onError={(error) => console.log(error)} // todo Better visualization
-          document={documentUrl || (pdfDocument.fileUrl as string)}
+          document={file.fileUrl as string}
           workerSrc="/pdf.worker.min.mjs"
           //workerSrc="//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs"
           beforeLoad={(progress) => <PDFLoading progress={progress} />}

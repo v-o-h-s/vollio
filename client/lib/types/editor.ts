@@ -31,7 +31,7 @@ export interface NoteContent {
  * Props for the main NotionEditor component
  */
 export interface NotionEditorProps {
-  pdfId?: string;
+  fileId?: string;
   content?: NoteContent;
   onChange?: (content: JSONContent) => void;
   onUpdate?: (editor: Editor) => void;

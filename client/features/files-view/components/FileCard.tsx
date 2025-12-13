@@ -68,7 +68,7 @@ export function FileCard({
             {filename}
           </p>
         </div>
-
+        {/* Dropdown Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -100,7 +100,7 @@ export function FileCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
+      {/** rename dialog */}
       <RenameDialog
         open={renameDialogOpen}
         onOpenChange={setRenameDialogOpen}
@@ -110,19 +110,20 @@ export function FileCard({
         currentName={filename}
         type="file"
       />
-
+      {/** move dialog */}
       <MoveItemDialog
         open={moveDialogOpen}
         onOpenChange={setMoveDialogOpen}
         onSubmit={async (targetFolderId) => {
           await moveFile(id, targetFolderId);
+          await refetch();
         }}
         folders={allFolders}
         currentFolderId={folderId}
         itemType="file"
         itemName={filename}
       />
-
+      {/** confirmation for deleting */}
       <ConfirmationDialog
         open={deleteDialogOpen}
         title="Delete File"

@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 interface NoteEditorTabProps {
   noteId: string;
-  pdfId: string;
+  fileId: string;
   isActive: boolean;
   onTitleChange?: (noteId: string, newTitle: string) => void;
 }
@@ -16,7 +16,7 @@ interface NoteEditorTabProps {
  */
 export function NoteEditorTab({
   noteId,
-  pdfId,
+  fileId,
   isActive,
   onTitleChange,
 }: NoteEditorTabProps) {
@@ -54,7 +54,7 @@ export function NoteEditorTab({
             title: noteData.title,
             content: noteData.content,
           }}
-          pdfId={pdfId}
+          fileId={fileId}
           autoSave={isActive} // Only auto-save when this tab is active
           autoSaveDelay={500}
         />

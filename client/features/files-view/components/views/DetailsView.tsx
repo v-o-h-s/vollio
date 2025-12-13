@@ -39,6 +39,7 @@ interface DetailsViewProps {
   onFileOpen: (fileId: string) => void;
   onEmptyAreaClick: () => void;
   dragOverFolderId: string | null;
+  allFolders: Folder[];
 }
 
 function getSourceIcon(source?: string) {
@@ -94,6 +95,7 @@ export function DetailsView({
   onFileOpen,
   onEmptyAreaClick,
   dragOverFolderId,
+  allFolders,
 }: DetailsViewProps) {
   if (folders.length === 0 && files.length === 0) {
     return (

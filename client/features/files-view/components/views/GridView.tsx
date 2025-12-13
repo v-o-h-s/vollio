@@ -2,7 +2,6 @@
 
 import { FileCard } from "../FileCard";
 import { FolderCard } from "../FolderCard";
-import { useDndContext } from "@dnd-kit/core";
 import { useDroppable } from "@dnd-kit/core";
 import { useDraggable } from "@dnd-kit/core";
 
@@ -27,6 +26,7 @@ interface GridViewProps {
   onFileOpen: (fileId: string) => void;
   onEmptyAreaClick: () => void;
   dragOverFolderId: string | null;
+  allFolders: Folder[];
 }
 
 function DraggableFolder({
@@ -125,6 +125,7 @@ export function GridView({
   onFileOpen,
   onEmptyAreaClick,
   dragOverFolderId,
+  allFolders,
 }: GridViewProps) {
   if (folders.length === 0 && files.length === 0) {
     return (

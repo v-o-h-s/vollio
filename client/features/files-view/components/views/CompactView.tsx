@@ -26,6 +26,7 @@ interface CompactViewProps {
   onFileOpen: (fileId: string) => void;
   onEmptyAreaClick: () => void;
   dragOverFolderId: string | null;
+  allFolders: Folder[];
 }
 
 function getSourceIcon(source?: string) {
@@ -49,6 +50,7 @@ export function CompactView({
   onFileOpen,
   onEmptyAreaClick,
   dragOverFolderId,
+  allFolders,
 }: CompactViewProps) {
   if (folders.length === 0 && files.length === 0) {
     return (

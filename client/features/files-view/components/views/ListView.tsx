@@ -28,6 +28,7 @@ interface ListViewProps {
   onFileOpen: (fileId: string) => void;
   onEmptyAreaClick: () => void;
   dragOverFolderId: string | null;
+  allFolders: Folder[];
 }
 
 function getSourceIcon(source?: string) {
@@ -63,6 +64,7 @@ export function ListView({
   onFileOpen,
   onEmptyAreaClick,
   dragOverFolderId,
+  allFolders,
 }: ListViewProps) {
   if (folders.length === 0 && files.length === 0) {
     return (
