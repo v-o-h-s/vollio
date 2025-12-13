@@ -1,3 +1,8 @@
+/**
+ * @file FilesToolbar.tsx
+ * @description Toolbar component for the files view, including search, view toggle, filters, and classroom access.
+ * Built with React and TypeScript.
+ */
 "use client";
 
 import React from "react";
