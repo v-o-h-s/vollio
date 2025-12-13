@@ -16,6 +16,9 @@ export function useFile() {
         error,
         refetch,
     } = useGetAllFilesQuery();
+    if (error) {
+        console.error("Error fetching files:", error);
+    }
 
     // Mutations
     const [renameFileMutation, { isLoading: isRenaming }] = useRenameFileMutation();
@@ -77,7 +80,7 @@ export function useFile() {
         // Data
         files: filesData || [],
         isLoading,
-        error,  
+        error,
         refetch,
 
         // Operations

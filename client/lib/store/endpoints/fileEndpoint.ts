@@ -1,13 +1,13 @@
 import { ApiBuilder } from "@/lib/store/endpoints/types";
 import { GetAllFilesResponse } from "../../../../server/src/shared/types/responses/fileRoutes";
-import { GetFileByIdResponse } from "../../../../server/src/shared/types/responses/fileRoutes"
-interface TransformedFile {
+import { GetFileByIdResponse } from "../../../../server/src/shared/types/responses/fileRoutes";
+export interface TransformedFile {
   id: string;
   filename: string;
-  fileUrl: string;
+  fileUrl?: string;
   fileSize: number;
   mimeType: string;
-  uploadedAt: string;
+  uploadedAt?: string;
   folderId: string | null;
   isGoogleDriveFile: boolean;
 }
@@ -18,15 +18,15 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
       url: "files/",
       method: "GET",
     }),
-    transformResponse: (response: GetAllFilesResponse) => {
+    transformResponse: (response: GetAllFilesResponse): TransformedFile[] => {
       if (!response.data) return [];
 
-      return response.data.pdfs.map(pdf => ({
+      return response.data.pdfs.map((pdf) => ({
         id: pdf.id,
         filename: pdf.filename,
-        fileSize: pdf.file_size,
-        mimeType: pdf.mime_type,
-        folderId: pdf.folder_id,
+        fileSize: pdf.fileSize,
+        mimeType: pdf.mimeType,
+        folderId: pdf.folderId,
         isGoogleDriveFile: pdf.isGoogleDriveFile,
       }));
     },
@@ -51,8 +51,8 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
         mimeType: file.mimeType,
         fileUrl: file.fileUrl,
         uploadedAt: file.uploadedAt,
-        folderId: file.folderId,
-        isGoogleDriveFile: file.isGoogleDriveFile,
+        folderId: null,
+        isGoogleDriveFile: false,
       };
     },
     providesTags: (_result, _error, id) => [{ type: "File", id }],

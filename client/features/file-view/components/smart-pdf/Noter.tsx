@@ -11,10 +11,11 @@ import {
 import { LoadingState } from "@/components/ui/loading";
 import { NoteCard } from "./NoteCard";
 import { NoteEditorTab } from "./NoteEditorTab";
+import { FileDetails } from "../../types/file";
 
 const HOME_TAB_ID = "home";
 
-export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
+export default function Noter({ file }: { file: FileDetails }) {
   // states
   const [tabs, setTabs] = useState<Tab[]>([
     { id: HOME_TAB_ID, label: "Home", isHome: true },
@@ -29,7 +30,7 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
     isLoading,
     error,
     refetch,
-  } = useGetNotesQuery({ pdfId: pdfDocument.id });
+  } = useGetNotesQuery({ pdfId: file.id });
   const [deleteNote] = useDeleteNoteMutation();
   const [createNote, { error: createNoteError, isLoading: isLoadingNewNote }] =
     useCreateNoteMutation();
@@ -47,7 +48,7 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
     if (isLoadingNewNote) return;
     try {
       const newNote = await createNote({
-        pdfId: pdfDocument.id,
+        pdfId: file.id,
         title: "Untitled note",
       }).unwrap();
 
@@ -303,7 +304,7 @@ export default function Noter({ pdfDocument }: { pdfDocument: PDFDocument }) {
             >
               <NoteEditorTab
                 noteId={tab.id}
-                pdfId={pdfDocument.id}
+                fileId={file.id}
                 isActive={activeTabId === tab.id}
                 onTitleChange={handleTitleChange}
               />

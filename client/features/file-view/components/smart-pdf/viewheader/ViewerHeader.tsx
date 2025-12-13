@@ -22,9 +22,8 @@ import { PDFViewerHeaderProps } from "./types";
 import { HIGHLIGHT_COLORS } from "./constants";
 import { PageNavigation } from "./PageNavigation";
 import { ZoomControls } from "./ZoomControls";
-
 export function ViewerHeader({
-  pdfDocument,
+  file,
   isHeaderVisible,
   setIsHeaderVisible,
   onToggleNoter,
@@ -100,7 +99,7 @@ export function ViewerHeader({
                   <FileText size={10} className="sm:w-3 sm:h-3 text-white" />
                 </div>
                 <h1 className="text-xs sm:text-sm font-semibold text-foreground truncate">
-                  {pdfDocument.filename}
+                  {file.filename}
                 </h1>
               </div>
             </div>

@@ -3,9 +3,10 @@ import { ServerSuccessResponse } from "./general";
 export interface PdfDetails {
 	id: string;
 	filename: string;
-	file_size: number;
-	mime_type: string;
-	folder_id: string | null;
+	fileSize: number;
+	mimeType: string;
+	uploadedAt: string;
+	folderId: string | null;
 	isGoogleDriveFile: boolean;
 }
 
@@ -23,6 +24,8 @@ export type GetFileByIdResponse = ServerSuccessResponse<{
 	fileSize: number;
 	mimeType: string;
 	uploadedAt: string;
+	folderId: string | null;
+	isGoogleDriveFile: boolean;
 }>;
 
 // POST /api/v1/files/upload

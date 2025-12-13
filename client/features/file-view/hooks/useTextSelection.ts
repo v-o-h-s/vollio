@@ -4,17 +4,17 @@ import { useCreateHighlightMutation } from "@/lib/store/apiSlice";
 import { useState } from "react";
 import { PdfHighlighterUtils } from "react-pdf-highlighter-extended";
 import { v4 as uuidv4 } from "uuid";
-import { PDFDocument } from "@/lib/types/pdf";
 import { toast } from "react-hot-toast";
+import { FileDetails } from "@/features/file-view/types/file";
 interface useSelectionProps {
   highlighterUtilsRef: React.RefObject<PdfHighlighterUtils | null>;
-  pdfDocument: PDFDocument;
+  file: FileDetails;
   currentHighlightColor?: string;
 }
 
 export function useSelection({
   highlighterUtilsRef,
-  pdfDocument,
+  file,
   currentHighlightColor,
 }: useSelectionProps) {
   const [createHighlight] = useCreateHighlightMutation();
@@ -42,7 +42,7 @@ export function useSelection({
       // Prepare the DTO for the API with tags
       const newHighlightDto: CreateHighlightDto = {
         id: highlightId,
-        pdfId: pdfDocument.id,
+        pdfId: file.id,
         type: pendingSelection.content.image ? "area" : "text",
         content: pendingSelection.content,
         position: pendingSelection.position,
@@ -84,7 +84,7 @@ export function useSelection({
       // Prepare the DTO for the API
       const newHighlightDto: CreateHighlightDto = {
         id: highlightId,
-        pdfId: pdfDocument.id,
+        pdfId: file.id,
         type: selection.content.image ? "area" : "text",
         content: selection.content,
         position: selection.position,

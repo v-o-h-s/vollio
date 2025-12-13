@@ -22,7 +22,7 @@ const baseQuery = fetchBaseQuery({
   prepareHeaders: (headers, { endpoint }) => {
     // Don't set Content-Type for FormData uploads (let browser set it with boundary)
     // fasity does not like it when you send him post like request without body
-    if (endpoint !== "uploadPDF" && endpoint !== "uploadFile" ) {
+    if (endpoint !== "uploadPDF" && endpoint !== "uploadFile" && endpoint !== "deleteFile" && endpoint !== "deleteFolder") {
       headers.set("Content-Type", "application/json");
     }
     return headers;

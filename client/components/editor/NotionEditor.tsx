@@ -64,7 +64,7 @@ function NotionEditorInner({
   autoSaveDelay = 500,
   onAutoSaveStatusChange,
   onNoteCreated,
-  pdfId,
+  fileId,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState(content?.title || "");
@@ -116,12 +116,12 @@ function NotionEditorInner({
 
       if (!currentNoteId) {
         // Create new note using RTK Query
-        console.log("📝 Creating new note with title:", title, "pdfId:", pdfId);
+        console.log("📝 Creating new note with title:", title, "fileId:", fileId);
 
         const newNote = await createNote({
           title,
           content,
-          pdfId,
+          fileId,
         }).unwrap();
         const newNoteId = newNote.id;
 

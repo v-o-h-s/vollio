@@ -11,10 +11,10 @@ import {
   GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Noter from "@/components/pdf/smart-pdf/Noter";
+import Noter from "@/features/file-view/components/smart-pdf/Noter";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { BetterViewer } from "@/components/pdf/smart-pdf/BetterViewer";
+import { BetterViewer } from "@/features/file-view/components/smart-pdf/BetterViewer";
 import { useGetFileByIdQuery } from "@/lib/store/apiSlice";
 export default function PDFPage() {
 
@@ -27,8 +27,7 @@ export default function PDFPage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Fetch PDF data using RTK Query
-  const { data, isLoading, isError, error, refetch } = useGetFileByIdQuery(id as string);
-  const fileData = data?.data;
+  const { data: fileData, isLoading, isError, error, refetch } = useGetFileByIdQuery(id as string);
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!isDragging || !containerRef.current) return;
@@ -139,7 +138,7 @@ export default function PDFPage() {
   }
 
   // No data case
-  if (!data) {
+  if (!fileData) {
     return (
       <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2">
         <div className="flex flex-col items-center space-y-4 w-[400px]">
@@ -188,7 +187,7 @@ export default function PDFPage() {
       >
 
         <BetterViewer
-          pdfDocument={data}
+          file={fileData}
           onToggleNoter={() => setIsNoteOpen(!isNoterOpen)}
         />
       </div>
@@ -260,7 +259,7 @@ export default function PDFPage() {
                 })`,
             }}
           >
-            <Noter pdfDocument={data} />
+            <Noter file={fileData} />
           </div>
         </>
       )}

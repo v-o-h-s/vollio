@@ -25,13 +25,14 @@ import { CompactView } from "./views/CompactView";
 import { DetailsView } from "./views/DetailsView";
 import { CreateFolderDialog } from "./dialogs/CreateFolderDialog";
 import { ClassroomImportDialog } from "./dialogs/ClassroomImportDialog";
+import { ContextMenu } from "./ContextMenu";
 import { useFilesViewState } from "../hooks/useFilesViewState";
 import { useBreadcrumbNavigation } from "../hooks/useBreadcrumbNavigation";
 import { useDragAndDrop } from "../hooks/useDragAndDrop";
 import { useFolder } from "../hooks/useFolder";
 import { useFile } from "../hooks/useFile";
 import { useFileExplorerShortcuts } from "../hooks/useFileExplorerShortcuts";
-import { Loader2, FolderOpen, FileText, FolderPlus, Upload } from "lucide-react";
+import { Loader2, FolderOpen, FileText, FolderPlus, Upload, Trash2 } from "lucide-react";
 import { RTKQueryError } from "@/lib/error-handling/rtk-query-error";
 import { useGetGoogleClassroomConnectionStatusQuery } from "@/lib/store/apiSlice";
 
@@ -43,9 +44,7 @@ export default function FilesDirectoryViewer() {
     error: foldersError,
     refetch: refetchFolders,
     createFolder,
-    moveFolder,
   } = useFolder();
-
   const {
     files,
     isLoading: isLoadingFiles,

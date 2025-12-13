@@ -14,10 +14,12 @@ export class GetAllFilesUseCase {
       return {
         id: file.getId(),
         filename: file.getFileName(),
-        file_size: file.getFileSize(),
-        mime_type: file.getMimeType(),
-        folder_id: file.getFolderId() || null,
-        isGoogleDriveFile,
+        fileSize: file.getFileSize(),
+        mimeType: file.getMimeType(),
+        folderId: file.getFolderId() || null,
+        isGoogleDriveFile: file.getSource().googleFileId ? true : false,
+        uploadedAt: new Date().toISOString(), // This should come from the entity if needed
+
       };
     });
   }

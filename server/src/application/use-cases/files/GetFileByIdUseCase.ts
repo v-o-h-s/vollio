@@ -11,6 +11,8 @@ export interface GetFileByIdResult {
   fileSize: number;
   mimeType: string;
   uploadedAt: string;
+  folderId: string | null;
+  isGoogleDriveFile: boolean;
 }
 
 export class GetFileByIdUseCase {
@@ -35,6 +37,8 @@ export class GetFileByIdUseCase {
         fileSize: file.getFileSize(),
         mimeType: file.getMimeType(),
         uploadedAt: new Date().toISOString(), // This should come from the entity if needed
+        folderId: file.getFolderId(),
+        isGoogleDriveFile: true,
       };
     }
 
@@ -49,6 +53,8 @@ export class GetFileByIdUseCase {
       fileSize: file.getFileSize(),
       mimeType: file.getMimeType(),
       uploadedAt: new Date().toISOString(), // This should come from the entity if needed
+      folderId: file.getFolderId(),
+      isGoogleDriveFile: false,
     };
   }
 }
