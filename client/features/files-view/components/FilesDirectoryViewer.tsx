@@ -95,6 +95,7 @@ export default function FilesDirectoryViewer() {
   const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [classroomDialogOpen, setClassroomDialogOpen] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
 
   // Classroom status (connection-level)
   const { data: classroomStatus, isLoading: isClassroomChecking } = useGetGoogleClassroomConnectionStatusQuery();
@@ -157,6 +158,12 @@ export default function FilesDirectoryViewer() {
         await Promise.all([refetchFiles(), refetchFolders()]);
       }
     });
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY });
   };
 
   // File drag and drop upload handlers
@@ -287,6 +294,7 @@ export default function FilesDirectoryViewer() {
           onDragLeave={handleFileDragLeave}
           onDragOver={handleFileDragOver}
           onDrop={handleFileDrop}
+          onContextMenu={handleContextMenu}
         >
           {renderView()}
 
@@ -361,6 +369,36 @@ export default function FilesDirectoryViewer() {
           </div>
         )}
       </DragOverlay>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          sections={[
+            {
+              actions: [
+                {
+                  label: "Create File",
+                  icon: <FileText className="h-4 w-4" />,
+                  onClick: () => {
+                    // File creation will be handled through a dialog in future
+                    console.log("Create file clicked");
+                  },
+                },
+                {
+                  label: "Create Folder",
+                  icon: <FolderPlus className="h-4 w-4" />,
+                  onClick: () => {
+                    setCreateFolderDialogOpen(true);
+                  },
+                },
+              ],
+            },
+          ]}
+        />
+      )}
     </DndContext>
   );
 }
