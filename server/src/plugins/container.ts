@@ -3,6 +3,7 @@ import fastifyPlugin from "fastify-plugin";
 import { asClass, asFunction, Lifetime, InjectionMode, asValue } from "awilix";
 import { createUserClient } from "../infrastructure/database/supabase/supabase";
 import { NoteRepository } from "../infrastructure/repositories/NoteRepository";
+import { EmbeddingStorageRepository } from "../infrastructure/repositories/EmbeddingStorageRepository";
 import { CreateNoteUseCase } from "../application/use-cases/notes/CreateNoteUseCase";
 import { UpdateNoteUseCase } from "../application/use-cases/notes/UpdateNoteUseCase";
 import { DeleteNoteUseCase } from "../application/use-cases/notes/DeleteNoteUseCase";
@@ -155,6 +156,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   fastify.diContainer.register({
     noteRepository: asClass(NoteRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    embeddingStorageRepository: asClass(EmbeddingStorageRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

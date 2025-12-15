@@ -1,13 +1,34 @@
 import { IEmbeddingService } from "../../domain/services/IEmbeddingService";
 import { Chunk } from "../../shared/utils/chunking";
 import { client } from "../embedding/embedding";
-export class EmbeddingService implements IEmbeddingService {
-    async generateEmbeddings() {
-        const embedding = await client.embed({
-            input: ["input1", "input2", "input3", "input4"],
-            model: "voyage-3.5-lite ",
-        });
-        return embedding
+import type { EmbeddingListResponse, EmbeddingItem } from "../../shared/types/embedding";
 
+enum EmbeddingConfig {
+    BATCH_SIZE = 14,
+}
+export class EmbeddingService implements IEmbeddingService {
+    async generateEmbeddings(chunks: Chunk[]): Promise<any> {
+            const results: number[][] = [];
+
+            for (let i = 0; i < chunks.length; i += EmbeddingConfig.BATCH_SIZE) {
+                const batch = chunks.slice(i, i + EmbeddingConfig.BATCH_SIZE);
+                const inputs = batch.map(c => c.text);
+
+                const res = (await client.embed({
+                    input: inputs,
+                    model: "voyage-3.5-lite",
+                })) as EmbeddingListResponse;
+
+                if (!res || !Array.isArray(res.data)) {
+                    throw new Error(`Failed to generate embeddings: unexpected response shape: ${JSON.stringify(res)}`);
+                }
+
+                for (const item of res.data as EmbeddingItem[]) {
+                    if (!Array.isArray(item.embedding)) throw new Error("Failed to generate embeddings: missing embedding in response item");
+                    results.push(item.embedding);
+                }
+            }
+
+            return results;
     }
 }
