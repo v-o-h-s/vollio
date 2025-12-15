@@ -1,13 +1,13 @@
 import { IEmbeddingService } from "../../domain/services/IEmbeddingService";
-import fetch from "node-fetch";
+import { Chunk } from "../../shared/utils/chunking";
+import { client } from "../embedding/embedding";
 export class EmbeddingService implements IEmbeddingService {
-    async generateEmbeddings(texts: string[], model?: string) {
-        const response = await fetch("https://noto.lightning.ai/embed", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ texts }) // must match FastAPI
+    async generateEmbeddings() {
+        const embedding = await client.embed({
+            input: ["input1", "input2", "input3", "input4"],
+            model: "voyage-3.5-lite ",
         });
-        const data = await response.json();
-        return (data as any).embeddings; // access embeddings directly
+        return embedding
+
     }
 }

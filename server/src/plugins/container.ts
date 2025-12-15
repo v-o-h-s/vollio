@@ -52,10 +52,11 @@ import { HighlightController } from "../interface/controllers/highlight.controll
 import { StreamFileUseCase } from "../application/use-cases/files/StreamFileUseCase";
 import { CreateSignedUrlUseCase } from "../application/use-cases/files/CreateSignedUrlUseCase";
 import { GetFileContentUseCase } from "../application/use-cases/files/GetFileContentUseCase";
-import { ChunkingFileByIdUseCase } from "../application/use-cases/chunking/ChunkingFileByIdUseCase";
 import { ChunkingService } from "../infrastructure/services/ChunkingService";
 import { EmbeddFileBYIdUseCase } from "../application/use-cases/embedding/EmbeddFileByIdUseCase";
 import { EmbeddingService } from "../infrastructure/services/EmbeddingService";
+import { FileProcessingService } from "../infrastructure/services/FileProcessingService";
+import { GenerativeAiService } from "../infrastructure/services/GenerativeAiService";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -307,12 +308,17 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
   });
-  // chunking
+  // file processing
   fastify.diContainer.register({
-    chunkingFileByIdUseCase: asClass(ChunkingFileByIdUseCase, {
+    fileProcessingService: asClass(FileProcessingService, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
+  });
+
+  // chunking
+  fastify.diContainer.register({
+
     chunkingService: asClass(ChunkingService, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -331,7 +337,13 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
   });
-
+  // generative ai
+  fastify.diContainer.register({
+    generativeAiService: asClass(GenerativeAiService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
 };
 export const containerPlugin = fastifyPlugin(diPlugin, {
   name: "di-container-plugin",

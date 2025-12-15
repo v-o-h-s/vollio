@@ -1,3 +1,5 @@
+import { ExtractedContent } from "../../shared/utils/chunking";
+
 export interface IChunkingService {
-    chunkText(text: string): Promise<number[]>
+    chunkText(text: ExtractedContent): Promise<number[]>
 }

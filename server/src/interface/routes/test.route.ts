@@ -4,7 +4,7 @@ const testRoute: FastifyPluginAsync = async (fastify: FastifyInstance, opts: Fas
     fastify.get<{ Params: { id: string } }>(`${opts.prefix}/:id`, async (request, reply) => {
         const testController = request.diScope.resolve("testController");
         // return testController.chunkFile(request, reply);
-        return testController.chunkFile(request, reply);
+        return testController.embeddFile(request, reply);
     });
 };
 

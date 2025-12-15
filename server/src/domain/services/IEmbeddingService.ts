@@ -1,8 +1,8 @@
+import { Chunk } from "../../shared/utils/chunking";
 
 export interface IEmbeddingService {
     generateEmbeddings(
-        texts: string[],
-        model?: string
+
     ): Promise<any>;
 
 }

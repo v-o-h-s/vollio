@@ -1,9 +1,10 @@
 
 import pdfjsLib from "pdfjs-dist"
 import { encodingForModel, TiktokenModel, Tiktoken } from "js-tiktoken";
-const CHUNKING_CONFIG = {
+export const CHUNKING_CONFIG = {
+    MODEL: "Qwen3-Embedding-0.6B",
     BATCH_SIZE: 5,
-    MAX_TOKENS: 1000,         // Maximum tokens per chunk
+    MAX_TOKENS: 700,         // Maximum tokens per chunk
     MIN_TOKENS: 50,           // Minimum tokens per chunk (skip smaller)
     OVERLAP_PERCENT: 0.25,    // 25% overlap between chunks
     PARAGRAPH_SEPARATOR: /\n\s*\n/,  // Two newlines = paragraph break
@@ -109,10 +110,9 @@ export function cleanText(text: string): string {
  */
 export async function createChunksFromParagraphs(
     paragraphs: Array<{ text: string; pageNum: number }>,
-    model: TiktokenModel,
     baseMetadata: Partial<ChunkMetadata>
 ): Promise<Chunk[]> {
-    const encoding = encodingForModel(model);
+    const encoding = encodingForModel("text-embedding-3-small");
     const chunks: Chunk[] = [];
     let chunkIndex = 0;
 
@@ -329,12 +329,3 @@ export function countTokens(text: string, model: TiktokenModel = "text-embedding
     return tokens.length;
 }
 
-/**
- * Legacy method for simple text chunking
- */
-export async function chunkText(text: string, model: TiktokenModel = "text-embedding-3-small"): Promise<Chunk[]> {
-    const paragraphs = text.split(CHUNKING_CONFIG.PARAGRAPH_SEPARATOR)
-        .filter(p => p.trim().length > 0)
-        .map((text, i) => ({ text, pageNum: 1 })); // Default to page 1 for plain text
-    return await createChunksFromParagraphs(paragraphs, model, {});
-}
