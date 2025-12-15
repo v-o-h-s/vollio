@@ -63,7 +63,7 @@ app.register(fastifyCors, {
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS','HEAD'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 });
 

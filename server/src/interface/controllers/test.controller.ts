@@ -1,16 +1,15 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { testChunks } from "../../application/use-cases/testChanks";
+import { error } from "console";
+import { EmbeddFileBYIdUseCase } from "../../application/use-cases/embedding/EmbeddFileByIdUseCase";
 
 export class testController {
 
-    constructor(private testChunks: testChunks) { }
-    async processTest(request: FastifyRequest<{ Body: { link: string } }>, reply: FastifyReply): Promise<void> {
-        const { link } = request.body;
-        try {
-            const chunks = await this.testChunks.execute(link);
-            reply.send(chunks);
-        } catch (error) {
-            reply.status(500).send({ error });
-        }
+    constructor(private embeddFileBYIdUseCase: EmbeddFileBYIdUseCase) { }
+
+    async embeddFile(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply): Promise<void> {
+        const { id } = request.params;
+        const embeddingResult = await this.embeddFileBYIdUseCase.execute(id);
+        reply.send({ success: true, message: "File embedded successfully", data: embeddingResult, error: null });
     }
 }

@@ -2,10 +2,11 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { IUserGoogleClassroomRepository } from "../../domain/repositories/IUserGoogleClassroomRepository";
 import { GoogleOAuthTokenResponse } from "../../shared/types/lms/classroom";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
-
+import { createServiceClient } from "../database/supabase/supabase";
 export class UserGoogleClassroomRepository
   implements IUserGoogleClassroomRepository {
   private supabaseClient: SupabaseClient;
+  private supabaseAdmin: SupabaseClient = createServiceClient();
   constructor(supabaseClient: SupabaseClient) {
     this.supabaseClient = supabaseClient;
   }
@@ -48,7 +49,19 @@ export class UserGoogleClassroomRepository
     if (error) throw new DatabaseError(error);
   }
 
-  async getTokens(): Promise<GoogleOAuthTokenResponse | null> {
+  async getTokens(userId?: string): Promise<GoogleOAuthTokenResponse | null> {
+    if (userId) {
+      const { data, error } = await this.supabaseAdmin
+        .from("user_google_classroom")
+        .select().eq('user_id', userId)
+        .single();
+      if (error) {
+        // Handle case where no tokens exist for this user
+        if (error.code === "PGRST116") return null;
+        throw new DatabaseError(error);
+      }
+      return data;
+    }
     const { data, error } = await this.supabaseClient
       .from("user_google_classroom")
       .select()
@@ -69,8 +82,8 @@ export class UserGoogleClassroomRepository
     if (error) throw new DatabaseError(error);
   }
 
-  async isTokenValid(): Promise<boolean> {
-    const tokens = await this.getTokens();
+  async isTokenValid(userId?: string): Promise<boolean> {
+    const tokens = await this.getTokens(userId);
     if (!tokens) return false;
     const tokenExpiry = new Date(tokens.token_expiry);
     return tokenExpiry > new Date();

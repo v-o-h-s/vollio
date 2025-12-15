@@ -6,14 +6,15 @@ import {
   FastifyRequest,
 } from "fastify";
 import fp from "fastify-plugin";
-import { validateBody, validateParams } from "../../shared/validation/validator";
+import { validateBody, validateParams, validateQuery } from "../../shared/validation/validator";
 import {
   fileIdParamsSchema,
   moveFileSchema,
   renameFileSchema,
   FileIdParams,
   MoveFileDTO,
-  RenameFileDTO
+  RenameFileDTO,
+  validateQuerySchema
 } from "../../shared/validation/fileSchemas";
 
 const fileRoutesHandler: FastifyPluginAsync = async (
@@ -38,13 +39,19 @@ const fileRoutesHandler: FastifyPluginAsync = async (
       return fileController.getFileFromGoogleDrive(request, reply);
     }
   );
-  // used to stream file content
-  // /api/v1/files/google-drive/:id/stream
-  fastify.get<{ Params: FileIdParams }>(
-    `${opts.prefix}/google-drive/:id/stream`,
-    {
-      preHandler: validateParams(fileIdParamsSchema),
-    },
+  // HEAD request for PDF metadata (used by PDF.js before streaming)
+  fastify.head<{ Querystring: { token: string } }>(
+    `${opts.prefix}/stream`,
+    async (request, reply) => {
+      const fileController = request.diScope.resolve("fileController");
+      return fileController.streamFileHead(request, reply);
+    }
+  );
+
+  // GET request to stream file content
+  fastify.get<{ Querystring: { token: string } }>(
+    `${opts.prefix}/stream`,
+    // preHandler: validateQuery(validateQuerySchema),
     async (request, reply) => {
       const fileController = request.diScope.resolve("fileController");
       return fileController.streamFile(request, reply);
@@ -124,9 +131,18 @@ const fileRoutesHandler: FastifyPluginAsync = async (
       return fileController.renameFile(request, reply);
     }
   );
-
+  fastify.get<{ Params: FileIdParams }>(
+    `${opts.prefix}/:id/signed-url`,
+  
+    async (request, reply) => {
+      const fileController = request.diScope.resolve("fileController");
+      return fileController.createSignedUrl(request, reply);
+    }
+  );
 
 };
+
+
 
 export const fileRoutes = fp(fileRoutesHandler, {
   name: "file-routes",

@@ -59,3 +59,8 @@ export interface AddFileFromGoogleDriveResponse {
 
 // GET /api/v1/files/:id/stream
 export type StreamFileResponse = ServerSuccessResponse<NodeJS.ReadableStream>;
+
+// POST /api/v1/files/:id/signed-url
+export type CreateSignedUrlResponse = ServerSuccessResponse<{
+	url: string;
+}>;

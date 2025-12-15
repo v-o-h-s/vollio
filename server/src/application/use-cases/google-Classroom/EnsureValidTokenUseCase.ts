@@ -1,6 +1,6 @@
 import { IUserGoogleClassroomRepository } from "../../../domain/repositories/IUserGoogleClassroomRepository";
 import { IGoogleClassroomService } from "../../../domain/services/IGoogleClassroomService";
-
+// Use case to ensure Google Classroom token is valid, refreshing if necessary
 export class EnsureValidTokenUseCase {
     private googleClassroomService: IGoogleClassroomService;
     private userGoogleClassroomRepository: IUserGoogleClassroomRepository;
@@ -13,13 +13,13 @@ export class EnsureValidTokenUseCase {
         this.userGoogleClassroomRepository = userGoogleClassroomRepository;
     }
 
-    async execute(): Promise<void> {
+    async execute(userId?: string): Promise<void> {
         // Check if token is valid
-        const isTokenValid = await this.userGoogleClassroomRepository.isTokenValid();
+        const isTokenValid = await this.userGoogleClassroomRepository.isTokenValid(userId);
         
         // If token is expired, refresh it
         if (!isTokenValid) {
-            const tokens = await this.userGoogleClassroomRepository.getTokens();
+            const tokens = await this.userGoogleClassroomRepository.getTokens(userId);
             if (!tokens || !tokens.refresh_token) {
                 throw new Error("No refresh token available. Please reconnect Google Classroom.");
             }

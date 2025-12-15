@@ -48,6 +48,9 @@ export default function PDFPage() {
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
+  const handleMouseDown = useCallback(() => {
+    setIsDragging(true);
+  }, []);
 
   // Add and remove event listeners
   useEffect(() => {

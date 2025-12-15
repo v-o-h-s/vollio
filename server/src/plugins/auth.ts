@@ -8,7 +8,7 @@ export const authPlugin = fp(async (fastify) => {
 
   fastify.addHook("preHandler", async (req, reply) => {
     // Skip auth check for public routes
-    if (req.url === "/") {
+    if (req.url === "/" || req.url.startsWith("/api/v1/files/stream")) {
       return;
     }
 

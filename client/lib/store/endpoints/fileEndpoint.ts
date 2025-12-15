@@ -115,8 +115,6 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
     providesTags: (_result, _error, id) => [{ type: "File", id }],
   }),
 
-
-
   addFileFromGoogleDrive: builder.mutation<any, { fileGoogleDriveId: string }>({
     query: (data) => ({
       url: "files/google-drive",
@@ -125,4 +123,5 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
     }),
     invalidatesTags: [{ type: "File", id: "LIST" }],
   }),
+
 });

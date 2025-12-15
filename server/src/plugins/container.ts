@@ -50,6 +50,13 @@ import { DeleteHighlightUseCase } from "../application/use-cases/highlights/Dele
 import { HighlightRepository } from "../infrastructure/repositories/HighlightRepository";
 import { HighlightController } from "../interface/controllers/highlight.controller";
 import { StreamFileUseCase } from "../application/use-cases/files/StreamFileUseCase";
+import { CreateSignedUrlUseCase } from "../application/use-cases/files/CreateSignedUrlUseCase";
+import { GetFileContentUseCase } from "../application/use-cases/files/GetFileContentUseCase";
+import { ChunkingService } from "../infrastructure/services/ChunkingService";
+import { EmbeddFileBYIdUseCase } from "../application/use-cases/embedding/EmbeddFileByIdUseCase";
+import { EmbeddingService } from "../infrastructure/services/EmbeddingService";
+import { FileProcessingService } from "../infrastructure/services/FileProcessingService";
+import { GenerativeAiService } from "../infrastructure/services/GenerativeAiService";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -64,10 +71,11 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.diContainer.register({
+
     streamFileUseCase: asClass(StreamFileUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
-    }), 
+    }),
     userGoogleClassroomRepository: asClass(UserGoogleClassroomRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -212,6 +220,14 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
+    createSignedUrlUseCase: asClass(CreateSignedUrlUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getFileContentUseCase: asClass(GetFileContentUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
   });
 
   fastify.diContainer.register({
@@ -292,8 +308,43 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
   });
-};
+  // file processing
+  fastify.diContainer.register({
+    fileProcessingService: asClass(FileProcessingService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
 
+  // chunking
+  fastify.diContainer.register({
+
+    chunkingService: asClass(ChunkingService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+
+
+  // embedding
+  fastify.diContainer.register({
+    embeddFileBYIdUseCase: asClass(EmbeddFileBYIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    embeddingService: asClass(EmbeddingService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+  // generative ai
+  fastify.diContainer.register({
+    generativeAiService: asClass(GenerativeAiService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+};
 export const containerPlugin = fastifyPlugin(diPlugin, {
   name: "di-container-plugin",
   fastify: "5.x",

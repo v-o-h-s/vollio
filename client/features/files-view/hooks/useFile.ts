@@ -6,6 +6,7 @@ import {
     useMoveFileMutation,
     useDeleteFileMutation,
     useUploadFileMutation,
+    useGetFileByIdQuery
 } from "@/lib/store/apiSlice";
 import { notify } from "@/lib/notify";
 export function useFile() {
@@ -35,7 +36,7 @@ export function useFile() {
             return { error };
         }
     };
-
+  
     const moveFile = async (id: string, folderId: string | null) => {
         try {
             await moveFileMutation({ id, folderId }).unwrap();
