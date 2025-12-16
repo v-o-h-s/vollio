@@ -12,6 +12,7 @@ import { GetAllUserNotesUseCase } from "../../application/use-cases/GetAllUserNo
 import { EnsureValidTokenUseCase } from "../../application/use-cases/google-Classroom/EnsureValidTokenUseCase";
 import { FileController } from "../../interface/controllers/file.controller";
 import { testController } from "../../interface/controllers/test.controller";
+import { QuizController } from "../../interface/controllers/quiz.controller";
 export interface User {
   id: string;
   email?: string;
@@ -51,6 +52,7 @@ export interface DIContainer {
   isConnectedUseCase: IsConnectedToGoogleClassroomUseCase;
   getCourseContentUseCase: GetCourseContentUseCase;
   testController: testController;
+  quizController: QuizController;
 }
 
 declare module "fastify" {

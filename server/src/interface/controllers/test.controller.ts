@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { testChunks } from "../../application/use-cases/testChanks";
 import { error } from "console";
-import { EmbeddFileBYIdUseCase } from "../../application/use-cases/embedding/EmbeddFileByIdUseCase";
+import { EmbeddFileBYIdUseCase } from "../../application/use-cases/embedding/EmbedFileByIdUseCase";
 
 export class testController {
 

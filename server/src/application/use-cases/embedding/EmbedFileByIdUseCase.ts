@@ -1,13 +1,13 @@
+import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
 import { IEmbeddingService } from "../../../domain/services/IEmbeddingService";
-import { EmbeddingStorageRepository } from "../../../infrastructure/repositories/EmbeddingStorageRepository";
 import { ChunkingService } from "../../../infrastructure/services/ChunkingService";
 import { FileProcessingService } from "../../../infrastructure/services/FileProcessingService";
 import { GetFileContentUseCase } from "../files/GetFileContentUseCase";
 
-export class EmbeddFileBYIdUseCase {
+export class EmbedFileByIdUseCase {
     constructor(
         private embeddingService: IEmbeddingService,
-        private embeddingStorageRepository: EmbeddingStorageRepository,
+        private embeddingRepository: IEmbeddingRepository,
         private getFileContentUseCase: GetFileContentUseCase,
         private fileProcessingService: FileProcessingService,
         private chunkingService: ChunkingService,
@@ -20,6 +20,6 @@ export class EmbeddFileBYIdUseCase {
         );
         const chunks = await this.chunkingService.chunkText(text);
         const embeddings = await this.embeddingService.generateEmbeddings(chunks);
-        await this.embeddingStorageRepository.storeEmbedding(fileId, embeddings, chunks);
+        await this.embeddingRepository.storeEmbedding(fileId, embeddings, chunks);
     }
 }

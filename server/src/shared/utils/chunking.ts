@@ -23,6 +23,7 @@ export type Chunk = {
     text: string;
     tokenCount: number;
     metadata: ChunkMetadata;
+    similarityScore?: number;
 }
 
 

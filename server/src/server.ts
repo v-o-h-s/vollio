@@ -16,6 +16,7 @@ import { fileRoutes } from "./interface/routes/file.route";
 import { testRoutes } from "./interface/routes/test.route";
 import { folderRoutes } from "./interface/routes/folder.route";
 import { highlightRoutes } from "./interface/routes/highlight.route";
+import { quizRoutes } from "./interface/routes/quiz.route";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -54,7 +55,7 @@ app.register(fastifyCors, {
   origin: (origin, cb) => {
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return cb(null, true);
-    
+
     if (allowedOrigins.includes(origin)) {
       cb(null, true);
     } else {
@@ -63,7 +64,7 @@ app.register(fastifyCors, {
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS','HEAD'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 });
 
@@ -109,6 +110,9 @@ app.register(highlightRoutes, {
 });
 app.register(testRoutes, {
   prefix: "/api/v1/test",
+});
+app.register(quizRoutes, {
+  prefix: "/api/v1/quizzes",
 });
 
 async function start(): Promise<void> {

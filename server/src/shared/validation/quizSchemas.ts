@@ -1,26 +1,11 @@
 import { JSONSchemaType } from "ajv";
-export enum QuizQuestionsTypeEnum {
-    MCQ = "mcq",
-    TRUE_FALSE = "true_false",
-    FILL_IN_THE_BLANKS = "fill_blanks",
-    SHORT_ANSWER = "short_answer",
-}
-
-export enum DifficultyLevel {
-    EASY = "easy",
-    MEDIUM = "medium",
-    HARD = "hard"
-}
-export enum QuizLanguage {
-    EN = "en",
-    FR = "fr",
-    AR = "ar"
-}
-export enum ExplanationLevel {
-    NONE = "none",
-    BRIEF = "brief",
-    DETAILED = "detailed"
-}
+import {
+    QuizQuestionsTypeEnum,
+    DifficultyLevel,
+    QuizLanguage,
+    ExplanationLevel,
+} from "../../domain/entities/Quiz";
+export { QuizQuestionsTypeEnum, DifficultyLevel, QuizLanguage, ExplanationLevel } from "../../domain/entities/Quiz";
 
 
 export interface CreateQuizDTO {
@@ -44,7 +29,7 @@ export const createQuizSchema: JSONSchemaType<CreateQuizDTO> = {
             pattern:
                 "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
         },
-        difficultyLevel: { type: "string", enum: [DifficultyLevel.EASY, DifficultyLevel.MEDIUM, DifficultyLevel.HARD] as const },
+        difficultyLevel: { type: "string", enum: [DifficultyLevel.EASY, DifficultyLevel.MEDIUM, DifficultyLevel.HARD] as const, nullable: false },
         numberOfQuestions: { type: "integer", nullable: true, minimum: 1, maximum: 44 },
 
         language: { type: "string", nullable: true, enum: [QuizLanguage.EN, QuizLanguage.FR, QuizLanguage.AR] as const },

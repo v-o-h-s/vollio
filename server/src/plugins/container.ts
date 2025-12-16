@@ -54,10 +54,11 @@ import { StreamFileUseCase } from "../application/use-cases/files/StreamFileUseC
 import { CreateSignedUrlUseCase } from "../application/use-cases/files/CreateSignedUrlUseCase";
 import { GetFileContentUseCase } from "../application/use-cases/files/GetFileContentUseCase";
 import { ChunkingService } from "../infrastructure/services/ChunkingService";
-import { EmbeddFileBYIdUseCase } from "../application/use-cases/embedding/EmbeddFileByIdUseCase";
+import { EmbeddFileBYIdUseCase } from "../application/use-cases/embedding/EmbedFileByIdUseCase";
 import { EmbeddingService } from "../infrastructure/services/EmbeddingService";
 import { FileProcessingService } from "../infrastructure/services/FileProcessingService";
 import { GenerativeAiService } from "../infrastructure/services/GenerativeAiService";
+import { QuizController } from "../interface/controllers/quiz.controller";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -345,6 +346,14 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   // generative ai
   fastify.diContainer.register({
     generativeAiService: asClass(GenerativeAiService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+
+  // Quiz controller
+  fastify.diContainer.register({
+    quizController: asClass(QuizController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
