@@ -10,13 +10,12 @@ export { QuizQuestionsTypeEnum, DifficultyLevel, QuizLanguage, ExplanationLevel 
 
 export interface CreateQuizDTO {
     userPrompt?: string;
-    fileId: string; // UUID string
+    documentId: string; // UUID string
     difficultyLevel: DifficultyLevel;
     numberOfQuestions?: number;
     language?: QuizLanguage;
     timeLimitMinutes?: number;
     explanationLevel?: ExplanationLevel;
-    randomSeed?: number;
     questionsDistribution?: Partial<Record<QuizQuestionsTypeEnum, number>>;
 }
 
@@ -24,7 +23,7 @@ export const createQuizSchema: JSONSchemaType<CreateQuizDTO> = {
     type: "object",
     properties: {
         userPrompt: { type: "string", nullable: true },
-        fileId: {
+        documentId: {
             type: "string",
             pattern:
                 "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
@@ -35,7 +34,6 @@ export const createQuizSchema: JSONSchemaType<CreateQuizDTO> = {
         language: { type: "string", nullable: true, enum: [QuizLanguage.EN, QuizLanguage.FR, QuizLanguage.AR] as const },
         timeLimitMinutes: { type: "integer", nullable: true, minimum: 1 },
         explanationLevel: { type: "string", nullable: true, enum: [ExplanationLevel.NONE, ExplanationLevel.BRIEF, ExplanationLevel.DETAILED] as const },
-        randomSeed: { type: "integer", nullable: true },
         questionsDistribution: {
             type: "object",
             nullable: true,
@@ -49,7 +47,7 @@ export const createQuizSchema: JSONSchemaType<CreateQuizDTO> = {
             additionalProperties: false,
         } as const,
     },
-    required: ["fileId", "difficultyLevel"],
+    required: ["documentId", "difficultyLevel"],
     additionalProperties: false,
 };
 

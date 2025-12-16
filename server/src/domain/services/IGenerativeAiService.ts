@@ -1,3 +1,5 @@
+import { ChunkMetadata } from "../../shared/utils/chunking";
+import { Quiz, QuizQuestion } from "../entities/Quiz";
 
 /**
  * Service interface for generative AI operations.
@@ -7,5 +9,5 @@
 export interface IGenerativeAiService {
     generateText(prompt: string): Promise<any>;
     refineUserPrompt(initialPrompt: string): Promise<string>;
-
+    generateQuizQuestions(quiz: Quiz, chunks: { content: string, metadata: ChunkMetadata }[],): Promise<QuizQuestion[]>;
 }

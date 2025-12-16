@@ -1,5 +1,5 @@
 import { IGenerativeAiService } from "../../domain/services/IGenerativeAiService";
-import { openRouter } from "../generative-ai/client";
+import { openRouter } from "../ai/generative-ai/client";
 export class GenerativeAiService implements IGenerativeAiService {
     async generateText(prompt: string): Promise<any> {
         const completion = await openRouter.chat.send({

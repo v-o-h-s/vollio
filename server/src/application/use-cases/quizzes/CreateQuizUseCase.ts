@@ -6,6 +6,10 @@ import { CreateQuizDTO } from "../../../shared/validation/quizSchemas";
 import { Quiz } from "../../../domain/entities/Quiz";
 import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";
+import crypto from "crypto";
+import { language } from "googleapis/build/src/apis/language";
+import { QuizMapper } from "../../../shared/mappers/QuizMapper";
+import { ChunkMetadata } from "../../../shared/utils/chunking";
 export class CreateQuizUseCase {
     constructor(
         private generativeAiService: IGenerativeAiService,
@@ -24,21 +28,42 @@ export class CreateQuizUseCase {
          *  4 - pass the chunks and other quiz parameters to the generative ai service to generate the quiz
          *  5 - return the quiz
          */
-
+        // getting chunks relevant to the prompt
         let refinedPrompt = "Generate a quiz based on the content provided.";
         if (data.userPrompt) {
             refinedPrompt = await this.generativeAiService.refineUserPrompt(data.userPrompt);
         }
         const promptEmbedding = await this.embeddingService.generateEmbeddingForText(refinedPrompt);
-        await this.ensureExistingOfDocumentEmbeddingUseCase.execute(data.fileId);
+        await this.ensureExistingOfDocumentEmbeddingUseCase.execute(data.documentId);
         const relevantEmbeddings = await this.embeddingRepository.searchSimilarEmbeddings(
             promptEmbedding,
             0.67,
             5
         );
-        const chunks = relevantEmbeddings.map(embedding =>{
-            return {content:embedding.content, index: embedding.chunkIndex};
-        }).join("\n");
+        if (relevantEmbeddings === null || relevantEmbeddings.length === 0) {
+            throw new Error("No relevant content found to generate the quiz.");
+        }
+        const chunks: { content: string, metadata: ChunkMetadata }[] = relevantEmbeddings.map(e => ({ content: e.getContent(), metadata: e.getMetadata() }));
 
+        // creating the quiz entity
+        const quiz = new Quiz(
+            crypto.randomUUID(),
+            data.documentId,
+            data.difficultyLevel,
+            data.language,
+            data.explanationLevel,
+            data.numberOfQuestions,
+            data.timeLimitMinutes,
+        )
+        // generating questions using generative ai service
+        const quizQuestions = await this.generativeAiService.generateQuizQuestions(
+            quiz,
+            chunks,
+
+        );
+        quiz.setQuestions(quizQuestions);
+
+        // mapping the quiz entity to response interface
+        return QuizMapper.fromDomainToInterface(quiz);
     }
 }

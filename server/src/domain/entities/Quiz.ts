@@ -59,7 +59,7 @@ export type QuizQuestion = MCQQuestion | TrueFalseQuestion | FillBlanksQuestion 
 
 export class Quiz {
     private id: string;
-    private fileId: string;
+    private documentId: string;
     private language: QuizLanguage;
     private difficultyLevel?: DifficultyLevel;
     private numberOfQuestions?: number;
@@ -70,18 +70,18 @@ export class Quiz {
 
     constructor(
         id: string,
-        fileId: string,
+        documentId: string,
         difficultyLevel: DifficultyLevel = DifficultyLevel.MEDIUM,
-        questions?: QuizQuestion[],
         language: QuizLanguage = QuizLanguage.EN,
+        explanationLevel: ExplanationLevel = ExplanationLevel.NONE,
         numberOfQuestions?: number,
         timeLimitMinutes?: number,
-        explanationLevel: ExplanationLevel = ExplanationLevel.NONE,
-        createdAt?: Date,
+        createdAt: Date = new Date(),
+        questions?: QuizQuestion[],
     ) {
 
         this.id = id;
-        this.fileId = fileId;
+        this.documentId = documentId;
         this.difficultyLevel = difficultyLevel;
         this.language = language;
         this.numberOfQuestions = numberOfQuestions;
@@ -98,7 +98,7 @@ export class Quiz {
     }
 
     public getFileId(): string {
-        return this.fileId;
+        return this.documentId;
     }
 
     public getLanguage(): QuizLanguage {
@@ -143,7 +143,7 @@ export class Quiz {
     public ToJSON() {
         return {
             id: this.id,
-            fileId: this.fileId,
+            documentId: this.documentId,
             language: this.language,
             difficultyLevel: this.difficultyLevel,
             numberOfQuestions: this.numberOfQuestions,

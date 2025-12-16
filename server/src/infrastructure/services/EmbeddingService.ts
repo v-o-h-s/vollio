@@ -1,6 +1,6 @@
 import { IEmbeddingService } from "../../domain/services/IEmbeddingService";
 import { Chunk } from "../../shared/utils/chunking";
-import { client } from "../embedding/embedding";
+import { client } from "../ai/embedding/embedding";
 import type { EmbeddingListResponse, EmbeddingItem } from "../../shared/types/embedding";
 
 enum EmbeddingConfig {
