@@ -1,21 +1,18 @@
-import { IEmbeddingService } from "../../../domain/services/IEmbeddingService";
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
-import { GenerativeAiService } from "../../../infrastructure/services/GenerativeAiService";
 import { CreateQuizResponse } from "../../../shared/types/responses/quizRoutes";
 import { CreateQuizDTO } from "../../../shared/validation/quizSchemas";
 import { Quiz } from "../../../domain/entities/Quiz";
-import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";
 import crypto from "crypto";
-import { language } from "googleapis/build/src/apis/language";
 import { QuizMapper } from "../../../shared/mappers/QuizMapper";
-import { ChunkMetadata } from "../../../shared/utils/chunking";
+import { ISemanticSearchService } from "../../../domain/services/ISemanticSearchService";
+import { FastifyBaseLogger } from "fastify";
 export class CreateQuizUseCase {
     constructor(
+        private logger: FastifyBaseLogger,
         private generativeAiService: IGenerativeAiService,
-        private embeddingRepository: IEmbeddingRepository,
-        private embeddingService: IEmbeddingService,
         private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
+        private semanticSearchService: ISemanticSearchService,
     ) {
     }
 
@@ -29,21 +26,13 @@ export class CreateQuizUseCase {
          *  5 - return the quiz
          */
         // getting chunks relevant to the prompt
+        await this.ensureExistingOfDocumentEmbeddingUseCase.execute(data.documentId);
         let refinedPrompt = "Generate a quiz based on the content provided.";
         if (data.userPrompt) {
             refinedPrompt = await this.generativeAiService.refineUserPrompt(data.userPrompt);
         }
-        const promptEmbedding = await this.embeddingService.generateEmbeddingForText(refinedPrompt);
-        await this.ensureExistingOfDocumentEmbeddingUseCase.execute(data.documentId);
-        const relevantEmbeddings = await this.embeddingRepository.searchSimilarEmbeddings(
-            promptEmbedding,
-            0.67,
-            5
-        );
-        if (relevantEmbeddings === null || relevantEmbeddings.length === 0) {
-            throw new Error("No relevant content found to generate the quiz.");
-        }
-        const chunks: { content: string, metadata: ChunkMetadata }[] = relevantEmbeddings.map(e => ({ content: e.getContent(), metadata: e.getMetadata() }));
+        const chunks = await this.semanticSearchService.findRelevantChunks(refinedPrompt);
+        this.logger.info(`Found ${chunks.length} relevant chunks for the prompt.`);
 
         // creating the quiz entity
         const quiz = new Quiz(
@@ -61,6 +50,7 @@ export class CreateQuizUseCase {
             chunks,
 
         );
+        this.logger.info(`Generated ${quizQuestions.length} questions for the quiz.`);
         quiz.setQuestions(quizQuestions);
 
         // mapping the quiz entity to response interface

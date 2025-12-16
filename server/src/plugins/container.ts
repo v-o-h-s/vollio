@@ -54,7 +54,6 @@ import { StreamFileUseCase } from "../application/use-cases/files/StreamFileUseC
 import { CreateSignedUrlUseCase } from "../application/use-cases/files/CreateSignedUrlUseCase";
 import { GetFileContentUseCase } from "../application/use-cases/files/GetFileContentUseCase";
 import { ChunkingService } from "../infrastructure/services/ChunkingService";
-import { EmbeddFileBYIdUseCase } from "../application/use-cases/embedding/EmbedFileByIdUseCase";
 import { EmbeddingService } from "../infrastructure/services/EmbeddingService";
 import { FileProcessingService } from "../infrastructure/services/FileProcessingService";
 import { GenerativeAiService } from "../infrastructure/services/GenerativeAiService";
@@ -334,10 +333,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   // embedding
   fastify.diContainer.register({
-    embeddFileBYIdUseCase: asClass(EmbeddFileBYIdUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
+    
     embeddingService: asClass(EmbeddingService, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
