@@ -2,8 +2,10 @@ import { Chunk } from "../../shared/utils/chunking";
 import { type SupabaseClient } from "@supabase/supabase-js";
 import { FastifyBaseLogger } from "fastify";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
+import { IEmbeddingRepository } from "../../domain/repositories/IEmbeddingRepository";
+import { Embedding } from "../entities/Embedding";
 
-export class EmbeddingStorageRepository {
+export class EmbeddingRepository implements IEmbeddingRepository {
     private supabaseClient: SupabaseClient;
     private logger?: FastifyBaseLogger;
 
@@ -18,10 +20,10 @@ export class EmbeddingStorageRepository {
      * - an array of vectors (number[][]) where each vector corresponds to a chunk, or
      * - a single vector (number[]) which will be applied to every chunk (not typical but supported).
      */
-    async storeEmbedding(documentId: string, embedding:  number[][], chunks: Chunk[]): Promise<void> {
-       
+    async storeEmbedding(documentId: string, embedding: number[][], chunks: Chunk[]): Promise<void> {
+
         const vectors: number[][] = embedding;
-           
+
         if (vectors.length !== chunks.length) {
             throw new DatabaseError({ message: "Embeddings length must match chunks length" });
         }
@@ -42,13 +44,7 @@ export class EmbeddingStorageRepository {
         }
     };
 
-    async searchSimilarEmbeddings(queryEmbedding: number[], matchThreshold = 0.7, matchCount = 10): Promise<Array<{
-        id: string;
-        documentId: string;
-        content: string;
-        similarity: number;
-        chunkIndex: number;
-    }>> {
+    async searchSimilarEmbeddings(queryEmbedding: number[], matchThreshold: number, matchCount: number): Promise<Embedding[]> {
         const { data, error } = await this.supabaseClient.rpc("search_embeddings", {
             query_embedding: queryEmbedding,
             match_threshold: matchThreshold,
@@ -59,15 +55,34 @@ export class EmbeddingStorageRepository {
             this.logger?.error({ err: error }, "Failed to search embeddings");
             throw new DatabaseError(error);
         }
+        if (!data || data.length === 0) {
+            return [];
+        }
 
-        const results = (data || []).map((row: any) => ({
-            id: row.id,
-            documentId: row.document_id,
-            content: row.content,
-            similarity: Number(row.similarity),
-            chunkIndex: row.chunk_index,
-        }));
+        const results = (data).map((row: any) => (new Embedding(
+            row.id,
+            row.document_id,
+            row.content,
+            row.embedding,
+            row.chunk_index,
+            row.token_count,
+            row.metadata,
+        )));
 
         return results;
     };
+    async isFileEmbedded(fileId: string): Promise<boolean> {
+        const { data, error } = await this.supabaseClient
+            .from("embeddings")
+            .select("id")
+            .eq("document_id", fileId)
+            .limit(1);
+
+        if (error) {
+            this.logger?.error({ err: error }, "Failed to check if file is embedded");
+            throw new DatabaseError(error);
+        }
+
+        return (data && data.length > 0);
+    }
 }

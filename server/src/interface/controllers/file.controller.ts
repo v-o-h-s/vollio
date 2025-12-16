@@ -21,7 +21,6 @@ import {
   UploadFileResponse,
 } from "../../shared/types/responses/fileRoutes";
 import { error } from "console";
-import { CreateSignedUrlUseCase } from "../../application/use-cases/files/CreateSignedUrlUseCase";
 
 export class FileController {
   constructor(
@@ -34,7 +33,6 @@ export class FileController {
     private moveFileUseCase: MoveFileUseCase,
     private renameFileUseCase: RenameFileUseCase,
     private streamFileUseCase: StreamFileUseCase,
-    private createSignedUrlUseCase: CreateSignedUrlUseCase
   ) { }
   // add pdf from google drive
   async addFileFromGoogleDrive(
@@ -135,7 +133,7 @@ export class FileController {
       return;
     }
 
-    const result = await this.getFileByIdUseCase.execute(request.params.id, userId);
+    const result = await this.getFileByIdUseCase.execute(request.params.id);
 
     reply.status(200).send({
       success: true,
@@ -284,30 +282,6 @@ export class FileController {
   }
 
 
-  async createSignedUrl(
-    request: FastifyRequest<{ Params: FileIdParams }>,
-    reply: FastifyReply
-  ): Promise<void> {
-    const userId = request.user?.id;
-    if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: " Not authenticated",
-        data: null,
-        error: { message: "Not authenticated" },
-      });
-      return;
-    }
-
-    const fileId = request.params.id;
-    const signedUrl = await this.createSignedUrlUseCase.execute(fileId, userId);
-    reply.status(200).send({
-      success: true,
-      message: "Signed URL created successfully",
-      data: signedUrl,
-      error: null,
-    });
-  }
   async streamFileHead(
     request: FastifyRequest<{ Querystring: { token: string } }>,
     reply: FastifyReply

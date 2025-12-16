@@ -17,9 +17,7 @@ export class Embedding {
         tokenCount: number,
         metadata: ChunkMetadata,
     ) {
-        if (!id) throw new Error("Embedding id is required");
-        if (!documentId) throw new Error("documentId is required");
-        if (!Array.isArray(embedding) || embedding.length === 0) throw new Error("embedding vector is required");
+
 
         this.id = id;
         this.documentId = documentId;

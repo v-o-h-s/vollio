@@ -7,12 +7,15 @@ import crypto from "crypto";
 import { QuizMapper } from "../../../shared/mappers/QuizMapper";
 import { ISemanticSearchService } from "../../../domain/services/ISemanticSearchService";
 import { FastifyBaseLogger } from "fastify";
+import { GetFileByIdUseCase } from "../files/GetFileByIdUseCase";
+import { NotFoundError } from "../../../shared/errors/NotFoundError";
 export class CreateQuizUseCase {
     constructor(
         private logger: FastifyBaseLogger,
         private generativeAiService: IGenerativeAiService,
         private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
         private semanticSearchService: ISemanticSearchService,
+        private getFileByIdUseCase: GetFileByIdUseCase
     ) {
     }
 
@@ -26,6 +29,9 @@ export class CreateQuizUseCase {
          *  5 - return the quiz
          */
         // getting chunks relevant to the prompt
+        if (!(await this.getFileByIdUseCase.execute(data.documentId))) {
+            throw new NotFoundError("File not found");
+        }
         await this.ensureExistingOfDocumentEmbeddingUseCase.execute(data.documentId);
         let refinedPrompt = "Generate a quiz based on the content provided.";
         if (data.userPrompt) {
