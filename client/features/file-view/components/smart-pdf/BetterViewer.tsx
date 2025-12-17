@@ -21,9 +21,7 @@ import { MyHighlight } from "@/lib/types/highlight";
 import { ViewerHeader } from "./viewheader";
 import { useSummaryActions } from "@/features/file-view/hooks/useSummaryActions";
 import { SummarySidebar } from "./summary/SummarySidebar";
-
 import { FileDetails } from "../../types/file"
-
 export const BetterViewer = ({
   file,
   onToggleNoter,

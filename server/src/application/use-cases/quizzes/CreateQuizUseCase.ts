@@ -28,6 +28,7 @@ export class CreateQuizUseCase {
          *  4 - pass the chunks and other quiz parameters to the generative ai service to generate the quiz
          *  5 - return the quiz
          */
+        
         // getting chunks relevant to the prompt
         if (!(await this.getFileByIdUseCase.execute(data.documentId))) {
             throw new NotFoundError("File not found");
