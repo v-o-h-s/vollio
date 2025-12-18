@@ -253,7 +253,7 @@ export default function CreateFlashcardsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard/flashcards">
+            <Link href="/dashboard/knowledge-test">
               <Button
                 variant="outline"
                 size="sm"

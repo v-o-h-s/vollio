@@ -115,7 +115,7 @@ export default function CreateQuizPage() {
 			toast.success("Quiz created successfully!");
 			// Navigate to the created quiz if id present
 			if (data?.id) router.push(`/dashboard/quizzes/${data.id}`);
-			else router.push("/dashboard/quizzes");
+			else router.push("/dashboard/knowledge-test");
 		} catch (err: any) {
 			console.error(err);
 			toast.error(err?.message || "Failed to create quiz");
@@ -136,7 +136,7 @@ export default function CreateQuizPage() {
 				{/* Header */}
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-4">
-						<Link href="/dashboard/quizzes">
+						<Link href="/dashboard/knowledge-test">
 							<Button variant="outline" size="sm" className="hover:scale-105 transition-transform duration-200">
 								<ArrowLeft className="w-4 h-4 mr-2" />
 								Back to Quizzes
@@ -273,7 +273,7 @@ export default function CreateQuizPage() {
 
 							<div className="flex items-center gap-3 mt-4">
 								<Button onClick={handleCreateQuiz} className="bg-primary">Create Quiz</Button>
-								<Button variant="ghost" onClick={() => router.push("/dashboard/quizzes")}>Cancel</Button>
+								<Button variant="ghost" onClick={() => router.push("/dashboard/knowledge-test")}>Cancel</Button>
 							</div>
 						</CardContent>
 					</Card>

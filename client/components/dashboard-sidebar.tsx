@@ -67,18 +67,10 @@ const navigationItems = [
     hoverColor: "hover:bg-purple-500/10 hover:border-purple-500/20",
   },
   {
-    name: "Quizzes",
-    href: "/dashboard/quizzes",
-    icon: Brain,
-    description: "Test your knowledge with interactive quizzes",
-    gradient: "from-orange-500 to-red-500",
-    hoverColor: "hover:bg-orange-500/10 hover:border-orange-500/20",
-  },
-  {
-    name: "Flashcards",
-    href: "/dashboard/flashcards",
-    icon: CreditCard,
-    description: "Study with spaced repetition flashcards",
+    name: "Knowledge",
+    href: "/dashboard/knowledge-test",
+    icon: BookOpen,
+    description: "Access the consolidated Knowledge Test",
     gradient: "from-pink-500 to-rose-500",
     hoverColor: "hover:bg-pink-500/10 hover:border-pink-500/20",
   },
@@ -124,14 +116,6 @@ export function DashboardSidebar({ className }: SidebarProps) {
       >
         {isMobileOpen ? <X size={16} /> : <Menu size={16} />}
       </button>
-
-      {/* Mobile Overlay */}
-      {isMobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-          onClick={toggleMobile}
-        />
-      )}
 
       {/* Sidebar */}
       <aside

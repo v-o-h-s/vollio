@@ -215,7 +215,7 @@ export default function QuizDetailPage() {
               <div className="flex gap-3 justify-center">
                 <Button 
                   variant="outline"
-                  onClick={() => router.push('/dashboard/quizzes')}
+                  onClick={() => router.push('/dashboard/knowledge-test')}
                 >
                   Back to Quizzes
                 </Button>

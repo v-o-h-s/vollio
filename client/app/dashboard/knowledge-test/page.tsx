@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,32 +42,40 @@ const sampleFlashcards: FlashcardSet[] = [
 ];
 
 export default function KnowledgeTestPage() {
-  const [section, setSection] = useState<Section>("quizzes");
-  const [query, setQuery] = useState("");
-  const [selectedDocument, setSelectedDocument] = useState<string>("all");
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [section, setSection] = React.useState<Section>("quizzes");
+  const [query, setQuery] = React.useState("");
+  const [selectedDocument, setSelectedDocument] = React.useState<string>("all");
+  const [selectedDifficulty, setSelectedDifficulty] = React.useState<string>("all");
+  const [selectedLanguage, setSelectedLanguage] = React.useState<string>("all");
 
-  const availableDocuments = useMemo(() => {
+  const availableDocuments = React.useMemo(() => {
     const docs = new Set<string>();
-    sampleQuizzes.forEach(q => q.documentName && docs.add(q.documentName));
-    sampleFlashcards.forEach(f => f.documentName && docs.add(f.documentName));
+    sampleQuizzes.forEach((q) => q.documentName && docs.add(q.documentName));
+    sampleFlashcards.forEach((f) => f.documentName && docs.add(f.documentName));
     return Array.from(docs);
   }, []);
 
-  const quizzes = useMemo(() => sampleQuizzes.filter(q => {
-    const matchesQuery = q.title.toLowerCase().includes(query.toLowerCase()) || (q.description || "").toLowerCase().includes(query.toLowerCase());
-    const matchesDocument = selectedDocument === "all" || q.documentName === selectedDocument;
-    const matchesDifficulty = selectedDifficulty === "all" || q.difficulty === selectedDifficulty;
-    const matchesLanguage = selectedLanguage === "all" || q.language === selectedLanguage;
-    return matchesQuery && matchesDocument && matchesDifficulty && matchesLanguage;
-  }), [query, selectedDocument, selectedDifficulty, selectedLanguage]);
+  const quizzes = React.useMemo(
+    () =>
+      sampleQuizzes.filter((q) => {
+        const matchesQuery = q.title.toLowerCase().includes(query.toLowerCase()) || (q.description || "").toLowerCase().includes(query.toLowerCase());
+        const matchesDocument = selectedDocument === "all" || q.documentName === selectedDocument;
+        const matchesDifficulty = selectedDifficulty === "all" || q.difficulty === selectedDifficulty;
+        const matchesLanguage = selectedLanguage === "all" || q.language === selectedLanguage;
+        return matchesQuery && matchesDocument && matchesDifficulty && matchesLanguage;
+      }),
+    [query, selectedDocument, selectedDifficulty, selectedLanguage]
+  );
 
-  const flashcards = useMemo(() => sampleFlashcards.filter(f => {
-    const matchesQuery = f.title.toLowerCase().includes(query.toLowerCase());
-    const matchesDocument = selectedDocument === "all" || f.documentName === selectedDocument;
-    return matchesQuery && matchesDocument;
-  }), [query, selectedDocument]);
+  const flashcards = React.useMemo(
+    () =>
+      sampleFlashcards.filter((f) => {
+        const matchesQuery = f.title.toLowerCase().includes(query.toLowerCase());
+        const matchesDocument = selectedDocument === "all" || f.documentName === selectedDocument;
+        return matchesQuery && matchesDocument;
+      }),
+    [query, selectedDocument]
+  );
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -94,7 +102,11 @@ export default function KnowledgeTestPage() {
                   <div className="mt-3 space-y-2">
                     <select value={selectedDocument} onChange={(e) => setSelectedDocument(e.target.value)} className="w-full px-3 py-2 border border-border/50 rounded-md bg-background text-foreground">
                       <option value="all">All documents</option>
-                      {availableDocuments.map(doc => <option key={doc} value={doc}>{doc}</option>)}
+                      {availableDocuments.map((doc) => (
+                        <option key={doc} value={doc}>
+                          {doc}
+                        </option>
+                      ))}
                     </select>
 
                     <div className="flex gap-2">
@@ -118,11 +130,15 @@ export default function KnowledgeTestPage() {
               <div className="pt-4">
                 {section === "quizzes" ? (
                   <Link href="/dashboard/quizzes/create">
-                    <Button className="w-full" variant="secondary"><Plus className="w-4 h-4 mr-2"/>Create Quiz</Button>
+                    <Button className="w-full" variant="secondary">
+                      <Plus className="w-4 h-4 mr-2" />Create Quiz
+                    </Button>
                   </Link>
                 ) : (
                   <Link href="/dashboard/flashcards/create">
-                    <Button className="w-full" variant="secondary"><Plus className="w-4 h-4 mr-2"/>Create Flashcards</Button>
+                    <Button className="w-full" variant="secondary">
+                      <Plus className="w-4 h-4 mr-2" />Create Flashcards
+                    </Button>
                   </Link>
                 )}
               </div>
@@ -138,41 +154,45 @@ export default function KnowledgeTestPage() {
               <p className="text-muted-foreground">{section === "quizzes" ? "Take a quiz to test your knowledge" : "Review flashcards and test yourself"}</p>
             </div>
             <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="flex items-center gap-2"><Play className="w-3 h-3"/>Practice</Badge>
+              <Badge variant="secondary" className="flex items-center gap-2">
+                <Play className="w-3 h-3" />Practice
+              </Badge>
             </div>
           </div>
 
           {/* List */}
           <div className="space-y-4">
-            {section === "quizzes" && quizzes.map(q => (
-              <Card key={q.id} className="flex items-center justify-between">
-                <div className="p-4">
-                  <h3 className="text-lg font-medium">{q.title}</h3>
-                  <p className="text-sm text-muted-foreground">{q.description}</p>
-                  <div className="mt-2 text-xs text-muted-foreground">{q.questions} questions • {new Date(q.createdAt).toLocaleDateString()}</div>
-                </div>
-                <div className="p-4 flex items-center gap-2">
-                  <Link href={`/dashboard/quizzes/${q.id}`}>
-                    <Button variant="outline"><Play className="w-4 h-4 mr-2"/>Start Test</Button>
-                  </Link>
-                </div>
-              </Card>
-            ))}
+            {section === "quizzes" &&
+              quizzes.map((q) => (
+                <Card key={q.id} className="flex items-center justify-between">
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium">{q.title}</h3>
+                    <p className="text-sm text-muted-foreground">{q.description}</p>
+                    <div className="mt-2 text-xs text-muted-foreground">{q.questions} questions • {new Date(q.createdAt).toLocaleDateString()}</div>
+                  </div>
+                  <div className="p-4 flex items-center gap-2">
+                    <Link href={`/dashboard/quizzes/${q.id}`}>
+                      <Button variant="outline"><Play className="w-4 h-4 mr-2" />Start Test</Button>
+                    </Link>
+                  </div>
+                </Card>
+              ))}
 
-            {section === "flashcards" && flashcards.map(f => (
-              <Card key={f.id} className="flex items-center justify-between">
-                <div className="p-4">
-                  <h3 className="text-lg font-medium">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground">{f.category} • {f.cards} cards</p>
-                  <div className="mt-2 text-xs text-muted-foreground">Created {new Date(f.createdAt).toLocaleDateString()}</div>
-                </div>
-                <div className="p-4 flex items-center gap-2">
-                  <Link href={`/dashboard/flashcards/study/${f.id}`}>
-                    <Button variant="outline"><Play className="w-4 h-4 mr-2"/>Study</Button>
-                  </Link>
-                </div>
-              </Card>
-            ))}
+            {section === "flashcards" &&
+              flashcards.map((f) => (
+                <Card key={f.id} className="flex items-center justify-between">
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium">{f.title}</h3>
+                    <p className="text-sm text-muted-foreground">{f.category} • {f.cards} cards</p>
+                    <div className="mt-2 text-xs text-muted-foreground">Created {new Date(f.createdAt).toLocaleDateString()}</div>
+                  </div>
+                  <div className="p-4 flex items-center gap-2">
+                    <Link href={`/dashboard/flashcards/study/${f.id}`}>
+                      <Button variant="outline"><Play className="w-4 h-4 mr-2" />Study</Button>
+                    </Link>
+                  </div>
+                </Card>
+              ))}
 
             {/* Empty state */}
             {(section === "quizzes" && quizzes.length === 0) && (

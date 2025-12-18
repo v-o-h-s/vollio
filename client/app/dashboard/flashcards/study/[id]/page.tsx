@@ -56,7 +56,7 @@ export default function StudyPage({ params }: { params: { id: string } }) {
   };
 
   const handleGoHome = () => {
-    router.push("/dashboard/flashcards");
+    router.push("/dashboard/knowledge-test");
   };
 
   const totalTime = studyResults ? Date.now() - sessionStartTime : 0;

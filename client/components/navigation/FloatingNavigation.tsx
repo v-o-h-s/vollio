@@ -65,13 +65,13 @@ const navigationItems = [
   },
   {
     name: "Quizzes",
-    href: "/dashboard/quizzes",
+    href: "/dashboard/knowledge-test",
     icon: Brain,
     description: "Interactive knowledge tests",
   },
   {
     name: "Flashcards",
-    href: "/dashboard/flashcards",
+    href: "/dashboard/knowledge-test",
     icon: CreditCard,
     description: "Study with spaced repetition",
   },

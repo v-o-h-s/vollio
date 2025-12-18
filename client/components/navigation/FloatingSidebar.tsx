@@ -275,7 +275,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           },
         ];
 
-      case "/dashboard/quizzes":
+      case "/dashboard/knowledge-test":
         return [
           {
             id: "create-quiz",
@@ -286,11 +286,19 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
             shortcut: "Ctrl+N",
           },
           {
-            id: "search-quizzes",
-            label: "Search Quizzes",
+            id: "create-flashcards",
+            label: "Create Flashcards",
+            icon: Plus,
+            onClick: () => router.push("/dashboard/flashcards/create"),
+            variant: "primary",
+            shortcut: "Ctrl+Shift+N",
+          },
+          {
+            id: "search-knowledge",
+            label: "Search",
             icon: Search,
             onClick: () => {
-              const searchEvent = new CustomEvent("trigger-quiz-search");
+              const searchEvent = new CustomEvent("trigger-knowledge-search");
               window.dispatchEvent(searchEvent);
             },
             shortcut: "Ctrl+F",
@@ -305,18 +313,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
             },
           },
           {
-            id: "filter-difficulty",
-            label: "Difficulty Filter",
-            icon: Target,
-            onClick: () => {
-              const difficultyEvent = new CustomEvent(
-                "trigger-difficulty-filter"
-              );
-              window.dispatchEvent(difficultyEvent);
-            },
-          },
-          {
-            id: "bookmarked-quizzes",
+            id: "bookmarked",
             label: "Bookmarked",
             icon: Bookmark,
             onClick: () => {
@@ -324,74 +321,9 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
               window.dispatchEvent(bookmarkEvent);
             },
           },
-          {
-            id: "quiz-stats",
-            label: "Statistics",
-            icon: Brain,
-            onClick: () => {
-              const statsEvent = new CustomEvent("trigger-quiz-stats");
-              window.dispatchEvent(statsEvent);
-            },
-          },
         ];
 
-      case "/dashboard/flashcards":
-        return [
-          {
-            id: "create-flashcards",
-            label: "Create Flashcards",
-            icon: Plus,
-            onClick: () => router.push("/dashboard/flashcards/create"),
-            variant: "primary",
-            shortcut: "Ctrl+N",
-          },
-          {
-            id: "search-flashcards",
-            label: "Search Flashcards",
-            icon: Search,
-            onClick: () => {
-              const searchEvent = new CustomEvent("trigger-flashcard-search");
-              window.dispatchEvent(searchEvent);
-            },
-            shortcut: "Ctrl+F",
-          },
-          {
-            id: "filter-category",
-            label: "Filter Category",
-            icon: Filter,
-            onClick: () => {
-              const filterEvent = new CustomEvent("trigger-flashcard-category-filter");
-              window.dispatchEvent(filterEvent);
-            },
-          },
-          {
-            id: "study-mode",
-            label: "Study Mode",
-            icon: Brain,
-            onClick: () => {
-              const studyEvent = new CustomEvent("trigger-study-mode");
-              window.dispatchEvent(studyEvent);
-            },
-          },
-          {
-            id: "bookmarked-flashcards",
-            label: "Bookmarked",
-            icon: Bookmark,
-            onClick: () => {
-              const bookmarkEvent = new CustomEvent("trigger-flashcard-bookmark-filter");
-              window.dispatchEvent(bookmarkEvent);
-            },
-          },
-          {
-            id: "review-due",
-            label: "Review Due",
-            icon: Clock,
-            onClick: () => {
-              const reviewEvent = new CustomEvent("trigger-review-due");
-              window.dispatchEvent(reviewEvent);
-            },
-          },
-        ];
+      // /dashboard/flashcards handled via knowledge-test
 
       case "/dashboard":
       default:
@@ -453,9 +385,9 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
       case "/dashboard/summarize":
         return "Summarize";
       case "/dashboard/quizzes":
-        return "Quizzes";
       case "/dashboard/flashcards":
-        return "Flashcards";
+      case "/dashboard/knowledge-test":
+        return "Knowledge";
       case "/dashboard":
         return "Dashboard";
       default:
@@ -513,6 +445,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
         ];
 
       case "/dashboard/quizzes":
+      case "/dashboard/knowledge-test":
         return [
           {
             label: "Total Quizzes",
@@ -533,28 +466,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
             color: "text-yellow-600 dark:text-yellow-400",
           },
         ];
-
-      case "/dashboard/flashcards":
-        return [
-          {
-            label: "Total Decks",
-            value: statistics.loading ? "..." : statistics.totalItems.toString(),
-            icon: CreditCard,
-            color: "text-pink-600 dark:text-pink-400",
-          },
-          {
-            label: "Avg Mastery",
-            value: statistics.loading ? "..." : `${statistics.averageScore || 0}%`,
-            icon: TrendingUp,
-            color: "text-green-600 dark:text-green-400",
-          },
-          {
-            label: "Study Streak",
-            value: statistics.loading ? "..." : `${statistics.studyStreak || 0} days`,
-            icon: Award,
-            color: "text-yellow-600 dark:text-yellow-400",
-          },
-        ];
+      // flashcards metrics are shown under knowledge as well
 
       case "/dashboard/summarize":
         return [
