@@ -319,7 +319,7 @@ export function FloatingToolbar({ editor, className }: FloatingToolbarProps) {
         aria-label="Text Color"
         title="Text color and highlighting"
       >
-        <Palette className="h-4 w-4" />
+        <Palette className="h-4 w -4" />
       </Button>
     </div>
   );

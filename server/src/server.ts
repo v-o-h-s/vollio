@@ -44,31 +44,11 @@ app.register(fastifySession, {
   saveUninitialized: false, // Don't save empty sessions
 });
 
-// Enable CORS for frontend
-const allowedOrigins = [
-  process.env.FRONTEND_URL || "http://localhost:3000",
-  "http://localhost:3000",
-  "http://localhost:3001",
-];
-
 app.register(fastifyCors, {
-  origin: (origin, cb) => {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return cb(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      cb(null, true);
-    } else {
-      app.log.warn(`CORS blocked request from origin: ${origin}`);
-      cb(new Error('Not allowed by CORS'), false);
-    }
-  },
+  origin: true,
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
 });
 
-app.log.info(`CORS enabled for origins: ${allowedOrigins.join(', ')}`);
 
 // Register multipart for file uploads
 app.register(fastifyMultipart, {

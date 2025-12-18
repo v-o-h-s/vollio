@@ -78,11 +78,11 @@ export default function KnowledgeTestPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 ">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar */}
         <aside className="col-span-1 sticky top-6">
-          <Card className="space-y-4 p-4">
+          <Card className="space-y-4 p-4 bg-card/30">
             <CardHeader>
               <CardTitle className="text-lg">Knowledge Test</CardTitle>
             </CardHeader>
@@ -164,7 +164,7 @@ export default function KnowledgeTestPage() {
           <div className="space-y-4">
             {section === "quizzes" &&
               quizzes.map((q) => (
-                <Card key={q.id} className="flex items-center justify-between">
+                <Card key={q.id} className="flex items-center justify-between bg-card/30">
                   <div className="p-4">
                     <h3 className="text-lg font-medium">{q.title}</h3>
                     <p className="text-sm text-muted-foreground">{q.description}</p>
@@ -180,7 +180,7 @@ export default function KnowledgeTestPage() {
 
             {section === "flashcards" &&
               flashcards.map((f) => (
-                <Card key={f.id} className="flex items-center justify-between">
+                <Card key={f.id} className="flex items-center justify-between bg-card/30">
                   <div className="p-4">
                     <h3 className="text-lg font-medium">{f.title}</h3>
                     <p className="text-sm text-muted-foreground">{f.category} • {f.cards} cards</p>

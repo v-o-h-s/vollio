@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
-import { ArrowLeft, BookOpen, Check, Circle, Plus, Save } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, Circle, Plus, Save, Zap } from "lucide-react";
 
 import { DocumentSelectionTabs } from "@/components/quiz/DocumentSelectionTabs";
 import { useGetPDFsQuery } from "@/lib/store/apiSlice";
@@ -204,7 +204,7 @@ export default function CreateQuizPage() {
 	}, [questionsDistribution]);
 
 	return (
-		<div className="min-h-screen bg-background p-6">
+		<div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
 			<div className="max-w-4xl mx-auto space-y-8">
 				{/* Header */}
 				<div className="flex items-center justify-between">
@@ -239,13 +239,19 @@ export default function CreateQuizPage() {
 					<Card className="border-border/50 shadow-sm">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
-								<BookOpen className="w-5 h-5" />
-								Source & Options
+								<BookOpen className="w-5 h-5 text-primary" />
+								Configuration
 							</CardTitle>
+							<CardDescription>
+								Customize your quiz generation settings and source material.
+							</CardDescription>
 						</CardHeader>
-						<CardContent className="space-y-4">
+						<CardContent className="space-y-6">
 							<div>
-								<Label>Source Document *</Label>
+								<h3 className="text-sm font-medium text-foreground mb-3 flex items-center gap-2">
+									<BookOpen className="w-4 h-4 text-primary" />
+									Source Material
+								</h3>
 								<DocumentSelectionTabs
 									availableDocuments={((pdfData?.pdfs || []).map((p: any) => ({ id: p.id, title: p.filename ?? p.title ?? "Untitled", page_count: p.pageCount ?? p.page_count ?? 1 })) as any)}
 									selectedDocuments={selectedDocuments as any}
@@ -328,78 +334,86 @@ export default function CreateQuizPage() {
 								)}
 							</div>
 
-							<div>
-								<Label htmlFor="prompt">User prompt (optional)</Label>
-								<Textarea id="prompt" value={userPrompt} onChange={(e) => setUserPrompt(e.target.value)} rows={3} className="mt-1" placeholder="Optional prompt to guide quiz generation" />
-							</div>
-
-							<div className="grid grid-cols-1 gap-4">
-								<div>
-									<Label>Difficulty *</Label>
-									<select value={difficulty} onChange={(e) => setDifficulty(e.target.value as any)} className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50">
-										{difficulties.map((d) => (
-											<option key={d} value={d}>
-												{d.charAt(0).toUpperCase() + d.slice(1)}
-											</option>
-										))}
-									</select>
-								</div>
-
-								<div>
-									<Label>Number of questions</Label>
-									<Input type="number" min={1} max={44} value={numberOfQuestions ?? ""} onChange={(e) => setNumberOfQuestions(e.target.value ? Number(e.target.value) : undefined)} className="mt-1" />
-								</div>
-
-								<div>
-									<Label>Language</Label>
-									<select value={language} onChange={(e) => setLanguage(e.target.value as any)} className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50">
-										{languages.map((l) => (
-											<option key={l} value={l}>
-												{l.toUpperCase()}
-											</option>
-										))}
-									</select>
-								</div>
-							</div>
-
-							<div className="grid grid-cols-1 gap-4">
-								<div>
-									<Label>Time limit (minutes)</Label>
-									<Input type="number" min={1} value={timeLimitMinutes ?? ""} onChange={(e) => setTimeLimitMinutes(e.target.value ? Number(e.target.value) : undefined)} className="mt-1" />
-								</div>
-
-								<div>
-									<Label>Explanation level</Label>
-									<select value={explanationLevel} onChange={(e) => setExplanationLevel(e.target.value as any)} className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50">
-										{explanationLevels.map((el) => (
-											<option key={el} value={el}>
-												{el.charAt(0).toUpperCase() + el.slice(1)}
-											</option>
-										))}
-									</select>
-								</div>
-
-								<div>
-									<Label>Distribution (optional)</Label>
-									<div className="grid grid-cols-2 gap-2 mt-1">
-										{questionTypes.map((t) => (
-											<div key={t.key} className="flex items-center gap-2">
-												<Label className="w-28 text-sm">{t.label}</Label>
-												<Input
-													type="number"
-													min={0}
-													value={questionsDistribution[t.key] ?? ""}
-													onChange={(e) =>
-														setQuestionsDistribution((prev) => ({
-															...prev,
-															[t.key]: e.target.value === "" ? "" : Number(e.target.value),
-														}))
-													}
-												/>
-											</div>
-										))}
+							<div className="pt-2">
+								<h3 className="text-sm font-medium text-foreground mb-4 flex items-center gap-2">
+									<Zap className="w-4 h-4 text-yellow-500" />
+									Quiz Options
+								</h3>
+								<div className="grid grid-cols-1 gap-5">
+									<div>
+										<Label htmlFor="prompt">User prompt (optional)</Label>
+										<Textarea id="prompt" value={userPrompt} onChange={(e) => setUserPrompt(e.target.value)} rows={3} className="mt-1" placeholder="Optional prompt to guide quiz generation" />
 									</div>
-									<p className="text-xs text-muted-foreground mt-1">Total distribution: <strong>{totalDistribution}</strong> {numberOfQuestions ? `(target ${numberOfQuestions})` : ""}</p>
+
+									<div className="grid grid-cols-1 gap-4">
+										<div>
+											<Label>Difficulty *</Label>
+											<select value={difficulty} onChange={(e) => setDifficulty(e.target.value as any)} className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50">
+												{difficulties.map((d) => (
+													<option key={d} value={d}>
+														{d.charAt(0).toUpperCase() + d.slice(1)}
+													</option>
+												))}
+											</select>
+										</div>
+
+										<div>
+											<Label>Number of questions</Label>
+											<Input type="number" min={1} max={44} value={numberOfQuestions ?? ""} onChange={(e) => setNumberOfQuestions(e.target.value ? Number(e.target.value) : undefined)} className="mt-1" />
+										</div>
+
+										<div>
+											<Label>Language</Label>
+											<select value={language} onChange={(e) => setLanguage(e.target.value as any)} className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50">
+												{languages.map((l) => (
+													<option key={l} value={l}>
+														{l.toUpperCase()}
+													</option>
+												))}
+											</select>
+										</div>
+									</div>
+
+									<div className="grid grid-cols-1 gap-4">
+										<div>
+											<Label>Time limit (minutes)</Label>
+											<Input type="number" min={1} value={timeLimitMinutes ?? ""} onChange={(e) => setTimeLimitMinutes(e.target.value ? Number(e.target.value) : undefined)} className="mt-1" />
+										</div>
+
+										<div>
+											<Label>Explanation level</Label>
+											<select value={explanationLevel} onChange={(e) => setExplanationLevel(e.target.value as any)} className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50">
+												{explanationLevels.map((el) => (
+													<option key={el} value={el}>
+														{el.charAt(0).toUpperCase() + el.slice(1)}
+													</option>
+												))}
+											</select>
+										</div>
+
+										<div>
+											<Label>Distribution (optional)</Label>
+											<div className="grid grid-cols-2 gap-2 mt-1">
+												{questionTypes.map((t) => (
+													<div key={t.key} className="flex items-center gap-2">
+														<Label className="w-28 text-sm">{t.label}</Label>
+														<Input
+															type="number"
+															min={0}
+															value={questionsDistribution[t.key] ?? ""}
+															onChange={(e) =>
+																setQuestionsDistribution((prev) => ({
+																	...prev,
+																	[t.key]: e.target.value === "" ? "" : Number(e.target.value),
+																}))
+															}
+														/>
+													</div>
+												))}
+											</div>
+											<p className="text-xs text-muted-foreground mt-1">Total distribution: <strong>{totalDistribution}</strong> {numberOfQuestions ? `(target ${numberOfQuestions})` : ""}</p>
+										</div>
+									</div>
 								</div>
 							</div>
 
