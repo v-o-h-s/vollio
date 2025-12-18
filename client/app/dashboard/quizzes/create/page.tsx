@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +53,13 @@ export default function CreateQuizPage() {
 		short_answer: "",
 	});
 
+	  // Flashcards auto-generation options
+	  const [generateFlashcards, setGenerateFlashcards] = useState<boolean>(false);
+	  const [flashcardsUseSameDocument, setFlashcardsUseSameDocument] = useState<boolean>(true);
+	  const [flashcardsDocumentId, setFlashcardsDocumentId] = useState<string | null>(null);
+	  const [flashcardsNumber, setFlashcardsNumber] = useState<number>(10);
+	  const [flashcardsIncludeHints, setFlashcardsIncludeHints] = useState<boolean>(true);
+
 	const selectedDocuments = useMemo(() => (document ? [{ id: document.id, title: document.title, pageCount: 1, selectedPages: [] }] : []), [document]);
 
 	const handleAddDocument = (doc: { id: string; title: string }) => {
@@ -76,6 +84,17 @@ export default function CreateQuizPage() {
 		if (numberOfQuestions && (numberOfQuestions < 1 || numberOfQuestions > 44)) {
 			toast.error("Number of questions must be between 1 and 44.");
 			return;
+		}
+
+		if (generateFlashcards) {
+			if (!flashcardsUseSameDocument && !flashcardsDocumentId) {
+				toast.error("Please select a document to generate flashcards from.");
+				return;
+			}
+			if (!flashcardsNumber || flashcardsNumber < 1) {
+				toast.error("Please enter a valid number of flashcards.");
+				return;
+			}
 		}
 
 		const body: any = {
@@ -113,6 +132,38 @@ export default function CreateQuizPage() {
 
 			const data = await resp.json();
 			toast.success("Quiz created successfully!");
+			// Optionally generate flashcards (do this after quiz creation)
+			if (generateFlashcards) {
+				const targetDocId = flashcardsUseSameDocument ? document.id : flashcardsDocumentId;
+				if (!targetDocId) {
+					toast.error("No document selected for flashcards generation.");
+				} else {
+					try {
+						const gresp = await fetch("/api/flashcards/generate-from-document", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify({
+								documentId: targetDocId,
+								settings: { numberOfCards: flashcardsNumber, includeHints: flashcardsIncludeHints },
+							}),
+						});
+						if (!gresp.ok) {
+							const text = await gresp.text();
+							throw new Error(text || "Failed to generate flashcards");
+						}
+						const gdata = await gresp.json();
+						if (gdata?.success) {
+							toast.success(`Generated ${gdata.flashcards?.length || flashcardsNumber} flashcards`);
+						} else {
+							toast.error("Flashcards generation returned an error");
+						}
+					} catch (err: any) {
+						console.error("Flashcards generation failed:", err);
+						toast.error(err?.message || "Failed to auto-generate flashcards");
+					}
+				}
+			}
+
 			// Navigate to the created quiz if id present
 			if (data?.id) router.push(`/dashboard/quizzes/${data.id}`);
 			else router.push("/dashboard/knowledge-test");
@@ -195,6 +246,50 @@ export default function CreateQuizPage() {
 							</div>
 
 							<Separator />
+
+							{/* Flashcards generation */}
+							<div>
+								<div className="flex items-center gap-2">
+									<Checkbox checked={generateFlashcards} onCheckedChange={(v) => setGenerateFlashcards(Boolean(v))} />
+									<Label className="mb-0">Also generate flashcards for this quiz (AI)</Label>
+								</div>
+
+								{generateFlashcards && (
+									<div className="mt-3 space-y-3">
+										<div className="flex items-center gap-3">
+											<Checkbox checked={flashcardsUseSameDocument} onCheckedChange={(v) => setFlashcardsUseSameDocument(Boolean(v))} />
+											<Label className="mb-0">Use the same document as the quiz</Label>
+										</div>
+											{flashcardsUseSameDocument && document && (
+												<div className="flex items-center gap-2 mt-2">
+													<Badge variant="secondary">Using: {document.title}</Badge>
+												</div>
+											)}
+										{!flashcardsUseSameDocument && (
+											<div>
+												<Label>Select document for flashcards</Label>
+												<select value={flashcardsDocumentId ?? ""} onChange={(e) => setFlashcardsDocumentId(e.target.value || null)} className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground">
+													<option value="">Select a document</option>
+													{(pdfData?.pdfs || []).map((p: any) => (
+														<option key={p.id} value={p.id}>{p.filename ?? p.title ?? p.id}</option>
+													))}
+												</select>
+											</div>
+										)}
+
+										<div className="grid grid-cols-2 gap-4">
+											<div>
+												<Label>Number of flashcards</Label>
+												<Input type="number" min={1} value={flashcardsNumber} onChange={(e) => setFlashcardsNumber(Number(e.target.value || 0))} className="mt-1" />
+											</div>
+											<div className="flex items-center gap-2">
+												<Checkbox checked={flashcardsIncludeHints} onCheckedChange={(v) => setFlashcardsIncludeHints(Boolean(v))} />
+												<Label className="mb-0">Include hints</Label>
+											</div>
+										</div>
+									</div>
+								)}
+							</div>
 
 							<div>
 								<Label htmlFor="prompt">User prompt (optional)</Label>
