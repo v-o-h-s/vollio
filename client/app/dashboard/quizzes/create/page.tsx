@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -53,12 +54,14 @@ export default function CreateQuizPage() {
 		short_answer: "",
 	});
 
-	  // Flashcards auto-generation options
-	  const [generateFlashcards, setGenerateFlashcards] = useState<boolean>(false);
-	  const [flashcardsUseSameDocument, setFlashcardsUseSameDocument] = useState<boolean>(true);
-	  const [flashcardsDocumentId, setFlashcardsDocumentId] = useState<string | null>(null);
-	  const [flashcardsNumber, setFlashcardsNumber] = useState<number>(10);
-	  const [flashcardsIncludeHints, setFlashcardsIncludeHints] = useState<boolean>(true);
+	// Flashcards options
+	const [generateFlashcards, setGenerateFlashcards] = useState<boolean>(false);
+	const [flashcardsMode, setFlashcardsMode] = useState<"document" | "manual">("document");
+	const [flashcardsUseSameDocument, setFlashcardsUseSameDocument] = useState<boolean>(true);
+	const [flashcardsDocumentId, setFlashcardsDocumentId] = useState<string | null>(null);
+	const [flashcardsNumber, setFlashcardsNumber] = useState<number>(10);
+	const [flashcardsIncludeHints, setFlashcardsIncludeHints] = useState<boolean>(true);
+	const [openManualAfterCreation, setOpenManualAfterCreation] = useState<boolean>(true);
 
 	const selectedDocuments = useMemo(() => (document ? [{ id: document.id, title: document.title, pageCount: 1, selectedPages: [] }] : []), [document]);
 
@@ -87,14 +90,18 @@ export default function CreateQuizPage() {
 		}
 
 		if (generateFlashcards) {
-			if (!flashcardsUseSameDocument && !flashcardsDocumentId) {
-				toast.error("Please select a document to generate flashcards from.");
-				return;
+			if (flashcardsMode === "document") {
+				const target = flashcardsUseSameDocument ? document?.id : flashcardsDocumentId;
+				if (!target) {
+					toast.error("Please select a document to generate flashcards from.");
+					return;
+				}
+				if (!flashcardsNumber || flashcardsNumber < 1) {
+					toast.error("Please enter a valid number of flashcards.");
+					return;
+				}
 			}
-			if (!flashcardsNumber || flashcardsNumber < 1) {
-				toast.error("Please enter a valid number of flashcards.");
-				return;
-			}
+			// manual mode requires no pre-submit validation
 		}
 
 		const body: any = {
@@ -132,34 +139,49 @@ export default function CreateQuizPage() {
 
 			const data = await resp.json();
 			toast.success("Quiz created successfully!");
-			// Optionally generate flashcards (do this after quiz creation)
+			// Optionally handle flashcards creation based on selected mode
 			if (generateFlashcards) {
-				const targetDocId = flashcardsUseSameDocument ? document.id : flashcardsDocumentId;
-				if (!targetDocId) {
-					toast.error("No document selected for flashcards generation.");
-				} else {
-					try {
-						const gresp = await fetch("/api/flashcards/generate-from-document", {
-							method: "POST",
-							headers: { "Content-Type": "application/json" },
-							body: JSON.stringify({
-								documentId: targetDocId,
-								settings: { numberOfCards: flashcardsNumber, includeHints: flashcardsIncludeHints },
-							}),
-						});
-						if (!gresp.ok) {
-							const text = await gresp.text();
-							throw new Error(text || "Failed to generate flashcards");
+				if (flashcardsMode === "document") {
+					const targetDocId = flashcardsUseSameDocument ? document.id : flashcardsDocumentId;
+					if (!targetDocId) {
+						toast.error("No document selected for flashcards generation.");
+					} else {
+						try {
+							const gresp = await fetch("/api/flashcards/generate-from-document", {
+								method: "POST",
+								headers: { "Content-Type": "application/json" },
+								body: JSON.stringify({
+									documentId: targetDocId,
+									settings: { numberOfCards: flashcardsNumber, includeHints: flashcardsIncludeHints },
+								}),
+							});
+							if (!gresp.ok) {
+								const text = await gresp.text();
+								throw new Error(text || "Failed to generate flashcards");
+							}
+							const gdata = await gresp.json();
+							if (gdata?.success) {
+								toast.success(`Generated ${gdata.flashcards?.length || flashcardsNumber} flashcards`);
+							} else {
+								toast.error("Flashcards generation returned an error");
+							}
+						} catch (err: any) {
+							console.error("Flashcards generation failed:", err);
+							toast.error(err?.message || "Failed to auto-generate flashcards");
 						}
-						const gdata = await gresp.json();
-						if (gdata?.success) {
-							toast.success(`Generated ${gdata.flashcards?.length || flashcardsNumber} flashcards`);
+					}
+				} else if (flashcardsMode === "manual") {
+					// If user asked to open manual editor after creation, redirect there
+					if (openManualAfterCreation) {
+						if (data?.id) {
+							router.push(`/dashboard/flashcards/create?fromQuizId=${data.id}`);
+							return; // already redirecting to flashcard editor
 						} else {
-							toast.error("Flashcards generation returned an error");
+							router.push(`/dashboard/flashcards/create`);
+							return;
 						}
-					} catch (err: any) {
-						console.error("Flashcards generation failed:", err);
-						toast.error(err?.message || "Failed to auto-generate flashcards");
+					} else {
+						toast.success("Quiz created — you can now create flashcards manually from the Knowledge page.");
 					}
 				}
 			}
@@ -257,14 +279,29 @@ export default function CreateQuizPage() {
 								{generateFlashcards && (
 									<div className="mt-3 space-y-3">
 										<div className="flex items-center gap-3">
-											<Checkbox checked={flashcardsUseSameDocument} onCheckedChange={(v) => setFlashcardsUseSameDocument(Boolean(v))} />
-											<Label className="mb-0">Use the same document as the quiz</Label>
+											<RadioGroup value={flashcardsMode} onValueChange={(v) => setFlashcardsMode(v as any)} className="grid grid-cols-2 gap-3">
+												<label className="flex items-center gap-2">
+													<RadioGroupItem value="document" />
+													<span>Generate from document</span>
+												</label>
+												<label className="flex items-center gap-2">
+													<RadioGroupItem value="manual" />
+													<span>Create manually</span>
+												</label>
+											</RadioGroup>
 										</div>
-											{flashcardsUseSameDocument && document && (
+											{flashcardsMode === "document" && flashcardsUseSameDocument && document && (
 												<div className="flex items-center gap-2 mt-2">
 													<Badge variant="secondary">Using: {document.title}</Badge>
 												</div>
-											)}
+												)}
+
+												{flashcardsMode === "manual" && (
+													<div className="mt-3 flex items-center gap-3">
+														<Checkbox checked={openManualAfterCreation} onCheckedChange={(v) => setOpenManualAfterCreation(Boolean(v))} />
+														<Label className="mb-0">Open flashcard editor after quiz creation</Label>
+													</div>
+												)}
 										{!flashcardsUseSameDocument && (
 											<div>
 												<Label>Select document for flashcards</Label>

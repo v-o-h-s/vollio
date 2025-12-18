@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -98,6 +99,9 @@ export default function CreateFlashcardsPage() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [savedCards, setSavedCards] = useState<Set<string>>(new Set());
   const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const searchParams = useSearchParams();
+  const fromQuizId = searchParams?.get("fromQuizId");
+  const [prefillFromQuiz, setPrefillFromQuiz] = useState<string | null>(null);
 
 
   // Fetch PDFs for AI generation
@@ -107,6 +111,17 @@ export default function CreateFlashcardsPage() {
     error: pdfError,
     refetch: refetchPDFs,
   } = useGetPDFsQuery();
+
+  // If opened from a quiz, prefill title and show banner
+  useEffect(() => {
+    if (fromQuizId) {
+      setPrefillFromQuiz(fromQuizId);
+      setDeckMetadata((prev) => ({
+        ...prev,
+        title: prev.title || `Flashcards from Quiz ${fromQuizId}`,
+      }));
+    }
+  }, [fromQuizId]);
 
 
 
@@ -265,7 +280,7 @@ export default function CreateFlashcardsPage() {
             </Link>
             <div>
               <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl">
+                <div className="p-2 bg-linear-to-r from-pink-500 to-rose-500 rounded-xl">
                   <Wand2 className="w-6 h-6 text-white" />
                 </div>
                 Create Flashcard Deck
@@ -275,6 +290,11 @@ export default function CreateFlashcardsPage() {
               </p>
             </div>
           </div>
+            {prefillFromQuiz && (
+              <div className="ml-4 text-sm text-muted-foreground">
+                Creating flashcards for quiz <strong>{prefillFromQuiz}</strong>
+              </div>
+            )}
 
           <div className="flex gap-3">
            
@@ -292,7 +312,7 @@ export default function CreateFlashcardsPage() {
             </Button>
             <Button
               onClick={saveDeck}
-              className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 hover:scale-105 transition-all duration-200"
+              className="bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 hover:scale-105 transition-all duration-200"
             >
               <Save className="w-4 h-4 mr-2" />
               Save Deck
@@ -314,7 +334,7 @@ export default function CreateFlashcardsPage() {
             </div>
             <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-pink-500 to-rose-500 h-2 rounded-full transition-all duration-500 ease-out"
+                className="bg-linear-to-r from-pink-500 to-rose-500 h-2 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
