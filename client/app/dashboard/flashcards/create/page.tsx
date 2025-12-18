@@ -25,7 +25,6 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { FlashcardPreview, FlashcardEditor, AIFlashcardGenerator } from "@/components/flashcards";
 import { useGetPDFsQuery } from "@/lib/store/apiSlice";
-import { useSubscription } from "@/lib/contexts/SubscriptionContext";
 import { PremiumBadge } from "@/components/ui/premium-badge";
 
 // Flashcard interface
@@ -100,7 +99,6 @@ export default function CreateFlashcardsPage() {
   const [savedCards, setSavedCards] = useState<Set<string>>(new Set());
   const [showAIGenerator, setShowAIGenerator] = useState(false);
 
-  const { features } = useSubscription();
 
   // Fetch PDFs for AI generation
   const {
@@ -279,19 +277,7 @@ export default function CreateFlashcardsPage() {
           </div>
 
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setShowAIGenerator(!showAIGenerator)}
-              className={`hover:scale-105 transition-transform duration-200 ${
-                features.aiGeneration
-                  ? "bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-purple-300 dark:border-purple-700"
-                  : ""
-              }`}
-            >
-              <Sparkles className="w-4 h-4 mr-2" />
-              {showAIGenerator ? "Hide AI" : "AI Generate"}
-              {features.aiGeneration && <PremiumBadge size="sm" className="ml-2" />}
-            </Button>
+           
             <Button
               variant="outline"
               onClick={() => setPreviewMode(!previewMode)}

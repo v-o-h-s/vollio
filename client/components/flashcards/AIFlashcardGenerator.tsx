@@ -22,7 +22,6 @@ import {
   Library,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { useSubscription } from "@/lib/contexts/SubscriptionContext";
 import { PremiumUpgrade } from "@/components/ui/premium-upgrade";
 import { PremiumBadge } from "@/components/ui/premium-badge";
 
@@ -62,7 +61,6 @@ export function AIFlashcardGenerator({
   pdfError,
   refetchPDFs,
 }: AIFlashcardGeneratorProps) {
-  const { features } = useSubscription();
   const [activeTab, setActiveTab] = useState<"library" | "upload" | "topic">(
     "library"
   );
@@ -306,16 +304,7 @@ export function AIFlashcardGenerator({
     });
   };
 
-  // Show premium upgrade if user doesn't have AI generation access
-  if (!features.aiGeneration) {
-    return (
-      <PremiumUpgrade
-        feature="AI Flashcard Generation"
-        description="Automatically generate high-quality flashcards from your documents or any topic using advanced AI. Save hours of manual work and create personalized study materials instantly."
-        onUpgrade={handleUpgrade}
-      />
-    );
-  }
+  
 
   return (
     <Card className="border-border/50 shadow-sm">
