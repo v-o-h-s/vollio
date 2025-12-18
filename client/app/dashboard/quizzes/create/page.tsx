@@ -204,10 +204,10 @@ export default function CreateQuizPage() {
 	}, [questionsDistribution]);
 
 	return (
-		<div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
-			<div className="max-w-4xl mx-auto space-y-8">
+		<div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 ">
+			<div className="max-w-4xl mx-auto space-y-8 ">
 				{/* Header */}
-				<div className="flex items-center justify-between">
+				<div className="flex items-center justify-between ">
 					<div className="flex items-center gap-4">
 						<Link href="/dashboard/knowledge-test">
 							<Button variant="outline" size="sm" className="hover:scale-105 transition-transform duration-200">
@@ -235,8 +235,8 @@ export default function CreateQuizPage() {
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 gap-6">
-					<Card className="border-border/50 shadow-sm">
+				<div className="grid grid-cols-1 gap-6 ">
+					<Card className="border-border/50 shadow-sm bg-card/20">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
 								<BookOpen className="w-5 h-5 text-primary" />
