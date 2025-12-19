@@ -1,5 +1,6 @@
 import { ChunkMetadata } from "../../shared/utils/chunking";
 import { Quiz, QuizQuestion } from "../entities/Quiz";
+import { CreateQuizDTO } from "../../shared/validation/quizSchemas";
 
 /**
  * Service interface for generative AI operations.
@@ -7,7 +8,10 @@ import { Quiz, QuizQuestion } from "../entities/Quiz";
  * using generative AI models.
  */
 export interface IGenerativeAiService {
-    generateText(prompt: string): Promise<any>;
-    refineUserPrompt(initialPrompt: string): Promise<string>;
-    generateQuizQuestions(quiz: Quiz, chunks: { content: string, metadata: ChunkMetadata }[],): Promise<QuizQuestion[]>;
+  generateText(prompt: string): Promise<any>;
+  refineUserPrompt(initialPrompt: string): Promise<string>;
+  generateQuizQuestions(
+    data: CreateQuizDTO,
+    chunks: { content: string; metadata: ChunkMetadata }[]
+  ): Promise<QuizQuestion[]>;
 }
