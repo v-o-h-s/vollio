@@ -56,13 +56,13 @@ export default function StudyPage({ params }: { params: { id: string } }) {
   };
 
   const handleGoHome = () => {
-    router.push("/dashboard/flashcards");
+    router.push("/dashboard/knowledge-test");
   };
 
   const totalTime = studyResults ? Date.now() - sessionStartTime : 0;
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
       {!studyResults ? (
         <StudyMode
           flashcards={demoFlashcards}

@@ -85,6 +85,7 @@ export function usePageStatistics(): PageStatistics {
           break;
 
         case "/dashboard/quizzes":
+        case "/dashboard/knowledge-test":
           // Mock quiz statistics - replace with real API when available
           setStatistics({
             totalItems: 6, // From dummy data

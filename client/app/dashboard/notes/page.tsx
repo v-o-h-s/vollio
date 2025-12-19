@@ -185,7 +185,7 @@ const NotesPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8 container mx-auto">
+      <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold text-foreground tracking-tight">Notes</h1>
@@ -210,7 +210,7 @@ const NotesPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold text-foreground tracking-tight">Notes</h1>
@@ -266,7 +266,7 @@ const NotesPage: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="space-y-6 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
         {/* Enhanced Header with Better Typography and Spacing */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">

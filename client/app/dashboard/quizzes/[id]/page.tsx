@@ -109,7 +109,7 @@ export default function QuizDetailPage() {
 
   if (!quizStarted) {
     return (
-      <div className="min-h-screen bg-background p-6">
+      <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
         <div className="max-w-4xl mx-auto">
           <Button 
             variant="ghost" 
@@ -166,7 +166,7 @@ export default function QuizDetailPage() {
   if (showResults) {
     const score = calculateScore();
     return (
-      <div className="min-h-screen bg-background p-6">
+      <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
         <div className="max-w-4xl mx-auto">
           <Card className="max-w-2xl mx-auto">
             <CardHeader className="text-center">
@@ -215,7 +215,7 @@ export default function QuizDetailPage() {
               <div className="flex gap-3 justify-center">
                 <Button 
                   variant="outline"
-                  onClick={() => router.push('/dashboard/quizzes')}
+                  onClick={() => router.push('/dashboard/knowledge-test')}
                 >
                   Back to Quizzes
                 </Button>
@@ -247,7 +247,7 @@ export default function QuizDetailPage() {
     <div className="min-h-screen bg-background">
       {/* Header with timer and progress */}
       <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button 
@@ -288,7 +288,7 @@ export default function QuizDetailPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
         <Card className="max-w-3xl mx-auto">
           <CardHeader>
             <CardTitle className="text-xl leading-relaxed">

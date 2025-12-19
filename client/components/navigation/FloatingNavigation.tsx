@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   Home,
-  FileText,
   NotebookPen,
   Brain,
   CreditCard,
@@ -45,12 +44,7 @@ const navigationItems = [
     icon: Home,
     description: "Overview and analytics",
   },
-  {
-    name: "Files",
-    href: "/dashboard/pdfs",
-    icon: FileText,
-    description: "View and manage PDFs",
-  },
+  
   {
     name: "Notes",
     href: "/dashboard/notes",
@@ -58,23 +52,13 @@ const navigationItems = [
     description: "Create and manage notes",
   },
   {
-    name: "Summarize",
-    href: "/dashboard/summarize",
-    icon: FileBarChart,
-    description: "AI-powered document summaries",
-  },
-  {
-    name: "Quizzes",
-    href: "/dashboard/quizzes",
-    icon: Brain,
-    description: "Interactive knowledge tests",
-  },
-  {
-    name: "Flashcards",
-    href: "/dashboard/flashcards",
-    icon: CreditCard,
-    description: "Study with spaced repetition",
-  },
+    name:"Knowledge Test",
+    href:"/dashboard/knowledge-test",
+    icon:Brain,
+    description:"Interactive knowledge tests"
+  }
+ 
+ 
 ];
 
 interface FloatingNavigationProps {

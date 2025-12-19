@@ -289,7 +289,7 @@ function StudyPage() {
       <StudyResults
         results={studyResults}
         onRestart={() => setStudyResults(null)}
-        onContinue={() => router.push('/dashboard/flashcards')}
+        onContinue={() => router.push('/dashboard/knowledge-test')}
         onSave={() => saveResults(studyResults)}
       />
     );
