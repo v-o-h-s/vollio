@@ -102,7 +102,7 @@ export function QuizCard({
       <CardFooter className="pt-2 pb-4">
         <div className="w-full flex items-center justify-between">
           <span className="text-sm font-medium">{questionCount} Questions</span>
-          <Link href={`/dashboard/quizzes/${q.id}`}>
+          <Link href={`/dashboard/knowledge-test/quizzes/${q.id}`}>
             <Button
               size="sm"
               className="rounded-full bg-purple-600 hover:bg-purple-700 text-white"

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Quiz Creation Schema
 export const quizCreationSchema = z.object({
-  documentId: z.string().max(1, "Only one document can be selected"),
+  documentId: z.string().min(1, "Please select a document"),
   userPrompt: z
     .string()
     .max(1000, "Prompt must be at most 1000 characters long")
@@ -11,14 +11,16 @@ export const quizCreationSchema = z.object({
   numberOfQuestions: z
     .number()
     .min(1, "Must have at least 1 question")
-    .max(44, "Maximum 44 questions allowed"),
-  language: z.enum(["en", "fr", "ar"]),
-  timeLimitMinutes: z.number().min(1).max(60),
+    .max(50, "Maximum 50 questions allowed"),
+  language: z.enum(["en", "fr", "es", "ar"]),
+  timeLimitMinutes: z.number().min(1).max(180).optional(),
   explanationLevel: z.enum(["none", "brief", "detailed"]),
   questionsDistribution: z
     .object({
-      MCQ: z.number().min(0).max(44),
-      TRUE_FALSE: z.number().min(0).max(44),
+      MCQ: z.number().min(0).max(50).optional(),
+      TRUE_FALSE: z.number().min(0).max(50).optional(),
+      FILL_BLANK: z.number().min(0).max(50).optional(),
+      SHORT_ANSWER: z.number().min(0).max(50).optional(),
     })
     .optional(),
 });

@@ -15,12 +15,14 @@ interface DocumentSelectionTabsProps {
   availableDocuments?: PDFDocument[];
   onSelectDocument?: (doc: PDFDocument) => void;
   isLoadingPDFs?: boolean;
+  selectedDocumentId?: string;
 }
 
 export function DocumentSelectionTabs({
   availableDocuments = [],
   onSelectDocument,
   isLoadingPDFs = false,
+  selectedDocumentId,
 }: DocumentSelectionTabsProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -54,26 +56,49 @@ export function DocumentSelectionTabs({
         ) : (
           <div className="max-h-[300px] overflow-y-auto divide-y divide-border/40">
             {filteredDocs.map((doc) => {
+              const isSelected = selectedDocumentId === doc.id;
               return (
                 <div
                   key={doc.id}
                   onClick={() => onSelectDocument?.(doc)}
-                  className={`flex items-center justify-between p-3 cursor-pointer transition-colors hover:bg-muted/50`}
+                  className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${
+                    isSelected
+                      ? "bg-indigo-500/10 border-l-2 border-indigo-500"
+                      : "hover:bg-muted/50 border-l-2 border-transparent"
+                  }`}
                 >
                   <div className="flex items-center gap-3 overflow-hidden">
-                    <div className={`p-2 rounded-lg`}>
+                    <div
+                      className={`p-2 rounded-lg ${
+                        isSelected
+                          ? "bg-indigo-500/20 text-indigo-600 dark:text-indigo-400"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
                       <FileText className="w-4 h-4" />
                     </div>
-                    <span className={`text-sm font-medium truncate`}>
+                    <span
+                      className={`text-sm font-medium truncate ${
+                        isSelected ? "text-indigo-700 dark:text-indigo-300" : ""
+                      }`}
+                    >
                       {doc.title}
                     </span>
                   </div>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                    className={`h-8 w-8 ${
+                      isSelected
+                        ? "text-indigo-600 bg-indigo-500/10"
+                        : "text-muted-foreground hover:text-primary"
+                    }`}
                   >
-                    <Plus className="w-4 h-4" />
+                    {isSelected ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Plus className="w-4 h-4" />
+                    )}
                   </Button>
                 </div>
               );

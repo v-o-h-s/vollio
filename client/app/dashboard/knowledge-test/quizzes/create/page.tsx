@@ -24,8 +24,22 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
-import { ArrowLeft, BookOpen, Zap, Clock, HelpCircle } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import {
+  ArrowLeft,
+  BookOpen,
+  Zap,
+  Clock,
+  HelpCircle,
+  Brain,
+  MessageSquare,
+  CheckCircle2,
+  ListTodo,
+  AlertCircle,
+  Globe,
+  Settings2,
+  FileText,
+} from "lucide-react";
 
 import { DocumentSelectionTabs } from "@/features/knowldge-test/quizzes/components/DocumentSelectionTabs";
 import { useGetAllFilesQuery } from "@/lib/store/apiSlice";
@@ -37,13 +51,60 @@ import { onSubmit } from "@/features/knowldge-test/quizzes/forms/createQuiz";
 import { toast } from "react-toastify";
 
 // Local enum-like constants mirroring server enums
-const difficulties = ["easy", "medium", "hard"] as const;
-const languages = ["en", "fr", "ar"] as const;
-const explanationLevels = ["none", "brief", "detailed"] as const;
+const difficulties = [
+  {
+    key: "easy",
+    label: "Easy",
+    description: "Focus on basics",
+    icon: Brain,
+    color: "text-green-500",
+  },
+  {
+    key: "medium",
+    label: "Medium",
+    description: "Standard level",
+    icon: Brain,
+    color: "text-amber-500",
+  },
+  {
+    key: "hard",
+    label: "Hard",
+    description: "Challenging",
+    icon: Brain,
+    color: "text-rose-500",
+  },
+] as const;
+
+const languages = [
+  { key: "en", label: "English", icon: "🇺🇸" },
+  { key: "fr", label: "French", icon: "🇫🇷" },
+  { key: "es", label: "Spanish", icon: "🇪🇸" },
+  { key: "ar", label: "Arabic", icon: "🇦🇪" },
+] as const;
+
+const explanationLevels = [
+  {
+    key: "none",
+    label: "None",
+    description: "Answers only",
+  },
+  {
+    key: "brief",
+    label: "Brief",
+    description: "Key points",
+  },
+  {
+    key: "detailed",
+    label: "Detailed",
+    description: "Full explanation",
+  },
+] as const;
 
 const questionTypes = [
-  { key: "MCQ", label: "Multiple Choice" },
-  { key: "TRUE_FALSE", label: "True / False" },
+  { key: "MCQ", label: "Multiple Choice", icon: ListTodo },
+  { key: "TRUE_FALSE", label: "True / False", icon: CheckCircle2 },
+  { key: "FILL_BLANK", label: "Fill in Blank", icon: MessageSquare },
+  { key: "SHORT_ANSWER", label: "Short Answer", icon: MessageSquare },
 ];
 
 export default function CreateQuizPage() {
@@ -133,11 +194,21 @@ export default function CreateQuizPage() {
         <Form {...form}>
           <form
             onSubmit={handleSubmit((data) =>
-              toast.promise(onSubmit(data), {
-                pending: "Creating quiz...",
-                success: "Quiz created successfully!",
-                error: "Failed to create quiz",
-              })
+              toast.promise(
+                onSubmit(data).then((res) => {
+                  if (res?.id) {
+                    router.push(`/dashboard/knowledge-test/quizzes/${res.id}`);
+                  } else {
+                    router.push("/dashboard/knowledge-test");
+                  }
+                  return res;
+                }),
+                {
+                  pending: "Creating quiz...",
+                  success: "Quiz created successfully!",
+                  error: "Failed to create quiz",
+                }
+              )
             )}
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -166,6 +237,7 @@ export default function CreateQuizPage() {
                       onSelectDocument={(d: any) =>
                         handleSelectDocument({ id: d.id })
                       }
+                      selectedDocumentId={documentId}
                       isLoadingPDFs={isLoadingDocuments}
                     />
                     {isSubmitted && errors.documentId && (
@@ -225,25 +297,39 @@ export default function CreateQuizPage() {
                         name="difficulty"
                         render={({ field }) => (
                           <FormItem className="space-y-3">
-                            <FormLabel className="text-sm font-semibold">
+                            <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                              <Brain className="w-4 h-4 text-indigo-500" />
                               Difficulty Level
                             </FormLabel>
                             <FormControl>
-                              <div className="flex p-1 bg-muted rounded-lg">
-                                {difficulties.map((diff) => (
-                                  <button
-                                    key={diff}
-                                    type="button"
-                                    onClick={() => field.onChange(diff)}
-                                    className={`flex-1 text-sm font-medium py-1.5 rounded-md transition-all ${
-                                      field.value === diff
-                                        ? "bg-background text-foreground shadow-xs"
-                                        : "text-muted-foreground hover:text-foreground"
-                                    }`}
-                                  >
-                                    {diff}
-                                  </button>
-                                ))}
+                              <div className="grid grid-cols-3 gap-2">
+                                {difficulties.map((diff) => {
+                                  const Icon = diff.icon;
+                                  const isSelected = field.value === diff.key;
+                                  return (
+                                    <button
+                                      key={diff.key}
+                                      type="button"
+                                      onClick={() => field.onChange(diff.key)}
+                                      className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 ${
+                                        isSelected
+                                          ? "border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                                          : "border-border/50 hover:border-indigo-200 hover:bg-muted/50 text-muted-foreground"
+                                      }`}
+                                    >
+                                      <Icon
+                                        className={`w-5 h-5 mb-2 ${
+                                          isSelected
+                                            ? diff.color
+                                            : "text-muted-foreground/60"
+                                        }`}
+                                      />
+                                      <span className="text-xs font-bold uppercase tracking-wider">
+                                        {diff.label}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
                               </div>
                             </FormControl>
                             {isSubmitted && <FormMessage />}
@@ -257,18 +343,35 @@ export default function CreateQuizPage() {
                         name="language"
                         render={({ field }) => (
                           <FormItem className="space-y-3">
-                            <FormLabel className="text-sm font-semibold">
-                              Language
+                            <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                              <Globe className="w-4 h-4 text-indigo-500" />
+                              Questions Language
                             </FormLabel>
                             <FormControl>
-                              <select
-                                {...field}
-                                className="w-full h-10 px-3 rounded-md border border-input bg-background/50 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                              >
-                                <option value="en">English (EN)</option>
-                                <option value="fr">French (FR)</option>
-                                <option value="ar">Arabic (AR)</option>
-                              </select>
+                              <div className="grid grid-cols-2 gap-2">
+                                {languages.map((lang) => {
+                                  const isSelected = field.value === lang.key;
+                                  return (
+                                    <button
+                                      key={lang.key}
+                                      type="button"
+                                      onClick={() => field.onChange(lang.key)}
+                                      className={`flex items-center gap-3 px-4 py-2 rounded-xl border-2 transition-all duration-200 ${
+                                        isSelected
+                                          ? "border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                                          : "border-border/50 hover:border-indigo-200 hover:bg-muted/50 text-muted-foreground"
+                                      }`}
+                                    >
+                                      <span className="text-xl">
+                                        {lang.icon}
+                                      </span>
+                                      <span className="text-xs font-bold uppercase tracking-wider">
+                                        {lang.label}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
                             </FormControl>
                             {isSubmitted && <FormMessage />}
                           </FormItem>
@@ -282,30 +385,48 @@ export default function CreateQuizPage() {
                         control={control}
                         name="numberOfQuestions"
                         render={({ field }) => (
-                          <FormItem className="space-y-2">
+                          <FormItem className="space-y-4">
                             <div className="flex justify-between items-center">
-                              <FormLabel className="text-sm font-semibold">
-                                Question Count
+                              <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                                <ListTodo className="w-4 h-4 text-indigo-500" />
+                                Number of Questions
                               </FormLabel>
-                              <span className="text-muted-foreground text-sm font-normal">
-                                {numberOfQuestions}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={50}
+                                  className="w-16 h-8 text-center bg-muted/20 font-bold"
+                                  {...field}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value
+                                        ? Math.min(
+                                            50,
+                                            Math.max(1, Number(e.target.value))
+                                          )
+                                        : undefined
+                                    )
+                                  }
+                                />
+                                <span className="text-xs text-muted-foreground">
+                                  / 50
+                                </span>
+                              </div>
                             </div>
                             <FormControl>
-                              <Input
-                                type="number"
-                                min={1}
-                                max={44}
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(
-                                    e.target.value
-                                      ? Number(e.target.value)
-                                      : undefined
-                                  )
-                                }
-                                className="bg-muted/20"
-                              />
+                              <div className="px-2">
+                                <Slider
+                                  value={[field.value || 1]}
+                                  min={1}
+                                  max={50}
+                                  step={1}
+                                  onValueChange={(vals) =>
+                                    field.onChange(vals[0])
+                                  }
+                                  className="py-4"
+                                />
+                              </div>
                             </FormControl>
                             {isSubmitted && <FormMessage />}
                           </FormItem>
@@ -317,29 +438,48 @@ export default function CreateQuizPage() {
                         control={control}
                         name="timeLimitMinutes"
                         render={({ field }) => (
-                          <FormItem className="space-y-2">
+                          <FormItem className="space-y-4">
                             <div className="flex justify-between items-center">
-                              <FormLabel className="text-sm font-semibold">
+                              <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-indigo-500" />
                                 Time Limit (min)
                               </FormLabel>
-                              <span className="text-muted-foreground text-sm font-normal">
-                                {timeLimitMinutes} min
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="number"
+                                  min={0}
+                                  max={180}
+                                  placeholder="No limit"
+                                  className="w-20 h-8 text-center bg-muted/20 font-bold"
+                                  value={field.value ?? ""}
+                                  onChange={(e) =>
+                                    field.onChange(
+                                      e.target.value === ""
+                                        ? undefined
+                                        : Math.min(180, Number(e.target.value))
+                                    )
+                                  }
+                                />
+                                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                  {field.value ? "min" : "No limit"}
+                                </span>
+                              </div>
                             </div>
                             <FormControl>
-                              <Input
-                                type="number"
-                                min={1}
-                                {...field}
-                                onChange={(e) =>
-                                  field.onChange(
-                                    e.target.value
-                                      ? Number(e.target.value)
-                                      : undefined
-                                  )
-                                }
-                                className="bg-muted/20"
-                              />
+                              <div className="px-2">
+                                <Slider
+                                  value={[field.value || 0]}
+                                  min={0}
+                                  max={120}
+                                  step={5}
+                                  onValueChange={(vals) =>
+                                    field.onChange(
+                                      vals[0] === 0 ? undefined : vals[0]
+                                    )
+                                  }
+                                  className="py-4"
+                                />
+                              </div>
                             </FormControl>
                             {isSubmitted && <FormMessage />}
                           </FormItem>
@@ -353,26 +493,33 @@ export default function CreateQuizPage() {
                       name="explanationLevel"
                       render={({ field }) => (
                         <FormItem className="space-y-3">
-                          <FormLabel className="text-sm font-semibold">
+                          <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-indigo-500" />
                             Explanation Detail
                           </FormLabel>
                           <FormControl>
                             <div className="grid grid-cols-3 gap-3">
-                              {explanationLevels.map((level) => (
-                                <div
-                                  key={level}
-                                  onClick={() => field.onChange(level)}
-                                  className={`cursor-pointer border rounded-lg p-3 text-center transition-all ${
-                                    field.value === level
-                                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-500"
-                                      : "border-border hover:border-indigo-200 hover:bg-muted/50"
-                                  }`}
-                                >
-                                  <span className="text-sm font-medium">
-                                    {level}
-                                  </span>
-                                </div>
-                              ))}
+                              {explanationLevels.map((level) => {
+                                const isSelected = field.value === level.key;
+                                return (
+                                  <div
+                                    key={level.key}
+                                    onClick={() => field.onChange(level.key)}
+                                    className={`cursor-pointer border-2 rounded-xl p-3 text-center transition-all duration-200 ${
+                                      isSelected
+                                        ? "border-indigo-500 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 shadow-sm"
+                                        : "border-border/50 hover:border-indigo-200 hover:bg-muted/50 text-muted-foreground"
+                                    }`}
+                                  >
+                                    <div className="text-sm font-bold uppercase tracking-wider mb-1">
+                                      {level.label}
+                                    </div>
+                                    <div className="text-[10px] text-muted-foreground leading-tight">
+                                      {level.description}
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </FormControl>
                           {isSubmitted && <FormMessage />}
@@ -381,54 +528,80 @@ export default function CreateQuizPage() {
                     />
 
                     {/* Distribution */}
-                    <div className="space-y-3">
-                      <FormLabel className="text-sm font-semibold">
-                        Question Types Distribution (Optional)
-                      </FormLabel>
-                      <div className="grid grid-cols-2 gap-4">
-                        {questionTypes.map((t) => (
-                          <FormField
-                            key={t.key}
-                            control={control}
-                            name={`questionsDistribution.${t.key}` as any}
-                            render={({ field }) => (
-                              <FormItem className="space-y-1">
-                                <FormLabel className="text-xs text-muted-foreground">
-                                  {t.label}
-                                </FormLabel>
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    min={0}
-                                    placeholder="Auto"
-                                    value={field.value ?? ""}
-                                    onChange={(e) =>
-                                      field.onChange(
-                                        e.target.value === ""
-                                          ? undefined
-                                          : Number(e.target.value)
-                                      )
-                                    }
-                                    className="h-8 text-sm"
-                                  />
-                                </FormControl>
-                                {isSubmitted && <FormMessage />}
-                              </FormItem>
+                    <div className="space-y-4 pt-4 border-t border-border/40">
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-sm font-semibold flex items-center gap-2">
+                          <Settings2 className="w-4 h-4 text-indigo-500" />
+                          Question Mix (Optional)
+                        </FormLabel>
+                        {totalDistribution > 0 && (
+                          <div
+                            className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              totalDistribution !== numberOfQuestions
+                                ? "bg-amber-500/10 text-amber-600"
+                                : "bg-green-500/10 text-green-600"
+                            }`}
+                          >
+                            {totalDistribution !== numberOfQuestions ? (
+                              <AlertCircle className="w-3 h-3" />
+                            ) : (
+                              <CheckCircle2 className="w-3 h-3" />
                             )}
-                          />
-                        ))}
+                            {totalDistribution} / {numberOfQuestions} Total
+                          </div>
+                        )}
                       </div>
-                      {totalDistribution > 0 && (
-                        <p
-                          className={`text-xs mt-1 ${
-                            totalDistribution !== numberOfQuestions
-                              ? "text-amber-500"
-                              : "text-green-500"
-                          }`}
-                        >
-                          Sum: {totalDistribution} / {numberOfQuestions} target
-                        </p>
-                      )}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {questionTypes.map((t) => {
+                          const Icon = t.icon;
+                          return (
+                            <FormField
+                              key={t.key}
+                              control={control}
+                              name={`questionsDistribution.${t.key}` as any}
+                              render={({ field }) => (
+                                <FormItem className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="p-1.5 rounded-lg bg-muted/50">
+                                      <Icon className="w-3.5 h-3.5 text-indigo-500" />
+                                    </div>
+                                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
+                                      {t.key.replace("_", " ")}
+                                    </FormLabel>
+                                  </div>
+                                  <FormControl>
+                                    <Input
+                                      type="number"
+                                      min={0}
+                                      max={50}
+                                      placeholder="0"
+                                      value={field.value ?? ""}
+                                      onChange={(e) =>
+                                        field.onChange(
+                                          e.target.value === ""
+                                            ? undefined
+                                            : Number(e.target.value)
+                                        )
+                                      }
+                                      className="h-9 text-center bg-muted/20 focus:bg-background transition-colors font-semibold"
+                                    />
+                                  </FormControl>
+                                  {isSubmitted && <FormMessage />}
+                                </FormItem>
+                              )}
+                            />
+                          );
+                        })}
+                      </div>
+                      {totalDistribution > 0 &&
+                        totalDistribution !== numberOfQuestions && (
+                          <p className="text-[10px] text-amber-600 flex items-center gap-1">
+                            <AlertCircle className="w-3 h-3" />
+                            Wait, the total ({totalDistribution}) doesn&apos;t
+                            match your requested count ({numberOfQuestions}). AI
+                            will adjust this for you.
+                          </p>
+                        )}
                     </div>
                   </CardContent>
                 </Card>
@@ -436,73 +609,106 @@ export default function CreateQuizPage() {
 
               {/* Right Column: Summary & Path */}
               <div className="lg:col-span-4 space-y-6">
-                <Card className="border-border/40 shadow-md sticky top-6 bg-card/20">
-                  <CardHeader className="bg-muted/50 pb-4">
-                    <CardTitle className="text-lg">Summary</CardTitle>
+                <Card className="border-border/40 shadow-xl sticky top-6 overflow-hidden bg-card/20 backdrop-blur-md">
+                  <CardHeader className="bg-indigo-600/10 border-b border-border/40 pb-4">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings2 className="w-5 h-5 text-indigo-600" />
+                      Quiz Summary
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    <div className="space-y-2 pb-4 border-b border-border/50">
-                      <span className="text-xs uppercase text-muted-foreground font-semibold tracking-wider">
-                        Target Document
+                  <CardContent className="p-6 space-y-6">
+                    <div className="space-y-3 pb-6 border-b border-border/40">
+                      <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest flex items-center gap-2">
+                        <BookOpen className="w-3 h-3" />
+                        Target Material
                       </span>
-                      <div className="font-medium text-sm truncate flex items-center gap-2">
-                        <BookOpen className="w-4 h-4 text-indigo-500" />
+                      <div className="font-semibold text-sm truncate p-3 bg-muted/30 rounded-xl border border-border/40 flex items-center gap-3">
+                        <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600">
+                          <FileText className="w-4 h-4" />
+                        </div>
                         {selectedDocument ? (
-                          selectedDocument.title
+                          <span className="truncate">
+                            {selectedDocument.title}
+                          </span>
                         ) : (
                           <span className="text-muted-foreground italic">
-                            None selected
+                            No source selected
                           </span>
                         )}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pb-4 border-b border-border/50">
-                      <div>
-                        <span className="text-xs uppercase text-muted-foreground font-semibold tracking-wider">
+                    <div className="grid grid-cols-2 gap-y-6 gap-x-4 pb-6 border-b border-border/40">
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">
                           Difficulty
                         </span>
-                        <p className="font-medium text-sm mt-1 capitalize">
-                          {difficulty}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-xs uppercase text-muted-foreground font-semibold tracking-wider">
-                          Language
-                        </span>
-                        <p className="font-medium text-sm mt-1 uppercase">
-                          {language}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-xs uppercase text-muted-foreground font-semibold tracking-wider">
-                          Duration
-                        </span>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Clock className="w-3 h-3 text-muted-foreground" />
-                          <p className="font-medium text-sm">
-                            {timeLimitMinutes} min
+                        <div className="flex items-center gap-2">
+                          <Brain className="w-3.5 h-3.5 text-indigo-500" />
+                          <p className="font-bold text-sm capitalize">
+                            {difficulty}
                           </p>
                         </div>
                       </div>
-                      <div>
-                        <span className="text-xs uppercase text-muted-foreground font-semibold tracking-wider">
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">
+                          Language
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <Globe className="w-3.5 h-3.5 text-indigo-500" />
+                          <p className="font-bold text-sm uppercase">
+                            {language}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">
+                          Estimated Time
+                        </span>
+                        <div className="flex items-center gap-2 text-indigo-600">
+                          <Clock className="w-3.5 h-3.5" />
+                          <p className="font-bold text-sm">
+                            {timeLimitMinutes || "No limit"}
+                            {timeLimitMinutes && " min"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">
                           Questions
                         </span>
-                        <p className="font-medium text-sm mt-1">
-                          {numberOfQuestions}
-                        </p>
+                        <div className="flex items-center gap-2 text-indigo-600">
+                          <ListTodo className="w-3.5 h-3.5" />
+                          <p className="font-bold text-sm">
+                            {numberOfQuestions}
+                          </p>
+                        </div>
                       </div>
                     </div>
 
-                    <Button
-                      type="submit"
-                      disabled={!selectedDocument || isSubmitting}
-                      className="w-full bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Zap className="w-4 h-4 mr-2" />
-                      {isSubmitting ? "Generating..." : "Generate Quiz"}
-                    </Button>
+                    <div className="space-y-3">
+                      <Button
+                        type="submit"
+                        disabled={!selectedDocument || isSubmitting}
+                        className="w-full h-12 bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-[0_8px_16px_-6px_rgba(79,70,229,0.5)] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group"
+                      >
+                        {isSubmitting ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Generating...
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2">
+                            <Zap className="w-4 h-4 fill-white group-hover:animate-pulse" />
+                            Generate My Quiz
+                          </div>
+                        )}
+                      </Button>
+                      <p className="text-[10px] text-center text-muted-foreground">
+                        Ready to start? AI will generate your quiz in ~30
+                        seconds.
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
