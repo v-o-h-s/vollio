@@ -58,9 +58,10 @@ import { SemanticSearchService } from "../application/services/SemanticSearchSer
 import { FileProcessingService } from "../infrastructure/services/FileProcessingService";
 import { GenerativeAiService } from "../infrastructure/services/GenerativeAiService";
 import { QuizController } from "../interface/controllers/quiz.controller";
-import { CreateQuizUseCase } from "../application/use-cases/quizzes/CreateGeneralQuizUseCase";
+import { CreateGeneralQuizUseCase } from "../application/use-cases/quizzes/CreateGeneralQuizUseCase";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../application/use-cases/embedding/EnsureExistingOfDocumentEmbeddingUseCase";
 import { EmbedFileByIdUseCase } from "../application/use-cases/embedding/EmbedFileByIdUseCase";
+import { QuizRepository } from "../infrastructure/repositories/QuizRepository";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -365,7 +366,11 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    createQuizUseCase: asClass(CreateQuizUseCase, {
+    quizRepository: asClass(QuizRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    createQuizUseCase: asClass(CreateGeneralQuizUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

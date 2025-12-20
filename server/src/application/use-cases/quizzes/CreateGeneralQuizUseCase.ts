@@ -13,13 +13,15 @@ import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRep
 import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/client";
 import { ServerError } from "../../../shared/errors/ServerError";
 import { quizPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/quizzes";
+import { IQuizRepository } from "../../../domain/repositories/IQuizRepository";
 export class CreateGeneralQuizUseCase {
   constructor(
     private logger: FastifyBaseLogger,
     private generativeAiService: IGenerativeAiService,
     private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
     private getFileByIdUseCase: GetFileByIdUseCase,
-    private embeddingRepository: IEmbeddingRepository
+    private embeddingRepository: IEmbeddingRepository,
+    private quizRepository: IQuizRepository
   ) {}
 
   async execute(data: CreateQuizDTO): Promise<CreateQuizResponse> {
@@ -129,6 +131,9 @@ export class CreateGeneralQuizUseCase {
       `Generated ${finalQuestions.length} questions for the quiz.`
     );
     quiz.setQuestions(finalQuestions);
+
+    // Save the quiz to the database
+    await this.quizRepository.save(quiz);
 
     // mapping the quiz entity to response interface
     return QuizMapper.fromDomainToInterface(quiz);

@@ -29,8 +29,6 @@ const explanationLevels = ["none", "brief", "detailed"] as const;
 const questionTypes = [
 	{ key: "mcq", label: "MCQ" },
 	{ key: "true_false", label: "True / False" },
-	{ key: "fill_blanks", label: "Fill in the blanks" },
-	{ key: "short_answer", label: "Short answer" },
 ];
 
 export default function CreateQuizPage() {
@@ -50,8 +48,6 @@ export default function CreateQuizPage() {
 	const [questionsDistribution, setQuestionsDistribution] = useState<Record<string, number | "">>({
 		mcq: "",
 		true_false: "",
-		fill_blanks: "",
-		short_answer: "",
 	});
 
 	// Flashcards options
