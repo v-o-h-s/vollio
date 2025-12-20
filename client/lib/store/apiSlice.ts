@@ -8,21 +8,26 @@ import { annotationEndpoints } from "./endpoints/annotationEndpoints";
 import { folderEndpoints } from "./endpoints/folderEndpoints";
 import { highlightEndpoints } from "./endpoints/highlightEndpoints";
 import { notesEndpoints } from "./endpoints/notesEndpoints";
-import { pdfEndpoints } from "./endpoints/pdfEndpoints";
 import { summaryEndpoints } from "./endpoints/summaryEndpoints";
 import { googleClassroomEndpoints } from "./endpoints/googleClassroomEndpoints";
 import { fileEndpoints } from "./endpoints/fileEndpoint";
 import { testEndpoints } from "./endpoints/testEndpoints";
+import { quizEndpoints } from "./endpoints/quizEndpoints";
 
 // Simple base query configuration with cookie-based authentication
 const baseQuery = fetchBaseQuery({
   baseUrl: "http://localhost:3000/api/v1/",
   timeout: 30000, // 30 second timeout
-  credentials: 'include', // Include cookies for Supabase authentication
+  credentials: "include", // Include cookies for Supabase authentication
   prepareHeaders: (headers, { endpoint }) => {
     // Don't set Content-Type for FormData uploads (let browser set it with boundary)
     // fasity does not like it when you send him post like request without body
-    if (endpoint !== "uploadPDF" && endpoint !== "uploadFile" && endpoint !== "deleteFile" && endpoint !== "deleteFolder") {
+    if (
+      endpoint !== "uploadPDF" &&
+      endpoint !== "uploadFile" &&
+      endpoint !== "deleteFile" &&
+      endpoint !== "deleteFolder"
+    ) {
       headers.set("Content-Type", "application/json");
     }
     return headers;
@@ -36,15 +41,14 @@ export const apiSlice = createApi({
   tagTypes: [
     "Annotation",
     "Highlight",
-    "PDF",
     "Note",
     "Folder",
     "Summary",
     "GoogleClassroom",
     "File",
+    "Quiz",
   ],
   endpoints: (builder) => ({
-    ...pdfEndpoints(builder),
     ...notesEndpoints(builder),
     ...annotationEndpoints(builder),
     ...highlightEndpoints(builder),
@@ -53,17 +57,12 @@ export const apiSlice = createApi({
     ...googleClassroomEndpoints(builder),
     ...fileEndpoints(builder),
     ...testEndpoints(builder),
+    ...quizEndpoints(builder),
   }),
 });
 
 // Export hooks for usage in functional components
 export const {
-  useUploadPDFMutation,
-  useGetPDFsQuery,
-  useGetPDFQuery,
-  useDeletePDFMutation,
-  useRenamePDFMutation,
-  useMovePDFMutation,
   useGetNotesQuery,
   useGetNoteQuery,
   useCreateNoteMutation,
@@ -99,9 +98,13 @@ export const {
   useRenameFileMutation,
   useMoveFileMutation,
   useGetFileFromGoogleDriveQuery,
-
   useAddFileFromGoogleDriveMutation,
   useProcessTestMutation,
+  //quizzes
+  useGetAllQuizzesQuery,
+  useGetQuizQuery,
+  useCreateQuizMutation,
+  useDeleteQuizMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

@@ -8,7 +8,7 @@ import { ServerSuccessResponse } from "@shared/types/responses/general";
 import { CreateQuizDTO } from "@shared/validation/quizSchemas";
 
 export const quizEndpoints = (builder: ApiBuilder) => ({
-  getQuizById: builder.query<GetQuizByIdResponse, string>({
+  getQuiz: builder.query<GetQuizByIdResponse, string>({
     query: (id) => ({
       url: `quizzes/${id}`,
       method: "GET",
