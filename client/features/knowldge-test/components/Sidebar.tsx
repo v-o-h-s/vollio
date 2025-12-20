@@ -10,12 +10,16 @@ import { useMemo, useState } from "react";
 interface SidebarProps {
   section: "quizzes" | "flashcards";
   setSection: (section: "quizzes" | "flashcards") => void;
+
+  query: string;
+  setQuery: (query: string) => void;
   selectedDocument: string;
   setSelectedDocument: (document: string) => void;
   selectedDifficulty: string;
   setSelectedDifficulty: (difficulty: string) => void;
   selectedLanguage: string;
   setSelectedLanguage: (language: string) => void;
+
   flashcards: any[];
   documentsMap: Map<string, string>;
   quizzesData: CreateQuizResponse[];
@@ -25,6 +29,8 @@ export function Sidebar({
   section,
   setSection,
 
+  query,
+  setQuery,
   selectedDocument,
   setSelectedDocument,
   selectedDifficulty,
@@ -35,8 +41,6 @@ export function Sidebar({
   flashcards,
   quizzesData,
 }: SidebarProps) {
-  const [query, setQuery] = useState("");
-  
   /**
    *  we filter like the document that have quizzes so we pass them later
    * to the sidebar for filtering
@@ -49,9 +53,9 @@ export function Sidebar({
     });
     flashcards.forEach((f) => f.documentName && docs.add(f.documentName));
     return Array.from(docs);
-  }, [quizzesData, documentsMap]);
+  }, [quizzesData, documentsMap, flashcards]);
 
-  const quizzes = useMemo(
+  const filteredQuizzes = useMemo(
     () =>
       (quizzesData || []).filter((q) => {
         const matchesQuery = (q.title || "")
@@ -86,6 +90,26 @@ export function Sidebar({
       documentsMap,
     ]
   );
+
+  const filteredFlashcards = useMemo(
+    () =>
+      flashcards.filter((f) => {
+        const matchesQuery = (f.title || "")
+          .toLowerCase()
+          .includes(query.toLowerCase());
+
+        const matchesDocument =
+          selectedDocument === "all" || f.documentName === selectedDocument;
+
+        // Reusing category as language/category filter
+        const matchesLanguage =
+          selectedLanguage === "all" || f.category === selectedLanguage;
+
+        return matchesQuery && matchesDocument && matchesLanguage;
+      }),
+    [flashcards, query, selectedDocument, selectedLanguage]
+  );
+
   return (
     <aside className="col-span-1 lg:col-span-3 space-y-6">
       <Card className="border-border/50 shadow-sm bg-card/40 backdrop-blur-sm sticky top-6">
@@ -118,7 +142,7 @@ export function Sidebar({
                 variant="secondary"
                 className="ml-auto text-[10px] h-5 min-w-5 flex items-center justify-center"
               >
-                {quizzes.length}
+                {filteredQuizzes.length}
               </Badge>
             </Button>
             <Button
@@ -142,7 +166,7 @@ export function Sidebar({
                 variant="secondary"
                 className="ml-auto text-[10px] h-5 min-w-5 flex items-center justify-center"
               >
-                {flashcards.length}
+                {filteredFlashcards.length}
               </Badge>
             </Button>
           </div>

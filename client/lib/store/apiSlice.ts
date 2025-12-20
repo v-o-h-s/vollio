@@ -13,6 +13,7 @@ import { googleClassroomEndpoints } from "./endpoints/googleClassroomEndpoints";
 import { fileEndpoints } from "./endpoints/fileEndpoint";
 import { testEndpoints } from "./endpoints/testEndpoints";
 import { quizEndpoints } from "./endpoints/quizEndpoints";
+import { flashcardEndpoints } from "./endpoints/flashcardEndpoints";
 
 // Simple base query configuration with cookie-based authentication
 const baseQuery = fetchBaseQuery({
@@ -47,6 +48,7 @@ export const apiSlice = createApi({
     "GoogleClassroom",
     "File",
     "Quiz",
+    "Flashcard",
   ],
   endpoints: (builder) => ({
     ...notesEndpoints(builder),
@@ -58,6 +60,7 @@ export const apiSlice = createApi({
     ...fileEndpoints(builder),
     ...testEndpoints(builder),
     ...quizEndpoints(builder),
+    ...flashcardEndpoints(builder),
   }),
 });
 
@@ -105,6 +108,12 @@ export const {
   useGetQuizQuery,
   useCreateQuizMutation,
   useDeleteQuizMutation,
+  //flashcards
+  useGetAllFlashCardsSetsQuery,
+  useGetFlashCardsSetQuery,
+  useGetFlashCardsSetsByDocumentIdQuery,
+  useCreateFlashCardsSetMutation,
+  useDeleteFlashCardsSetMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

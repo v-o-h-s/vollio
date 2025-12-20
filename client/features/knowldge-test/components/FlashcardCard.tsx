@@ -12,20 +12,27 @@ import {
   DropdownMenuTrigger,
   Button,
 } from "@/components/ui";
-import { GraduationCap, Layers, Link, MoreVertical } from "lucide-react";
-export function FlashcardCard({ f }: { f: any }) {
-    const getDifficultyColor = (diff: string) => {
-        switch (diff) {
-          case "Easy":
-            return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
-          case "Medium":
-            return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
-          case "Hard":
-            return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
-          default:
-            return "bg-gray-100 text-gray-700";
-        }
-      };
+import Link from "next/link";
+import { GraduationCap, Layers, MoreVertical } from "lucide-react";
+
+interface FlashcardCardProps {
+  f: any;
+  onDelete?: (id: string) => void;
+}
+
+export function FlashcardCard({ f, onDelete }: FlashcardCardProps) {
+  const getDifficultyColor = (diff: string) => {
+    switch (diff) {
+      case "Easy":
+        return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+      case "Medium":
+        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+      case "Hard":
+        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
   return (
     <Card
       key={f.id}
@@ -50,8 +57,11 @@ export function FlashcardCard({ f }: { f: any }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem onClick={() => {}}>Edit</DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => onDelete?.(f.id)}
+              >
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>

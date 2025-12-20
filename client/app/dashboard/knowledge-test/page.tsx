@@ -20,61 +20,30 @@ import {
   useGetAllQuizzesQuery,
   useDeleteQuizMutation,
   useGetAllFilesQuery,
+  useGetAllFlashCardsSetsQuery,
+  useDeleteFlashCardsSetMutation,
 } from "@/lib/store/apiSlice";
-
-interface FlashcardSet {
-  id: string;
-  title: string;
-  cards: number;
-  category?: string;
-  documentName?: string;
-  createdAt: string;
-  mastery?: number; // percentage
-}
-
-const sampleFlashcards: FlashcardSet[] = [
-  {
-    id: "f1",
-    title: "Spanish - Food",
-    cards: 40,
-    category: "Language",
-    documentName: "SpanishNotes.pdf",
-    createdAt: "2025-03-10",
-    mastery: 45,
-  },
-  {
-    id: "f2",
-    title: "Calculus - Derivatives",
-    cards: 30,
-    category: "Mathematics",
-    documentName: "CalculusBook.pdf",
-    createdAt: "2025-02-25",
-    mastery: 10,
-  },
-  {
-    id: "f3",
-    title: "World History Timeline",
-    cards: 55,
-    category: "History",
-    documentName: "History.pdf",
-    createdAt: "2025-03-01",
-    mastery: 75,
-  },
-];
 
 export default function KnowledgeTestPage() {
   const {
     data: quizzesData,
     isLoading: isLoadingQuizzes,
-    error: quizzesFetchingError,
     refetch: refetchQuizzes,
   } = useGetAllQuizzesQuery();
   const { data: documentsData, refetch: refetchDocuments } =
     useGetAllFilesQuery();
   const [deleteQuiz] = useDeleteQuizMutation();
 
+  const {
+    data: flashcardsData,
+    isLoading: isLoadingFlashcards,
+    refetch: refetchFlashcards,
+  } = useGetAllFlashCardsSetsQuery();
+  const [deleteFlashcardSet] = useDeleteFlashCardsSetMutation();
+
   const [section, setSection] = useState<Section>("quizzes");
 
+  const [query, setQuery] = useState("");
   const [selectedDocument, setSelectedDocument] = useState<string>("all");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
@@ -86,10 +55,80 @@ export default function KnowledgeTestPage() {
     documentsData?.forEach((document) =>
       map.set(document.id, document.filename)
     );
+    // Also add documents from flashcards if they are not in the file list (unlikely but possible if deleted)
+    flashcardsData?.forEach((f) => {
+      if (f.documentId && !map.has(f.documentId)) {
+        // We don't have the filename if it's not in documentsData, maybe "Unknown" or just skip
+      }
+    });
+
     return map;
-  }, [documentsData]);
+  }, [documentsData, flashcardsData]);
 
+  // Map API response to UI model
+  const mappedFlashcards = useMemo(() => {
+    if (!flashcardsData) return [];
+    return flashcardsData.map((set) => ({
+      id: set.id,
+      title: set.name,
+      cards: set.flashCards?.length || 0,
+      category: set.language || "General",
+      documentName: documentsMap.get(set.documentId) || "Unknown Document",
+      createdAt: set.createdAt,
+      mastery: 0,
+      documentId: set.documentId,
+    }));
+  }, [flashcardsData, documentsMap]);
 
+  // Apply filters for Flashcards
+  const filteredFlashcards = useMemo(() => {
+    return mappedFlashcards.filter((f) => {
+      const matchesQuery = (f.title || "")
+        .toLowerCase()
+        .includes(query.toLowerCase());
+      const matchesDocument =
+        selectedDocument === "all" || f.documentName === selectedDocument; // Note: Sidebar uses documentName value for options
+
+      // Reusing category as language/category filter
+      // Adjust if logic for category/language distinction becomes stricter
+      const matchesLanguage =
+        selectedLanguage === "all" || f.category === selectedLanguage;
+
+      return matchesQuery && matchesDocument && matchesLanguage;
+    });
+  }, [mappedFlashcards, query, selectedDocument, selectedLanguage]);
+
+  // Apply filters for Quizzes
+  const filteredQuizzes = useMemo(() => {
+    return (quizzesData || []).filter((q) => {
+      const matchesQuery = (q.title || "")
+        .toLowerCase()
+        .includes(query.toLowerCase());
+
+      const filename = documentsMap.get(q.fileId);
+      const matchesDocument =
+        selectedDocument === "all" || filename === selectedDocument;
+
+      const matchesDifficulty =
+        selectedDifficulty === "all" ||
+        q.settings.difficultyLevel?.toLowerCase() ===
+          selectedDifficulty.toLowerCase();
+
+      const matchesLanguage =
+        selectedLanguage === "all" || q.language === selectedLanguage;
+
+      return (
+        matchesQuery && matchesDocument && matchesDifficulty && matchesLanguage
+      );
+    });
+  }, [
+    quizzesData,
+    query,
+    selectedDocument,
+    selectedDifficulty,
+    selectedLanguage,
+    documentsMap,
+  ]);
 
   return (
     <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
@@ -144,15 +183,20 @@ export default function KnowledgeTestPage() {
         <Sidebar
           section={section}
           setSection={setSection}
-          documentsMap={documentsMap}
+          query={query}
+          setQuery={setQuery}
           selectedDocument={selectedDocument}
           setSelectedDocument={setSelectedDocument}
           selectedDifficulty={selectedDifficulty}
           setSelectedDifficulty={setSelectedDifficulty}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
-          quizzesData={quizzesData || []}
-          flashcards={sampleFlashcards}
+          documentsMap={documentsMap}
+          quizzesData={quizzesData || []} // Pass raw data for available documents calculation
+          flashcards={mappedFlashcards} // Pass raw mapped data for available documents calculation
+
+          // Pass counts if needed, but Sidebar calculates filtering internally currently.
+          // We will update Sidebar to use these props.
         />
 
         {/* Main Content Grid */}
@@ -193,13 +237,25 @@ export default function KnowledgeTestPage() {
             )}
             {section === "quizzes" &&
               !isLoadingQuizzes &&
-              quizzesData?.map((q) => (
+              filteredQuizzes.map((q) => (
                 <QuizCard key={q.id} q={q} onDelete={(id) => deleteQuiz(id)} />
               ))}
 
             {/* Flashcard Cards */}
+            {section === "flashcards" && isLoadingFlashcards && (
+              <div className="col-span-full flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            )}
             {section === "flashcards" &&
-              sampleFlashcards?.map((f) => <FlashcardCard f={f} />)}
+              !isLoadingFlashcards &&
+              filteredFlashcards?.map((f) => (
+                <FlashcardCard
+                  key={f.id}
+                  f={f}
+                  onDelete={(id) => deleteFlashcardSet(id)}
+                />
+              ))}
 
             {/* Empty States */}
             {section === "quizzes" && quizzesData?.length === 0 && (
@@ -212,16 +268,18 @@ export default function KnowledgeTestPage() {
                 </p>
               </div>
             )}
-            {section === "flashcards" && sampleFlashcards?.length === 0 && (
-              <div className="col-span-full flex flex-col items-center justify-center p-12 text-center border rounded-xl border-dashed bg-muted/30">
-                <Layers className="w-12 h-12 text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-medium">No flashcards found</h3>
-                <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-                  Try adjusting your filters or create a new deck to get started
-                  studying.
-                </p>
-              </div>
-            )}
+            {section === "flashcards" &&
+              !isLoadingFlashcards &&
+              filteredFlashcards?.length === 0 && (
+                <div className="col-span-full flex flex-col items-center justify-center p-12 text-center border rounded-xl border-dashed bg-muted/30">
+                  <Layers className="w-12 h-12 text-muted-foreground/50 mb-4" />
+                  <h3 className="text-lg font-medium">No flashcards found</h3>
+                  <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+                    Try adjusting your filters or create a new deck to get
+                    started studying.
+                  </p>
+                </div>
+              )}
           </div>
         </main>
       </div>
