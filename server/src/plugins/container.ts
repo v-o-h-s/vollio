@@ -63,6 +63,13 @@ import { EnsureExistingOfDocumentEmbeddingUseCase } from "../application/use-cas
 import { EmbedFileByIdUseCase } from "../application/use-cases/embedding/EmbedFileByIdUseCase";
 import { QuizRepository } from "../infrastructure/repositories/QuizRepository";
 import { CreateUserPromptQuizUseCase } from "../application/use-cases/quizzes/CreateUserPromptQuizUseCase";
+import { FlashCardsSetRepository } from "../infrastructure/repositories/FlashCardsSetRepository";
+import { GenerateGeneralFlashCardsUseCase } from "../application/use-cases/flashcards/GenerateGeneralFlashCardsUseCase";
+import { GetAllFlashCardsSetsUseCase } from "../application/use-cases/flashcards/GetAllFlashCardsSetsUseCase";
+import { GetFlashCardsSetByIdUseCase } from "../application/use-cases/flashcards/GetFlashCardsSetByIdUseCase";
+import { DeleteFlashCardsSetUseCase } from "../application/use-cases/flashcards/DeleteFlashCardsSetUseCase";
+import { GetFlashCardsSetsByDocumentIdUseCase } from "../application/use-cases/flashcards/GetFlashCardsSetsByDocumentIdUseCase";
+import { FlashCardsController } from "../interface/controllers/flashcards.controller";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -371,11 +378,45 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
+    flashCardsSetRepository: asClass(FlashCardsSetRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
     createQuizUseCase: asClass(CreateGeneralQuizUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
     createUserPromptQuizUseCase: asClass(CreateUserPromptQuizUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    generateGeneralFlashCardsUseCase: asClass(
+      GenerateGeneralFlashCardsUseCase,
+      {
+        lifetime: Lifetime.SCOPED,
+        injectionMode: InjectionMode.CLASSIC,
+      }
+    ),
+    getAllFlashCardsSetsUseCase: asClass(GetAllFlashCardsSetsUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getFlashCardsSetByIdUseCase: asClass(GetFlashCardsSetByIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    deleteFlashCardsSetUseCase: asClass(DeleteFlashCardsSetUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getFlashCardsSetsByDocumentIdUseCase: asClass(
+      GetFlashCardsSetsByDocumentIdUseCase,
+      {
+        lifetime: Lifetime.SCOPED,
+        injectionMode: InjectionMode.CLASSIC,
+      }
+    ),
+    flashCardsController: asClass(FlashCardsController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

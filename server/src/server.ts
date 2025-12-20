@@ -17,6 +17,7 @@ import { testRoutes } from "./interface/routes/test.route";
 import { folderRoutes } from "./interface/routes/folder.route";
 import { highlightRoutes } from "./interface/routes/highlight.route";
 import { quizRoutes } from "./interface/routes/quiz.route";
+import { flashcardRoutes } from "./interface/routes/flashcards.route";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -48,7 +49,6 @@ app.register(fastifyCors, {
   origin: true,
   credentials: true,
 });
-
 
 // Register multipart for file uploads
 app.register(fastifyMultipart, {
@@ -93,6 +93,9 @@ app.register(testRoutes, {
 });
 app.register(quizRoutes, {
   prefix: "/api/v1/quizzes",
+});
+app.register(flashcardRoutes, {
+  prefix: "/api/v1/flashcards",
 });
 
 async function start(): Promise<void> {

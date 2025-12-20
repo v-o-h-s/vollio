@@ -10,17 +10,35 @@ interface CreateFolderInput {
 }
 
 export class CreateFolderUseCase {
-
-  constructor(private folderRepository: IFolderRepository, private logger: FastifyBaseLogger) {}
+  constructor(
+    private folderRepository: IFolderRepository,
+    private logger: FastifyBaseLogger
+  ) {}
 
   async execute(input: CreateFolderInput): Promise<Folder> {
+    this.logger.info(
+      {
+        userId: input.userId,
+        folderName: input.name,
+        parentId: input.parentId,
+      },
+      "Executing CreateFolderUseCase"
+    );
     // Validate folder name
     if (!input.name || input.name.trim().length === 0) {
+      this.logger.warn(
+        { userId: input.userId },
+        "Folder name validation failed in CreateFolderUseCase: empty name"
+      );
       throw new Error("Folder name is required");
     }
 
     const folderName = input.name.trim();
     if (folderName.length > 255) {
+      this.logger.warn(
+        { userId: input.userId, folderName },
+        "Folder name validation failed in CreateFolderUseCase: name too long"
+      );
       throw new Error("Folder name cannot exceed 255 characters");
     }
 
@@ -32,6 +50,10 @@ export class CreateFolderUseCase {
     );
 
     if (nameExists) {
+      this.logger.warn(
+        { userId: input.userId, folderName, parentId: input.parentId },
+        "Folder already exists in CreateFolderUseCase"
+      );
       throw new Error(
         `A folder with the name "${folderName}" already exists in this location`
       );
@@ -45,6 +67,10 @@ export class CreateFolderUseCase {
       );
 
       if (!parentFolder) {
+        this.logger.warn(
+          { userId: input.userId, parentId: input.parentId },
+          "Parent folder not found in CreateFolderUseCase"
+        );
         throw new Error("Parent folder not found or access denied");
       }
     }
@@ -56,7 +82,11 @@ export class CreateFolderUseCase {
       folderName,
       input.parentId || null
     );
-   this.logger.info(`Creating folder ${folder}`);
-    return this.folderRepository.createFolder(folder);
+    const result = await this.folderRepository.createFolder(folder);
+    this.logger.info(
+      { folderId: result.getId() },
+      "CreateFolderUseCase executed successfully"
+    );
+    return result;
   }
 }

@@ -1,13 +1,18 @@
 import { IFileRepository } from "../../../domain/repositories/IFileRepository";
 import { PdfDetails } from "../../../shared/types/responses/fileRoutes";
+import { FastifyBaseLogger } from "fastify";
 
 export class GetAllFilesUseCase {
-  constructor(private fileRepository: IFileRepository) { }
+  constructor(
+    private fileRepository: IFileRepository,
+    private logger: FastifyBaseLogger
+  ) {}
 
   async execute(userId: string): Promise<PdfDetails[]> {
+    this.logger.info({ userId }, "Executing GetAllFilesUseCase");
     const files = await this.fileRepository.getAllFilesByUserId(userId);
 
-    return files.map((file) => {
+    const result = files.map((file) => {
       const source = file.getSource();
       const isGoogleDriveFile = !!source.googleFileId;
 
@@ -19,8 +24,13 @@ export class GetAllFilesUseCase {
         folderId: file.getFolderId() || null,
         isGoogleDriveFile: file.getSource().googleFileId ? true : false,
         uploadedAt: new Date().toISOString(), // This should come from the entity if needed
-
       };
     });
+
+    this.logger.info(
+      { userId, count: result.length },
+      "GetAllFilesUseCase executed successfully"
+    );
+    return result;
   }
 }

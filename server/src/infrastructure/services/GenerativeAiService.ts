@@ -68,4 +68,42 @@ export class GenerativeAiService implements IGenerativeAiService {
       return { questions: [] };
     }
   }
+
+  async generateFlashCards(
+    prompt: string
+  ): Promise<{ flashCards: any[]; name?: string; summary?: string }> {
+    try {
+      const completion = await openRouter.chat.send({
+        model: "google/gemini-2.0-flash-001",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        stream: false,
+      });
+
+      const content = completion.choices?.[0]?.message?.content || "{}";
+
+      const contentStr = String(content);
+      const cleanContent = contentStr
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+      const parsed = JSON.parse(cleanContent);
+
+      return {
+        flashCards: Array.isArray(parsed.flashCards) ? parsed.flashCards : [],
+        name: typeof parsed.name === "string" ? parsed.name : undefined,
+        summary:
+          typeof parsed.summary === "string" ? parsed.summary : undefined,
+      };
+    } catch (error) {
+      this.logger.error(
+        "GenerativeAiService.generateFlashCards failed: " + error
+      );
+      return { flashCards: [] };
+    }
+  }
 }

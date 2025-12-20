@@ -1,4 +1,5 @@
 import { IFolderRepository } from "../../../domain/repositories/IFolderRepository";
+import { FastifyBaseLogger } from "fastify";
 
 interface DeleteFolderInput {
   userId: string;
@@ -7,9 +8,20 @@ interface DeleteFolderInput {
 }
 
 export class DeleteFolderUseCase {
-  constructor(private folderRepository: IFolderRepository) {}
+  constructor(
+    private folderRepository: IFolderRepository,
+    private logger: FastifyBaseLogger
+  ) {}
 
   async execute(input: DeleteFolderInput): Promise<void> {
+    this.logger.info(
+      {
+        folderId: input.folderId,
+        userId: input.userId,
+        moveContentsTo: input.moveContentsTo,
+      },
+      "Executing DeleteFolderUseCase"
+    );
     // Validate folder exists and belongs to user
     const existingFolder = await this.folderRepository.getFolderById(
       input.folderId,
@@ -17,6 +29,10 @@ export class DeleteFolderUseCase {
     );
 
     if (!existingFolder) {
+      this.logger.warn(
+        { folderId: input.folderId, userId: input.userId },
+        "Folder not found in DeleteFolderUseCase"
+      );
       throw new Error("Folder not found or access denied");
     }
 
@@ -28,11 +44,19 @@ export class DeleteFolderUseCase {
       );
 
       if (!targetFolder) {
+        this.logger.warn(
+          { targetFolderId: input.moveContentsTo, userId: input.userId },
+          "Target folder not found in DeleteFolderUseCase"
+        );
         throw new Error("Target folder not found or access denied");
       }
     }
 
     // Move PDFs to target folder or root
+    this.logger.info(
+      { folderId: input.folderId, targetFolderId: input.moveContentsTo },
+      "Moving PDFs out of folder being deleted"
+    );
     await this.folderRepository.movePdfsBetweenFolders(
       input.folderId,
       input.moveContentsTo || null,
@@ -40,6 +64,10 @@ export class DeleteFolderUseCase {
     );
 
     // Move subfolders to target folder or root
+    this.logger.info(
+      { folderId: input.folderId, targetFolderId: input.moveContentsTo },
+      "Moving subfolders out of folder being deleted"
+    );
     await this.folderRepository.moveSubfoldersBetweenFolders(
       input.folderId,
       input.moveContentsTo || null,
@@ -48,5 +76,9 @@ export class DeleteFolderUseCase {
 
     // Delete the folder
     await this.folderRepository.deleteFolder(input.folderId, input.userId);
+    this.logger.info(
+      { folderId: input.folderId },
+      "DeleteFolderUseCase executed successfully"
+    );
   }
 }

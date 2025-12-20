@@ -13,4 +13,7 @@ export interface IGenerativeAiService {
   generateQuizQuestions(
     prompt: string
   ): Promise<{ questions: QuizQuestion[]; title?: string; summary?: string }>;
+  generateFlashCards(
+    prompt: string
+  ): Promise<{ flashCards: any[]; name?: string; summary?: string }>;
 }

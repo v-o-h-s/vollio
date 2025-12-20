@@ -8,6 +8,8 @@ import {
 import { IQuizRepository } from "../../domain/repositories/IQuizRepository";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 import { QuizMapper } from "../../shared/mappers/QuizMapper";
+import { FastifyBaseLogger } from "fastify";
+
 /**
  * QuizRepository
  *
@@ -18,7 +20,10 @@ import { QuizMapper } from "../../shared/mappers/QuizMapper";
  * @implements {IQuizRepository}
  */
 export class QuizRepository implements IQuizRepository {
-  constructor(private supabaseClient: SupabaseClient) {}
+  constructor(
+    private supabaseClient: SupabaseClient,
+    private logger: FastifyBaseLogger
+  ) {}
 
   /**
    * Saves a quiz to the database.
@@ -27,6 +32,7 @@ export class QuizRepository implements IQuizRepository {
    * @returns {Promise<void>}
    */
   async save(quiz: Quiz): Promise<void> {
+    this.logger.info({ quizId: quiz.getId() }, "Saving quiz to database");
     const { error: quizError } = await this.supabaseClient
       .from("quizzes")
       .insert({
@@ -42,10 +48,22 @@ export class QuizRepository implements IQuizRepository {
         created_at: quiz.getCreatedAt().toISOString(),
       });
 
-    if (quizError) throw new DatabaseError(quizError);
+    if (quizError) {
+      this.logger.error(
+        { error: quizError, quizId: quiz.getId() },
+        "Error saving quiz"
+      );
+      throw new DatabaseError(quizError);
+    }
 
     const questions = quiz.getQuestions();
-    if (questions.length === 0) return;
+    if (questions.length === 0) {
+      this.logger.info(
+        { quizId: quiz.getId() },
+        "No questions to save for quiz"
+      );
+      return;
+    }
 
     // Prepare quiz_questions
     const questionRecords = questions.map((q, index) => ({
@@ -62,7 +80,13 @@ export class QuizRepository implements IQuizRepository {
       .from("quiz_questions")
       .insert(questionRecords);
 
-    if (questionsError) throw new DatabaseError(questionsError);
+    if (questionsError) {
+      this.logger.error(
+        { error: questionsError, quizId: quiz.getId() },
+        "Error saving quiz questions"
+      );
+      throw new DatabaseError(questionsError);
+    }
 
     // Prepare sub-table records
     const mcqOptions: any[] = [];
@@ -93,15 +117,31 @@ export class QuizRepository implements IQuizRepository {
       const { error } = await this.supabaseClient
         .from("mcq_options")
         .insert(mcqOptions);
-      if (error) throw new DatabaseError(error);
+      if (error) {
+        this.logger.error(
+          { error, quizId: quiz.getId() },
+          "Error saving MCQ options"
+        );
+        throw new DatabaseError(error);
+      }
     }
 
     if (tfAnswers.length > 0) {
       const { error } = await this.supabaseClient
         .from("true_false_answers")
         .insert(tfAnswers);
-      if (error) throw new DatabaseError(error);
+      if (error) {
+        this.logger.error(
+          { error, quizId: quiz.getId() },
+          "Error saving True/False answers"
+        );
+        throw new DatabaseError(error);
+      }
     }
+    this.logger.info(
+      { quizId: quiz.getId(), questionsCount: questions.length },
+      "Quiz saved successfully"
+    );
   }
 
   /**
@@ -111,6 +151,7 @@ export class QuizRepository implements IQuizRepository {
    * @returns {Promise<Quiz | null>} The quiz if found, otherwise null.
    */
   async findById(id: string): Promise<Quiz | null> {
+    this.logger.info({ quizId: id }, "Finding quiz by ID");
     const { data: quizData, error: quizError } = await this.supabaseClient
       .from("quizzes")
       .select(
@@ -127,10 +168,18 @@ export class QuizRepository implements IQuizRepository {
       .single();
 
     if (quizError) {
-      if (quizError.code === "PGRST116") return null;
+      if (quizError.code === "PGRST116") {
+        this.logger.info({ quizId: id }, "Quiz not found");
+        return null;
+      }
+      this.logger.error(
+        { error: quizError, quizId: id },
+        "Error finding quiz by ID"
+      );
       throw new DatabaseError(quizError);
     }
 
+    this.logger.info({ quizId: id }, "Quiz found");
     return QuizMapper.fromPersistenceToDomain(quizData);
   }
 
@@ -140,12 +189,20 @@ export class QuizRepository implements IQuizRepository {
    * @returns {Promise<Quiz[]>} An array of quizzes.
    */
   async findAll(): Promise<Quiz[]> {
+    this.logger.info("Finding all quizzes");
     const { data, error } = await this.supabaseClient
       .from("quizzes")
       .select(`*`)
       .order("created_at", { ascending: false });
 
-    if (error) throw new DatabaseError(error);
+    if (error) {
+      this.logger.error({ error }, "Error finding all quizzes");
+      throw new DatabaseError(error);
+    }
+    this.logger.info(
+      { count: data?.length || 0 },
+      "Quizzes retrieved successfully"
+    );
     return (data || []).map((row) => QuizMapper.fromPersistenceToDomain(row));
   }
 
@@ -156,10 +213,15 @@ export class QuizRepository implements IQuizRepository {
    * @returns {Promise<void>}
    */
   async delete(id: string): Promise<void> {
+    this.logger.info({ quizId: id }, "Deleting quiz");
     const { error } = await this.supabaseClient
       .from("quizzes")
       .delete()
       .eq("id", id);
-    if (error) throw new DatabaseError(error);
+    if (error) {
+      this.logger.error({ error, quizId: id }, "Error deleting quiz");
+      throw new DatabaseError(error);
+    }
+    this.logger.info({ quizId: id }, "Quiz deleted successfully");
   }
 }

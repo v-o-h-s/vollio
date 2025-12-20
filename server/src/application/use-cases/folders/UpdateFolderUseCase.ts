@@ -1,5 +1,6 @@
 import { IFolderRepository } from "../../../domain/repositories/IFolderRepository";
 import { Folder } from "../../../domain/entities/Folder";
+import { FastifyBaseLogger } from "fastify";
 
 interface UpdateFolderInput {
   userId: string;
@@ -9,14 +10,23 @@ interface UpdateFolderInput {
 }
 
 export class UpdateFolderUseCase {
-  constructor(private folderRepository: IFolderRepository) {}
+  constructor(
+    private folderRepository: IFolderRepository,
+    private logger: FastifyBaseLogger
+  ) {}
 
   async execute(input: UpdateFolderInput): Promise<Folder> {
+    this.logger.info(
+      { folderId: input.folderId, userId: input.userId },
+      "Executing UpdateFolderUseCase"
+    );
     // Validate at least one field is provided
     if (input.name === undefined && input.parentId === undefined) {
-      throw new Error(
-        "At least one field (name or parentId) must be provided"
+      this.logger.warn(
+        { folderId: input.folderId },
+        "Validation failed in UpdateFolderUseCase: no fields provided"
       );
+      throw new Error("At least one field (name or parentId) must be provided");
     }
 
     // Get existing folder
@@ -26,11 +36,18 @@ export class UpdateFolderUseCase {
     );
 
     if (!existingFolder) {
+      this.logger.warn(
+        { folderId: input.folderId, userId: input.userId },
+        "Folder not found in UpdateFolderUseCase"
+      );
       throw new Error("Folder not found or access denied");
     }
 
     // Validate parent folder if provided
-    if (input.parentId !== undefined && input.parentId !== existingFolder.getParentId()) {
+    if (
+      input.parentId !== undefined &&
+      input.parentId !== existingFolder.getParentId()
+    ) {
       if (input.parentId) {
         // Check parent exists and belongs to user
         const parentFolder = await this.folderRepository.getFolderById(
@@ -39,11 +56,19 @@ export class UpdateFolderUseCase {
         );
 
         if (!parentFolder) {
+          this.logger.warn(
+            { parentId: input.parentId, userId: input.userId },
+            "Parent folder not found in UpdateFolderUseCase"
+          );
           throw new Error("Parent folder not found or access denied");
         }
 
         // Prevent circular references
         if (input.parentId === input.folderId) {
+          this.logger.warn(
+            { folderId: input.folderId },
+            "Circular reference check failed in UpdateFolderUseCase: same folder"
+          );
           throw new Error("A folder cannot be its own parent");
         }
 
@@ -52,10 +77,11 @@ export class UpdateFolderUseCase {
           input.folderId
         );
 
-        if (
-          descendants &&
-          descendants.some((d) => d.id === input.parentId)
-        ) {
+        if (descendants && descendants.some((d) => d.id === input.parentId)) {
+          this.logger.warn(
+            { folderId: input.folderId, parentId: input.parentId },
+            "Circular reference check failed in UpdateFolderUseCase: move to descendant"
+          );
           throw new Error("Cannot move folder to one of its descendants");
         }
       }
@@ -75,6 +101,10 @@ export class UpdateFolderUseCase {
       );
 
       if (nameExists) {
+        this.logger.warn(
+          { name: input.name, folderId: input.folderId },
+          "Folder name conflict in UpdateFolderUseCase"
+        );
         throw new Error(
           "A folder with this name already exists in the same location"
         );
@@ -83,6 +113,11 @@ export class UpdateFolderUseCase {
       existingFolder.setName(input.name);
     }
 
-    return this.folderRepository.updateFolder(existingFolder);
+    const result = await this.folderRepository.updateFolder(existingFolder);
+    this.logger.info(
+      { folderId: result.getId() },
+      "UpdateFolderUseCase executed successfully"
+    );
+    return result;
   }
 }

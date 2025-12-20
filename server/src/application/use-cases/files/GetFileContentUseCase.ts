@@ -30,11 +30,13 @@ export class GetFileContentUseCase {
   ) {}
 
   async execute(fileId: string): Promise<GetFileContentResult> {
+    this.logger.info({ fileId }, "Executing GetFileContentUseCase");
     // Get file metadata from repository
     // Note: RLS in FileRepository ensures user can only access their own files
     const file = await this.fileRepository.getFileById(fileId);
 
     if (!file) {
+      this.logger.warn({ fileId }, "File not found in GetFileContentUseCase");
       throw new NotFoundError("File not found or access denied");
     }
 
@@ -43,13 +45,17 @@ export class GetFileContentUseCase {
 
     // If file is from Google Drive
     if (!storagePath && googleDriveId) {
-      this.logger.debug(`Fetching file from Google Drive: ${googleDriveId}`);
-      
+      this.logger.info(
+        { fileId, googleDriveId },
+        "Fetching file from Google Drive"
+      );
+
       // Ensure valid Google OAuth tokens
       await this.ensureValidTokenUseCase.execute();
-      
+
       const tokens = await this.userGoogleClassroomRepository.getTokens();
       if (!tokens || !tokens.access_token) {
+        this.logger.error("No access token available in GetFileContentUseCase");
         throw new ServerError("No access token available");
       }
 
@@ -60,9 +66,17 @@ export class GetFileContentUseCase {
       );
 
       if (!content) {
+        this.logger.warn(
+          { googleDriveId },
+          "File not found in Google Drive during GetFileContentUseCase"
+        );
         throw new NotFoundError("File not found in Google Drive");
       }
 
+      this.logger.info(
+        { fileId },
+        "GetFileContentUseCase executed successfully (Google Drive)"
+      );
       return {
         fileId: file.getId(),
         filename: file.getFileName(),
@@ -74,15 +88,23 @@ export class GetFileContentUseCase {
 
     // If file is from Supabase Storage
     if (storagePath) {
-      this.logger.debug(`Fetching file from storage: ${storagePath}`);
-      
+      this.logger.info({ fileId, storagePath }, "Fetching file from storage");
+
       // Download file from storage
       const content = await this.storageService.downloadFile(storagePath);
 
       if (!content) {
+        this.logger.warn(
+          { storagePath },
+          "File not found in storage during GetFileContentUseCase"
+        );
         throw new NotFoundError("File not found in storage");
       }
 
+      this.logger.info(
+        { fileId },
+        "GetFileContentUseCase executed successfully (Storage)"
+      );
       return {
         fileId: file.getId(),
         filename: file.getFileName(),
@@ -93,6 +115,12 @@ export class GetFileContentUseCase {
     }
 
     // No valid source found
-    throw new ServerError("File has no valid source (neither storage path nor Google Drive ID)");
+    this.logger.error(
+      { fileId },
+      "File has no valid source in GetFileContentUseCase"
+    );
+    throw new ServerError(
+      "File has no valid source (neither storage path nor Google Drive ID)"
+    );
   }
 }

@@ -6,26 +6,28 @@ import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { ServerError } from "../../../shared/errors/ServerError";
 import { EnsureValidTokenUseCase } from "../google-Classroom/EnsureValidTokenUseCase";
 import { File } from "../../../domain/entities/File";
+import { FastifyBaseLogger } from "fastify";
+
 export class AddFileFromGoogleDriveUseCase {
-  private fileRepository: IFileRepository;
-  private googleDriveService: IGoogleDriveService;
-  private ensureValidTokenUseCase: EnsureValidTokenUseCase;
-  private userGoogleClassroomRepository: UserGoogleClassroomRepository;
   constructor(
-    fileRepository: IFileRepository,
-    googleDriveService: IGoogleDriveService,
-    userGoogleClassroomRepository: UserGoogleClassroomRepository,
-    ensureValidTokenUseCase: EnsureValidTokenUseCase
-  ) {
-    this.fileRepository = fileRepository;
-    this.googleDriveService = googleDriveService;
-    this.userGoogleClassroomRepository = userGoogleClassroomRepository;
-    this.ensureValidTokenUseCase = ensureValidTokenUseCase;
-  }
+    private fileRepository: IFileRepository,
+    private googleDriveService: IGoogleDriveService,
+    private userGoogleClassroomRepository: UserGoogleClassroomRepository,
+    private ensureValidTokenUseCase: EnsureValidTokenUseCase,
+    private logger: FastifyBaseLogger
+  ) {}
+
   async execute(fileGoogleDriveId: string): Promise<void> {
+    this.logger.info(
+      { fileGoogleDriveId },
+      "Executing AddFileFromGoogleDriveUseCase"
+    );
     await this.ensureValidTokenUseCase.execute();
     const tokens = await this.userGoogleClassroomRepository.getTokens();
     if (!tokens || !tokens.access_token) {
+      this.logger.error(
+        "No access token available in AddFileFromGoogleDriveUseCase"
+      );
       throw new ServerError("No access token available");
     }
     const data = await this.googleDriveService.getFileMetadata(
@@ -33,6 +35,7 @@ export class AddFileFromGoogleDriveUseCase {
       fileGoogleDriveId
     );
     if (!data) {
+      this.logger.warn({ fileGoogleDriveId }, "File not found in Google Drive");
       throw new NotFoundError("file is not found");
     }
     const fileId = crypto.randomUUID();
@@ -48,5 +51,9 @@ export class AddFileFromGoogleDriveUseCase {
     );
 
     await this.fileRepository.addFile(file);
+    this.logger.info(
+      { fileId, fileGoogleDriveId },
+      "AddFileFromGoogleDriveUseCase executed successfully"
+    );
   }
 }

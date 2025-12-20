@@ -25,8 +25,16 @@ export class CreateGeneralQuizUseCase {
   ) {}
 
   async execute(data: CreateQuizDTO): Promise<CreateQuizResponse> {
+    this.logger.info(
+      { documentId: data.documentId },
+      "Executing CreateGeneralQuizUseCase"
+    );
     // getting chunks relevant to the prompt
     if (!(await this.getFileByIdUseCase.execute(data.documentId))) {
+      this.logger.warn(
+        { documentId: data.documentId },
+        "File not found in CreateGeneralQuizUseCase"
+      );
       throw new NotFoundError("File not found");
     }
     await this.ensureExistingOfDocumentEmbeddingUseCase.execute(
@@ -54,8 +62,13 @@ export class CreateGeneralQuizUseCase {
     let previousSummary = "";
 
     // If no chunks, return empty
-    if (!chunks.length)
+    if (!chunks.length) {
+      this.logger.error(
+        { documentId: data.documentId },
+        "No chunks found for the document"
+      );
       throw new ServerError("No chunks found for the document");
+    }
 
     // Create batches
     const batches: { content: string; metadata: ChunkMetadata }[][] = [];
@@ -63,7 +76,20 @@ export class CreateGeneralQuizUseCase {
       batches.push(chunks.slice(i, i + GENRATIVE_AI_CONFIG.BATCH_SIZE));
     }
 
+    this.logger.info(
+      { documentId: data.documentId, batchCount: batches.length },
+      "Starting batch processing for quiz generation"
+    );
+
     for (let i = 0; i < batches.length; i++) {
+      this.logger.info(
+        {
+          documentId: data.documentId,
+          currentBatch: i + 1,
+          totalBatches: batches.length,
+        },
+        "Processing batch for quiz"
+      );
       const batch = batches[i];
 
       // Clone DTO to adjust question counts per batch
@@ -171,6 +197,11 @@ export class CreateGeneralQuizUseCase {
 
     // Save the quiz to the database
     await this.quizRepository.save(quiz);
+
+    this.logger.info(
+      { quizId: quiz.getId() },
+      "CreateGeneralQuizUseCase completed successfully"
+    );
 
     // mapping the quiz entity to response interface
     return QuizMapper.fromDomainToInterface(quiz);

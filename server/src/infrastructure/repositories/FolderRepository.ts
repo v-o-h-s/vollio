@@ -2,20 +2,18 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { IFolderRepository } from "../../domain/repositories/IFolderRepository";
 import { Folder } from "../../domain/entities/Folder";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
-import type { FastifyBaseLogger, } from "fastify";
+import type { FastifyBaseLogger } from "fastify";
 export class FolderRepository implements IFolderRepository {
-  private supabaseClient: SupabaseClient;
-  private logger: FastifyBaseLogger;
-
-  constructor(supabaseClient: SupabaseClient, logger: FastifyBaseLogger) {
-    this.supabaseClient = supabaseClient;
-    this.logger = logger;
-  }
+  constructor(
+    private supabaseClient: SupabaseClient,
+    private logger: FastifyBaseLogger
+  ) {}
 
   async getFolderById(
     id: string,
     userId: string
   ): Promise<{ id: string; name: string; parentId: string | null } | null> {
+    this.logger.info({ folderId: id, userId }, "Getting folder by ID");
     const { data, error } = await this.supabaseClient
       .from("folders")
       .select("id, name, parent_id")
@@ -25,15 +23,17 @@ export class FolderRepository implements IFolderRepository {
 
     if (error) {
       if (error.code === "PGRST116") {
+        this.logger.info({ folderId: id, userId }, "Folder not found");
         return null;
       }
+      this.logger.error(
+        { error, folderId: id, userId },
+        "Error getting folder by ID"
+      );
       throw new DatabaseError(error);
     }
 
-    if (!data) {
-      return null;
-    }
-
+    this.logger.info({ folderId: id }, "Folder found");
     return {
       id: data.id,
       name: data.name,
@@ -42,6 +42,7 @@ export class FolderRepository implements IFolderRepository {
   }
 
   async getFolderEntity(id: string, userId: string): Promise<Folder | null> {
+    this.logger.info({ folderId: id, userId }, "Getting folder entity");
     const { data, error } = await this.supabaseClient
       .from("folders")
       .select("*")
@@ -51,15 +52,17 @@ export class FolderRepository implements IFolderRepository {
 
     if (error) {
       if (error.code === "PGRST116") {
+        this.logger.info({ folderId: id, userId }, "Folder entity not found");
         return null;
       }
+      this.logger.error(
+        { error, folderId: id, userId },
+        "Error getting folder entity"
+      );
       throw new DatabaseError(error);
     }
 
-    if (!data) {
-      return null;
-    }
-
+    this.logger.info({ folderId: id }, "Folder entity found");
     return new Folder(
       data.id,
       data.user_id,
@@ -73,6 +76,7 @@ export class FolderRepository implements IFolderRepository {
   async getAllUserFolders(
     userId: string
   ): Promise<Array<Folder & { pdfCount: number }>> {
+    this.logger.info({ userId }, "Getting all user folders");
     const { data: folders, error } = await this.supabaseClient
       .from("folders")
       .select("*")
@@ -80,17 +84,19 @@ export class FolderRepository implements IFolderRepository {
       .order("created_at", { ascending: false });
 
     if (error) {
+      this.logger.error({ error, userId }, "Error getting all user folders");
       throw new DatabaseError(error);
     }
 
     if (!folders || folders.length === 0) {
+      this.logger.info({ userId }, "No folders found for user");
       return [];
     }
 
     // Get PDF counts for each folder
     const foldersWithCounts: Array<Folder & { pdfCount: number }> =
       await Promise.all(
-        folders.map(async (folder) => {
+        folders.map(async (folder: any) => {
           const { count } = await this.supabaseClient
             .from("pdfs")
             .select("*", { count: "exact", head: true })
@@ -111,12 +117,18 @@ export class FolderRepository implements IFolderRepository {
         })
       );
 
+    this.logger.info(
+      { userId, count: foldersWithCounts.length },
+      "Retrieved all user folders"
+    );
     return foldersWithCounts;
   }
 
   async createFolder(folder: Folder): Promise<Folder> {
- 
-    console.log(`Creating folder ${folder}`);
+    this.logger.info(
+      { folderName: folder.getName(), userId: folder.getUserId() },
+      "Creating folder"
+    );
     const { data, error } = await this.supabaseClient
       .from("folders")
       .insert({
@@ -129,10 +141,14 @@ export class FolderRepository implements IFolderRepository {
       .single();
 
     if (error) {
-      this.logger.error(`Error creating folder: ${error.message}`);
+      this.logger.error(
+        { error, folderName: folder.getName() },
+        "Error creating folder"
+      );
       throw new DatabaseError(error);
     }
 
+    this.logger.info({ folderId: data.id }, "Folder created successfully");
     return new Folder(
       data.id,
       data.user_id,
@@ -144,6 +160,7 @@ export class FolderRepository implements IFolderRepository {
   }
 
   async updateFolder(folder: Folder): Promise<Folder> {
+    this.logger.info({ folderId: folder.getId() }, "Updating folder");
     const { data, error } = await this.supabaseClient
       .from("folders")
       .update({
@@ -156,9 +173,17 @@ export class FolderRepository implements IFolderRepository {
       .single();
 
     if (error) {
+      this.logger.error(
+        { error, folderId: folder.getId() },
+        "Error updating folder"
+      );
       throw new DatabaseError(error);
     }
 
+    this.logger.info(
+      { folderId: folder.getId() },
+      "Folder updated successfully"
+    );
     return new Folder(
       data.id,
       data.user_id,
@@ -170,6 +195,7 @@ export class FolderRepository implements IFolderRepository {
   }
 
   async deleteFolder(id: string, userId: string): Promise<void> {
+    this.logger.info({ folderId: id, userId }, "Deleting folder");
     const { error } = await this.supabaseClient
       .from("folders")
       .delete()
@@ -177,8 +203,13 @@ export class FolderRepository implements IFolderRepository {
       .eq("user_id", userId);
 
     if (error) {
+      this.logger.error(
+        { error, folderId: id, userId },
+        "Error deleting folder"
+      );
       throw new DatabaseError(error);
     }
+    this.logger.info({ folderId: id }, "Folder deleted successfully");
   }
 
   async folderNameExists(
@@ -187,6 +218,10 @@ export class FolderRepository implements IFolderRepository {
     userId: string,
     excludeFolderId?: string
   ): Promise<boolean> {
+    this.logger.info(
+      { name, parentId, userId },
+      "Checking if folder name exists"
+    );
     let query = this.supabaseClient
       .from("folders")
       .select("id")
@@ -211,16 +246,18 @@ export class FolderRepository implements IFolderRepository {
     }
 
     if (error) {
+      this.logger.error(
+        { error, name, userId },
+        "Error checking folder name existence"
+      );
       throw new DatabaseError(error);
     }
 
     return !!data;
   }
 
-  async getFolderDescendants(
-    folderId: string
-  ): Promise<Array<{ id: string }>> {
-    // Use a recursive CTE to get all descendants
+  async getFolderDescendants(folderId: string): Promise<Array<{ id: string }>> {
+    this.logger.info({ folderId }, "Getting folder descendants");
     const { data, error } = await this.supabaseClient.rpc(
       "get_folder_descendants",
       {
@@ -229,6 +266,10 @@ export class FolderRepository implements IFolderRepository {
     );
 
     if (error) {
+      this.logger.error(
+        { error, folderId },
+        "Error getting folder descendants"
+      );
       throw new DatabaseError(error);
     }
 
@@ -240,6 +281,10 @@ export class FolderRepository implements IFolderRepository {
     targetFolderId: string | null,
     userId: string
   ): Promise<void> {
+    this.logger.info(
+      { sourceFolderId, targetFolderId, userId },
+      "Moving PDFs between folders"
+    );
     const { error } = await this.supabaseClient
       .from("pdfs")
       .update({ folder_id: targetFolderId || null })
@@ -247,6 +292,10 @@ export class FolderRepository implements IFolderRepository {
       .eq("user_id", userId);
 
     if (error) {
+      this.logger.error(
+        { error, sourceFolderId, targetFolderId },
+        "Error moving PDFs between folders"
+      );
       throw new DatabaseError(error);
     }
   }
@@ -256,6 +305,10 @@ export class FolderRepository implements IFolderRepository {
     targetFolderId: string | null,
     userId: string
   ): Promise<void> {
+    this.logger.info(
+      { sourceFolderId, targetFolderId, userId },
+      "Moving subfolders between folders"
+    );
     const { error } = await this.supabaseClient
       .from("folders")
       .update({ parent_id: targetFolderId || null })
@@ -263,6 +316,10 @@ export class FolderRepository implements IFolderRepository {
       .eq("user_id", userId);
 
     if (error) {
+      this.logger.error(
+        { error, sourceFolderId, targetFolderId },
+        "Error moving subfolders between folders"
+      );
       throw new DatabaseError(error);
     }
   }
