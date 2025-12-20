@@ -42,6 +42,15 @@ export interface TrueFalseQuestion extends BaseQuizQuestion {
 
 export type QuizQuestion = MCQQuestion | TrueFalseQuestion;
 
+export class Quiz {
+  private id: string;
+  private documentId: string;
+  private language: QuizLanguage;
+  private difficultyLevel?: DifficultyLevel;
+  private numberOfQuestions?: number;
+  private timeLimitMinutes?: number;
+  private explanationLevel: ExplanationLevel;
+  private questions?: QuizQuestion[];
   private title?: string;
   private createdAt: Date;
 
@@ -68,15 +77,19 @@ export type QuizQuestion = MCQQuestion | TrueFalseQuestion;
     this.createdAt = createdAt || new Date();
     this.title = title;
   }
+
   public getTitle(): string | null {
     return this.title ?? null;
   }
+
   public setTitle(title: string): void {
     this.title = title;
   }
+
   public setTimeLimitMinutes(timeLimitMinutes: number): void {
     this.timeLimitMinutes = timeLimitMinutes;
   }
+
   public getId(): string {
     return this.id;
   }
@@ -92,6 +105,7 @@ export type QuizQuestion = MCQQuestion | TrueFalseQuestion;
   public getDifficultyLevel(): DifficultyLevel | null {
     return this.difficultyLevel ?? null;
   }
+
   public setDifficultyLevel(difficultyLevel: DifficultyLevel): void {
     this.difficultyLevel = difficultyLevel;
   }
@@ -99,6 +113,7 @@ export type QuizQuestion = MCQQuestion | TrueFalseQuestion;
   public getNumberOfQuestions(): number | null {
     return this.numberOfQuestions ?? null;
   }
+
   public setNumberOfQuestions(numberOfQuestions: number): void {
     this.numberOfQuestions = numberOfQuestions;
   }
@@ -118,6 +133,7 @@ export type QuizQuestion = MCQQuestion | TrueFalseQuestion;
   public getCreatedAt(): Date {
     return this.createdAt;
   }
+
   public setQuestions(questions: QuizQuestion[]): void {
     this.questions = questions;
   }
@@ -126,6 +142,7 @@ export type QuizQuestion = MCQQuestion | TrueFalseQuestion;
     return {
       id: this.id,
       documentId: this.documentId,
+      title: this.title,
       language: this.language,
       difficultyLevel: this.difficultyLevel,
       numberOfQuestions: this.numberOfQuestions,

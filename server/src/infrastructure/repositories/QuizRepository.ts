@@ -8,22 +8,39 @@ import {
 import { IQuizRepository } from "../../domain/repositories/IQuizRepository";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 import { QuizMapper } from "../../shared/mappers/QuizMapper";
-
+/**
+ * QuizRepository
+ *
+ * @description
+ * Handles all database operations related to quizzes.
+ *
+ * @class
+ * @implements {IQuizRepository}
+ */
 export class QuizRepository implements IQuizRepository {
   constructor(private supabaseClient: SupabaseClient) {}
 
+  /**
+   * Saves a quiz to the database.
+   *
+   * @param {Quiz} quiz - The quiz to save.
+   * @returns {Promise<void>}
+   */
   async save(quiz: Quiz): Promise<void> {
-    const { error: quizError } = await this.supabaseClient.from("quizzes").insert({
-      id: quiz.getId(),
-      document_id: quiz.getFileId(),
-      language: quiz.getLanguage(),
-      difficulty_level: quiz.getDifficultyLevel(),
-      number_of_questions:
-        quiz.getNumberOfQuestions() || quiz.getQuestions().length,
-      time_limit_minutes: quiz.getTimeLimitMinutes(),
-      explanation_level: quiz.getExplanationLevel(),
-      created_at: quiz.getCreatedAt().toISOString(),
-    });
+    const { error: quizError } = await this.supabaseClient
+      .from("quizzes")
+      .insert({
+        id: quiz.getId(),
+        title: quiz.getTitle(),
+        document_id: quiz.getFileId(),
+        language: quiz.getLanguage(),
+        difficulty_level: quiz.getDifficultyLevel(),
+        number_of_questions:
+          quiz.getNumberOfQuestions() || quiz.getQuestions().length,
+        time_limit_minutes: quiz.getTimeLimitMinutes(),
+        explanation_level: quiz.getExplanationLevel(),
+        created_at: quiz.getCreatedAt().toISOString(),
+      });
 
     if (quizError) throw new DatabaseError(quizError);
 
@@ -87,6 +104,12 @@ export class QuizRepository implements IQuizRepository {
     }
   }
 
+  /**
+   * Finds a quiz by its ID.
+   *
+   * @param {string} id - The ID of the quiz to find.
+   * @returns {Promise<Quiz | null>} The quiz if found, otherwise null.
+   */
   async findById(id: string): Promise<Quiz | null> {
     const { data: quizData, error: quizError } = await this.supabaseClient
       .from("quizzes")
@@ -111,27 +134,32 @@ export class QuizRepository implements IQuizRepository {
     return QuizMapper.fromPersistenceToDomain(quizData);
   }
 
+  /**
+   * Finds all quizzes in the database.
+   *
+   * @returns {Promise<Quiz[]>} An array of quizzes.
+   */
   async findAll(): Promise<Quiz[]> {
     const { data, error } = await this.supabaseClient
       .from("quizzes")
-      .select(
-        `
-        *,
-        quiz_questions (
-          *,
-          mcq_options (*),
-          true_false_answers (*)
-        )
-      `
-      )
+      .select(`*`)
       .order("created_at", { ascending: false });
 
     if (error) throw new DatabaseError(error);
     return (data || []).map((row) => QuizMapper.fromPersistenceToDomain(row));
   }
 
+  /**
+   * Deletes a quiz from the database by its ID.
+   *
+   * @param {string} id - The ID of the quiz to delete.
+   * @returns {Promise<void>}
+   */
   async delete(id: string): Promise<void> {
-    const { error } = await this.supabaseClient.from("quizzes").delete().eq("id", id);
+    const { error } = await this.supabaseClient
+      .from("quizzes")
+      .delete()
+      .eq("id", id);
     if (error) throw new DatabaseError(error);
   }
 }

@@ -33,7 +33,7 @@ export class GenerativeAiService implements IGenerativeAiService {
 
   async generateQuizQuestions(
     prompt: string
-  ): Promise<{ questions: QuizQuestion[]; summary?: string }> {
+  ): Promise<{ questions: QuizQuestion[]; title?: string; summary?: string }> {
     try {
       const completion = await openRouter.chat.send({
         model: "google/gemini-2.0-flash-001",
@@ -57,6 +57,7 @@ export class GenerativeAiService implements IGenerativeAiService {
 
       return {
         questions: Array.isArray(parsed.questions) ? parsed.questions : [],
+        title: typeof parsed.title === "string" ? parsed.title : undefined,
         summary:
           typeof parsed.summary === "string" ? parsed.summary : undefined,
       };

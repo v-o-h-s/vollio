@@ -12,5 +12,5 @@ export interface IGenerativeAiService {
   refineUserPrompt(initialPrompt: string): Promise<string>;
   generateQuizQuestions(
     prompt: string
-  ): Promise<{ questions: QuizQuestion[]; summary?: string }>;
+  ): Promise<{ questions: QuizQuestion[]; title?: string; summary?: string }>;
 }

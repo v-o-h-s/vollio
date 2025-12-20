@@ -160,6 +160,7 @@ export const quizPromptGenerator = (data: CreateQuizDTO): PromptResult => {
     OUTPUT FORMAT:
     Return ONLY valid JSON with no markdown formatting. The JSON must match this structure:
     {
+      "title": "string (A creative and relevant title for the quiz)",
       "questions": [
         {
           "id": "string",

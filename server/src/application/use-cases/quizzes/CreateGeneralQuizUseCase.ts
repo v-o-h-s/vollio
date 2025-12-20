@@ -109,8 +109,12 @@ export class CreateGeneralQuizUseCase {
         context
       );
 
-      const { questions, summary } =
+      const { questions, title, summary } =
         await this.generativeAiService.generateQuizQuestions(fullPrompt);
+
+      if (title && !quiz.getTitle()) {
+        quiz.setTitle(title);
+      }
 
       allQuestions.push(...questions);
       if (summary) {

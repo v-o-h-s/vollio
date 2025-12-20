@@ -15,6 +15,7 @@ export class QuizMapper {
   public static fromDomainToInterface(quiz: Quiz): CreateQuizResponse {
     return {
       id: quiz.getId(),
+      title: quiz.getTitle(),
       fileId: quiz.getFileId(),
       language: quiz.getLanguage(),
       settings: {
@@ -71,7 +72,8 @@ export class QuizMapper {
       row.number_of_questions,
       row.time_limit_minutes,
       new Date(row.created_at),
-      questions
+      questions,
+      row.title
     );
   }
 }
