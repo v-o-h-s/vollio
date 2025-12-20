@@ -13,15 +13,13 @@ interface PDFDocument {
 
 interface DocumentSelectionTabsProps {
   availableDocuments?: PDFDocument[];
-  selectedDocuments?: { id: string }[];
-  onAddDocument?: (doc: PDFDocument) => void;
+  onSelectDocument?: (doc: PDFDocument) => void;
   isLoadingPDFs?: boolean;
 }
 
 export function DocumentSelectionTabs({
   availableDocuments = [],
-  selectedDocuments = [],
-  onAddDocument,
+  onSelectDocument,
   isLoadingPDFs = false,
 }: DocumentSelectionTabsProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,7 +40,7 @@ export function DocumentSelectionTabs({
         />
       </div>
 
-      <div className="border border-primary/20 rounded-xl overflow-hidden bg-card/50">
+      <div className="border border-primary/20 rounded-xl overflow-hidden bg-card/20">
         {isLoadingPDFs ? (
           <div className="p-8 text-center text-muted-foreground">
             <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2" />
@@ -56,48 +54,27 @@ export function DocumentSelectionTabs({
         ) : (
           <div className="max-h-[300px] overflow-y-auto divide-y divide-border/40">
             {filteredDocs.map((doc) => {
-              const isSelected = selectedDocuments.some((d) => d.id === doc.id);
               return (
                 <div
                   key={doc.id}
-                  onClick={() => onAddDocument?.(doc)}
-                  className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${
-                    isSelected
-                      ? "bg-primary/10 hover:bg-primary/15"
-                      : "hover:bg-muted/50"
-                  }`}
+                  onClick={() => onSelectDocument?.(doc)}
+                  className={`flex items-center justify-between p-3 cursor-pointer transition-colors hover:bg-muted/50`}
                 >
                   <div className="flex items-center gap-3 overflow-hidden">
-                    <div
-                      className={`p-2 rounded-lg ${
-                        isSelected
-                          ? "bg-primary/20 text-primary"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
+                    <div className={`p-2 rounded-lg`}>
                       <FileText className="w-4 h-4" />
                     </div>
-                    <span
-                      className={`text-sm font-medium truncate ${
-                        isSelected ? "text-primary" : "text-foreground"
-                      }`}
-                    >
+                    <span className={`text-sm font-medium truncate`}>
                       {doc.title}
                     </span>
                   </div>
-                  {isSelected ? (
-                    <div className="bg-primary text-primary-foreground rounded-full p-1">
-                      <Check className="w-3 h-3" />
-                    </div>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-primary"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
                 </div>
               );
             })}

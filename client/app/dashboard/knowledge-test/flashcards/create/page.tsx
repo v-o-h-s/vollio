@@ -46,7 +46,7 @@ import {
   flashcardAutoSchema,
   type FlashcardManualFormData,
   type FlashcardAutoFormData,
-} from "@/lib/schemas/knowledge-test.schema";
+} from "@/features/knowldge-test/schemas/knowledge-test.schema";
 
 // Flashcard interface
 interface FlashcardItem {

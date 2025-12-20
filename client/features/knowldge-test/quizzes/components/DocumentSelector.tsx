@@ -1,20 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { 
-  FileText, 
-  Search, 
-  Calendar, 
-  HardDrive, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  FileText,
+  Search,
+  Calendar,
+  HardDrive,
   CheckCircle,
   Upload,
-  Filter
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  Filter,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Document {
   id: string;
@@ -35,94 +35,103 @@ interface DocumentSelectorProps {
 // Mock documents - replace with actual API call
 const mockDocuments: Document[] = [
   {
-    id: '1',
-    title: 'JavaScript Fundamentals Guide.pdf',
+    id: "1",
+    title: "JavaScript Fundamentals Guide.pdf",
     pageCount: 45,
-    uploadDate: '2024-01-15',
-    size: '2.3 MB',
-    category: 'Programming',
-    tags: ['javascript', 'web-development', 'fundamentals']
+    uploadDate: "2024-01-15",
+    size: "2.3 MB",
+    category: "Programming",
+    tags: ["javascript", "web-development", "fundamentals"],
   },
   {
-    id: '2',
-    title: 'React Advanced Patterns.pdf',
+    id: "2",
+    title: "React Advanced Patterns.pdf",
     pageCount: 78,
-    uploadDate: '2024-01-12',
-    size: '4.1 MB',
-    category: 'Programming',
-    tags: ['react', 'patterns', 'advanced']
+    uploadDate: "2024-01-12",
+    size: "4.1 MB",
+    category: "Programming",
+    tags: ["react", "patterns", "advanced"],
   },
   {
-    id: '3',
-    title: 'Linear Algebra Textbook.pdf',
+    id: "3",
+    title: "Linear Algebra Textbook.pdf",
     pageCount: 234,
-    uploadDate: '2024-01-10',
-    size: '12.5 MB',
-    category: 'Mathematics',
-    tags: ['linear-algebra', 'mathematics', 'textbook']
+    uploadDate: "2024-01-10",
+    size: "12.5 MB",
+    category: "Mathematics",
+    tags: ["linear-algebra", "mathematics", "textbook"],
   },
   {
-    id: '4',
-    title: 'World History Overview.pdf',
+    id: "4",
+    title: "World History Overview.pdf",
     pageCount: 156,
-    uploadDate: '2024-01-08',
-    size: '8.7 MB',
-    category: 'History',
-    tags: ['history', 'world-history', 'overview']
+    uploadDate: "2024-01-08",
+    size: "8.7 MB",
+    category: "History",
+    tags: ["history", "world-history", "overview"],
   },
   {
-    id: '5',
-    title: 'Organic Chemistry Reactions.pdf',
+    id: "5",
+    title: "Organic Chemistry Reactions.pdf",
     pageCount: 89,
-    uploadDate: '2024-01-05',
-    size: '5.2 MB',
-    category: 'Chemistry',
-    tags: ['chemistry', 'organic', 'reactions']
-  }
+    uploadDate: "2024-01-05",
+    size: "5.2 MB",
+    category: "Chemistry",
+    tags: ["chemistry", "organic", "reactions"],
+  },
 ];
 
-export function DocumentSelector({ 
-  onDocumentSelect, 
-  selectedDocument, 
-  className 
+export function DocumentSelector({
+  onDocumentSelect,
+  selectedDocument,
+  className,
 }: DocumentSelectorProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [documents, setDocuments] = useState<Document[]>([]);
 
   // Simulate loading documents
   useEffect(() => {
     const loadDocuments = async () => {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       setDocuments(mockDocuments);
     };
-    
+
     loadDocuments();
   }, []);
 
   // Filter documents based on search and category
-  const filteredDocuments = documents.filter(doc => {
-    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         doc.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesCategory = selectedCategory === 'All' || doc.category === selectedCategory;
-    
+  const filteredDocuments = documents.filter((doc) => {
+    const matchesSearch =
+      doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doc.tags?.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    const matchesCategory =
+      selectedCategory === "All" || doc.category === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
 
   // Get unique categories
-  const categories = ['All', ...Array.from(new Set(documents.map(doc => doc.category).filter(Boolean)))];
+  const categories = [
+    "All",
+    ...Array.from(
+      new Set(documents.map((doc) => doc.category).filter(Boolean))
+    ),
+  ];
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   return (
-    <Card className={cn("w-full", className)}>
+    <Card className={cn("w-full bg-card/20", className)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
@@ -179,10 +188,10 @@ export function DocumentSelector({
                     <div className="flex items-center gap-2 mb-2">
                       <h4 className="font-medium truncate">{doc.title}</h4>
                       {selectedDocument?.id === doc.id && (
-                        <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                        <CheckCircle className="w-4 h-4 text-primary shrink-0" />
                       )}
                     </div>
-                    
+
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                       <div className="flex items-center gap-1">
                         <FileText className="w-3 h-3" />
@@ -240,7 +249,7 @@ export function DocumentSelector({
               const file = e.target.files?.[0];
               if (file) {
                 // Handle file upload
-                console.log('File selected:', file.name);
+                console.log("File selected:", file.name);
               }
             }}
           />

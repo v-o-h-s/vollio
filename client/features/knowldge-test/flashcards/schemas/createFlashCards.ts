@@ -1,36 +1,6 @@
-import { z } from "zod";
-
-// Quiz Creation Schema
-export const quizCreationSchema = z.object({
-  documentId: z
-    .string()
-    .min(1, "Please select a source document")
-    .max(1, "Only one document can be selected"),
-  userPrompt: z
-    .string()
-    .max(1000, "Prompt must be at most 1000 characters long")
-    .optional(),
-  difficulty: z.enum(["easy", "medium", "hard"]).default("medium"),
-  numberOfQuestions: z
-    .number()
-    .min(1, "Must have at least 1 question")
-    .max(44, "Maximum 44 questions allowed")
-    .optional()
-    .default(14),
-  language: z.enum(["en", "fr", "ar"]).default("en"),
-  timeLimitMinutes: z.number().min(1).max(60).default(10),
-  explanationLevel: z.enum(["none", "brief", "detailed"]).default("none"),
-  questionsDistribution: z
-    .object({
-      MCQ: z.number().min(0).max(44),
-      TRUE_FALSE: z.number().min(0).max(44)
-    })
-    .optional(),
-});
-
-export type QuizCreationFormData = z.infer<typeof quizCreationSchema>;
-
+import z from "zod";
 // Flashcard Creation Schema (Manual Mode)
+
 export const flashcardManualSchema = z.object({
   title: z.string().min(1, "Deck title is required"),
   description: z.string().optional(),

@@ -10,9 +10,9 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Brain, Layers } from "lucide-react";
-import { Sidebar } from "@/features/knowldge-test/components/Sidebar";
-import { QuizCard } from "@/features/knowldge-test/components/QuizCard";
-import { FlashcardCard } from "@/features/knowldge-test/components/FlashcardCard";
+import { Sidebar } from "@/features/knowldge-test/sidebar/components/Sidebar";
+import { QuizCard } from "@/features/knowldge-test/quizzes/components/QuizCard";
+import { FlashcardCard } from "@/features/knowldge-test/flashcards/components/FlashcardCard";
 
 type Section = "quizzes" | "flashcards";
 
