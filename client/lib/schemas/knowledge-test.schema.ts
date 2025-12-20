@@ -2,27 +2,28 @@ import { z } from "zod";
 
 // Quiz Creation Schema
 export const quizCreationSchema = z.object({
-  documentId: z.string().min(1, "Please select a source document"),
-  userPrompt: z.string().optional(),
-  difficulty: z.enum(["easy", "medium", "hard"], {
-    required_error: "Please select a difficulty level",
-  }),
+  documentId: z
+    .string()
+    .min(1, "Please select a source document")
+    .max(1, "Only one document can be selected"),
+  userPrompt: z
+    .string()
+    .max(1000, "Prompt must be at most 1000 characters long")
+    .optional(),
+  difficulty: z.enum(["easy", "medium", "hard"]).default("medium"),
   numberOfQuestions: z
     .number()
     .min(1, "Must have at least 1 question")
     .max(44, "Maximum 44 questions allowed")
     .optional()
-    .default(10),
-  language: z.enum(["en", "fr", "ar"]).optional().default("en"),
-  timeLimitMinutes: z.number().min(1).optional().default(10),
-  explanationLevel: z
-    .enum(["none", "brief", "detailed"])
-    .optional()
-    .default("none"),
+    .default(14),
+  language: z.enum(["en", "fr", "ar"]).default("en"),
+  timeLimitMinutes: z.number().min(1).max(60).default(10),
+  explanationLevel: z.enum(["none", "brief", "detailed"]).default("none"),
   questionsDistribution: z
     .object({
-      MCQ: z.number().min(0).optional(),
-      TRUE_FALSE: z.number().min(0).optional(),
+      MCQ: z.number().min(0).max(44),
+      TRUE_FALSE: z.number().min(0).max(44)
     })
     .optional(),
 });
