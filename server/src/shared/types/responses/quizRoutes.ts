@@ -3,7 +3,6 @@ import {
   ExplanationLevel,
   QuizLanguage,
 } from "../../validation/quizSchemas";
-import { ServerSuccessResponse } from "./general";
 import { QuizQuestion } from "../../../domain/entities/Quiz";
 
 // POST /api/v1/quizzes  (data)

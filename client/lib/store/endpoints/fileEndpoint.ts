@@ -1,6 +1,6 @@
 import { ApiBuilder } from "@/lib/store/endpoints/types";
-import { GetAllFilesResponse } from "../../../../server/src/shared/types/responses/fileRoutes";
-import { GetFileByIdResponse } from "../../../../server/src/shared/types/responses/fileRoutes";
+import { GetAllFilesResponse } from "@shared/types/responses/fileRoutes";
+import { GetFileByIdResponse } from "@shared/types/responses/fileRoutes";
 export interface TransformedFile {
   id: string;
   filename: string;
@@ -123,5 +123,4 @@ export const fileEndpoints = (builder: ApiBuilder) => ({
     }),
     invalidatesTags: [{ type: "File", id: "LIST" }],
   }),
-
 });

@@ -1,6 +1,6 @@
 import { ApiBuilder } from "@/lib/store/endpoints/types";
-import { GetAllFoldersResponse } from "../../../../server/src/shared/types/responses/folderRoutes";
-import { ServerErrorResponse } from "../../../../server/src/shared/types/responses/general";
+import { GetAllFoldersResponse } from "@shared/types/responses/folderRoutes";
+import { ServerErrorResponse } from "@shared/types/responses/general";
 
 interface TransformedFolder {
   id: string;
@@ -27,7 +27,7 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
       if (!response.data) return { folders: [], count: 0 };
 
       const count = response.data.totalCount;
-      const folders = response.data.folders.map(folder => ({
+      const folders = response.data.folders.map((folder) => ({
         id: folder.id,
         user_id: folder.user_id,
         name: folder.name,
@@ -38,7 +38,7 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
       }));
       return { folders, count };
     },
-    
+
     providesTags: ["Folder"],
   }),
 
@@ -63,7 +63,10 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
     providesTags: (_result, _error, id) => [{ type: "Folder", id }],
   }),
 
-  createFolder: builder.mutation<TransformedFolder, { name: string; parentId?: string | null }>({
+  createFolder: builder.mutation<
+    TransformedFolder,
+    { name: string; parentId?: string | null }
+  >({
     query: (data) => ({
       url: "folders/",
       method: "POST",
@@ -84,7 +87,10 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
     invalidatesTags: [{ type: "Folder", id: "LIST" }],
   }),
 
-  updateFolder: builder.mutation<TransformedFolder, { id: string; name?: string; parentId?: string | null }>({
+  updateFolder: builder.mutation<
+    TransformedFolder,
+    { id: string; name?: string; parentId?: string | null }
+  >({
     query: ({ id, ...data }) => ({
       url: `folders/${id}`,
       method: "PUT",
@@ -108,7 +114,10 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
     ],
   }),
 
-  deleteFolder: builder.mutation<{ success: boolean }, { id: string; cascade?: boolean }>({
+  deleteFolder: builder.mutation<
+    { success: boolean },
+    { id: string; cascade?: boolean }
+  >({
     query: ({ id, cascade }) => ({
       url: `folders/${id}${cascade !== undefined ? `?cascade=${cascade}` : ""}`,
       method: "DELETE",
