@@ -1,6 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import {
   CreateFlashCardsDTO,
+  CreateManualFlashCardsDTO,
   FlashCardsSetIdParams,
 } from "../../shared/validation/flashcardSchemas";
 import { CreateFlashCardsSetResponse } from "../../shared/types/responses/flashcardsRoutes";
@@ -10,6 +11,7 @@ import { GetAllFlashCardsSetsUseCase } from "../../application/use-cases/flashca
 import { GetFlashCardsSetByIdUseCase } from "../../application/use-cases/flashcards/GetFlashCardsSetByIdUseCase";
 import { DeleteFlashCardsSetUseCase } from "../../application/use-cases/flashcards/DeleteFlashCardsSetUseCase";
 import { GetFlashCardsSetsByDocumentIdUseCase } from "../../application/use-cases/flashcards/GetFlashCardsSetsByDocumentIdUseCase";
+import { CreateFlashCardsSetUseCase } from "../../application/use-cases/flashcards/CreateFlashCardsSetUseCase";
 import { UnauthorizedErrorObject } from "../../shared/types/error";
 
 export class FlashCardsController {
@@ -18,7 +20,8 @@ export class FlashCardsController {
     private getAllFlashCardsSetsUseCase: GetAllFlashCardsSetsUseCase,
     private getFlashCardsSetByIdUseCase: GetFlashCardsSetByIdUseCase,
     private deleteFlashCardsSetUseCase: DeleteFlashCardsSetUseCase,
-    private getFlashCardsSetsByDocumentIdUseCase: GetFlashCardsSetsByDocumentIdUseCase
+    private getFlashCardsSetsByDocumentIdUseCase: GetFlashCardsSetsByDocumentIdUseCase,
+    private createFlashCardsSetUseCase: CreateFlashCardsSetUseCase
   ) {}
 
   async generateFlashCardsSet(
@@ -42,6 +45,28 @@ export class FlashCardsController {
       reply,
       response,
       "Flashcard set generated successfully"
+    );
+  }
+
+  async createFlashCardsSet(
+    request: FastifyRequest<{ Body: CreateManualFlashCardsDTO }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      return ResponseFormatter.error(
+        reply,
+        UnauthorizedErrorObject,
+        401,
+        "Unauthorized"
+      );
+    }
+
+    const set = await this.createFlashCardsSetUseCase.execute(request.body);
+    return ResponseFormatter.success(
+      reply,
+      set.toJSON(),
+      "Flashcard set created successfully"
     );
   }
 

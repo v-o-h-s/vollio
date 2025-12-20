@@ -159,8 +159,8 @@ export default function KnowledgeTestPage() {
           <Link
             href={
               section === "quizzes"
-                ? "/dashboard/quizzes/create"
-                : "/dashboard/flashcards/create"
+                ? "/dashboard/knowledge-test/quizzes/create"
+                : "/dashboard/knowledge-test/flashcards/create"
             }
           >
             <Button
@@ -206,8 +206,8 @@ export default function KnowledgeTestPage() {
             <Link
               href={
                 section === "quizzes"
-                  ? "/dashboard/quizzes/create"
-                  : "/dashboard/flashcards/create"
+                  ? "/dashboard/knowledge-test/quizzes/create"
+                  : "/dashboard/knowledge-test/flashcards/create"
               }
             >
               <Card className="h-full border-2 border-dashed border-muted-foreground/20 bg-muted/5 hover:bg-muted/10 hover:border-primary/50 transition-all cursor-pointer flex flex-col items-center justify-center p-6 min-h-[220px] group">

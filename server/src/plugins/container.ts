@@ -69,6 +69,7 @@ import { GetAllFlashCardsSetsUseCase } from "../application/use-cases/flashcards
 import { GetFlashCardsSetByIdUseCase } from "../application/use-cases/flashcards/GetFlashCardsSetByIdUseCase";
 import { DeleteFlashCardsSetUseCase } from "../application/use-cases/flashcards/DeleteFlashCardsSetUseCase";
 import { GetFlashCardsSetsByDocumentIdUseCase } from "../application/use-cases/flashcards/GetFlashCardsSetsByDocumentIdUseCase";
+import { CreateFlashCardsSetUseCase } from "../application/use-cases/flashcards/CreateFlashCardsSetUseCase";
 import { FlashCardsController } from "../interface/controllers/flashcards.controller";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
@@ -416,6 +417,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
         injectionMode: InjectionMode.CLASSIC,
       }
     ),
+    createFlashCardsSetUseCase: asClass(CreateFlashCardsSetUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
     flashCardsController: asClass(FlashCardsController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,

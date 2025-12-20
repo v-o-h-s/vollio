@@ -1,373 +1,106 @@
 "use client";
 
-import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import toast from "react-hot-toast";
-
-import {
-  Library,
-  Upload,
-  Plus,
-  FileText,
-  Trash2,
-  AlertCircle,
-} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Search, FileText, LayoutTemplate, Plus, Check } from "lucide-react";
+import { useState } from "react";
 
 interface PDFDocument {
   id: string;
   title: string;
-  page_count?: number;
-}
-
-interface SelectedDocument {
-  id: string;
-  title: string;
-  pageCount: number;
-  selectedPages: number[];
 }
 
 interface DocumentSelectionTabsProps {
   availableDocuments?: PDFDocument[];
-  selectedDocuments?: SelectedDocument[];
+  selectedDocuments?: { id: string }[];
   onAddDocument?: (doc: PDFDocument) => void;
-  onRemoveDocument?: (docId: string) => void;
-  onUpdateDocumentPages?: (docId: string, pages: number[]) => void;
-  onDocumentsUploaded?: () => void;
   isLoadingPDFs?: boolean;
-  pdfError?: any;
-  refetchPDFs?: () => void;
-  // Alternative props for different use cases
-  onDocumentsSelected?: (documents: any[]) => void;
-  mode?: string;
 }
 
 export function DocumentSelectionTabs({
   availableDocuments = [],
   selectedDocuments = [],
   onAddDocument,
-  onRemoveDocument,
-  onUpdateDocumentPages,
-  onDocumentsUploaded,
   isLoadingPDFs = false,
-  pdfError,
-  refetchPDFs,
 }: DocumentSelectionTabsProps) {
-  const [activeTab, setActiveTab] = useState<"library" | "upload">("library");
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const handleFileUpload = async (files: File[]) => {
-    setIsUploading(true);
-
-    for (const file of files) {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const response = await fetch("/api/pdfs/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error("Upload failed");
-        }
-
-        toast.success(`${file.name} has been uploaded successfully.`);
-      } catch (error) {
-        console.error(`Failed to upload ${file.name}:`, error);
-        toast.error(`Failed to upload ${file.name}.`);
-      }
-    }
-
-    setIsUploading(false);
-    onDocumentsUploaded?.();
-    // Switch to library tab to show newly uploaded documents
-    setActiveTab("library");
-  };
-
-  const handleFileDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    const pdfFiles = files.filter((file) => file.type === "application/pdf");
-
-    if (pdfFiles.length > 0) {
-      handleFileUpload(pdfFiles);
-    } else {
-      alert("Please upload PDF files only.");
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-  };
+  const filteredDocs = availableDocuments.filter((doc) =>
+    (doc.title || "").toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="space-y-4">
-      {/* Tab Navigation */}
-      <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-        <Button
-          variant={activeTab === "library" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("library")}
-          className="flex-1 flex items-center gap-2"
-        >
-          <Library className="w-4 h-4" />
-          From Library
-        </Button>
-        <Button
-          variant={activeTab === "upload" ? "default" : "ghost"}
-          size="sm"
-          onClick={() => setActiveTab("upload")}
-          className="flex-1 flex items-center gap-2"
-        >
-          <Upload className="w-4 h-4" />
-          Upload New
-        </Button>
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search documents..."
+          className="pl-9 bg-background/50 border-primary/20"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
 
-      {/* Tab Content */}
-      {activeTab === "library" && (
-        <div className="space-y-4">
-          <div>
-            <Label>Available Documents ({availableDocuments?.length || 0})</Label>
-            {isLoadingPDFs ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-3" />
-                <p className="text-muted-foreground">
-                  Loading your documents...
-                </p>
-              </div>
-            ) : pdfError ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <AlertCircle className="w-12 h-12 text-red-500 mb-3" />
-                <p className="text-muted-foreground">
-                  Failed to load documents
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => refetchPDFs?.()}
-                  className="mt-2"
-                >
-                  Try Again
-                </Button>
-              </div>
-            ) : (availableDocuments?.length || 0) === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <FileText className="w-12 h-12 text-muted-foreground mb-3" />
-                <p className="text-muted-foreground">
-                  No documents in your library
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Upload some PDFs to get started
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 max-h-60 overflow-y-auto border rounded-lg p-2">
-                {(availableDocuments || []).map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => onAddDocument?.(doc)}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{doc.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {doc.page_count || 1} pages
-                      </p>
-                    </div>
-                    <Plus className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                ))}
-              </div>
-            )}
+      <div className="border border-primary/20 rounded-xl overflow-hidden bg-card/50">
+        {isLoadingPDFs ? (
+          <div className="p-8 text-center text-muted-foreground">
+            <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2" />
+            Loading documents...
           </div>
-        </div>
-      )}
-
-      {activeTab === "upload" && (
-        <div className="space-y-4">
-          <div>
-            <Label>Upload New Documents</Label>
-            <div
-              className={`mt-2 border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                isDragOver
-                  ? "border-primary bg-primary/5"
-                  : "border-muted-foreground/25 hover:border-muted-foreground/50"
-              }`}
-              onDrop={handleFileDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-            >
-              <div className="flex flex-col items-center gap-4">
-                <div
-                  className={`rounded-full p-4 ${
-                    isDragOver ? "bg-primary/10" : "bg-muted/50"
-                  }`}
-                >
-                  <Upload
-                    className={`w-8 h-8 ${
-                      isDragOver ? "text-primary" : "text-muted-foreground"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-1">
-                    {isDragOver ? "Drop files here" : "Drag & drop PDF files"}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    or click to browse your computer
-                  </p>
-
-                  <Button
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
-                  >
-                    {isUploading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4 mr-2" />
-                        Choose Files
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <FileText className="w-3 h-3" />
-                  <span>PDF files only • Max 50MB per file</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".pdf"
-        multiple
-        className="hidden"
-        onChange={(e) => {
-          const files = Array.from(e.target.files || []);
-          if (files.length > 0) {
-            handleFileUpload(files);
-          }
-        }}
-      />
-
-      <Separator />
-
-      {/* Selected Documents */}
-      <div>
-        <Label>Selected Documents ({selectedDocuments?.length || 0})</Label>
-        {(selectedDocuments?.length || 0) === 0 ? (
-          <div className="flex flex-col items-center justify-center py-6 text-center border rounded-lg mt-2">
-            <FileText className="w-8 h-8 text-muted-foreground mb-2" />
-            <p className="text-sm text-muted-foreground">
-              No documents selected
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Choose from your library or upload new files
-            </p>
+        ) : filteredDocs.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground">
+            <LayoutTemplate className="w-10 h-10 mx-auto mb-2 opacity-20" />
+            <p>No documents found</p>
           </div>
         ) : (
-          <div className="space-y-3 mt-2">
-            {(selectedDocuments || []).map((doc) => (
-              <div key={doc.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{doc.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {doc.selectedPages?.length || 0} of {doc.pageCount} pages
-                      selected
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onRemoveDocument?.(doc.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {/* Page Selection */}
-                <div>
-                  <Label className="text-sm">Page Selection</Label>
-                  <div className="flex gap-2 mt-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        onUpdateDocumentPages?.(
-                          doc.id,
-                          Array.from({ length: doc.pageCount }, (_, i) => i + 1)
-                        )
-                      }
+          <div className="max-h-[300px] overflow-y-auto divide-y divide-border/40">
+            {filteredDocs.map((doc) => {
+              const isSelected = selectedDocuments.some((d) => d.id === doc.id);
+              return (
+                <div
+                  key={doc.id}
+                  onClick={() => onAddDocument?.(doc)}
+                  className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${
+                    isSelected
+                      ? "bg-primary/10 hover:bg-primary/15"
+                      : "hover:bg-muted/50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div
+                      className={`p-2 rounded-lg ${
+                        isSelected
+                          ? "bg-primary/20 text-primary"
+                          : "bg-muted text-muted-foreground"
+                      }`}
                     >
-                      All Pages
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onUpdateDocumentPages?.(doc.id, [])}
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <span
+                      className={`text-sm font-medium truncate ${
+                        isSelected ? "text-primary" : "text-foreground"
+                      }`}
                     >
-                      Clear
+                      {doc.title}
+                    </span>
+                  </div>
+                  {isSelected ? (
+                    <div className="bg-primary text-primary-foreground rounded-full p-1">
+                      <Check className="w-3 h-3" />
+                    </div>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                    >
+                      <Plus className="w-4 h-4" />
                     </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {Array.from({ length: doc.pageCount }, (_, i) => i + 1).map(
-                      (page) => (
-                        <Badge
-                          key={page}
-                          variant={
-                            doc.selectedPages?.includes(page)
-                              ? "default"
-                              : "outline"
-                          }
-                          className="cursor-pointer text-xs"
-                          onClick={() => {
-                            const newPages = doc.selectedPages?.includes(page)
-                              ? doc.selectedPages?.filter((p) => p !== page) || []
-                              : [...(doc.selectedPages || []), page].sort(
-                                  (a, b) => a - b
-                                );
-                            onUpdateDocumentPages?.(doc.id, newPages);
-                          }}
-                        >
-                          {page}
-                        </Badge>
-                      )
-                    )}
-                  </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

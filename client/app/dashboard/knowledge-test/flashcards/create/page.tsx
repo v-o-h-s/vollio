@@ -2,7 +2,13 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,12 +31,13 @@ import {
   Zap,
   PenTool,
   Loader2,
+  HelpCircle,
 } from "lucide-react";
 import Link from "next/link";
-import toast from "react-hot-toast";
+import { notify } from "@/lib/notify";
 import { FlashcardPreview, FlashcardEditor } from "@/components/flashcards";
 import { DocumentSelectionTabs } from "@/components/quiz/DocumentSelectionTabs";
-import { useGetPDFsQuery } from "@/lib/store/apiSlice";
+import { useGetAllFilesQuery } from "@/lib/store/apiSlice";
 
 // Flashcard interface
 interface FlashcardItem {
@@ -45,6 +52,7 @@ interface DeckMetadata {
   title: string;
   description: string;
   category: string;
+  language: "en" | "fr" | "ar";
   difficulty: "Easy" | "Medium" | "Hard";
   tags: string[];
 }
@@ -65,38 +73,22 @@ const categories = [
 
 const difficulties = ["Easy", "Medium", "Hard"] as const;
 
-// Predefined tags for suggestions
-const suggestedTags = [
-  "vocabulary",
-  "formulas",
-  "concepts",
-  "definitions",
-  "examples",
-  "practice",
-  "theory",
-  "applications",
-  "fundamentals",
-  "advanced",
-  "beginner",
-  "intermediate",
-  "expert",
-  "review",
-  "exam-prep",
-];
-
-export default function CreateFlashcardsPage() {
+export default function CreateFlashCardsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromQuizId = searchParams?.get("fromQuizId");
-  
+
   // State for Tabs
-  const [activeTab, setActiveTab] = useState<"automatic" | "manual">("automatic");
+  const [activeTab, setActiveTab] = useState<"automatic" | "manual">(
+    "automatic"
+  );
 
   // State for Manual Mode
   const [deckMetadata, setDeckMetadata] = useState<DeckMetadata>({
     title: "",
     description: "",
     category: "Programming",
+    language: "en",
     difficulty: "Medium",
     tags: [],
   });
@@ -113,18 +105,17 @@ export default function CreateFlashcardsPage() {
   const [prefillFromQuiz, setPrefillFromQuiz] = useState<string | null>(null);
 
   // State for Automatic Mode
-  const [autoDocument, setAutoDocument] = useState<{ id: string; title: string } | null>(null);
+  const [autoDocument, setAutoDocument] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
   const [autoCardCount, setAutoCardCount] = useState<number>(10);
-  const [autoDifficulty, setAutoDifficulty] = useState<typeof difficulties[number]>("Medium");
+  const [autoDifficulty, setAutoDifficulty] =
+    useState<(typeof difficulties)[number]>("Medium");
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Fetch PDFs for AI generation
-  const {
-    data: pdfData,
-    isLoading: isLoadingPDFs,
-    error: pdfError,
-    refetch: refetchPDFs,
-  } = useGetPDFsQuery();
+  const { data: filesData, isLoading: isLoadingPDFs } = useGetAllFilesQuery();
 
   // If opened from a quiz, prefill title and show banner
   useEffect(() => {
@@ -139,15 +130,13 @@ export default function CreateFlashcardsPage() {
   }, [fromQuizId]);
 
   // Derived state for DocumentSelectionTabs
-  const selectedDocuments = useMemo(() => (autoDocument ? [{ id: autoDocument.id, title: autoDocument.title, pageCount: 1, selectedPages: [] }] : []), [autoDocument]);
+  const selectedDocuments = useMemo(
+    () => (autoDocument ? [{ id: autoDocument.id }] : []),
+    [autoDocument]
+  );
 
   const handleAddDocument = (doc: { id: string; title: string }) => {
     setAutoDocument({ id: doc.id, title: doc.title });
-    toast.success(`Selected "${doc.title}"`);
-  };
-
-  const handleRemoveDocument = (docId: string) => {
-    setAutoDocument(null);
   };
 
   // --- Manual Mode Handlers ---
@@ -163,12 +152,12 @@ export default function CreateFlashcardsPage() {
     setCurrentCardIndex(flashcards.length);
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 300);
-    toast.success("New card added!");
+    notify.success("New card added!");
   };
 
   const removeFlashcard = (id: string) => {
     if (flashcards.length === 1) {
-      toast.error("You need at least one card!");
+      notify.error("You need at least one card!");
       return;
     }
 
@@ -176,7 +165,7 @@ export default function CreateFlashcardsPage() {
     if (currentCardIndex >= flashcards.length - 1) {
       setCurrentCardIndex(Math.max(0, flashcards.length - 2));
     }
-    toast.success("Card removed!");
+    notify.success("Card removed!");
   };
 
   const updateFlashcard = (
@@ -236,19 +225,24 @@ export default function CreateFlashcardsPage() {
     newFlashcards.splice(newIndex, 0, newCard);
     setFlashcards(newFlashcards);
     setCurrentCardIndex(newIndex);
-    toast.success("Card duplicated!");
+    notify.success("Card duplicated!");
   };
 
   const shuffleCards = () => {
     const shuffled = [...flashcards].sort(() => Math.random() - 0.5);
     setFlashcards(shuffled);
     setCurrentCardIndex(0);
-    toast.success("Cards shuffled!");
+    notify.success("Cards shuffled!");
   };
 
-  const saveDeck = () => {
+  const saveDeck = async () => {
     if (!deckMetadata.title.trim()) {
-      toast.error("Please enter a deck title!");
+      notify.error("Please enter a deck title!");
+      return;
+    }
+
+    if (!autoDocument) {
+      notify.error("Please select a linked document!");
       return;
     }
 
@@ -256,15 +250,39 @@ export default function CreateFlashcardsPage() {
       (card) => card.front.trim() && card.back.trim()
     );
     if (validCards.length === 0) {
-      toast.error("Please create at least one complete card!");
+      notify.error("Please create at least one complete card!");
       return;
     }
 
-    // Simulate saving (In a real app, you'd POST this to your API)
-    toast.success(
-      `Deck "${deckMetadata.title}" saved with ${validCards.length} cards!`
-    );
-    // Redirect or clear
+    // Construct payload for API
+    const payload = {
+      name: deckMetadata.title,
+      description: deckMetadata.description,
+      language: deckMetadata.language,
+      documentId: autoDocument.id,
+      flashCards: validCards.map((c) => ({
+        front: c.front,
+        back: c.back,
+        hint: c.hint,
+      })),
+    };
+
+    try {
+      notify.loading("Saving deck...");
+      const res = await fetch("/api/v1/flashcards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to save flashcard set");
+
+      notify.success(`Deck "${deckMetadata.title}" saved successfully!`);
+      router.push("/dashboard/knowledge-test");
+    } catch (e) {
+      console.error(e);
+      notify.error("Failed to save deck");
+    }
   };
 
   const currentCard = flashcards[currentCardIndex];
@@ -273,30 +291,30 @@ export default function CreateFlashcardsPage() {
   ).length;
   const progressPercentage = (completedCards / flashcards.length) * 100;
 
-
   // --- Automatic Mode Handlers ---
 
   const handleGenerate = async () => {
     if (!autoDocument) {
-      toast.error("Please select a document first.");
+      notify.error("Please select a document first.");
       return;
     }
     if (autoCardCount < 1) {
-      toast.error("Please enter a valid number of cards.");
+      notify.error("Please enter a valid number of cards.");
       return;
     }
 
     setIsGenerating(true);
     try {
-      const resp = await fetch("/api/flashcards/generate-from-document", {
+      notify.loading("Generating flashcards...");
+      const resp = await fetch("/api/v1/flashcards/generate-from-document", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           documentId: autoDocument.id,
-          settings: { 
-            numberOfCards: autoCardCount, 
+          settings: {
+            numberOfCards: autoCardCount,
             difficulty: autoDifficulty,
-            includeHints: true 
+            includeHints: true,
           },
         }),
       });
@@ -308,27 +326,29 @@ export default function CreateFlashcardsPage() {
 
       const data = await resp.json();
       if (data.success && data.flashcards) {
-        toast.success(`Generated ${data.flashcards.length} flashcards!`);
+        notify.success(`Generated ${data.flashcards.length} flashcards!`);
         // Switch to manual mode with generated cards to allow editing
-        setFlashcards(data.flashcards.map((c: any) => ({
-          id: c.id || Math.random().toString(),
-          front: c.front,
-          back: c.back,
-          hint: c.hint
-        })));
-        setDeckMetadata(prev => ({
+        setFlashcards(
+          data.flashcards.map((c: any) => ({
+            id: c.id || Math.random().toString(),
+            front: c.front,
+            back: c.back,
+            hint: c.hint,
+          }))
+        );
+        setDeckMetadata((prev) => ({
           ...prev,
           title: `Flashcards: ${autoDocument.title}`,
-          difficulty: autoDifficulty
+          difficulty: autoDifficulty,
         }));
         setActiveTab("manual");
         setCurrentCardIndex(0);
       } else {
-        toast.error("No flashcards were returned.");
+        notify.error("No flashcards were returned.");
       }
     } catch (err: any) {
       console.error("Generation error:", err);
-      toast.error(err.message || "Something went wrong during generation.");
+      notify.error(err.message || "Something went wrong during generation.");
     } finally {
       setIsGenerating(false);
     }
@@ -338,44 +358,47 @@ export default function CreateFlashcardsPage() {
     <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link href="/dashboard/knowledge-test">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="hover:scale-105 transition-transform duration-200"
+                className="hover:bg-muted text-muted-foreground"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Flashcards
+                Back
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                <div className="p-2 bg-linear-to-r from-pink-500 to-rose-500 rounded-xl">
-                  {activeTab === 'automatic' ? <Sparkles className="w-6 h-6 text-white" /> : <PenTool className="w-6 h-6 text-white" />}
-                </div>
+              <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-pink-500 to-rose-500">
                 Create Flashcard Deck
               </h1>
               <p className="text-muted-foreground mt-1">
-                {activeTab === 'automatic' ? "Generate cards instantly with AI" : "Craft your cards manually"}
+                {activeTab === "automatic"
+                  ? "Generate cards instantly with AI"
+                  : "Craft your cards manually"}
               </p>
             </div>
           </div>
-          
-          {activeTab === 'manual' && (
+
+          {activeTab === "manual" && (
             <div className="flex gap-3">
               <Button
                 variant="outline"
                 onClick={() => setPreviewMode(!previewMode)}
                 className="hover:scale-105 transition-transform duration-200"
               >
-                {previewMode ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
+                {previewMode ? (
+                  <EyeOff className="w-4 h-4 mr-2" />
+                ) : (
+                  <Eye className="w-4 h-4 mr-2" />
+                )}
                 {previewMode ? "Edit Mode" : "Preview"}
               </Button>
               <Button
                 onClick={saveDeck}
-                className="bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 hover:scale-105 transition-all duration-200"
+                className="bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 hover:scale-105 transition-all duration-200 text-white shadow-lg"
               >
                 <Save className="w-4 h-4 mr-2" />
                 Save Deck
@@ -384,111 +407,147 @@ export default function CreateFlashcardsPage() {
           )}
         </div>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setActiveTab(v as any)}
+          className="space-y-6"
+        >
           <div className="flex justify-center">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="automatic" className="flex items-center gap-2">
+            <TabsList className="grid w-full max-w-md grid-cols-2 bg-muted/50 p-1 rounded-xl">
+              <TabsTrigger
+                value="automatic"
+                className="flex items-center gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
                 <Sparkles className="w-4 h-4" />
                 Automatic (AI)
               </TabsTrigger>
-              <TabsTrigger value="manual" className="flex items-center gap-2">
+              <TabsTrigger
+                value="manual"
+                className="flex items-center gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
                 <PenTool className="w-4 h-4" />
                 Manual Creation
               </TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="automatic" className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+          <TabsContent
+            value="automatic"
+            className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <Card className="md:col-span-2 border-border/50 shadow-sm">
-                 <CardHeader>
-                   <CardTitle className="flex items-center gap-2">
-                     <BookOpen className="w-5 h-5 text-primary" />
-                     Source Material
-                   </CardTitle>
-                   <CardDescription>
-                     Select a document from your library to generate flashcards from.
-                   </CardDescription>
-                 </CardHeader>
-                 <CardContent>
-                  <DocumentSelectionTabs
-                    availableDocuments={((pdfData?.pdfs || []).map((p: any) => ({ id: p.id, title: p.filename ?? p.title ?? "Untitled", page_count: p.pageCount ?? p.page_count ?? 1 })) as any)}
-                    selectedDocuments={selectedDocuments as any}
-                    onAddDocument={(d: any) => handleAddDocument({ id: d.id, title: d.title })}
-                    onRemoveDocument={(id: string) => handleRemoveDocument(id)}
-                    isLoadingPDFs={isLoadingPDFs}
-                    pdfError={pdfError}
-                    refetchPDFs={refetchPDFs}
-                  />
-                  {autoDocument && (
-                    <div className="flex items-center gap-2 mt-4 p-3 bg-muted/50 rounded-lg border border-primary/20">
-                      <Check className="w-4 h-4 text-green-500" />
-                      <span className="text-sm font-medium">Selected:</span>
-                      <Badge variant="secondary">{autoDocument.title}</Badge>
+              {/* Important: Document Selection on the Left */}
+              <Card className="md:col-span-2 lg:col-span-1 border-border/40 shadow-sm overflow-hidden h-fit">
+                <CardHeader className="bg-muted/30 border-b border-border/40 pb-4">
+                  <CardTitle className="flex items-center gap-2">
+                    <div className="p-2 rounded-md bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400">
+                      <BookOpen className="w-5 h-5" />
                     </div>
+                    Source Material
+                  </CardTitle>
+                  <CardDescription>
+                    Select the document you want to generate flashcards from.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <DocumentSelectionTabs
+                    availableDocuments={
+                      (filesData || []).map((p: any) => ({
+                        id: p.id,
+                        title: p.filename ?? p.title ?? "Untitled",
+                      })) as any
+                    }
+                    selectedDocuments={selectedDocuments}
+                    onAddDocument={(d: any) =>
+                      handleAddDocument({ id: d.id, title: d.title })
+                    }
+                    isLoadingPDFs={isLoadingPDFs}
+                  />
+                  {!autoDocument && (
+                    <p className="text-sm text-pink-600 mt-2 flex items-center gap-2 animate-pulse">
+                      <HelpCircle className="w-4 h-4" /> Please select a
+                      document to proceed
+                    </p>
                   )}
-                 </CardContent>
-               </Card>
+                </CardContent>
+              </Card>
 
-               <Card className="border-border/50 shadow-sm relative overflow-hidden">
-                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                   <Zap className="w-24 h-24" />
-                 </div>
-                 <CardHeader>
-                   <CardTitle className="flex items-center gap-2">
-                     <Zap className="w-5 h-5 text-yellow-500" />
-                     Generation Options
-                   </CardTitle>
-                 </CardHeader>
-                 <CardContent className="space-y-6 relative z-10">
-                   <div>
-                     <Label>Number of Cards (Estimate)</Label>
-                     <Input 
-                        type="number" 
-                        min={1} 
+              <div className="md:col-span-2 lg:col-span-1 space-y-6">
+                <Card className="border-border/40 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Zap className="w-24 h-24" />
+                  </div>
+                  <CardHeader className="bg-muted/30 border-b border-border/40 pb-4">
+                    <CardTitle className="flex items-center gap-2">
+                      <div className="p-2 rounded-md bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400">
+                        <Zap className="w-5 h-5" />
+                      </div>
+                      Generation Options
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6 relative z-10 p-6">
+                    <div>
+                      <Label className="text-sm font-semibold">
+                        Number of Cards (Estimate)
+                      </Label>
+                      <Input
+                        type="number"
+                        min={1}
                         max={50}
-                        value={autoCardCount} 
-                        onChange={(e) => setAutoCardCount(parseInt(e.target.value) || 0)}
-                        className="mt-2"
+                        value={autoCardCount}
+                        onChange={(e) =>
+                          setAutoCardCount(parseInt(e.target.value) || 0)
+                        }
+                        className="mt-2 bg-muted/20"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">Recommended: 10-20 cards per session</p>
-                   </div>
-                   
-                   <div>
-                      <Label>Difficulty Level</Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Recommended: 10-20 cards per session
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-semibold">
+                        Difficulty Level
+                      </Label>
                       <div className="grid grid-cols-3 gap-2 mt-2">
                         {difficulties.map((d) => (
-                          <div 
+                          <button
                             key={d}
                             onClick={() => setAutoDifficulty(d)}
-                            className={`cursor-pointer text-center p-2 rounded-md border transition-all ${
-                              autoDifficulty === d 
-                                ? "bg-primary text-primary-foreground border-primary shadow-md transform scale-105" 
-                                : "hover:bg-muted border-border"
+                            className={`text-center py-2 px-3 rounded-lg text-sm font-medium transition-all border ${
+                              autoDifficulty === d
+                                ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
+                                : "bg-background border-border hover:bg-muted"
                             }`}
                           >
                             {d}
-                          </div>
+                          </button>
                         ))}
                       </div>
-                   </div>
-                 </CardContent>
-               </Card>
+                    </div>
+                  </CardContent>
+                </Card>
 
-               <Card className="flex flex-col justify-center items-center border-border/50 shadow-sm bg-gradient-to-br from-background to-muted/30">
-                 <CardContent className="p-6 text-center space-y-4">
-                   <div className="p-4 rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center mx-auto mb-2">
-                     <Wand2 className="w-8 h-8 text-primary" />
-                   </div>
-                   <h3 className="font-semibold text-xl">Ready to Generate?</h3>
-                   <p className="text-muted-foreground text-sm max-w-xs mx-auto">
-                     Our AI will analyze your document and create {autoCardCount} {autoDifficulty.toLowerCase()} flashcards for you.
-                   </p>
-                   <Button 
-                      size="lg" 
-                      onClick={handleGenerate} 
+                <Card className="flex flex-col justify-center items-center border-border/40 shadow-sm bg-linear-to-br from-background to-muted/30">
+                  <CardContent className="p-8 text-center space-y-4">
+                    <div className="p-4 rounded-full bg-linear-to-r from-pink-500/10 to-rose-500/10 w-16 h-16 flex items-center justify-center mx-auto mb-2">
+                      <Wand2 className="w-8 h-8 text-pink-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-xl">
+                        Ready to Generate?
+                      </h3>
+                      <p className="text-muted-foreground text-sm mt-1 max-w-[250px] mx-auto">
+                        Our AI will analyze your document and create{" "}
+                        {autoCardCount} {autoDifficulty.toLowerCase()}{" "}
+                        flashcards for you.
+                      </p>
+                    </div>
+                    <Button
+                      size="lg"
+                      onClick={handleGenerate}
                       disabled={isGenerating || !autoDocument}
-                      className="w-full max-w-xs bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                      className="w-full bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       {isGenerating ? (
                         <>
@@ -502,12 +561,16 @@ export default function CreateFlashcardsPage() {
                         </>
                       )}
                     </Button>
-                 </CardContent>
-               </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="manual" className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+          <TabsContent
+            value="manual"
+            className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-2 duration-300"
+          >
             {/* Progress Bar */}
             <Card className="border-border/50">
               <CardContent className="p-4">
@@ -557,7 +620,9 @@ export default function CreateFlashcardsPage() {
                     </div>
 
                     <div>
-                      <Label htmlFor="description">Description</Label>
+                      <Label htmlFor="description">
+                        Description (Optional)
+                      </Label>
                       <Textarea
                         id="description"
                         placeholder="Describe what this deck covers..."
@@ -573,25 +638,65 @@ export default function CreateFlashcardsPage() {
                       />
                     </div>
 
+                    {/* Document Selection for Manual Mode */}
+                    <div className="space-y-2">
+                      <Label>Linked Document *</Label>
+                      {!autoDocument ? (
+                        <div className="border border-dashed border-red-300 bg-red-50 dark:bg-red-900/10 p-4 rounded-md text-center">
+                          <p className="text-sm text-red-500 mb-2">
+                            A document is required for this deck.
+                          </p>
+                          <DocumentSelectionTabs
+                            availableDocuments={
+                              (filesData || []).map((p: any) => ({
+                                id: p.id,
+                                title: p.filename ?? p.title ?? "Untitled",
+                              })) as any
+                            }
+                            selectedDocuments={selectedDocuments}
+                            onAddDocument={(d: any) =>
+                              handleAddDocument({ id: d.id, title: d.title })
+                            }
+                            isLoadingPDFs={isLoadingPDFs}
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50">
+                          <div className="flex items-center gap-2">
+                            <BookOpen className="w-4 h-4 text-primary" />
+                            <span className="font-medium text-sm">
+                              {autoDocument.title}
+                            </span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setAutoDocument(null)}
+                            className="h-8 text-destructive hover:text-destructive"
+                          >
+                            Change
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="category">Category</Label>
+                        <Label htmlFor="language">Language</Label>
                         <select
-                          id="category"
-                          value={deckMetadata.category}
+                          id="language"
+                          value={deckMetadata.language || "en"}
                           onChange={(e) =>
                             setDeckMetadata({
                               ...deckMetadata,
-                              category: e.target.value,
+                              language: e.target.value as "en" | "fr" | "ar",
                             })
                           }
                           className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm"
                         >
-                          {categories.map((category) => (
-                            <option key={category} value={category}>
-                              {category}
-                            </option>
-                          ))}
+                          <option value="en">English</option>
+                          <option value="fr">French</option>
+                          <option value="ar">Arabic</option>
                         </select>
                       </div>
 
@@ -663,7 +768,9 @@ export default function CreateFlashcardsPage() {
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            setCurrentCardIndex(Math.max(0, currentCardIndex - 1))
+                            setCurrentCardIndex(
+                              Math.max(0, currentCardIndex - 1)
+                            )
                           }
                           disabled={currentCardIndex === 0}
                         >
@@ -674,7 +781,10 @@ export default function CreateFlashcardsPage() {
                           size="sm"
                           onClick={() =>
                             setCurrentCardIndex(
-                              Math.min(flashcards.length - 1, currentCardIndex + 1)
+                              Math.min(
+                                flashcards.length - 1,
+                                currentCardIndex + 1
+                              )
                             )
                           }
                           disabled={currentCardIndex === flashcards.length - 1}
@@ -685,10 +795,18 @@ export default function CreateFlashcardsPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
-                      <Button variant="outline" size="sm" onClick={addFlashcard}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={addFlashcard}
+                      >
                         <Plus className="w-4 h-4 mr-1" /> Add
                       </Button>
-                      <Button variant="outline" size="sm" onClick={shuffleCards}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={shuffleCards}
+                      >
                         <Shuffle className="w-4 h-4 mr-1" /> Mix
                       </Button>
                     </div>
@@ -705,9 +823,11 @@ export default function CreateFlashcardsPage() {
                           onClick={() => setCurrentCardIndex(index)}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">Card {index + 1}</span>
+                            <span className="text-sm font-medium">
+                              Card {index + 1}
+                            </span>
                             {card.front.trim() && card.back.trim() && (
-                                <Check className="w-3 h-3 text-green-500" />
+                              <Check className="w-3 h-3 text-green-500" />
                             )}
                           </div>
                         </div>
@@ -720,7 +840,11 @@ export default function CreateFlashcardsPage() {
               {/* Card Editor/Preview */}
               <div className="lg:col-span-2">
                 {!previewMode ? (
-                  <div className={`transition-all duration-300 ${isAnimating ? "scale-[1.02]" : ""}`}>
+                  <div
+                    className={`transition-all duration-300 ${
+                      isAnimating ? "scale-[1.02]" : ""
+                    }`}
+                  >
                     <FlashcardEditor
                       card={currentCard}
                       cardIndex={currentCardIndex}

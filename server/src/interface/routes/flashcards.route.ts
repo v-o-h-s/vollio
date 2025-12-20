@@ -6,6 +6,8 @@ import {
 import {
   CreateFlashCardsDTO,
   createFlashCardsSchema,
+  CreateManualFlashCardsDTO,
+  createManualFlashCardsSchema,
   FlashCardsSetIdParams,
   flashCardsSetIdParamsSchema,
 } from "../../shared/validation/flashcardSchemas";
@@ -20,8 +22,23 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
   opts: FastifyPluginOptions
 ): Promise<void> => {
-  fastify.post<{ Body: CreateFlashCardsDTO }>(
+  // Manual creation
+  fastify.post<{ Body: CreateManualFlashCardsDTO }>(
     `${opts.prefix}/`,
+    {
+      preHandler: validateBody(createManualFlashCardsSchema),
+    },
+    async (request, reply) => {
+      const flashCardsController = request.diScope.resolve(
+        "flashCardsController"
+      ) as FlashCardsController;
+      return flashCardsController.createFlashCardsSet(request, reply);
+    }
+  );
+
+  // AI Generation
+  fastify.post<{ Body: CreateFlashCardsDTO }>(
+    `${opts.prefix}/generate-from-document`,
     {
       preHandler: validateBody(createFlashCardsSchema),
     },
