@@ -2,6 +2,9 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Card,
   CardContent,
@@ -38,6 +41,12 @@ import { notify } from "@/lib/notify";
 import { FlashcardPreview, FlashcardEditor } from "@/components/flashcards";
 import { DocumentSelectionTabs } from "@/components/quiz/DocumentSelectionTabs";
 import { useGetAllFilesQuery } from "@/lib/store/apiSlice";
+import {
+  flashcardManualSchema,
+  flashcardAutoSchema,
+  type FlashcardManualFormData,
+  type FlashcardAutoFormData,
+} from "@/lib/schemas/knowledge-test.schema";
 
 // Flashcard interface
 interface FlashcardItem {
@@ -46,30 +55,6 @@ interface FlashcardItem {
   back: string;
   hint?: string;
 }
-
-// Deck metadata interface
-interface DeckMetadata {
-  title: string;
-  description: string;
-  category: string;
-  language: "en" | "fr" | "ar";
-  difficulty: "Easy" | "Medium" | "Hard";
-  tags: string[];
-}
-
-// Categories and difficulties
-const categories = [
-  "Mathematics",
-  "Programming",
-  "History",
-  "Chemistry",
-  "Computer Science",
-  "Language",
-  "Medicine",
-  "Physics",
-  "Biology",
-  "Literature",
-];
 
 const difficulties = ["Easy", "Medium", "Hard"] as const;
 
@@ -83,20 +68,6 @@ export default function CreateFlashCardsPage() {
     "automatic"
   );
 
-  // State for Manual Mode
-  const [deckMetadata, setDeckMetadata] = useState<DeckMetadata>({
-    title: "",
-    description: "",
-    category: "Programming",
-    language: "en",
-    difficulty: "Medium",
-    tags: [],
-  });
-
-  const [flashcards, setFlashcards] = useState<FlashcardItem[]>([
-    { id: "1", front: "", back: "", hint: "" },
-  ]);
-
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [previewMode, setPreviewMode] = useState(false);
   const [tagInput, setTagInput] = useState("");
@@ -104,66 +75,117 @@ export default function CreateFlashCardsPage() {
   const [savedCards, setSavedCards] = useState<Set<string>>(new Set());
   const [prefillFromQuiz, setPrefillFromQuiz] = useState<string | null>(null);
 
-  // State for Automatic Mode
-  const [autoDocument, setAutoDocument] = useState<{
-    id: string;
-    title: string;
-  } | null>(null);
-  const [autoCardCount, setAutoCardCount] = useState<number>(10);
-  const [autoDifficulty, setAutoDifficulty] =
-    useState<(typeof difficulties)[number]>("Medium");
-  const [isGenerating, setIsGenerating] = useState(false);
-
   // Fetch PDFs for AI generation
   const { data: filesData, isLoading: isLoadingPDFs } = useGetAllFilesQuery();
+
+  // Manual Mode Form
+  const manualForm = useForm<FlashcardManualFormData>({
+    resolver: zodResolver(flashcardManualSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      language: "en",
+      difficulty: "Medium",
+      documentId: "",
+      tags: [],
+      flashcards: [{ id: "1", front: "", back: "", hint: "" }],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: manualForm.control,
+    name: "flashcards",
+  });
+
+  // Auto Mode Form
+  const autoForm = useForm<FlashcardAutoFormData>({
+    resolver: zodResolver(flashcardAutoSchema),
+    defaultValues: {
+      documentId: "",
+      numberOfCards: 10,
+      difficulty: "Medium",
+      includeHints: true,
+    },
+  });
+
+  // Watch values
+  const manualDocumentId = manualForm.watch("documentId");
+  const autoDocumentId = autoForm.watch("documentId");
+  const manualTags = manualForm.watch("tags");
+  const flashcards = manualForm.watch("flashcards");
 
   // If opened from a quiz, prefill title and show banner
   useEffect(() => {
     if (fromQuizId) {
       setPrefillFromQuiz(fromQuizId);
-      setActiveTab("manual"); // Assuming manual adjustment if coming from quiz, but can be auto too
-      setDeckMetadata((prev) => ({
-        ...prev,
-        title: prev.title || `Flashcards from Quiz ${fromQuizId}`,
-      }));
+      setActiveTab("manual");
+      manualForm.setValue("title", `Flashcards from Quiz ${fromQuizId}`);
     }
   }, [fromQuizId]);
 
-  // Derived state for DocumentSelectionTabs
-  const selectedDocuments = useMemo(
+  // Get selected document info
+  const getSelectedDocument = (docId: string) => {
+    if (!docId || !filesData) return null;
+    const doc = filesData.find((p: any) => p.id === docId);
+    return doc
+      ? { id: doc.id, title: doc.filename ?? doc.title ?? "Untitled" }
+      : null;
+  };
+
+  const manualDocument = useMemo(
+    () => getSelectedDocument(manualDocumentId),
+    [manualDocumentId, filesData]
+  );
+
+  const autoDocument = useMemo(
+    () => getSelectedDocument(autoDocumentId),
+    [autoDocumentId, filesData]
+  );
+
+  const selectedDocumentsManual = useMemo(
+    () => (manualDocument ? [{ id: manualDocument.id }] : []),
+    [manualDocument]
+  );
+
+  const selectedDocumentsAuto = useMemo(
     () => (autoDocument ? [{ id: autoDocument.id }] : []),
     [autoDocument]
   );
 
-  const handleAddDocument = (doc: { id: string; title: string }) => {
-    setAutoDocument({ id: doc.id, title: doc.title });
+  const handleAddDocumentManual = (doc: { id: string; title: string }) => {
+    manualForm.setValue("documentId", doc.id, { shouldValidate: true });
+  };
+
+  const handleAddDocumentAuto = (doc: { id: string; title: string }) => {
+    autoForm.setValue("documentId", doc.id, { shouldValidate: true });
   };
 
   // --- Manual Mode Handlers ---
 
   const addFlashcard = () => {
-    const newCard: FlashcardItem = {
+    const newCard = {
       id: Date.now().toString(),
       front: "",
       back: "",
       hint: "",
     };
-    setFlashcards([...flashcards, newCard]);
-    setCurrentCardIndex(flashcards.length);
+    append(newCard);
+    setCurrentCardIndex(fields.length);
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 300);
     notify.success("New card added!");
   };
 
   const removeFlashcard = (id: string) => {
-    if (flashcards.length === 1) {
+    const index = fields.findIndex((f) => f.id === id);
+    if (fields.length === 1) {
       notify.error("You need at least one card!");
       return;
     }
 
-    setFlashcards(flashcards.filter((card) => card.id !== id));
-    if (currentCardIndex >= flashcards.length - 1) {
-      setCurrentCardIndex(Math.max(0, flashcards.length - 2));
+    remove(index);
+    if (currentCardIndex >= fields.length - 1) {
+      setCurrentCardIndex(Math.max(0, fields.length - 2));
     }
     notify.success("Card removed!");
   };
@@ -173,38 +195,36 @@ export default function CreateFlashCardsPage() {
     field: keyof FlashcardItem,
     value: string
   ) => {
-    setFlashcards(
-      flashcards.map((card) =>
-        card.id === id ? { ...card, [field]: value } : card
-      )
-    );
+    const index = fields.findIndex((f) => f.id === id);
+    if (index !== -1) {
+      manualForm.setValue(`flashcards.${index}.${field}`, value);
 
-    // Mark as saved temporarily
-    setSavedCards((prev) => new Set(prev).add(id));
-    setTimeout(() => {
-      setSavedCards((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(id);
-        return newSet;
-      });
-    }, 1000);
+      // Mark as saved temporarily
+      setSavedCards((prev) => new Set(prev).add(id));
+      setTimeout(() => {
+        setSavedCards((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(id);
+          return newSet;
+        });
+      }, 1000);
+    }
   };
 
   const addTag = (tag: string) => {
-    if (tag && !deckMetadata.tags.includes(tag)) {
-      setDeckMetadata({
-        ...deckMetadata,
-        tags: [...deckMetadata.tags, tag],
-      });
+    const currentTags = manualForm.getValues("tags") || [];
+    if (tag && !currentTags.includes(tag)) {
+      manualForm.setValue("tags", [...currentTags, tag]);
       setTagInput("");
     }
   };
 
   const removeTag = (tagToRemove: string) => {
-    setDeckMetadata({
-      ...deckMetadata,
-      tags: deckMetadata.tags.filter((tag) => tag !== tagToRemove),
-    });
+    const currentTags = manualForm.getValues("tags") || [];
+    manualForm.setValue(
+      "tags",
+      currentTags.filter((tag) => tag !== tagToRemove)
+    );
   };
 
   const handleTagInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -215,51 +235,44 @@ export default function CreateFlashCardsPage() {
   };
 
   const duplicateCard = (card: FlashcardItem) => {
-    const newCard: FlashcardItem = {
+    const newCard = {
       ...card,
       id: Date.now().toString(),
       front: `${card.front} (Copy)`,
     };
     const newIndex = currentCardIndex + 1;
-    const newFlashcards = [...flashcards];
-    newFlashcards.splice(newIndex, 0, newCard);
-    setFlashcards(newFlashcards);
+    // Insert at specific position
+    const currentCards = manualForm.getValues("flashcards");
+    const newCards = [...currentCards];
+    newCards.splice(newIndex, 0, newCard);
+    manualForm.setValue("flashcards", newCards);
     setCurrentCardIndex(newIndex);
     notify.success("Card duplicated!");
   };
 
   const shuffleCards = () => {
-    const shuffled = [...flashcards].sort(() => Math.random() - 0.5);
-    setFlashcards(shuffled);
+    const currentCards = manualForm.getValues("flashcards");
+    const shuffled = [...currentCards].sort(() => Math.random() - 0.5);
+    manualForm.setValue("flashcards", shuffled);
     setCurrentCardIndex(0);
     notify.success("Cards shuffled!");
   };
 
-  const saveDeck = async () => {
-    if (!deckMetadata.title.trim()) {
-      notify.error("Please enter a deck title!");
-      return;
-    }
-
-    if (!autoDocument) {
-      notify.error("Please select a linked document!");
-      return;
-    }
-
-    const validCards = flashcards.filter(
+  const onManualSubmit = async (data: FlashcardManualFormData) => {
+    const validCards = data.flashcards.filter(
       (card) => card.front.trim() && card.back.trim()
     );
+
     if (validCards.length === 0) {
       notify.error("Please create at least one complete card!");
       return;
     }
 
-    // Construct payload for API
     const payload = {
-      name: deckMetadata.title,
-      description: deckMetadata.description,
-      language: deckMetadata.language,
-      documentId: autoDocument.id,
+      name: data.title,
+      description: data.description,
+      language: data.language,
+      documentId: data.documentId,
       flashCards: validCards.map((c) => ({
         front: c.front,
         back: c.back,
@@ -277,7 +290,7 @@ export default function CreateFlashCardsPage() {
 
       if (!res.ok) throw new Error("Failed to save flashcard set");
 
-      notify.success(`Deck "${deckMetadata.title}" saved successfully!`);
+      notify.success(`Deck "${data.title}" saved successfully!`);
       router.push("/dashboard/knowledge-test");
     } catch (e) {
       console.error(e);
@@ -285,36 +298,26 @@ export default function CreateFlashCardsPage() {
     }
   };
 
-  const currentCard = flashcards[currentCardIndex];
-  const completedCards = flashcards.filter(
+  const currentCard = fields[currentCardIndex];
+  const completedCards = fields.filter(
     (card) => card.front.trim() && card.back.trim()
   ).length;
-  const progressPercentage = (completedCards / flashcards.length) * 100;
+  const progressPercentage = (completedCards / fields.length) * 100;
 
   // --- Automatic Mode Handlers ---
 
-  const handleGenerate = async () => {
-    if (!autoDocument) {
-      notify.error("Please select a document first.");
-      return;
-    }
-    if (autoCardCount < 1) {
-      notify.error("Please enter a valid number of cards.");
-      return;
-    }
-
-    setIsGenerating(true);
+  const onAutoSubmit = async (data: FlashcardAutoFormData) => {
     try {
       notify.loading("Generating flashcards...");
       const resp = await fetch("/api/v1/flashcards/generate-from-document", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          documentId: autoDocument.id,
+          documentId: data.documentId,
           settings: {
-            numberOfCards: autoCardCount,
-            difficulty: autoDifficulty,
-            includeHints: true,
+            numberOfCards: data.numberOfCards,
+            difficulty: data.difficulty,
+            includeHints: data.includeHints,
           },
         }),
       });
@@ -324,23 +327,26 @@ export default function CreateFlashCardsPage() {
         throw new Error(text || "Failed to generate flashcards");
       }
 
-      const data = await resp.json();
-      if (data.success && data.flashcards) {
-        notify.success(`Generated ${data.flashcards.length} flashcards!`);
-        // Switch to manual mode with generated cards to allow editing
-        setFlashcards(
-          data.flashcards.map((c: any) => ({
-            id: c.id || Math.random().toString(),
-            front: c.front,
-            back: c.back,
-            hint: c.hint,
-          }))
+      const responseData = await resp.json();
+      if (responseData.success && responseData.flashcards) {
+        notify.success(
+          `Generated ${responseData.flashcards.length} flashcards!`
         );
-        setDeckMetadata((prev) => ({
-          ...prev,
-          title: `Flashcards: ${autoDocument.title}`,
-          difficulty: autoDifficulty,
+        // Switch to manual mode with generated cards to allow editing
+        const generatedCards = responseData.flashcards.map((c: any) => ({
+          id: c.id || Math.random().toString(),
+          front: c.front,
+          back: c.back,
+          hint: c.hint,
         }));
+
+        manualForm.setValue("flashcards", generatedCards);
+        manualForm.setValue(
+          "title",
+          `Flashcards: ${autoDocument?.title || "Generated"}`
+        );
+        manualForm.setValue("difficulty", data.difficulty);
+        manualForm.setValue("documentId", data.documentId);
         setActiveTab("manual");
         setCurrentCardIndex(0);
       } else {
@@ -349,8 +355,6 @@ export default function CreateFlashCardsPage() {
     } catch (err: any) {
       console.error("Generation error:", err);
       notify.error(err.message || "Something went wrong during generation.");
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -397,11 +401,12 @@ export default function CreateFlashCardsPage() {
                 {previewMode ? "Edit Mode" : "Preview"}
               </Button>
               <Button
-                onClick={saveDeck}
+                onClick={manualForm.handleSubmit(onManualSubmit)}
+                disabled={manualForm.formState.isSubmitting}
                 className="bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 hover:scale-105 transition-all duration-200 text-white shadow-lg"
               >
                 <Save className="w-4 h-4 mr-2" />
-                Save Deck
+                {manualForm.formState.isSubmitting ? "Saving..." : "Save Deck"}
               </Button>
             </div>
           )}
@@ -435,441 +440,492 @@ export default function CreateFlashCardsPage() {
             value="automatic"
             className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-300"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Important: Document Selection on the Left */}
-              <Card className="md:col-span-2 lg:col-span-1 border-border/40 shadow-sm overflow-hidden h-fit">
-                <CardHeader className="bg-muted/30 border-b border-border/40 pb-4">
-                  <CardTitle className="flex items-center gap-2">
-                    <div className="p-2 rounded-md bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400">
-                      <BookOpen className="w-5 h-5" />
-                    </div>
-                    Source Material
-                  </CardTitle>
-                  <CardDescription>
-                    Select the document you want to generate flashcards from.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <DocumentSelectionTabs
-                    availableDocuments={
-                      (filesData || []).map((p: any) => ({
-                        id: p.id,
-                        title: p.filename ?? p.title ?? "Untitled",
-                      })) as any
-                    }
-                    selectedDocuments={selectedDocuments}
-                    onAddDocument={(d: any) =>
-                      handleAddDocument({ id: d.id, title: d.title })
-                    }
-                    isLoadingPDFs={isLoadingPDFs}
-                  />
-                  {!autoDocument && (
-                    <p className="text-sm text-pink-600 mt-2 flex items-center gap-2 animate-pulse">
-                      <HelpCircle className="w-4 h-4" /> Please select a
-                      document to proceed
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-
-              <div className="md:col-span-2 lg:col-span-1 space-y-6">
-                <Card className="border-border/40 shadow-sm relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <Zap className="w-24 h-24" />
-                  </div>
+            <form onSubmit={autoForm.handleSubmit(onAutoSubmit)}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Document Selection */}
+                <Card className="md:col-span-2 lg:col-span-1 border-border/40 shadow-sm overflow-hidden h-fit">
                   <CardHeader className="bg-muted/30 border-b border-border/40 pb-4">
                     <CardTitle className="flex items-center gap-2">
-                      <div className="p-2 rounded-md bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400">
-                        <Zap className="w-5 h-5" />
+                      <div className="p-2 rounded-md bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400">
+                        <BookOpen className="w-5 h-5" />
                       </div>
-                      Generation Options
+                      Source Material
                     </CardTitle>
+                    <CardDescription>
+                      Select the document you want to generate flashcards from.
+                    </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6 relative z-10 p-6">
-                    <div>
-                      <Label className="text-sm font-semibold">
-                        Number of Cards (Estimate)
-                      </Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={50}
-                        value={autoCardCount}
-                        onChange={(e) =>
-                          setAutoCardCount(parseInt(e.target.value) || 0)
-                        }
-                        className="mt-2 bg-muted/20"
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Recommended: 10-20 cards per session
+                  <CardContent className="p-6">
+                    <DocumentSelectionTabs
+                      availableDocuments={
+                        (filesData || []).map((p: any) => ({
+                          id: p.id,
+                          title: p.filename ?? p.title ?? "Untitled",
+                        })) as any
+                      }
+                      selectedDocuments={selectedDocumentsAuto}
+                      onAddDocument={(d: any) =>
+                        handleAddDocumentAuto({ id: d.id, title: d.title })
+                      }
+                      isLoadingPDFs={isLoadingPDFs}
+                    />
+                    {autoForm.formState.errors.documentId && (
+                      <p className="text-sm text-destructive mt-2 flex items-center gap-2">
+                        <HelpCircle className="w-4 h-4" />{" "}
+                        {autoForm.formState.errors.documentId.message}
                       </p>
-                    </div>
+                    )}
+                    {!autoDocument && !autoForm.formState.errors.documentId && (
+                      <p className="text-sm text-pink-600 mt-2 flex items-center gap-2 animate-pulse">
+                        <HelpCircle className="w-4 h-4" /> Please select a
+                        document to proceed
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
 
-                    <div>
-                      <Label className="text-sm font-semibold">
-                        Difficulty Level
-                      </Label>
-                      <div className="grid grid-cols-3 gap-2 mt-2">
-                        {difficulties.map((d) => (
-                          <button
-                            key={d}
-                            onClick={() => setAutoDifficulty(d)}
-                            className={`text-center py-2 px-3 rounded-lg text-sm font-medium transition-all border ${
-                              autoDifficulty === d
-                                ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
-                                : "bg-background border-border hover:bg-muted"
-                            }`}
-                          >
-                            {d}
-                          </button>
-                        ))}
+                <div className="md:col-span-2 lg:col-span-1 space-y-6">
+                  <Card className="border-border/40 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                      <Zap className="w-24 h-24" />
+                    </div>
+                    <CardHeader className="bg-muted/30 border-b border-border/40 pb-4">
+                      <CardTitle className="flex items-center gap-2">
+                        <div className="p-2 rounded-md bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400">
+                          <Zap className="w-5 h-5" />
+                        </div>
+                        Generation Options
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6 relative z-10 p-6">
+                      <div>
+                        <Label className="text-sm font-semibold">
+                          Number of Cards (Estimate)
+                        </Label>
+                        <Controller
+                          name="numberOfCards"
+                          control={autoForm.control}
+                          render={({ field }) => (
+                            <Input
+                              type="number"
+                              min={1}
+                              max={50}
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(parseInt(e.target.value) || 1)
+                              }
+                              className="mt-2 bg-muted/20"
+                            />
+                          )}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Recommended: 10-20 cards per session
+                        </p>
+                        {autoForm.formState.errors.numberOfCards && (
+                          <p className="text-xs text-destructive mt-1">
+                            {autoForm.formState.errors.numberOfCards.message}
+                          </p>
+                        )}
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
 
-                <Card className="flex flex-col justify-center items-center border-border/40 shadow-sm bg-linear-to-br from-background to-muted/30">
-                  <CardContent className="p-8 text-center space-y-4">
-                    <div className="p-4 rounded-full bg-linear-to-r from-pink-500/10 to-rose-500/10 w-16 h-16 flex items-center justify-center mx-auto mb-2">
-                      <Wand2 className="w-8 h-8 text-pink-500" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-xl">
-                        Ready to Generate?
-                      </h3>
-                      <p className="text-muted-foreground text-sm mt-1 max-w-[250px] mx-auto">
-                        Our AI will analyze your document and create{" "}
-                        {autoCardCount} {autoDifficulty.toLowerCase()}{" "}
-                        flashcards for you.
-                      </p>
-                    </div>
-                    <Button
-                      size="lg"
-                      onClick={handleGenerate}
-                      disabled={isGenerating || !autoDocument}
-                      className="w-full bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Generate Flashcards
-                        </>
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
+                      <div>
+                        <Label className="text-sm font-semibold">
+                          Difficulty Level
+                        </Label>
+                        <Controller
+                          name="difficulty"
+                          control={autoForm.control}
+                          render={({ field }) => (
+                            <div className="grid grid-cols-3 gap-2 mt-2">
+                              {difficulties.map((d) => (
+                                <button
+                                  key={d}
+                                  type="button"
+                                  onClick={() => field.onChange(d)}
+                                  className={`text-center py-2 px-3 rounded-lg text-sm font-medium transition-all border ${
+                                    field.value === d
+                                      ? "bg-pink-50 border-pink-500 text-pink-700 dark:bg-pink-900/20 dark:text-pink-300"
+                                      : "bg-background border-border hover:bg-muted"
+                                  }`}
+                                >
+                                  {d}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="flex flex-col justify-center items-center border-border/40 shadow-sm bg-linear-to-br from-background to-muted/30">
+                    <CardContent className="p-8 text-center space-y-4">
+                      <div className="p-4 rounded-full bg-linear-to-r from-pink-500/10 to-rose-500/10 w-16 h-16 flex items-center justify-center mx-auto mb-2">
+                        <Wand2 className="w-8 h-8 text-pink-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-xl">
+                          Ready to Generate?
+                        </h3>
+                        <p className="text-muted-foreground text-sm mt-1 max-w-[250px] mx-auto">
+                          Our AI will analyze your document and create{" "}
+                          {autoForm.watch("numberOfCards")}{" "}
+                          {autoForm.watch("difficulty").toLowerCase()}{" "}
+                          flashcards for you.
+                        </p>
+                      </div>
+                      <Button
+                        type="submit"
+                        size="lg"
+                        disabled={
+                          autoForm.formState.isSubmitting || !autoDocument
+                        }
+                        className="w-full bg-linear-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        {autoForm.formState.isSubmitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4 mr-2" />
+                            Generate Flashcards
+                          </>
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
-            </div>
+            </form>
           </TabsContent>
 
           <TabsContent
             value="manual"
             className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-2 duration-300"
           >
-            {/* Progress Bar */}
-            <Card className="border-border/50">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-foreground">
-                    Progress: {completedCards} of {flashcards.length} cards
-                    completed
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {Math.round(progressPercentage)}%
-                  </span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                  <div
-                    className="bg-linear-to-r from-pink-500 to-rose-500 h-2 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Deck Metadata (Same as before but wrapped in consistent card style) */}
-              <div className="lg:col-span-1 space-y-6">
-                <Card className="border-border/50 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BookOpen className="w-5 h-5" />
-                      Deck Information
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="title">Deck Title *</Label>
-                      <Input
-                        id="title"
-                        placeholder="Enter deck title..."
-                        value={deckMetadata.title}
-                        onChange={(e) =>
-                          setDeckMetadata({
-                            ...deckMetadata,
-                            title: e.target.value,
-                          })
-                        }
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="description">
-                        Description (Optional)
-                      </Label>
-                      <Textarea
-                        id="description"
-                        placeholder="Describe what this deck covers..."
-                        value={deckMetadata.description}
-                        onChange={(e) =>
-                          setDeckMetadata({
-                            ...deckMetadata,
-                            description: e.target.value,
-                          })
-                        }
-                        className="mt-1 resize-none"
-                        rows={3}
-                      />
-                    </div>
-
-                    {/* Document Selection for Manual Mode */}
-                    <div className="space-y-2">
-                      <Label>Linked Document *</Label>
-                      {!autoDocument ? (
-                        <div className="border border-dashed border-red-300 bg-red-50 dark:bg-red-900/10 p-4 rounded-md text-center">
-                          <p className="text-sm text-red-500 mb-2">
-                            A document is required for this deck.
-                          </p>
-                          <DocumentSelectionTabs
-                            availableDocuments={
-                              (filesData || []).map((p: any) => ({
-                                id: p.id,
-                                title: p.filename ?? p.title ?? "Untitled",
-                              })) as any
-                            }
-                            selectedDocuments={selectedDocuments}
-                            onAddDocument={(d: any) =>
-                              handleAddDocument({ id: d.id, title: d.title })
-                            }
-                            isLoadingPDFs={isLoadingPDFs}
-                          />
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50">
-                          <div className="flex items-center gap-2">
-                            <BookOpen className="w-4 h-4 text-primary" />
-                            <span className="font-medium text-sm">
-                              {autoDocument.title}
-                            </span>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setAutoDocument(null)}
-                            className="h-8 text-destructive hover:text-destructive"
-                          >
-                            Change
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="language">Language</Label>
-                        <select
-                          id="language"
-                          value={deckMetadata.language || "en"}
-                          onChange={(e) =>
-                            setDeckMetadata({
-                              ...deckMetadata,
-                              language: e.target.value as "en" | "fr" | "ar",
-                            })
-                          }
-                          className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm"
-                        >
-                          <option value="en">English</option>
-                          <option value="fr">French</option>
-                          <option value="ar">Arabic</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="difficulty">Difficulty</Label>
-                        <select
-                          id="difficulty"
-                          value={deckMetadata.difficulty}
-                          onChange={(e) =>
-                            setDeckMetadata({
-                              ...deckMetadata,
-                              difficulty: e.target.value as any,
-                            })
-                          }
-                          className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm"
-                        >
-                          {difficulties.map((difficulty) => (
-                            <option key={difficulty} value={difficulty}>
-                              {difficulty}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="tags">Tags</Label>
-                      <Input
-                        id="tags"
-                        placeholder="Add tags..."
-                        value={tagInput}
-                        onChange={(e) => setTagInput(e.target.value)}
-                        onKeyDown={handleTagInput}
-                        className="mt-1"
-                      />
-                      {deckMetadata.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {deckMetadata.tags.map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="secondary"
-                              className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-                              onClick={() => removeTag(tag)}
-                            >
-                              {tag} ×
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Card Navigation */}
-                <Card className="border-border/50 shadow-sm">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Brain className="w-5 h-5" />
-                      Card Navigation
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Card {currentCardIndex + 1} of {flashcards.length}
-                      </span>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setCurrentCardIndex(
-                              Math.max(0, currentCardIndex - 1)
-                            )
-                          }
-                          disabled={currentCardIndex === 0}
-                        >
-                          ←
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            setCurrentCardIndex(
-                              Math.min(
-                                flashcards.length - 1,
-                                currentCardIndex + 1
-                              )
-                            )
-                          }
-                          disabled={currentCardIndex === flashcards.length - 1}
-                        >
-                          →
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={addFlashcard}
-                      >
-                        <Plus className="w-4 h-4 mr-1" /> Add
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={shuffleCards}
-                      >
-                        <Shuffle className="w-4 h-4 mr-1" /> Mix
-                      </Button>
-                    </div>
-
-                    <div className="max-h-40 overflow-y-auto space-y-1">
-                      {flashcards.map((card, index) => (
-                        <div
-                          key={card.id}
-                          className={`p-2 rounded-md cursor-pointer transition-all duration-200 ${
-                            index === currentCardIndex
-                              ? "bg-primary/10 border border-primary/20"
-                              : "bg-muted/50 hover:bg-muted"
-                          }`}
-                          onClick={() => setCurrentCardIndex(index)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">
-                              Card {index + 1}
-                            </span>
-                            {card.front.trim() && card.back.trim() && (
-                              <Check className="w-3 h-3 text-green-500" />
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Card Editor/Preview */}
-              <div className="lg:col-span-2">
-                {!previewMode ? (
-                  <div
-                    className={`transition-all duration-300 ${
-                      isAnimating ? "scale-[1.02]" : ""
-                    }`}
-                  >
-                    <FlashcardEditor
-                      card={currentCard}
-                      cardIndex={currentCardIndex}
-                      totalCards={flashcards.length}
-                      onUpdate={updateFlashcard}
-                      onDuplicate={duplicateCard}
-                      onDelete={removeFlashcard}
-                      canDelete={flashcards.length > 1}
-                      isSaved={savedCards.has(currentCard.id)}
+            <form onSubmit={manualForm.handleSubmit(onManualSubmit)}>
+              {/* Progress Bar */}
+              <Card className="border-border/50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-foreground">
+                      Progress: {completedCards} of {fields.length} cards
+                      completed
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {Math.round(progressPercentage)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-linear-to-r from-pink-500 to-rose-500 h-2 rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${progressPercentage}%` }}
                     />
                   </div>
-                ) : (
-                  <Card className="border-border/50 shadow-sm h-full flex flex-col justify-center">
-                    <CardContent className="p-8">
-                      <FlashcardPreview
-                        front={currentCard.front}
-                        back={currentCard.back}
-                        hint={currentCard.hint}
-                        showControls={true}
-                      />
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Deck Metadata */}
+                <div className="lg:col-span-1 space-y-6">
+                  <Card className="border-border/50 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="w-5 h-5" />
+                        Deck Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <Label htmlFor="title">Deck Title *</Label>
+                        <Controller
+                          name="title"
+                          control={manualForm.control}
+                          render={({ field }) => (
+                            <Input
+                              id="title"
+                              placeholder="Enter deck title..."
+                              {...field}
+                              className="mt-1"
+                            />
+                          )}
+                        />
+                        {manualForm.formState.errors.title && (
+                          <p className="text-xs text-destructive mt-1">
+                            {manualForm.formState.errors.title.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label htmlFor="description">
+                          Description (Optional)
+                        </Label>
+                        <Controller
+                          name="description"
+                          control={manualForm.control}
+                          render={({ field }) => (
+                            <Textarea
+                              id="description"
+                              placeholder="Describe what this deck covers..."
+                              {...field}
+                              className="mt-1 resize-none"
+                              rows={3}
+                            />
+                          )}
+                        />
+                      </div>
+
+                      {/* Document Selection for Manual Mode */}
+                      <div className="space-y-2">
+                        <Label>Linked Document *</Label>
+                        {!manualDocument ? (
+                          <div className="border border-dashed border-red-300 bg-red-50 dark:bg-red-900/10 p-4 rounded-md text-center">
+                            <p className="text-sm text-red-500 mb-2">
+                              A document is required for this deck.
+                            </p>
+                            <DocumentSelectionTabs
+                              availableDocuments={
+                                (filesData || []).map((p: any) => ({
+                                  id: p.id,
+                                  title: p.filename ?? p.title ?? "Untitled",
+                                })) as any
+                              }
+                              selectedDocuments={selectedDocumentsManual}
+                              onAddDocument={(d: any) =>
+                                handleAddDocumentManual({
+                                  id: d.id,
+                                  title: d.title,
+                                })
+                              }
+                              isLoadingPDFs={isLoadingPDFs}
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between p-3 border rounded-md bg-muted/50">
+                            <div className="flex items-center gap-2">
+                              <BookOpen className="w-4 h-4 text-primary" />
+                              <span className="font-medium text-sm">
+                                {manualDocument.title}
+                              </span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                manualForm.setValue("documentId", "")
+                              }
+                              className="h-8 text-destructive hover:text-destructive"
+                            >
+                              Change
+                            </Button>
+                          </div>
+                        )}
+                        {manualForm.formState.errors.documentId && (
+                          <p className="text-xs text-destructive mt-1">
+                            {manualForm.formState.errors.documentId.message}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="language">Language</Label>
+                          <Controller
+                            name="language"
+                            control={manualForm.control}
+                            render={({ field }) => (
+                              <select
+                                id="language"
+                                {...field}
+                                className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm"
+                              >
+                                <option value="en">English</option>
+                                <option value="fr">French</option>
+                                <option value="ar">Arabic</option>
+                              </select>
+                            )}
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="difficulty">Difficulty</Label>
+                          <Controller
+                            name="difficulty"
+                            control={manualForm.control}
+                            render={({ field }) => (
+                              <select
+                                id="difficulty"
+                                {...field}
+                                className="w-full mt-1 px-3 py-2 border border-border/50 rounded-md bg-background text-foreground text-sm"
+                              >
+                                {difficulties.map((difficulty) => (
+                                  <option key={difficulty} value={difficulty}>
+                                    {difficulty}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="tags">Tags</Label>
+                        <Input
+                          id="tags"
+                          placeholder="Add tags..."
+                          value={tagInput}
+                          onChange={(e) => setTagInput(e.target.value)}
+                          onKeyDown={handleTagInput}
+                          className="mt-1"
+                        />
+                        {manualTags && manualTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {manualTags.map((tag) => (
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                                onClick={() => removeTag(tag)}
+                              >
+                                {tag} ×
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
-                )}
+
+                  {/* Card Navigation */}
+                  <Card className="border-border/50 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Brain className="w-5 h-5" />
+                        Card Navigation
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">
+                          Card {currentCardIndex + 1} of {fields.length}
+                        </span>
+                        <div className="flex gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setCurrentCardIndex(
+                                Math.max(0, currentCardIndex - 1)
+                              )
+                            }
+                            disabled={currentCardIndex === 0}
+                          >
+                            ←
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setCurrentCardIndex(
+                                Math.min(
+                                  fields.length - 1,
+                                  currentCardIndex + 1
+                                )
+                              )
+                            }
+                            disabled={currentCardIndex === fields.length - 1}
+                          >
+                            →
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={addFlashcard}
+                        >
+                          <Plus className="w-4 h-4 mr-1" /> Add
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={shuffleCards}
+                        >
+                          <Shuffle className="w-4 h-4 mr-1" /> Mix
+                        </Button>
+                      </div>
+
+                      <div className="max-h-40 overflow-y-auto space-y-1">
+                        {fields.map((card, index) => (
+                          <div
+                            key={card.id}
+                            className={`p-2 rounded-md cursor-pointer transition-all duration-200 ${
+                              index === currentCardIndex
+                                ? "bg-primary/10 border border-primary/20"
+                                : "bg-muted/50 hover:bg-muted"
+                            }`}
+                            onClick={() => setCurrentCardIndex(index)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium">
+                                Card {index + 1}
+                              </span>
+                              {card.front.trim() && card.back.trim() && (
+                                <Check className="w-3 h-3 text-green-500" />
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Card Editor/Preview */}
+                <div className="lg:col-span-2">
+                  {!previewMode ? (
+                    <div
+                      className={`transition-all duration-300 ${
+                        isAnimating ? "scale-[1.02]" : ""
+                      }`}
+                    >
+                      <FlashcardEditor
+                        card={currentCard}
+                        cardIndex={currentCardIndex}
+                        totalCards={fields.length}
+                        onUpdate={updateFlashcard}
+                        onDuplicate={duplicateCard}
+                        onDelete={removeFlashcard}
+                        canDelete={fields.length > 1}
+                        isSaved={savedCards.has(currentCard.id)}
+                      />
+                    </div>
+                  ) : (
+                    <Card className="border-border/50 shadow-sm h-full flex flex-col justify-center">
+                      <CardContent className="p-8">
+                        <FlashcardPreview
+                          front={currentCard.front}
+                          back={currentCard.back}
+                          hint={currentCard.hint}
+                          showControls={true}
+                        />
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               </div>
-            </div>
+            </form>
           </TabsContent>
         </Tabs>
       </div>
