@@ -9,7 +9,7 @@ export interface CreateFlashCardsSetResponse {
     id: string;
     front: string;
     back: string;
-    explanation: string;
+    hint: string;
   }[];
 }
 
@@ -26,7 +26,7 @@ export interface FlashCardsSetSummary {
     id: string;
     front: string;
     back: string;
-    explanation: string;
+    hint: string;
   }[];
 }
 
@@ -41,7 +41,7 @@ export interface GetFlashCardsSetByIdResponse {
     id: string;
     front: string;
     back: string;
-    explanation: string;
+    hint: string;
   }[];
 }
 

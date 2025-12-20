@@ -3,20 +3,20 @@ export class FlashCard {
   private setId: string;
   private front: string;
   private back: string;
-  private explanation?: string;
+  private hint?: string;
 
   constructor(
     id: string,
     setId: string,
     front: string,
     back: string,
-    explanation?: string
+    hint?: string
   ) {
     this.id = id;
     this.setId = setId;
     this.front = front;
     this.back = back;
-    this.explanation = explanation;
+    this.hint = hint;
   }
 
   public getId(): string {
@@ -39,12 +39,12 @@ export class FlashCard {
     this.back = back;
   }
 
-  public getExplanation(): string | undefined {
-    return this.explanation;
+  public getHint(): string | undefined {
+    return this.hint;
   }
 
-  public setExplanation(explanation: string): void {
-    this.explanation = explanation;
+  public setHint(hint: string): void {
+    this.hint = hint;
   }
 
   public getSetId(): string {
@@ -61,7 +61,7 @@ export class FlashCard {
       setId: this.setId,
       front: this.front,
       back: this.back,
-      explanation: this.explanation,
+      hint: this.hint,
     };
   }
 }

@@ -5,8 +5,7 @@ import { QuizLanguage } from "../../domain/entities/Quiz";
 export class FlashCardMapper {
   public static fromPersistenceToDomain(row: any): FlashCardsSet {
     const flashCards = (row.flashcards || []).map(
-      (fc: any) =>
-        new FlashCard(fc.id, fc.set_id, fc.front, fc.back, fc.explanation)
+      (fc: any) => new FlashCard(fc.id, fc.set_id, fc.front, fc.back, fc.hint)
     );
 
     return new FlashCardsSet(

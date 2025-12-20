@@ -42,7 +42,7 @@ export const flashcardPromptGenerator = (
   const rules = [
     "Output ONLY valid JSON (no surrounding text).",
     "Each flashcard MUST have a clear 'front' (question/term) and 'back' (answer/definition).",
-    "Include an 'explanation' field for additional context or deeper understanding of the card.",
+    "Include a 'hint' field for additional context or deeper understanding of the card.",
     "Do NOT exceed requested card counts.",
     "If content is insufficient, reduce card count and explain why in metadata.",
     "Every flashcard must be directly grounded in the provided content.",
@@ -74,7 +74,7 @@ export const flashcardPromptGenerator = (
           "id": "string",
           "front": "string",
           "back": "string",
-          "explanation": "string (optional)"
+          "hint": "string (optional)"
         }
       ],
       "language": "en" | "fr" | "ar",

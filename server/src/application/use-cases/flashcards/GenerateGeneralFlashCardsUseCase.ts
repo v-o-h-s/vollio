@@ -136,7 +136,7 @@ export class GenerateGeneralFlashCardsUseCase {
             flashCardsSet.getId(),
             c.front,
             c.back,
-            c.explanation
+            c.hint
           )
       );
 
@@ -169,7 +169,7 @@ export class GenerateGeneralFlashCardsUseCase {
           c.getSetId(),
           c.getFront(),
           c.getBack(),
-          c.getExplanation()
+          c.getHint()
         );
       }
       return c;
@@ -203,7 +203,7 @@ export class GenerateGeneralFlashCardsUseCase {
         id: fc.id,
         front: fc.front,
         back: fc.back,
-        explanation: fc.explanation || "",
+        hint: fc.hint || "",
       })),
     };
   }

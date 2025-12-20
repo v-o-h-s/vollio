@@ -36,7 +36,7 @@ export class FlashCardsSetRepository implements IFlashCardsSetRepository {
       set_id: set.getId(),
       front: fc.getFront(),
       back: fc.getBack(),
-      explanation: fc.getExplanation(),
+      hint: fc.getHint(),
     }));
 
     const { error: cardsError } = await this.supabaseClient
