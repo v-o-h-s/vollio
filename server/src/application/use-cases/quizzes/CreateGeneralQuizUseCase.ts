@@ -127,6 +127,39 @@ export class CreateGeneralQuizUseCase {
       finalQuestions = finalQuestions.slice(0, data.numberOfQuestions);
     }
 
+    const isUUID = (uuid: string) =>
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        uuid
+      );
+
+    // Ensure all question and option IDs are valid UUIDs
+    finalQuestions = finalQuestions.map((q) => {
+      const newQ = { ...q };
+      if (!isUUID(newQ.id)) {
+        newQ.id = crypto.randomUUID();
+      }
+
+      if (newQ.type === "mcq") {
+        const optionMap = new Map<string, string>();
+        newQ.options = newQ.options.map((opt) => {
+          const newOpt = { ...opt };
+          if (!isUUID(newOpt.id)) {
+            const newId = crypto.randomUUID();
+            optionMap.set(opt.id, newId);
+            newOpt.id = newId;
+          }
+          return newOpt;
+        });
+
+        if (newQ.correctOptionIds) {
+          newQ.correctOptionIds = newQ.correctOptionIds.map(
+            (id) => optionMap.get(id) || id
+          );
+        }
+      }
+      return newQ;
+    });
+
     this.logger.info(
       `Generated ${finalQuestions.length} questions for the quiz.`
     );

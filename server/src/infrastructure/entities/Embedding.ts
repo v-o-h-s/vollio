@@ -5,7 +5,6 @@ export class Embedding {
     private documentId: string;
     private content: string;
     private embedding: number[];
-    private chunkIndex: number;
     private tokenCount: number;
     private metadata: ChunkMetadata;
     constructor(
@@ -13,7 +12,6 @@ export class Embedding {
         documentId: string,
         content: string,
         embedding: number[],
-        chunkIndex: number,
         tokenCount: number,
         metadata: ChunkMetadata,
     ) {
@@ -23,7 +21,6 @@ export class Embedding {
         this.documentId = documentId;
         this.content = content;
         this.embedding = embedding;
-        this.chunkIndex = chunkIndex;
         this.tokenCount = tokenCount;
         this.metadata = metadata;
     }
@@ -44,10 +41,6 @@ export class Embedding {
         return this.embedding;
     }
 
-    public getChunkIndex(): number {
-        return this.chunkIndex;
-    }
-
     public getTokenCount(): number {
         return this.tokenCount;
     }
@@ -62,7 +55,6 @@ export class Embedding {
             documentId: this.documentId,
             content: this.content,
             embedding: this.embedding,
-            chunkIndex: this.chunkIndex,
             tokenCount: this.tokenCount,
             metadata: this.metadata,
         };

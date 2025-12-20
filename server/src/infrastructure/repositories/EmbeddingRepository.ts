@@ -37,7 +37,6 @@ export class EmbeddingRepository implements IEmbeddingRepository {
       document_id: documentId,
       content: chunk.text,
       embedding: vectors[idx],
-      chunk_index: chunk.metadata.chunkIndex ?? idx,
       token_count: chunk.tokenCount,
       metadata: chunk.metadata,
     }));
@@ -75,7 +74,6 @@ export class EmbeddingRepository implements IEmbeddingRepository {
           row.document_id,
           row.content,
           row.embedding,
-          row.chunk_index,
           row.token_count,
           row.metadata
         )
@@ -115,7 +113,6 @@ export class EmbeddingRepository implements IEmbeddingRepository {
           row.document_id,
           row.content,
           row.embedding,
-          row.chunk_index,
           row.token_count,
           row.metadata
         )

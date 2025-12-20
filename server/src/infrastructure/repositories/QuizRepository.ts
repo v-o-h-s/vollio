@@ -10,10 +10,10 @@ import { DatabaseError } from "../../shared/errors/DatabaseError";
 import { QuizMapper } from "../../shared/mappers/QuizMapper";
 
 export class QuizRepository implements IQuizRepository {
-  constructor(private supabase: SupabaseClient) {}
+  constructor(private supabaseClient: SupabaseClient) {}
 
   async save(quiz: Quiz): Promise<void> {
-    const { error: quizError } = await this.supabase.from("quizzes").insert({
+    const { error: quizError } = await this.supabaseClient.from("quizzes").insert({
       id: quiz.getId(),
       document_id: quiz.getFileId(),
       language: quiz.getLanguage(),
@@ -41,7 +41,7 @@ export class QuizRepository implements IQuizRepository {
       position: index + 1,
     }));
 
-    const { error: questionsError } = await this.supabase
+    const { error: questionsError } = await this.supabaseClient
       .from("quiz_questions")
       .insert(questionRecords);
 
@@ -73,14 +73,14 @@ export class QuizRepository implements IQuizRepository {
     }
 
     if (mcqOptions.length > 0) {
-      const { error } = await this.supabase
+      const { error } = await this.supabaseClient
         .from("mcq_options")
         .insert(mcqOptions);
       if (error) throw new DatabaseError(error);
     }
 
     if (tfAnswers.length > 0) {
-      const { error } = await this.supabase
+      const { error } = await this.supabaseClient
         .from("true_false_answers")
         .insert(tfAnswers);
       if (error) throw new DatabaseError(error);
@@ -88,7 +88,7 @@ export class QuizRepository implements IQuizRepository {
   }
 
   async findById(id: string): Promise<Quiz | null> {
-    const { data: quizData, error: quizError } = await this.supabase
+    const { data: quizData, error: quizError } = await this.supabaseClient
       .from("quizzes")
       .select(
         `
@@ -112,7 +112,7 @@ export class QuizRepository implements IQuizRepository {
   }
 
   async findAll(): Promise<Quiz[]> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.supabaseClient
       .from("quizzes")
       .select(
         `
@@ -131,7 +131,7 @@ export class QuizRepository implements IQuizRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.supabase.from("quizzes").delete().eq("id", id);
+    const { error } = await this.supabaseClient.from("quizzes").delete().eq("id", id);
     if (error) throw new DatabaseError(error);
   }
 }

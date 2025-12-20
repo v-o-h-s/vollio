@@ -141,7 +141,7 @@ export const quizPromptGenerator = (data: CreateQuizDTO): PromptResult => {
 
     RULES:
     - ${rules.join("\n- ")}
-    - Assign a unique ID ( uuid) to each question and option (e.g., "q1", "opt1").
+    - Assign a unique, valid v4 UUID to each question and option.
 
     USER INSTRUCTION:
     ${refinedUserPromptText}

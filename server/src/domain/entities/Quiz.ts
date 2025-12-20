@@ -42,15 +42,7 @@ export interface TrueFalseQuestion extends BaseQuizQuestion {
 
 export type QuizQuestion = MCQQuestion | TrueFalseQuestion;
 
-export class Quiz {
-  private id: string;
-  private documentId: string;
-  private language: QuizLanguage;
-  private difficultyLevel?: DifficultyLevel;
-  private numberOfQuestions?: number;
-  private timeLimitMinutes?: number;
-  private explanationLevel: ExplanationLevel;
-  private questions?: QuizQuestion[];
+  private title?: string;
   private createdAt: Date;
 
   constructor(
@@ -62,7 +54,8 @@ export class Quiz {
     numberOfQuestions?: number,
     timeLimitMinutes?: number,
     createdAt: Date = new Date(),
-    questions?: QuizQuestion[]
+    questions?: QuizQuestion[],
+    title?: string
   ) {
     this.id = id;
     this.documentId = documentId;
@@ -73,6 +66,13 @@ export class Quiz {
     this.explanationLevel = explanationLevel;
     this.questions = questions || [];
     this.createdAt = createdAt || new Date();
+    this.title = title;
+  }
+  public getTitle(): string | null {
+    return this.title ?? null;
+  }
+  public setTitle(title: string): void {
+    this.title = title;
   }
   public setTimeLimitMinutes(timeLimitMinutes: number): void {
     this.timeLimitMinutes = timeLimitMinutes;
