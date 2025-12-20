@@ -11,7 +11,6 @@ export interface IGenerativeAiService {
   generateText(prompt: string): Promise<any>;
   refineUserPrompt(initialPrompt: string): Promise<string>;
   generateQuizQuestions(
-    data: CreateQuizDTO,
-    chunks: { content: string; metadata: ChunkMetadata }[]
-  ): Promise<QuizQuestion[]>;
+    prompt: string
+  ): Promise<{ questions: QuizQuestion[]; summary?: string }>;
 }

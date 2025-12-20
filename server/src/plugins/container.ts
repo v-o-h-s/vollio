@@ -3,7 +3,7 @@ import fastifyPlugin from "fastify-plugin";
 import { asClass, asFunction, Lifetime, InjectionMode, asValue } from "awilix";
 import { createUserClient } from "../infrastructure/database/supabase/supabase";
 import { NoteRepository } from "../infrastructure/repositories/NoteRepository";
-import { EmbeddingRepository} from "../infrastructure/repositories/EmbeddingRepository";
+import { EmbeddingRepository } from "../infrastructure/repositories/EmbeddingRepository";
 import { CreateNoteUseCase } from "../application/use-cases/notes/CreateNoteUseCase";
 import { UpdateNoteUseCase } from "../application/use-cases/notes/UpdateNoteUseCase";
 import { DeleteNoteUseCase } from "../application/use-cases/notes/DeleteNoteUseCase";
@@ -58,7 +58,7 @@ import { SemanticSearchService } from "../application/services/SemanticSearchSer
 import { FileProcessingService } from "../infrastructure/services/FileProcessingService";
 import { GenerativeAiService } from "../infrastructure/services/GenerativeAiService";
 import { QuizController } from "../interface/controllers/quiz.controller";
-import { CreateQuizUseCase } from "../application/use-cases/quizzes/CreateQuizUseCase";
+import { CreateQuizUseCase } from "../application/use-cases/quizzes/CreateGeneralQuizUseCase";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../application/use-cases/embedding/EnsureExistingOfDocumentEmbeddingUseCase";
 import { EmbedFileByIdUseCase } from "../application/use-cases/embedding/EmbedFileByIdUseCase";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
@@ -75,7 +75,6 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.diContainer.register({
-
     streamFileUseCase: asClass(StreamFileUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -162,7 +161,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    
+
     createNoteUseCase: asClass(CreateNoteUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -225,7 +224,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-   
+
     getFileContentUseCase: asClass(GetFileContentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -320,13 +319,11 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   // chunking
   fastify.diContainer.register({
-
     chunkingService: asClass(ChunkingService, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
   });
-
 
   // embedding
   fastify.diContainer.register({
@@ -342,10 +339,13 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    ensureExistingOfDocumentEmbeddingUseCase: asClass(EnsureExistingOfDocumentEmbeddingUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
+    ensureExistingOfDocumentEmbeddingUseCase: asClass(
+      EnsureExistingOfDocumentEmbeddingUseCase,
+      {
+        lifetime: Lifetime.SCOPED,
+        injectionMode: InjectionMode.CLASSIC,
+      }
+    ),
     embeddingRepository: asClass(EmbeddingRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -359,7 +359,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
     }),
   });
 
-  // Quiz 
+  // Quiz
   fastify.diContainer.register({
     quizController: asClass(QuizController, {
       lifetime: Lifetime.SCOPED,
@@ -370,8 +370,6 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
   });
-
-
 };
 export const containerPlugin = fastifyPlugin(diPlugin, {
   name: "di-container-plugin",

@@ -27,9 +27,7 @@ export interface BaseQuizQuestion {
     id: string;
     type: QuizQuestionsTypeEnum;
     text: string;
-    points: number;
     explanation?: string;
-    position?: number;
 }
 
 export interface MCQQuestion extends BaseQuizQuestion {

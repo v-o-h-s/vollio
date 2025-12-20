@@ -1,0 +1,136 @@
+import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
+import { CreateQuizResponse } from "../../../shared/types/responses/quizRoutes";
+import { CreateQuizDTO } from "../../../shared/validation/quizSchemas";
+import { Quiz, QuizQuestion } from "../../../domain/entities/Quiz";
+import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";
+import crypto from "crypto";
+import { QuizMapper } from "../../../shared/mappers/QuizMapper";
+import { FastifyBaseLogger } from "fastify";
+import { GetFileByIdUseCase } from "../files/GetFileByIdUseCase";
+import { NotFoundError } from "../../../shared/errors/NotFoundError";
+import { ChunkMetadata } from "../../../shared/utils/chunking";
+import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
+import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/client";
+import { ServerError } from "../../../shared/errors/ServerError";
+import { quizPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/quizzes";
+export class CreateGeneralQuizUseCase {
+  constructor(
+    private logger: FastifyBaseLogger,
+    private generativeAiService: IGenerativeAiService,
+    private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
+    private getFileByIdUseCase: GetFileByIdUseCase,
+    private embeddingRepository: IEmbeddingRepository
+  ) {}
+
+  async execute(data: CreateQuizDTO): Promise<CreateQuizResponse> {
+    // getting chunks relevant to the prompt
+    if (!(await this.getFileByIdUseCase.execute(data.documentId))) {
+      throw new NotFoundError("File not found");
+    }
+    await this.ensureExistingOfDocumentEmbeddingUseCase.execute(
+      data.documentId
+    );
+    const chunks: { content: string; metadata: ChunkMetadata }[] = (
+      await this.embeddingRepository.getDocumentEmbeddings(data.documentId)
+    ).map((chunk) => ({
+      content: chunk.getContent(),
+      metadata: chunk.getMetadata(),
+    }));
+
+    // creating the quiz entity
+    const quiz = new Quiz(
+      crypto.randomUUID(),
+      data.documentId,
+      data.difficultyLevel,
+      data.language,
+      data.explanationLevel,
+      data.numberOfQuestions,
+      data.timeLimitMinutes
+    );
+
+    const allQuestions: QuizQuestion[] = [];
+    let previousSummary = "";
+
+    // If no chunks, return empty
+    if (!chunks.length)
+      throw new ServerError("No chunks found for the document");
+
+    // Create batches
+    const batches: { content: string; metadata: ChunkMetadata }[][] = [];
+    for (let i = 0; i < chunks.length; i += GENRATIVE_AI_CONFIG.BATCH_SIZE) {
+      batches.push(chunks.slice(i, i + GENRATIVE_AI_CONFIG.BATCH_SIZE));
+    }
+
+    for (let i = 0; i < batches.length; i++) {
+      const batch = batches[i];
+
+      // Clone DTO to adjust question counts per batch
+      const batchDTO = { ...data };
+
+      // Distribute specific number of questions if set
+      if (
+        typeof data.numberOfQuestions === "number" &&
+        data.numberOfQuestions > 0
+      ) {
+        const baseCount = Math.floor(data.numberOfQuestions / batches.length);
+        const remainder = data.numberOfQuestions % batches.length;
+        // Add remainder to the first few batches
+        batchDTO.numberOfQuestions = baseCount + (i < remainder ? 1 : 0);
+      }
+
+      // Distribute distribution counts if set
+      if (data.questionsDistribution) {
+        const newDist = { ...data.questionsDistribution };
+        // We iterate over the keys of the partial record
+        for (const key of Object.keys(newDist) as Array<keyof typeof newDist>) {
+          const val = newDist[key];
+          if (typeof val === "number") {
+            const base = Math.floor(val / batches.length);
+            const rem = val % batches.length;
+            newDist[key] = base + (i < rem ? 1 : 0);
+          }
+        }
+        batchDTO.questionsDistribution = newDist;
+      }
+
+      const { prompt: promptTemplate } = quizPromptGenerator(batchDTO);
+
+      let context = batch.map((c) => c.content).join("\n\n");
+
+      // Inject previous summary if available
+      if (previousSummary) {
+        context = `PREVIOUS CONTEXT SUMMARY:\n${previousSummary}\n\nCURRENT CONTENT:\n${context}`;
+      }
+
+      const fullPrompt = promptTemplate.replace(
+        "<<CONTENT_GOES_HERE>>",
+        context
+      );
+
+      const { questions, summary } =
+        await this.generativeAiService.generateQuizQuestions(fullPrompt);
+
+      allQuestions.push(...questions);
+      if (summary) {
+        previousSummary = summary;
+      }
+    }
+    // Safety check: ensure we didn't exceed requested total if somehow model hallucinated specific counts
+    // (Optional, but strict adherence might desire slicing)
+    let finalQuestions = allQuestions;
+    if (
+      typeof data.numberOfQuestions === "number" &&
+      finalQuestions.length > data.numberOfQuestions
+    ) {
+      finalQuestions = finalQuestions.slice(0, data.numberOfQuestions);
+    }
+
+    this.logger.info(
+      `Generated ${finalQuestions.length} questions for the quiz.`
+    );
+    quiz.setQuestions(finalQuestions);
+
+    // mapping the quiz entity to response interface
+    return QuizMapper.fromDomainToInterface(quiz);
+  }
+}
