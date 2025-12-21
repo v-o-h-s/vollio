@@ -71,6 +71,10 @@ import { DeleteFlashCardsSetUseCase } from "../application/use-cases/flashcards/
 import { GetFlashCardsSetsByDocumentIdUseCase } from "../application/use-cases/flashcards/GetFlashCardsSetsByDocumentIdUseCase";
 import { CreateFlashCardsSetUseCase } from "../application/use-cases/flashcards/CreateFlashCardsSetUseCase";
 import { FlashCardsController } from "../interface/controllers/flashcards.controller";
+import { GetAllQuizzesUseCase } from "../application/use-cases/quizzes/GetAllquizzesUseCase";
+import { GetQuizByIdUseCase } from "../application/use-cases/quizzes/GetQuizByIdUseCase";
+import { DeleteQuizByIdUseCase } from "../application/use-cases/quizzes/DeleteQuizByIdUseCase";
+
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -422,6 +426,18 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     flashCardsController: asClass(FlashCardsController, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getAllQuizzesUseCase: asClass(GetAllQuizzesUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getQuizByIdUseCase: asClass(GetQuizByIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    deleteQuizByIdUseCase: asClass(DeleteQuizByIdUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

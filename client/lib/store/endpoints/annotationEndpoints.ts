@@ -47,7 +47,7 @@ export const annotationEndpoints = (builder: ApiBuilder) => ({
     },
     invalidatesTags: [
       { type: "Annotation", id: "LIST" },
-      { type: "PDF", id: "LIST" },
+      { type: "File", id: "LIST" },
     ],
   }),
 });

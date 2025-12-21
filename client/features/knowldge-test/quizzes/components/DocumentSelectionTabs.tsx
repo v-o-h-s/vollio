@@ -86,6 +86,7 @@ export function DocumentSelectionTabs({
                     </span>
                   </div>
                   <Button
+                    type="button"
                     variant="ghost"
                     size="icon"
                     className={`h-8 w-8 ${

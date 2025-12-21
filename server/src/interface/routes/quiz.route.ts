@@ -18,7 +18,7 @@ const quizHandler: FastifyPluginAsync = async (
   opts: FastifyPluginOptions
 ): Promise<void> => {
   fastify.post<{ Body: CreateQuizDTO }>(
-    `${opts.prefix}/`,
+    `${opts.prefix}`,
     {
       preHandler: validateBody(createQuizSchema),
     },
@@ -50,7 +50,7 @@ const quizHandler: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get(`${opts.prefix}/`, async (request, reply) => {
+  fastify.get(`${opts.prefix}`, async (request, reply) => {
     const quizController = request.diScope.resolve("quizController");
     return quizController.getAllQuizzes(request, reply);
   });

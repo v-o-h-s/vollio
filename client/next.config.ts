@@ -23,6 +23,26 @@ const nextConfig: NextConfig = {
         source: "/api/v1/files/:path*",
         destination: "http://localhost:3000/api/v1/files/:path*",
       },
+      {
+        source: "/api/v1/quizzes/:path*",
+        destination: "http://localhost:3000/api/v1/quizzes/:path*",
+      },
+      {
+        source: "/api/v1/flashcards/:path*",
+        destination: "http://localhost:3000/api/v1/flashcards/:path*",
+      },
+      {
+        source: "/api/v1/folders/:path*",
+        destination: "http://localhost:3000/api/v1/folders/:path*",
+      },
+      {
+        source: "/api/v1/highlights/:path*",
+        destination: "http://localhost:3000/api/v1/highlights/:path*",
+      },
+      {
+        source: "/api/v1/test/:path*",
+        destination: "http://localhost:3000/api/v1/test/:path*",
+      },
     ];
   },
 };

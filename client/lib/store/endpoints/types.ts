@@ -9,7 +9,7 @@ import type { EndpointBuilder } from "@reduxjs/toolkit/query";
 export type ApiTag =
   | "Annotation"
   | "Highlight"
-  | "PDF"
+  | "Flashcard"
   | "Note"
   | "Folder"
   | "Summary"

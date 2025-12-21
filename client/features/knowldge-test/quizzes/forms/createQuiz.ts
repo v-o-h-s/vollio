@@ -1,12 +1,11 @@
 import { QuizCreationFormData } from "../schemas/createQuizSchema";
-import { redirect } from "next/navigation";
 
-export const onSubmit = async (data: QuizCreationFormData) => {
+export const prepareQuizPayload = (data: QuizCreationFormData) => {
   const body: any = {
     documentId: data.documentId,
-    difficultyLevel: data.difficulty.toUpperCase(),
+    difficultyLevel: data.difficulty,
     language: data.language,
-    explanationLevel: data.explanationLevel.toUpperCase(),
+    explanationLevel: data.explanationLevel,
     numberOfQuestions: data.numberOfQuestions,
   };
 
@@ -24,16 +23,5 @@ export const onSubmit = async (data: QuizCreationFormData) => {
   }
   if (Object.keys(dist).length > 0) body.questionsDistribution = dist;
 
-  const resp = await fetch("/api/v1/quizzes", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || "Failed to create quiz");
-  }
-
-  return await resp.json();
+  return body;
 };

@@ -42,12 +42,16 @@ import {
 } from "lucide-react";
 
 import { DocumentSelectionTabs } from "@/features/knowldge-test/quizzes/components/DocumentSelectionTabs";
-import { useGetAllFilesQuery } from "@/lib/store/apiSlice";
+import { QuestionDistribution } from "@/features/knowldge-test/quizzes/components/QuestionDistribution";
+import {
+  useGetAllFilesQuery,
+  useCreateQuizMutation,
+} from "@/lib/store/apiSlice";
 import {
   quizCreationSchema,
   type QuizCreationFormData,
 } from "@/features/knowldge-test/quizzes/schemas/createQuizSchema";
-import { onSubmit } from "@/features/knowldge-test/quizzes/forms/createQuiz";
+import { prepareQuizPayload } from "@/features/knowldge-test/quizzes/forms/createQuiz";
 import { toast } from "react-toastify";
 
 // Local enum-like constants mirroring server enums
@@ -100,18 +104,12 @@ const explanationLevels = [
   },
 ] as const;
 
-const questionTypes = [
-  { key: "MCQ", label: "Multiple Choice", icon: ListTodo },
-  { key: "TRUE_FALSE", label: "True / False", icon: CheckCircle2 },
-  { key: "FILL_BLANK", label: "Fill in Blank", icon: MessageSquare },
-  { key: "SHORT_ANSWER", label: "Short Answer", icon: MessageSquare },
-];
-
 export default function CreateQuizPage() {
   const router = useRouter();
 
   const { data: documentsData, isLoading: isLoadingDocuments } =
     useGetAllFilesQuery();
+  const [createQuiz] = useCreateQuizMutation();
 
   // Initialize React Hook Form
   const form = useForm<QuizCreationFormData>({
@@ -193,23 +191,40 @@ export default function CreateQuizPage() {
 
         <Form {...form}>
           <form
-            onSubmit={handleSubmit((data) =>
-              toast.promise(
-                onSubmit(data).then((res) => {
-                  if (res?.id) {
-                    router.push(`/dashboard/knowledge-test/quizzes/${res.id}`);
-                  } else {
-                    router.push("/dashboard/knowledge-test");
-                  }
-                  return res;
-                }),
+            onSubmit={handleSubmit(async (data) => {
+              const payload = prepareQuizPayload(data);
+              await toast.promise(
+                createQuiz(payload)
+                  .unwrap()
+                  .then((res) => {
+                    if (res?.id) {
+                      router.push(
+                        `/dashboard/knowledge-test/quizzes/${res.id}`
+                      );
+                    } else {
+                      router.push("/dashboard/knowledge-test");
+                    }
+                    return res;
+                  })
+                  .catch((err) => {
+                    console.error("Quiz creation failed:", err);
+                    throw err;
+                  }),
                 {
                   pending: "Creating quiz...",
                   success: "Quiz created successfully!",
-                  error: "Failed to create quiz",
+                  error: {
+                    render({ data }: any) {
+                      return (
+                        data?.data?.message ||
+                        data?.error ||
+                        "Failed to create quiz"
+                      );
+                    },
+                  },
                 }
-              )
-            )}
+              );
+            })}
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Left Column: Configuration */}
@@ -532,76 +547,40 @@ export default function CreateQuizPage() {
                       <div className="flex items-center justify-between">
                         <FormLabel className="text-sm font-semibold flex items-center gap-2">
                           <Settings2 className="w-4 h-4 text-indigo-500" />
-                          Question Mix (Optional)
+                          Question Mix{" "}
+                          <span className="text-muted-foreground font-normal">
+                            (Optional)
+                          </span>
                         </FormLabel>
-                        {totalDistribution > 0 && (
-                          <div
-                            className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              totalDistribution !== numberOfQuestions
-                                ? "bg-amber-500/10 text-amber-600"
-                                : "bg-green-500/10 text-green-600"
-                            }`}
-                          >
-                            {totalDistribution !== numberOfQuestions ? (
-                              <AlertCircle className="w-3 h-3" />
-                            ) : (
-                              <CheckCircle2 className="w-3 h-3" />
-                            )}
-                            {totalDistribution} / {numberOfQuestions} Total
-                          </div>
-                        )}
                       </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {questionTypes.map((t) => {
-                          const Icon = t.icon;
-                          return (
-                            <FormField
-                              key={t.key}
-                              control={control}
-                              name={`questionsDistribution.${t.key}` as any}
-                              render={({ field }) => (
-                                <FormItem className="space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <div className="p-1.5 rounded-lg bg-muted/50">
-                                      <Icon className="w-3.5 h-3.5 text-indigo-500" />
-                                    </div>
-                                    <FormLabel className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">
-                                      {t.key.replace("_", " ")}
-                                    </FormLabel>
-                                  </div>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      min={0}
-                                      max={50}
-                                      placeholder="0"
-                                      value={field.value ?? ""}
-                                      onChange={(e) =>
-                                        field.onChange(
-                                          e.target.value === ""
-                                            ? undefined
-                                            : Number(e.target.value)
-                                        )
-                                      }
-                                      className="h-9 text-center bg-muted/20 focus:bg-background transition-colors font-semibold"
-                                    />
-                                  </FormControl>
-                                  {isSubmitted && <FormMessage />}
-                                </FormItem>
-                              )}
-                            />
-                          );
-                        })}
+
+                      <div className="bg-muted/10 rounded-xl p-4 border border-border/50">
+                        <QuestionDistribution
+                          totalQuestions={numberOfQuestions}
+                          distribution={questionsDistribution || {}}
+                          onChange={(
+                            key: string,
+                            value: number | undefined
+                          ) => {
+                            // Use setValue from react-hook-form to update the nested field
+                            // We cast to any because the path is dynamic, but it is type-safe in practice
+                            setValue(
+                              `questionsDistribution.${key}` as any,
+                              value,
+                              {
+                                shouldDirty: true,
+                                shouldTouch: true,
+                                shouldValidate: true,
+                              }
+                            );
+                          }}
+                        />
                       </div>
-                      {totalDistribution > 0 &&
-                        totalDistribution !== numberOfQuestions && (
-                          <p className="text-[10px] text-amber-600 flex items-center gap-1">
-                            <AlertCircle className="w-3 h-3" />
-                            Wait, the total ({totalDistribution}) doesn&apos;t
-                            match your requested count ({numberOfQuestions}). AI
-                            will adjust this for you.
-                          </p>
-                        )}
+
+                      <p className="text-[10px] text-muted-foreground text-center">
+                        * If left empty or incomplete, AI will automatically
+                        balance the remaining questions.
+                      </p>
                     </div>
                   </CardContent>
                 </Card>

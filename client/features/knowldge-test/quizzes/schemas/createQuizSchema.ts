@@ -19,8 +19,6 @@ export const quizCreationSchema = z.object({
     .object({
       MCQ: z.number().min(0).max(50).optional(),
       TRUE_FALSE: z.number().min(0).max(50).optional(),
-      FILL_BLANK: z.number().min(0).max(50).optional(),
-      SHORT_ANSWER: z.number().min(0).max(50).optional(),
     })
     .optional(),
 });
