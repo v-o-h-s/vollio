@@ -33,6 +33,7 @@ export const flashcardPromptGenerator = (
     : "Generate a set of flashcards based on the content provided.";
 
   const language = data.language || null;
+  const difficulty = data.difficulty || "Medium";
 
   const numberOfCards: number | "auto" =
     typeof data.numberOfCards === "number" && data.numberOfCards > 0
@@ -60,6 +61,7 @@ export const flashcardPromptGenerator = (
 
     CONSTRAINTS:
     - Language: ${language ?? "auto-detect (en, fr, ar)"}
+    - Difficulty: ${difficulty}
     - Total flashcards: ${numberOfCards}
 
     INPUT CONTENT:

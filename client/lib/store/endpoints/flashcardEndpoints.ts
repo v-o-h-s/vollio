@@ -6,7 +6,10 @@ import {
   GetFlashCardsSetsByDocumentIdResponse,
 } from "@shared/types/responses/flashcardsRoutes";
 import { ServerSuccessResponse } from "@shared/types/responses/general";
-import { CreateFlashCardsDTO } from "@shared/validation/flashcardSchemas";
+import {
+  CreateFlashCardsDTO,
+  CreateManualFlashCardsDTO,
+} from "@shared/validation/flashcardSchemas";
 
 export const flashcardEndpoints = (builder: ApiBuilder) => ({
   getFlashCardsSet: builder.query<GetFlashCardsSetByIdResponse, string>({
@@ -64,7 +67,7 @@ export const flashcardEndpoints = (builder: ApiBuilder) => ({
 
   createFlashCardsSet: builder.mutation<
     CreateFlashCardsSetResponse,
-    CreateFlashCardsDTO
+    CreateManualFlashCardsDTO
   >({
     query: (data) => ({
       url: "flashcards",
@@ -76,6 +79,26 @@ export const flashcardEndpoints = (builder: ApiBuilder) => ({
     ) => {
       if (!response.data) {
         throw new Error("Failed to create flashcard set");
+      }
+      return response.data;
+    },
+    invalidatesTags: [{ type: "Flashcard", id: "LIST" }],
+  }),
+
+  generateFlashCardsSet: builder.mutation<
+    CreateFlashCardsSetResponse,
+    CreateFlashCardsDTO
+  >({
+    query: (data) => ({
+      url: "flashcards/generate-from-document",
+      method: "POST",
+      body: data,
+    }),
+    transformResponse: (
+      response: ServerSuccessResponse<CreateFlashCardsSetResponse>
+    ) => {
+      if (!response.data) {
+        throw new Error("Failed to generate flashcard set");
       }
       return response.data;
     },

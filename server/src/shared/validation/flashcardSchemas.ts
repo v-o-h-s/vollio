@@ -6,6 +6,7 @@ export interface CreateFlashCardsDTO {
   documentId: string; // UUID string
   numberOfCards?: number;
   language?: QuizLanguage;
+  difficulty?: "Easy" | "Medium" | "Hard";
 }
 
 export const createFlashCardsSchema: JSONSchemaType<CreateFlashCardsDTO> = {
@@ -27,6 +28,11 @@ export const createFlashCardsSchema: JSONSchemaType<CreateFlashCardsDTO> = {
       type: "string",
       nullable: true,
       enum: [QuizLanguage.EN, QuizLanguage.FR, QuizLanguage.AR] as const,
+    },
+    difficulty: {
+      type: "string",
+      nullable: true,
+      enum: ["Easy", "Medium", "Hard"] as const,
     },
   },
   required: ["documentId"],

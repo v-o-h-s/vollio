@@ -31,7 +31,30 @@ export const flashcardAutoSchema = z.object({
     .max(50, "Maximum 50 cards allowed")
     .default(10),
   difficulty: z.enum(["Easy", "Medium", "Hard"]).default("Medium"),
-  includeHints: z.boolean().default(true),
 });
 
 export type FlashcardAutoFormData = z.infer<typeof flashcardAutoSchema>;
+
+export const prepareFlashcardPayload = (
+  mode: "manual" | "auto",
+  data: FlashcardManualFormData | FlashcardAutoFormData
+) => {
+  if (mode === "manual") {
+    const manualData = data as FlashcardManualFormData;
+    return {
+      name: manualData.title,
+      description: manualData.description,
+      language: manualData.language,
+      documentId: manualData.documentId,
+      flashCards: manualData.flashcards,
+    };
+  } else {
+    const autoData = data as FlashcardAutoFormData;
+    return {
+      documentId: autoData.documentId,
+      numberOfCards: autoData.numberOfCards,
+      language: "en",
+      difficulty: autoData.difficulty,
+    };
+  }
+};

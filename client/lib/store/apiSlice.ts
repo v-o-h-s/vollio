@@ -113,6 +113,7 @@ export const {
   useGetFlashCardsSetQuery,
   useGetFlashCardsSetsByDocumentIdQuery,
   useCreateFlashCardsSetMutation,
+  useGenerateFlashCardsSetMutation,
   useDeleteFlashCardsSetMutation,
 } = apiSlice;
 
