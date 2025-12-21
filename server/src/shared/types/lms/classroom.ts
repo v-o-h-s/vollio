@@ -351,3 +351,12 @@ export interface ClassroomCourseWorkResponse {
     }[];
   };
 }
+
+export interface CourseContent {
+  announcements: ClassroomAnnouncementResponse[];
+  materials: ClassroomCourseWorkResponse[];
+}
+
+export type CourseWithContent = Course & {
+  content: CourseContent;
+};

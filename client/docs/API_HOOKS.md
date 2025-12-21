@@ -3,6 +3,7 @@
 This document provides a comprehensive list of all available RTK Query hooks in the application.
 
 ## Table of Contents
+
 - [PDF Management](#pdf-management)
 - [Folder Management](#folder-management)
 - [Notes Management](#notes-management)
@@ -17,10 +18,12 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ## PDF Management
 
 ### Queries
+
 - `useGetPDFsQuery()` - Fetch all user's PDFs with folders
 - `useGetPDFQuery(pdfId: string)` - Fetch a single PDF by ID
 
 ### Mutations
+
 - `useUploadPDFMutation()` - Upload a new PDF file
 - `useDeletePDFMutation()` - Delete a PDF
 - `useRenamePDFMutation()` - Rename a PDF
@@ -33,9 +36,11 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ## Folder Management
 
 ### Queries
+
 - `useGetFoldersQuery()` - Fetch all user's folders with PDF counts
 
 ### Mutations
+
 - `useCreateFolderMutation()` - Create a new folder
 - `useUpdateFolderMutation()` - Update folder name or parent
 - `useDeleteFolderMutation()` - Delete a folder (optionally move contents)
@@ -47,10 +52,12 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ## Notes Management
 
 ### Queries
+
 - `useGetNotesQuery()` - Fetch all user's notes
 - `useGetNoteQuery(noteId: string)` - Fetch a single note by ID
 
 ### Mutations
+
 - `useCreateNoteMutation()` - Create a new note
 - `useUpdateNoteMutation()` - Update note content
 - `useDeleteNoteMutation()` - Delete a note
@@ -62,9 +69,11 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ## Annotations
 
 ### Queries
+
 - `useGetAnnotationsQuery()` - Fetch all annotations
 
 ### Mutations
+
 - `useCreateAnnotationMutation()` - Create a new annotation
 
 **Cache Tags:** `Annotation`
@@ -74,10 +83,12 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ## Highlights
 
 ### Queries
+
 - `useGetHighlightsQuery()` - Fetch all highlights
 - `useGetPDFHighlightsQuery(pdfId: string)` - Fetch highlights for a specific PDF
 
 ### Mutations
+
 - `useCreateHighlightMutation()` - Create a new highlight
 - `useUpdateHighlightMutation()` - Update a highlight
 - `useDeleteHighlightMutation()` - Delete a highlight
@@ -89,9 +100,11 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ## Summaries
 
 ### Queries
+
 - `useGetSummaryByPdfIdQuery(pdfId: string)` - Fetch summary for a specific PDF
 
 ### Mutations
+
 - `useCreateOrUpdateSummaryMutation()` - Create or update a summary
 - `useUpdateSummaryMutation()` - Update an existing summary
 - `useDeleteSummaryMutation()` - Delete a summary
@@ -103,17 +116,20 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ## Google Classroom Integration
 
 ### Queries
+
 - `useCheckGoogleClassroomTokenStatusQuery()` - Check if user is connected to Google Classroom
 - `useGetGoogleClassroomCoursesListQuery()` - Get list of user's courses
 - `useGetGoogleClassroomCourseContentQuery(courseId: string)` - Get content (materials) for a specific course
 
 ### Mutations
+
 - `useConnectGoogleClassroomMutation()` - Initiate OAuth connection to Google Classroom
 - `useDisconnectGoogleClassroomMutation()` - Disconnect from Google Classroom
 
 **Cache Tags:** `GoogleClassroom`, `GoogleClassroom:TOKEN_STATUS`, `GoogleClassroom:COURSES`, `GoogleClassroom:{courseId}`
 
 **API Routes:**
+
 - `/api/v1/integrations/lms/google-classroom/*` (proxied from server)
 
 ---
@@ -121,12 +137,15 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ## File Management
 
 ### Queries
+
 - `useGetFileFromGoogleDriveQuery(fileId: string)` - Fetch a file from Google Drive as Blob
 
 ### Mutations
+
 - `useAddFileFromGoogleDriveMutation()` - Add a file from Google Drive to the user's PDFs
 
 **Request Type for Add File:**
+
 ```typescript
 {
   fileId: string;       // Google Drive file ID
@@ -140,11 +159,13 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 **Cache Tags:** `File`, `File:LIST`, `File:{fileId}`
 
 **Notes:**
+
 - Adding a file from Google Drive also invalidates the `PDF:LIST` tag
 - Google Drive PDFs have `storage_path: null` and `google_file_id` set
 - Use `isGoogleDriveFile` flag to identify Google Drive files
 
 **API Routes:**
+
 - `/api/v1/files/*` (proxied from server)
 - `/api/v1/files/classroom/:fileId` - Get file content
 
@@ -153,18 +174,19 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ## Usage Examples
 
 ### Fetching PDFs
+
 ```typescript
-import { useGetPDFsQuery } from '@/lib/store/apiSlice';
+import { useGetPDFsQuery } from "@/lib/store/apiSlice";
 
 function MyComponent() {
   const { data, isLoading, error } = useGetPDFsQuery();
-  
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading PDFs</div>;
-  
+
   return (
     <div>
-      {data?.pdfs.map(pdf => (
+      {data?.pdfs.map((pdf) => (
         <div key={pdf.id}>
           {pdf.filename}
           {pdf.isGoogleDriveFile && <span>📁 Google Drive</span>}
@@ -176,18 +198,19 @@ function MyComponent() {
 ```
 
 ### Adding a Google Drive File
+
 ```typescript
-import { useAddFileFromGoogleDriveMutation } from '@/lib/store/apiSlice';
+import { useAddFileFromGoogleDriveMutation } from "@/lib/store/apiSlice";
 
 function AddFromDrive() {
   const [addFile, { isLoading }] = useAddFileFromGoogleDriveMutation();
-  
+
   const handleAdd = async (fileId: string) => {
     try {
       await addFile({
         fileId,
-        fileName: 'document.pdf',
-        mimeType: 'application/pdf',
+        fileName: "document.pdf",
+        mimeType: "application/pdf",
         fileSize: 1024000,
       }).unwrap();
       // Success!
@@ -199,23 +222,23 @@ function AddFromDrive() {
 ```
 
 ### Fetching Google Classroom Courses
+
 ```typescript
-import { 
+import {
   useCheckGoogleClassroomTokenStatusQuery,
-  useGetGoogleClassroomCoursesListQuery 
-} from '@/lib/store/apiSlice';
+  useGetGoogleClassroomCoursesListQuery,
+} from "@/lib/store/apiSlice";
 
 function ClassroomIntegration() {
   const { data: tokenStatus } = useCheckGoogleClassroomTokenStatusQuery();
-  const { data: courses } = useGetGoogleClassroomCoursesListQuery(
-    undefined,
-    { skip: !tokenStatus?.isConnected }
-  );
-  
+  const { data: courses } = useGetGoogleClassroomCoursesListQuery(undefined, {
+    skip: !tokenStatus?.isConnected,
+  });
+
   return (
     <div>
       {tokenStatus?.isConnected ? (
-        courses?.data.courses.map(course => (
+        courses?.data.courses.map((course) => (
           <div key={course.id}>{course.name}</div>
         ))
       ) : (
@@ -243,13 +266,17 @@ The following mutations automatically invalidate related caches:
 ## Configuration
 
 ### Base URL
+
 All endpoints are prefixed with `/api` (configured in `apiSlice.ts`)
 
 ### Timeout
+
 Default timeout is 30 seconds for all requests
 
 ### Rewrites
+
 The following routes are proxied to the backend server (localhost:3000):
+
 - `/api/v1/notes/*`
 - `/api/v1/integrations/*`
 - `/api/v1/files/*`
@@ -261,9 +288,11 @@ Configure in `next.config.ts` if the server port changes.
 ## Type Safety
 
 All hooks are fully typed with TypeScript. Import types from:
+
 - `@/lib/types/pdf` - PDF, Folder, Highlight types
-- `@/lib/types/server-respones/classroomRouteResponses` - Google Classroom types
-- `@/lib/types/server-respones/fileRouteResponses` - File management types
+- `@shared/types/lms/classroom` - Google Classroom types
+- `@shared/types/responses/googleClassroomRoutes` - Google Classroom API types
+- `@shared/types/responses/fileRoutes` - File management types
 
 ---
 

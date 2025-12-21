@@ -37,8 +37,7 @@ import {
   useGetGoogleClassroomCoursesListQuery,
   useGetGoogleClassroomCourseContentQuery,
 } from "@/lib/store/apiSlice";
-import { CourseContent } from "@/lib/types/server-respones/classroomRouteResponses";
-import { CourseListResponse } from "@server/shared/types/lms/classroom";
+import { CourseContent, CourseListResponse } from "@shared/types/lms/classroom";
 interface ClassroomImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
