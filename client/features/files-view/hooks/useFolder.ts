@@ -1,12 +1,10 @@
-
 import {
   useGetAllFoldersQuery,
   useCreateFolderMutation,
   useUpdateFolderMutation,
   useDeleteFolderMutation,
 } from "@/lib/store/apiSlice";
-import { toast } from "react-hot-toast";
-
+import { toast } from "react-toastify";
 export function useFolder() {
   // Query
   const {
@@ -17,15 +15,27 @@ export function useFolder() {
   } = useGetAllFoldersQuery();
 
   // Mutations
-  const [createFolderMutation, { isLoading: isCreating }] = useCreateFolderMutation();
-  const [updateFolderMutation, { isLoading: isUpdating }] = useUpdateFolderMutation();
-  const [deleteFolderMutation, { isLoading: isDeleting }] = useDeleteFolderMutation();
+  const [createFolderMutation, { isLoading: isCreating }] =
+    useCreateFolderMutation();
+  const [updateFolderMutation, { isLoading: isUpdating }] =
+    useUpdateFolderMutation();
+  const [deleteFolderMutation, { isLoading: isDeleting }] =
+    useDeleteFolderMutation();
 
   // Folder operations
   const createFolder = async (name: string, parentId: string | null = null) => {
     try {
-      await createFolderMutation({ name, parentId }).unwrap();
-      toast.success("Folder created successfully");
+      toast.promise(
+        async () => {
+          await createFolderMutation({ name, parentId }).unwrap();
+          await refetch();
+        },
+        {
+          pending: "Creating folder...",
+          success: "Folder created successfully",
+          error: "Failed to create folder",
+        }
+      );
       return true;
     } catch (error) {
       toast.error("Failed to create folder");

@@ -23,7 +23,11 @@ interface ListViewProps {
   folders: Folder[];
   files: File[];
   isItemSelected: (type: "file" | "folder", id: string) => boolean;
-  onItemSelect: (type: "file" | "folder", id: string, e: React.MouseEvent) => void;
+  onItemSelect: (
+    type: "file" | "folder",
+    id: string,
+    e: React.MouseEvent
+  ) => void;
   onFolderOpen: (folderId: string) => void;
   onFileOpen: (fileId: string) => void;
   onEmptyAreaClick: () => void;
@@ -78,14 +82,18 @@ export function ListView({
   }
 
   return (
-    <div className="w-full" onClick={onEmptyAreaClick}>
+    <div
+      className="w-full h-full overflow-y-auto overflow-x-hidden bg-card/20"
+      onClick={onEmptyAreaClick}
+    >
       {/* Folders Section */}
       <div className="space-y-1 p-4">
         {folders.map((folder) => {
-          const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-            id: `folder-${folder.id}`,
-            data: { type: "folder", id: folder.id, name: folder.name },
-          });
+          const { attributes, listeners, setNodeRef, isDragging } =
+            useDraggable({
+              id: `folder-${folder.id}`,
+              data: { type: "folder", id: folder.id, name: folder.name },
+            });
 
           const { setNodeRef: setDroppableRef } = useDroppable({
             id: `folder-${folder.id}`,
@@ -114,8 +122,13 @@ export function ListView({
               onClick={(e) => onItemSelect("folder", folder.id, e)}
               onDoubleClick={() => onFolderOpen(folder.id)}
             >
-              <Folder className="w-5 h-5 text-blue-500 flex-shrink-0" />
-              <span className="text-sm font-medium flex-1 truncate">{folder.name}</span>
+              <Folder className="w-5 h-5 text-blue-500 shrink-0" />
+              <span
+                className="text-sm font-medium flex-1 truncate"
+                title={folder.name}
+              >
+                {folder.name}
+              </span>
             </div>
           );
         })}
@@ -124,10 +137,11 @@ export function ListView({
       {/* Files Section */}
       <div className="space-y-1 px-4 pb-4">
         {files.map((file) => {
-          const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-            id: `file-${file.id}`,
-            data: { type: "file", id: file.id, name: file.filename },
-          });
+          const { attributes, listeners, setNodeRef, isDragging } =
+            useDraggable({
+              id: `file-${file.id}`,
+              data: { type: "file", id: file.id, name: file.filename },
+            });
 
           const isSelected = isItemSelected("file", file.id);
 
@@ -146,9 +160,14 @@ export function ListView({
               onClick={(e) => onItemSelect("file", file.id, e)}
               onDoubleClick={() => onFileOpen(file.id)}
             >
-              <FileIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
-              <span className="text-sm font-medium flex-1 truncate">{file.filename}</span>
-              <div className="flex items-center gap-2 ml-auto text-xs text-muted-foreground flex-shrink-0">
+              <FileIcon className="w-5 h-5 text-gray-400 shrink-0" />
+              <span
+                className="text-sm font-medium flex-1 truncate"
+                title={file.filename}
+              >
+                {file.filename}
+              </span>
+              <div className="flex items-center gap-2 ml-auto text-xs text-muted-foreground shrink-0">
                 <div className="flex items-center gap-1">
                   {getSourceIcon(file.source)}
                   <span>{getSourceLabel(file.source)}</span>

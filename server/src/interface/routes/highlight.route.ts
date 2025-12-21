@@ -22,40 +22,46 @@ import {
 
 const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  options: FastifyPluginOptions
+  _options: FastifyPluginOptions
 ): Promise<void> => {
   // Get all highlights
   fastify.get<{ Querystring: GetHighlightsQuery }>(
-    `${options.prefix}/`,
+    "/",
     {
       preHandler: validateQuery(getHighlightsQuerySchema),
     },
     async (request, reply) => {
-      const highlightController = request.diScope.resolve("highlightController") as any;
+      const highlightController = request.diScope.resolve(
+        "highlightController"
+      ) as any;
       return highlightController.getAllHighlights(request, reply);
     }
   );
 
   // Create a new highlight
   fastify.post<{ Body: CreateHighlightDTO }>(
-    `${options.prefix}/`,
+    "/",
     {
       preHandler: validateBody(createHighlightSchema),
     },
     async (request, reply) => {
-      const highlightController = request.diScope.resolve("highlightController") as any;
+      const highlightController = request.diScope.resolve(
+        "highlightController"
+      ) as any;
       return highlightController.createHighlight(request, reply);
     }
   );
 
   // Get a specific highlight by ID
   fastify.get<{ Params: HighlightIdParams }>(
-    `${options.prefix}/:id`,
+    "/:id",
     {
       preHandler: validateParams(highlightIdParamsSchema),
     },
     async (request, reply) => {
-      const highlightController = request.diScope.resolve("highlightController") as any;
+      const highlightController = request.diScope.resolve(
+        "highlightController"
+      ) as any;
       return highlightController.getHighlightById(request, reply);
     }
   );
@@ -65,7 +71,7 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     Params: HighlightIdParams;
     Body: UpdateHighlightDTO;
   }>(
-    `${options.prefix}/:id`,
+    "/:id",
     {
       preHandler: [
         validateParams(highlightIdParamsSchema),
@@ -73,19 +79,23 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const highlightController = request.diScope.resolve("highlightController") as any;
+      const highlightController = request.diScope.resolve(
+        "highlightController"
+      ) as any;
       return highlightController.updateHighlight(request, reply);
     }
   );
 
   // Delete a highlight
   fastify.delete<{ Params: HighlightIdParams }>(
-    `${options.prefix}/:id`,
+    "/:id",
     {
       preHandler: validateParams(highlightIdParamsSchema),
     },
     async (request, reply) => {
-      const highlightController = request.diScope.resolve("highlightController") as any;
+      const highlightController = request.diScope.resolve(
+        "highlightController"
+      ) as any;
       return highlightController.deleteHighlight(request, reply);
     }
   );

@@ -18,8 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { PDFViewerHeaderProps } from "./types";
-import { HIGHLIGHT_COLORS } from "./constants";
+import { PDFViewerHeaderProps } from "./lib/types";
+import { HIGHLIGHT_COLORS } from "./lib/constants";
 import { PageNavigation } from "./PageNavigation";
 import { ZoomControls } from "./ZoomControls";
 export function ViewerHeader({
@@ -87,7 +87,7 @@ export function ViewerHeader({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => router.push("/dashboard/pdfs")}
+                onClick={() => router.push("/dashboard")}
                 className="cursor-pointer h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-full flex-shrink-0"
                 title="Back to PDFs"
               >

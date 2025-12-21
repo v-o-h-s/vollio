@@ -34,7 +34,11 @@ interface DetailsViewProps {
   folders: Folder[];
   files: File[];
   isItemSelected: (type: "file" | "folder", id: string) => boolean;
-  onItemSelect: (type: "file" | "folder", id: string, e: React.MouseEvent) => void;
+  onItemSelect: (
+    type: "file" | "folder",
+    id: string,
+    e: React.MouseEvent
+  ) => void;
   onFolderOpen: (folderId: string) => void;
   onFileOpen: (fileId: string) => void;
   onEmptyAreaClick: () => void;
@@ -109,7 +113,10 @@ export function DetailsView({
   }
 
   return (
-    <div className="w-full h-full overflow-auto" onClick={onEmptyAreaClick}>
+    <div
+      className="w-full h-full overflow-y-auto overflow-x-hidden bg-card/20"
+      onClick={onEmptyAreaClick}
+    >
       <Table>
         <TableHeader>
           <TableRow>
@@ -123,10 +130,11 @@ export function DetailsView({
         <TableBody>
           {/* Folders */}
           {folders.map((folder) => {
-            const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-              id: `folder-${folder.id}`,
-              data: { type: "folder", id: folder.id, name: folder.name },
-            });
+            const { attributes, listeners, setNodeRef, isDragging } =
+              useDraggable({
+                id: `folder-${folder.id}`,
+                data: { type: "folder", id: folder.id, name: folder.name },
+              });
 
             const { setNodeRef: setDroppableRef } = useDroppable({
               id: `folder-${folder.id}`,
@@ -157,7 +165,12 @@ export function DetailsView({
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Folder className="w-4 h-4 text-blue-500" />
-                    <span>{folder.name}</span>
+                    <span
+                      className="truncate max-w-[200px]"
+                      title={folder.name}
+                    >
+                      {folder.name}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>Folder</TableCell>
@@ -170,10 +183,11 @@ export function DetailsView({
 
           {/* Files */}
           {files.map((file) => {
-            const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-              id: `file-${file.id}`,
-              data: { type: "file", id: file.id, name: file.filename },
-            });
+            const { attributes, listeners, setNodeRef, isDragging } =
+              useDraggable({
+                id: `file-${file.id}`,
+                data: { type: "file", id: file.id, name: file.filename },
+              });
 
             const isSelected = isItemSelected("file", file.id);
 
@@ -194,14 +208,21 @@ export function DetailsView({
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <FileIcon className="w-4 h-4 text-gray-400" />
-                    <span>{file.filename}</span>
+                    <span
+                      className="truncate max-w-[200px]"
+                      title={file.filename}
+                    >
+                      {file.filename}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>File</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     {getSourceIcon(file.source)}
-                    <span className="text-xs">{getSourceLabel(file.source)}</span>
+                    <span className="text-xs">
+                      {getSourceLabel(file.source)}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>{formatSize(file.size)}</TableCell>

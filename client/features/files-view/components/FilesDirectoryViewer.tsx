@@ -8,7 +8,7 @@
 
 "use client";
 
-import { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -17,7 +17,7 @@ import {
   useSensors,
   closestCenter,
 } from "@dnd-kit/core";
-import { FilesToolbar } from "./FilesToolbar";
+import { FilesToolbar } from "./DocumentsToolbar";
 import { Breadcrumb } from "./Breadcrumb";
 import { GridView } from "./views/GridView";
 import { ListView } from "./views/ListView";
@@ -32,7 +32,14 @@ import { useDragAndDrop } from "../hooks/useDragAndDrop";
 import { useFolder } from "../hooks/useFolder";
 import { useFile } from "../hooks/useFile";
 import { useFileExplorerShortcuts } from "../hooks/useFileExplorerShortcuts";
-import { Loader2, FolderOpen, FileText, FolderPlus, Upload, Trash2 } from "lucide-react";
+import {
+  Loader2,
+  FolderOpen,
+  FileText,
+  FolderPlus,
+  Upload,
+  Trash2,
+} from "lucide-react";
 import { RTKQueryError } from "@/lib/error-handling/rtk-query-error";
 import { useGetGoogleClassroomConnectionStatusQuery } from "@/lib/store/apiSlice";
 
@@ -95,15 +102,19 @@ export default function FilesDirectoryViewer() {
   const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [classroomDialogOpen, setClassroomDialogOpen] = useState(false);
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
   // Classroom status (connection-level)
-  const { data: classroomStatus, isLoading: isClassroomChecking } = useGetGoogleClassroomConnectionStatusQuery();
+  const { data: classroomStatus, isLoading: isClassroomChecking } =
+    useGetGoogleClassroomConnectionStatusQuery();
   const classroomLabel = isClassroomChecking
     ? "Checking..."
     : classroomStatus?.data?.isConnected
-      ? "Add from Classroom"
-      : "Connect Classroom";
+    ? "Add from Classroom"
+    : "Connect Classroom";
   // Keyboard shortcuts
   useFileExplorerShortcuts({
     onSelectAll: selectAll,
@@ -125,8 +136,39 @@ export default function FilesDirectoryViewer() {
     })
   );
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Handlers
-  const handleItemSelect = (type: "file" | "folder", id: string, e: React.MouseEvent) => {
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileInputChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    for (const file of files) {
+      const result = await uploadFile(file, currentFolder);
+      if (result.error) {
+        console.error("Failed to upload file:", file.name);
+      }
+    }
+
+    // Clear the input so the same file can be uploaded again if needed
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    refetchFiles();
+  };
+
+  const handleItemSelect = (
+    type: "file" | "folder",
+    id: string,
+    e: React.MouseEvent
+  ) => {
     const isMultiSelect = e.ctrlKey || e.metaKey;
     toggleItemSelection(type, id, isMultiSelect);
   };
@@ -153,7 +195,14 @@ export default function FilesDirectoryViewer() {
     handleDragEnd(event, async (itemType, itemId, targetFolderId) => {
       if (targetFolderId) {
         const cleanTargetFolderId = targetFolderId.replace(/^folder-/, "");
-        console.log("moving ", itemType, " from ", itemId, " to ", cleanTargetFolderId)
+        console.log(
+          "moving ",
+          itemType,
+          " from ",
+          itemId,
+          " to ",
+          cleanTargetFolderId
+        );
         await moveFile(itemId, cleanTargetFolderId);
         await Promise.all([refetchFiles(), refetchFolders()]);
       }
@@ -183,7 +232,12 @@ export default function FilesDirectoryViewer() {
     const x = e.clientX;
     const y = e.clientY;
 
-    if (x <= rect.left || x >= rect.right || y <= rect.top || y >= rect.bottom) {
+    if (
+      x <= rect.left ||
+      x >= rect.right ||
+      y <= rect.top ||
+      y >= rect.bottom
+    ) {
       setIsDraggingFile(false);
     }
   };
@@ -271,25 +325,43 @@ export default function FilesDirectoryViewer() {
       onDragEnd={handleDragEndWithMove}
       onDragCancel={handleDragCancel}
     >
-      <div className="space-y-4 flex flex-col ">
-        {/* Toolbar with search, view toggle, filter, and classroom button */}
-        <FilesToolbar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          filters={filters}
-          onFiltersChange={setFilters}
-          classroomLabel={classroomLabel}
-          onClassroomClick={() => setClassroomDialogOpen(true)}
+      <div className="flex flex-col h-[700px] overflow-hidden rounded-xl p-4 ">
+        {/* Hidden File Input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          multiple
+          onChange={handleFileInputChange}
         />
 
+        {/* Toolbar with search, view toggle, filter, and classroom button */}
+        <div className="flex-none pb-4">
+          <FilesToolbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            filters={filters}
+            onFiltersChange={setFilters}
+            classroomLabel={classroomLabel}
+            onClassroomClick={() => setClassroomDialogOpen(true)}
+            onUploadClick={handleUploadClick}
+            onCreateFolderClick={() => setCreateFolderDialogOpen(true)}
+          />
+        </div>
+
         {/* Breadcrumb Navigation */}
-        <Breadcrumb path={breadcrumbPath} onNavigate={handleBreadcrumbNavigate} />
+        <div className="flex-none pb-2">
+          <Breadcrumb
+            path={breadcrumbPath}
+            onNavigate={handleBreadcrumbNavigate}
+          />
+        </div>
 
         {/* Files and folders content with drag-drop upload */}
         <div
-          className="rounded-lg overflow-hidden relative"
+          className="flex-1 rounded-lg overflow-hidden relative"
           onDragEnter={handleFileDragEnter}
           onDragLeave={handleFileDragLeave}
           onDragOver={handleFileDragOver}
@@ -300,7 +372,7 @@ export default function FilesDirectoryViewer() {
 
           {/* Drag overlay - Full screen popup for upload only*/}
           {isDraggingFile && (
-            <div className="fixed inset-0 bg-background/95 backdrop-blur-sm flex items-center justify-center z-[100]">
+            <div className="fixed  inset-0 bg-background/95  backdrop-blur-sm flex items-center justify-center z-[100]">
               <div className="max-w-md w-full mx-4 bg-card border-2 border-dashed border-primary rounded-2xl p-12 shadow-2xl">
                 <div className="text-center space-y-4">
                   <div className="relative">
@@ -308,7 +380,9 @@ export default function FilesDirectoryViewer() {
                     <Upload className="h-20 w-20 text-primary mx-auto relative animate-bounce" />
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-bold text-foreground">Drop your files here</h3>
+                    <h3 className="text-2xl font-bold text-foreground">
+                      Drop your files here
+                    </h3>
                     <p className="text-sm text-muted-foreground">
                       {currentFolder
                         ? "Files will be uploaded to the current folder"
@@ -316,7 +390,9 @@ export default function FilesDirectoryViewer() {
                     </p>
                   </div>
                   <div className="pt-4 border-t border-border">
-                    <p className="text-xs text-muted-foreground">Multiple files supported</p>
+                    <p className="text-xs text-muted-foreground">
+                      Multiple files supported
+                    </p>
                   </div>
                 </div>
               </div>
@@ -356,15 +432,20 @@ export default function FilesDirectoryViewer() {
       <DragOverlay>
         {activeItem && (
           <div className=" flex flex-col justify-center items-center    rounded-lg shadow-lg w-[140px] opacity-90">
-            <div >
-              <div className="aspect-square  w-[90px] h-[90px] rounded-lg flex flex-col items-center justify-center  ">
+            <div className="w-full px-2">
+              <div className="aspect-square  w-[90px] h-[90px] rounded-lg flex flex-col items-center justify-center mx-auto ">
                 {activeItem.type === "folder" ? (
                   <FolderOpen className="h-12 w-12 text-white" />
                 ) : (
                   <FileText className="h-12 w-12 text-white" />
                 )}
               </div>
-              <p className="text-sm font-medium text-center truncate">{activeItem.name}</p>
+              <p
+                className="text-sm font-medium text-center truncate w-full mt-2"
+                title={activeItem.name}
+              >
+                {activeItem.name}
+              </p>
             </div>
           </div>
         )}

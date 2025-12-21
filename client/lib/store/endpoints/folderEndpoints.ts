@@ -72,19 +72,7 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
       method: "POST",
       body: data,
     }),
-    transformResponse: (response: any) => {
-      if (!response.data) throw new Error("Failed to create folder");
-      const folder = response.data;
-      return {
-        id: folder.id,
-        user_id: folder.user_id,
-        name: folder.name,
-        parent_id: folder.parent_id,
-        created_at: folder.created_at,
-        updated_at: folder.updated_at,
-      };
-    },
-    invalidatesTags: [{ type: "Folder", id: "LIST" }],
+  
   }),
 
   updateFolder: builder.mutation<

@@ -21,7 +21,11 @@ interface CompactViewProps {
   folders: Folder[];
   files: File[];
   isItemSelected: (type: "file" | "folder", id: string) => boolean;
-  onItemSelect: (type: "file" | "folder", id: string, e: React.MouseEvent) => void;
+  onItemSelect: (
+    type: "file" | "folder",
+    id: string,
+    e: React.MouseEvent
+  ) => void;
   onFolderOpen: (folderId: string) => void;
   onFileOpen: (fileId: string) => void;
   onEmptyAreaClick: () => void;
@@ -64,14 +68,18 @@ export function CompactView({
   }
 
   return (
-    <div className="w-full p-2" onClick={onEmptyAreaClick}>
+    <div
+      className="w-full h-full overflow-y-auto overflow-x-hidden bg-card/20 p-2"
+      onClick={onEmptyAreaClick}
+    >
       {/* Folders */}
       <div className="space-y-0.5">
         {folders.map((folder) => {
-          const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-            id: `folder-${folder.id}`,
-            data: { type: "folder", id: folder.id, name: folder.name },
-          });
+          const { attributes, listeners, setNodeRef, isDragging } =
+            useDraggable({
+              id: `folder-${folder.id}`,
+              data: { type: "folder", id: folder.id, name: folder.name },
+            });
 
           const { setNodeRef: setDroppableRef } = useDroppable({
             id: `folder-${folder.id}`,
@@ -100,8 +108,10 @@ export function CompactView({
               onClick={(e) => onItemSelect("folder", folder.id, e)}
               onDoubleClick={() => onFolderOpen(folder.id)}
             >
-              <Folder className="w-4 h-4 text-blue-500 flex-shrink-0" />
-              <span className="truncate">{folder.name}</span>
+              <Folder className="w-4 h-4 text-blue-500 shrink-0" />
+              <span className="truncate" title={folder.name}>
+                {folder.name}
+              </span>
             </div>
           );
         })}
@@ -110,10 +120,11 @@ export function CompactView({
       {/* Files */}
       <div className="space-y-0.5">
         {files.map((file) => {
-          const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-            id: `file-${file.id}`,
-            data: { type: "file", id: file.id, name: file.filename },
-          });
+          const { attributes, listeners, setNodeRef, isDragging } =
+            useDraggable({
+              id: `file-${file.id}`,
+              data: { type: "file", id: file.id, name: file.filename },
+            });
 
           const isSelected = isItemSelected("file", file.id);
 
@@ -132,9 +143,11 @@ export function CompactView({
               onClick={(e) => onItemSelect("file", file.id, e)}
               onDoubleClick={() => onFileOpen(file.id)}
             >
-              <FileIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              <span className="truncate flex-1">{file.filename}</span>
-              <div className="flex items-center opacity-70 flex-shrink-0">
+              <FileIcon className="w-4 h-4 text-gray-400 shrink-0" />
+              <span className="truncate flex-1" title={file.filename}>
+                {file.filename}
+              </span>
+              <div className="flex items-center opacity-70 shrink-0">
                 {getSourceIcon(file.source)}
               </div>
             </div>

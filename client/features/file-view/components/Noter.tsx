@@ -11,7 +11,7 @@ import {
 import { LoadingState } from "@/components/ui/loading";
 import { NoteCard } from "./NoteCard";
 import { NoteEditorTab } from "./NoteEditorTab";
-import { FileDetails } from "../../types/file";
+import { FileDetails } from "../types/file";
 
 const HOME_TAB_ID = "home";
 

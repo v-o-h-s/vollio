@@ -48,7 +48,9 @@ app.register(fastifySession, {
 app.register(fastifyCors, {
   origin: true,
   credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 });
+
 
 // Register multipart for file uploads
 app.register(fastifyMultipart, {

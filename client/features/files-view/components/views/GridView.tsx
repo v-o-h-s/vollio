@@ -21,7 +21,11 @@ interface GridViewProps {
   folders: Folder[];
   files: File[];
   isItemSelected: (type: "file" | "folder", id: string) => boolean;
-  onItemSelect: (type: "file" | "folder", id: string, e: React.MouseEvent) => void;
+  onItemSelect: (
+    type: "file" | "folder",
+    id: string,
+    e: React.MouseEvent
+  ) => void;
   onFolderOpen: (folderId: string) => void;
   onFileOpen: (fileId: string) => void;
   onEmptyAreaClick: () => void;
@@ -140,7 +144,7 @@ export function GridView({
 
   return (
     <div
-      className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-9 xl:grid-cols-10 gap-4 p-4"
+      className="grid bg-card/20 overflow-y-auto overflow-x-hidden h-[550px] grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-9 xl:grid-cols-10 gap-4 p-4 auto-rows-max shadow-xs border-1 rounded-xl"
       onClick={onEmptyAreaClick}
     >
       {folders.map((folder) => (

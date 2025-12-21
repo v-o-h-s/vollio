@@ -11,7 +11,7 @@ export { Breadcrumb } from "./components/Breadcrumb";
 export { ContextMenu } from "./components/ContextMenu";
 export { FileCard } from "./components/FileCard";
 export { FolderCard } from "./components/FolderCard";
-export { FilesToolbar } from "./components/FilesToolbar";
+export { FilesToolbar } from "./components/DocumentsToolbar";
 
 // Views
 export { GridView } from "./components/views/GridView";
@@ -36,5 +36,8 @@ export { useFile } from "./hooks/useFile";
 // Types
 export type { File, Folder, SelectedItem } from "./hooks/useFilesViewState";
 export type { BreadcrumbItem } from "./components/Breadcrumb";
-export type { ContextMenuAction, ContextMenuSection } from "./components/ContextMenu";
+export type {
+  ContextMenuAction,
+  ContextMenuSection,
+} from "./components/ContextMenu";
 export type { DragItem } from "./hooks/useDragAndDrop";

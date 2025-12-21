@@ -11,14 +11,12 @@ import {
   GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Noter from "@/features/file-view/components/smart-pdf/Noter";
+import Noter from "@/features/file-view/components/Noter";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { BetterViewer } from "@/features/file-view/components/smart-pdf/BetterViewer";
+import { BetterViewer } from "@/features/file-view/components/BetterViewer";
 import { useGetFileByIdQuery } from "@/lib/store/apiSlice";
 export default function PDFPage() {
-
-
   const router = useRouter();
   const { id } = useParams();
   const [isNoterOpen, setIsNoteOpen] = useState(false);
@@ -27,7 +25,13 @@ export default function PDFPage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Fetch PDF data using RTK Query
-  const { data: fileData, isLoading, isError, error, refetch } = useGetFileByIdQuery(id as string);
+  const {
+    data: fileData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetFileByIdQuery(id as string);
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!isDragging || !containerRef.current) return;
@@ -188,7 +192,6 @@ export default function PDFPage() {
             : "100%",
         }}
       >
-
         <BetterViewer
           file={fileData}
           onToggleNoter={() => setIsNoteOpen(!isNoterOpen)}
@@ -258,8 +261,9 @@ export default function PDFPage() {
               "transition-none"
             )}
             style={{
-              width: `calc(${100 - leftWidth}% - ${isDragging ? "32px" : "8px"
-                })`,
+              width: `calc(${100 - leftWidth}% - ${
+                isDragging ? "32px" : "8px"
+              })`,
             }}
           >
             <Noter file={fileData} />

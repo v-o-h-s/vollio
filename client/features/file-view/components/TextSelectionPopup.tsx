@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { textBound } from "./smart-pdf/Viewer";
+import { textBound } from "./Viewer";
 import { Sparkles, NotebookPen, X, Highlighter } from "lucide-react";
 
 
