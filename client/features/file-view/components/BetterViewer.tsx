@@ -21,7 +21,7 @@ import {
   PdfHighlighterUtils,
   PdfLoader,
   PdfScaleValue,
-} from "react-pdf-highlighter-extended";
+} from "react-pdf-highlighter-extended-plus";
 import { useRef } from "react";
 import { ExpandableTip } from "./highlight/ExpandableTip";
 import { TagSelectionDialog } from "./tags/TagSelectionDialog";
@@ -222,8 +222,8 @@ export const BetterViewer = ({
         <PdfLoader
           onError={(error) => console.log(error)} // todo Better visualization
           document={file.fileUrl as string}
-          workerSrc="/pdf.worker.min.mjs"
-          //workerSrc="//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs"
+          // workerSrc="/pdf.worker.min.mjs"
+          // //workerSrc="//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs"
           beforeLoad={(progress) => <PDFLoading progress={progress} />}
         >
           {(pdfDocument) => (

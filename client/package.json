@@ -93,7 +93,7 @@
     "react-error-boundary": "^6.0.0",
     "react-hook-form": "^7.69.0",
     "react-hot-toast": "^2.5.2",
-    "react-pdf-highlighter-extended": "^8.1.0",
+    "react-pdf-highlighter-extended-plus": "1.0.0",
     "react-redux": "^9.2.0",
     "react-toastify": "^11.0.5",
     "sharp": "^0.34.4",
