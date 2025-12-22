@@ -25,7 +25,6 @@ import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 
 export class HighlightController {
   constructor(
-    private getAllHighlightsUseCase: GetAllHighlightsUseCase,
     private createHighlightUseCase: CreateHighlightUseCase,
     private getHighlightByIdUseCase: GetHighlightByIdUseCase,
     private updateHighlightUseCase: UpdateHighlightUseCase,

@@ -223,7 +223,7 @@ export class HighlightRepository implements IHighlightRepository {
     const { data, error } = await this.supabaseClient
       .from("highlights")
       .select("*")
-      .eq("document_id", documentId)
+      .eq("pdf_id", documentId)
       .order("created_at", { ascending: false });
 
     if (error) {

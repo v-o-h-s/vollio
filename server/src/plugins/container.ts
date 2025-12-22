@@ -50,6 +50,7 @@ import { UpdateHighlightUseCase } from "../application/use-cases/highlights/Upda
 import { DeleteHighlightUseCase } from "../application/use-cases/highlights/DeleteHighlightUseCase";
 import { HighlightRepository } from "../infrastructure/repositories/HighlightRepository";
 import { HighlightController } from "../interface/controllers/highlight.controller";
+import { GetHighlightsByDocumentIdUseCase } from "../application/use-cases/highlights/GetHighlightsByDocumentIdUseCase";
 import { StreamFileUseCase } from "../application/use-cases/files/StreamFileUseCase";
 import { GetFileContentUseCase } from "../application/use-cases/files/GetFileContentUseCase";
 import { ChunkingService } from "../infrastructure/services/ChunkingService";
@@ -306,6 +307,13 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
+    getHighlightsByDocumentIdUseCase: asClass(
+      GetHighlightsByDocumentIdUseCase,
+      {
+        lifetime: Lifetime.SCOPED,
+        injectionMode: InjectionMode.CLASSIC,
+      }
+    ),
     highlightController: asClass(HighlightController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,

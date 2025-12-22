@@ -1,6 +1,4 @@
 import { Summary, SummaryServerResponse } from "@/lib/types/summary";
-import { CreateSummaryDto } from "@/lib/dto/createSummaryDto";
-import { UpdateSummaryDto } from "@/lib/dto/updateSummaryDto";
 import { ApiBuilder } from "./types";
 
 export const summaryEndpoints = (builder: ApiBuilder) => ({

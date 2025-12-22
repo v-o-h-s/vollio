@@ -18,13 +18,17 @@ import { folderRoutes } from "./interface/routes/folder.route";
 import { highlightRoutes } from "./interface/routes/highlight.route";
 import { quizRoutes } from "./interface/routes/quiz.route";
 import { flashcardRoutes } from "./interface/routes/flashcards.route";
+import { summaryRoutes } from "./interface/routes/summary.route";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
 
 // APP INITIALIZATION
-export const app: FastifyInstance = Fastify({ logger: loggerConfig });
+export const app: FastifyInstance = Fastify({
+  logger: loggerConfig,
+  ignoreTrailingSlash: true,
+});
 
 // MIDDLEWARE REGISTRATION
 app.register(fastifyCookie, {
@@ -50,7 +54,6 @@ app.register(fastifyCors, {
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 });
-
 
 // Register multipart for file uploads
 app.register(fastifyMultipart, {
@@ -98,6 +101,9 @@ app.register(quizRoutes, {
 });
 app.register(flashcardRoutes, {
   prefix: "/api/v1/flashcards",
+});
+app.register(summaryRoutes, {
+  prefix: "/api/v1/summaries",
 });
 
 async function start(): Promise<void> {

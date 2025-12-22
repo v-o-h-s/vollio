@@ -26,11 +26,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
   _options: FastifyPluginOptions
 ): Promise<void> => {
-
-
   // get highlights by document ID
   fastify.get<{ Querystring: HighlightDocumentIdParams }>(
-    `${_options.prefix}/`,
+    `${_options.prefix}`,
     {
       preHandler: validateQuery(highlightDocumentIdParamsSchema),
     },
@@ -44,7 +42,7 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
 
   // Create a new highlight
   fastify.post<{ Body: CreateHighlightDTO }>(
-    `${_options.prefix}/`,
+    `${_options.prefix}`,
     {
       preHandler: validateBody(createHighlightSchema),
     },
