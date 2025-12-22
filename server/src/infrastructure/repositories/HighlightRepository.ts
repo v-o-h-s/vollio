@@ -9,6 +9,7 @@ import {
 } from "../../domain/entities/Highlight";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 import { FastifyBaseLogger } from "fastify";
+import { HighlightsMapper } from "../../shared/mappers/HighlightsMapper";
 
 export class HighlightRepository implements IHighlightRepository {
   constructor(
@@ -47,7 +48,7 @@ export class HighlightRepository implements IHighlightRepository {
       { userId, pdfId, count: data.length },
       "Highlights retrieved successfully"
     );
-    return data.map((row) => this.mapRowToHighlight(row));
+    return data.map((row) => HighlightsMapper.mapRowToHighlight(row));
   }
 
   async getHighlightById(
@@ -83,7 +84,7 @@ export class HighlightRepository implements IHighlightRepository {
     }
 
     this.logger.info({ highlightId: id }, "Highlight found");
-    return this.mapRowToHighlight(data);
+    return HighlightsMapper.mapRowToHighlight(data);
   }
 
   async createHighlight(highlight: Highlight): Promise<Highlight> {
@@ -125,7 +126,7 @@ export class HighlightRepository implements IHighlightRepository {
       { highlightId: data.id },
       "Highlight created successfully"
     );
-    return this.mapRowToHighlight(data);
+    return HighlightsMapper.mapRowToHighlight(data);
   }
 
   async updateHighlight(highlight: Highlight): Promise<Highlight> {
@@ -164,7 +165,7 @@ export class HighlightRepository implements IHighlightRepository {
       { highlightId: highlight.getId() },
       "Highlight updated successfully"
     );
-    return this.mapRowToHighlight(data);
+    return HighlightsMapper.mapRowToHighlight(data);
   }
 
   async deleteHighlight(id: string, userId: string): Promise<void> {
@@ -214,27 +215,34 @@ export class HighlightRepository implements IHighlightRepository {
       { pdfId, userId, count: data.length },
       "Highlights retrieved successfully for PDF"
     );
-    return data.map((row) => this.mapRowToHighlight(row));
+    return data.map((row) => HighlightsMapper.mapRowToHighlight(row));
   }
 
-  /**
-   * Map database row to Highlight entity
-   */
-  private mapRowToHighlight(row: any): Highlight {
-    return new Highlight(
-      row.id,
-      row.user_id,
-      row.pdf_id,
-      row.type as HighlightType,
-      row.content as HighlightContent,
-      row.position as ScaledPosition,
-      row.has_note,
-      new Date(row.created_at),
-      new Date(row.updated_at),
-      row.color,
-      row.note_id,
-      row.tags,
-      row.style as HighlightStyle | undefined
+  async getHighlightsByDocumentId(documentId: string): Promise<Highlight[]> {
+    this.logger.info({ documentId }, "Getting highlights by document ID");
+    const { data, error } = await this.supabaseClient
+      .from("highlights")
+      .select("*")
+      .eq("document_id", documentId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      this.logger.error(
+        { error, documentId },
+        "Error getting highlights by document ID"
+      );
+      throw new DatabaseError(error);
+    }
+
+    if (!data) {
+      this.logger.info({ documentId }, "No highlights found for document");
+      return [];
+    }
+
+    this.logger.info(
+      { documentId, count: data.length },
+      "Highlights retrieved successfully for document"
     );
+    return data.map((row) => HighlightsMapper.mapRowToHighlight(row));
   }
 }

@@ -7,10 +7,15 @@ import { UploadFileUseCase } from "../../application/use-cases/files/UploadFileU
 import { DeleteFileUseCase } from "../../application/use-cases/files/DeleteFileUseCase";
 import { MoveFileUseCase } from "../../application/use-cases/files/MoveFileUseCase";
 import { RenameFileUseCase } from "../../application/use-cases/files/RenameFileUseCase";
-import { MoveFileDTO, RenameFileDTO, FileIdParams } from "../../shared/validation/fileSchemas";
+import {
+  MoveFileDTO,
+  RenameFileDTO,
+  FileIdParams,
+} from "../../shared/validation/fileSchemas";
 import { StreamFileUseCase } from "../../application/use-cases/files/StreamFileUseCase";
 import {
   AddFileFromGoogleDriveResponse,
+  CreateSignedUrlResponse,
   DeleteFileResponse,
   GetAllFilesResponse,
   GetFileByIdResponse,
@@ -19,8 +24,8 @@ import {
   RenameFileResponse,
   StreamFileResponse,
   UploadFileResponse,
+
 } from "../../shared/types/responses/fileRoutes";
-import { error } from "console";
 
 export class FileController {
   constructor(
@@ -32,8 +37,8 @@ export class FileController {
     private deleteFileUseCase: DeleteFileUseCase,
     private moveFileUseCase: MoveFileUseCase,
     private renameFileUseCase: RenameFileUseCase,
-    private streamFileUseCase: StreamFileUseCase,
-  ) { }
+    private streamFileUseCase: StreamFileUseCase
+  ) {}
   // add pdf from google drive
   async addFileFromGoogleDrive(
     request: FastifyRequest<{
@@ -249,7 +254,7 @@ export class FileController {
       success: true,
       message: "File moved successfully",
       data: null,
-      error: null
+      error: null,
     } satisfies MoveFileResponse);
   }
 
@@ -281,7 +286,6 @@ export class FileController {
     } satisfies RenameFileResponse);
   }
 
-
   async streamFileHead(
     request: FastifyRequest<{ Querystring: { token: string } }>,
     reply: FastifyReply
@@ -307,7 +311,10 @@ export class FileController {
         .header("Access-Control-Allow-Origin", "*")
         .header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
         .header("Access-Control-Allow-Headers", "Content-Type, Range")
-        .header("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges")
+        .header(
+          "Access-Control-Expose-Headers",
+          "Content-Length, Content-Range, Accept-Ranges"
+        )
         .header("Content-Type", "application/pdf")
         .header("Content-Disposition", "inline; filename=file.pdf")
         .header("Accept-Ranges", "bytes")
@@ -352,7 +359,10 @@ export class FileController {
         .header("Access-Control-Allow-Origin", "*")
         .header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
         .header("Access-Control-Allow-Headers", "Content-Type, Range")
-        .header("Access-Control-Expose-Headers", "Content-Length, Content-Range, Accept-Ranges")
+        .header(
+          "Access-Control-Expose-Headers",
+          "Content-Length, Content-Range, Accept-Ranges"
+        )
         .header("Content-Type", "application/pdf")
         .header("Content-Disposition", "inline; filename=file.pdf")
         .header("Accept-Ranges", "bytes")
@@ -372,5 +382,6 @@ export class FileController {
       });
     }
   }
+
 
 }

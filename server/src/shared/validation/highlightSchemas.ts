@@ -99,11 +99,13 @@ export const createHighlightSchema: JSONSchemaType<CreateHighlightDTO> = {
   properties: {
     id: {
       type: "string",
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
     pdfId: {
       type: "string",
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
     type: {
       type: "string",
@@ -126,7 +128,8 @@ export const createHighlightSchema: JSONSchemaType<CreateHighlightDTO> = {
     noteId: {
       type: "string",
       nullable: true,
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
     tags: {
       type: "array",
@@ -176,7 +179,8 @@ export const updateHighlightSchema: JSONSchemaType<UpdateHighlightDTO> = {
     noteId: {
       type: "string",
       nullable: true,
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
     position: {
       ...scaledPositionSchema,
@@ -189,7 +193,8 @@ export const updateHighlightSchema: JSONSchemaType<UpdateHighlightDTO> = {
     },
     pdfId: {
       type: "string",
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
       nullable: true,
     },
     tags: {
@@ -219,7 +224,8 @@ export const highlightIdParamsSchema: JSONSchemaType<HighlightIdParams> = {
   properties: {
     id: {
       type: "string",
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
   },
   required: ["id"],
@@ -238,10 +244,31 @@ export const getHighlightsQuerySchema: JSONSchemaType<GetHighlightsQuery> = {
   properties: {
     pdfId: {
       type: "string",
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
       nullable: true,
     },
   },
   required: [],
+  additionalProperties: false,
+} as any;
+
+/**
+ * DTO for highlight document ID params
+ */
+export interface HighlightDocumentIdParams {
+  documentId: string;
+}
+
+export const highlightDocumentIdParamsSchema: JSONSchemaType<HighlightDocumentIdParams> = {
+  type: "object",
+  properties: {
+    documentId: {
+      type: "string",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+    },
+  },
+  required: ["documentId"],
   additionalProperties: false,
 } as any;

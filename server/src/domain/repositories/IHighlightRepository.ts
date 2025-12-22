@@ -30,4 +30,9 @@ export interface IHighlightRepository {
    * Get all highlights for a PDF
    */
   getHighlightsByPdfId(pdfId: string, userId: string): Promise<Highlight[]>;
+
+  /**
+   * Get all highlights for a document
+   */
+  getHighlightsByDocumentId(documentId: string): Promise<Highlight[]>;
 }

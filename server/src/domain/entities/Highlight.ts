@@ -107,6 +107,7 @@ export class Highlight {
     return this.pdfId;
   }
 
+
   /**
    * Get highlight type
    */
@@ -150,6 +151,12 @@ export class Highlight {
     return this.hasNote;
   }
 
+  /**
+   * Get has note flag
+   */
+  public getHasNote(): boolean {
+    return this.hasNote;
+  }
   /**
    * Set has note flag
    */

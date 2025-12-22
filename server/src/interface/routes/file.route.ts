@@ -6,7 +6,11 @@ import {
   FastifyRequest,
 } from "fastify";
 import fp from "fastify-plugin";
-import { validateBody, validateParams, validateQuery } from "../../shared/validation/validator";
+import {
+  validateBody,
+  validateParams,
+  validateQuery,
+} from "../../shared/validation/validator";
 import {
   fileIdParamsSchema,
   moveFileSchema,
@@ -14,7 +18,7 @@ import {
   FileIdParams,
   MoveFileDTO,
   RenameFileDTO,
-  validateQuerySchema
+  validateQuerySchema,
 } from "../../shared/validation/fileSchemas";
 
 const fileRoutesHandler: FastifyPluginAsync = async (
@@ -22,13 +26,10 @@ const fileRoutesHandler: FastifyPluginAsync = async (
   opts: FastifyPluginOptions
 ): Promise<void> => {
   // Get all files - Must be before /:id route to avoid route matching issues
-  fastify.get(
-    `${opts.prefix}/`,
-    async (request, reply) => {
-      const fileController = request.diScope.resolve("fileController");
-      return fileController.getAllFiles(request, reply);
-    }
-  );
+  fastify.get(`${opts.prefix}/`, async (request, reply) => {
+    const fileController = request.diScope.resolve("fileController");
+    return fileController.getAllFiles(request, reply);
+  });
 
   // used like when you click on some pdf from google drive (but return like general file fetch)
   // /api/v1/files/google-drive/:id
@@ -66,16 +67,11 @@ const fileRoutesHandler: FastifyPluginAsync = async (
     }
   );
 
-
-
   // Upload file
-  fastify.post(
-    `${opts.prefix}/upload`,
-    async (request, reply) => {
-      const fileController = request.diScope.resolve("fileController");
-      return fileController.uploadFile(request, reply);
-    }
-  );
+  fastify.post(`${opts.prefix}/upload`, async (request, reply) => {
+    const fileController = request.diScope.resolve("fileController");
+    return fileController.uploadFile(request, reply);
+  });
 
   // Get file by ID
   fastify.get<{ Params: FileIdParams }>(
@@ -124,28 +120,15 @@ const fileRoutesHandler: FastifyPluginAsync = async (
         validateParams(fileIdParamsSchema),
         validateBody(renameFileSchema),
       ],
-
     },
     async (request, reply) => {
       const fileController = request.diScope.resolve("fileController");
       return fileController.renameFile(request, reply);
     }
   );
-  fastify.get<{ Params: FileIdParams }>(
-    `${opts.prefix}/:id/signed-url`,
-  
-    async (request, reply) => {
-      const fileController = request.diScope.resolve("fileController");
-      return fileController.createSignedUrl(request, reply);
-    }
-  );
-
 };
-
-
 
 export const fileRoutes = fp(fileRoutesHandler, {
   name: "file-routes",
   fastify: "5.x",
 });
-

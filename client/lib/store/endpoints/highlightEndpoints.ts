@@ -14,7 +14,7 @@ import { ServerSuccessResponse } from "@shared/types/responses/general";
 
 export const highlightEndpoints = (builder: ApiBuilder) => ({
   getHighlights: builder.query<HighlightData[], void>({
-    query: () => "highlights",
+    query: () => "highlights/",
     transformResponse: (response: GetHighlightsResponse) => response.data || [],
     providesTags: (result) =>
       result
@@ -26,7 +26,7 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
   }),
 
   getPDFHighlights: builder.query<HighlightData[], string>({
-    query: (pdfId) => `highlights?pdfId=${pdfId}`,
+    query: (pdfId) => `highlights?documentId=${pdfId}`,
     transformResponse: (response: GetHighlightsResponse) => response.data || [],
     providesTags: (result) =>
       result
@@ -39,7 +39,7 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
 
   createHighlight: builder.mutation<null, CreateHighlightDTO>({
     query: (highlight) => ({
-      url: "highlights",
+      url: "highlights/",
       method: "POST",
       body: highlight,
     }),

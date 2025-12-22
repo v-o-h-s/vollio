@@ -1,14 +1,13 @@
 import { useUpdateHighlightMutation } from "@/lib/store/apiSlice";
-import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
 import { useDeleteHighlightMutation } from "@/lib/store/apiSlice";
-
+import { CreateHighlightDTO } from "@shared/validation/highlightSchemas";
 export const useHighlightActions = () => {
   const [updateHighlight] = useUpdateHighlightMutation();
   const [deleteHighlight] = useDeleteHighlightMutation();
 
   const handleUpdateAllHighlight = async (
     highlightId: string,
-    highlight: Partial<CreateHighlightDto>
+    highlight: Partial<CreateHighlightDTO>
   ) => {
     try {
       const updated = await updateHighlight({

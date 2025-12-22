@@ -2,8 +2,8 @@ import { ServerSuccessResponse } from "./general";
 
 export interface HighlightData {
     id: string;
-    user_id: string;
-    pdf_id: string;
+    userId: string;
+    pdfId: string;
     type: "text" | "area";
     content?: {
         text?: string;
@@ -31,12 +31,12 @@ export interface HighlightData {
         usePdfCoordinates?: boolean;
     };
     color?: string | null;
-    has_note: boolean;
-    note_id?: string | null;
+    hasNote: boolean;
+    noteId?: string | null;
     tags?: string[] | null;
     style?: "highlight" | "tagged" | null;
-    created_at: string;
-    updated_at: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export type CreateHighlightResponse = ServerSuccessResponse<null>

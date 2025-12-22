@@ -17,30 +17,34 @@ import {
   CreateHighlightDTO,
   UpdateHighlightDTO,
   HighlightIdParams,
+  HighlightDocumentIdParams,
   GetHighlightsQuery,
+  highlightDocumentIdParamsSchema,
 } from "../../shared/validation/highlightSchemas";
 
 const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
   _options: FastifyPluginOptions
 ): Promise<void> => {
-  // Get all highlights
-  fastify.get<{ Querystring: GetHighlightsQuery }>(
-    "/",
+
+
+  // get highlights by document ID
+  fastify.get<{ Querystring: HighlightDocumentIdParams }>(
+    `${_options.prefix}/`,
     {
-      preHandler: validateQuery(getHighlightsQuerySchema),
+      preHandler: validateQuery(highlightDocumentIdParamsSchema),
     },
     async (request, reply) => {
       const highlightController = request.diScope.resolve(
         "highlightController"
       ) as any;
-      return highlightController.getAllHighlights(request, reply);
+      return highlightController.getHighlightsByDocumentId(request, reply);
     }
   );
 
   // Create a new highlight
   fastify.post<{ Body: CreateHighlightDTO }>(
-    "/",
+    `${_options.prefix}/`,
     {
       preHandler: validateBody(createHighlightSchema),
     },
@@ -54,7 +58,7 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
 
   // Get a specific highlight by ID
   fastify.get<{ Params: HighlightIdParams }>(
-    "/:id",
+    `${_options.prefix}/:id`,
     {
       preHandler: validateParams(highlightIdParamsSchema),
     },
@@ -71,7 +75,7 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     Params: HighlightIdParams;
     Body: UpdateHighlightDTO;
   }>(
-    "/:id",
+    `${_options.prefix}/:id`,
     {
       preHandler: [
         validateParams(highlightIdParamsSchema),
@@ -88,7 +92,7 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
 
   // Delete a highlight
   fastify.delete<{ Params: HighlightIdParams }>(
-    "/:id",
+    `${_options.prefix}/:id`,
     {
       preHandler: validateParams(highlightIdParamsSchema),
     },
