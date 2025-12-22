@@ -83,10 +83,14 @@ export const {
   useCreateFolderMutation,
   useUpdateFolderMutation,
   useDeleteFolderMutation,
-  useGetSummaryByPdfIdQuery,
-  useCreateOrUpdateSummaryMutation,
+  //summaries
+  useGetSummariesByDocumentIdQuery,
+  useGetSummaryByIdQuery,
+  useCreateSummaryMutation,
   useUpdateSummaryMutation,
   useDeleteSummaryMutation,
+
+  
   useConnectGoogleClassroomMutation,
   useRefreshGoogleClassroomTokenMutation,
   useDisconnectGoogleClassroomMutation,

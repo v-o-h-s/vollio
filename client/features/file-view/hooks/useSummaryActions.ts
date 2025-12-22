@@ -1,12 +1,18 @@
 import {
-  useCreateOrUpdateSummaryMutation,
-  useGetSummaryByPdfIdQuery,
+  useCreateSummaryMutation,
+  useGetSummariesByDocumentIdQuery,
+  useUpdateSummaryMutation,
 } from "@/lib/store/apiSlice";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
-export const useSummaryActions = (pdfId: string) => {
-  const { data: summary } = useGetSummaryByPdfIdQuery(pdfId);
-  const [createOrUpdateSummary] = useCreateOrUpdateSummaryMutation();
+export const useSummaryActions = (documentId: string) => {
+  const { data: summaries } = useGetSummariesByDocumentIdQuery(documentId);
+  const [createSummary] = useCreateSummaryMutation();
+  const [updateSummary] = useUpdateSummaryMutation();
+
+  const summary = useMemo(() => {
+    return summaries && summaries.length > 0 ? summaries[0] : null;
+  }, [summaries]);
 
   const addMainPoint = useCallback(
     async (text: string) => {
@@ -20,13 +26,19 @@ export const useSummaryActions = (pdfId: string) => {
 
       const updatedMainPoints = [...currentMainPoints, text];
 
-      await createOrUpdateSummary({
-        pdfId,
-        mainPoints: updatedMainPoints,
-        attributes: summary?.attributes || null,
-      });
+      if (summary) {
+        await updateSummary({
+          id: summary.id,
+          mainPoints: updatedMainPoints,
+        });
+      } else {
+        await createSummary({
+          documentId,
+          mainPoints: updatedMainPoints,
+        });
+      }
     },
-    [pdfId, summary, createOrUpdateSummary]
+    [documentId, summary, createSummary, updateSummary]
   );
 
   const removeMainPoint = useCallback(
@@ -37,13 +49,12 @@ export const useSummaryActions = (pdfId: string) => {
         (point) => point !== text
       );
 
-      await createOrUpdateSummary({
-        pdfId,
+      await updateSummary({
+        id: summary.id,
         mainPoints: updatedMainPoints,
-        attributes: summary.attributes,
       });
     },
-    [pdfId, summary, createOrUpdateSummary]
+    [summary, updateSummary]
   );
 
   return {

@@ -6,7 +6,13 @@ import { SummaryMapper } from "../../../shared/mappers/SummaryMapper";
 export class CreateSummaryUseCase {
   constructor(private summaryRepository: ISummaryRepository) {}
   async execute(data: CreateSummaryDTO) {
-    const summary = new Summary(data.documentId, data.mainPoints, data.text);
+    const summary = new Summary(
+      data.documentId,
+      data.mainPoints,
+      undefined,
+      undefined,
+      data.text
+    );
     const createdSummary: Summary = await this.summaryRepository.createSummary(
       summary
     );

@@ -1,41 +1,76 @@
-import { Summary, SummaryServerResponse } from "@/lib/types/summary";
 import { ApiBuilder } from "./types";
+import { SummaryData } from "@shared/types/responses/summaryRoutes";
+import {
+  CreateSummaryDTO,
+  UpdateSummaryDTO,
+} from "@shared/validation/summarySchema";
+import { ServerSuccessResponse } from "@shared/types/responses/general";
 
 export const summaryEndpoints = (builder: ApiBuilder) => ({
-  getSummaryByPdfId: builder.query<Summary | null, string>({
-    query: (pdfId) => `summaries?pdfId=${pdfId}`,
-    transformResponse: (response: SummaryServerResponse) => response.data,
+  getSummariesByDocumentId: builder.query<SummaryData[], string>({
+    query: (documentId) => `summaries?documentId=${documentId}`,
+    transformResponse: (response: ServerSuccessResponse<SummaryData[]>) =>
+      response.data || [],
     providesTags: (result) =>
-      result ? [{ type: "Summary" as const, id: result.id }] : [],
+      result
+        ? [
+            ...result.map(({ id }) => ({ type: "Summary" as const, id })),
+            { type: "Summary", id: "LIST" },
+          ]
+        : [{ type: "Summary", id: "LIST" }],
   }),
-  createOrUpdateSummary: builder.mutation<Summary | null, CreateSummaryDto>({
-    query: (summary) => ({
+
+  getSummaryById: builder.query<SummaryData, string>({
+    query: (id) => `summaries/${id}`,
+    transformResponse: (response: ServerSuccessResponse<SummaryData>) => {
+      if (!response.data) throw new Error("Summary not found");
+      return response.data;
+    },
+    providesTags: (result) =>
+      result ? [{ type: "Summary", id: result.id }] : [],
+  }),
+
+  createSummary: builder.mutation<SummaryData, CreateSummaryDTO>({
+    query: (data) => ({
       url: "summaries",
       method: "POST",
-      body: summary,
+      body: data,
     }),
-    transformResponse: (response: SummaryServerResponse) => response.data,
-    invalidatesTags: (result) =>
-      result ? [{ type: "Summary", id: result.id }] : [],
+    transformResponse: (response: ServerSuccessResponse<SummaryData>) => {
+      if (!response.data) throw new Error("Failed to create summary");
+      return response.data;
+    },
+    invalidatesTags: [{ type: "Summary", id: "LIST" }],
   }),
-  updateSummary: builder.mutation<
-    Summary | null,
-    { id: string; summary: UpdateSummaryDto }
-  >({
-    query: ({ id, summary }) => ({
-      url: `summaries/${id}`,
+
+  updateSummary: builder.mutation<SummaryData, UpdateSummaryDTO>({
+    query: (data) => ({
+      url: "summaries",
       method: "PATCH",
-      body: summary,
+      body: data,
     }),
-    transformResponse: (response: SummaryServerResponse) => response.data,
+    transformResponse: (response: ServerSuccessResponse<SummaryData>) => {
+      if (!response.data) throw new Error("Failed to update summary");
+      return response.data;
+    },
     invalidatesTags: (result) =>
-      result ? [{ type: "Summary", id: result.id }] : [],
+      result
+        ? [
+            { type: "Summary", id: result.id },
+            { type: "Summary", id: "LIST" },
+          ]
+        : [{ type: "Summary", id: "LIST" }],
   }),
-  deleteSummary: builder.mutation<{ success: boolean }, string>({
+
+  deleteSummary: builder.mutation<void, string>({
     query: (id) => ({
-      url: `summaries/${id}`,
+      url: "summaries",
       method: "DELETE",
+      body: { id },
     }),
-    invalidatesTags: (result, error, id) => [{ type: "Summary", id }],
+    invalidatesTags: (_result, _error, id) => [
+      { type: "Summary", id },
+      { type: "Summary", id: "LIST" },
+    ],
   }),
 });

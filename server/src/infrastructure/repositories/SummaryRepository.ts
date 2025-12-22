@@ -2,6 +2,7 @@ import { ISummaryRepository } from "../../domain/repositories/ISummaryRepository
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Summary } from "../../domain/entities/Summary";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
+import { SummaryMapper } from "../../shared/mappers/SummaryMapper";
 
 export class SummaryRepository implements ISummaryRepository {
   private supabaseClient: SupabaseClient;
@@ -10,9 +11,10 @@ export class SummaryRepository implements ISummaryRepository {
     this.supabaseClient = supabaseClient;
   }
   async createSummary(summary: Summary): Promise<Summary> {
+    const persistenceData = SummaryMapper.fromDomainToPersistence(summary);
     const { error } = await this.supabaseClient
       .from("summaries")
-      .insert(summary);
+      .insert(persistenceData);
     if (error) {
       throw new DatabaseError(error);
     }
@@ -40,7 +42,7 @@ export class SummaryRepository implements ISummaryRepository {
       }
       throw new DatabaseError(error);
     }
-    return data;
+    return SummaryMapper.fromPersistenceToDomain(data);
   }
   async getSummariesByDocumentId(documentId: string): Promise<Summary[]> {
     const { data, error } = await this.supabaseClient
@@ -50,7 +52,9 @@ export class SummaryRepository implements ISummaryRepository {
     if (error) {
       throw new DatabaseError(error);
     }
-    return data;
+    return (data || []).map((row: any) =>
+      SummaryMapper.fromPersistenceToDomain(row)
+    );
   }
   async deleteSummariesByDocumentId(documentId: string): Promise<void> {
     const { error } = await this.supabaseClient
@@ -86,9 +90,10 @@ export class SummaryRepository implements ISummaryRepository {
     }
   }
   async updateSummary(summary: Summary): Promise<void> {
+    const persistenceData = SummaryMapper.fromDomainToPersistence(summary);
     const { error } = await this.supabaseClient
       .from("summaries")
-      .update(summary)
+      .update(persistenceData)
       .eq("id", summary.getId());
     if (error) {
       throw new DatabaseError(error);

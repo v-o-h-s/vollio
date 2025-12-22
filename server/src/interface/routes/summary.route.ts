@@ -67,7 +67,7 @@ const summaryHandler: FastifyPluginAsync = async (
     }
   );
   fastify.get<{ Params: GetSummaryByIdDTO }>(
-    `${opts.prefix}`,
+    `${opts.prefix}/:id`,
     {
       preHandler: validateParams(GetSummaryByIdDTOSchema),
     },

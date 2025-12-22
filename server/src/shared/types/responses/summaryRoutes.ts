@@ -2,7 +2,7 @@ import { ServerSuccessResponse } from "./general";
 
 export interface SummaryData {
   id: string;
-  documentId:string,
+  documentId: string;
   mainPoints: string[];
   text: string | null;
 }

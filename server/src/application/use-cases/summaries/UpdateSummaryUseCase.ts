@@ -1,6 +1,6 @@
-import { Summary } from "../../../domain/entities/Summary";
 import { ISummaryRepository } from "../../../domain/repositories/ISummaryRepository";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
+import { SummaryMapper } from "../../../shared/mappers/SummaryMapper";
 import { UpdateSummaryDTO } from "../../../shared/validation/summarySchema";
 
 export class UpdateSummaryUseCase {
@@ -16,6 +16,7 @@ export class UpdateSummaryUseCase {
     if (data.text) {
       summary.setText(data.text);
     }
-    return await this.summaryRepository.updateSummary(summary);
+    await this.summaryRepository.updateSummary(summary);
+    return SummaryMapper.fromDomainToInterface(summary);
   }
 }
