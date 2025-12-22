@@ -1,3 +1,4 @@
 - Entities should be instantiated within the Repository layer.
 - The Repository layer is responsible for mapping persistence models to entities.
 - The Use Case layer is responsible for mapping entities to response models.
+- only apislice can access server types

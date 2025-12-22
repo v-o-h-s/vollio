@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Summary } from "@/lib/types/summary";
+import { SummaryData } from "@shared/types/responses/summaryRoutes";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { X, FileText, Trash2 } from "lucide-react";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 interface SummarySidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  summary: Summary | null;
+  summary: SummaryData | null;
   onRemoveMainPoint: (text: string) => void;
 }
 
@@ -58,7 +58,7 @@ export const SummarySidebar = ({
                 className="group relative p-3 rounded-lg border border-border/50 bg-card/50 hover:bg-accent/30 transition-colors"
               >
                 <div className="flex items-start gap-2">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-medium">
+                  <div className="shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-medium">
                     {index + 1}
                   </div>
                   <p className="flex-1 text-sm text-foreground leading-relaxed">
@@ -67,7 +67,7 @@ export const SummarySidebar = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                     onClick={() => onRemoveMainPoint(point)}
                   >
                     <Trash2 className="w-3 h-3 text-destructive" />

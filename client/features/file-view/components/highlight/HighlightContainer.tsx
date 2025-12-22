@@ -1,5 +1,18 @@
 "use client";
 
+// SSR safeguard for pdf.js evaluation
+if (typeof window === "undefined") {
+  (global as any).window = {};
+  (global as any).document = {
+    documentElement: {
+      style: {},
+    },
+  };
+  (global as any).navigator = {
+    userAgent: "",
+  };
+}
+
 import { useHighlightContainerContext } from "react-pdf-highlighter-extended";
 import { useState } from "react";
 import toast from "react-hot-toast";

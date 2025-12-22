@@ -1,4 +1,18 @@
 "use client";
+
+// SSR safeguard for pdf.js evaluation
+if (typeof window === "undefined") {
+  (global as any).window = {};
+  (global as any).document = {
+    documentElement: {
+      style: {},
+    },
+  };
+  (global as any).navigator = {
+    userAgent: "",
+  };
+}
+
 import "@/app/styles/components/betterViewer.css";
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
@@ -85,11 +99,11 @@ export const BetterViewer = ({
       position: h.position,
       content: h.content,
       type: h.type,
-      color: h.color,
-      tags: h.tags,
-      style: h.style,
+      color: h.color || undefined,
+      tags: h.tags || undefined,
+      style: h.style || undefined,
       noteId: h.noteId ?? undefined,
-    }));
+    })) as MyHighlight[];
   }, [apiHighlights]);
 
   // Adapter to make ViewerHeader work with react-pdf-highlighter-extended

@@ -11,11 +11,22 @@ import {
   GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Noter from "@/features/file-view/components/Noter";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { BetterViewer } from "@/features/file-view/components/BetterViewer";
+import dynamic from "next/dynamic";
 import { useGetFileByIdQuery } from "@/lib/store/apiSlice";
+
+const BetterViewer = dynamic(
+  () =>
+    import("@/features/file-view/components/BetterViewer").then(
+      (mod) => mod.BetterViewer
+    ),
+  { ssr: false }
+);
+
+const Noter = dynamic(() => import("@/features/file-view/components/Noter"), {
+  ssr: false,
+});
 export default function PDFPage() {
   const router = useRouter();
   const { id } = useParams();

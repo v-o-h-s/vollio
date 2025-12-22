@@ -30,7 +30,7 @@ const transformNote = (note: any): Note => ({
 export const notesEndpoints = (builder: ApiBuilder) => ({
   getNotes: builder.query<Note[], { pdfId?: string } | void>({
     query: (params) => ({
-      url: "v1/notes",
+      url: "notes",
       params: params?.pdfId ? { pdfId: params.pdfId } : undefined,
     }),
     transformResponse: (response: BackendResponse<any[]>, meta, arg) => {
@@ -54,7 +54,7 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
   }),
 
   getNote: builder.query<Note, string>({
-    query: (noteId) => `v1/notes/${noteId}`,
+    query: (noteId) => `notes/${noteId}`,
     transformResponse: (response: BackendResponse<any>) => {
       if (!response.success || !response.data) {
         throw new Error(response.error || "Failed to fetch note");
@@ -66,7 +66,7 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
 
   createNote: builder.mutation<Note, CreateNoteRequest>({
     query: (noteData) => ({
-      url: "v1/notes",
+      url: "notes",
       method: "POST",
       body: noteData,
     }),
@@ -84,7 +84,7 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
     { id: string; updates: UpdateNoteRequest }
   >({
     query: ({ id, updates }) => ({
-      url: `v1/notes/${id}`,
+      url: `notes/${id}`,
       method: "PUT",
       body: updates,
     }),
@@ -102,7 +102,7 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
 
   deleteNote: builder.mutation<{ success: boolean }, string>({
     query: (noteId) => ({
-      url: `v1/notes/${noteId}`,
+      url: `notes/${noteId}`,
       method: "DELETE",
     }),
     transformResponse: (response: BackendResponse<any>) => {

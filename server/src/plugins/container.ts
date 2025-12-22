@@ -75,7 +75,13 @@ import { FlashCardsController } from "../interface/controllers/flashcards.contro
 import { GetAllQuizzesUseCase } from "../application/use-cases/quizzes/GetAllquizzesUseCase";
 import { GetQuizByIdUseCase } from "../application/use-cases/quizzes/GetQuizByIdUseCase";
 import { DeleteQuizByIdUseCase } from "../application/use-cases/quizzes/DeleteQuizByIdUseCase";
-
+import { SummaryController } from "../interface/controllers/summary.controller";
+import { CreateSummaryUseCase } from "../application/use-cases/summaries/CreateSummaryUseCase";
+import { GetSummaryByIdUseCase } from "../application/use-cases/summaries/GetSummaryByIdUseCase";
+import { UpdateSummaryUseCase } from "../application/use-cases/summaries/UpdateSummaryUseCase";
+import { DeleteSummaryUseCase } from "../application/use-cases/summaries/DeleteSummaryUseCase";
+import { SummaryRepository } from "../infrastructure/repositories/SummaryRepository";
+import { GetSummariesByDocumentIdUseCase } from "../application/use-cases/summaries/GetSummariesByDocumentIdUseCase";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -383,6 +389,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   // Quiz
   fastify.diContainer.register({
+    getSummariesByDocumentIdUseCase: asClass(GetSummariesByDocumentIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
     quizController: asClass(QuizController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -446,6 +456,33 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     deleteQuizByIdUseCase: asClass(DeleteQuizByIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+
+  fastify.diContainer.register({
+    summaryController: asClass(SummaryController, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    createSummaryUseCase: asClass(CreateSummaryUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getSummaryByIdUseCase: asClass(GetSummaryByIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    updateSummaryUseCase: asClass(UpdateSummaryUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    deleteSummaryUseCase: asClass(DeleteSummaryUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    summaryRepository: asClass(SummaryRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

@@ -7,13 +7,13 @@ import { FastifyBaseLogger } from "fastify";
 
 export class NoteRepository implements INoteRepository {
   constructor(
-    private supabase: SupabaseClient,
+    private supabaseClient: SupabaseClient,
     private logger: FastifyBaseLogger
   ) {}
 
   async createNote(note: Note): Promise<Note> {
     this.logger.info({ noteId: note.getId() }, "Creating note");
-    const { data, error } = await this.supabase
+    const { data, error } = await this.supabaseClient
       .from("notes")
       .insert({
         id: note.getId(),
@@ -44,7 +44,7 @@ export class NoteRepository implements INoteRepository {
 
   async updateNote(note: Note): Promise<Note> {
     this.logger.info({ noteId: note.getId() }, "Updating note");
-    const { data, error } = await this.supabase
+    const { data, error } = await this.supabaseClient
       .from("notes")
       .update({
         title: note.getTitle(),
@@ -73,7 +73,7 @@ export class NoteRepository implements INoteRepository {
 
   async deleteNote(noteId: string): Promise<void> {
     this.logger.info({ noteId }, "Deleting note");
-    const { error } = await this.supabase
+    const { error } = await this.supabaseClient
       .from("notes")
       .delete()
       .eq("id", noteId);
@@ -87,7 +87,7 @@ export class NoteRepository implements INoteRepository {
 
   async getNoteById(noteId: string): Promise<Note | null> {
     this.logger.info({ noteId }, "Getting note by ID");
-    const { data, error } = await this.supabase
+    const { data, error } = await this.supabaseClient
       .from("notes")
       .select("*")
       .eq("id", noteId)
@@ -108,7 +108,7 @@ export class NoteRepository implements INoteRepository {
 
   async getNotesByUserId(userId: string): Promise<Note[]> {
     this.logger.info({ userId }, "Getting notes by user ID");
-    const { data, error } = await this.supabase
+    const { data, error } = await this.supabaseClient
       .from("notes")
       .select("*")
       .eq("user_id", userId)
