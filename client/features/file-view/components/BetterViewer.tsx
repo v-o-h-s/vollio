@@ -71,6 +71,7 @@ export const BetterViewer = ({
     handleCreateHighlight,
     handleAddToSummary: handleAddToSummaryBase,
     handleAddNote,
+    handleCopy,
   } = useSelection({
     highlighterUtilsRef,
     file,
@@ -236,6 +237,7 @@ export const BetterViewer = ({
               selectionTip={
                 <ExpandableTip
                   onHighlight={handleCreateHighlight}
+                  onCopy={handleCopy}
                   onAddTag={handleAddTag}
                   onAddNote={handleAddNote}
                   onAddToSummary={handleAddToSummary}

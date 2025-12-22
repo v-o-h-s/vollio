@@ -1,4 +1,4 @@
-import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
+import { CreateHighlightDTO } from "@shared/validation/highlightSchemas";
 import { useUpdateHighlightMutation } from "@/lib/store/apiSlice";
 import { useCreateHighlightMutation } from "@/lib/store/apiSlice";
 import { useState } from "react";
@@ -40,7 +40,7 @@ export function useSelection({
       const highlightId = uuidv4();
 
       // Prepare the DTO for the API with tags
-      const newHighlightDto: CreateHighlightDto = {
+      const newHighlightDto: CreateHighlightDTO = {
         id: highlightId,
         pdfId: file.id,
         type: pendingSelection.content.image ? "area" : "text",
@@ -82,7 +82,7 @@ export function useSelection({
       const highlightId = uuidv4();
 
       // Prepare the DTO for the API
-      const newHighlightDto: CreateHighlightDto = {
+      const newHighlightDto: CreateHighlightDTO = {
         id: highlightId,
         pdfId: file.id,
         type: selection.content.image ? "area" : "text",
@@ -133,6 +133,28 @@ export function useSelection({
     });
   };
 
+  // Handler to copy selected text to clipboard
+  const handleCopy = async () => {
+    const selection = highlighterUtilsRef.current?.getCurrentSelection();
+    if (!selection || !selection.content.text) return;
+
+    try {
+      await navigator.clipboard.writeText(selection.content.text);
+      toast.success("Text copied to clipboard", {
+        duration: 1500,
+        position: "bottom-right",
+      });
+      // Optionally hide selection tip after copy
+      highlighterUtilsRef.current?.removeGhostHighlight();
+    } catch (error) {
+      toast.error("Failed to copy text", {
+        duration: 2000,
+        position: "bottom-right",
+      });
+      console.error("Failed to copy text:", error);
+    }
+  };
+
   return {
     isTagDialogOpen,
     setIsTagDialogOpen,
@@ -141,5 +163,6 @@ export function useSelection({
     handleCreateHighlight,
     handleAddToSummary,
     handleAddNote,
+    handleCopy,
   };
 }

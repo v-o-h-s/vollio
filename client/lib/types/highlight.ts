@@ -3,7 +3,7 @@
  * Matches the database schema for the highlights table
  */
 
-import { CreateHighlightDto } from "../dto/createHighLightDto";
+import { CreateHighlightDTO } from "@shared/validation/highlightSchemas";
 
 // Allowed highlight types
 export type HighlightType = "text" | "area";
@@ -68,7 +68,7 @@ export interface SupabaseHighlightResponse {
   updated_at: string;
 }
 
-export interface HighlightwithDetails extends CreateHighlightDto {
+export interface HighlightwithDetails extends CreateHighlightDTO {
   createdAt: string;
   updatedAt: string;
 }
