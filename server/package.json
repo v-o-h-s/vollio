@@ -30,15 +30,11 @@
     "querystring": "^0.2.1",
     "react-toastify": "^11.0.5",
     "sharp": "^0.34.5",
-    "ts-node-dev": "^2.0.0",
-    "url-join": "^4.0.1",
     "voyageai": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "nodemon": "^3.1.11",
-    "source-map-support": "^0.5.21",
-    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
   }
 }
