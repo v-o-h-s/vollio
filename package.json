@@ -16,7 +16,8 @@
   },
   "workspaces": [
     "server",
-    "client"
+    "client",
+    "packages/shared"
   ],
   "devDependencies": {
     "concurrently": "^9.0.0"

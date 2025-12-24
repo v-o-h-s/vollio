@@ -1,4 +1,4 @@
-import { TextHighlight } from "react-pdf-highlighter-extended";
+import { TextHighlight } from "react-pdf-highlighter-extended-plus";
 import { MyHighlight } from "@/lib/types/highlight";
 import { useState } from "react";
 

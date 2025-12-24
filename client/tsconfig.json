@@ -26,12 +26,12 @@
       "@/*": [
         "./*"
       ],
-      "@shared/*": [
-        "../server/src/shared/*"
-      ],
-      "@server/*":[
-        "../server/src/*"
-      ]
+      // "@shared/*": [
+      //   "../server/src/shared/*"
+      // ],
+      // "@server/*":[
+      //   "../server/src/*"
+      // ]
     }
   },
   "include": [

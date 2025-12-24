@@ -1,8 +1,8 @@
-import { CreateHighlightDTO } from "@shared/validation/highlightSchemas";
+import { CreateHighlightDTO } from "@noto/shared";
 import { useUpdateHighlightMutation } from "@/lib/store/apiSlice";
 import { useCreateHighlightMutation } from "@/lib/store/apiSlice";
 import { useState } from "react";
-import { PdfHighlighterUtils } from "react-pdf-highlighter-extended";
+import { PdfHighlighterUtils } from "react-pdf-highlighter-extended-plus";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "react-hot-toast";
 import { FileDetails } from "@/features/file-view/types/file";

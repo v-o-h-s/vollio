@@ -13,10 +13,10 @@ if (typeof window === "undefined") {
   };
 }
 
-import { useHighlightContainerContext } from "react-pdf-highlighter-extended";
+import { useHighlightContainerContext } from "react-pdf-highlighter-extended-plus";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
+import { CreateHighlightDTO } from "@shared/validation/highlightSchemas";
 import { ContextMenu } from "./ContextMenu";
 import { StandardHighlight } from "./StandardHighlight";
 import { TaggedHighlight } from "../tags/TaggedHighlight";
@@ -25,7 +25,7 @@ import { MyHighlight } from "@/lib/types/highlight";
 interface HighlightContainerProps {
   updateHighlight: (
     highlightId: string,
-    highlight: Partial<CreateHighlightDto>
+    highlight: Partial<CreateHighlightDTO>
   ) => any;
   deleteHighlight: (highlightId: string) => any;
 }
