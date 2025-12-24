@@ -47,7 +47,7 @@ export class AuthError extends BaseAppError {
       {
 
         severity: ErrorSeverity.HIGH,
-        userMessage: "Please sign in to continue using Noto.",
+        userMessage: "Please sign in to continue using Vollio.",
         actionLabel: "Sign In",
         statusCode: 401,
         context,

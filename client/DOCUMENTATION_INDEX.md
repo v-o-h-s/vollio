@@ -1,8 +1,8 @@
-# Noto Documentation Index
+# Vollio Documentation Index
 
 ## 📚 Complete Documentation Guide
 
-This comprehensive documentation index provides organized access to all Noto PDF annotation application documentation, covering everything from quick start guides to advanced technical implementation details.
+This comprehensive documentation index provides organized access to all Vollio PDF annotation application documentation, covering everything from quick start guides to advanced technical implementation details.
 
 ## 🚀 Quick Start
 
@@ -226,6 +226,6 @@ This comprehensive documentation index provides organized access to all Noto PDF
 
 **Status**: ✅ Complete and Current  
 **Last Updated**: January 2025  
-**Maintained by**: Noto Development Team
+**Maintained by**: Vollio Development Team
 
-This documentation index is regularly updated to reflect the current state of the Noto PDF annotation application. For the most current information, always refer to the latest version of each document.
+This documentation index is regularly updated to reflect the current state of the Vollio PDF annotation application. For the most current information, always refer to the latest version of each document.

@@ -1,6 +1,6 @@
-# Noto Server API
+# Vollio Server API
 
-This is a Fastify-based API server for the Noto application, implementing Clean Architecture with Dependency Injection.
+This is a Fastify-based API server for the Vollio application, implementing Clean Architecture with Dependency Injection.
 
 ## Architecture
 

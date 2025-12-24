@@ -1,4 +1,4 @@
-# Noto - Advanced PDF Annotation & Note-Taking Platform
+# Vollio - Advanced PDF Annotation & Note-Taking Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue)](https://reactjs.org/)
@@ -7,7 +7,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC)](https://tailwindcss.com/)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com)
 
-**Noto** is a modern, enterprise-grade PDF annotation and note-taking application built with Next.js 15 and React 19. It provides intelligent document processing, sophisticated PDF annotation tools, comprehensive note management with real-time synchronization, and advanced learning features including AI-powered quiz generation and document summarization.
+**Vollio** is a modern, enterprise-grade PDF annotation and note-taking application built with Next.js 15 and React 19. It provides intelligent document processing, sophisticated PDF annotation tools, comprehensive note management with real-time synchronization, and advanced learning features including AI-powered quiz generation and document summarization.
 
 ## 🚀 Key Features
 
@@ -89,8 +89,8 @@
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-org/noto.git
-   cd noto
+   git clone https://github.com/your-org/vollio.git
+   cd vollio
    ```
 
 2. **Install dependencies**
@@ -132,7 +132,7 @@ Visit `http://localhost:3000` to see the application.
 ## 📁 Project Structure
 
 ```
-noto/
+vollio/
 ├── app/                          # Next.js App Router
 │   ├── api/                      # API routes
 │   │   ├── pdfs/                 # PDF management endpoints
@@ -247,7 +247,7 @@ noto/
 
 ## ⚠️ Error Handling & Validation
 
-Noto implements a comprehensive, 8-category error handling system with automatic validation and detailed logging:
+Vollio implements a comprehensive, 8-category error handling system with automatic validation and detailed logging:
 
 ### Error Categories
 
@@ -422,6 +422,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ by the Noto Team**
+**Built with ❤️ by the Vollio Team**
 
-For more information, visit our [documentation](./docs) or check out the [live demo](https://noto-demo.vercel.app).
+For more information, visit our [documentation](./docs) or check out the [live demo](https://vollio-demo.vercel.app).

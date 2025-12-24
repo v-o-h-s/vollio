@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Noto backend implements **JWT-based authentication** using Supabase Auth and Fastify. The authentication flow is stateless and cookie-based, leveraging Supabase's Session tokens stored as HTTP-only cookies.
+The Vollio backend implements **JWT-based authentication** using Supabase Auth and Fastify. The authentication flow is stateless and cookie-based, leveraging Supabase's Session tokens stored as HTTP-only cookies.
 
 **Key Principle**: The backend is stateless - it doesn't store user sessions. Instead, it verifies JWT tokens from cookies on every request.
 

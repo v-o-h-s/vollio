@@ -166,7 +166,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                   <Image src="/logo.png" alt="logo" width={40} height={40} />
                   <div>
                     <h1 className="font-bold text-lg text-sidebar-foreground tracking-tight">
-                      Noto
+                      Vollio
                     </h1>
                   </div>
                 </div>

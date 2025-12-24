@@ -46,7 +46,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Noto",
+  title: "Vollio",
   description:
     "Upload PDFs, add notes, and create flashcards for better studying",
   icons: {
@@ -80,7 +80,7 @@ export default function RootLayout({
           theme="dark"
           transition={Bounce}
         />
-        <ThemeProvider defaultTheme="light" storageKey="noto-theme">
+        <ThemeProvider defaultTheme="light" storageKey="vollio-theme">
           <ReduxProvider>
             <EditorProvider>{children}</EditorProvider>
           </ReduxProvider>

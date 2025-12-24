@@ -1,11 +1,11 @@
-# Noto - Full-Stack Note-Taking Application
+# Vollio - Full-Stack Note-Taking Application
 
 A modern, full-stack note-taking application built with Next.js, Fastify, and Supabase.
 
 ## Project Structure
 
 ```
-noto/
+vollio/
 ├── backend/          # Fastify API server
 │   ├── src/
 │   │   ├── server.ts

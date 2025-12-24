@@ -9,7 +9,7 @@ type ThemeMode = "light" | "dark";
  */
 export function getInitialTheme(
   defaultTheme: ThemeMode = "light",
-  storageKey: string = "noto-theme"
+  storageKey: string = "vollio-theme"
 ): ThemeMode {
   // Check if we're on the client side
   if (typeof window === "undefined") {
@@ -42,7 +42,7 @@ export function getInitialTheme(
  */
 export function setStoredTheme(
   theme: ThemeMode,
-  storageKey: string = "noto-theme"
+  storageKey: string = "vollio-theme"
 ): void {
   if (typeof window === "undefined") {
     return;

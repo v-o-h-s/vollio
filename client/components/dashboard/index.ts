@@ -1,7 +1,7 @@
 /**
  * Dashboard Components Module
  *
- * This module exports all dashboard-related components for the Noto application.
+ * This module exports all dashboard-related components for the Vollio application.
  * These components work together to provide a comprehensive dashboard experience.
  *
  * Components:
@@ -12,7 +12,7 @@
  * Usage:
  * import { RecentActivityDisplay, AutoSaveStatusProvider, FloatingAutoSaveStatus } from '@/components/dashboard'
  *
- * @author Noto Team
+ * @author Vollio Team
  * @version 1.0.0
  */
 

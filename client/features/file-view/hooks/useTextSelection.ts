@@ -1,4 +1,4 @@
-import { CreateHighlightDTO } from "@noto/shared";
+import { CreateHighlightDTO } from "@vollio/shared";
 import { useUpdateHighlightMutation } from "@/lib/store/apiSlice";
 import { useCreateHighlightMutation } from "@/lib/store/apiSlice";
 import { useState } from "react";

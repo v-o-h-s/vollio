@@ -55,12 +55,12 @@ export default fp(async (fastify: FastifyInstance) => {
     openapi: {
       openapi: "3.0.0",
       info: {
-        title: "Noto API",
-        description: "API documentation for Noto - PDF annotation and note-taking platform",
+        title: "Vollio API",
+        description: "API documentation for Vollio - PDF annotation and note-taking platform",
         version: "1.0.0",
         contact: {
           name: "API Support",
-          url: "https://github.com/gyro-mc/noto",
+          url: "https://github.com/gyro-mc/vollio",
         },
       },
       servers: [
@@ -69,7 +69,7 @@ export default fp(async (fastify: FastifyInstance) => {
           description: "Development server",
         },
         {
-          url: process.env.API_URL || "https://api.noto.app",
+          url: process.env.API_URL || "https://api.vollio.app",
           description: "Production server",
         },
       ],

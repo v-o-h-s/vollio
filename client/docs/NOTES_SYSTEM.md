@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Noto notes system provides complete standalone note-taking functionality with rich text editing, internal auto-save capabilities using RTK Query, and seamless integration with the PDF annotation workflow. Built with TipTap editor, simplified auto-save architecture, and full CRUD API implementation.
+The Vollio notes system provides complete standalone note-taking functionality with rich text editing, internal auto-save capabilities using RTK Query, and seamless integration with the PDF annotation workflow. Built with TipTap editor, simplified auto-save architecture, and full CRUD API implementation.
 
 ## Features
 

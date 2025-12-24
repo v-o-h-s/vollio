@@ -1,10 +1,10 @@
-# Noto PDF Annotation API Documentation
+# Vollio PDF Annotation API Documentation
 
-This document describes the comprehensive API endpoints for the Noto PDF annotation application with complete Supabase backend integration. All API interactions use RTK Query mutations and queries for consistency, caching, and automatic error handling.
+This document describes the comprehensive API endpoints for the Vollio PDF annotation application with complete Supabase backend integration. All API interactions use RTK Query mutations and queries for consistency, caching, and automatic error handling.
 
 ## 🚀 Current Status: Production Ready ✅
 
-The Noto API is fully implemented and production-ready with:
+The Vollio API is fully implemented and production-ready with:
 - **Complete CRUD Operations**: All core endpoints (PDFs, Notes, Annotations, Highlights, Folders)
 - **Advanced Features**: Document processing, vector search, highlight management
 - **Security**: JWT authentication, RLS policies, comprehensive validation

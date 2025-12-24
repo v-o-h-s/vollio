@@ -1,7 +1,7 @@
 {
-  "name": "@noto/shared",
+  "name": "@vollio/shared",
   "version": "1.0.0",
-  "description": "Shared types for Noto applications",
+  "description": "Shared types for Vollio applications",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

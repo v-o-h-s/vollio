@@ -1,6 +1,6 @@
 # Library & Utilities
 
-This directory contains the core library code, utilities, and configurations that power the Noto PDF annotation application. It includes state management, database integration, type definitions, and helper functions.
+This directory contains the core library code, utilities, and configurations that power the Vollio PDF annotation application. It includes state management, database integration, type definitions, and helper functions.
 
 ## 📁 Directory Structure
 

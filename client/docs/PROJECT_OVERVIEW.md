@@ -1,8 +1,8 @@
-# Noto PDF Annotation Application - Project Overview
+# Vollio PDF Annotation Application - Project Overview
 
 ## 🎯 Project Vision
 
-Noto is a modern, secure, and responsive PDF annotation application that enables users to upload PDFs, select text, and create rich annotations with seamless cross-device functionality. Built with cutting-edge web technologies, it provides an intuitive annotation experience while maintaining enterprise-grade security and performance.
+Vollio is a modern, secure, and responsive PDF annotation application that enables users to upload PDFs, select text, and create rich annotations with seamless cross-device functionality. Built with cutting-edge web technologies, it provides an intuitive annotation experience while maintaining enterprise-grade security and performance.
 
 ## 📊 Current Project Status - January 2025
 
@@ -145,7 +145,7 @@ Testing:
 ### Project Structure
 
 ```
-noto-pdf-annotation/
+vollio-pdf-annotation/
 ├── app/                    # Next.js App Router
 │   ├── api/               # API endpoints
 │   │   ├── pdfs/         # PDF management
@@ -396,7 +396,7 @@ MONITORING_ID=your-monitoring-id
 
 ## 🚀 Getting Started
 
-Ready to contribute to Noto? Start with our [Quick Start Guide](./README.md#quick-start) and explore the comprehensive documentation ecosystem. Whether you're setting up the development environment, implementing new features, or improving existing functionality, our documentation provides the guidance you need.
+Ready to contribute to Vollio? Start with our [Quick Start Guide](./README.md#quick-start) and explore the comprehensive documentation ecosystem. Whether you're setting up the development environment, implementing new features, or improving existing functionality, our documentation provides the guidance you need.
 
 **Key Resources:**
 
@@ -406,7 +406,7 @@ Ready to contribute to Noto? Start with our [Quick Start Guide](./README.md#quic
 - **Components**: [Component READMEs](../components/) for UI implementation
 - **Testing**: [Test Documentation](../test/README.md) for quality assurance
 
-Welcome to the Noto development team! 🎉
+Welcome to the Vollio development team! 🎉
 
 ---
 

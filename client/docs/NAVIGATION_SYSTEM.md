@@ -1,6 +1,6 @@
 # Navigation System Documentation
 
-The Noto navigation system provides a modern, space-efficient, and immersive navigation experience through two complementary floating components that replace traditional sidebar navigation.
+The Vollio navigation system provides a modern, space-efficient, and immersive navigation experience through two complementary floating components that replace traditional sidebar navigation.
 
 ## 🎯 Overview
 
@@ -30,7 +30,7 @@ The FloatingNavigation replaces traditional top navigation bars and sidebars wit
     {/* Brand with status indicator */}
     <button className="flex items-center gap-2 px-3 py-2 rounded-xl">
       <Image src="/logo.png" width={24} height={24} />
-      <span className="font-semibold">Noto</span>
+      <span className="font-semibold">Vollio</span>
       <ChevronUp className="w-4 h-4" />
     </button>
     
@@ -64,7 +64,7 @@ The FloatingNavigation replaces traditional top navigation bars and sidebars wit
       <div className="flex items-center gap-3">
         <Image src="/logo.png" width={32} height={32} />
         <div>
-          <h2 className="font-bold text-lg">Noto</h2>
+          <h2 className="font-bold text-lg">Vollio</h2>
           <p className="text-xs text-muted-foreground">PDF Annotation & Notes</p>
         </div>
       </div>
@@ -724,4 +724,4 @@ export default function NotesPage() {
 - **Multi-Selection**: Batch operations support
 - **Quick Switcher**: Command palette-style navigation
 
-This navigation system provides a modern, efficient, and accessible foundation for the Noto application while maintaining excellent user experience across all devices and interaction methods.
+This navigation system provides a modern, efficient, and accessible foundation for the Vollio application while maintaining excellent user experience across all devices and interaction methods.

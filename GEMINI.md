@@ -1,7 +1,7 @@
 # GEMINI.md - Project Context
 
 ## Project Overview
-**Name:** Noto (Monorepo)
+**Name:** Vollio (Monorepo)
 **Description:** A full-stack note-taking application designed for modern needs, featuring rich text editing, PDF support, and AI capabilities.
 
 ## Architecture

@@ -14,7 +14,7 @@
  * - Integrates with RTK Query for real-time activity updates
  * - Modern card-based design with hover effects
  * 
- * @author Noto Team
+ * @author Vollio Team
  * @version 1.0.0
  */
 

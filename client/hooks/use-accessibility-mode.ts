@@ -22,7 +22,7 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   keyboardNavigation: true,
 };
 
-const STORAGE_KEY = 'noto-accessibility-settings';
+const STORAGE_KEY = 'vollio-accessibility-settings';
 
 /**
  * Hook for managing accessibility settings and modes

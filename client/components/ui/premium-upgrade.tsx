@@ -48,7 +48,7 @@ export function PremiumUpgrade({ feature, description, onUpgrade }: PremiumUpgra
           </Badge>
         </CardTitle>
         <p className="text-muted-foreground">
-          {feature} is available with Noto Premium
+          {feature} is available with Vollio Premium
         </p>
       </CardHeader>
 

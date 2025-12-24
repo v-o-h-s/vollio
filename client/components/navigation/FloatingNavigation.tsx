@@ -149,7 +149,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
               <div className="relative">
                 <Image
                   src="/logo.png"
-                  alt="Noto"
+                  alt="Vollio"
                   width={24}
                   height={24}
                   className="rounded-lg"
@@ -157,7 +157,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full animate-pulse" />
               </div>
               <span className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
-                Noto
+                Vollio
               </span>
               <ChevronUp className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </button>
@@ -302,7 +302,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                 <div className="relative">
                   <Image
                     src="/logo.png"
-                    alt="Noto"
+                    alt="Vollio"
                     width={32}
                     height={32}
                     className="rounded-lg"
@@ -310,7 +310,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full animate-pulse" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-lg text-foreground">Noto</h2>
+                  <h2 className="font-bold text-lg text-foreground">Vollio</h2>
                   <p className="text-xs text-muted-foreground">
                     PDF Annotation & Notes
                   </p>

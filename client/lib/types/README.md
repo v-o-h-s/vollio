@@ -1,6 +1,6 @@
 # Types Organization
 
-This directory contains all TypeScript type definitions for the Noto PDF annotation application, organized by subject matter for better maintainability and discoverability.
+This directory contains all TypeScript type definitions for the Vollio PDF annotation application, organized by subject matter for better maintainability and discoverability.
 
 ## File Structure
 

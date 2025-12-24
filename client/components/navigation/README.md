@@ -1,6 +1,6 @@
 # Navigation Components
 
-The Noto navigation system consists of two complementary floating components that provide modern, space-efficient navigation without interfering with the main content area.
+The Vollio navigation system consists of two complementary floating components that provide modern, space-efficient navigation without interfering with the main content area.
 
 ## FloatingNavigation
 
@@ -18,7 +18,7 @@ The primary navigation component that replaces traditional sidebars with a moder
 ### States
 
 #### Collapsed State (Floating Dock)
-- **Brand Logo**: Noto logo with animated status indicator
+- **Brand Logo**: Vollio logo with animated status indicator
 - **Quick Navigation**: Icon-based access to all main sections (Dashboard, Files, Notes, Quizzes, Flashcards)
 - **User Avatar**: Profile access with online status indicator
 - **Current Page Indicator**: Floating tooltip showing active section
@@ -311,4 +311,4 @@ Both components share a consistent glassmorphism design system:
 - **Keyboard Shortcuts**: Customizable shortcut system
 - **Multi-Selection**: Batch operations support
 
-This navigation system provides a modern, efficient, and accessible way to navigate the Noto application while maintaining immersive content experiences and supporting both desktop and mobile workflows.
+This navigation system provides a modern, efficient, and accessible way to navigate the Vollio application while maintaining immersive content experiences and supporting both desktop and mobile workflows.

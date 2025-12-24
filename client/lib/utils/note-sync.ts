@@ -98,7 +98,7 @@ export function broadcastNoteUpdate(
   // Broadcast to all tabs via BroadcastChannel
   if (typeof window !== "undefined" && "BroadcastChannel" in window) {
     try {
-      const channel = new BroadcastChannel("noto-notes-sync");
+      const channel = new BroadcastChannel("vollio-notes-sync");
       channel.postMessage(message);
       console.log("Broadcasted note update:", message);
     } catch (error) {
@@ -130,7 +130,7 @@ export function broadcastNoteCreate(note: Note): void {
 
   if (typeof window !== "undefined" && "BroadcastChannel" in window) {
     try {
-      const channel = new BroadcastChannel("noto-notes-sync");
+      const channel = new BroadcastChannel("vollio-notes-sync");
       channel.postMessage(message);
       console.log("Broadcasted note creation:", message);
     } catch (error) {
@@ -159,7 +159,7 @@ export function broadcastNoteDelete(noteId: string): void {
 
   if (typeof window !== "undefined" && "BroadcastChannel" in window) {
     try {
-      const channel = new BroadcastChannel("noto-notes-sync");
+      const channel = new BroadcastChannel("vollio-notes-sync");
       channel.postMessage(message);
       console.log("Broadcasted note deletion:", message);
     } catch (error) {
@@ -188,7 +188,7 @@ export function broadcastNoteFocus(noteId: string): void {
 
   if (typeof window !== "undefined" && "BroadcastChannel" in window) {
     try {
-      const channel = new BroadcastChannel("noto-notes-sync");
+      const channel = new BroadcastChannel("vollio-notes-sync");
       channel.postMessage(message);
       console.log("Broadcasted note focus:", message);
     } catch (error) {
@@ -222,7 +222,7 @@ export function setupNoteSyncListeners(callbacks: {
   // BroadcastChannel listener
   if (typeof window !== "undefined" && "BroadcastChannel" in window) {
     try {
-      const channel = new BroadcastChannel("noto-notes-sync");
+      const channel = new BroadcastChannel("vollio-notes-sync");
 
       const handleBroadcastMessage = (event: MessageEvent<NoteSyncMessage>) => {
         if (!isValidNoteSyncMessage(event.data)) {
