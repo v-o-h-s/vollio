@@ -116,12 +116,17 @@ function NotionEditorInner({
 
       if (!currentNoteId) {
         // Create new note using RTK Query
-        console.log("📝 Creating new note with title:", title, "fileId:", fileId);
+        console.log(
+          "📝 Creating new note with title:",
+          title,
+          "fileId:",
+          fileId
+        );
 
         const newNote = await createNote({
           title,
           content,
-          fileId,
+          documentId: fileId,
         }).unwrap();
         const newNoteId = newNote.id;
 
