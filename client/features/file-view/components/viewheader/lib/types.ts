@@ -23,6 +23,10 @@ export interface PDFViewerHeaderProps {
   onToggleSummary?: () => void;
   /** Whether summary sidebar is open */
   isSummaryOpen?: boolean;
+  /** Function to toggle AI assistant */
+  onToggleAssistant?: () => void;
+  /** Whether AI assistant is open */
+  isAssistantOpen?: boolean;
   /** Width of the viewer container (for responsive resizing) */
   viewerWidth?: string;
 }

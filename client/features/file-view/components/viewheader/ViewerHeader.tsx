@@ -10,6 +10,7 @@ import {
   Home,
   Tag as TagIcon,
   ScrollText,
+  MessageSquare,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -34,6 +35,8 @@ export function ViewerHeader({
   isTagsOpen,
   onToggleSummary,
   isSummaryOpen,
+  onToggleAssistant,
+  isAssistantOpen,
   viewerWidth = "100%",
 }: PDFViewerHeaderProps) {
   const router = useRouter();
@@ -177,6 +180,18 @@ export function ViewerHeader({
                       <span>Summary</span>
                     </button>
 
+                    {/* Assistant Toggle */}
+                    <button
+                      onClick={onToggleAssistant}
+                      className={cn(
+                        "w-full text-left px-3 py-2 rounded text-sm font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer flex items-center gap-2",
+                        isAssistantOpen && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <MessageSquare size={16} />
+                      <span>Assistant</span>
+                    </button>
+
                     {/* Notes Toggle */}
                     <button
                       onClick={onToggleNoter}
@@ -270,6 +285,21 @@ export function ViewerHeader({
                 >
                   <ScrollText size={14} />
                   <span className="text-xs ml-1">Summary</span>
+                </Button>
+
+                {/* Assistant Toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleAssistant}
+                  className={cn(
+                    "cursor-pointer h-8 px-2 flex-shrink-0",
+                    isAssistantOpen && "bg-accent text-accent-foreground"
+                  )}
+                  title="AI Assistant"
+                >
+                  <MessageSquare size={14} />
+                  <span className="text-xs ml-1">Assistant</span>
                 </Button>
 
                 {/* Notes Toggle */}

@@ -39,9 +39,11 @@ import { FileDetails } from "../types/document";
 export const BetterViewer = ({
   file,
   onToggleNoter,
+  onToggleAssistant,
 }: {
   file: FileDetails;
   onToggleNoter?: () => void;
+  onToggleAssistant?: () => void;
 }) => {
   // Fetch highlights for this PDF from API
   const { data: apiHighlights, isLoading: isLoadingHighlights } =
@@ -53,6 +55,7 @@ export const BetterViewer = ({
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isTagSidebarOpen, setIsTagSidebarOpen] = useState(false);
   const [isSummarySidebarOpen, setIsSummarySidebarOpen] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isExplanationBoxOpen, setIsExplanationBoxOpen] = useState(false);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const [zoomValue, setZoomValue] = useState<PdfScaleValue>("page-width");
@@ -187,6 +190,8 @@ export const BetterViewer = ({
           isTagsOpen={isTagSidebarOpen}
           onToggleSummary={() => setIsSummarySidebarOpen(!isSummarySidebarOpen)}
           isSummaryOpen={isSummarySidebarOpen}
+          onToggleAssistant={onToggleAssistant}
+          isAssistantOpen={isAssistantOpen}
         />
       ) : (
         <button

@@ -25,12 +25,23 @@ const BetterViewer = dynamic(
   { ssr: false }
 );
 
+const AssistantChat = dynamic(
+  () =>
+    import("@/features/file-view/components/Assistant/AssistantChat").then(
+      (mod) => ({ default: mod.AssistantChat })
+    ),
+  { ssr: false }
+);
+
 export default function PDFPage() {
   const router = useRouter();
   const { id } = useParams();
   const [isNoterOpen, setIsNoteOpen] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [leftWidth, setLeftWidth] = useState(50); // percentage
-  const [isDragging, setIsDragging] = useState(false);
+  const [isAssistantDividerDragging, setIsAssistantDividerDragging] =
+    useState(false);
+  const [isNoterDividerDragging, setIsNoterDividerDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Fetch PDF data using RTK Query
@@ -46,7 +57,7 @@ export default function PDFPage() {
       if (!isDragging || !containerRef.current) return;
 
       const container = containerRef.current;
-      const containerRect = container.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect(); // returns the size and position of the element relative to the viewport.
       const offsetX = e.clientX - containerRect.left;
       const newLeftWidth = (offsetX / containerRect.width) * 100;
 
@@ -98,7 +109,7 @@ export default function PDFPage() {
               Loading your file
             </span>
           </div>
-          <p className="text-sm text-muted-foreground text-center break-words">
+          <p className="text-sm text-muted-foreground text-center wrap-break-word">
             Preparing your document for viewing
           </p>
         </div>
@@ -126,7 +137,7 @@ export default function PDFPage() {
             <h3 className="text-2xl font-semibold text-foreground">
               {statusCode === 404 ? "PDF Not Found" : "Error Loading PDF"}
             </h3>
-            <p className="text-base mt-2 text-muted-foreground break-words">
+            <p className="text-base mt-2 text-muted-foreground wrap-break-word">
               {message ?? "Failed to load PDF. Please try again."}
             </p>
           </div>
@@ -187,29 +198,26 @@ export default function PDFPage() {
       ref={containerRef}
       className="flex h-screen w-screen p-2 gap-2 relative"
     >
-      {/* PDF Viewer Panel */}
-      <div
-        className={cn(
-          "h-full rounded-[var(--radius)] flex flex-row overflow-hidden",
-          "border border-border bg-card",
-          "shadow-md",
-          "transition-none"
-        )}
-        style={{
-          width: isNoterOpen
-            ? `calc(${leftWidth}% - ${isDragging ? "16px" : "4px"})`
-            : "100%",
-        }}
-      >
-        <BetterViewer
-          file={fileData}
-          onToggleNoter={() => setIsNoteOpen(!isNoterOpen)}
-        />
-      </div>
-
-      {isNoterOpen && (
+      {/* Left Panel: AI Assistant (when isAssistantOpen) */}
+      {isAssistantOpen && (
         <>
-          {/* Resizable Divider */}
+          <div
+            className={cn(
+              "h-full rounded-[var(--radius)] flex flex-row overflow-hidden",
+              "border border-border bg-card",
+              "shadow-md",
+              "transition-none"
+            )}
+            style={{
+              width: isNoterOpen
+                ? `calc(25% - ${isDragging ? "8px" : "4px"})`
+                : `calc(${leftWidth}% - ${isDragging ? "16px" : "4px"})`,
+            }}
+          >
+            <AssistantChat />
+          </div>
+
+          {/* Divider after assistant  */}
           <div
             onMouseDown={handleMouseDown}
             className={cn(
@@ -223,7 +231,6 @@ export default function PDFPage() {
             aria-orientation="vertical"
             tabIndex={0}
           >
-            {/* Simple Bar */}
             <div
               className={cn(
                 "absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
@@ -233,8 +240,6 @@ export default function PDFPage() {
                   : "w-0.5 bg-border group-hover:w-1 group-hover:bg-primary/80"
               )}
             />
-
-            {/* Grip Icon */}
             <div
               className={cn(
                 "relative z-10 rounded-md transition-all duration-200",
@@ -246,8 +251,84 @@ export default function PDFPage() {
             >
               <GripVertical className="w-4 h-4" />
             </div>
+            <div
+              className={cn(
+                "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-12",
+                "pointer-events-none z-20 whitespace-nowrap",
+                "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+                "bg-popover text-popover-foreground text-xs px-2 py-1",
+                "rounded-md border border-border"
+              )}
+            >
+              Drag to resize
+            </div>
+          </div>
+        </>
+      )}
 
-            {/* Simple Tooltip */}
+      {/* Middle Panel: BetterViewer (always visible) */}
+      <div
+        className={cn(
+          "h-full rounded-[var(--radius)] flex flex-row overflow-hidden",
+          "border border-border bg-card",
+          "shadow-md",
+          "transition-none"
+        )}
+        style={{
+          width:
+            isNoterOpen && isAssistantOpen
+              ? "50%"
+              : isNoterOpen
+              ? `calc(${100 - leftWidth}% - 8px)`
+              : isAssistantOpen
+              ? `calc(${100 - leftWidth}% - 8px)`
+              : "100%",
+        }}
+      >
+        <BetterViewer
+          file={fileData}
+          onToggleNoter={() => setIsNoteOpen(!isNoterOpen)}
+          onToggleAssistant={() => setIsAssistantOpen(!isAssistantOpen)}
+        />
+      </div>
+
+      {/* Right Panel: Noter (when isNoterOpen) */}
+      {isNoterOpen && (
+        <>
+          {/* Divider before Noter */}
+          <div
+            onMouseDown={handleMouseDown}
+            className={cn(
+              "relative flex items-center justify-center flex-shrink-0 group",
+              "transition-all duration-200 ease-in-out cursor-col-resize select-none",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              isDragging ? "w-8" : "w-2 hover:w-8"
+            )}
+            style={{ cursor: "col-resize" }}
+            role="separator"
+            aria-orientation="vertical"
+            tabIndex={0}
+          >
+            <div
+              className={cn(
+                "absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
+                "transition-all duration-200",
+                isDragging
+                  ? "w-1 bg-primary"
+                  : "w-0.5 bg-border group-hover:w-1 group-hover:bg-primary/80"
+              )}
+            />
+            <div
+              className={cn(
+                "relative z-10 rounded-md transition-all duration-200",
+                "flex items-center justify-center",
+                isDragging
+                  ? "bg-primary text-primary-foreground scale-110 px-1 py-2"
+                  : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5"
+              )}
+            >
+              <GripVertical className="w-4 h-4" />
+            </div>
             <div
               className={cn(
                 "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-12",
@@ -261,18 +342,17 @@ export default function PDFPage() {
             </div>
           </div>
 
-          {/* Noter Panel */}
           <div
             className={cn(
               "h-full rounded-[var(--radius)] flex flex-row overflow-hidden pt-1 relative",
-              "border border-border ",
+              "border border-border",
               "shadow-md",
               "transition-none"
             )}
             style={{
-              width: `calc(${100 - leftWidth}% - ${
-                isDragging ? "32px" : "8px"
-              })`,
+              width: isAssistantOpen
+                ? `calc(25% - 4px)`
+                : `calc(${100 - leftWidth}% - 8px)`,
             }}
           >
             <Noter file={fileData} />
