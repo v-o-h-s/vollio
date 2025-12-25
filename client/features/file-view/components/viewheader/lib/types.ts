@@ -1,4 +1,4 @@
-import { FileDetails } from "@/features/file-view/types/file";
+import { FileDetails } from "@/features/file-view/types/document";
 
 export interface PDFViewerHeaderProps {
   /** Function to toggle noter */

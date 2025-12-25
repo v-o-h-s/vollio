@@ -5,7 +5,7 @@ import { useState } from "react";
 import { PdfHighlighterUtils } from "react-pdf-highlighter-extended-plus";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "react-hot-toast";
-import { FileDetails } from "@/features/file-view/types/file";
+import { FileDetails } from "@/features/file-view/types/document";
 interface useSelectionProps {
   highlighterUtilsRef: React.RefObject<PdfHighlighterUtils | null>;
   file: FileDetails;
