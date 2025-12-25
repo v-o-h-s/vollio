@@ -56,9 +56,9 @@ function NotionEditorInner({
   editable = true,
   className,
   autoFocus = false,
-  customToolbar,
   showWordCount = false,
   showReadingTime = false,
+  showTitle = true,
   // Auto-save props
   autoSave = false,
   noteId,
@@ -474,33 +474,31 @@ function NotionEditorInner({
   return (
     <div className="w-full">
       {/* Title Section */}
-      <div className="mb-4 bg-background">
-        <input
-          type="text"
-          value={noteTitle}
-          onChange={(e) => handleTitleChange(e.target.value)}
-          placeholder="Enter note title..."
-          disabled={!editable}
-          className={cn(
-            "w-full px-4 py-3 text-xl font-semibold bg-transparent border-0",
-            "focus:outline-none focus:ring-0 placeholder:text-muted-foreground",
-            "resize-none overflow-hidden"
-          )}
-          style={{ fontSize: "1.5rem", lineHeight: "2rem" }}
-        />
-        <hr className="border-border" />
-      </div>
+      {showTitle && (
+        <div className="mb-4 bg-background">
+          <input
+            type="text"
+            value={noteTitle}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            placeholder="Enter note title..."
+            disabled={!editable}
+            className={cn(
+              "w-full px-4 py-3 text-xl font-semibold bg-transparent border-0",
+              "focus:outline-none focus:ring-0 placeholder:text-muted-foreground",
+              "resize-none overflow-hidden"
+            )}
+            style={{ fontSize: "1.5rem", lineHeight: "2rem" }}
+          />
+          <hr className="border-border" />
+        </div>
+      )}
 
       {/* Content Section */}
       {editor && (
         <>
           <BubbleMenu editor={editor} />
           <TableBubbleMenu editor={editor} />
-          {customToolbar ? (
-            customToolbar(editor)
-          ) : (
-            <FloatingToolbar editor={editor} />
-          )}
+          <FloatingToolbar editor={editor} />
         </>
       )}
       <EditorContent

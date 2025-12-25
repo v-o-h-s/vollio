@@ -42,6 +42,7 @@ export interface NotionEditorProps {
   customToolbar?: (editor: Editor) => React.ReactNode;
   showWordCount?: boolean;
   showReadingTime?: boolean;
+  showTitle?: boolean;
   // Auto-save props
   autoSave?: boolean;
   noteId?: string;
