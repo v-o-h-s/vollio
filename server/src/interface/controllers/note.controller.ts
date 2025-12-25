@@ -15,7 +15,7 @@ import {
   GetNoteByIdResponse,
   UpdateNoteResponse,
   DeleteNoteResponse,
-} from "../../shared/types/responses/noteRoutes";
+} from '@vollio/shared';
 
 export class NoteController {
   constructor(

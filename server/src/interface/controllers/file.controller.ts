@@ -25,7 +25,7 @@ import {
   StreamFileResponse,
   UploadFileResponse,
 
-} from "../../shared/types/responses/fileRoutes";
+} from '@vollio/shared';
 
 export class FileController {
   constructor(

@@ -20,7 +20,7 @@ import {
   GetCoursesResponse,
   GetCoursesWithContentResponse,
   GetCourseContentResponse,
-} from "../../shared/types/responses/googleClassroomRoutes";
+} from '@vollio/shared';
 import "dotenv/config"
 export class GoogleClassroomController {
   private googleClassroomService: GoogleClassroomService;

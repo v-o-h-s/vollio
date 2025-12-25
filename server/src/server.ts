@@ -19,6 +19,7 @@ import { highlightRoutes } from "./interface/routes/highlight.route";
 import { quizRoutes } from "./interface/routes/quiz.route";
 import { flashcardRoutes } from "./interface/routes/flashcards.route";
 import { summaryRoutes } from "./interface/routes/summary.route";
+import { aiRoutes } from "./interface/routes/ai.route";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -104,6 +105,9 @@ app.register(flashcardRoutes, {
 });
 app.register(summaryRoutes, {
   prefix: "/api/v1/summaries",
+});
+app.register(aiRoutes, {
+  prefix: "/api/v1/ai",
 });
 
 async function start(): Promise<void> {

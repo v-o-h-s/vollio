@@ -3,7 +3,7 @@ import { HighlightContent } from "../validation/highlightSchemas";
 import { HighlightStyle } from "../../domain/entities/Highlight";
 import { HighlightType } from "../../domain/entities/Highlight";
 import { ScaledPosition } from "../../domain/entities/Highlight";
-import { HighlightData } from "../types/responses/highlightRoutes";
+import { HighlightData } from "@vollio/shared";
 
 export class HighlightsMapper {
   constructor() {}
@@ -25,7 +25,7 @@ export class HighlightsMapper {
     );
   }
   static mapEntityToResponse(highlight: Highlight): HighlightData {
-    return ({
+    return {
       id: highlight.getId(),
       userId: highlight.getUserId(),
       pdfId: highlight.getPdfId(),
@@ -39,6 +39,6 @@ export class HighlightsMapper {
       noteId: highlight.getNoteId(),
       tags: highlight.getTags(),
       style: highlight.getStyle(),
-    });
+    };
   }
 }

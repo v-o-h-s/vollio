@@ -1,5 +1,5 @@
 import { ServerSuccessResponse } from "./general";
-import { JSONContent } from "../requests/noteRequests";
+import { JSONContent } from "../note";
 
 // Note data structure returned by endpoints
 export interface NoteData {

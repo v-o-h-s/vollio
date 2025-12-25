@@ -1,5 +1,5 @@
 import { JSONSchemaType } from "ajv";
-import { JSONContent } from "../types/note";
+import { JSONContent } from "@vollio/shared";
 
 // Schema for creating a note
 export interface CreateNoteDTO {

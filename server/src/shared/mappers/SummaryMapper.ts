@@ -1,5 +1,5 @@
 import { Summary } from "../../domain/entities/Summary";
-import { SummaryData } from "../types/responses/summaryRoutes";
+import { SummaryData } from "@vollio/shared";
 
 export class SummaryMapper {
   constructor() {}

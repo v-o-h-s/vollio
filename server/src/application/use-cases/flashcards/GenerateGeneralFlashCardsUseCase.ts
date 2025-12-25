@@ -1,7 +1,7 @@
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
 import { IFlashCardsSetRepository } from "../../../domain/repositories/IFlashCardsSetRepository";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
-import { CreateFlashCardsSetResponse } from "../../../shared/types/responses/flashcardsRoutes";
+import { CreateFlashCardsSetResponse } from '@vollio/shared';
 import { CreateFlashCardsDTO } from "../../../shared/validation/flashcardSchemas";
 import { IFileRepository } from "../../../domain/repositories/IFileRepository";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";

@@ -1,5 +1,5 @@
 import { IQuizRepository } from "../../../domain/repositories/IQuizRepository";
-import { GetAllQuizzesResponse } from "../../../shared/types/responses/quizRoutes";
+import { GetAllQuizzesResponse } from '@vollio/shared';
 import { QuizMapper } from "../../../shared/mappers/QuizMapper";
 import { FastifyBaseLogger } from "fastify";
 

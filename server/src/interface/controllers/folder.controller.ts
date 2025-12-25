@@ -17,7 +17,7 @@ import {
   GetFolderByIdResponse,
   DeleteFolderResponse,
   FolderData,
-} from "../../shared/types/responses/folderRoutes";
+} from '@vollio/shared';
 
 export class FolderController {
   constructor(

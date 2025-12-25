@@ -18,7 +18,7 @@ import {
   GetHighlightByIdResponse,
   DeleteHighlightResponse,
   HighlightData,
-} from "../../shared/types/responses/highlightRoutes";
+} from '@vollio/shared';
 import { FastifyBaseLogger } from "fastify";
 import { GetHighlightsByDocumentIdUseCase } from "../../application/use-cases/highlights/GetHighlightsByDocumentIdUseCase";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";

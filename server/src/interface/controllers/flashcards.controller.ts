@@ -4,7 +4,7 @@ import {
   CreateManualFlashCardsDTO,
   FlashCardsSetIdParams,
 } from "../../shared/validation/flashcardSchemas";
-import { CreateFlashCardsSetResponse } from "../../shared/types/responses/flashcardsRoutes";
+import { CreateFlashCardsSetResponse } from '@vollio/shared';
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 import { GenerateGeneralFlashCardsUseCase } from "../../application/use-cases/flashcards/GenerateGeneralFlashCardsUseCase";
 import { GetAllFlashCardsSetsUseCase } from "../../application/use-cases/flashcards/GetAllFlashCardsSetsUseCase";

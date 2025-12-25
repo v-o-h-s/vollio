@@ -1,5 +1,5 @@
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
-import { CreateQuizResponse } from "../../../shared/types/responses/quizRoutes";
+import { CreateQuizResponse } from '@vollio/shared';
 import { CreateQuizDTO } from "../../../shared/validation/quizSchemas";
 import { Quiz, QuizQuestion } from "../../../domain/entities/Quiz";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";

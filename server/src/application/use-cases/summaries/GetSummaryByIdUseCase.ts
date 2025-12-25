@@ -1,7 +1,7 @@
 import { ISummaryRepository } from "../../../domain/repositories/ISummaryRepository";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { SummaryMapper } from "../../../shared/mappers/SummaryMapper";
-import { SummaryData } from "../../../shared/types/responses/summaryRoutes";
+import { SummaryData } from '@vollio/shared';
 
 export class GetSummaryByIdUseCase {
   constructor(private summaryRepository: ISummaryRepository) {}

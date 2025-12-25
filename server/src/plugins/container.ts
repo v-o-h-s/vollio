@@ -35,8 +35,6 @@ import { MoveFileUseCase } from "../application/use-cases/files/MoveFileUseCase"
 import { RenameFileUseCase } from "../application/use-cases/files/RenameFileUseCase";
 import { StorageService } from "../infrastructure/services/StorageService";
 import { FolderRepository } from "../infrastructure/repositories/FolderRepository";
-import { testChunks } from "../application/use-cases/testChanks";
-import { testController } from "../interface/controllers/test.controller";
 import { GetAllUserFoldersUseCase } from "../application/use-cases/folders/GetAllUserFoldersUseCase";
 import { CreateFolderUseCase } from "../application/use-cases/folders/CreateFolderUseCase";
 import { GetFolderByIdUseCase } from "../application/use-cases/folders/GetFolderByIdUseCase";
@@ -82,6 +80,8 @@ import { UpdateSummaryUseCase } from "../application/use-cases/summaries/UpdateS
 import { DeleteSummaryUseCase } from "../application/use-cases/summaries/DeleteSummaryUseCase";
 import { SummaryRepository } from "../infrastructure/repositories/SummaryRepository";
 import { GetSummariesByDocumentIdUseCase } from "../application/use-cases/summaries/GetSummariesByDocumentIdUseCase";
+import { ExplainTextUseCase } from "../application/use-cases/ai/ExplainTextUseCase";
+import { AiController } from "../interface/controllers/ai.controller";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -326,17 +326,6 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
     }),
   });
 
-  // will be deleted
-  fastify.diContainer.register({
-    testChunks: asClass(testChunks, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    testController: asClass(testController, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-  });
   // file processing
   fastify.diContainer.register({
     fileProcessingService: asClass(FileProcessingService, {
@@ -483,6 +472,17 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     summaryRepository: asClass(SummaryRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+
+  fastify.diContainer.register({
+    explainTextUseCase: asClass(ExplainTextUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    aiController: asClass(AiController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

@@ -14,6 +14,7 @@ import { FileController } from "../../interface/controllers/file.controller";
 import { testController } from "../../interface/controllers/test.controller";
 import { QuizController } from "../../interface/controllers/quiz.controller";
 import { SummaryController } from "../../interface/controllers/summary.controller";
+import { AiController } from "../../interface/controllers/ai.controller";
 export interface User {
   id: string;
   email?: string;
@@ -55,6 +56,7 @@ export interface DIContainer {
   testController: testController;
   quizController: QuizController;
   summaryController: SummaryController;
+  aiController: AiController;
 }
 
 declare module "fastify" {

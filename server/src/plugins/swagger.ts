@@ -56,7 +56,8 @@ export default fp(async (fastify: FastifyInstance) => {
       openapi: "3.0.0",
       info: {
         title: "Vollio API",
-        description: "API documentation for Vollio - PDF annotation and note-taking platform",
+        description:
+          "API documentation for Vollio - PDF annotation and note-taking platform",
         version: "1.0.0",
         contact: {
           name: "API Support",
@@ -114,6 +115,11 @@ export default fp(async (fastify: FastifyInstance) => {
         {
           name: "Google Classroom",
           description: "Google Classroom integration endpoints",
+        },
+        {
+          name: "AI",
+          description:
+            "Generative AI endpoints for explanation and content generation",
         },
       ],
     },

@@ -1,5 +1,5 @@
 import { IFileRepository } from "../../../domain/repositories/IFileRepository";
-import { PdfDetails } from "../../../shared/types/responses/fileRoutes";
+import { PdfDetails } from '@vollio/shared';
 import { FastifyBaseLogger } from "fastify";
 
 export class GetAllFilesUseCase {

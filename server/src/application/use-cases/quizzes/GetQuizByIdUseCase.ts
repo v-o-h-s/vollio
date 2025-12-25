@@ -1,6 +1,6 @@
 import { IQuizRepository } from "../../../domain/repositories/IQuizRepository";
 import { QuizMapper } from "../../../shared/mappers/QuizMapper";
-import { GetQuizByIdResponse } from "../../../shared/types/responses/quizRoutes";
+import { GetQuizByIdResponse } from '@vollio/shared';
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { FastifyBaseLogger } from "fastify";
 

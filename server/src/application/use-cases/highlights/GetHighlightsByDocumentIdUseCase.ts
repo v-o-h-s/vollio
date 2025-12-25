@@ -1,7 +1,7 @@
 import { IHighlightRepository } from "../../../domain/repositories/IHighlightRepository";
 import { Highlight } from "../../../domain/entities/Highlight";
 import { HighlightsMapper } from "../../../shared/mappers/HighlightsMapper";
-import { HighlightData } from "../../../shared/types/responses/highlightRoutes";
+import { HighlightData } from '@vollio/shared';
 
 export class GetHighlightsByDocumentIdUseCase {
   constructor(private highlightRepository: IHighlightRepository) {}

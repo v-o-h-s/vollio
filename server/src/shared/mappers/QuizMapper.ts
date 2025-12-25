@@ -8,7 +8,7 @@ import {
   QuizLanguage,
   ExplanationLevel,
 } from "../../domain/entities/Quiz";
-import { CreateQuizResponse } from "../types/responses/quizRoutes";
+import { CreateQuizResponse } from "@vollio/shared";
 
 export class QuizMapper {
   constructor() {}
