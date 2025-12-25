@@ -38,7 +38,8 @@ export default function PDFPage() {
   const { id } = useParams();
   const [isNoterOpen, setIsNoteOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
-  const [leftWidth, setLeftWidth] = useState(50); // percentage
+  const [assistantWidth, setAssistantWidth] = useState(25);
+  const [noterWidth, setNoterWidth] = useState(25);
   const [isAssistantDividerDragging, setIsAssistantDividerDragging] =
     useState(false);
   const [isNoterDividerDragging, setIsNoterDividerDragging] = useState(false);
@@ -52,45 +53,98 @@ export default function PDFPage() {
     error,
     refetch,
   } = useGetFileByIdQuery(id as string);
-  const handleMouseMove = useCallback(
+
+  // Mouse handlers for Assistant divider
+  const handleMouseMoveAssistant = useCallback(
     (e: MouseEvent) => {
-      if (!isDragging || !containerRef.current) return;
+      if (!isAssistantDividerDragging || !containerRef.current) return;
 
       const container = containerRef.current;
-      const containerRect = container.getBoundingClientRect(); // returns the size and position of the element relative to the viewport.
-      const offsetX = e.clientX - containerRect.left;
-      const newLeftWidth = (offsetX / containerRect.width) * 100;
+      const rect = container.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const newWidth = (offsetX / rect.width) * 100;
 
-      // Constrain between 20% and 80%
-      if (newLeftWidth >= 20 && newLeftWidth <= 80) {
-        setLeftWidth(newLeftWidth);
+      // Constrain between 15% and 50%
+      if (newWidth >= 20 && newWidth <= 50) {
+        setAssistantWidth(newWidth);
       }
     },
-    [isDragging]
+    [isAssistantDividerDragging]
   );
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-  const handleMouseDown = useCallback(() => {
-    setIsDragging(true);
+  const handleMouseUpAssistant = useCallback(() => {
+    setIsAssistantDividerDragging(false);
   }, []);
 
-  // Add and remove event listeners
+  const handleMouseDownAssistant = useCallback(() => {
+    setIsAssistantDividerDragging(true);
+  }, []);
+
+  // Mouse handlers for Noter divider
+  const handleMouseMoveNoter = useCallback(
+    (e: MouseEvent) => {
+      if (!isNoterDividerDragging || !containerRef.current) return;
+
+      const container = containerRef.current;
+      const rect = container.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const containerWidth = rect.width;
+
+      // Calculate from the right side
+      const distanceFromRight = containerWidth - offsetX;
+      const newWidth = (distanceFromRight / containerWidth) * 100;
+
+      // Constrain between 15% and 50%
+      if (newWidth >= 20 && newWidth <= 50) {
+        setNoterWidth(newWidth);
+      }
+    },
+    [isNoterDividerDragging]
+  );
+
+  const handleMouseUpNoter = useCallback(() => {
+    setIsNoterDividerDragging(false);
+  }, []);
+
+  const handleMouseDownNoter = useCallback(() => {
+    setIsNoterDividerDragging(true);
+  }, []);
+
+  // Add document-level event listeners for dragging
   useEffect(() => {
-    if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
+    if (isAssistantDividerDragging) {
+      document.addEventListener("mousemove", handleMouseMoveAssistant);
+      document.addEventListener("mouseup", handleMouseUpAssistant);
     } else {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMoveAssistant);
+      document.removeEventListener("mouseup", handleMouseUpAssistant);
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMoveAssistant);
+      document.removeEventListener("mouseup", handleMouseUpAssistant);
     };
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  }, [
+    isAssistantDividerDragging,
+    handleMouseMoveAssistant,
+    handleMouseUpAssistant,
+  ]);
+
+  useEffect(() => {
+    if (isNoterDividerDragging) {
+      document.addEventListener("mousemove", handleMouseMoveNoter);
+      document.addEventListener("mouseup", handleMouseUpNoter);
+    } else {
+      document.removeEventListener("mousemove", handleMouseMoveNoter);
+      document.removeEventListener("mouseup", handleMouseUpNoter);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMoveNoter);
+      document.removeEventListener("mouseup", handleMouseUpNoter);
+    };
+  }, [isNoterDividerDragging, handleMouseMoveNoter, handleMouseUpNoter]);
+
   // Enhanced loading state
   if (isLoading) {
     return (
@@ -203,28 +257,26 @@ export default function PDFPage() {
         <>
           <div
             className={cn(
-              "h-full rounded-[var(--radius)] flex flex-row overflow-hidden",
+              "h-full rounded-lg flex flex-row overflow-hidden",
               "border border-border bg-card",
               "shadow-md",
               "transition-none"
             )}
             style={{
-              width: isNoterOpen
-                ? `calc(25% - ${isDragging ? "8px" : "4px"})`
-                : `calc(${leftWidth}% - ${isDragging ? "16px" : "4px"})`,
+              width: isNoterOpen ? `${assistantWidth}%` : `${assistantWidth}%`,
             }}
           >
             <AssistantChat />
           </div>
 
-          {/* Divider after assistant  */}
+          {/* Divider after assistant */}
           <div
-            onMouseDown={handleMouseDown}
+            onMouseDown={handleMouseDownAssistant}
             className={cn(
-              "relative flex items-center justify-center flex-shrink-0 group",
+              "relative flex items-center justify-center shrink-0 group",
               "transition-all duration-200 ease-in-out cursor-col-resize select-none",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              isDragging ? "w-8" : "w-2 hover:w-8"
+              isAssistantDividerDragging ? "w-8" : "w-2 hover:w-8"
             )}
             style={{ cursor: "col-resize" }}
             role="separator"
@@ -235,7 +287,7 @@ export default function PDFPage() {
               className={cn(
                 "absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
                 "transition-all duration-200",
-                isDragging
+                isAssistantDividerDragging
                   ? "w-1 bg-primary"
                   : "w-0.5 bg-border group-hover:w-1 group-hover:bg-primary/80"
               )}
@@ -244,7 +296,7 @@ export default function PDFPage() {
               className={cn(
                 "relative z-10 rounded-md transition-all duration-200",
                 "flex items-center justify-center",
-                isDragging
+                isAssistantDividerDragging
                   ? "bg-primary text-primary-foreground scale-110 px-1 py-2"
                   : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5"
               )}
@@ -269,7 +321,7 @@ export default function PDFPage() {
       {/* Middle Panel: BetterViewer (always visible) */}
       <div
         className={cn(
-          "h-full rounded-[var(--radius)] flex flex-row overflow-hidden",
+          "h-full rounded-lg flex flex-row overflow-hidden",
           "border border-border bg-card",
           "shadow-md",
           "transition-none"
@@ -277,11 +329,11 @@ export default function PDFPage() {
         style={{
           width:
             isNoterOpen && isAssistantOpen
-              ? "50%"
+              ? `${100 - assistantWidth - noterWidth}%`
               : isNoterOpen
-              ? `calc(${100 - leftWidth}% - 8px)`
+              ? `${100 - noterWidth}%`
               : isAssistantOpen
-              ? `calc(${100 - leftWidth}% - 8px)`
+              ? `${100 - assistantWidth}%`
               : "100%",
         }}
       >
@@ -297,12 +349,12 @@ export default function PDFPage() {
         <>
           {/* Divider before Noter */}
           <div
-            onMouseDown={handleMouseDown}
+            onMouseDown={handleMouseDownNoter}
             className={cn(
-              "relative flex items-center justify-center flex-shrink-0 group",
+              "relative flex items-center justify-center shrink-0 group",
               "transition-all duration-200 ease-in-out cursor-col-resize select-none",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              isDragging ? "w-8" : "w-2 hover:w-8"
+              isNoterDividerDragging ? "w-8" : "w-2 hover:w-8"
             )}
             style={{ cursor: "col-resize" }}
             role="separator"
@@ -313,7 +365,7 @@ export default function PDFPage() {
               className={cn(
                 "absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
                 "transition-all duration-200",
-                isDragging
+                isNoterDividerDragging
                   ? "w-1 bg-primary"
                   : "w-0.5 bg-border group-hover:w-1 group-hover:bg-primary/80"
               )}
@@ -322,7 +374,7 @@ export default function PDFPage() {
               className={cn(
                 "relative z-10 rounded-md transition-all duration-200",
                 "flex items-center justify-center",
-                isDragging
+                isNoterDividerDragging
                   ? "bg-primary text-primary-foreground scale-110 px-1 py-2"
                   : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5"
               )}
@@ -344,15 +396,13 @@ export default function PDFPage() {
 
           <div
             className={cn(
-              "h-full rounded-[var(--radius)] flex flex-row overflow-hidden pt-1 relative",
+              "h-full rounded-lg flex flex-row overflow-hidden pt-1 relative",
               "border border-border",
               "shadow-md",
               "transition-none"
             )}
             style={{
-              width: isAssistantOpen
-                ? `calc(25% - 4px)`
-                : `calc(${100 - leftWidth}% - 8px)`,
+              width: `${noterWidth}%`,
             }}
           >
             <Noter file={fileData} />
