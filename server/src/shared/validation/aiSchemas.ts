@@ -14,7 +14,6 @@ export const AssistantDTOSchema: JSONSchemaType<AssistantDTO> = {
   type: "object",
   properties: {
     message: { type: "string", minLength: 1 },
-    fileId: { type: "string", format: "uuid" },
     history: {
       type: "array",
       items: {
@@ -29,6 +28,6 @@ export const AssistantDTOSchema: JSONSchemaType<AssistantDTO> = {
       nullable: true,
     },
   },
-  required: ["message", "fileId"],
+  required: ["message"],
   additionalProperties: false,
 };

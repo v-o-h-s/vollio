@@ -23,16 +23,13 @@ export class AssistantChatUseCase {
 
     const result = await this.generativeAiService.generateText(prompt);
 
-    this.logger.info({ result }, "AssistantChatUseCase result");
-
-    let parsed;
     if (typeof result === "string") {
       try {
         const cleanContent = result
           .replace(/```json/g, "")
           .replace(/```/g, "")
           .trim();
-        parsed = JSON.parse(cleanContent);
+        return { content: JSON.parse(cleanContent) };
       } catch (error) {
         this.logger.error(
           "Failed to parse AI response in AssistantChatUseCase: " + error
@@ -49,25 +46,11 @@ export class AssistantChatUseCase {
           },
         };
       }
-    } else {
-      parsed = result;
     }
 
-    // Fix node types if necessary (consistent with ExplainTextUseCase)
-    const fixNodeTypes = (node: any) => {
-      if (!node) return;
-      if (node.type === "list") node.type = "bulletList";
-      if (Array.isArray(node.content)) {
-        node.content.forEach(fixNodeTypes);
-      }
-    };
-
-    if (parsed.content) {
-      fixNodeTypes(parsed.content);
-    }
-
+    this.logger.info(result, "AssistantChatUseCase result");
     return {
-      content: parsed.content || {
+      content: result || {
         type: "doc",
         content: [
           {

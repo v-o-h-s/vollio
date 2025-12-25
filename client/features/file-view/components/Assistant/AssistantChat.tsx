@@ -5,15 +5,13 @@ import { Send, Sparkles } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { JSONContent } from "@tiptap/core";
 import { useAssistant } from "../../hooks/useAssistant";
 
 export function AssistantChat() {
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { messages, addUserMessage, handleDelete } = useAssistant();
+  const { messages, addUserMessage, handleDelete, isLoading } = useAssistant();
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -29,7 +27,6 @@ export function AssistantChat() {
     if (!input.trim() || isLoading) return;
     addUserMessage(input);
     setInput("");
-    
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -158,75 +155,4 @@ export function AssistantChat() {
       </div>
     </div>
   );
-}
-
-// Mock AI responses (replace with actual API integration later)
-function getMockResponse(userInput: string): JSONContent {
-  const responses = [
-    "I'd be happy to help you with that! Based on the document you're viewing, I can provide detailed insights and explanations.",
-    "That's a great question! Let me analyze the content and provide you with a comprehensive answer.",
-    "I understand what you're asking. The document contains relevant information that can help answer your question.",
-    "Based on the PDF content, here's what I can tell you: This is a simulated response that demonstrates the chat interface. The actual AI integration will provide real, context-aware answers.",
-    "Let me break that down for you. The key points from the document suggest several important considerations you should be aware of.",
-  ];
-
-  const randomText = responses[Math.floor(Math.random() * responses.length)];
-
-  return {
-    type: "doc",
-    content: [
-      {
-        type: "paragraph",
-        content: [
-          {
-            type: "text",
-            text: randomText,
-          },
-        ],
-      },
-      {
-        type: "heading",
-        attrs: { level: 3 },
-        content: [
-          {
-            type: "text",
-            text: "Summary of Insights",
-          },
-        ],
-      },
-      {
-        type: "bulletList",
-        content: [
-          {
-            type: "listItem",
-            content: [
-              {
-                type: "paragraph",
-                content: [
-                  {
-                    type: "text",
-                    text: "Detailed analysis of the current section content.",
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            type: "listItem",
-            content: [
-              {
-                type: "paragraph",
-                content: [
-                  {
-                    type: "text",
-                    text: "Context-aware suggestions based on your document.",
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  };
 }

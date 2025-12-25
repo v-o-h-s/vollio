@@ -124,6 +124,8 @@ export const {
   //ai
   useExplainTextQuery,
   useLazyExplainTextQuery,
+  useAssistantChatMutation,
+
 } = apiSlice;
 
 // Export the reducer and middleware

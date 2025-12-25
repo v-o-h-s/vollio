@@ -22,13 +22,11 @@ ${message}
 
 HARD CONSTRAINTS (DO NOT VIOLATE):
 1. Your response MUST be a valid JSON object.
-2. The JSON MUST represent a valid Tiptap document.
-3. The root structure MUST be:
+2. The JSON MUST be a valid Tiptap JSONContent document.
+3. The ROOT of the JSON MUST be:
    {
-     "content": {
-       "type": "doc",
-       "content": [...]
-     }
+     "type": "doc",
+     "content": [...]
    }
 4. Allowed node types ONLY:
    - paragraph
@@ -40,9 +38,9 @@ HARD CONSTRAINTS (DO NOT VIOLATE):
    - codeBlock
    - blockquote
 5. Do NOT use Markdown syntax inside text nodes (no **, *, \`\`\`, etc).
-6. Do NOT include explanations, comments, or text outside the JSON.
-7. If the question is unclear or underspecified, return a paragraph explaining exactly what is missing.
+6. Do NOT include explanations, comments, metadata, or text outside the JSON.
+7. If the question is unclear or underspecified, return a single paragraph explaining exactly what is missing.
 
 OUTPUT:
-Return ONLY the JSON object. Nothing else.`;
+Return ONLY the JSON document. Nothing else.`;
 };

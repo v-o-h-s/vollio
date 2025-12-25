@@ -29,6 +29,27 @@ const aiRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: AssistantDTO }>(
     `${options.prefix}/assistant`,
     {
+      schema: {
+        tags: ["AI"],
+        summary: "Chat with AI Assistant",
+        body: AssistantDTOSchema,
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+              data: {
+                type: "object",
+                properties: {
+                  content: { type: "object", additionalProperties: true },
+                },
+              },
+              error: { type: "object", nullable: true },
+            },
+          },
+        },
+      },
       preHandler: validateBody(AssistantDTOSchema),
     },
     async (request, reply) => {
