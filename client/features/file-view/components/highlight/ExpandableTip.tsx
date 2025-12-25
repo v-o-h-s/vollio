@@ -1,4 +1,11 @@
-import { Highlighter, Tag, StickyNote, ListChecks, Copy } from "lucide-react";
+import {
+  Highlighter,
+  Tag,
+  StickyNote,
+  ListChecks,
+  Copy,
+  Sparkles,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -8,6 +15,7 @@ interface ExpandableTipProps {
   onAddTag?: () => void;
   onAddNote?: () => void;
   onAddToSummary?: () => void;
+  onExplain?: () => void;
 }
 
 export const ExpandableTip = ({
@@ -16,6 +24,7 @@ export const ExpandableTip = ({
   onAddTag,
   onAddNote,
   onAddToSummary,
+  onExplain,
 }: ExpandableTipProps) => {
   return (
     <Card className="shadow-lg border-muted animate-in fade-in zoom-in duration-200">
@@ -89,6 +98,20 @@ export const ExpandableTip = ({
             <ListChecks className="h-4 w-4 shrink-0" />
             <span className="text-sm max-w-0 group-hover:max-w-[200px] overflow-hidden whitespace-nowrap transition-all duration-200">
               add to summary main points
+            </span>
+          </Button>
+        )}
+        {/* Explain Button */}
+        {onExplain && (
+          <Button
+            onClick={onExplain}
+            variant="ghost"
+            size="sm"
+            className="group h-8 px-2 gap-2 font-normal hover:bg-accent cursor-pointer transition-all duration-200 overflow-hidden"
+          >
+            <Sparkles className="h-4 w-4 shrink-0" />
+            <span className="text-sm max-w-0 group-hover:max-w-[200px] overflow-hidden whitespace-nowrap transition-all duration-200">
+              explain
             </span>
           </Button>
         )}

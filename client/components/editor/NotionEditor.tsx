@@ -126,7 +126,7 @@ function NotionEditorInner({
         const newNote = await createNote({
           title,
           content,
-          documentId: fileId,
+          pdfId: fileId,
         }).unwrap();
         const newNoteId = newNote.id;
 
@@ -325,9 +325,6 @@ function NotionEditorInner({
       // Add keyboard shortcuts
       KeyboardShortcuts,
       // Add text alignment
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),

@@ -15,6 +15,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { useGetFileByIdQuery } from "@/lib/store/apiSlice";
+import { Noter } from "@/features/file-view/components/notes";
 
 const BetterViewer = dynamic(
   () =>
@@ -24,9 +25,6 @@ const BetterViewer = dynamic(
   { ssr: false }
 );
 
-const Noter = dynamic(() => import("@/features/file-view/components/Noter"), {
-  ssr: false,
-});
 export default function PDFPage() {
   const router = useRouter();
   const { id } = useParams();

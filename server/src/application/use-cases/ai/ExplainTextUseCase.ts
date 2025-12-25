@@ -56,6 +56,19 @@ export class ExplainTextUseCase {
       parsed = result;
     }
 
+    // Recursive function to fix unknown node types (like 'list' -> 'bulletList')
+    const fixNodeTypes = (node: any) => {
+      if (!node) return;
+      if (node.type === "list") node.type = "bulletList";
+      if (Array.isArray(node.content)) {
+        node.content.forEach(fixNodeTypes);
+      }
+    };
+
+    if (parsed.content) {
+      fixNodeTypes(parsed.content);
+    }
+
     return {
       title: parsed.title || "Explanation",
       content: parsed.content || {

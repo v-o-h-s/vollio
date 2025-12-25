@@ -12,7 +12,6 @@ if (typeof window === "undefined") {
     userAgent: "",
   };
 }
-
 import "@/app/styles/components/betterViewer.css";
 import { ChevronUp } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
@@ -23,6 +22,7 @@ import {
   PdfScaleValue,
 } from "react-pdf-highlighter-extended-plus";
 import { useRef } from "react";
+import { ExplanationBox } from "./ai/ExplanationBox";
 import { ExpandableTip } from "./highlight/ExpandableTip";
 import { TagSelectionDialog } from "./tags/TagSelectionDialog";
 import { HighlightContainer } from "./highlight/HighlightContainer";
@@ -43,7 +43,6 @@ export const BetterViewer = ({
   file: FileDetails;
   onToggleNoter?: () => void;
 }) => {
-  console.log("BetterViewer rendering for file:", file);
   // Fetch highlights for this PDF from API
   const { data: apiHighlights, isLoading: isLoadingHighlights } =
     useGetPDFHighlightsQuery(file.id);
@@ -54,6 +53,7 @@ export const BetterViewer = ({
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isTagSidebarOpen, setIsTagSidebarOpen] = useState(false);
   const [isSummarySidebarOpen, setIsSummarySidebarOpen] = useState(false);
+  const [isExplanationBoxOpen, setIsExplanationBoxOpen] = useState(false);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const [zoomValue, setZoomValue] = useState<PdfScaleValue>("page-width");
 
@@ -66,31 +66,21 @@ export const BetterViewer = ({
   const {
     isTagDialogOpen,
     setIsTagDialogOpen,
-    handleAddTag,
+    isExplainOpen,
+    setIsExplainOpen,
+    explainResult,
     handleTagConfirm,
     handleCreateHighlight,
-    handleAddToSummary: handleAddToSummaryBase,
+    handleAddToSummary,
     handleAddNote,
     handleCopy,
+    handleExplain,
+    handleAddTag,
   } = useSelection({
     highlighterUtilsRef,
     file,
     currentHighlightColor,
   });
-
-  // Enhanced add to summary handler
-  const handleAddToSummary = async () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection || !selection.content.text) return;
-
-    try {
-      await addMainPoint(selection.content.text);
-      // Clear ghost highlight after adding
-      highlighterUtilsRef.current?.removeGhostHighlight();
-    } catch (error) {
-      console.error("Failed to add to summary:", error);
-    }
-  };
 
   // Map API highlights to react-pdf-highlighter format
   const highlights = useMemo<Array<MyHighlight>>(() => {
@@ -241,6 +231,7 @@ export const BetterViewer = ({
                   onAddTag={handleAddTag}
                   onAddNote={handleAddNote}
                   onAddToSummary={handleAddToSummary}
+                  onExplain={handleExplain}
                 />
               }
               highlights={highlights}
@@ -275,6 +266,14 @@ export const BetterViewer = ({
         onClose={() => setIsSummarySidebarOpen(false)}
         summary={summary ?? null}
         onRemoveMainPoint={removeMainPoint}
+      />
+
+      {/* Explanation Box */}
+      <ExplanationBox
+        isOpen={isExplainOpen}
+        onClose={() => setIsExplainOpen(false)}
+        explainResult={explainResult}
+        onSaveToNotes={() => {}}
       />
     </div>
   );

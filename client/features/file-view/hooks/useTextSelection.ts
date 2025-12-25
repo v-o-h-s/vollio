@@ -1,11 +1,15 @@
 import { CreateHighlightDTO } from "@vollio/shared";
-import { useUpdateHighlightMutation } from "@/lib/store/apiSlice";
-import { useCreateHighlightMutation } from "@/lib/store/apiSlice";
+import {
+  useUpdateHighlightMutation,
+  useCreateHighlightMutation,
+  useLazyExplainTextQuery,
+} from "@/lib/store/apiSlice";
 import { useState } from "react";
 import { PdfHighlighterUtils } from "react-pdf-highlighter-extended-plus";
 import { v4 as uuidv4 } from "uuid";
-import { toast } from "react-hot-toast";
 import { FileDetails } from "@/features/file-view/types/document";
+import { toast } from "react-toastify";
+
 interface useSelectionProps {
   highlighterUtilsRef: React.RefObject<PdfHighlighterUtils | null>;
   file: FileDetails;
@@ -18,34 +22,56 @@ export function useSelection({
   currentHighlightColor,
 }: useSelectionProps) {
   const [createHighlight] = useCreateHighlightMutation();
-  const [pendingSelection, setPendingSelection] = useState<any>(null);
+  const [selection, setSelection] = useState<any>(null);
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
+
+  // AI Explanation State
+  const [isExplainOpen, setIsExplainOpen] = useState(false);
+  const [triggerExplain, explainResult] = useLazyExplainTextQuery();
+
+  // Helper to sync local selection with viewer selection
+  const captureSelection = () => {
+    const activeSelection = highlighterUtilsRef.current?.getCurrentSelection();
+    if (activeSelection) {
+      setSelection(activeSelection);
+    }
+    return activeSelection;
+  };
 
   // Handler to add a tag to selected text
   const handleAddTag = () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection) return;
-
-    // Store the selection and open the tag dialog
-    setPendingSelection(selection);
+    const activeSelection = captureSelection();
+    if (!activeSelection) return;
     setIsTagDialogOpen(true);
   };
 
-  // Handler when tags are confirmed in the dialog
-  const handleTagConfirm = async (selectedTags: string[]) => {
-    if (!pendingSelection) return;
+  const handleExplain = async () => {
+    const activeSelection = captureSelection();
+    if (!activeSelection || !activeSelection.content?.text) return;
+
+    setIsExplainOpen(true);
 
     try {
-      // Generate a proper UUID for the highlight
-      const highlightId = uuidv4();
+      await triggerExplain(activeSelection.content.text).unwrap();
+    } catch (err: any) {
+      console.error("AI Explanation Error:", err);
+      toast.error(
+        err?.data?.message || err?.message || "Failed to generate explanation"
+      );
+    }
+  };
 
-      // Prepare the DTO for the API with tags
+  const handleTagConfirm = async (selectedTags: string[]) => {
+    if (!selection) return;
+
+    try {
+      const highlightId = uuidv4();
       const newHighlightDto: CreateHighlightDTO = {
         id: highlightId,
         pdfId: file.id,
-        type: pendingSelection.content.image ? "area" : "text",
-        content: pendingSelection.content,
-        position: pendingSelection.position,
+        type: selection.content.image ? "area" : "text",
+        content: selection.content,
+        position: selection.position,
         color: currentHighlightColor,
         hasNote: false,
         noteId: null,
@@ -53,116 +79,81 @@ export function useSelection({
         style: "tagged",
       };
 
-      // Create the highlight via API
       await createHighlight(newHighlightDto).unwrap();
-
-      toast.success(`Highlight created with ${selectedTags.length} tag(s)`, {
-        duration: 2000,
-        position: "bottom-right",
-      });
-
-      // Clear pending selection
-      setPendingSelection(null);
+      toast.success(`Highlight created with ${selectedTags.length} tag(s)`);
+      setSelection(null);
     } catch (error) {
-      toast.error("Failed to create highlight with tags. Please try again.", {
-        duration: 3000,
-        position: "bottom-right",
-      });
-      console.error("Failed to create highlight with tags:", error);
+      toast.error("Failed to create highlight with tags.");
     }
   };
 
-  // Handler to create a new highlight
   const handleCreateHighlight = async () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection) return;
+    const activeSelection = captureSelection();
+    if (!activeSelection) return;
 
-    try {
-      // Generate a proper UUID for the highlight
-      const highlightId = uuidv4();
+    const highlightId = uuidv4();
+    const newHighlightDto: CreateHighlightDTO = {
+      id: highlightId,
+      pdfId: file.id,
+      type: activeSelection.content.image ? "area" : "text",
+      content: activeSelection.content,
+      position: activeSelection.position,
+      color: currentHighlightColor ?? "#FF0000",
+      hasNote: false,
+      noteId: null,
+    };
 
-      // Prepare the DTO for the API
-      const newHighlightDto: CreateHighlightDTO = {
-        id: highlightId,
-        pdfId: file.id,
-        type: selection.content.image ? "area" : "text",
-        content: selection.content,
-        position: selection.position,
-        color: currentHighlightColor ?? "#FF0000",
-        hasNote: false,
-        noteId: null,
-      };
-
-      // Create the highlight via API
-      await createHighlight(newHighlightDto).unwrap();
-
-      // The highlights list will automatically update via RTK Query cache
-    } catch (error) {
-      // Show error toast
-      toast.error("Failed to create highlight. Please try again.", {
-        duration: 3000,
-        position: "bottom-right",
-      });
-      console.error("Failed to create highlight:", error);
-    }
+    toast.promise(createHighlight(newHighlightDto).unwrap(), {
+      pending: "Creating highlight...",
+      success: "Highlight created",
+      error: "Failed to create highlight",
+    });
   };
 
-  // Handler to add a note to selected text
   const handleAddNote = () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection) return;
-
-    // TODO: Implement note input dialog
-    console.log("Add note to selection:", selection.content.text);
-    toast.success("Note feature coming soon!", {
-      duration: 2000,
-      position: "bottom-right",
-    });
+    const activeSelection = captureSelection();
+    if (!activeSelection) return;
+    toast.success("Note feature coming soon!");
   };
 
-  // Handler to add selected text to summary
   const handleAddToSummary = async () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection || !selection.content.text) return;
-
-    // Note: This function will be enhanced by useSummaryActions hook in BetterViewer
-    console.log("Add to summary:", selection.content.text);
-    toast.success("Added to summary main points", {
-      duration: 2000,
-      position: "bottom-right",
-    });
+    const activeSelection = captureSelection();
+    if (!activeSelection || !activeSelection.content.text) return;
+    toast.success("Added to summary main points");
   };
 
-  // Handler to copy selected text to clipboard
   const handleCopy = async () => {
-    const selection = highlighterUtilsRef.current?.getCurrentSelection();
-    if (!selection || !selection.content.text) return;
+    const activeSelection = captureSelection();
+    if (!activeSelection || !activeSelection.content.text) return;
 
     try {
-      await navigator.clipboard.writeText(selection.content.text);
-      toast.success("Text copied to clipboard", {
-        duration: 1500,
-        position: "bottom-right",
-      });
-      // Optionally hide selection tip after copy
+      await navigator.clipboard.writeText(activeSelection.content.text);
+      toast.success("Text copied to clipboard");
       highlighterUtilsRef.current?.removeGhostHighlight();
     } catch (error) {
-      toast.error("Failed to copy text", {
-        duration: 2000,
-        position: "bottom-right",
-      });
-      console.error("Failed to copy text:", error);
+      toast.error("Failed to copy text");
     }
   };
 
   return {
+    // Selection state
+    selection,
+    setSelection,
     isTagDialogOpen,
     setIsTagDialogOpen,
+
+    // AI state
+    isExplainOpen,
+    setIsExplainOpen,
+    explainResult,
+
+    // Handlers
     handleAddTag,
     handleTagConfirm,
     handleCreateHighlight,
     handleAddToSummary,
     handleAddNote,
     handleCopy,
+    handleExplain,
   };
 }

@@ -12,3 +12,5 @@ export interface ServerErrorResponse {
   data: null;
   error: ErrorObject;
 }
+
+export type ApiResponse<T> = ServerSuccessResponse<T> | ServerErrorResponse;
