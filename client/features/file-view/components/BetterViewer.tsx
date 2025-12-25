@@ -22,7 +22,6 @@ import {
   PdfScaleValue,
 } from "react-pdf-highlighter-extended-plus";
 import { useRef } from "react";
-import { ExplanationBox } from "./Assistant/ExplanationBox";
 import { ExpandableTip } from "./highlight/ExpandableTip";
 import { TagSelectionDialog } from "./tags/TagSelectionDialog";
 import { HighlightContainer } from "./highlight/HighlightContainer";
@@ -271,14 +270,6 @@ export const BetterViewer = ({
         onClose={() => setIsSummarySidebarOpen(false)}
         summary={summary ?? null}
         onRemoveMainPoint={removeMainPoint}
-      />
-
-      {/* Explanation Box */}
-      <ExplanationBox
-        isOpen={isExplainOpen}
-        onClose={() => setIsExplainOpen(false)}
-        explainResult={explainResult}
-        onSaveToNotes={() => {}}
       />
     </div>
   );
