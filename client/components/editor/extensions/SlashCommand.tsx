@@ -17,6 +17,7 @@ import {
   Link,
   Table,
   LucideIcon,
+  Sparkles,
 } from "lucide-react";
 
 export interface SlashCommandItem {
@@ -177,6 +178,20 @@ export const slashCommandItems: SlashCommandItem[] = [
     },
     keywords: ["table", "grid", "rows", "columns"],
   },
+  {
+    title: "AI Callout",
+    description: "Insert an AI-generated callout box.",
+    icon: Sparkles,
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .setAICallout({ title: "AI Insight" })
+        .run();
+    },
+    keywords: ["ai", "callout", "sparkles", "insight"],
+  },
 ];
 
 interface SlashCommandListProps {
@@ -191,7 +206,7 @@ function SlashCommandList({
   selectedIndex,
 }: SlashCommandListProps) {
   return (
-    <div className="slash-command-menu z-[60] h-auto max-h-[330px] w-72 overflow-y-auto rounded-md border border-border bg-background/95 backdrop-blur-sm p-1 shadow-xl">
+    <div className="slash-command-menu z-60 h-auto max-h-[330px] w-72 overflow-y-auto rounded-md border border-border bg-background/95 backdrop-blur-sm p-1 shadow-xl">
       {items.length > 0 ? (
         items.map((item, index) => {
           const Icon = item.icon;

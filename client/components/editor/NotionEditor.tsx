@@ -31,6 +31,7 @@ import {
 import { KeyboardShortcuts } from "./extensions/KeyboardShortcuts";
 import { ImageUpload } from "./extensions/ImageUpload";
 import { EnhancedLink } from "./extensions/EnhancedLink";
+import { AICallout } from "./extensions/AICallout";
 import { LinkDialog } from "./LinkDialog";
 import { BubbleMenu } from "./BubbleMenu";
 import { TableBubbleMenu } from "./TableBubbleMenu";
@@ -328,6 +329,8 @@ function NotionEditorInner({
       TextAlign.configure({
         types: ["heading", "paragraph"],
       }),
+      // Add AI Callout for AI-generated content
+      AICallout,
     ],
     content: content?.content || "",
     editable,
