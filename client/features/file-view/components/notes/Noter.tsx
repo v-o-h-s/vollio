@@ -12,15 +12,16 @@ import { LoadingState } from "@/components/ui/loading";
 import { NoteCard } from "./NoteCard";
 import { NoteEditorTab } from "./NoteEditorTab";
 import { FileDetails } from "../types/file";
+import { useViewer } from "../../context/ViewerContext";
 
 const HOME_TAB_ID = "home";
 
-export default function Noter({ file }: { file: FileDetails }) {
+export default function Noter({ file }: { file: FileDetails }) {  
   // states
   const [tabs, setTabs] = useState<Tab[]>([
     { id: HOME_TAB_ID, label: "Home", isHome: true },
   ]);
-  const [activeTabId, setActiveTabId] = useState<string>(HOME_TAB_ID);
+  const { activeTabId, setActiveTabId } = useViewer();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
 

@@ -9,6 +9,8 @@ interface ViewerContextType {
   isNoterOpen: boolean;
   setIsNoterOpen: (isOpen: boolean) => void;
   toggleNoter: () => void;
+  activeTabId: string;
+  setActiveTabId: (id: string) => void;
 }
 
 const ViewerContext = createContext<ViewerContextType | undefined>(undefined);
@@ -16,7 +18,7 @@ const ViewerContext = createContext<ViewerContextType | undefined>(undefined);
 export function ViewerProvider({ children }: { children: ReactNode }) {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isNoterOpen, setIsNoterOpen] = useState(false);
-
+  const [activeTabId, setActiveTabId] = useState<string>("home");
   const toggleAssistant = () => setIsAssistantOpen((prev) => !prev);
   const toggleNoter = () => setIsNoterOpen((prev) => !prev);
 
@@ -29,6 +31,8 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         isNoterOpen,
         setIsNoterOpen,
         toggleNoter,
+        activeTabId,
+        setActiveTabId,
       }}
     >
       {children}

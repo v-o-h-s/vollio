@@ -129,6 +129,7 @@ export function ChatMessage({
                 )}
               </button>
               <button
+              onClick={()=>{}}
                 className="p-1 rounded-md hover:bg-muted text-muted-foreground transition-colors"
                 title="Add to notes"
               >
