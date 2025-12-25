@@ -1,5 +1,7 @@
+"use client";
+
 import { JSONContent } from "@tiptap/core";
-import { useState } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { useAssistantChatMutation } from "@/lib/store/apiSlice";
 import { AssistantChatMessage } from "@vollio/shared";
 
@@ -9,10 +11,24 @@ interface Message {
   timestamp: Date;
 }
 
-export function useAssistant() {
+interface AssistantContextType {
+  messages: Message[];
+  addUserMessage: (message: string) => Promise<void>;
+  handleDelete: (index: number) => void;
+  isAssistantLoading: boolean;
+}
+
+const AssistantContext = createContext<AssistantContextType | undefined>(
+  undefined
+);
+
+export function AssistantProvider({ children }: { children: ReactNode }) {
+  // Assistant State
   const [messages, setMessages] = useState<Message[]>([]);
-  const [assistantChat, { isLoading }] = useAssistantChatMutation();
-    // we use this function so like the request will have plain text in history 
+  const [assistantChat, { isLoading: isAssistantLoading }] =
+    useAssistantChatMutation();
+
+  // Assistant Logic
   const extractTextFromContent = (content: string | JSONContent): string => {
     if (typeof content === "string") return content;
     if (!content.content) return "";
@@ -94,10 +110,24 @@ export function useAssistant() {
     });
   };
 
-  return {
-    messages,
-    addUserMessage,
-    handleDelete,
-    isLoading,
-  };
+  return (
+    <AssistantContext.Provider
+      value={{
+        messages,
+        addUserMessage,
+        handleDelete,
+        isAssistantLoading,
+      }}
+    >
+      {children}
+    </AssistantContext.Provider>
+  );
+}
+
+export function useAssistant() {
+  const context = useContext(AssistantContext);
+  if (context === undefined) {
+    throw new Error("useAssistant must be used within a AssistantProvider");
+  }
+  return context;
 }

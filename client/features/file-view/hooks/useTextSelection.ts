@@ -9,6 +9,8 @@ import { PdfHighlighterUtils } from "react-pdf-highlighter-extended-plus";
 import { v4 as uuidv4 } from "uuid";
 import { FileDetails } from "@/features/file-view/types/document";
 import { toast } from "react-toastify";
+import { useViewer } from "../context/ViewerContext";
+import { useAssistant } from "../context/AssistantContext";
 
 interface useSelectionProps {
   highlighterUtilsRef: React.RefObject<PdfHighlighterUtils | null>;
@@ -21,13 +23,12 @@ export function useSelection({
   file,
   currentHighlightColor,
 }: useSelectionProps) {
+  const { setIsAssistantOpen } = useViewer();
+  const { addUserMessage } = useAssistant();
+  // ... existing code
   const [createHighlight] = useCreateHighlightMutation();
   const [selection, setSelection] = useState<any>(null);
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
-
-  // AI Explanation State
-  const [isExplainOpen, setIsExplainOpen] = useState(false);
-  const [triggerExplain, explainResult] = useLazyExplainTextQuery();
 
   // Helper to sync local selection with viewer selection
   const captureSelection = () => {
@@ -48,17 +49,9 @@ export function useSelection({
   const handleExplain = async () => {
     const activeSelection = captureSelection();
     if (!activeSelection || !activeSelection.content?.text) return;
-
-    setIsExplainOpen(true);
-
-    try {
-      await triggerExplain(activeSelection.content.text).unwrap();
-    } catch (err: any) {
-      console.error("AI Explanation Error:", err);
-      toast.error(
-        err?.data?.message || err?.message || "Failed to generate explanation"
-      );
-    }
+    setIsAssistantOpen(true);
+    if (!activeSelection.content.text.trim()) return;
+    addUserMessage(`Explain ${activeSelection.content.text}`);
   };
 
   const handleTagConfirm = async (selectedTags: string[]) => {
@@ -141,11 +134,6 @@ export function useSelection({
     setSelection,
     isTagDialogOpen,
     setIsTagDialogOpen,
-
-    // AI state
-    isExplainOpen,
-    setIsExplainOpen,
-    explainResult,
 
     // Handlers
     handleAddTag,

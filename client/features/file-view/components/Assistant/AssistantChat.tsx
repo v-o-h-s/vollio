@@ -5,13 +5,19 @@ import { Send, Sparkles } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useAssistant } from "../../hooks/useAssistant";
+import { useAssistant } from "../../context/AssistantContext";
+import { useViewer } from "../../context/ViewerContext";
 
 export function AssistantChat() {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { messages, addUserMessage, handleDelete, isLoading } = useAssistant();
+  const {
+    messages,
+    addUserMessage,
+    handleDelete,
+    isAssistantLoading: isLoading,
+  } = useAssistant();
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

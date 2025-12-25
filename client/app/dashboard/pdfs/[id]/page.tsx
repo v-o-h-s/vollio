@@ -33,11 +33,25 @@ const AssistantChat = dynamic(
   { ssr: false }
 );
 
-export default function PDFPage() {
+import {
+  ViewerProvider,
+  useViewer,
+} from "@/features/file-view/context/ViewerContext";
+
+function PDFPageContent() {
   const router = useRouter();
   const { id } = useParams();
-  const [isNoterOpen, setIsNoteOpen] = useState(false);
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+
+  // Use context instead of local state
+  const {
+    isAssistantOpen,
+    setIsAssistantOpen,
+    isNoterOpen,
+    setIsNoterOpen,
+    toggleAssistant,
+    toggleNoter,
+  } = useViewer();
+
   const [assistantWidth, setAssistantWidth] = useState(25);
   const [noterWidth, setNoterWidth] = useState(25);
   const [isAssistantDividerDragging, setIsAssistantDividerDragging] =
@@ -339,8 +353,8 @@ export default function PDFPage() {
       >
         <BetterViewer
           file={fileData}
-          onToggleNoter={() => setIsNoteOpen(!isNoterOpen)}
-          onToggleAssistant={() => setIsAssistantOpen(!isAssistantOpen)}
+          onToggleNoter={toggleNoter}
+          onToggleAssistant={toggleAssistant}
         />
       </div>
 
@@ -410,5 +424,17 @@ export default function PDFPage() {
         </>
       )}
     </div>
+  );
+}
+
+import { AssistantProvider } from "@/features/file-view/context/AssistantContext";
+
+export default function PDFPage() {
+  return (
+    <AssistantProvider>
+      <ViewerProvider>
+        <PDFPageContent />
+      </ViewerProvider>
+    </AssistantProvider>
   );
 }

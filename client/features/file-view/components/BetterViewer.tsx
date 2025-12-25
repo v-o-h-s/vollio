@@ -68,16 +68,13 @@ export const BetterViewer = ({
   const {
     isTagDialogOpen,
     setIsTagDialogOpen,
-    isExplainOpen,
-    setIsExplainOpen,
-    explainResult,
     handleTagConfirm,
     handleCreateHighlight,
     handleAddToSummary,
     handleAddNote,
     handleCopy,
-    handleExplain,
     handleAddTag,
+    handleExplain,
   } = useSelection({
     highlighterUtilsRef,
     file,
