@@ -22,7 +22,7 @@ import {
   PdfScaleValue,
 } from "react-pdf-highlighter-extended-plus";
 import { useRef } from "react";
-import { ExplanationBox } from "./ai/ExplanationBox";
+import { ExplanationBox } from "./Assistant/ExplanationBox";
 import { ExpandableTip } from "./highlight/ExpandableTip";
 import { TagSelectionDialog } from "./tags/TagSelectionDialog";
 import { HighlightContainer } from "./highlight/HighlightContainer";
