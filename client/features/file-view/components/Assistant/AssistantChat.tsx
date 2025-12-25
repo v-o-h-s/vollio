@@ -5,19 +5,15 @@ import { Send, Sparkles } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-  timestamp: Date;
-}
+import type { JSONContent } from "@tiptap/core";
+import { useAssistant } from "../../hooks/useAssistant";
 
 export function AssistantChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { messages, addUserMessage, handleDelete } = useAssistant();
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -31,27 +27,9 @@ export function AssistantChat() {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      role: "user",
-      content: input,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    addUserMessage(input);
     setInput("");
-    setIsLoading(true);
-
-    // Simulate AI response (replace with actual API call later)
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: getMockResponse(input),
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1000 + Math.random() * 1000);
+    
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -62,12 +40,12 @@ export function AssistantChat() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background w-full">
       {/* Header */}
-      <div className="flex-shrink-0 border-b border-border bg-card px-4 py-3">
+      <div className="shrink-0 border-b border-border bg-card/20 px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 rounded-full  flex items-center justify-center">
+            <Sparkles className="w-4 h-4 dark:text-white" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground">
@@ -85,7 +63,7 @@ export function AssistantChat() {
         {messages.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-center space-y-2 max-w-sm px-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-purple-500/10 to-purple-600/10 flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto rounded-full bg-linear-to-br from-purple-500/10 to-purple-600/10 flex items-center justify-center">
                 <Sparkles className="w-8 h-8 text-purple-500" />
               </div>
               <h3 className="text-lg font-semibold text-foreground">
@@ -105,11 +83,12 @@ export function AssistantChat() {
                 role={message.role}
                 content={message.content}
                 timestamp={message.timestamp}
+                onDelete={() => handleDelete(index)}
               />
             ))}
             {isLoading && (
               <div className="flex gap-3 p-4 animate-in fade-in duration-300">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
                   <Sparkles className="w-4 h-4 text-white animate-pulse" />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -138,7 +117,7 @@ export function AssistantChat() {
       </div>
 
       {/* Input Area */}
-      <div className="flex-shrink-0 border-t border-border bg-card p-4">
+      <div className="shrink-0 border-t border-border bg-background p-4">
         <div className="flex gap-2">
           <textarea
             ref={inputRef}
@@ -159,7 +138,7 @@ export function AssistantChat() {
           <Button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="h-11 w-11 rounded-xl flex-shrink-0 p-0"
+            className="h-11 w-11 rounded-xl shrink-0 p-0"
             title="Send message (Enter)"
           >
             <Send className="w-4 h-4" />
@@ -182,7 +161,7 @@ export function AssistantChat() {
 }
 
 // Mock AI responses (replace with actual API integration later)
-function getMockResponse(userInput: string): string {
+function getMockResponse(userInput: string): JSONContent {
   const responses = [
     "I'd be happy to help you with that! Based on the document you're viewing, I can provide detailed insights and explanations.",
     "That's a great question! Let me analyze the content and provide you with a comprehensive answer.",
@@ -191,5 +170,63 @@ function getMockResponse(userInput: string): string {
     "Let me break that down for you. The key points from the document suggest several important considerations you should be aware of.",
   ];
 
-  return responses[Math.floor(Math.random() * responses.length)];
+  const randomText = responses[Math.floor(Math.random() * responses.length)];
+
+  return {
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: randomText,
+          },
+        ],
+      },
+      {
+        type: "heading",
+        attrs: { level: 3 },
+        content: [
+          {
+            type: "text",
+            text: "Summary of Insights",
+          },
+        ],
+      },
+      {
+        type: "bulletList",
+        content: [
+          {
+            type: "listItem",
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "Detailed analysis of the current section content.",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "listItem",
+            content: [
+              {
+                type: "paragraph",
+                content: [
+                  {
+                    type: "text",
+                    text: "Context-aware suggestions based on your document.",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
 }

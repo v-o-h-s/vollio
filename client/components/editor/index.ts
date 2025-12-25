@@ -7,8 +7,6 @@ export { EditorErrorBoundary } from './EditorErrorBoundary';
 export { FloatingToolbar } from './FloatingToolbar';
 export { PDFAnnotationToolbar } from './PDFAnnotationToolbar';
 export { EditorToolbar } from './EditorToolbar';
-export { BubbleMenu } from './BubbleMenu';
-export { TableBubbleMenu } from './TableBubbleMenu';
 
 // Enhanced editor variants
 export { RobustNotionEditor } from './RobustNotionEditor';

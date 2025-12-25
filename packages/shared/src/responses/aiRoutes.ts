@@ -11,3 +11,14 @@ export interface ExplainTextResponse {
   data: ExplainTextResponseData | null;
   error: any;
 }
+
+export interface AssistantResponseData {
+  content: JSONContent;
+}
+
+export interface AssistantResponse {
+  success: boolean;
+  message: string;
+  data: AssistantResponseData | null;
+  error: any;
+}

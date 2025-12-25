@@ -1,11 +1,34 @@
 import { JSONSchemaType } from "ajv";
-import { ExplainTextDTO } from "@vollio/shared";
+import { ExplainTextDTO, AssistantDTO } from "@vollio/shared";
 
 export const ExplainTextDTOSchema: JSONSchemaType<ExplainTextDTO> = {
   type: "object",
   properties: {
-    text: { type: "string", minLength: 1, maxLength: 10000 }, // ~1000-2000 words limit, 1000 words is ~5000-7000 chars. 10000 is safe.
+    text: { type: "string", minLength: 1, maxLength: 10000 },
   },
   required: ["text"],
+  additionalProperties: false,
+};
+
+export const AssistantDTOSchema: JSONSchemaType<AssistantDTO> = {
+  type: "object",
+  properties: {
+    message: { type: "string", minLength: 1 },
+    fileId: { type: "string", format: "uuid" },
+    history: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          role: { type: "string", enum: ["user", "assistant"] },
+          content: { type: "string" },
+        },
+        required: ["role", "content"],
+        additionalProperties: false,
+      },
+      nullable: true,
+    },
+  },
+  required: ["message", "fileId"],
   additionalProperties: false,
 };

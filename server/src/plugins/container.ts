@@ -81,6 +81,7 @@ import { DeleteSummaryUseCase } from "../application/use-cases/summaries/DeleteS
 import { SummaryRepository } from "../infrastructure/repositories/SummaryRepository";
 import { GetSummariesByDocumentIdUseCase } from "../application/use-cases/summaries/GetSummariesByDocumentIdUseCase";
 import { ExplainTextUseCase } from "../application/use-cases/ai/ExplainTextUseCase";
+import { AssistantChatUseCase } from "../application/use-cases/ai/AssistantChatUseCase";
 import { AiController } from "../interface/controllers/ai.controller";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
@@ -479,6 +480,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   fastify.diContainer.register({
     explainTextUseCase: asClass(ExplainTextUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    assistantChatUseCase: asClass(AssistantChatUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

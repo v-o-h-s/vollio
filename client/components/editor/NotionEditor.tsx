@@ -33,8 +33,6 @@ import { ImageUpload } from "./extensions/ImageUpload";
 import { EnhancedLink } from "./extensions/EnhancedLink";
 import { AICallout } from "./extensions/AICallout";
 import { LinkDialog } from "./LinkDialog";
-import { BubbleMenu } from "./BubbleMenu";
-import { TableBubbleMenu } from "./TableBubbleMenu";
 import { FloatingToolbar } from "./FloatingToolbar";
 import { cn } from "@/lib/utils";
 import { AutoSaveStatus } from "./AutoSaveStatus";
@@ -494,10 +492,8 @@ function NotionEditorInner({
       )}
 
       {/* Content Section */}
-      {editor && (
+      {editor && editable && (
         <>
-          <BubbleMenu editor={editor} />
-          <TableBubbleMenu editor={editor} />
           <FloatingToolbar editor={editor} />
         </>
       )}

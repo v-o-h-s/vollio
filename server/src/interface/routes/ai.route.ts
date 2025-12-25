@@ -4,8 +4,11 @@ import {
   FastifyPluginOptions,
 } from "fastify";
 import fp from "fastify-plugin";
-import { ExplainTextDTO } from "@vollio/shared";
-import { ExplainTextDTOSchema } from "../../shared/validation/aiSchemas";
+import { ExplainTextDTO, AssistantDTO } from "@vollio/shared";
+import {
+  ExplainTextDTOSchema,
+  AssistantDTOSchema,
+} from "../../shared/validation/aiSchemas";
 import { validateBody } from "../../shared/validation/validator";
 
 const aiRoutesHandler: FastifyPluginAsync = async (
@@ -20,6 +23,17 @@ const aiRoutesHandler: FastifyPluginAsync = async (
     async (request, reply) => {
       const aiController = request.diScope.resolve("aiController");
       return aiController.explainText(request, reply);
+    }
+  );
+
+  fastify.post<{ Body: AssistantDTO }>(
+    `${options.prefix}/assistant`,
+    {
+      preHandler: validateBody(AssistantDTOSchema),
+    },
+    async (request, reply) => {
+      const aiController = request.diScope.resolve("aiController");
+      return aiController.assistantChat(request, reply);
     }
   );
 };
