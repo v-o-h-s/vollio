@@ -439,7 +439,7 @@ export default function FilesDirectoryViewer() {
                 )}
               </div>
               <p
-                className="text-sm font-medium text-center truncate w-full mt-2"
+                className="text-sm font-medium text-center line-clamp-2 wrap-break-word w-full mt-2"
                 title={activeItem.name}
               >
                 {activeItem.name}

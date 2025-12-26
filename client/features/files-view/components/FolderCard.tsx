@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Folder, MoreVertical, Edit, Trash2, MoveRight, Loader2 } from "lucide-react";
+import {
+  Folder,
+  MoreVertical,
+  Edit,
+  Trash2,
+  MoveRight,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -45,14 +52,20 @@ export function FolderCard({
   return (
     <>
       <div
-        className={cn(`relative group flex flex-col justify-center h-[140px] w-[140px] cursor-pointer transition-all hover:shadow-md hover:bg-muted/5 rounded-2xl ${isSelected ? "bg-blue-50 dark:bg-blue-950 border-blue-500 " : ""}`,
-          )}
+        className={cn(
+          `relative group flex flex-col justify-center h-[140px] w-[140px] cursor-pointer transition-all hover:shadow-md hover:bg-muted/5 rounded-2xl ${
+            isSelected ? "bg-blue-50 dark:bg-blue-950 border-blue-500 " : ""
+          }`
+        )}
         onClick={onSelect}
         onDoubleClick={onOpen}
       >
         <div className="flex flex-col items-center gap-4">
           <Folder className="h-12 w-12 group-hover:text-primary transition-colors" />
-          <p className="text-sm text-center font-bold truncate w-full" title={name}>
+          <p
+            className="text-sm text-center font-bold px-2 line-clamp-2 wrap-break-word w-full"
+            title={name}
+          >
             {name}
           </p>
         </div>

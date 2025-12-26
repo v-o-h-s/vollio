@@ -509,23 +509,6 @@
   color: inherit;
 }
 
-/* Enhanced scrollbar for modal editor */
-.notion-editor-modal .ProseMirror::-webkit-scrollbar {
-  width: 8px;
-}
-
-.notion-editor-modal .ProseMirror::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.notion-editor-modal .ProseMirror::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
-  border-radius: 4px;
-}
-
-.notion-editor-modal .ProseMirror::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
-}
 
 /* Dark mode enhancements for modal */
 .dark .notion-editor-modal .ProseMirror {
