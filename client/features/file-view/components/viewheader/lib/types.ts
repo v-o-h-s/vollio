@@ -1,8 +1,6 @@
 import { FileDetails } from "@/features/file-view/types/document";
 
 export interface PDFViewerHeaderProps {
-  /** Function to toggle noter */
-  onToggleNoter?: () => void;
   /** PDF document being viewed */
   file: FileDetails;
   /** Whether the header is visible */
@@ -24,9 +22,7 @@ export interface PDFViewerHeaderProps {
   /** Whether summary sidebar is open */
   isSummaryOpen?: boolean;
   /** Function to toggle AI assistant */
-  onToggleAssistant?: () => void;
-  /** Whether AI assistant is open */
-  isAssistantOpen?: boolean;
+
   /** Width of the viewer container (for responsive resizing) */
   viewerWidth?: string;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Bot, SquarePen } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,7 @@ export function AssistantChat() {
     messages,
     addUserMessage,
     handleDelete,
+    resetMessages,
     isAssistantLoading: isLoading,
   } = useAssistant();
 
@@ -28,6 +29,14 @@ export function AssistantChat() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+      inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
+    }
+  }, [input]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -45,10 +54,10 @@ export function AssistantChat() {
   return (
     <div className="h-full flex flex-col bg-background w-full">
       {/* Header */}
-      <div className="shrink-0 border-b border-border bg-card/20 px-4 py-3">
+      <div className="shrink-0 border-b border-border bg-card/20 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full  flex items-center justify-center">
-            <Sparkles className="w-4 h-4 dark:text-white" />
+            <Bot className="w-4 h-4 dark:text-white" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground">
@@ -59,6 +68,17 @@ export function AssistantChat() {
             </p>
           </div>
         </div>
+        {messages.length > 0 && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={resetMessages}
+            className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors"
+            title="New Chat"
+          >
+            <SquarePen className="w-4 h-4" />
+          </Button>
+        )}
       </div>
 
       {/* Messages Area */}
@@ -67,7 +87,7 @@ export function AssistantChat() {
           <div className="h-full flex items-center justify-center">
             <div className="text-center space-y-2 max-w-sm px-4">
               <div className="w-16 h-16 mx-auto rounded-full bg-linear-to-br from-purple-500/10 to-purple-600/10 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-purple-500" />
+                <Bot className="w-8 h-8 text-purple-500" />
               </div>
               <h3 className="text-lg font-semibold text-foreground">
                 Start a conversation
@@ -92,7 +112,7 @@ export function AssistantChat() {
             {isLoading && (
               <div className="flex gap-3 p-4 animate-in fade-in duration-300">
                 <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4 h-4 text-white animate-pulse" />
+                  <Bot className="w-4 h-4 text-white animate-pulse" />
                 </div>
                 <div className="flex flex-col gap-1">
                   <div className="rounded-2xl rounded-tl-sm bg-muted px-4 py-2.5">

@@ -4,7 +4,7 @@ import {
   StickyNote,
   ListChecks,
   Copy,
-  Sparkles,
+  Bot,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -109,7 +109,7 @@ export const ExpandableTip = ({
             size="sm"
             className="group h-8 px-2 gap-2 font-normal hover:bg-accent cursor-pointer transition-all duration-200 overflow-hidden"
           >
-            <Sparkles className="h-4 w-4 shrink-0" />
+            <Bot className="h-4 w-4 shrink-0" />
             <span className="text-sm max-w-0 group-hover:max-w-[200px] overflow-hidden whitespace-nowrap transition-all duration-200">
               explain
             </span>

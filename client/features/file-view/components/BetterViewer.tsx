@@ -13,7 +13,7 @@ if (typeof window === "undefined") {
   };
 }
 import "@/app/styles/components/betterViewer.css";
-import { ChevronUp } from "lucide-react";
+import { ChevronUp, MessageSquare, FileText } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import {
   PdfHighlighter,
@@ -34,15 +34,20 @@ import { MyHighlight } from "@/lib/types/highlight";
 import { ViewerHeader } from "./viewheader";
 import { useSummaryActions } from "@/features/file-view/hooks/useSummaryActions";
 import { SummarySidebar } from "./summary/SummarySidebar";
+import { ViewerFloatingActions } from "./ViewerFloatingActions";
 import { FileDetails } from "../types/document";
 export const BetterViewer = ({
   file,
   onToggleNoter,
   onToggleAssistant,
+  isNoterOpen,
+  isAssistantOpen,
 }: {
   file: FileDetails;
   onToggleNoter?: () => void;
   onToggleAssistant?: () => void;
+  isNoterOpen?: boolean;
+  isAssistantOpen?: boolean;
 }) => {
   // Fetch highlights for this PDF from API
   const { data: apiHighlights, isLoading: isLoadingHighlights } =
@@ -54,7 +59,6 @@ export const BetterViewer = ({
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isTagSidebarOpen, setIsTagSidebarOpen] = useState(false);
   const [isSummarySidebarOpen, setIsSummarySidebarOpen] = useState(false);
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isExplanationBoxOpen, setIsExplanationBoxOpen] = useState(false);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const [zoomValue, setZoomValue] = useState<PdfScaleValue>("page-width");
@@ -181,13 +185,10 @@ export const BetterViewer = ({
           pdfViewerRef={pdfViewerAdapter}
           currentHighlightColor={currentHighlightColor}
           onHighlightColorChange={setCurrentHighlightColor}
-          onToggleNoter={onToggleNoter}
           onToggleTags={() => setIsTagSidebarOpen(!isTagSidebarOpen)}
           isTagsOpen={isTagSidebarOpen}
           onToggleSummary={() => setIsSummarySidebarOpen(!isSummarySidebarOpen)}
           isSummaryOpen={isSummarySidebarOpen}
-          onToggleAssistant={onToggleAssistant}
-          isAssistantOpen={isAssistantOpen}
         />
       ) : (
         <button
@@ -261,12 +262,18 @@ export const BetterViewer = ({
         onScrollToHighlight={handleScrollToHighlight}
       />
 
-      {/* Summary Sidebar */}
       <SummarySidebar
         isOpen={isSummarySidebarOpen}
         onClose={() => setIsSummarySidebarOpen(false)}
         summary={summary ?? null}
         onRemoveMainPoint={removeMainPoint}
+      />
+
+      <ViewerFloatingActions
+        onToggleNoter={onToggleNoter}
+        onToggleAssistant={onToggleAssistant}
+        isNoterOpen={isNoterOpen}
+        isAssistantOpen={isAssistantOpen}
       />
     </div>
   );

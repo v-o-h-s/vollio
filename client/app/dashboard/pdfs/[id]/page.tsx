@@ -355,6 +355,8 @@ function PDFPageContent() {
           file={fileData}
           onToggleNoter={toggleNoter}
           onToggleAssistant={toggleAssistant}
+          isNoterOpen={isNoterOpen}
+          isAssistantOpen={isAssistantOpen}
         />
       </div>
 

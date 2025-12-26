@@ -27,7 +27,7 @@ export function ViewerHeader({
   file,
   isHeaderVisible,
   setIsHeaderVisible,
-  onToggleNoter,
+
   pdfViewerRef,
   currentHighlightColor = "#FFEB3B",
   onHighlightColorChange,
@@ -35,8 +35,6 @@ export function ViewerHeader({
   isTagsOpen,
   onToggleSummary,
   isSummaryOpen,
-  onToggleAssistant,
-  isAssistantOpen,
   viewerWidth = "100%",
 }: PDFViewerHeaderProps) {
   const router = useRouter();
@@ -180,27 +178,6 @@ export function ViewerHeader({
                       <span>Summary</span>
                     </button>
 
-                    {/* Assistant Toggle */}
-                    <button
-                      onClick={onToggleAssistant}
-                      className={cn(
-                        "w-full text-left px-3 py-2 rounded text-sm font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer flex items-center gap-2",
-                        isAssistantOpen && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <MessageSquare size={16} />
-                      <span>Assistant</span>
-                    </button>
-
-                    {/* Notes Toggle */}
-                    <button
-                      onClick={onToggleNoter}
-                      className="w-full text-left px-3 py-2 rounded text-sm font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer flex items-center gap-2"
-                    >
-                      <FileText size={16} />
-                      <span>Notes</span>
-                    </button>
-
                     <DropdownMenuSeparator />
 
                     {/* Hide Header */}
@@ -285,33 +262,6 @@ export function ViewerHeader({
                 >
                   <ScrollText size={14} />
                   <span className="text-xs ml-1">Summary</span>
-                </Button>
-
-                {/* Assistant Toggle */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onToggleAssistant}
-                  className={cn(
-                    "cursor-pointer h-8 px-2 flex-shrink-0",
-                    isAssistantOpen && "bg-accent text-accent-foreground"
-                  )}
-                  title="AI Assistant"
-                >
-                  <MessageSquare size={14} />
-                  <span className="text-xs ml-1">Assistant</span>
-                </Button>
-
-                {/* Notes Toggle */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onToggleNoter}
-                  className="cursor-pointer h-8 px-2 flex-shrink-0"
-                  title="Notes"
-                >
-                  <FileText size={14} />
-                  <span className="text-xs ml-1">Notes</span>
                 </Button>
 
                 {/* Hide Header */}

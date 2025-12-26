@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import { FileText, Trash2 } from "lucide-react";
+import { FileText, Trash2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface NoteCardProps {
@@ -30,6 +30,11 @@ export const NoteCard = ({
     }
   };
 
+  const handleOpenInNewTab = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.open(`/dashboard/notes/${note.id}`, "_blank");
+  };
+
   const handleClick = () => {
     if (!isDeleting) {
       onClick(note.id);
@@ -46,7 +51,7 @@ export const NoteCard = ({
       }`}
     >
       <div
-        className={`p-2 rounded-md bg-primary/10 text-primary transition-colors flex-shrink-0 ${
+        className={`p-2 rounded-md bg-primary/10 text-primary transition-colors shrink-0 ${
           !isDeleting && "group-hover:bg-primary/20"
         }`}
       >
@@ -64,17 +69,32 @@ export const NoteCard = ({
           {isDeleting ? "Deleting..." : `Updated ${formattedDate}`}
         </p>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        disabled={isDeleting}
-        className={`cursor-pointer transition-opacity flex-shrink-0 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 ${
-          isDeleting ? "opacity-50" : "opacity-0 group-hover:opacity-100"
-        }`}
-        onClick={handleDelete}
-      >
-        <Trash2 className="w-4 h-4" />
-      </Button>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          disabled={isDeleting}
+          className={`cursor-pointer transition-opacity shrink-0 h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 ${
+            isDeleting ? "opacity-50" : "opacity-0 group-hover:opacity-100"
+          }`}
+          onClick={handleOpenInNewTab}
+          title="Open in new window"
+        >
+          <ExternalLink className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          disabled={isDeleting}
+          className={`cursor-pointer transition-opacity shrink-0 h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 ${
+            isDeleting ? "opacity-50" : "opacity-0 group-hover:opacity-100"
+          }`}
+          onClick={handleDelete}
+          title="Delete note"
+        >
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
     </div>
   );
 };

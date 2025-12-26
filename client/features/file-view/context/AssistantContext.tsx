@@ -3,7 +3,6 @@
  * Use case: Triggered when a user selects "Explain" from the expandable toolbar.
  */
 
-
 "use client";
 
 import { JSONContent } from "@tiptap/core";
@@ -21,6 +20,7 @@ interface AssistantContextType {
   messages: Message[];
   addUserMessage: (message: string) => Promise<void>;
   handleDelete: (index: number) => void;
+  resetMessages: () => void;
   isAssistantLoading: boolean;
 }
 
@@ -116,12 +116,17 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const resetMessages = () => {
+    setMessages([]);
+  };
+
   return (
     <AssistantContext.Provider
       value={{
         messages,
         addUserMessage,
         handleDelete,
+        resetMessages,
         isAssistantLoading,
       }}
     >
