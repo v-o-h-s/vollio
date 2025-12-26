@@ -49,7 +49,6 @@ export function NoteEditorTab({
     <div className="p-8 h-full flex flex-col">
       <div className="flex-1 h-full">
         <NotionEditor
-          
           noteId={noteData.id}
           content={{
             title: noteData.title,
@@ -58,6 +57,7 @@ export function NoteEditorTab({
           fileId={fileId}
           autoSave={isActive} // Only auto-save when this tab is active
           autoSaveDelay={500}
+          lastUpdatedAt={noteData.updatedAt}
         />
       </div>
     </div>

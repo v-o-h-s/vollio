@@ -64,6 +64,7 @@ function NotionEditorInner({
   onAutoSaveStatusChange,
   onNoteCreated,
   fileId,
+  lastUpdatedAt,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState(content?.title || "");
@@ -405,18 +406,48 @@ function NotionEditorInner({
     content?.title,
     autoSave,
   ]);
+  // Track the last update we processed to avoid loops
+  const lastProcessedUpdateRef = useRef<string | undefined>(undefined);
+
   // Handle content updates when prop changes (only on initial load or when switching notes)
   useEffect(() => {
     if (editor && content?.content !== undefined) {
-      // Only set content on initial load or when switching to a different note
-      // This prevents cache updates from overwriting current edits during auto-save
-      if (!hasContentInitialized.current) {
-        console.log("🔄 Initial content load", { noteId: currentNoteId });
+      // Allow update if:
+      // 1. Not initialized yet
+      // 2. OR lastUpdatedAt prop has changed (and is defined), meaning external update
+
+      // Logic explanation:
+      // 1. When typing: The `lastUpdatedAt` prop from the server hasn't changed yet, so the editor remains "locked" to local state to prevent overwriting user input.
+      // 2. When external update (e.g. AI Assistant): The `lastUpdatedAt` prop changes, signaling a new version. We "unlock" and synchronize the editor with the new content.
+      // the unlockin and locking is about props content (use it or not) (istg this shit is goated)
+      const shouldUpdate =
+        !hasContentInitialized.current ||
+        (lastUpdatedAt && lastUpdatedAt !== lastProcessedUpdateRef.current);
+
+      if (shouldUpdate) {
+        console.log("🔄 Updating content from props", {
+          noteId: currentNoteId,
+          isInitial: !hasContentInitialized.current,
+          lastUpdatedAt,
+        });
+
+        // Save current selection to try restoring it after update
+        const previousSelection = editor.state.selection;
+
         editor.commands.setContent(content.content, { emitUpdate: false });
+
+        // Restore selection if document didn't change too much, otherwise cursor jumps to start/end
+        // Ideally we'd map the selection, but for now specific "append" operations might be jarring
+        // if user is typing. However, this mostly happens when user clicks "Add to note",
+        // so they are probably not typing in this exact millisecond.
+
         hasContentInitialized.current = true;
+        if (lastUpdatedAt) {
+          lastProcessedUpdateRef.current = lastUpdatedAt;
+        }
       }
     }
-  }, [editor, content?.content, currentNoteId]);
+  }, [editor, content?.content, currentNoteId, lastUpdatedAt]);
 
   // Reset content initialization when switching notes
   useEffect(() => {

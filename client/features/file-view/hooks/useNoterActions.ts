@@ -1,6 +1,6 @@
 import { useGetNotesQuery } from "@/lib/store/apiSlice";
 import { FileDetails } from "../types/document";
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import {
   useDeleteNoteMutation,
   useCreateNoteMutation,

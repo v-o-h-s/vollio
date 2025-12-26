@@ -127,24 +127,33 @@
 
 .ProseMirror code {
   background-color: hsl(var(--muted));
-  padding: 0.125rem 0.375rem;
+  padding: 0.2rem 0.3rem;
   border-radius: 0.25rem;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas,
-    "Liberation Mono", Menlo, monospace;
-  font-size: 0.875em;
-  color: hsl(var(--foreground));
-  border: 1px solid hsl(var(--border));
+  font-family:
+    "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.85em;
+  color: hsl(var(--primary));
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  
 }
 
 .ProseMirror pre {
-  background-color: hsl(var(--muted));
+  background: hsl(var(--muted));
   color: hsl(var(--foreground));
-  padding: 1rem;
+  font-family:
+    "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+  padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   overflow-x: auto;
   margin: 1.5rem 0;
   border: 1px solid hsl(var(--border));
   position: relative;
+  line-height: 1.7;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  border: 1px solid #1b1f35;
 }
 
 .ProseMirror pre code {
@@ -153,20 +162,20 @@
   color: inherit;
   border: none;
   font-size: 0.875rem;
-  line-height: 1.5;
+  font-family: inherit;
 }
 
-/* Syntax highlighting for code blocks */
+/* Modern Syntax Highlighting */
 .ProseMirror .hljs-comment,
 .ProseMirror .hljs-quote {
-  color: hsl(var(--muted-foreground));
+  color: #94a3b8; /* Slate-400 - Subtle comments */
   font-style: italic;
 }
 
 .ProseMirror .hljs-keyword,
 .ProseMirror .hljs-selector-tag,
 .ProseMirror .hljs-subst {
-  color: hsl(var(--primary));
+  color: #a855f7; /* Purple-500 - Vibrant keywords */
   font-weight: 600;
 }
 
@@ -175,59 +184,61 @@
 .ProseMirror .hljs-variable,
 .ProseMirror .hljs-template-variable,
 .ProseMirror .hljs-tag .hljs-attr {
-  color: #e11d48;
+  color: #ef4444; /* Red-500 - Clear numbers/vars */
 }
 
 .ProseMirror .hljs-string,
 .ProseMirror .hljs-doctag {
-  color: #059669;
+  color: #10b981; /* Emerald-500 - Fresh strings */
 }
 
 .ProseMirror .hljs-title,
 .ProseMirror .hljs-section,
 .ProseMirror .hljs-selector-id {
-  color: #dc2626;
+  color: #3b82f6; /* Blue-500 - Strong titles */
   font-weight: 600;
 }
 
 .ProseMirror .hljs-type,
 .ProseMirror .hljs-class .hljs-title {
-  color: #7c3aed;
+  color: #f59e0b; /* Amber-500 - Distinct types */
   font-weight: 600;
 }
 
 .ProseMirror .hljs-tag,
 .ProseMirror .hljs-name,
 .ProseMirror .hljs-attribute {
-  color: #0ea5e9;
+  color: #3b82f6; /* Blue-500 - Consistent tags */
   font-weight: normal;
 }
 
 .ProseMirror .hljs-regexp,
 .ProseMirror .hljs-link {
-  color: #0891b2;
+  color: #ec4899; /* Pink-500 - Regex pops */
 }
 
 .ProseMirror .hljs-symbol,
 .ProseMirror .hljs-bullet {
-  color: #8b5cf6;
+  color: #8b5cf6; /* Violet-500 - Bullets match keywords usually */
 }
 
 .ProseMirror .hljs-built_in,
 .ProseMirror .hljs-builtin-name {
-  color: #0ea5e9;
+  color: #06b6d4; /* Cyan-500 - Built-ins */
 }
 
 .ProseMirror .hljs-meta {
-  color: hsl(var(--muted-foreground));
+  color: #64748b; /* Slate-500 - Meta info */
 }
 
 .ProseMirror .hljs-deletion {
-  background: #fecaca;
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .ProseMirror .hljs-addition {
-  background: #bbf7d0;
+  background: #dcfce7;
+  color: #166534;
 }
 
 .ProseMirror .hljs-emphasis {
@@ -235,8 +246,11 @@
 }
 
 .ProseMirror .hljs-strong {
-  font-weight: 600;
+  font-weight: 700;
 }
+
+
+
 
 /* Focus styles */
 .ProseMirror:focus {
