@@ -18,8 +18,8 @@ export class GoogleClassroomService implements IGoogleClassroomService {
 
   private scopes = [
     "https://www.googleapis.com/auth/classroom.courses.readonly", // list courses
-    "https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly", // list posted files
-    "https://www.googleapis.com/auth/drive.readonly", // read file content or metadata
+    "https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly", // list posted documents
+    "https://www.googleapis.com/auth/drive.readonly", // read document content or metadata
     "https://www.googleapis.com/auth/classroom.announcements.readonly",
   ];
 

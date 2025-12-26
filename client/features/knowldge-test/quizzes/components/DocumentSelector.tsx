@@ -36,7 +36,7 @@ interface DocumentSelectorProps {
 const mockDocuments: Document[] = [
   {
     id: "1",
-    title: "JavaScript Fundamentals Guide.pdf",
+    title: "JavaScript Fundamentals Guide.document",
     pageCount: 45,
     uploadDate: "2024-01-15",
     size: "2.3 MB",
@@ -45,7 +45,7 @@ const mockDocuments: Document[] = [
   },
   {
     id: "2",
-    title: "React Advanced Patterns.pdf",
+    title: "React Advanced Patterns.document",
     pageCount: 78,
     uploadDate: "2024-01-12",
     size: "4.1 MB",
@@ -54,7 +54,7 @@ const mockDocuments: Document[] = [
   },
   {
     id: "3",
-    title: "Linear Algebra Textbook.pdf",
+    title: "Linear Algebra Textbook.document",
     pageCount: 234,
     uploadDate: "2024-01-10",
     size: "12.5 MB",
@@ -63,7 +63,7 @@ const mockDocuments: Document[] = [
   },
   {
     id: "4",
-    title: "World History Overview.pdf",
+    title: "World History Overview.document",
     pageCount: 156,
     uploadDate: "2024-01-08",
     size: "8.7 MB",
@@ -72,7 +72,7 @@ const mockDocuments: Document[] = [
   },
   {
     id: "5",
-    title: "Organic Chemistry Reactions.pdf",
+    title: "Organic Chemistry Reactions.document",
     pageCount: 89,
     uploadDate: "2024-01-05",
     size: "5.2 MB",
@@ -243,13 +243,13 @@ export function DocumentSelector({
           <input
             id="document-upload"
             type="file"
-            accept=".pdf"
+            accept=".document"
             className="hidden"
             onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                // Handle file upload
-                console.log("File selected:", file.name);
+              const document = e.target.files?.[0];
+              if (document) {
+                // Handle document upload
+                console.log("Document selected:", document.name);
               }
             }}
           />

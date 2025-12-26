@@ -22,7 +22,7 @@ import {
   Star,
   Target,
   Bookmark,
-  FileBarChart,
+  DocumentBarChart,
   Sparkles,
   History,
   Download,
@@ -72,15 +72,15 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
     const basePath = pathname.split("/").slice(0, 3).join("/"); // /dashboard/[page]
 
     switch (basePath) {
-      case "/dashboard/pdfs":
+      case "/dashboard/documents":
         return [
           {
-            id: "upload-pdf",
-            label: "Upload PDF",
+            id: "upload-document",
+            label: "Upload Document",
             icon: Upload,
             onClick: () => {
               // Trigger upload action - could emit event or call a function
-              const uploadEvent = new CustomEvent("trigger-pdf-upload");
+              const uploadEvent = new CustomEvent("trigger-document-upload");
               window.dispatchEvent(uploadEvent);
             },
             variant: "primary",
@@ -96,21 +96,21 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
             },
           },
           {
-            id: "search-files",
-            label: "Search Files",
+            id: "search-documents",
+            label: "Search Documents",
             icon: Search,
             onClick: () => {
-              const searchEvent = new CustomEvent("trigger-file-search");
+              const searchEvent = new CustomEvent("trigger-document-search");
               window.dispatchEvent(searchEvent);
             },
             shortcut: "Ctrl+F",
           },
           {
-            id: "filter-files",
+            id: "filter-documents",
             label: "Filter & Sort",
             icon: Filter,
             onClick: () => {
-              const filterEvent = new CustomEvent("trigger-file-filter");
+              const filterEvent = new CustomEvent("trigger-document-filter");
               window.dispatchEvent(filterEvent);
             },
           },
@@ -124,7 +124,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
             },
           },
           {
-            id: "refresh-files",
+            id: "refresh-documents",
             label: "Refresh",
             icon: RefreshCw,
             onClick: () => {
@@ -332,7 +332,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
             id: "quick-upload",
             label: "Quick Upload",
             icon: Upload,
-            onClick: () => router.push("/dashboard/pdfs"),
+            onClick: () => router.push("/dashboard/documents"),
             variant: "primary",
           },
           {
@@ -348,10 +348,10 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
             onClick: () => router.push("/dashboard/quizzes/create"),
           },
           {
-            id: "recent-files",
-            label: "Recent Files",
+            id: "recent-documents",
+            label: "Recent Documents",
             icon: FileText,
-            onClick: () => router.push("/dashboard/pdfs"),
+            onClick: () => router.push("/dashboard/documents"),
           },
           {
             id: "settings",
@@ -378,8 +378,8 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
   const getPageTitle = () => {
     const basePath = pathname.split("/").slice(0, 3).join("/");
     switch (basePath) {
-      case "/dashboard/pdfs":
-        return "Files";
+      case "/dashboard/documents":
+        return "Documents";
       case "/dashboard/notes":
         return "Notes";
       case "/dashboard/summarize":
@@ -400,10 +400,10 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
     const basePath = pathname.split("/").slice(0, 3).join("/");
     
     switch (basePath) {
-      case "/dashboard/pdfs":
+      case "/dashboard/documents":
         return [
           {
-            label: "Total PDFs",
+            label: "Total Documents",
             value: statistics.loading ? "..." : statistics.totalItems.toString(),
             icon: FileText,
             color: "text-blue-600 dark:text-blue-400",
@@ -496,7 +496,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           {
             label: "Total Items",
             value: statistics.loading ? "..." : statistics.totalItems.toString(),
-            icon: FileBarChart,
+            icon: DocumentBarChart,
             color: "text-blue-600 dark:text-blue-400",
           },
           {

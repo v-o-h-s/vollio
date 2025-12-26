@@ -5,7 +5,7 @@ import { JSONContent } from "@vollio/shared";
 export interface CreateNoteDTO {
   title?: string;
   content?: JSONContent;
-  pdfId?: string;
+  documentId?: string;
 }
 
 export const createNoteSchema: JSONSchemaType<CreateNoteDTO> = {
@@ -13,7 +13,7 @@ export const createNoteSchema: JSONSchemaType<CreateNoteDTO> = {
   properties: {
     title: { type: "string", nullable: true },
     content: { type: "object", nullable: true, required: [] } as any,
-    pdfId: { type: "string", nullable: true },
+    documentId: { type: "string", nullable: true },
   },
   required: [],
   additionalProperties: false,

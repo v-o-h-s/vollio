@@ -1,6 +1,6 @@
 import { BaseAppError, ErrorSeverity, } from "../BaseAppError";
 
-export enum FileValidationErrorType {
+export enum DocumentValidationErrorType {
   GENERAL_VALIDATION = "GENERAL_VALIDATION",
   FILE_TOO_LARGE = "FILE_TOO_LARGE",
   INVALID_FILE_TYPE = "INVALID_FILE_TYPE",
@@ -11,11 +11,11 @@ export enum FileValidationErrorType {
  * Validation errors
  * Use static factory methods to create specific error types
  */
-export class FileValidationError extends BaseAppError {
-  public readonly FileValidationErrorType: FileValidationErrorType;
+export class DocumentValidationError extends BaseAppError {
+  public readonly DocumentValidationErrorType: DocumentValidationErrorType;
 
   private constructor(
-    FileValidationErrorType: FileValidationErrorType,
+    DocumentValidationErrorType: DocumentValidationErrorType,
     message: string,
     options: {
       context?: any;
@@ -32,7 +32,7 @@ export class FileValidationError extends BaseAppError {
       statusCode: options.statusCode,
       context: options.context,
     });
-    this.FileValidationErrorType = FileValidationErrorType;
+    this.DocumentValidationErrorType = DocumentValidationErrorType;
   }
 
   /**
@@ -40,8 +40,8 @@ export class FileValidationError extends BaseAppError {
    */
   static general(
     message: string = "Validation error",
-  ): FileValidationError {
-    return new FileValidationError(FileValidationErrorType.GENERAL_VALIDATION, message, {
+  ): DocumentValidationError {
+    return new DocumentValidationError(DocumentValidationErrorType.GENERAL_VALIDATION, message, {
       severity: ErrorSeverity.LOW,
       retryable: false,
       userMessage: "Please check your input and try again.",
@@ -51,20 +51,20 @@ export class FileValidationError extends BaseAppError {
   }
 
   /**
-   * Create a file too large error
+   * Create a document too large error
    */
-  static fileTooLarge(
+  static documentTooLarge(
     maxSize: number = 50,
     context?: any,
-  ): FileValidationError {
-    return new FileValidationError(
-      FileValidationErrorType.FILE_TOO_LARGE,
-      `File size exceeds ${maxSize}MB`,
+  ): DocumentValidationError {
+    return new DocumentValidationError(
+      DocumentValidationErrorType.FILE_TOO_LARGE,
+      `Document size exceeds ${maxSize}MB`,
       {
         severity: ErrorSeverity.LOW,
         retryable: false,
-        userMessage: `The selected file exceeds the maximum size limit of ${maxSize}MB.`,
-        actionLabel: "Choose Another File",
+        userMessage: `The selected document exceeds the maximum size limit of ${maxSize}MB.`,
+        actionLabel: "Choose Another Document",
         statusCode: 413,
         context,
       }
@@ -72,20 +72,20 @@ export class FileValidationError extends BaseAppError {
   }
 
   /**
-   * Create an invalid file type error
+   * Create an invalid document type error
    */
-  static invalidFileType(
-    expectedType: string = "PDF",
+  static invalidDocumentType(
+    expectedType: string = "Document",
     context?: any,
-  ): FileValidationError {
-    return new FileValidationError(
-      FileValidationErrorType.INVALID_FILE_TYPE,
-      `Invalid file type, expected ${expectedType}`,
+  ): DocumentValidationError {
+    return new DocumentValidationError(
+      DocumentValidationErrorType.INVALID_FILE_TYPE,
+      `Invalid document type, expected ${expectedType}`,
       {
         severity: ErrorSeverity.LOW,
         retryable: false,
-        userMessage: `Only ${expectedType} files are supported. Please select a ${expectedType} file.`,
-        actionLabel: `Choose ${expectedType} File`,
+        userMessage: `Only ${expectedType} documents are supported. Please select a ${expectedType} document.`,
+        actionLabel: `Choose ${expectedType} Document`,
         statusCode: 400,
         context,
       }
@@ -93,18 +93,18 @@ export class FileValidationError extends BaseAppError {
   }
 
   /**
-   * Create an invalid file format error
+   * Create an invalid document format error
    */
-  static invalidFileFormat(
-    message: string = "Invalid file format",
+  static invalidDocumentFormat(
+    message: string = "Invalid document format",
     context?: any,
-  ): FileValidationError {
-    return new FileValidationError(FileValidationErrorType.INVALID_FILE_FORMAT, message, {
+  ): DocumentValidationError {
+    return new DocumentValidationError(DocumentValidationErrorType.INVALID_FILE_FORMAT, message, {
       severity: ErrorSeverity.LOW,
       retryable: false,
       userMessage:
-        "The selected file appears to be corrupted or in an unsupported format.",
-      actionLabel: "Choose Another File",
+        "The selected document appears to be corrupted or in an unsupported format.",
+      actionLabel: "Choose Another Document",
       statusCode: 400,
       context,
     });
@@ -116,8 +116,8 @@ export class FileValidationError extends BaseAppError {
   static fieldRequired(
     fieldName: string,
     context?: any,
-  ): FileValidationError {
-    return new FileValidationError(FileValidationErrorType.GENERAL_VALIDATION, `${fieldName} is required`, {
+  ): DocumentValidationError {
+    return new DocumentValidationError(DocumentValidationErrorType.GENERAL_VALIDATION, `${fieldName} is required`, {
       severity: ErrorSeverity.LOW,
       retryable: false,
       userMessage: `${fieldName} is required. Please provide a value.`,
@@ -135,9 +135,9 @@ export class FileValidationError extends BaseAppError {
     minLength: number,
     maxLength: number,
     context?: any,
-  ): FileValidationError {
-    return new FileValidationError(
-      FileValidationErrorType.GENERAL_VALIDATION,
+  ): DocumentValidationError {
+    return new DocumentValidationError(
+      DocumentValidationErrorType.GENERAL_VALIDATION,
       `${fieldName} must be between ${minLength} and ${maxLength} characters`,
       {
         severity: ErrorSeverity.LOW,
@@ -151,15 +151,15 @@ export class FileValidationError extends BaseAppError {
   }
 
   /**
-   * Create an invalid format error (for non-file fields)
+   * Create an invalid format error (for non-document fields)
    */
   static invalidFormat(
     fieldName: string,
     expectedFormat: string,
     context?: any,
-  ): FileValidationError {
-    return new FileValidationError(
-      FileValidationErrorType.GENERAL_VALIDATION,
+  ): DocumentValidationError {
+    return new DocumentValidationError(
+      DocumentValidationErrorType.GENERAL_VALIDATION,
       `${fieldName} has invalid format`,
       {
         severity: ErrorSeverity.LOW,
@@ -179,9 +179,9 @@ export class FileValidationError extends BaseAppError {
     fieldName: string,
     message: string = "This value already exists",
     context?: any,
-  ): FileValidationError {
-    return new FileValidationError(
-      FileValidationErrorType.GENERAL_VALIDATION,
+  ): DocumentValidationError {
+    return new DocumentValidationError(
+      DocumentValidationErrorType.GENERAL_VALIDATION,
       `Duplicate ${fieldName}: ${message}`,
       {
         severity: ErrorSeverity.LOW,
@@ -195,29 +195,29 @@ export class FileValidationError extends BaseAppError {
   }
 
   getTitle(): string {
-    switch (this.FileValidationErrorType) {
-      case FileValidationErrorType.GENERAL_VALIDATION:
+    switch (this.DocumentValidationErrorType) {
+      case DocumentValidationErrorType.GENERAL_VALIDATION:
         return "Invalid Input";
-      case FileValidationErrorType.FILE_TOO_LARGE:
-        return "File Too Large";
-      case FileValidationErrorType.INVALID_FILE_TYPE:
-        return "Invalid File Type";
-      case FileValidationErrorType.INVALID_FILE_FORMAT:
-        return "Invalid File Format";
+      case DocumentValidationErrorType.FILE_TOO_LARGE:
+        return "Document Too Large";
+      case DocumentValidationErrorType.INVALID_FILE_TYPE:
+        return "Invalid Document Type";
+      case DocumentValidationErrorType.INVALID_FILE_FORMAT:
+        return "Invalid Document Format";
       default:
         return "Validation Error";
     }
   }
 
   getActionLabel(): string {
-    switch (this.FileValidationErrorType) {
-      case FileValidationErrorType.GENERAL_VALIDATION:
+    switch (this.DocumentValidationErrorType) {
+      case DocumentValidationErrorType.GENERAL_VALIDATION:
         return "Try Again";
-      case FileValidationErrorType.FILE_TOO_LARGE:
-      case FileValidationErrorType.INVALID_FILE_FORMAT:
-        return "Choose Another File";
-      case FileValidationErrorType.INVALID_FILE_TYPE:
-        return "Choose PDF File";
+      case DocumentValidationErrorType.FILE_TOO_LARGE:
+      case DocumentValidationErrorType.INVALID_FILE_FORMAT:
+        return "Choose Another Document";
+      case DocumentValidationErrorType.INVALID_FILE_TYPE:
+        return "Choose Document Document";
       default:
         return "Try Again";
     }

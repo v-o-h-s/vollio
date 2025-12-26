@@ -20,18 +20,18 @@ const transformNote = (note: any): Note => ({
     typeof note.content === "string"
       ? JSON.parse(note.content)
       : note.content || null,
-  pdfAnnotationId: note.pdfAnnotationId || null,
+  documentAnnotationId: note.documentAnnotationId || null,
   createdAt: note.createdAt,
   updatedAt: note.updatedAt,
   isDeleted: note.isDeleted || false,
-  pdfId: note.pdfId || null,
+  documentId: note.documentId || null,
 });
 
 export const notesEndpoints = (builder: ApiBuilder) => ({
-  getNotes: builder.query<Note[], { pdfId?: string } | void>({
+  getNotes: builder.query<Note[], { documentId?: string } | void>({
     query: (params) => ({
       url: "notes",
-      params: params?.pdfId ? { pdfId: params.pdfId } : undefined,
+      params: params?.documentId ? { documentId: params.documentId } : undefined,
     }),
     transformResponse: (response: BackendResponse<any[]>, meta, arg) => {
       if (!response.success || !response.data) {
@@ -39,9 +39,9 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
       }
       let notes = response.data.map(transformNote);
 
-      // Client-side filtering for pdfId since backend doesn't support it yet
-      if (arg?.pdfId) {
-        notes = notes.filter((n) => n.pdfId === arg.pdfId);
+      // Client-side filtering for documentId since backend doesn't support it yet
+      if (arg?.documentId) {
+        notes = notes.filter((n) => n.documentId === arg.documentId);
       }
 
       return notes;

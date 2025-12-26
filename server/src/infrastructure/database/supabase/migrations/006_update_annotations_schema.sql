@@ -4,8 +4,8 @@
 -- Add note_id column to annotations table
 ALTER TABLE annotations ADD COLUMN note_id UUID REFERENCES notes(id) ON DELETE CASCADE;
 
--- Remove the pdf_annotation_id column from notes table (reverse relationship)
-ALTER TABLE notes DROP COLUMN IF EXISTS pdf_annotation_id;
+-- Remove the document_annotation_id column from notes table (reverse relationship)
+ALTER TABLE notes DROP COLUMN IF EXISTS document_annotation_id;
 
 -- Create index for the new note_id column
 CREATE INDEX idx_annotations_note_id ON annotations(note_id);
@@ -15,5 +15,5 @@ CREATE INDEX idx_annotations_note_id ON annotations(note_id);
 
 -- Add a comment to document the relationship
 COMMENT ON COLUMN annotations.note_id IS 'References the note that contains the annotation content';
-COMMENT ON TABLE annotations IS 'PDF text annotations linked to notes. Each annotation represents a highlighted text selection in a PDF that is linked to a note.';
-COMMENT ON TABLE notes IS 'Rich text notes created with the TipTap editor. Can be standalone or linked to PDF annotations.';
+COMMENT ON TABLE annotations IS 'Document text annotations linked to notes. Each annotation represents a highlighted text selection in a Document that is linked to a note.';
+COMMENT ON TABLE notes IS 'Rich text notes created with the TipTap editor. Can be standalone or linked to Document annotations.';

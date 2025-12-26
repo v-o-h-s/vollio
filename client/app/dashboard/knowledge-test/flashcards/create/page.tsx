@@ -41,7 +41,7 @@ import { toast } from "react-toastify";
 import { FlashcardPreview, FlashcardEditor } from "@/components/flashcards";
 import { DocumentSelectionTabs } from "@/features/knowldge-test/quizzes/components/DocumentSelectionTabs";
 import {
-  useGetAllFilesQuery,
+  useGetAllDocumentsQuery,
   useCreateFlashCardsSetMutation,
   useGenerateFlashCardsSetMutation,
 } from "@/lib/store/apiSlice";
@@ -80,8 +80,9 @@ export default function CreateFlashCardsPage() {
   const [savedCards, setSavedCards] = useState<Set<string>>(new Set());
   const [prefillFromQuiz, setPrefillFromQuiz] = useState<string | null>(null);
 
-  // Fetch PDFs for AI generation
-  const { data: filesData, isLoading: isLoadingPDFs } = useGetAllFilesQuery();
+  // Fetch Documents for AI generation
+  const { data: documentsData, isLoading: isLoadingDocuments } =
+    useGetAllDocumentsQuery();
 
   // Manual Mode Form
   const manualForm = useForm<FlashcardManualFormData>({
@@ -129,21 +130,21 @@ export default function CreateFlashCardsPage() {
 
   // Get selected document info
   const getSelectedDocument = (docId: string) => {
-    if (!docId || !filesData) return null;
-    const doc = filesData.find((p: any) => p.id === docId);
+    if (!docId || !documentsData) return null;
+    const doc = documentsData.find((p: any) => p.id === docId);
     return doc
-      ? { id: doc.id, title: doc.filename ?? doc.title ?? "Untitled" }
+      ? { id: doc.id, title: doc.name ?? doc.title ?? "Untitled" }
       : null;
   };
 
   const manualDocument = useMemo(
     () => getSelectedDocument(manualDocumentId),
-    [manualDocumentId, filesData]
+    [manualDocumentId, documentsData]
   );
 
   const autoDocument = useMemo(
     () => getSelectedDocument(autoDocumentId),
-    [autoDocumentId, filesData]
+    [autoDocumentId, documentsData]
   );
 
   const selectedDocumentsManual = useMemo(
@@ -457,16 +458,16 @@ export default function CreateFlashCardsPage() {
                   <CardContent className="p-6">
                     <DocumentSelectionTabs
                       availableDocuments={
-                        (filesData || []).map((p: any) => ({
+                        (documentsData || []).map((p: any) => ({
                           id: p.id,
-                          title: p.filename ?? p.title ?? "Untitled",
+                          title: p.name ?? p.title ?? "Untitled",
                         })) as any
                       }
                       selectedDocuments={selectedDocumentsAuto}
                       onAddDocument={(d: any) =>
                         handleAddDocumentAuto({ id: d.id, title: d.title })
                       }
-                      isLoadingPDFs={isLoadingPDFs}
+                      isLoadingDocuments={isLoadingDocuments}
                     />
                     {autoForm.formState.errors.documentId && (
                       <p className="text-sm text-destructive mt-2 flex items-center gap-2">
@@ -687,9 +688,9 @@ export default function CreateFlashCardsPage() {
                             </p>
                             <DocumentSelectionTabs
                               availableDocuments={
-                                (filesData || []).map((p: any) => ({
+                                (documentsData || []).map((p: any) => ({
                                   id: p.id,
-                                  title: p.filename ?? p.title ?? "Untitled",
+                                  title: p.name ?? p.title ?? "Untitled",
                                 })) as any
                               }
                               selectedDocuments={selectedDocumentsManual}
@@ -699,7 +700,7 @@ export default function CreateFlashCardsPage() {
                                   title: d.title,
                                 })
                               }
-                              isLoadingPDFs={isLoadingPDFs}
+                              isLoadingDocuments={isLoadingDocuments}
                             />
                           </div>
                         ) : (

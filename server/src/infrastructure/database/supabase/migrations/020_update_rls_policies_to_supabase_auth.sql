@@ -6,11 +6,11 @@
 -- Step 1: Drop all existing RLS policies
 -- ============================================================================
 
--- PDFs table policies
-DROP POLICY IF EXISTS "Users can only view their own PDFs" ON pdfs;
-DROP POLICY IF EXISTS "Users can only create their own PDFs" ON pdfs;
-DROP POLICY IF EXISTS "Users can only update their own PDFs" ON pdfs;
-DROP POLICY IF EXISTS "Users can only delete their own PDFs" ON pdfs;
+-- Documents table policies
+DROP POLICY IF EXISTS "Users can only view their own Documents" ON documents;
+DROP POLICY IF EXISTS "Users can only create their own Documents" ON documents;
+DROP POLICY IF EXISTS "Users can only update their own Documents" ON documents;
+DROP POLICY IF EXISTS "Users can only delete their own Documents" ON documents;
 
 -- User activity table policies
 DROP POLICY IF EXISTS "Users can only view their own activity" ON user_activity;
@@ -49,21 +49,21 @@ DROP POLICY IF EXISTS "summaries_delete_policy" ON summaries;
 -- Step 2: Create new RLS policies using auth.uid()
 -- ============================================================================
 
--- PDFs table policies
-CREATE POLICY "Users can only view their own PDFs" ON pdfs
+-- Documents table policies
+CREATE POLICY "Users can only view their own Documents" ON documents
   FOR SELECT
   USING (user_id = auth.uid()::text);
 
-CREATE POLICY "Users can only create their own PDFs" ON pdfs
+CREATE POLICY "Users can only create their own Documents" ON documents
   FOR INSERT
   WITH CHECK (user_id = auth.uid()::text);
 
-CREATE POLICY "Users can only update their own PDFs" ON pdfs
+CREATE POLICY "Users can only update their own Documents" ON documents
   FOR UPDATE
   USING (user_id = auth.uid()::text)
   WITH CHECK (user_id = auth.uid()::text);
 
-CREATE POLICY "Users can only delete their own PDFs" ON pdfs
+CREATE POLICY "Users can only delete their own Documents" ON documents
   FOR DELETE
   USING (user_id = auth.uid()::text);
 

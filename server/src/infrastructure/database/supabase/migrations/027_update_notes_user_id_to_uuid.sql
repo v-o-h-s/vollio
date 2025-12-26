@@ -16,8 +16,8 @@ CREATE TABLE notes (
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     title TEXT DEFAULT NULL,
     content JSONB DEFAULT NULL,
-    pdf_id UUID NULL REFERENCES pdfs(id) ON DELETE CASCADE,
-    pdf_annotation_id UUID NULL, -- Will be recreated after annotations table is migrated
+    document_id UUID NULL REFERENCES documents(id) ON DELETE CASCADE,
+    document_annotation_id UUID NULL, -- Will be recreated after annotations table is migrated
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     is_deleted BOOLEAN DEFAULT FALSE,
@@ -28,8 +28,8 @@ CREATE TABLE notes (
 
 -- Step 4: Create indexes for efficient querying
 CREATE INDEX idx_notes_user_id ON notes(user_id);
-CREATE INDEX idx_notes_pdf_id ON notes(pdf_id);
-CREATE INDEX idx_notes_pdf_annotation_id ON notes(pdf_annotation_id);
+CREATE INDEX idx_notes_document_id ON notes(document_id);
+CREATE INDEX idx_notes_document_annotation_id ON notes(document_annotation_id);
 CREATE INDEX idx_notes_created_at ON notes(created_at DESC);
 CREATE INDEX idx_notes_updated_at ON notes(updated_at DESC);
 CREATE INDEX idx_notes_is_deleted ON notes(is_deleted) WHERE is_deleted = FALSE;
@@ -104,8 +104,8 @@ COMMENT ON COLUMN notes.id IS 'Unique identifier for the note';
 COMMENT ON COLUMN notes.user_id IS 'Supabase Auth user ID (UUID) - auto-populated from authenticated user';
 COMMENT ON COLUMN notes.title IS 'Note title - optional, can be NULL';
 COMMENT ON COLUMN notes.content IS 'TipTap JSONContent format - optional, can be NULL';
-COMMENT ON COLUMN notes.pdf_id IS 'Direct reference to the PDF document - optional, can be NULL';
-COMMENT ON COLUMN notes.pdf_annotation_id IS 'Optional link to annotation';
+COMMENT ON COLUMN notes.document_id IS 'Direct reference to the Document document - optional, can be NULL';
+COMMENT ON COLUMN notes.document_annotation_id IS 'Optional link to annotation';
 COMMENT ON COLUMN notes.created_at IS 'Creation timestamp';
 COMMENT ON COLUMN notes.updated_at IS 'Last update timestamp';
 COMMENT ON COLUMN notes.is_deleted IS 'Soft delete flag';

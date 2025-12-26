@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Filter, Brain, Layers, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
-import { CreateQuizResponse } from "@shared/types/responses/quizRoutes";
+import { CreateQuizResponse } from "@vollio/shared";
 import { useMemo, useState } from "react";
 
 interface SidebarProps {
@@ -48,8 +48,8 @@ export function Sidebar({
   const availableDocuments = useMemo(() => {
     const docs = new Set<string>();
     quizzesData?.forEach((q) => {
-      const filename = documentsMap.get(q.fileId);
-      if (filename) docs.add(filename);
+      const name = documentsMap.get(q.documentId);
+      if (name) docs.add(name);
     });
     flashcards.forEach((f) => f.documentName && docs.add(f.documentName));
     return Array.from(docs);
@@ -62,9 +62,9 @@ export function Sidebar({
           .toLowerCase()
           .includes(query.toLowerCase());
 
-        const filename = documentsMap.get(q.fileId);
+        const name = documentsMap.get(q.documentId);
         const matchesDocument =
-          selectedDocument === "all" || filename === selectedDocument;
+          selectedDocument === "all" || name === selectedDocument;
 
         const matchesDifficulty =
           selectedDifficulty === "all" ||

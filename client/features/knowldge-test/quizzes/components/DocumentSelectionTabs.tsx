@@ -6,22 +6,22 @@ import { Input } from "@/components/ui/input";
 import { Search, FileText, LayoutTemplate, Plus, Check } from "lucide-react";
 import { useState } from "react";
 
-interface PDFDocument {
+interface DocumentDocument {
   id: string;
   title: string;
 }
 
 interface DocumentSelectionTabsProps {
-  availableDocuments?: PDFDocument[];
-  onSelectDocument?: (doc: PDFDocument) => void;
-  isLoadingPDFs?: boolean;
+  availableDocuments?: DocumentDocument[];
+  onSelectDocument?: (doc: DocumentDocument) => void;
+  isLoadingDocuments?: boolean;
   selectedDocumentId?: string;
 }
 
 export function DocumentSelectionTabs({
   availableDocuments = [],
   onSelectDocument,
-  isLoadingPDFs = false,
+  isLoadingDocuments = false,
   selectedDocumentId,
 }: DocumentSelectionTabsProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +43,7 @@ export function DocumentSelectionTabs({
       </div>
 
       <div className="border border-primary/20 rounded-xl overflow-hidden bg-card/20">
-        {isLoadingPDFs ? (
+        {isLoadingDocuments ? (
           <div className="p-8 text-center text-muted-foreground">
             <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2" />
             Loading documents...

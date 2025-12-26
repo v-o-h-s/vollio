@@ -63,39 +63,39 @@ export function LoadingState({
   );
 }
 
-interface PDFLoadingProps {
+interface DocumentLoadingProps {
   stage: "uploading" | "processing" | "rendering" | "complete";
   progress?: number;
-  fileName?: string;
+  documentName?: string;
 }
 
-export function PDFLoadingIndicator({
+export function DocumentLoadingIndicator({
   stage,
   progress,
-  fileName,
-}: PDFLoadingProps) {
+  documentName,
+}: DocumentLoadingProps) {
   const stages = {
     uploading: {
       icon: Upload,
-      title: "Uploading PDF",
-      description: fileName
-        ? `Uploading ${fileName}...`
-        : "Uploading your PDF file...",
+      title: "Uploading Document",
+      description: documentName
+        ? `Uploading ${documentName}...`
+        : "Uploading your Document document...",
     },
     processing: {
       icon: FileText,
-      title: "Processing PDF",
-      description: "Converting PDF for viewing and annotation...",
+      title: "Processing Document",
+      description: "Converting Document for viewing and annotation...",
     },
     rendering: {
       icon: Loader2,
-      title: "Loading PDF Viewer",
-      description: "Initializing PDF viewer and text layer...",
+      title: "Loading Document Viewer",
+      description: "Initializing Document viewer and text layer...",
     },
     complete: {
       icon: CheckCircle,
-      title: "PDF Ready",
-      description: "Your PDF is ready for annotation!",
+      title: "Document Ready",
+      description: "Your Document is ready for annotation!",
     },
   };
 
@@ -201,7 +201,7 @@ export function Skeleton({ className = "", animate = true }: SkeletonProps) {
   );
 }
 
-export function PDFViewerSkeleton() {
+export function DocumentViewerSkeleton() {
   return (
     <div className="w-full h-full bg-white rounded-xl border border-gray-200 overflow-hidden">
       <div className="animate-pulse">
@@ -215,7 +215,7 @@ export function PDFViewerSkeleton() {
           <Skeleton className="h-8 w-8" />
         </div>
 
-        {/* PDF content skeleton */}
+        {/* Document content skeleton */}
         <div className="p-8 space-y-6">
           <div className="max-w-2xl mx-auto space-y-4">
             <Skeleton className="h-4 w-full" />

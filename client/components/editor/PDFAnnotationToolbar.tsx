@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
-interface PDFAnnotationToolbarProps {
+interface DocumentAnnotationToolbarProps {
   editor: Editor;
   onSaveAnnotation?: (content: any) => void;
   onCancel?: () => void;
@@ -37,12 +37,12 @@ const HIGHLIGHT_COLORS = [
   { name: 'Pink', value: '#fbcfe8', class: 'bg-pink-200' },
 ];
 
-export function PDFAnnotationToolbar({ 
+export function DocumentAnnotationToolbar({ 
   editor, 
   onSaveAnnotation, 
   onCancel,
   className 
-}: PDFAnnotationToolbarProps) {
+}: DocumentAnnotationToolbarProps) {
   const [position, setPosition] = useState<ToolbarPosition>({
     top: 0,
     left: 0,

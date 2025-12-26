@@ -8,7 +8,7 @@ This document summarizes the quiz generation pipeline, database schema, and supp
 - Features include batched generation (summary-based context), automated difficulty adjustment, and multi-language support.
 - Fully integrated with Supabase RLS and automated ownership triggers.
 
-## Key files / migrations
+## Key documents / migrations
 
 - `src/infrastructure/database/supabase/migrations/033_add_the_quiz_table.sql` — Core schema for quizzes, questions, and specific answer types.
 - `src/infrastructure/database/supabase/migrations/034_add_quiz_rls.sql` — RLS policies and user ownership triggers for all quiz-related tables.
@@ -22,7 +22,7 @@ Table: `quizzes` (Root Aggregate)
 - id UUID PRIMARY KEY
 - title TEXT (AI-generated)
 - user_id UUID REFERENCES auth.users
-- document_id UUID REFERENCES pdfs
+- document_id UUID REFERENCES documents
 - language ENUM (en, fr, ar)
 - difficulty_level ENUM (easy, medium, hard)
 - number_of_questions INT

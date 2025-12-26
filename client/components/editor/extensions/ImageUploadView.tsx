@@ -32,7 +32,7 @@ export function ImageUploadView({
   const [isResizing, setIsResizing] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageLoad = useCallback(() => {
     if (imageRef.current && !width && !height) {
@@ -111,19 +111,19 @@ export function ImageUploadView({
     [dragStart, isResizing, updateAttributes]
   );
 
-  const handleFileSelect = useCallback(
+  const handleDocumentSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+      const document = e.target.files?.[0];
+      if (!document) return;
 
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        updateAttributes({ error: 'Please select an image file' });
+      // Validate document type
+      if (!document.type.startsWith('image/')) {
+        updateAttributes({ error: 'Please select an image document' });
         return;
       }
 
-      // Validate file size (10MB)
-      if (file.size > 10 * 1024 * 1024) {
+      // Validate document size (10MB)
+      if (document.size > 10 * 1024 * 1024) {
         updateAttributes({ error: 'Image must be smaller than 10MB' });
         return;
       }
@@ -132,7 +132,7 @@ export function ImageUploadView({
       updateAttributes({ loading: true, error: null });
 
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('document', document);
 
       fetch('/api/images/upload', {
         method: 'POST',
@@ -143,7 +143,7 @@ export function ImageUploadView({
           if (data.success) {
             updateAttributes({
               src: data.data.url,
-              alt: file.name,
+              alt: document.name,
               loading: false,
               error: null,
             });
@@ -190,7 +190,7 @@ export function ImageUploadView({
           </div>
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => documentInputRef.current?.click()}
               className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
             >
               Try Again
@@ -203,10 +203,10 @@ export function ImageUploadView({
             </button>
           </div>
           <input
-            ref={fileInputRef}
+            ref={documentInputRef}
             type="file"
             accept="image/*"
-            onChange={handleFileSelect}
+            onChange={handleDocumentSelect}
             className="hidden"
           />
         </div>
@@ -225,16 +225,16 @@ export function ImageUploadView({
               Click to upload an image or drag and drop
             </p>
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => documentInputRef.current?.click()}
               className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
             >
               Choose Image
             </button>
             <input
-              ref={fileInputRef}
+              ref={documentInputRef}
               type="file"
               accept="image/*"
-              onChange={handleFileSelect}
+              onChange={handleDocumentSelect}
               className="hidden"
             />
           </div>

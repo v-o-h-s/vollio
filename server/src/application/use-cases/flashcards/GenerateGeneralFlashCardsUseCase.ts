@@ -3,7 +3,7 @@ import { IFlashCardsSetRepository } from "../../../domain/repositories/IFlashCar
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { CreateFlashCardsSetResponse } from '@vollio/shared';
 import { CreateFlashCardsDTO } from "../../../shared/validation/flashcardSchemas";
-import { IFileRepository } from "../../../domain/repositories/IFileRepository";
+import { IDocumentRepository } from "../../../domain/repositories/IDocumentRepository";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";
 import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
 import { ChunkMetadata } from "../../../shared/utils/chunking";
@@ -19,7 +19,7 @@ export class GenerateGeneralFlashCardsUseCase {
   constructor(
     private logger: FastifyBaseLogger,
     private flashCardsSetRepository: IFlashCardsSetRepository,
-    private fileRepository: IFileRepository,
+    private documentRepository: IDocumentRepository,
     private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
     private embeddingRepository: IEmbeddingRepository,
     private generativeAiService: IGenerativeAiService
@@ -32,13 +32,13 @@ export class GenerateGeneralFlashCardsUseCase {
       { documentId: data.documentId },
       "Executing GenerateGeneralFlashCardsUseCase"
     );
-    const file = await this.fileRepository.getFileById(data.documentId);
-    if (!file) {
+    const document = await this.documentRepository.getDocumentById(data.documentId);
+    if (!document) {
       this.logger.warn(
         { documentId: data.documentId },
-        "File not found in GenerateGeneralFlashCardsUseCase"
+        "Document not found in GenerateGeneralFlashCardsUseCase"
       );
-      throw new NotFoundError("File not found");
+      throw new NotFoundError("Document not found");
     }
 
     await this.ensureExistingOfDocumentEmbeddingUseCase.execute(

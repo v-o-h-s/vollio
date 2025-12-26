@@ -1,0 +1,133 @@
+import { ApiBuilder } from "@/lib/store/endpoints/types";
+import {
+  GetAllDocumentsResponse,
+  GetDocumentByIdResponse,
+} from "@vollio/shared";
+export interface TransformedDocument {
+  id: string;
+  name: string;
+  documentUrl?: string;
+  size: number;
+  mimeType: string;
+  uploadedAt?: string;
+  folderId: string | null;
+  isGoogleDriveDocument: boolean;
+}
+
+export const documentEndpoints = (builder: ApiBuilder) => ({
+  getAllDocuments: builder.query<TransformedDocument[], void>({
+    query: () => ({
+      url: "documents/",
+      method: "GET",
+    }),
+    transformResponse: (
+      response: GetAllDocumentsResponse
+    ): TransformedDocument[] => {
+      if (!response.data) return [];
+
+      return response.data.documents.map((document) => ({
+        id: document.id,
+        name: document.name, // using name from shared
+        size: document.size, // using size from shared
+        mimeType: document.mimeType,
+        folderId: document.folderId,
+        isGoogleDriveDocument: document.isGoogleDriveDocument,
+      }));
+    },
+
+    providesTags: ["Document"],
+  }),
+
+  getDocumentById: builder.query<TransformedDocument, string>({
+    query: (id) => ({
+      url: `documents/${id}`,
+      method: "GET",
+    }),
+    transformResponse: (baseQueryReturnValue: GetDocumentByIdResponse) => {
+      const document = baseQueryReturnValue.data;
+      if (!document) {
+        throw new Error("Document not found");
+      }
+      return {
+        id: document.id,
+        name: document.name,
+        size: document.size,
+        mimeType: document.mimeType,
+        documentUrl: document.documentUrl,
+        uploadedAt: document.uploadedAt,
+        folderId: document.folderId,
+        isGoogleDriveDocument: document.isGoogleDriveDocument,
+      };
+    },
+    providesTags: (_result, _error, id) => [{ type: "Document", id }],
+  }),
+
+  uploadDocument: builder.mutation<TransformedDocument, FormData>({
+    query: (formData) => ({
+      url: "documents/upload",
+      method: "POST",
+      body: formData,
+    }),
+    invalidatesTags: [{ type: "Document", id: "LIST" }],
+  }),
+
+  deleteDocument: builder.mutation<{ success: boolean }, string>({
+    query: (id) => ({
+      url: `documents/${id}`,
+      method: "DELETE",
+      body: undefined,
+      headers: {
+        "Content-Type": undefined,
+      },
+    }),
+    invalidatesTags: (_result, _error, id) => [
+      { type: "Document", id: "LIST" },
+      { type: "Document", id },
+    ],
+  }),
+
+  renameDocument: builder.mutation<any, { id: string; name: string }>({
+    query: ({ id, name }) => ({
+      url: `documents/${id}/rename`,
+      method: "PUT",
+      body: { name },
+    }),
+    invalidatesTags: (_result, _error, { id }) => [
+      { type: "Document", id: "LIST" },
+      { type: "Document", id },
+    ],
+  }),
+
+  moveDocument: builder.mutation<any, { id: string; folderId: string | null }>({
+    query: ({ id, folderId }) => ({
+      url: `documents/${id}/move`,
+      method: "PATCH",
+      body: { folderId },
+    }),
+    invalidatesTags: (_result, _error, { id }) => [
+      { type: "Document", id: "LIST" },
+      { type: "Document", id },
+      { type: "Folder", id: "LIST" },
+    ],
+  }),
+
+  getDocumentFromGoogleDrive: builder.query<any, string>({
+    query: (id) => ({
+      url: `documents/google-drive/${id}`,
+      method: "GET",
+    }),
+    providesTags: (_result, _error, id) => [{ type: "Document", id }],
+  }),
+
+  addDocumentFromGoogleDrive: builder.mutation<
+    any,
+    { documentGoogleDriveId: string }
+  >({
+    query: (data) => ({
+      url: "documents/google-drive",
+      method: "POST",
+      body: data,
+    }),
+    invalidatesTags: [{ type: "Document", id: "LIST" }],
+  }),
+});

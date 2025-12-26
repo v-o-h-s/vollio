@@ -115,7 +115,7 @@ COMMENT ON COLUMN flashcards.hint IS 'Optional hint or additional context to hel
 - [ ] Existing flashcards still display correctly
 - [ ] Database migration runs without errors
 
-## Files Modified
+## Documents Modified
 
 1. `/server/src/domain/entities/FlashCard.ts`
 2. `/server/src/shared/mappers/FlashCardMapper.ts`
@@ -124,7 +124,7 @@ COMMENT ON COLUMN flashcards.hint IS 'Optional hint or additional context to hel
 5. `/server/src/shared/types/responses/flashcardsRoutes.ts`
 6. `/server/src/infrastructure/ai/generative-ai/prompts/flashcards.ts`
 
-## Files Created
+## Documents Created
 
 1. `/server/src/infrastructure/database/supabase/migrations/038_rename_flashcard_explanation_to_hint.sql`
 

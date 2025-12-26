@@ -7,7 +7,7 @@ export interface FolderData {
     parent_id: string | null;
     created_at: string;
     updated_at: string;
-    pdf_count?: number;
+    document_count?: number;
 }
 
 export type CreateFolderResponse = ServerSuccessResponse<null>

@@ -11,7 +11,7 @@ import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveS
 
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { Rectangle } from "@/lib/types/pdf"; 
+import { Rectangle } from "@/lib/types/document"; 
 import {
   useCreateAnnotationMutation,
 } from "@/lib/store/apiSlice";
@@ -25,8 +25,8 @@ interface SelectionData {
   text: string;
   pageNumber: number;
   coordinates: Rectangle;
-  pdfId: string;
-  pdfFilename: string;
+  documentId: string;
+  documentDocumentname: string;
 }
 
 export default function NewNotePage() {
@@ -96,7 +96,7 @@ export default function NewNotePage() {
     }
   }, [searchParams]);
 
-  // RTK Query mutations for PDF annotations
+  // RTK Query mutations for Document annotations
   const [createAnnotation] = useCreateAnnotationMutation();
 
   // Create annotation when note is created if we the note creating is triggered by text selection
@@ -109,7 +109,7 @@ export default function NewNotePage() {
         const noteContentText = noteContent.title || "Untitled Note";
         
         await createAnnotation({
-          pdfId: selectionData.pdfId,
+          documentId: selectionData.documentId,
           noteId: noteId,
           selectedText: selectionData.text,
           pageNumber: selectionData.pageNumber,
@@ -121,7 +121,7 @@ export default function NewNotePage() {
         console.log("Annotation created successfully, linking to note:", noteId);
 
         // Note: Cross-tab sync for annotations will be handled by the annotation API
-        // The PDF viewer will automatically update when the annotation is created
+        // The Document viewer will automatically update when the annotation is created
       } catch (error) {
         console.error("Failed to create annotation:", error);
         // Don't throw - annotation creation failure shouldn't break note creation
@@ -134,7 +134,7 @@ export default function NewNotePage() {
   const handleNoteCreated = useCallback(
     (newNoteId: string) => {
       setNoteId(newNoteId);
-      // Create annotation if this note was created from PDF text selection
+      // Create annotation if this note was created from Document text selection
       createAnnotationForNote(newNoteId);
     },
     [createAnnotationForNote]
@@ -166,16 +166,16 @@ export default function NewNotePage() {
 
   // Handle successful save is now handled via onSaveSuccess callback
 
-  // Handle go back - navigate back to PDF if we came from annotation
+  // Handle go back - navigate back to Document if we came from annotation
   const handleGoBack = useCallback(() => {
     if (selectionData) {
-      // Try to navigate back to the PDF tab
-      const pdfUrl = `/dashboard/pdfs?pdf=${selectionData.pdfId}`;
+      // Try to navigate back to the Document tab
+      const documentUrl = `/dashboard/documents?document=${selectionData.documentId}`;
 
       // Try cross-tab navigation first
       if (window.opener && !window.opener.closed) {
         try {
-          window.opener.location.href = pdfUrl;
+          window.opener.location.href = documentUrl;
           window.opener.focus();
           window.close();
           return;
@@ -185,7 +185,7 @@ export default function NewNotePage() {
       }
 
       // Fallback to regular navigation
-      router.push(pdfUrl);
+      router.push(documentUrl);
     } else {
       router.push("/dashboard/notes");
     }
@@ -255,10 +255,10 @@ export default function NewNotePage() {
                   {selectionData && (
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Badge variant="secondary" className="text-xs">
-                        PDF Annotation
+                        Document Annotation
                       </Badge>
                       <span className="truncate">
-                        {selectionData.pdfFilename}
+                        {selectionData.documentDocumentname}
                       </span>
                     </div>
                   )}
@@ -280,22 +280,22 @@ export default function NewNotePage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    const pdfUrl = `/dashboard/pdfs?pdf=${selectionData.pdfId}`;
+                    const documentUrl = `/dashboard/documents?document=${selectionData.documentId}`;
                     if (window.opener && !window.opener.closed) {
                       try {
-                        window.opener.location.href = pdfUrl;
+                        window.opener.location.href = documentUrl;
                         window.opener.focus();
                       } catch (error) {
-                        router.push(pdfUrl);
+                        router.push(documentUrl);
                       }
                     } else {
-                      router.push(pdfUrl);
+                      router.push(documentUrl);
                     }
                   }}
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  <span className="hidden sm:inline">View in PDF</span>
+                  <span className="hidden sm:inline">View in Document</span>
                 </Button>
               )}
 

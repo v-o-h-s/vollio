@@ -8,7 +8,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathName = usePathname();
-  const isPdfPage = pathName.startsWith("/dashboard/pdfs/");
+  const isPdfPage = pathName.startsWith("/dashboard/documents/");
   return (
     <div className="min-h-screen bg-background">
       {/* Main Content */}

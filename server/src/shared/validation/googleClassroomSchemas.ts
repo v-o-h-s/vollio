@@ -23,8 +23,8 @@ export const GoogleCallbackQuerySchema: JSONSchemaType<GoogleCallbackQuery> = {
   additionalProperties: false,
 };
 
-// Schema for a single Drive File in materials
-const DriveFileSchema = {
+// Schema for a single Drive Document in materials
+const DriveDocumentSchema = {
   type: "object",
   properties: {
     id: { type: "string" },
@@ -37,12 +37,12 @@ const DriveFileSchema = {
 const MaterialsSchema = {
   type: "object",
   properties: {
-    driveFiles: {
+    driveDocuments: {
       type: "array",
-      items: DriveFileSchema,
+      items: DriveDocumentSchema,
     },
   },
-  required: ["driveFiles"],
+  required: ["driveDocuments"],
 } as const;
 
 // Schema for ClassroomAnnouncementResponse

@@ -1,6 +1,6 @@
--- Migration: Add Google Classroom integration and update PDFs table
+-- Migration: Add Google Classroom integration and update Documents table
 -- Date: 2025-12-04
--- Description: Create user_google_classroom table and add google_file_id to pdfs table
+-- Description: Create user_google_classroom table and add google_document_id to documents table
 
 -- Create user_google_classroom table
 CREATE TABLE IF NOT EXISTS user_google_classroom (
@@ -33,11 +33,11 @@ CREATE POLICY "Users can delete their own google classroom connection"
   ON user_google_classroom FOR DELETE
   USING (user_id = auth.uid()::text);
 
--- Update pdfs table
-ALTER TABLE pdfs ADD COLUMN IF NOT EXISTS google_file_id TEXT;
-ALTER TABLE pdfs ALTER COLUMN storage_path DROP NOT NULL;
+-- Update documents table
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS google_document_id TEXT;
+ALTER TABLE documents ALTER COLUMN storage_path DROP NOT NULL;
 
 -- Comment on table and columns
 COMMENT ON TABLE user_google_classroom IS 'Stores Google Classroom connection details for users';
 COMMENT ON COLUMN user_google_classroom.user_id IS 'Supabase Auth User ID';
-COMMENT ON COLUMN pdfs.google_file_id IS 'Google Drive File ID for Classroom integration';
+COMMENT ON COLUMN documents.google_document_id IS 'Google Drive Document ID for Classroom integration';

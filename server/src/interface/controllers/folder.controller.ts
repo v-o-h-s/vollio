@@ -29,7 +29,7 @@ export class FolderController {
   ) {}
 
   /**
-   * GET /api/folders - List user's folders with PDF counts
+   * GET /api/folders - List user's folders with Document counts
    */
   async getAllFolders(
     request: FastifyRequest,
@@ -50,7 +50,7 @@ export class FolderController {
 
     const foldersData: FolderData[] = folders.map((folder) => ({
       ...folder.toJSON(),
-      pdf_count: (folder as any).pdfCount,
+      document_count: (folder as any).documentCount,
     }));
 
     reply.status(200).send({

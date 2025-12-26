@@ -75,7 +75,7 @@ export class FolderRepository implements IFolderRepository {
 
   async getAllUserFolders(
     userId: string
-  ): Promise<Array<Folder & { pdfCount: number }>> {
+  ): Promise<Array<Folder & { documentCount: number }>> {
     this.logger.info({ userId }, "Getting all user folders");
     const { data: folders, error } = await this.supabaseClient
       .from("folders")
@@ -93,12 +93,12 @@ export class FolderRepository implements IFolderRepository {
       return [];
     }
 
-    // Get PDF counts for each folder
-    const foldersWithCounts: Array<Folder & { pdfCount: number }> =
+    // Get Document counts for each folder
+    const foldersWithCounts: Array<Folder & { documentCount: number }> =
       await Promise.all(
         folders.map(async (folder: any) => {
           const { count } = await this.supabaseClient
-            .from("pdfs")
+            .from("documents")
             .select("*", { count: "exact", head: true })
             .eq("folder_id", folder.id);
 
@@ -112,8 +112,8 @@ export class FolderRepository implements IFolderRepository {
           );
 
           return Object.assign(folderEntity, {
-            pdfCount: count || 0,
-          }) as Folder & { pdfCount: number };
+            documentCount: count || 0,
+          }) as Folder & { documentCount: number };
         })
       );
 
@@ -283,10 +283,10 @@ export class FolderRepository implements IFolderRepository {
   ): Promise<void> {
     this.logger.info(
       { sourceFolderId, targetFolderId, userId },
-      "Moving PDFs between folders"
+      "Moving Documents between folders"
     );
     const { error } = await this.supabaseClient
-      .from("pdfs")
+      .from("documents")
       .update({ folder_id: targetFolderId || null })
       .eq("folder_id", sourceFolderId)
       .eq("user_id", userId);
@@ -294,7 +294,7 @@ export class FolderRepository implements IFolderRepository {
     if (error) {
       this.logger.error(
         { error, sourceFolderId, targetFolderId },
-        "Error moving PDFs between folders"
+        "Error moving Documents between folders"
       );
       throw new DatabaseError(error);
     }

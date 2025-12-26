@@ -2,9 +2,9 @@ import { Highlight } from "../entities/Highlight";
 
 export interface IHighlightRepository {
   /**
-   * Get all highlights for a user, optionally filtered by PDF ID
+   * Get all highlights for a user, optionally filtered by Document ID
    */
-  getAllHighlights(userId: string, pdfId?: string): Promise<Highlight[]>;
+  getAllHighlights(userId: string, documentId?: string): Promise<Highlight[]>;
 
   /**
    * Get a highlight by ID
@@ -27,9 +27,12 @@ export interface IHighlightRepository {
   deleteHighlight(id: string, userId: string): Promise<void>;
 
   /**
-   * Get all highlights for a PDF
+   * Get all highlights for a Document
    */
-  getHighlightsByPdfId(pdfId: string, userId: string): Promise<Highlight[]>;
+  getHighlightsByDocumentIdAndUserId(
+    documentId: string,
+    userId: string
+  ): Promise<Highlight[]>;
 
   /**
    * Get all highlights for a document

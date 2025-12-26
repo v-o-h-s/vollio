@@ -35,7 +35,7 @@ export interface Scaled {
 export interface ScaledPosition {
   boundingRect: Scaled;
   rects: Scaled[];
-  usePdfCoordinates?: boolean;
+  useDocumentCoordinates?: boolean;
 }
 
 /**
@@ -44,7 +44,7 @@ export interface ScaledPosition {
 export class Highlight {
   private id: string;
   private userId: string;
-  private pdfId: string;
+  private documentId: string;
   private type: HighlightType;
   private content: HighlightContent;
   private position: ScaledPosition;
@@ -59,7 +59,7 @@ export class Highlight {
   constructor(
     id: string,
     userId: string,
-    pdfId: string,
+    documentId: string,
     type: HighlightType,
     content: HighlightContent,
     position: ScaledPosition,
@@ -73,7 +73,7 @@ export class Highlight {
   ) {
     this.id = id;
     this.userId = userId;
-    this.pdfId = pdfId;
+    this.documentId = documentId;
     this.type = type;
     this.content = content;
     this.position = position;
@@ -101,10 +101,10 @@ export class Highlight {
   }
 
   /**
-   * Get PDF ID
+   * Get Document ID
    */
-  public getPdfId(): string {
-    return this.pdfId;
+  public getDocumentId(): string {
+    return this.documentId;
   }
 
 
@@ -231,7 +231,7 @@ export class Highlight {
     return {
       id: this.id,
       user_id: this.userId,
-      pdf_id: this.pdfId,
+      document_id: this.documentId,
       type: this.type,
       content: this.content,
       position: this.position,

@@ -52,10 +52,10 @@ export class DeleteFolderUseCase {
       }
     }
 
-    // Move PDFs to target folder or root
+    // Move Documents to target folder or root
     this.logger.info(
       { folderId: input.folderId, targetFolderId: input.moveContentsTo },
-      "Moving PDFs out of folder being deleted"
+      "Moving Documents out of folder being deleted"
     );
     await this.folderRepository.movePdfsBetweenFolders(
       input.folderId,

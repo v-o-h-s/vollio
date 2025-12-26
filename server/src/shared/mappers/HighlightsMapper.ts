@@ -11,7 +11,7 @@ export class HighlightsMapper {
     return new Highlight(
       row.id,
       row.user_id,
-      row.pdf_id,
+      row.document_id,
       row.type as HighlightType,
       row.content as HighlightContent,
       row.position as ScaledPosition,
@@ -28,7 +28,7 @@ export class HighlightsMapper {
     return {
       id: highlight.getId(),
       userId: highlight.getUserId(),
-      pdfId: highlight.getPdfId(),
+      documentId: highlight.getDocumentId(),
       type: highlight.getType(),
       content: highlight.getContent(),
       position: highlight.getPosition(),

@@ -61,7 +61,7 @@ export class UpdateNoteUseCase {
       input.data.content !== undefined
         ? input.data.content
         : existingNote.getContent(),
-      existingNote.getPdfId(),
+      existingNote.getDocumentId(),
       existingNote.getCreatedAt(),
       new Date() // Update timestamp
     );

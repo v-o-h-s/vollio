@@ -48,7 +48,7 @@ export class SummaryRepository implements ISummaryRepository {
     const { data, error } = await this.supabaseClient
       .from("summaries")
       .select("*")
-      .eq("pdf_id", documentId);
+      .eq("document_id", documentId);
     if (error) {
       throw new DatabaseError(error);
     }
@@ -60,7 +60,7 @@ export class SummaryRepository implements ISummaryRepository {
     const { error } = await this.supabaseClient
       .from("summaries")
       .delete()
-      .eq("pdf_id", documentId);
+      .eq("document_id", documentId);
     if (error) {
       throw new DatabaseError(error);
     }

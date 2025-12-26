@@ -3,8 +3,8 @@ import { FastifyInstance, FastifyPluginAsync, FastifyPluginOptions } from "fasti
 const testRoute: FastifyPluginAsync = async (fastify: FastifyInstance, opts: FastifyPluginOptions) => {
     fastify.get<{ Params: { id: string } }>(`${opts.prefix}/:id`, async (request, reply) => {
         const testController = request.diScope.resolve("testController");
-        // return testController.chunkFile(request, reply);
-        return testController.embeddFile(request, reply);
+        // return testController.chunkDocument(request, reply);
+        return testController.embeddDocument(request, reply);
     });
 };
 

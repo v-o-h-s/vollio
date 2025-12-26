@@ -1,4 +1,4 @@
--- Add folders table for organizing PDFs
+-- Add folders table for organizing Documents
 CREATE TABLE folders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL, -- Clerk user ID
@@ -12,8 +12,8 @@ CREATE TABLE folders (
   CONSTRAINT folders_no_self_parent CHECK (id != parent_id)
 );
 
--- Add folder_id column to PDFs table
-ALTER TABLE pdfs ADD COLUMN folder_id UUID REFERENCES folders(id) ON DELETE SET NULL;
+-- Add folder_id column to Documents table
+ALTER TABLE documents ADD COLUMN folder_id UUID REFERENCES folders(id) ON DELETE SET NULL;
 
 -- Enable Row Level Security for folders
 ALTER TABLE folders ENABLE ROW LEVEL SECURITY;
@@ -36,7 +36,7 @@ CREATE POLICY "Users can only delete their own folders" ON folders
 CREATE INDEX idx_folders_user_id ON folders(user_id);
 CREATE INDEX idx_folders_parent_id ON folders(parent_id);
 CREATE INDEX idx_folders_created_at ON folders(created_at DESC);
-CREATE INDEX idx_pdfs_folder_id ON pdfs(folder_id);
+CREATE INDEX idx_documents_folder_id ON documents(folder_id);
 
 -- Update trigger for folders table
 CREATE TRIGGER update_folders_updated_at BEFORE UPDATE ON folders
@@ -66,8 +66,8 @@ AS $$
   ORDER BY fp.level DESC;
 $$;
 
--- Function to count PDFs in a folder (including subfolders)
-CREATE OR REPLACE FUNCTION count_pdfs_in_folder(folder_uuid UUID)
+-- Function to count Documents in a folder (including subfolders)
+CREATE OR REPLACE FUNCTION count_documents_in_folder(folder_uuid UUID)
 RETURNS INTEGER
 LANGUAGE SQL
 STABLE
@@ -84,7 +84,7 @@ AS $$
     INNER JOIN folder_tree ft ON f.parent_id = ft.id
   )
   SELECT COUNT(*)::INTEGER
-  FROM pdfs p
+  FROM documents p
   WHERE p.folder_id IN (SELECT id FROM folder_tree);
 $$;
 

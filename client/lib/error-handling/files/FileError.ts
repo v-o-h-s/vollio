@@ -1,6 +1,6 @@
 import { BaseAppError, ErrorSeverity } from "../BaseAppError";
 
-export enum FileErrorType {
+export enum DocumentErrorType {
   GENERAL_ERROR = "GENERAL_ERROR",
   LOADING_ERROR = "LOADING_ERROR",
   RENDERING_ERROR = "RENDERING_ERROR",
@@ -9,15 +9,15 @@ export enum FileErrorType {
 }
 
 /**
- * File errors
+ * Document errors
  * Use static factory methods to create specific error types
  */
-export class FileError extends BaseAppError {
-  public readonly FileErrorType: FileErrorType;
-  public readonly FileName: string
+export class DocumentError extends BaseAppError {
+  public readonly DocumentErrorType: DocumentErrorType;
+  public readonly DocumentName: string
   private constructor(
-    FileName: string,
-    FileErrorType: FileErrorType,
+    DocumentName: string,
+    DocumentErrorType: DocumentErrorType,
     message: string,
     options: {
       severity: ErrorSeverity;
@@ -36,21 +36,21 @@ export class FileError extends BaseAppError {
       context: options.context,
       actionLabel: options.actionLabel,
     });
-    this.FileErrorType = FileErrorType;
-    this.FileName = FileName
+    this.DocumentErrorType = DocumentErrorType;
+    this.DocumentName = DocumentName
   }
 
   /**
-   * Create a general File error
+   * Create a general Document error
    */
   static general(
-    message: string = "File error",
-    fileName: string = "file",
+    message: string = "Document error",
+    documentName: string = "document",
     context?: any,
-  ): FileError {
-    return new FileError(fileName, FileErrorType.GENERAL_ERROR, message, {
+  ): DocumentError {
+    return new DocumentError(documentName, DocumentErrorType.GENERAL_ERROR, message, {
       severity: ErrorSeverity.MEDIUM,
-      userMessage: `There was an error with the file ${fileName}.`,
+      userMessage: `There was an error with the document ${documentName}.`,
       statusCode: 422,
       context,
       actionLabel: "Retry",
@@ -61,13 +61,13 @@ export class FileError extends BaseAppError {
    * Create a loading error
    */
   static loadingError(
-    message: string = "File loading failed",
-    fileName: string = "file",
+    message: string = "Document loading failed",
+    documentName: string = "document",
     context?: any,
-  ): FileError {
-    return new FileError(fileName, FileErrorType.LOADING_ERROR, message, {
+  ): DocumentError {
+    return new DocumentError(documentName, DocumentErrorType.LOADING_ERROR, message, {
       severity: ErrorSeverity.MEDIUM,
-      userMessage: `Unable to load the file ${fileName}. The file might be corrupted.`,
+      userMessage: `Unable to load the document ${documentName}. The document might be corrupted.`,
       statusCode: 422,
       context,
       actionLabel: "Retry Loading",
@@ -77,34 +77,34 @@ export class FileError extends BaseAppError {
 
 
   /**
-   * Create a corrupted file error
+   * Create a corrupted document error
    */
   static corrupted(
-    message: string = "File file is corrupted",
-    fileName: string = "file",
+    message: string = "Document document is corrupted",
+    documentName: string = "document",
     context?: any ,
-  ): FileError {
-    return new FileError(fileName, FileErrorType.CORRUPTED, message, {
+  ): DocumentError {
+    return new DocumentError(documentName, DocumentErrorType.CORRUPTED, message, {
       severity: ErrorSeverity.HIGH,
-      userMessage: `The file ${fileName} appears to be corrupted and cannot be opened.`,
+      userMessage: `The document ${documentName} appears to be corrupted and cannot be opened.`,
       statusCode: 422,
       context,
-      actionLabel: "Choose Another File",
+      actionLabel: "Choose Another Document",
     });
   }
 
   getTitle(): string {
-    switch (this.FileErrorType) {
-      case FileErrorType.GENERAL_ERROR:
-        return "File Error";
-      case FileErrorType.LOADING_ERROR:
-        return "File Loading Failed";
-      case FileErrorType.RENDERING_ERROR:
-        return "File Display Error";
-      case FileErrorType.CORRUPTED:
-        return "Corrupted File";
+    switch (this.DocumentErrorType) {
+      case DocumentErrorType.GENERAL_ERROR:
+        return "Document Error";
+      case DocumentErrorType.LOADING_ERROR:
+        return "Document Loading Failed";
+      case DocumentErrorType.RENDERING_ERROR:
+        return "Document Display Error";
+      case DocumentErrorType.CORRUPTED:
+        return "Corrupted Document";
       default:
-        return "File Error";
+        return "Document Error";
     }
   }
 

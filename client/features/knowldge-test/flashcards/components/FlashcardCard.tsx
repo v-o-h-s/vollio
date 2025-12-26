@@ -14,7 +14,7 @@ import {
 } from "@/components/ui";
 import Link from "next/link";
 import { GraduationCap, Layers, MoreVertical, Trash2 } from "lucide-react";
-import { FlashCardsSetSummary } from "@shared/types/responses/flashcardsRoutes";
+import { FlashCardsSetSummary } from "@vollio/shared";
 import { format } from "date-fns";
 
 interface FlashcardCardProps {

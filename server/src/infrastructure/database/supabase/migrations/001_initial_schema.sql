@@ -15,27 +15,27 @@ AS $$
   )::text;
 $$;
 
--- PDFs table
-CREATE TABLE pdfs (
+-- Documents table
+CREATE TABLE documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL, -- Clerk user ID
-  filename TEXT NOT NULL,
-  file_size BIGINT NOT NULL,
+  documentname TEXT NOT NULL,
+  document_size BIGINT NOT NULL,
   storage_path TEXT NOT NULL, -- Path in Supabase Storage
-  mime_type TEXT NOT NULL DEFAULT 'application/pdf',
+  mime_type TEXT NOT NULL DEFAULT 'application/document',
   uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
-  CONSTRAINT pdfs_user_id_check CHECK (char_length(user_id) > 0),
-  CONSTRAINT pdfs_filename_check CHECK (char_length(filename) > 0),
-  CONSTRAINT pdfs_file_size_check CHECK (file_size > 0)
+  CONSTRAINT documents_user_id_check CHECK (char_length(user_id) > 0),
+  CONSTRAINT documents_documentname_check CHECK (char_length(documentname) > 0),
+  CONSTRAINT documents_document_size_check CHECK (document_size > 0)
 );
 
 -- User Activity table
 CREATE TABLE user_activity (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL, -- Clerk user ID
-  pdf_id UUID NOT NULL REFERENCES pdfs(id) ON DELETE CASCADE,
+  document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
   activity_type TEXT NOT NULL DEFAULT 'view',
   accessed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
@@ -44,25 +44,25 @@ CREATE TABLE user_activity (
 );
 
 -- Enable Row Level Security
-ALTER TABLE pdfs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_activity ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for PDFs table - Granular CRUD operations
--- Users can only SELECT their own PDFs
-CREATE POLICY "Users can only view their own PDFs" ON pdfs
+-- RLS Policies for Documents table - Granular CRUD operations
+-- Users can only SELECT their own Documents
+CREATE POLICY "Users can only view their own Documents" ON documents
   FOR SELECT USING (user_id = requesting_user_id());
 
--- Users can only INSERT PDFs with their own user_id
-CREATE POLICY "Users can only create their own PDFs" ON pdfs
+-- Users can only INSERT Documents with their own user_id
+CREATE POLICY "Users can only create their own Documents" ON documents
   FOR INSERT WITH CHECK (user_id = requesting_user_id());
 
--- Users can only UPDATE their own PDFs
-CREATE POLICY "Users can only update their own PDFs" ON pdfs
+-- Users can only UPDATE their own Documents
+CREATE POLICY "Users can only update their own Documents" ON documents
   FOR UPDATE USING (user_id = requesting_user_id())
   WITH CHECK (user_id = requesting_user_id());
 
--- Users can only DELETE their own PDFs
-CREATE POLICY "Users can only delete their own PDFs" ON pdfs
+-- Users can only DELETE their own Documents
+CREATE POLICY "Users can only delete their own Documents" ON documents
   FOR DELETE USING (user_id = requesting_user_id());
 
 -- RLS Policies for User Activity table - Granular CRUD operations
@@ -84,14 +84,14 @@ CREATE POLICY "Users can only delete their own activity" ON user_activity
   FOR DELETE USING (user_id = requesting_user_id());
 
 -- Indexes for performance
-CREATE INDEX idx_pdfs_user_id ON pdfs(user_id);
-CREATE INDEX idx_pdfs_uploaded_at ON pdfs(uploaded_at DESC);
+CREATE INDEX idx_documents_user_id ON documents(user_id);
+CREATE INDEX idx_documents_uploaded_at ON documents(uploaded_at DESC);
 
 CREATE INDEX idx_user_activity_user_id ON user_activity(user_id);
 CREATE INDEX idx_user_activity_accessed_at ON user_activity(accessed_at DESC);
-CREATE INDEX idx_user_activity_pdf_id ON user_activity(pdf_id);
+CREATE INDEX idx_user_activity_document_id ON user_activity(document_id);
 
--- Update trigger for pdfs table
+-- Update trigger for documents table
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -100,5 +100,5 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
-CREATE TRIGGER update_pdfs_updated_at BEFORE UPDATE ON pdfs
+CREATE TRIGGER update_documents_updated_at BEFORE UPDATE ON documents
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

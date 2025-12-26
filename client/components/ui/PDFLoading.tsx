@@ -2,7 +2,7 @@ import React from "react";
 import { Progress } from "@/components/ui/progress";
 import { Loader2 } from "lucide-react";
 
-export const PDFLoading = ({
+export const DocumentLoading = ({
   progress,
 }: {
   progress: { loaded: number; total: number };
@@ -18,7 +18,7 @@ export const PDFLoading = ({
       <div className="flex flex-col items-center gap-6 p-8 rounded-2xl bg-card border border-border shadow-2xl animate-in fade-in zoom-in duration-300 w-[300px]">
         <div className="flex flex-col items-center gap-2 w-full">
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-            Loading PDF
+            Loading Document
           </h3>
 
           {hasTotal ? (

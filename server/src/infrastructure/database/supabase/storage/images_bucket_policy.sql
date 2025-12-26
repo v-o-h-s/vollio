@@ -19,7 +19,7 @@ CREATE POLICY "Users can upload images to their own folder" ON storage.objects
     bucket_id = 'images' AND 
     -- The first folder in the path matches their Clerk user ID
     storage_requesting_user_id() = (storage.foldername(name))[1] AND 
-    -- The file is an allowed image type
+    -- The document is an allowed image type
     (storage.extension(name)) IN ('jpg', 'jpeg', 'png', 'gif', 'webp')
   );
 

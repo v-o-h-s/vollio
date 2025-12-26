@@ -15,7 +15,7 @@ CREATE TABLE public.folders (
 CREATE TABLE public.highlights (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
-  pdf_id uuid NOT NULL,
+  document_id uuid NOT NULL,
   type character varying NOT NULL DEFAULT 'text'::character varying CHECK (type::text = ANY (ARRAY['text'::character varying, 'area'::character varying]::text[])),
   content jsonb DEFAULT '{}'::jsonb CHECK (jsonb_typeof(content) = 'object'::text),
   position jsonb NOT NULL CHECK (jsonb_typeof("position") = 'object'::text),
@@ -28,48 +28,48 @@ CREATE TABLE public.highlights (
   updated_at timestamp with time zone DEFAULT now(),
   CONSTRAINT highlights_pkey PRIMARY KEY (id),
   CONSTRAINT highlights_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
-  CONSTRAINT highlights_pdf_id_fkey FOREIGN KEY (pdf_id) REFERENCES public.pdfs(id)
+  CONSTRAINT highlights_document_id_fkey FOREIGN KEY (document_id) REFERENCES public.documents(id)
 );
 CREATE TABLE public.notes (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   title text,
   content jsonb CHECK (content IS NULL OR content ? 'type'::text),
-  pdf_id uuid,
-  pdf_annotation_id uuid,
+  document_id uuid,
+  document_annotation_id uuid,
   created_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
   is_deleted boolean DEFAULT false,
   CONSTRAINT notes_pkey PRIMARY KEY (id),
   CONSTRAINT notes_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
-  CONSTRAINT notes_pdf_id_fkey FOREIGN KEY (pdf_id) REFERENCES public.pdfs(id)
+  CONSTRAINT notes_document_id_fkey FOREIGN KEY (document_id) REFERENCES public.documents(id)
 );
-CREATE TABLE public.pdfs (
+CREATE TABLE public.documents (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
-  filename text NOT NULL CHECK (char_length(filename) > 0),
-  file_size bigint NOT NULL CHECK (file_size > 0),
+  documentname text NOT NULL CHECK (char_length(documentname) > 0),
+  document_size bigint NOT NULL CHECK (document_size > 0),
   storage_path text,
-  mime_type text NOT NULL DEFAULT 'application/pdf'::text,
+  mime_type text NOT NULL DEFAULT 'application/document'::text,
   uploaded_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
   folder_id uuid,
-  google_file_id text,
+  google_document_id text,
   user_id uuid NOT NULL,
-  CONSTRAINT pdfs_pkey PRIMARY KEY (id),
-  CONSTRAINT pdfs_folder_id_fkey FOREIGN KEY (folder_id) REFERENCES public.folders(id),
-  CONSTRAINT pdfs_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+  CONSTRAINT documents_pkey PRIMARY KEY (id),
+  CONSTRAINT documents_folder_id_fkey FOREIGN KEY (folder_id) REFERENCES public.folders(id),
+  CONSTRAINT documents_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
 CREATE TABLE public.summaries (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
-  pdf_id uuid NOT NULL,
+  document_id uuid NOT NULL,
   main_points ARRAY DEFAULT '{}'::text[],
   attributes jsonb,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
   CONSTRAINT summaries_pkey PRIMARY KEY (id),
   CONSTRAINT summaries_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id),
-  CONSTRAINT summaries_pdf_id_fkey FOREIGN KEY (pdf_id) REFERENCES public.pdfs(id)
+  CONSTRAINT summaries_document_id_fkey FOREIGN KEY (document_id) REFERENCES public.documents(id)
 );
 CREATE TABLE public.user_google_classroom (
   user_id uuid NOT NULL,

@@ -27,7 +27,7 @@ DROP TRIGGER IF EXISTS update_quiz_attempt_updated_at ON quiz_attempts;
 -- But we'll be explicit for clarity
 
 -- Clean up any quiz-related storage buckets (if any)
--- Note: This would need to be done manually in Supabase dashboard if there were quiz-related files
+-- Note: This would need to be done manually in Supabase dashboard if there were quiz-related documents
 
 -- Remove quiz-related document processing columns if they exist
 -- (These might have been added for RAG functionality)
@@ -35,13 +35,13 @@ DO $$
 BEGIN
     -- Check if columns exist before trying to drop them
     IF EXISTS (SELECT 1 FROM information_schema.columns 
-               WHERE table_name = 'pdfs' AND column_name = 'quiz_processed') THEN
-        ALTER TABLE pdfs DROP COLUMN quiz_processed;
+               WHERE table_name = 'documents' AND column_name = 'quiz_processed') THEN
+        ALTER TABLE documents DROP COLUMN quiz_processed;
     END IF;
     
     IF EXISTS (SELECT 1 FROM information_schema.columns 
-               WHERE table_name = 'pdfs' AND column_name = 'quiz_chunks_count') THEN
-        ALTER TABLE pdfs DROP COLUMN quiz_chunks_count;
+               WHERE table_name = 'documents' AND column_name = 'quiz_chunks_count') THEN
+        ALTER TABLE documents DROP COLUMN quiz_chunks_count;
     END IF;
     
     IF EXISTS (SELECT 1 FROM information_schema.columns 

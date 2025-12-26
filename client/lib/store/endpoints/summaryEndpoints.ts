@@ -1,10 +1,10 @@
 import { ApiBuilder } from "./types";
-import { SummaryData } from "@shared/types/responses/summaryRoutes";
+import { SummaryData } from "@vollio/shared";
 import {
   CreateSummaryDTO,
   UpdateSummaryDTO,
-} from "@shared/validation/summarySchema";
-import { ServerSuccessResponse } from "@shared/types/responses/general";
+} from "@vollio/shared";
+import { ServerSuccessResponse } from "@vollio/shared";
 
 export const summaryEndpoints = (builder: ApiBuilder) => ({
   getSummariesByDocumentId: builder.query<SummaryData[], string>({

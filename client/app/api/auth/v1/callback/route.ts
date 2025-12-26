@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   // if "next" is in param, use it as the redirect URL
-  let next = searchParams.get("next") ?? "/dashboard/pdfs";
+  let next = searchParams.get("next") ?? "/dashboard/documents";
 
   console.log("Auth callback params:", {
     code: code ? "***" : null,
@@ -17,8 +17,8 @@ export async function GET(request: Request) {
 
   if (!next.startsWith("/")) {
     // if "next" is not a relative URL, use the default
-    console.log("Invalid next param, resetting to /dashboard/pdfs");
-    next = "/dashboard/pdfs";
+    console.log("Invalid next param, resetting to /dashboard/documents");
+    next = "/dashboard/documents";
   }
 
   if (code) {

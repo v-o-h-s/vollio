@@ -237,7 +237,7 @@ Retrieves content (announcements and materials) for a specific course.
             "alternateLink": "string",
             "updatedAt": "string",
             "materials": {
-              "driveFiles": [
+              "driveDocuments": [
                 {
                   "id": "string",
                   "title": "string"
@@ -255,7 +255,7 @@ Retrieves content (announcements and materials) for a specific course.
             "alternateLink": "string",
             "updatedAt": "string",
             "materials": {
-              "driveFiles": [
+              "driveDocuments": [
                 {
                   "id": "string",
                   "title": "string",

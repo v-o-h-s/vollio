@@ -1,5 +1,5 @@
 /**
- * Main types index file - exports all type definitions
+ * Main types index document - exports all type definitions
  */
 
 // Re-export all types from individual modules
@@ -8,7 +8,7 @@ export * from "./auth";
 export * from "./dashboard";
 export * from "./database";
 export * from "./editor";
-export * from "./pdf";
+export * from "./document";
 export * from "./theme";
 
 // Re-export JSONContent from TipTap for convenience

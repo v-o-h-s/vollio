@@ -26,10 +26,10 @@ CREATE TRIGGER set_notes_user_id
   FOR EACH ROW
   EXECUTE FUNCTION set_user_id_from_auth();
 
--- PDFs table
-DROP TRIGGER IF EXISTS set_pdfs_user_id ON pdfs;
-CREATE TRIGGER set_pdfs_user_id
-  BEFORE INSERT ON pdfs
+-- Documents table
+DROP TRIGGER IF EXISTS set_documents_user_id ON documents;
+CREATE TRIGGER set_documents_user_id
+  BEFORE INSERT ON documents
   FOR EACH ROW
   EXECUTE FUNCTION set_user_id_from_auth();
 
@@ -76,7 +76,7 @@ CREATE TRIGGER set_summaries_user_id
 -- COMMENTED OUT - Only uncomment if you want to modify column defaults
 
 -- ALTER TABLE notes ALTER COLUMN user_id SET DEFAULT auth.uid()::text;
--- ALTER TABLE pdfs ALTER COLUMN user_id SET DEFAULT auth.uid()::text;
+-- ALTER TABLE documents ALTER COLUMN user_id SET DEFAULT auth.uid()::text;
 -- ALTER TABLE highlights ALTER COLUMN user_id SET DEFAULT auth.uid()::text;
 -- ALTER TABLE folders ALTER COLUMN user_id SET DEFAULT auth.uid()::text;
 -- ALTER TABLE user_activity ALTER COLUMN user_id SET DEFAULT auth.uid()::text;

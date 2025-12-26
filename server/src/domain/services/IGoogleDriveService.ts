@@ -1,15 +1,15 @@
 import { Readable } from "stream";
 
 export interface IGoogleDriveService {
-  getFileMetadata(
+  getDocumentMetadata(
     accessToken: string,
-    fileId: string
+    documentId: string
   ): Promise<{
     id: string;
     name: string;
     mimeType: string;
     size: number;
   } | null>;
-  getFileById(accessToken: string, fileId: string): Promise<Buffer>;
-  streamFile(accessToken: string, fileId: string): Promise<Readable>;
+  getDocumentById(accessToken: string, documentId: string): Promise<Buffer>;
+  streamDocument(accessToken: string, documentId: string): Promise<Readable>;
 }

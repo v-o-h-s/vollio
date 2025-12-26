@@ -10,7 +10,7 @@ import { IsConnectedToGoogleClassroomUseCase } from "../../application/use-cases
 import { GetCourseContentUseCase } from "../../application/use-cases/google-Classroom/GetCourseContentUseCase";
 import { GetCoursesWithContentUseCase } from "../../application/use-cases/google-Classroom/GetCoursesWithContentUseCase";
 import { ClassroomAnnouncementResponse } from "../../shared/types/lms/classroom";
-import { AddFileFromGoogleDriveUseCase } from "../../application/use-cases/files/AddFileFromGoogleDriveUseCase";
+import { AddDocumentFromGoogleDriveUseCase } from "../../application/use-cases/documents/AddDocumentFromGoogleDriveUseCase";
 import {
   ConnectCallbackResponse,
   RefreshAccessTokenResponse,
@@ -31,7 +31,7 @@ export class GoogleClassroomController {
   private getCoursesUseCase: GetCoursesUseCase;
   private isConnectedUseCase: IsConnectedToGoogleClassroomUseCase;
   private getCourseContentUseCase: GetCourseContentUseCase;
-  private addFileFromGoogleDriveUseCase: AddFileFromGoogleDriveUseCase;
+  private addDocumentFromGoogleDriveUseCase: AddDocumentFromGoogleDriveUseCase;
 
   constructor(
     googleClassroomService: GoogleClassroomService,
@@ -42,7 +42,7 @@ export class GoogleClassroomController {
     getCoursesUseCase: GetCoursesUseCase,
     isConnectedUseCase: IsConnectedToGoogleClassroomUseCase,
     getCourseContentUseCase: GetCourseContentUseCase,
-    addFileFromGoogleDriveUseCase: AddFileFromGoogleDriveUseCase
+    addDocumentFromGoogleDriveUseCase: AddDocumentFromGoogleDriveUseCase
   ) {
     this.googleClassroomService = googleClassroomService;
     this.fromCodeToDatabaseUseCase = fromCodeToDatabaseUseCase;
@@ -52,7 +52,7 @@ export class GoogleClassroomController {
     this.getCoursesUseCase = getCoursesUseCase;
     this.isConnectedUseCase = isConnectedUseCase;
     this.getCourseContentUseCase = getCourseContentUseCase;
-    this.addFileFromGoogleDriveUseCase = addFileFromGoogleDriveUseCase;
+    this.addDocumentFromGoogleDriveUseCase = addDocumentFromGoogleDriveUseCase;
   }
 
   async connect(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -113,7 +113,7 @@ export class GoogleClassroomController {
     await this.fromCodeToDatabaseUseCase.execute(code);
 
     // Redirect back to client after successful connect
-    reply.redirect(`${process.env.FRONTEND_URL}/dashboard/pdfs`);
+    reply.redirect(`${process.env.FRONTEND_URL}/dashboard/documents`);
   }
 
   async refreshAccessToken(

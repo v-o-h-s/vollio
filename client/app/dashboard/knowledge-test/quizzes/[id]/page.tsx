@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetQuizQuery } from "@/lib/store/apiSlice";
-import { QuizQuestionsTypeEnum } from "@shared/validation/quizSchemas";
+import { QuizQuestionsTypeEnum } from "@vollio/shared";
 import { MCQQuestion, TrueFalseQuestion } from "@server/domain/entities/Quiz";
 import { Badge } from "@/components/ui";
 

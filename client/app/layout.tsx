@@ -47,7 +47,7 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Vollio",
   description:
-    "Upload PDFs, add notes, and create flashcards for better studying",
+    "Upload Documents, add notes, and create flashcards for better studying",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",

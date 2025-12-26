@@ -76,9 +76,9 @@ export function mapErrorToAppError(
     );
   }
 
-  // Handle file validation errors
+  // Handle document validation errors
   if (
-    error?.message?.includes("file size") ||
+    error?.message?.includes("document size") ||
     error?.message?.includes("too large")
   ) {
     return createAppError(
@@ -90,8 +90,8 @@ export function mapErrorToAppError(
   }
 
   if (
-    error?.message?.includes("file type") ||
-    error?.message?.includes("PDF")
+    error?.message?.includes("document type") ||
+    error?.message?.includes("Document")
   ) {
     return createAppError(
       ErrorType.INVALID_FILE_TYPE,
@@ -170,7 +170,7 @@ function mapRTKQueryError(error: any, context?: ErrorContext): AppError {
     case 413:
       return createAppError(
         ErrorType.FILE_TOO_LARGE,
-        data?.error || "File too large",
+        data?.error || "Document too large",
         context,
         error
       );
@@ -178,7 +178,7 @@ function mapRTKQueryError(error: any, context?: ErrorContext): AppError {
     case 415:
       return createAppError(
         ErrorType.INVALID_FILE_TYPE,
-        data?.error || "Unsupported file type",
+        data?.error || "Unsupported document type",
         context,
         error
       );
@@ -383,36 +383,36 @@ export async function withRetry<T>(
  * Creates error context for upload operations
  */
 export function createUploadErrorContext(
-  fileName: string,
-  fileSize: number,
-  fileType?: string,
+  documentName: string,
+  size: number,
+  documentType?: string,
   uploadProgress?: number
 ): ErrorContext {
   return {
-    component: "FileUpload",
+    component: "DocumentUpload",
     action: "upload",
-    fileName,
-    fileSize,
+    documentName,
+    size,
     // Include additional context if provided
-    ...(fileType && { fileType }),
+    ...(documentType && { documentType }),
     ...(uploadProgress !== undefined && { uploadProgress }),
   };
 }
 
 /**
- * Creates error context for PDF operations
+ * Creates error context for Document operations
  */
-export function createPDFErrorContext(
+export function createDocumentErrorContext(
   operation: "load" | "render" | "annotate" | "save",
-  pdfId?: string,
-  fileName?: string,
+  documentId?: string,
+  documentName?: string,
   pageNumber?: number
 ): ErrorContext {
   return {
-    component: "PDFViewer",
+    component: "DocumentViewer",
     action: operation,
-    pdfId,
-    fileName,
+    documentId,
+    documentName,
     ...(pageNumber !== undefined && { pageNumber }),
   };
 }

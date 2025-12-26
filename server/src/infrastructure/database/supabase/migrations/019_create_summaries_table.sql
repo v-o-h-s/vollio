@@ -1,24 +1,24 @@
 -- Migration: Create summaries table
 -- Date: December 2, 2025
--- Description: Create summaries table to store main points collected from PDFs without creating highlights
+-- Description: Create summaries table to store main points collected from Documents without creating highlights
 
 -- Create summaries table
 CREATE TABLE IF NOT EXISTS summaries (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id TEXT NOT NULL,
-    pdf_id UUID NOT NULL REFERENCES pdfs(id) ON DELETE CASCADE,
+    document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
     main_points TEXT[] DEFAULT '{}',
     attributes JSONB,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     
-    -- Ensure one summary per user per PDF
-    CONSTRAINT unique_user_pdf_summary UNIQUE (user_id, pdf_id)
+    -- Ensure one summary per user per Document
+    CONSTRAINT unique_user_document_summary UNIQUE (user_id, document_id)
 );
 
 -- Create indexes for efficient querying
 CREATE INDEX IF NOT EXISTS idx_summaries_user_id ON summaries(user_id);
-CREATE INDEX IF NOT EXISTS idx_summaries_pdf_id ON summaries(pdf_id);
+CREATE INDEX IF NOT EXISTS idx_summaries_document_id ON summaries(document_id);
 CREATE INDEX IF NOT EXISTS idx_summaries_main_points ON summaries USING GIN (main_points);
 
 -- Create updated_at trigger
@@ -59,8 +59,8 @@ CREATE POLICY summaries_delete_policy ON summaries
     USING (auth.jwt() ->> 'sub' = user_id);
 
 -- Comments
-COMMENT ON TABLE summaries IS 'Stores user summaries with main points collected from PDFs';
+COMMENT ON TABLE summaries IS 'Stores user summaries with main points collected from Documents';
 COMMENT ON COLUMN summaries.user_id IS 'Clerk user ID';
-COMMENT ON COLUMN summaries.pdf_id IS 'Reference to the PDF';
+COMMENT ON COLUMN summaries.document_id IS 'Reference to the Document';
 COMMENT ON COLUMN summaries.main_points IS 'Array of text snippets collected as main points';
 COMMENT ON COLUMN summaries.attributes IS 'Flexible JSONB field for additional metadata';

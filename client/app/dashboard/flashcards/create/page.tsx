@@ -37,7 +37,7 @@ import Link from "next/link";
 import { toast } from "react-toastify";
 import { FlashcardPreview, FlashcardEditor } from "@/components/flashcards";
 import { DocumentSelectionTabs } from "@/components/quiz/DocumentSelectionTabs";
-import { useGetAllFilesQuery } from "@/lib/store/apiSlice";
+import { useGetAllDocumentsQuery } from "@/lib/store/apiSlice";
 
 // Flashcard interface
 interface FlashcardItem {
@@ -114,8 +114,8 @@ export default function CreateFlashCardsPage() {
     useState<(typeof difficulties)[number]>("Medium");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Fetch PDFs for AI generation
-  const { data: filesData, isLoading: isLoadingPDFs } = useGetAllFilesQuery();
+  // Fetch Documents for AI generation
+  const { data: documentsData, isLoading: isLoadingDocuments } = useGetAllDocumentsQuery();
 
   // If opened from a quiz, prefill title and show banner
   useEffect(() => {
@@ -472,16 +472,16 @@ export default function CreateFlashCardsPage() {
                 <CardContent className="p-6">
                   <DocumentSelectionTabs
                     availableDocuments={
-                      (filesData || []).map((p: any) => ({
+                      (documentsData || []).map((p: any) => ({
                         id: p.id,
-                        title: p.filename ?? p.title ?? "Untitled",
+                        title: p.name ?? p.title ?? "Untitled",
                       })) as any
                     }
                     selectedDocuments={selectedDocuments}
                     onAddDocument={(d: any) =>
                       handleAddDocument({ id: d.id, title: d.title })
                     }
-                    isLoadingPDFs={isLoadingPDFs}
+                    isLoadingDocuments={isLoadingDocuments}
                   />
                   {!autoDocument && (
                     <p className="text-sm text-pink-600 mt-2 flex items-center gap-2 animate-pulse">
@@ -668,16 +668,16 @@ export default function CreateFlashCardsPage() {
                           </p>
                           <DocumentSelectionTabs
                             availableDocuments={
-                              (filesData || []).map((p: any) => ({
+                              (documentsData || []).map((p: any) => ({
                                 id: p.id,
-                                title: p.filename ?? p.title ?? "Untitled",
+                                title: p.name ?? p.title ?? "Untitled",
                               })) as any
                             }
                             selectedDocuments={selectedDocuments}
                             onAddDocument={(d: any) =>
                               handleAddDocument({ id: d.id, title: d.title })
                             }
-                            isLoadingPDFs={isLoadingPDFs}
+                            isLoadingDocuments={isLoadingDocuments}
                           />
                         </div>
                       ) : (

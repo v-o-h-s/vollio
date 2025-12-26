@@ -3,7 +3,7 @@ import { JSONContent } from "../note";
 export interface CreateNoteDTO {
   title?: string;
   content?: JSONContent;
-  pdfId?: string;
+  documentId?: string;
 }
 
 export interface UpdateNoteDTO {

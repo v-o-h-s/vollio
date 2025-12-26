@@ -7,7 +7,7 @@ export interface NoteData {
   title?: string;
   content?: JSONContent;
   userId: string;
-  pdfId?: string;
+  documentId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

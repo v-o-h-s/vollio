@@ -2,7 +2,7 @@
  * Dashboard-related types for UI state management and data aggregation
  */
 
-import { PDFDocument, UserActivity } from "./pdf";
+import { DocumentDocument, UserActivity } from "./document";
 
 // ============================================================================
 // DASHBOARD TYPES
@@ -12,9 +12,9 @@ import { PDFDocument, UserActivity } from "./pdf";
  * Dashboard data aggregation
  */
 export interface DashboardData {
-  pdfs: PDFDocument[];
+  documents: DocumentDocument[];
   recentActivity: UserActivity | null;
-  totalFiles: number;
+  totalDocuments: number;
   totalSize: number;
 }
 
@@ -47,7 +47,7 @@ export interface ActivitySummary {
   lastActivity: string | null; // ISO string for Redux serialization
   mostViewedPdf: {
     id: string;
-    filename: string;
+    name: string;
     viewCount: number;
   } | null;
 }
@@ -60,12 +60,12 @@ export interface SupabaseActivityResponse {
   data?: {
     activities: Array<{
       id: string;
-      pdfId: string;
+      documentId: string;
       activityType: "view" | "upload" | "delete";
       accessedAt: string;
-      pdf?: {
-        filename: string;
-        fileUrl: string;
+      document?: {
+        name: string;
+        documentUrl: string;
       };
     }>;
     summary: {

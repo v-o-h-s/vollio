@@ -1,4 +1,4 @@
-import FilesDirectoryViewer from "@/features/files-view/components/FilesDirectoryViewer";
+import DocumentsDirectoryViewer from "@/features/documents-view/components/DocumentsDirectoryViewer";
 import { Library } from "lucide-react";
 
 export default function DashboardPage() {
@@ -14,13 +14,13 @@ export default function DashboardPage() {
             </h1>
           </div>
           <p className="text-muted-foreground text-sm">
-            Manage your documents with file system-style navigation
+            Manage your documents with document system-style navigation
           </p>
         </div>
       </div>
 
-      {/* PDF Directory View */}
-      <FilesDirectoryViewer />
+      {/* Document Directory View */}
+      <DocumentsDirectoryViewer />
     </div>
   );
 }

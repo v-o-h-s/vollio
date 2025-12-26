@@ -5,7 +5,7 @@
 CREATE TABLE annotations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL, -- Clerk user ID
-  pdf_id UUID NOT NULL REFERENCES pdfs(id) ON DELETE CASCADE,
+  document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
   page_number INTEGER NOT NULL,
   selected_text TEXT NOT NULL,
   note_content TEXT NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE notes (
   user_id TEXT NOT NULL, -- Clerk user ID
   title TEXT NOT NULL DEFAULT 'Untitled',
   content JSONB NOT NULL DEFAULT '{"type":"doc","content":[{"type":"paragraph"}]}', -- TipTap JSONContent format
-  pdf_annotation_id UUID REFERENCES annotations(id) ON DELETE SET NULL, -- Optional link to annotation
+  document_annotation_id UUID REFERENCES annotations(id) ON DELETE SET NULL, -- Optional link to annotation
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   is_deleted BOOLEAN DEFAULT FALSE,
@@ -82,12 +82,12 @@ CREATE POLICY "Users can only delete their own notes" ON notes
 
 -- Indexes for performance
 CREATE INDEX idx_annotations_user_id ON annotations(user_id);
-CREATE INDEX idx_annotations_pdf_id ON annotations(pdf_id);
+CREATE INDEX idx_annotations_document_id ON annotations(document_id);
 CREATE INDEX idx_annotations_page_number ON annotations(page_number);
 CREATE INDEX idx_annotations_created_at ON annotations(created_at DESC);
 
 CREATE INDEX idx_notes_user_id ON notes(user_id);
-CREATE INDEX idx_notes_pdf_annotation_id ON notes(pdf_annotation_id);
+CREATE INDEX idx_notes_document_annotation_id ON notes(document_annotation_id);
 CREATE INDEX idx_notes_created_at ON notes(created_at DESC);
 CREATE INDEX idx_notes_updated_at ON notes(updated_at DESC);
 CREATE INDEX idx_notes_is_deleted ON notes(is_deleted) WHERE is_deleted = FALSE;

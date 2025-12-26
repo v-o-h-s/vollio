@@ -4,12 +4,12 @@ import {
   GetFlashCardsSetByIdResponse,
   CreateFlashCardsSetResponse,
   GetFlashCardsSetsByDocumentIdResponse,
-} from "@shared/types/responses/flashcardsRoutes";
-import { ServerSuccessResponse } from "@shared/types/responses/general";
+} from "@vollio/shared";
+import { ServerSuccessResponse } from "@vollio/shared";
 import {
   CreateFlashCardsDTO,
   CreateManualFlashCardsDTO,
-} from "@shared/validation/flashcardSchemas";
+} from "@vollio/shared";
 
 export const flashcardEndpoints = (builder: ApiBuilder) => ({
   getFlashCardsSet: builder.query<GetFlashCardsSetByIdResponse, string>({

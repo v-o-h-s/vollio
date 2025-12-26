@@ -81,8 +81,8 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
 
   const handleViewAnnotation = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (note.pdfAnnotationId && onViewAnnotation) {
-      onViewAnnotation(note.pdfAnnotationId);
+    if (note.documentAnnotationId && onViewAnnotation) {
+      onViewAnnotation(note.documentAnnotationId);
     }
   };
 
@@ -195,14 +195,14 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
                   </Button>
                 )}
                 
-                {/* PDF annotation link */}
-                {note.pdfAnnotationId && (
+                {/* Document annotation link */}
+                {note.documentAnnotationId && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleViewAnnotation}
                     className="h-8 w-8 p-0 hover:bg-accent"
-                    title="View PDF annotation"
+                    title="View Document annotation"
                   >
                     <ExternalLink size={14} className="text-muted-foreground hover:text-primary" />
                   </Button>
@@ -273,10 +273,10 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
                   </div>
                 </div>
                 
-                {/* PDF annotation badge */}
-                {note.pdfAnnotationId && (
+                {/* Document annotation badge */}
+                {note.documentAnnotationId && (
                   <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium">
-                    Linked to PDF
+                    Linked to Document
                   </span>
                 )}
               </div>
@@ -316,14 +316,14 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
             </Button>
           )}
           
-          {/* PDF annotation link */}
-          {note.pdfAnnotationId && (
+          {/* Document annotation link */}
+          {note.documentAnnotationId && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleViewAnnotation}
               className="h-8 w-8 p-0 hover:bg-accent"
-              title="View PDF annotation"
+              title="View Document annotation"
             >
               <ExternalLink size={14} className="text-muted-foreground hover:text-primary" />
             </Button>
@@ -403,10 +403,10 @@ export const EnhancedNoteCard = memo<EnhancedNoteCardProps>(({
             )}
           </div>
           
-          {/* PDF annotation badge */}
-          {note.pdfAnnotationId && (
+          {/* Document annotation badge */}
+          {note.documentAnnotationId && (
             <span className="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium">
-              Linked to PDF
+              Linked to Document
             </span>
           )}
         </div>

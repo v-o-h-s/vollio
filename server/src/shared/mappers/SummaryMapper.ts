@@ -5,7 +5,7 @@ export class SummaryMapper {
   constructor() {}
   static fromPersistenceToDomain(row: any): Summary {
     return new Summary(
-      row.pdf_id,
+      row.document_id,
       row.main_points,
       row.created_at,
       row.updated_at,
@@ -16,7 +16,7 @@ export class SummaryMapper {
   static fromDomainToInterface(summary: Summary): SummaryData {
     return {
       id: summary.getId(),
-      documentId: summary.getPdfId(),
+      documentId: summary.getDocumentId(),
       mainPoints: summary.getMainPoints(),
       text: summary.getText() ?? null,
     };
@@ -24,7 +24,7 @@ export class SummaryMapper {
   static fromDomainToPersistence(summary: Summary): any {
     return {
       id: summary.getId(),
-      pdf_id: summary.getPdfId(),
+      document_id: summary.getDocumentId(),
       main_points: summary.getMainPoints(),
       text: summary.getText() ?? null,
       created_at: summary.getCreatedAt(),

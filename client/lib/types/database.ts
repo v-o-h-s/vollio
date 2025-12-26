@@ -6,42 +6,42 @@
 export interface Database {
   public: {
     Tables: {
-      pdfs: {
+      documents: {
         Row: {
           id: string;
           user_id: string;
-          filename: string;
-          file_size: number;
+          name: string;
+          document_size: number;
           storage_path: string | null;
           mime_type: string;
           folder_id: string | null;
           uploaded_at: string;
           updated_at: string;
-          google_file_id?: string | null;
+          google_document_id?: string | null;
         };
         Insert: {
           id?: string;
           user_id: string;
-          filename: string;
-          file_size: number;
+          name: string;
+          document_size: number;
           storage_path?: string | null;
           mime_type?: string;
           folder_id?: string | null;
           uploaded_at?: string;
           updated_at?: string;
-          google_file_id?: string | null;
+          google_document_id?: string | null;
         };
         Update: {
           id?: string;
           user_id?: string;
-          filename?: string;
-          file_size?: number;
+          name?: string;
+          document_size?: number;
           storage_path?: string | null;
           mime_type?: string;
           folder_id?: string | null;
           uploaded_at?: string;
           updated_at?: string;
-          google_file_id?: string | null;
+          google_document_id?: string | null;
         };
       };
       folders: {
@@ -74,21 +74,21 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          pdf_id: string;
+          document_id: string;
           activity_type: string;
           accessed_at: string;
         };
         Insert: {
           id?: string;
           user_id: string;
-          pdf_id: string;
+          document_id: string;
           activity_type?: string;
           accessed_at?: string;
         };
         Update: {
           id?: string;
           user_id?: string;
-          pdf_id?: string;
+          document_id?: string;
           activity_type?: string;
           accessed_at?: string;
         };
@@ -97,7 +97,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          pdf_id: string;
+          document_id: string;
           note_id: string;
           page_number: number;
           selected_text: string;
@@ -114,7 +114,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
-          pdf_id: string;
+          document_id: string;
           note_id: string;
           page_number: number;
           selected_text: string;
@@ -131,7 +131,7 @@ export interface Database {
         Update: {
           id?: string;
           user_id?: string;
-          pdf_id?: string;
+          document_id?: string;
           note_id?: string;
           page_number?: number;
           selected_text?: string;
@@ -150,7 +150,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          pdf_id: string;
+          document_id: string;
           note_id: string | null;
           content: string;
           title: string | null;
@@ -170,7 +170,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
-          pdf_id: string;
+          document_id: string;
           note_id?: string | null;
           content: string;
           title?: string | null;
@@ -190,7 +190,7 @@ export interface Database {
         Update: {
           id?: string;
           user_id?: string;
-          pdf_id?: string;
+          document_id?: string;
           note_id?: string | null;
           content?: string;
           title?: string | null;
@@ -379,16 +379,16 @@ export interface Database {
 
       generation_method: "simple" | "rag";
       processing_status: "pending" | "processing" | "completed" | "failed";
-      extraction_method: "pdfjs" | "ocr";
+      extraction_method: "documentjs" | "ocr";
       highlight_type: "quick" | "comment" | "note";
     };
   };
 }
 
 // Helper types for easier usage
-export type PDFRow = Database["public"]["Tables"]["pdfs"]["Row"];
-export type PDFInsert = Database["public"]["Tables"]["pdfs"]["Insert"];
-export type PDFUpdate = Database["public"]["Tables"]["pdfs"]["Update"];
+export type DocumentRow = Database["public"]["Tables"]["documents"]["Row"];
+export type DocumentInsert = Database["public"]["Tables"]["documents"]["Insert"];
+export type DocumentUpdate = Database["public"]["Tables"]["documents"]["Update"];
 
 export type FolderRow = Database["public"]["Tables"]["folders"]["Row"];
 export type FolderInsert = Database["public"]["Tables"]["folders"]["Insert"];

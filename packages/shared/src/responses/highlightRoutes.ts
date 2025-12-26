@@ -3,7 +3,7 @@ import { ServerSuccessResponse } from "./general";
 export interface HighlightData {
     id: string;
     userId: string;
-    pdfId: string;
+    documentId: string;
     type: "text" | "area";
     content?: {
         text?: string;

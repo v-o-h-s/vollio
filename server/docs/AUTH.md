@@ -35,7 +35,7 @@ app.register(fastifyCookie, {
 The `createUserClient` function extracts Supabase cookies and creates a Supabase client:
 
 ```typescript
-// File: src/infrastructure/supabase.ts
+// Document: src/infrastructure/supabase.ts
 export async function createUserClient(req: FastifyRequest) {
     const supabase = createServerClient(
         process.env.SUPABASE_URL!,
@@ -66,7 +66,7 @@ export async function createUserClient(req: FastifyRequest) {
 The auth plugin calls `supabase.auth.getClaims()` to verify the JWT:
 
 ```typescript
-// File: src/plugins/auth.ts
+// Document: src/plugins/auth.ts
 const { data, error } = await supabase.auth.getClaims()
 ```
 

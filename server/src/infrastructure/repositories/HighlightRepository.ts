@@ -17,35 +17,38 @@ export class HighlightRepository implements IHighlightRepository {
     private logger: FastifyBaseLogger
   ) {}
 
-  async getAllHighlights(userId: string, pdfId?: string): Promise<Highlight[]> {
-    this.logger.info({ userId, pdfId }, "Getting all highlights");
+  async getAllHighlights(
+    userId: string,
+    documentId?: string
+  ): Promise<Highlight[]> {
+    this.logger.info({ userId, documentId }, "Getting all highlights");
     let query = this.supabaseClient
       .from("highlights")
       .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
-    if (pdfId) {
-      query = query.eq("pdf_id", pdfId);
+    if (documentId) {
+      query = query.eq("document_id", documentId);
     }
 
     const { data, error } = await query;
 
     if (error) {
       this.logger.error(
-        { error, userId, pdfId },
+        { error, userId, documentId },
         "Error getting all highlights"
       );
       throw new DatabaseError(error);
     }
 
     if (!data) {
-      this.logger.info({ userId, pdfId }, "No highlights found");
+      this.logger.info({ userId, documentId }, "No highlights found");
       return [];
     }
 
     this.logger.info(
-      { userId, pdfId, count: data.length },
+      { userId, documentId, count: data.length },
       "Highlights retrieved successfully"
     );
     return data.map((row) => HighlightsMapper.mapRowToHighlight(row));
@@ -92,7 +95,7 @@ export class HighlightRepository implements IHighlightRepository {
       {
         highlightId: highlight.getId(),
         userId: highlight.getUserId(),
-        pdfId: highlight.getPdfId(),
+        documentId: highlight.getDocumentId(),
       },
       "Creating highlight"
     );
@@ -101,7 +104,7 @@ export class HighlightRepository implements IHighlightRepository {
       .insert({
         id: highlight.getId(),
         user_id: highlight.getUserId(),
-        pdf_id: highlight.getPdfId(),
+        document_id: highlight.getDocumentId(),
         type: highlight.getType(),
         content: highlight.getContent(),
         position: highlight.getPosition(),
@@ -143,7 +146,7 @@ export class HighlightRepository implements IHighlightRepository {
         note_id: highlight.getNoteId(),
         position: highlight.getPosition(),
         type: highlight.getType(),
-        pdf_id: highlight.getPdfId(),
+        document_id: highlight.getDocumentId(),
         tags: highlight.getTags(),
         style: highlight.getStyle(),
         updated_at: new Date().toISOString(),
@@ -186,34 +189,40 @@ export class HighlightRepository implements IHighlightRepository {
     this.logger.info({ highlightId: id }, "Highlight deleted successfully");
   }
 
-  async getHighlightsByPdfId(
-    pdfId: string,
+  async getHighlightsByDocumentIdAndUserId(
+    documentId: string,
     userId: string
   ): Promise<Highlight[]> {
-    this.logger.info({ pdfId, userId }, "Getting highlights by PDF ID");
+    this.logger.info(
+      { documentId, userId },
+      "Getting highlights by Document ID"
+    );
     const { data, error } = await this.supabaseClient
       .from("highlights")
       .select("*")
-      .eq("pdf_id", pdfId)
+      .eq("document_id", documentId)
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (error) {
       this.logger.error(
-        { error, pdfId, userId },
-        "Error getting highlights by PDF ID"
+        { error, documentId, userId },
+        "Error getting highlights by Document ID"
       );
       throw new DatabaseError(error);
     }
 
     if (!data) {
-      this.logger.info({ pdfId, userId }, "No highlights found for PDF");
+      this.logger.info(
+        { documentId, userId },
+        "No highlights found for Document"
+      );
       return [];
     }
 
     this.logger.info(
-      { pdfId, userId, count: data.length },
-      "Highlights retrieved successfully for PDF"
+      { documentId, userId, count: data.length },
+      "Highlights retrieved successfully for Document"
     );
     return data.map((row) => HighlightsMapper.mapRowToHighlight(row));
   }
@@ -223,7 +232,7 @@ export class HighlightRepository implements IHighlightRepository {
     const { data, error } = await this.supabaseClient
       .from("highlights")
       .select("*")
-      .eq("pdf_id", documentId)
+      .eq("document_id", documentId)
       .order("created_at", { ascending: false });
 
     if (error) {

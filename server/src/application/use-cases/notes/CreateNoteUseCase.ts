@@ -25,7 +25,7 @@ export class CreateNoteUseCase {
       input.userId,
       input.title,
       input.content,
-      input.pdfId
+      input.documentId
     );
 
     const result = await this.noteRepository.createNote(note);

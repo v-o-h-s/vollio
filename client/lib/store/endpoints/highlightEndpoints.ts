@@ -5,12 +5,12 @@ import {
   UpdateHighlightResponse,
   DeleteHighlightResponse,
   HighlightData,
-} from "@shared/types/responses/highlightRoutes";
+} from "@vollio/shared";
 import {
   CreateHighlightDTO,
   UpdateHighlightDTO,
-} from "@shared/validation/highlightSchemas";
-import { ServerSuccessResponse } from "@shared/types/responses/general";
+} from "@vollio/shared";
+import { ServerSuccessResponse } from "@vollio/shared";
 
 export const highlightEndpoints = (builder: ApiBuilder) => ({
   getHighlights: builder.query<HighlightData[], void>({
@@ -25,8 +25,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
         : [{ type: "Highlight", id: "LIST" }],
   }),
 
-  getPDFHighlights: builder.query<HighlightData[], string>({
-    query: (pdfId) => `highlights?documentId=${pdfId}`,
+  getDocumentHighlights: builder.query<HighlightData[], string>({
+    query: (documentId) => `highlights?documentId=${documentId}`,
     transformResponse: (response: GetHighlightsResponse) => response.data || [],
     providesTags: (result) =>
       result

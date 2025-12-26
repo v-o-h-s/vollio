@@ -26,7 +26,7 @@
       "@/*": [
         "./*"
       ],
-      // "@shared/*": [
+      // "@vollio/shared": [
       //   "../server/src/shared/*"
       // ],
       // "@server/*":[

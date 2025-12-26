@@ -25,7 +25,7 @@ import { toast } from "react-toastify";
 import { PremiumUpgrade } from "@/components/ui/premium-upgrade";
 import { PremiumBadge } from "@/components/ui/premium-badge";
 
-interface PDFDocument {
+interface DocumentDocument {
   id: string;
   title: string;
   page_count?: number;
@@ -47,24 +47,24 @@ interface AIGenerationSettings {
 }
 
 interface AIFlashcardGeneratorProps {
-  availableDocuments: PDFDocument[];
+  availableDocuments: DocumentDocument[];
   onCardsGenerated: (cards: FlashcardItem[]) => void;
-  isLoadingPDFs: boolean;
-  pdfError: any;
-  refetchPDFs: () => void;
+  isLoadingDocuments: boolean;
+  documentError: any;
+  refetchDocuments: () => void;
 }
 
 export function AIFlashcardGenerator({
   availableDocuments,
   onCardsGenerated,
-  isLoadingPDFs,
-  pdfError,
-  refetchPDFs,
+  isLoadingDocuments,
+  documentError,
+  refetchDocuments,
 }: AIFlashcardGeneratorProps) {
   const [activeTab, setActiveTab] = useState<"library" | "upload" | "topic">(
     "library"
   );
-  const [selectedDocument, setSelectedDocument] = useState<PDFDocument | null>(
+  const [selectedDocument, setSelectedDocument] = useState<DocumentDocument | null>(
     null
   );
   const [topicInput, setTopicInput] = useState("");
@@ -84,7 +84,7 @@ export function AIFlashcardGenerator({
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
 
   const cardStyles = [
     "Definition",
@@ -218,16 +218,16 @@ export function AIFlashcardGenerator({
     }
   };
 
-  // Handle file upload
-  const handleFileUpload = async (files: File[]) => {
+  // Handle document upload
+  const handleDocumentUpload = async (documents: Document[]) => {
     setIsUploading(true);
 
-    for (const file of files) {
+    for (const document of files) {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("document", document);
 
       try {
-        const response = await fetch("/api/pdfs/upload", {
+        const response = await fetch("/api/documents/upload", {
           method: "POST",
           body: formData,
         });
@@ -236,32 +236,32 @@ export function AIFlashcardGenerator({
           throw new Error("Upload failed");
         }
 
-        toast.success(`${file.name} has been uploaded successfully.`);
+        toast.success(`${document.name} has been uploaded successfully.`);
       } catch (error) {
-        console.error(`Failed to upload ${file.name}:`, error);
-        toast.error(`Failed to upload ${file.name}.`);
+        console.error(`Failed to upload ${document.name}:`, error);
+        toast.error(`Failed to upload ${document.name}.`);
       }
     }
 
     setIsUploading(false);
-    refetchPDFs();
+    refetchDocuments();
     // Switch to library tab to show newly uploaded documents
     setActiveTab("library");
   };
 
-  // Handle file drop
-  const handleFileDrop = (e: React.DragEvent) => {
+  // Handle document drop
+  const handleDocumentDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
 
     const files = Array.from(e.dataTransfer.files);
-    const pdfFiles = files.filter((file) => file.type === "application/pdf");
+    const documentDocuments = documents.filter((document) => document.type === "application/document");
 
-    if (pdfFiles.length > 0) {
-      handleFileUpload(pdfFiles);
+    if (documentDocuments.length > 0) {
+      handleDocumentUpload(documentDocuments);
     } else {
-      toast.error("Please upload PDF files only.");
+      toast.error("Please upload Document documents only.");
     }
   };
 
@@ -357,7 +357,7 @@ export function AIFlashcardGenerator({
               <Label>
                 Select Document from Library ({availableDocuments.length})
               </Label>
-              {isLoadingPDFs ? (
+              {isLoadingDocuments ? (
                 <div className="flex items-center justify-center py-8 text-center">
                   <div className="space-y-2">
                     <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
@@ -366,13 +366,13 @@ export function AIFlashcardGenerator({
                     </p>
                   </div>
                 </div>
-              ) : pdfError ? (
+              ) : documentError ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <AlertCircle className="w-8 h-8 text-red-500 mb-2" />
                   <p className="text-sm text-muted-foreground mb-2">
                     Failed to load documents
                   </p>
-                  <Button variant="outline" size="sm" onClick={refetchPDFs}>
+                  <Button variant="outline" size="sm" onClick={refetchDocuments}>
                     Try Again
                   </Button>
                 </div>
@@ -383,7 +383,7 @@ export function AIFlashcardGenerator({
                     No documents in your library
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Upload some PDFs to get started
+                    Upload some Documents to get started
                   </p>
                   <Button
                     variant="outline"
@@ -438,7 +438,7 @@ export function AIFlashcardGenerator({
                     ? "border-primary bg-primary/5"
                     : "border-muted-foreground/25 hover:border-muted-foreground/50"
                 }`}
-                onDrop={handleFileDrop}
+                onDrop={handleDocumentDrop}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
               >
@@ -457,7 +457,7 @@ export function AIFlashcardGenerator({
 
                   <div>
                     <h3 className="font-medium mb-1">
-                      {isDragOver ? "Drop files here" : "Drag & drop PDF files"}
+                      {isDragOver ? "Drop documents here" : "Drag & drop Document documents"}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       or click to browse your computer
@@ -465,7 +465,7 @@ export function AIFlashcardGenerator({
 
                     <Button
                       variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => documentInputRef.current?.click()}
                       disabled={isUploading}
                     >
                       {isUploading ? (
@@ -476,7 +476,7 @@ export function AIFlashcardGenerator({
                       ) : (
                         <>
                           <Upload className="w-4 h-4 mr-2" />
-                          Choose Files
+                          Choose Documents
                         </>
                       )}
                     </Button>
@@ -484,7 +484,7 @@ export function AIFlashcardGenerator({
 
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <FileText className="w-3 h-3" />
-                    <span>PDF files only • Max 50MB per file</span>
+                    <span>Document documents only • Max 50MB per document</span>
                   </div>
                 </div>
               </div>
@@ -713,17 +713,17 @@ export function AIFlashcardGenerator({
             : `Generate ${settings.numberOfCards} Flashcards`}
         </Button>
 
-        {/* Hidden file input */}
+        {/* Hidden document input */}
         <input
-          ref={fileInputRef}
+          ref={documentInputRef}
           type="file"
-          accept=".pdf"
+          accept=".document"
           multiple
           className="hidden"
           onChange={(e) => {
             const files = Array.from(e.target.files || []);
-            if (files.length > 0) {
-              handleFileUpload(files);
+            if (documents.length > 0) {
+              handleDocumentUpload(documents);
             }
           }}
         />
@@ -735,11 +735,11 @@ export function AIFlashcardGenerator({
             <p className="font-medium mb-1">AI Generation Tips:</p>
             <ul className="text-xs space-y-1 list-disc list-inside">
               <li>
-                <strong>From Library:</strong> Select existing PDFs to generate
+                <strong>From Library:</strong> Select existing Documents to generate
                 flashcards from your uploaded documents
               </li>
               <li>
-                <strong>Upload New:</strong> Drag & drop or upload new PDF files
+                <strong>Upload New:</strong> Drag & drop or upload new Document documents
                 to expand your library
               </li>
               <li>

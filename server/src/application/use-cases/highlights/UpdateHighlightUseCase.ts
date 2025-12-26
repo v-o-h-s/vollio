@@ -11,7 +11,7 @@ interface UpdateHighlightInput {
   noteId?: string | null;
   position?: ScaledPosition;
   type?: "text" | "area";
-  pdfId?: string;
+  documentId?: string;
   tags?: string[];
   style?: "highlight" | "tagged";
 }

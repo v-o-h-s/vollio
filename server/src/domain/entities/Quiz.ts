@@ -94,7 +94,7 @@ export class Quiz {
     return this.id;
   }
 
-  public getFileId(): string {
+  public getDocumentId(): string {
     return this.documentId;
   }
 

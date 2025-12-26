@@ -3,7 +3,7 @@
 
 CREATE TABLE IF NOT EXISTS flashcard_sets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  document_id UUID NOT NULL REFERENCES pdfs(id) ON DELETE CASCADE,
+  document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   language language_enum NOT NULL DEFAULT 'en',

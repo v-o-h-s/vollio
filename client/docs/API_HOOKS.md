@@ -290,9 +290,9 @@ Configure in `next.config.ts` if the server port changes.
 All hooks are fully typed with TypeScript. Import types from:
 
 - `@/lib/types/pdf` - PDF, Folder, Highlight types
-- `@shared/types/lms/classroom` - Google Classroom types
-- `@shared/types/responses/googleClassroomRoutes` - Google Classroom API types
-- `@shared/types/responses/fileRoutes` - File management types
+- `@vollio/shared
+- `@vollio/shared
+- `@vollio/shared
 
 ---
 

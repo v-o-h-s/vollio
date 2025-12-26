@@ -1,12 +1,12 @@
-import type { Annotation } from "@/lib/types/pdf";
+import type { Annotation } from "@/lib/types/document";
 import type { ApiResponse } from "../types";
 import type { ApiBuilder } from "./types";
 
 export const annotationEndpoints = (builder: ApiBuilder) => ({
   getAnnotations: builder.query<Annotation[], string | void>({
-    query: (pdfId) => ({
+    query: (documentId) => ({
       url: "annotations",
-      params: pdfId ? { pdfId } : undefined,
+      params: documentId ? { documentId } : undefined,
     }),
     transformResponse: (response: ApiResponse<Annotation[]>) => {
       if (!response.success || !response.data) {
@@ -26,7 +26,7 @@ export const annotationEndpoints = (builder: ApiBuilder) => ({
   createAnnotation: builder.mutation<
     Annotation,
     {
-      pdfId: string;
+      documentId: string;
       noteId: string;
       selectedText: string;
       pageNumber: number;
@@ -47,7 +47,7 @@ export const annotationEndpoints = (builder: ApiBuilder) => ({
     },
     invalidatesTags: [
       { type: "Annotation", id: "LIST" },
-      { type: "File", id: "LIST" },
+      { type: "Document", id: "LIST" },
     ],
   }),
 });

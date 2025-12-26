@@ -85,7 +85,7 @@ export class HighlightController {
 
     await this.createHighlightUseCase.execute({
       userId,
-      pdfId: request.body.pdfId,
+      documentId: request.body.documentId,
       type: request.body.type,
       content: request.body.content,
       position: request.body.position,
@@ -167,7 +167,7 @@ export class HighlightController {
       noteId: request.body.noteId,
       position: request.body.position,
       type: request.body.type,
-      pdfId: request.body.pdfId,
+      documentId: request.body.documentId,
       tags: request.body.tags,
       style: request.body.style,
     });

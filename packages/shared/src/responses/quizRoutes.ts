@@ -9,7 +9,7 @@ import { QuizQuestion } from "../requests/quizRequests"; // Need to add QuizQues
 export interface CreateQuizResponse {
   id: string; // quiz UUID
   title: string | null;
-  fileId: string;
+  documentId: string;
   language: QuizLanguage;
   settings: {
     difficultyLevel: DifficultyLevel | null;

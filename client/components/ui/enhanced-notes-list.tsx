@@ -132,7 +132,7 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
         return activeFilters.every(filter => {
           switch (filter) {
             case 'linked':
-              return note.pdfAnnotationId;
+              return note.documentAnnotationId;
             case 'recent':
               const dayAgo = new Date();
               dayAgo.setDate(dayAgo.getDate() - 1);
@@ -329,7 +329,7 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
             <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-md border-border/50 rounded-xl shadow-xl">
               <DropdownMenuItem onClick={() => toggleFilter('linked')} className="hover:bg-accent/30 rounded-lg">
                 <Link size={14} className="mr-2" />
-                Linked to PDFs
+                Linked to Documents
                 {activeFilters.includes('linked') && (
                   <span className="ml-auto text-primary">✓</span>
                 )}
@@ -537,7 +537,7 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                 Start your note-taking journey
               </h3>
               <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
-                Create rich, interactive notes with our powerful editor. Link them to PDF annotations, 
+                Create rich, interactive notes with our powerful editor. Link them to Document annotations, 
                 organize your thoughts, and build your knowledge base. Get started with your first note!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -578,9 +578,9 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                   <div className="w-12 h-12 mx-auto rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
                     <FileText size={20} className="text-green-600 dark:text-green-400" />
                   </div>
-                  <h4 className="font-semibold text-foreground">PDF Integration</h4>
+                  <h4 className="font-semibold text-foreground">Document Integration</h4>
                   <p className="text-sm text-muted-foreground">
-                    Link notes directly to PDF annotations and highlights
+                    Link notes directly to Document annotations and highlights
                   </p>
                 </div>
                 <div className="space-y-2">

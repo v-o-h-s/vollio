@@ -1,12 +1,12 @@
 export class Summary {
   private id: string;
-  private pdfId: string;
+  private documentId: string;
   private mainPoints: string[];
   private createdAt: string;
   private updatedAt: string;
   private text?: string;
   constructor(
-    pdfId: string,
+    documentId: string,
     mainPoints: string[],
     createdAt?: string,
     updatedAt?: string,
@@ -14,7 +14,7 @@ export class Summary {
     id?: string
   ) {
     this.id = id ?? crypto.randomUUID();
-    this.pdfId = pdfId;
+    this.documentId = documentId;
     this.mainPoints = mainPoints;
     this.createdAt = createdAt ?? new Date().toISOString();
     this.updatedAt = updatedAt ?? new Date().toISOString();
@@ -30,8 +30,8 @@ export class Summary {
     return this.id;
   }
 
-  public getPdfId(): string {
-    return this.pdfId;
+  public getDocumentId(): string {
+    return this.documentId;
   }
 
   public getMainPoints(): string[] {

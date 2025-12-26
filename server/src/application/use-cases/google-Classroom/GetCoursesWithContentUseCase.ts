@@ -69,11 +69,11 @@ export class GetCoursesWithContentUseCase {
 
         const formattedAnnouncements = (announcements || [])
           .map((announcement) => {
-            const driveFiles = (announcement.materials || [])
-              .filter((m: any) => m.driveFile && m.driveFile.driveFile)
+            const driveDocuments = (announcement.materials || [])
+              .filter((m: any) => m.driveDocument && m.driveDocument.driveDocument)
               .map((m: any) => ({
-                id: m.driveFile.driveFile.id,
-                title: m.driveFile.driveFile.title,
+                id: m.driveDocument.driveDocument.id,
+                title: m.driveDocument.driveDocument.title,
               }));
 
             return {
@@ -83,20 +83,20 @@ export class GetCoursesWithContentUseCase {
               alternateLink: announcement.alternateLink,
               updatedAt: announcement.updateTime,
               materials: {
-                driveFiles: driveFiles,
+                driveDocuments: driveDocuments,
               },
             };
           })
-          .filter((item: any) => item.materials.driveFiles.length > 0);
+          .filter((item: any) => item.materials.driveDocuments.length > 0);
 
         const formattedCourseWork = (courseWork || [])
           .map((work) => {
-            const driveFiles = (work.materials || [])
-              .filter((m: any) => m.driveFile && m.driveFile.driveFile)
+            const driveDocuments = (work.materials || [])
+              .filter((m: any) => m.driveDocument && m.driveDocument.driveDocument)
               .map((m: any) => ({
-                id: m.driveFile.driveFile.id,
-                title: m.driveFile.driveFile.title,
-                thumbnailUrl: m.driveFile.driveFile.thumbnailUrl,
+                id: m.driveDocument.driveDocument.id,
+                title: m.driveDocument.driveDocument.title,
+                thumbnailUrl: m.driveDocument.driveDocument.thumbnailUrl,
               }));
 
             return {
@@ -107,11 +107,11 @@ export class GetCoursesWithContentUseCase {
               alternateLink: work.alternateLink,
               updatedAt: work.updateTime,
               materials: {
-                driveFiles: driveFiles,
+                driveDocuments: driveDocuments,
               },
             };
           })
-          .filter((item: any) => item.materials.driveFiles.length > 0);
+          .filter((item: any) => item.materials.driveDocuments.length > 0);
 
         return {
           ...course,

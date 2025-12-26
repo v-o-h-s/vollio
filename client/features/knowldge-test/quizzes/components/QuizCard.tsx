@@ -16,7 +16,7 @@ import {
 import { BookOpen, Clock, Globe, MoreVertical, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CreateQuizResponse } from "@shared/types/responses/quizRoutes";
+import { CreateQuizResponse } from "@vollio/shared";
 
 const getDifficultyColor = (diff: string | null) => {
   switch (diff?.toLowerCase()) {
@@ -86,7 +86,7 @@ export function QuizCard({
           <div className="flex items-center gap-1">
             <BookOpen className="w-3.5 h-3.5" />
             <span className="truncate max-w-[100px]">
-              {q.fileId.split("-")[0]}...
+              {q.documentId.split("-")[0]}...
             </span>
           </div>
           <div className="flex items-center gap-1">

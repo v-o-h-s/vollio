@@ -1,5 +1,5 @@
 /**
- * RTK Query API slice for annotation and PDF management
+ * RTK Query API slice for annotation and Document management
  * Simplified version using basic fetchBaseQuery without custom error handling
  */
 
@@ -10,7 +10,7 @@ import { highlightEndpoints } from "./endpoints/highlightEndpoints";
 import { notesEndpoints } from "./endpoints/notesEndpoints";
 import { summaryEndpoints } from "./endpoints/summaryEndpoints";
 import { googleClassroomEndpoints } from "./endpoints/googleClassroomEndpoints";
-import { fileEndpoints } from "./endpoints/fileEndpoint";
+import { documentEndpoints } from "./endpoints/documentEndpoint";
 import { testEndpoints } from "./endpoints/testEndpoints";
 import { quizEndpoints } from "./endpoints/quizEndpoints";
 import { flashcardEndpoints } from "./endpoints/flashcardEndpoints";
@@ -25,9 +25,9 @@ const baseQuery = fetchBaseQuery({
     // Don't set Content-Type for FormData uploads (let browser set it with boundary)
     // fasity does not like it when you send him post like request without body
     if (
-      endpoint !== "uploadPDF" &&
-      endpoint !== "uploadFile" &&
-      endpoint !== "deleteFile" &&
+      endpoint !== "uploadDocument" &&
+      endpoint !== "uploadDocument" &&
+      endpoint !== "deleteDocument" &&
       endpoint !== "deleteFolder"&&
       endpoint !== "deleteNote"
     ) {
@@ -48,7 +48,7 @@ export const apiSlice = createApi({
     "Folder",
     "Summary",
     "GoogleClassroom",
-    "File",
+    "Document",
     "Quiz",
     "Flashcard",
   ],
@@ -59,7 +59,7 @@ export const apiSlice = createApi({
     ...folderEndpoints(builder),
     ...summaryEndpoints(builder),
     ...googleClassroomEndpoints(builder),
-    ...fileEndpoints(builder),
+    ...documentEndpoints(builder),
     ...testEndpoints(builder),
     ...quizEndpoints(builder),
     ...flashcardEndpoints(builder),
@@ -77,7 +77,7 @@ export const {
   useGetAnnotationsQuery,
   useCreateAnnotationMutation,
   useGetHighlightsQuery,
-  useGetPDFHighlightsQuery,
+  useGetDocumentHighlightsQuery,
   useCreateHighlightMutation,
   useUpdateHighlightMutation,
   useDeleteHighlightMutation,
@@ -100,14 +100,14 @@ export const {
   useGetGoogleClassroomCoursesListQuery,
   useGetGoogleClassroomCoursesWithContentQuery,
   useGetGoogleClassroomCourseContentQuery,
-  useGetAllFilesQuery,
-  useGetFileByIdQuery,
-  useUploadFileMutation,
-  useDeleteFileMutation,
-  useRenameFileMutation,
-  useMoveFileMutation,
-  useGetFileFromGoogleDriveQuery,
-  useAddFileFromGoogleDriveMutation,
+  useGetAllDocumentsQuery,
+  useGetDocumentByIdQuery,
+  useUploadDocumentMutation,
+  useDeleteDocumentMutation,
+  useRenameDocumentMutation,
+  useMoveDocumentMutation,
+  useGetDocumentFromGoogleDriveQuery,
+  useAddDocumentFromGoogleDriveMutation,
   useProcessTestMutation,
   //quizzes
   useGetAllQuizzesQuery,

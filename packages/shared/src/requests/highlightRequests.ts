@@ -11,7 +11,7 @@ interface Scaled {
 interface ScaledPosition {
   boundingRect: Scaled;
   rects: Scaled[];
-  usePdfCoordinates?: boolean;
+  useDocumentCoordinates?: boolean;
 }
 
 export interface HighlightContent {
@@ -21,7 +21,7 @@ export interface HighlightContent {
 
 export interface CreateHighlightDTO {
   id: string;
-  pdfId: string;
+  documentId: string;
   type?: "text" | "area";
   content?: HighlightContent;
   position: ScaledPosition;
@@ -39,7 +39,7 @@ export interface UpdateHighlightDTO {
   noteId?: string | null;
   position?: ScaledPosition;
   type?: "text" | "area";
-  pdfId?: string;
+  documentId?: string;
   tags?: string[];
   style?: "highlight" | "tagged";
 }
@@ -49,7 +49,7 @@ export interface HighlightIdParams {
 }
 
 export interface GetHighlightsQuery {
-  pdfId?: string;
+  documentId?: string;
 }
 
 export interface HighlightDocumentIdParams {

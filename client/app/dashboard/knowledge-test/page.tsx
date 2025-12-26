@@ -19,7 +19,7 @@ type Section = "quizzes" | "flashcards";
 import {
   useGetAllQuizzesQuery,
   useDeleteQuizMutation,
-  useGetAllFilesQuery,
+  useGetAllDocumentsQuery,
   useGetAllFlashCardsSetsQuery,
   useDeleteFlashCardsSetMutation,
 } from "@/lib/store/apiSlice";
@@ -31,7 +31,7 @@ export default function KnowledgeTestPage() {
     refetch: refetchQuizzes,
   } = useGetAllQuizzesQuery();
   const { data: documentsData, refetch: refetchDocuments } =
-    useGetAllFilesQuery();
+    useGetAllDocumentsQuery();
   const [deleteQuiz] = useDeleteQuizMutation();
 
   const {
@@ -48,17 +48,17 @@ export default function KnowledgeTestPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
 
-  // memorizing all documents (like for performance and we only register id and filename,
+  // memorizing all documents (like for performance and we only register id and name,
   // basically what we need in this page)
   const documentsMap = useMemo(() => {
     const map = new Map<string, string>();
     documentsData?.forEach((document) =>
-      map.set(document.id, document.filename)
+      map.set(document.id, document.name)
     );
-    // Also add documents from flashcards if they are not in the file list (unlikely but possible if deleted)
+    // Also add documents from flashcards if they are not in the document list (unlikely but possible if deleted)
     flashcardsData?.forEach((f) => {
       if (f.documentId && !map.has(f.documentId)) {
-        // We don't have the filename if it's not in documentsData, maybe "Unknown" or just skip
+        // We don't have the name if it's not in documentsData, maybe "Unknown" or just skip
       }
     });
 
@@ -105,9 +105,9 @@ export default function KnowledgeTestPage() {
         .toLowerCase()
         .includes(query.toLowerCase());
 
-      const filename = documentsMap.get(q.fileId);
+      const name = documentsMap.get(q.documentId);
       const matchesDocument =
-        selectedDocument === "all" || filename === selectedDocument;
+        selectedDocument === "all" || name === selectedDocument;
 
       const matchesDifficulty =
         selectedDifficulty === "all" ||

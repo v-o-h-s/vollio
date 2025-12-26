@@ -14,7 +14,7 @@ export type ApiTag =
   | "Folder"
   | "Summary"
   | "GoogleClassroom"
-  | "File"
+  | "Document"
   | "Quiz";
 
 export type ApiBuilder = EndpointBuilder<

@@ -19,7 +19,7 @@ export class NoteRepository implements INoteRepository {
         id: note.getId(),
         title: note.getTitle(),
         content: note.getContent(),
-        pdf_id: note.getPdfId(),
+        document_id: note.getDocumentId(),
         created_at: note.getCreatedAt(),
         updated_at: note.getUpdatedAt(),
       })
@@ -132,7 +132,7 @@ export class NoteRepository implements INoteRepository {
       data.user_id,
       data.title,
       data.content,
-      data.pdf_id,
+      data.document_id,
       new Date(data.created_at),
       new Date(data.updated_at)
     );

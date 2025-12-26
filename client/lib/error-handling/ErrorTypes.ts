@@ -43,16 +43,16 @@ export enum ValidationErrorType {
   DUPLICATE_VALUE = "DUPLICATE_VALUE",
 }
 
-// File Error Types
-export enum FileErrorType {
+// Document Error Types
+export enum DocumentErrorType {
   GENERAL = "GENERAL",
   LOADING_ERROR = "LOADING_ERROR",
   RENDERING_ERROR = "RENDERING_ERROR",
   CORRUPTED = "CORRUPTED",
 }
 
-// File Validation Error Types
-export enum FileValidationErrorType {
+// Document Validation Error Types
+export enum DocumentValidationErrorType {
   INVALID_FORMAT = "INVALID_FORMAT",
   FILE_TOO_LARGE = "FILE_TOO_LARGE",
   FILE_TOO_SMALL = "FILE_TOO_SMALL",
@@ -108,8 +108,8 @@ export type AllErrorTypes =
   | AuthErrorType
   | DatabaseErrorType
   | ValidationErrorType
-  | FileErrorType
-  | FileValidationErrorType
+  | DocumentErrorType
+  | DocumentValidationErrorType
   | StorageErrorType
   | AIErrorType
   | NetworkErrorType
@@ -122,8 +122,8 @@ export const ERROR_CLASS_MAP = {
   [AuthErrorType.AUTHENTICATION_REQUIRED]: "AuthError",
   [DatabaseErrorType.CONNECTION_FAILED]: "DatabaseError",
   [ValidationErrorType.INVALID_TYPE]: "ValidationError",
-  [FileErrorType.LOADING_ERROR]: "FileError",
-  [FileValidationErrorType.INVALID_FORMAT]: "FileValidationError",
+  [DocumentErrorType.LOADING_ERROR]: "DocumentError",
+  [DocumentValidationErrorType.INVALID_FORMAT]: "DocumentValidationError",
   [StorageErrorType.UPLOAD_FAILED]: "StorageError",
   [AIErrorType.RATE_LIMIT_EXCEEDED]: "AIError",
   [NetworkErrorType.CONNECTION_TIMEOUT]: "NetworkError",

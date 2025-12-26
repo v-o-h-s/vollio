@@ -172,13 +172,13 @@ export class DatabaseError extends BaseAppError {
    * Create a storage error
    */
   static storageError(
-    message: string = "File storage error",
+    message: string = "Document storage error",
     context?: any,
     cause?: Error
   ): DatabaseError {
     return new DatabaseError(DatabaseErrorType.STORAGE_ERROR, message, {
       severity: ErrorSeverity.MEDIUM,
-      userMessage: "File storage error occurred.",
+      userMessage: "Document storage error occurred.",
       actionLabel: "Retry",
       statusCode: 500,
       context,

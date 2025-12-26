@@ -4,10 +4,10 @@ This document summarizes the embedding pipeline, database schema, RLS policies, 
 
 ## Overview
 
-- We store text chunks from PDFs alongside vector embeddings in the `embeddings` table.
+- We store text chunks from Documents alongside vector embeddings in the `embeddings` table.
 - Embeddings are generated in batches (14 chunks per request) by the embedding service and persisted with RLS and triggers to ensure ownership and safety.
 
-## Key files / migrations
+## Key documents / migrations
 
 - `src/infrastructure/database/supabase/migrations/030_add_embedding_table(very important).sql` — creates the `embeddings` table and `search_embeddings()` function (512-dim vectors).
 - `src/infrastructure/database/supabase/migrations/031_add_embeddings_rls.sql` — enables Row Level Security, auto-populates `user_id` from `auth.uid()` (trigger), adds `updated_at` trigger, and creates SELECT/INSERT/UPDATE/DELETE policies.
@@ -19,7 +19,7 @@ Table: `embeddings`
 
 - id UUID PRIMARY KEY DEFAULT gen_random_uuid()
 - user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE
-- document_id UUID NOT NULL REFERENCES pdfs(id) ON DELETE CASCADE
+- document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE
 - content TEXT NOT NULL
 - embedding VECTOR(512) NOT NULL
 - chunk_index INT NOT NULL
@@ -76,7 +76,7 @@ SELECT * FROM search_embeddings(your_query_vector::vector(512), 0.75, 10);
   - `searchSimilarEmbeddings(queryEmbedding, matchThreshold?, matchCount?)` calls the `search_embeddings` RPC and maps results to an array.
   - Uses `DatabaseError` and optional logging for errors.
 
-- `EmbeddFileBYIdUseCase` ties everything together: fetch file content, chunk, generate embeddings, store them.
+- `EmbeddDocumentBYIdUseCase` ties everything together: fetch document content, chunk, generate embeddings, store them.
 
 ## TTL cleanup (cron job)
 

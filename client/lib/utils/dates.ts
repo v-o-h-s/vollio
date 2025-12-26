@@ -81,9 +81,9 @@ export function formatDatabaseDate(input: string | Date | number): string {
 }
 
 /**
- * Formats a date for file naming (safe for filesystem)
+ * Formats a date for document naming (safe for documentsystem)
  */
-export function formatFileDate(input: string | Date | number): string {
+export function formatDocumentDate(input: string | Date | number): string {
   const date = toDate(input);
   
   return date.toISOString()

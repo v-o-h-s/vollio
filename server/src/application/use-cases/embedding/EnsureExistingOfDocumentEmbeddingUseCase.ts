@@ -1,15 +1,15 @@
 import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
-import { EmbedFileByIdUseCase } from "./EmbedFileByIdUseCase";
+import { EmbedDocumentByIdUseCase } from "./EmbedDocumentByIdUseCase";
 
 export class EnsureExistingOfDocumentEmbeddingUseCase {
     constructor(private embeddingRepository: IEmbeddingRepository,
-        private embedFileByIdUseCase: EmbedFileByIdUseCase) {
+        private embedDocumentByIdUseCase: EmbedDocumentByIdUseCase) {
     }
 
     async execute(documentId: string): Promise<void> {
-        const isEmbedded = await this.embeddingRepository.isFileEmbedded(documentId);
+        const isEmbedded = await this.embeddingRepository.isDocumentEmbedded(documentId);
         if (!isEmbedded) {
-            await this.embedFileByIdUseCase.execute(documentId);
+            await this.embedDocumentByIdUseCase.execute(documentId);
         }
     }
 }

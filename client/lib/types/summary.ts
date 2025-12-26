@@ -2,7 +2,7 @@
 
 export interface Summary {
   id: string;
-  pdfId: string;
+  documentId: string;
   mainPoints: string[];
   createdAt: string;
   updatedAt: string;
@@ -10,7 +10,7 @@ export interface Summary {
 
 export interface SupabaseSummaryResponse {
   id: string;
-  pdf_id: string;
+  document_id: string;
   main_points: string[];
   created_at: string;
   updated_at: string;
@@ -29,7 +29,7 @@ export const mapSupabaseSummaryResponseToSummary = (
 ): Summary => {
   return {
     id: data.id,
-    pdfId: data.pdf_id,
+    documentId: data.document_id,
     mainPoints: data.main_points || [],
     createdAt: data.created_at,
     updatedAt: data.updated_at,

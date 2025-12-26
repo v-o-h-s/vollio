@@ -6,7 +6,7 @@ import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExi
 import crypto from "crypto";
 import { QuizMapper } from "../../../shared/mappers/QuizMapper";
 import { FastifyBaseLogger } from "fastify";
-import { GetFileByIdUseCase } from "../files/GetFileByIdUseCase";
+import { GetDocumentByIdUseCase } from "../documents/GetDocumentByIdUseCase";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { ChunkMetadata } from "../../../shared/utils/chunking";
 import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
@@ -19,7 +19,7 @@ export class CreateGeneralQuizUseCase {
     private logger: FastifyBaseLogger,
     private generativeAiService: IGenerativeAiService,
     private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
-    private getFileByIdUseCase: GetFileByIdUseCase,
+    private getDocumentByIdUseCase: GetDocumentByIdUseCase,
     private embeddingRepository: IEmbeddingRepository,
     private quizRepository: IQuizRepository
   ) {}
@@ -30,12 +30,12 @@ export class CreateGeneralQuizUseCase {
       "Executing CreateGeneralQuizUseCase"
     );
     // getting chunks relevant to the prompt
-    if (!(await this.getFileByIdUseCase.execute(data.documentId))) {
+    if (!(await this.getDocumentByIdUseCase.execute(data.documentId))) {
       this.logger.warn(
         { documentId: data.documentId },
-        "File not found in CreateGeneralQuizUseCase"
+        "Document not found in CreateGeneralQuizUseCase"
       );
-      throw new NotFoundError("File not found");
+      throw new NotFoundError("Document not found");
     }
     await this.ensureExistingOfDocumentEmbeddingUseCase.execute(
       data.documentId

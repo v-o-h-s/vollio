@@ -9,7 +9,7 @@ import {
   NotebookPen,
   Brain,
   CreditCard,
-  FileBarChart,
+  DocumentBarChart,
   Settings,
   User,
   LogOut,
@@ -203,7 +203,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                       src={user.user_metadata.avatar_url}
                       width={32}
                       height={32}
-                      alt="Profile"
+                      alt="Prodocument"
                       className="rounded-lg"
                     />
                   ) : (
@@ -233,7 +233,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                 <DropdownMenuGroup className="p-2">
                   <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
                     <User className="mr-3 h-4 w-4 text-muted-foreground" />
-                    <span className="text-foreground">Profile</span>
+                    <span className="text-foreground">Prodocument</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
                     <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
@@ -312,7 +312,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                 <div>
                   <h2 className="font-bold text-lg text-foreground">Vollio</h2>
                   <p className="text-xs text-muted-foreground">
-                    PDF Annotation & Notes
+                    Document Annotation & Notes
                   </p>
                 </div>
               </div>
@@ -407,7 +407,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                     src={user.user_metadata.avatar_url}
                     width={40}
                     height={40}
-                    alt="Profile"
+                    alt="Prodocument"
                     className="rounded-lg"
                   />
                 ) : (
@@ -438,7 +438,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                     <DropdownMenuGroup className="p-2">
                       <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
                         <User className="mr-3 h-4 w-4 text-muted-foreground" />
-                        <span className="text-foreground">Profile</span>
+                        <span className="text-foreground">Prodocument</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
                         <Settings className="mr-3 h-4 w-4 text-muted-foreground" />

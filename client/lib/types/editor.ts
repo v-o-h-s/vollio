@@ -31,7 +31,7 @@ export interface NoteContent {
  * Props for the main NotionEditor component
  */
 export interface NotionEditorProps {
-  fileId?: string;
+  documentId?: string;
   content?: NoteContent;
   onChange?: (content: JSONContent) => void;
   onUpdate?: (editor: Editor) => void;
@@ -127,11 +127,11 @@ export interface Note {
   userId: string;
   title: string;
   content: JSONContent; // TipTap JSONContent format
-  pdfAnnotationId?: string | null;
+  documentAnnotationId?: string | null;
   createdAt: string; // ISO string for Redux serialization
   updatedAt: string; // ISO string for Redux serialization
   isDeleted: boolean;
-  pdfId?: string | null;
+  documentId?: string | null;
 }
 
 /**
@@ -142,7 +142,6 @@ export interface CreateNoteRequest {
   documentId?: string;
   title?: string;
   content?: JSONContent | null;
-  pdfId?: string;
   color?: string;
   is_auto_generated?: boolean;
 }
@@ -169,11 +168,11 @@ interface SupabaseNote {
   userId: string;
   title: string;
   content: JSONContent | null;
-  pdfAnnotationId: string | null;
+  documentAnnotationId: string | null;
   createdAt: string;
   updatedAt: string;
   isDeleted: boolean;
-  pdfId: string | null;
+  documentId: string | null;
 }
 
 /**
@@ -192,5 +191,5 @@ export interface SupabaseSingleNoteFromListRepsonse {
   createdAt: string;
   updatedAt: string;
   isDeleted: boolean;
-  pdfId: string | null;
+  documentId: string | null;
 }

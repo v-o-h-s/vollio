@@ -14,7 +14,7 @@ DROP TABLE IF EXISTS highlights CASCADE;
 CREATE TABLE highlights (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    pdf_id UUID NOT NULL REFERENCES pdfs(id) ON DELETE CASCADE,
+    document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
     type VARCHAR(20) NOT NULL DEFAULT 'text' 
         CHECK (type IN ('text', 'area')),
     content JSONB DEFAULT '{}'::jsonb,
@@ -37,7 +37,7 @@ CREATE TABLE highlights (
 
 -- Step 4: Create indexes for efficient querying
 CREATE INDEX idx_highlights_user_id ON highlights(user_id);
-CREATE INDEX idx_highlights_pdf_id ON highlights(pdf_id);
+CREATE INDEX idx_highlights_document_id ON highlights(document_id);
 CREATE INDEX idx_highlights_type ON highlights(type);
 CREATE INDEX idx_highlights_has_note ON highlights(has_note);
 CREATE INDEX idx_highlights_note_id ON highlights(note_id);
@@ -111,10 +111,10 @@ CREATE POLICY "Users can delete their own highlights"
   USING (auth.uid() = user_id);
 
 -- Step 9: Add comments
-COMMENT ON TABLE highlights IS 'PDF highlights (text or area) with optional notes. Stores position data and content in JSONB format.';
+COMMENT ON TABLE highlights IS 'Document highlights (text or area) with optional notes. Stores position data and content in JSONB format.';
 COMMENT ON COLUMN highlights.id IS 'Unique identifier for the highlight';
 COMMENT ON COLUMN highlights.user_id IS 'Supabase Auth user ID (UUID) - auto-populated from authenticated user';
-COMMENT ON COLUMN highlights.pdf_id IS 'Which PDF this highlight belongs to';
+COMMENT ON COLUMN highlights.document_id IS 'Which Document this highlight belongs to';
 COMMENT ON COLUMN highlights.type IS 'Type of highlight: "text" (text selection) or "area" (rectangular area)';
 COMMENT ON COLUMN highlights.content IS 'JSONB object containing highlight content: { text?: string, image?: string }';
 COMMENT ON COLUMN highlights.position IS 'JSONB object containing ScaledPosition structure: { boundingRect: {...}, rects: [...], usePdfCoordinates?: boolean }';

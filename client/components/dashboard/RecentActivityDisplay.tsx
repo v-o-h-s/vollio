@@ -3,11 +3,11 @@
 /**
  * Recent Activity Display Component
  * 
- * A component to show user's recent PDF activity prominently on the dashboard.
- * Displays the last opened PDF with quick access functionality and real-time updates.
+ * A component to show user's recent Document activity prominently on the dashboard.
+ * Displays the last opened Document with quick access functionality and real-time updates.
  * 
  * Key Features:
- * - Shows user's last opened PDF prominently
+ * - Shows user's last opened Document prominently
  * - Displays last accessed time with human-readable formatting
  * - Provides quick access link to continue where user left off
  * - Handles cases where no recent activity exists
@@ -20,13 +20,13 @@
 
 import { useRouter } from 'next/navigation'
 import { Clock, FileText, Eye, ArrowRight } from 'lucide-react'
-import { useGetPDFsQuery } from '@/lib/store/apiSlice'
+import { useGetDocumentsQuery } from '@/lib/store/apiSlice'
 import { UserActivity } from '@/lib/types'
 
-// Extended interface for recent activity that includes filename from API response
-interface RecentActivityWithFilename extends UserActivity {
-    filename: string;
-    fileUrl: string;
+// Extended interface for recent activity that includes name from API response
+interface RecentActivityWithDocumentname extends UserActivity {
+    name: string;
+    documentUrl: string;
 }
 
 interface RecentActivityDisplayProps {
@@ -85,21 +85,21 @@ export default function RecentActivityDisplay({
 }: RecentActivityDisplayProps) {
     const router = useRouter()
 
-    // Fetch user's PDFs and recent activity using RTK Query
+    // Fetch user's Documents and recent activity using RTK Query
     const {
-        data: pdfData,
+        data: documentData,
         isLoading,
         error
-    } = useGetPDFsQuery()
+    } = useGetDocumentsQuery()
 
-    const recentActivity = pdfData?.recentActivity
+    const recentActivity = documentData?.recentActivity
 
     /**
-     * Handles click to open the recent PDF
+     * Handles click to open the recent Document
      */
     const handleActivityClick = () => {
         if (recentActivity) {
-            router.push(`/dashboard/pdf-notes?pdf=${recentActivity.pdfId}`)
+            router.push(`/dashboard/document-notes?document=${recentActivity.documentId}`)
         }
     }
 
@@ -153,7 +153,7 @@ export default function RecentActivityDisplay({
                     </div>
                     <h4 className="font-semibold text-gray-900 mb-1">No recent activity</h4>
                     <p className="text-gray-600 text-sm">
-                        Your recent PDF activity will appear here
+                        Your recent Document activity will appear here
                     </p>
                 </div>
             </div>
@@ -176,7 +176,7 @@ export default function RecentActivityDisplay({
         `}
             >
                 <div className="flex items-center gap-4">
-                    {/* PDF Icon */}
+                    {/* Document Icon */}
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
                         <FileText size={24} className="text-white" />
                     </div>
@@ -185,7 +185,7 @@ export default function RecentActivityDisplay({
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                             <h4 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
-                                {recentActivity.filename || 'Unknown PDF'}
+                                {recentActivity.name || 'Unknown Document'}
                             </h4>
                             <div className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                                 <Eye size={12} />

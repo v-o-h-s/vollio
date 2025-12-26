@@ -24,8 +24,8 @@ export enum ErrorType {
 export interface ErrorContext {
   component?: string;
   action?: string;
-  fileName?: string;
-  fileSize?: number;
+  documentName?: string;
+  size?: number;
   userId?: string;
   requestId?: string;
   [key: string]: any;
@@ -97,7 +97,7 @@ export class AppError extends Error {
       case ErrorType.SERVER:
         return "Server Error";
       case ErrorType.FILE_OPERATION:
-        return "File Error";
+        return "Document Error";
       case ErrorType.STORAGE:
         return "Storage Error";
       default:
@@ -206,16 +206,16 @@ export function createServerError(
 }
 
 /**
- * Create a file operation error
+ * Create a document operation error
  */
-export function createFileError(
+export function createDocumentError(
   message: string,
   context?: ErrorContext
 ): AppError {
   return new AppError({
     type: ErrorType.FILE_OPERATION,
     message,
-    userMessage: "There was a problem with the file. Please try again.",
+    userMessage: "There was a problem with the document. Please try again.",
     severity: ErrorSeverity.MEDIUM,
     retryable: true,
     context,

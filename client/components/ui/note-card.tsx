@@ -18,8 +18,8 @@ export const NoteCard = memo<NoteCardProps>(({ note, onEdit, onViewAnnotation })
 
   const handleViewAnnotation = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (note.pdfAnnotationId && onViewAnnotation) {
-      onViewAnnotation(note.pdfAnnotationId);
+    if (note.documentAnnotationId && onViewAnnotation) {
+      onViewAnnotation(note.documentAnnotationId);
     }
   };
 
@@ -42,13 +42,13 @@ export const NoteCard = memo<NoteCardProps>(({ note, onEdit, onViewAnnotation })
         <h3 className="font-semibold text-gray-900 line-clamp-2 group-hover:text-green-600 transition-colors">
           {note.title}
         </h3>
-        {note.pdfAnnotationId && (
+        {note.documentAnnotationId && (
           <Button
             variant="ghost"
             size="sm"
             onClick={handleViewAnnotation}
             className="flex-shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
-            title="View PDF annotation"
+            title="View Document annotation"
           >
             <ExternalLink size={14} />
           </Button>
@@ -69,9 +69,9 @@ export const NoteCard = memo<NoteCardProps>(({ note, onEdit, onViewAnnotation })
           </span>
         </div>
         
-        {note.pdfAnnotationId && (
+        {note.documentAnnotationId && (
           <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-            Linked to PDF
+            Linked to Document
           </span>
         )}
       </div>

@@ -12,7 +12,7 @@ Creates a new note.
 - **Body Parameters**:
   - `title` (string): Title of the note
   - `content` (string): Content of the note
-  - `pdfId` (string, optional): Associated PDF ID
+  - `documentId` (string, optional): Associated Document ID
 
 - **Success Response**:
   - **Code**: 201 Created
@@ -26,7 +26,7 @@ Creates a new note.
         "title": "string",
         "content": "object",
         "userId": "string (UUID)",
-        "pdfId": "string (UUID, optional)",
+        "documentId": "string (UUID, optional)",
         "createdAt": "string (ISO 8601 timestamp)",
         "updatedAt": "string (ISO 8601 timestamp)"
       },
@@ -66,7 +66,7 @@ Retrieves all notes for the authenticated user.
           "title": "string",
           "content": "object",
           "userId": "string (UUID)",
-          "pdfId": "string (UUID, optional)",
+          "documentId": "string (UUID, optional)",
           "createdAt": "string (ISO 8601 timestamp)",
           "updatedAt": "string (ISO 8601 timestamp)"
         }
@@ -100,7 +100,7 @@ Retrieves a specific note.
         "title": "string",
         "content": "object",
         "userId": "string (UUID)",
-        "pdfId": "string (UUID, optional)",
+        "documentId": "string (UUID, optional)",
         "createdAt": "string (ISO 8601 timestamp)",
         "updatedAt": "string (ISO 8601 timestamp)"
       },
@@ -136,7 +136,7 @@ Updates an existing note.
         "title": "string",
         "content": "object",
         "userId": "string (UUID)",
-        "pdfId": "string (UUID, optional)",
+        "documentId": "string (UUID, optional)",
         "createdAt": "string (ISO 8601 timestamp)",
         "updatedAt": "string (ISO 8601 timestamp)"
       },

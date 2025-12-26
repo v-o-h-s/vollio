@@ -1,7 +1,7 @@
 -- Migration: Replace annotations table with highlights table
 -- Date: September 13, 2025
 -- Description: Replace the annotations table with a more focused highlights table
--- that better matches the PDF annotation workflow requirements
+-- that better matches the Document annotation workflow requirements
 
 -- Drop the existing annotations table (will cascade to remove dependent objects)
 DROP TABLE IF EXISTS annotations CASCADE;
@@ -10,7 +10,7 @@ DROP TABLE IF EXISTS annotations CASCADE;
 CREATE TABLE highlights (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id TEXT NOT NULL, -- Clerk user ID
-  pdf_id UUID NOT NULL REFERENCES pdfs(id) ON DELETE CASCADE,
+  document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
   note_id UUID REFERENCES notes(id) ON DELETE CASCADE, -- Link to associated note
   
   -- Highlight content and metadata
@@ -21,7 +21,7 @@ CREATE TABLE highlights (
   color VARCHAR(7) NOT NULL DEFAULT '#FFFF00', -- Hex color code for highlight
   opacity DECIMAL(3,2) NOT NULL DEFAULT 0.4 CHECK (opacity >= 0.1 AND opacity <= 1.0),
   
-  -- PDF positioning data
+  -- Document positioning data
   page_number INTEGER NOT NULL CHECK (page_number > 0),
   textbounds JSONB NOT NULL, -- Array of TextBounds objects for accurate highlighting [{x, y, width, height}, ...]
   
@@ -55,7 +55,7 @@ CREATE POLICY "Users can only delete their own highlights" ON highlights
 
 -- Performance indexes
 CREATE INDEX idx_highlights_user_id ON highlights(user_id);
-CREATE INDEX idx_highlights_pdf_id ON highlights(pdf_id);
+CREATE INDEX idx_highlights_document_id ON highlights(document_id);
 CREATE INDEX idx_highlights_note_id ON highlights(note_id);
 CREATE INDEX idx_highlights_page_number ON highlights(page_number);
 CREATE INDEX idx_highlights_created_at ON highlights(created_at DESC);
@@ -67,8 +67,8 @@ CREATE TRIGGER update_highlights_updated_at BEFORE UPDATE ON highlights
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Add table and column comments for documentation
-COMMENT ON TABLE highlights IS 'PDF text highlights linked to notes. Each highlight represents a visually marked text selection in a PDF that can be linked to a note.';
-COMMENT ON COLUMN highlights.content IS 'The actual text content that was selected and highlighted in the PDF';
+COMMENT ON TABLE highlights IS 'Document text highlights linked to notes. Each highlight represents a visually marked text selection in a Document that can be linked to a note.';
+COMMENT ON COLUMN highlights.content IS 'The actual text content that was selected and highlighted in the Document';
 COMMENT ON COLUMN highlights.title IS 'Optional title for the highlight, often derived from the linked note title';
 COMMENT ON COLUMN highlights.color IS 'Hex color code for the highlight appearance (e.g., #FFFF00 for yellow)';
 COMMENT ON COLUMN highlights.opacity IS 'Opacity level for the highlight (0.1 to 1.0)';

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useGetPDFsQuery } from "@/lib/store/apiSlice";
+import { useGetAllDocumentsQuery } from "@/lib/store/apiSlice";
 import { toast } from "react-toastify";
 
 import {
@@ -17,7 +17,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-interface PDFDocument {
+interface DocumentDocument {
   id: string;
   title: string;
   page_count?: number;
@@ -25,10 +25,9 @@ interface PDFDocument {
 
 interface SelectedDocument {
   id: string;
-  title: string;
-  filename: string;
+  name: string;
   uploadedAt: string;
-  fileSize: number;
+  size: number;
   pageCount?: number;
   selectedPages?: number[];
 }
@@ -47,31 +46,31 @@ export function DocumentSelector({
   const [activeTab, setActiveTab] = useState<"library" | "upload">("library");
   const [isUploading, setIsUploading] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
 
   const {
-    data: pdfData,
-    isLoading: isLoadingPDFs,
-    error: pdfError,
-    refetch: refetchPDFs,
-  } = useGetPDFsQuery();
+    data: documents,
+    isLoading: isLoadingDocuments,
+    error: documentError,
+    refetch: refetchDocuments,
+  } = useGetAllDocumentsQuery();
 
-  // Transform PDFDocument to match DocumentSelector interface
-  const availableDocuments = (pdfData?.pdfs || []).map((pdf) => ({
-    id: pdf.id,
-    title: pdf.title,
-    page_count: pdf.page_count,
+  // No need to transform much if types are correct, but doc.name is what we need
+  const availableDocuments = (documents || []).map((document) => ({
+    id: document.id,
+    title: document.name,
+    page_count: 0, // Should be added to DocumentDetails if available
   }));
 
-  const handleFileUpload = async (files: File[]) => {
+  const handleDocumentUpload = async (files: File[]) => {
     setIsUploading(true);
 
-    for (const file of files) {
+    for (const document of files) {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("document", document);
 
       try {
-        const response = await fetch("/api/pdfs/upload", {
+        const response = await fetch("/api/v1/documents/upload", {
           method: "POST",
           body: formData,
         });
@@ -80,31 +79,33 @@ export function DocumentSelector({
           throw new Error("Upload failed");
         }
 
-        toast.success(`${file.name} has been uploaded successfully.`);
+        toast.success(`${document.name} has been uploaded successfully.`);
       } catch (error) {
-        console.error(`Failed to upload ${file.name}:`, error);
-        toast.error(`Failed to upload ${file.name}.`);
+        console.error(`Failed to upload ${document.name}:`, error);
+        toast.error(`Failed to upload ${document.name}.`);
       }
     }
 
     setIsUploading(false);
-    refetchPDFs();
+    refetchDocuments();
     // Switch to library tab to show newly uploaded documents
     setActiveTab("library");
   };
 
-  const handleFileDrop = (e: React.DragEvent) => {
+  const handleDocumentDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
 
     const files = Array.from(e.dataTransfer.files);
-    const pdfFiles = files.filter((file) => file.type === "application/pdf");
+    const documentsInDrop = files.filter(
+      (document) => document.type === "application/pdf"
+    );
 
-    if (pdfFiles.length > 0) {
-      handleFileUpload(pdfFiles);
+    if (documentsInDrop.length > 0) {
+      handleDocumentUpload(documentsInDrop);
     } else {
-      alert("Please upload PDF files only.");
+      alert("Please upload documents only.");
     }
   };
 
@@ -120,7 +121,7 @@ export function DocumentSelector({
     setIsDragOver(false);
   };
 
-  const handleAddDocument = (doc: PDFDocument) => {
+  const handleAddDocument = (doc: DocumentDocument) => {
     // Check if document is already selected
     if (selectedDocuments.some((selected) => selected.id === doc.id)) {
       toast.error("Document is already selected");
@@ -129,10 +130,9 @@ export function DocumentSelector({
 
     const newDocument: SelectedDocument = {
       id: doc.id,
-      title: doc.title,
-      filename: doc.title,
+      name: doc.title,
       uploadedAt: new Date().toISOString(),
-      fileSize: 0, // We don't have this info from the API
+      size: 0, // We don't have this info from the list if not in DocumentDetails
       pageCount: doc.page_count || 1,
       selectedPages: Array.from(
         { length: doc.page_count || 1 },
@@ -188,14 +188,14 @@ export function DocumentSelector({
         <div className="space-y-4">
           <div>
             <Label>Available Documents ({availableDocuments.length})</Label>
-            {isLoadingPDFs ? (
+            {isLoadingDocuments ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mb-3" />
                 <p className="text-muted-foreground">
                   Loading your documents...
                 </p>
               </div>
-            ) : pdfError ? (
+            ) : documentError ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <AlertCircle className="w-12 h-12 text-red-500 mb-3" />
                 <p className="text-muted-foreground">
@@ -204,7 +204,7 @@ export function DocumentSelector({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => refetchPDFs()}
+                  onClick={() => refetchDocuments()}
                   className="mt-2"
                 >
                   Try Again
@@ -217,7 +217,7 @@ export function DocumentSelector({
                   No documents in your library
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Upload some PDFs to get started
+                  Upload some Documents to get started
                 </p>
               </div>
             ) : (
@@ -253,7 +253,7 @@ export function DocumentSelector({
                   ? "border-primary bg-primary/5"
                   : "border-muted-foreground/25 hover:border-muted-foreground/50"
               }`}
-              onDrop={handleFileDrop}
+              onDrop={handleDocumentDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
             >
@@ -272,7 +272,9 @@ export function DocumentSelector({
 
                 <div>
                   <h3 className="font-medium mb-1">
-                    {isDragOver ? "Drop files here" : "Drag & drop PDF files"}
+                    {isDragOver
+                      ? "Drop documents here"
+                      : "Drag & drop documents"}
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     or click to browse your computer
@@ -280,7 +282,7 @@ export function DocumentSelector({
 
                   <Button
                     variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => documentInputRef.current?.click()}
                     disabled={isUploading}
                   >
                     {isUploading ? (
@@ -291,7 +293,7 @@ export function DocumentSelector({
                     ) : (
                       <>
                         <Upload className="w-4 h-4 mr-2" />
-                        Choose Files
+                        Choose Documents
                       </>
                     )}
                   </Button>
@@ -299,7 +301,7 @@ export function DocumentSelector({
 
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <FileText className="w-3 h-3" />
-                  <span>PDF files only • Max 50MB per file</span>
+                  <span>documents only • Max 50MB per document</span>
                 </div>
               </div>
             </div>
@@ -307,9 +309,9 @@ export function DocumentSelector({
         </div>
       )}
 
-      {/* Hidden file input */}
+      {/* Hidden document input */}
       <input
-        ref={fileInputRef}
+        ref={documentInputRef}
         type="file"
         accept=".pdf"
         multiple
@@ -317,7 +319,7 @@ export function DocumentSelector({
         onChange={(e) => {
           const files = Array.from(e.target.files || []);
           if (files.length > 0) {
-            handleFileUpload(files);
+            handleDocumentUpload(files);
           }
         }}
       />
@@ -334,7 +336,7 @@ export function DocumentSelector({
               No documents selected
             </p>
             <p className="text-xs text-muted-foreground">
-              Choose from your library or upload new files
+              Choose from your library or upload new documents
             </p>
           </div>
         ) : (
@@ -343,7 +345,7 @@ export function DocumentSelector({
               <div key={doc.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{doc.title}</p>
+                    <p className="font-medium truncate">{doc.name}</p>
                     <p className="text-sm text-muted-foreground">
                       {doc.selectedPages?.length || doc.pageCount || 0} of{" "}
                       {doc.pageCount || 0} pages selected

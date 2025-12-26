@@ -4,7 +4,7 @@ Base URL: `/api/v1/folders`
 
 ## 1. Get All User Folders
 
-Retrieves all folders for the authenticated user with PDF counts.
+Retrieves all folders for the authenticated user with Document counts.
 
 - **URL**: `/`
 - **Method**: `GET`
@@ -26,7 +26,7 @@ Retrieves all folders for the authenticated user with PDF counts.
           "parentId": "string (UUID) | null",
           "color": "string | null",
           "icon": "string | null",
-          "pdfCount": "number",
+          "documentCount": "number",
           "createdAt": "string (ISO 8601 timestamp)",
           "updatedAt": "string (ISO 8601 timestamp)"
         }
@@ -97,7 +97,7 @@ Creates a new folder for the authenticated user.
 
 ## 3. Get Folder by ID
 
-Retrieves a specific folder with PDF count.
+Retrieves a specific folder with Document count.
 
 - **URL**: `/:id`
 - **Method**: `GET`
@@ -120,7 +120,7 @@ Retrieves a specific folder with PDF count.
         "parentId": "string (UUID) | null",
         "color": "string | null",
         "icon": "string | null",
-        "pdfCount": "number",
+        "documentCount": "number",
         "createdAt": "string (ISO 8601 timestamp)",
         "updatedAt": "string (ISO 8601 timestamp)"
       },
@@ -185,7 +185,7 @@ Deletes a folder and optionally moves its contents.
 - **URL Parameters**:
   - `id` (string): The UUID of the folder to delete
 - **Query Parameters**:
-  - `targetFolderId` (string, optional): UUID of folder to move PDFs and subfolders to. If not provided, contents moved to root level.
+  - `targetFolderId` (string, optional): UUID of folder to move Documents and subfolders to. If not provided, contents moved to root level.
 
 - **Success Response**:
   - **Code**: 200 OK
@@ -219,6 +219,6 @@ Deletes a folder and optionally moves its contents.
 ## Notes
 
 - All folder operations enforce user isolation - users can only access their own folders
-- PDF count is calculated by counting all PDFs directly in the folder
-- Deleting a folder with PDFs requires specifying a targetFolderId or they will be moved to root
+- Document count is calculated by counting all Documents directly in the folder
+- Deleting a folder with Documents requires specifying a targetFolderId or they will be moved to root
 - Nested folder hierarchies are supported with parentId references

@@ -31,9 +31,9 @@ import { toast } from "react-toastify";
 interface SelectedDocument {
   id: string;
   title: string;
-  filename: string;
+  name: string;
   uploadedAt: string;
-  fileSize: number;
+  size: number;
   pageCount?: number;
   selectedPages?: number[];
 }
@@ -192,7 +192,7 @@ The reviewed documents provide valuable insights that can inform decision-making
 ## Key Points
 • Documents analyzed: ${
           selectedDocuments.length
-        } files (${totalPages} total pages)
+        } documents (${totalPages} total pages)
 • Primary focus: ${settings.focus.replace("-", " ")}
 • Tone: ${settings.tone}
 • Length: ${settings.length}

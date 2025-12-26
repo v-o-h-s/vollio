@@ -16,7 +16,7 @@ export class QuizMapper {
     return {
       id: quiz.getId(),
       title: quiz.getTitle(),
-      fileId: quiz.getFileId(),
+      documentId: quiz.getDocumentId(),
       language: quiz.getLanguage(),
       settings: {
         difficultyLevel: quiz.getDifficultyLevel(),

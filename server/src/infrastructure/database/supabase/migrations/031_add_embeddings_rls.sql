@@ -1,6 +1,6 @@
 -- Migration: Add Row Level Security for embeddings
 -- Date: December 15, 2025
--- Description: Enable RLS on the `embeddings` table and add policies that allow users to operate only on embeddings that belong to PDFs they own.
+-- Description: Enable RLS on the `embeddings` table and add policies that allow users to operate only on embeddings that belong to Documents they own.
 
 -- 1️⃣ Enable Row Level Security
 ALTER TABLE embeddings ENABLE ROW LEVEL SECURITY;
@@ -46,7 +46,7 @@ CREATE TRIGGER embeddings_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_embeddings_updated_at();
 
--- 2️⃣ RLS Policy: Users can view embeddings belonging to their PDFs
+-- 2️⃣ RLS Policy: Users can view embeddings belonging to their Documents
 CREATE POLICY "Users can view their own embeddings" ON embeddings
     FOR SELECT
     USING (
@@ -54,7 +54,7 @@ CREATE POLICY "Users can view their own embeddings" ON embeddings
         auth.uid() = user_id
     );
 
--- 3️⃣ RLS Policy: Users can insert embeddings only for PDFs they own
+-- 3️⃣ RLS Policy: Users can insert embeddings only for Documents they own
 CREATE POLICY "Users can insert their own embeddings" ON embeddings
     FOR INSERT
     WITH CHECK (
@@ -62,7 +62,7 @@ CREATE POLICY "Users can insert their own embeddings" ON embeddings
         auth.uid() = user_id
     );
 
--- 4️⃣ RLS Policy: Users can update embeddings only when the embedding belongs to a PDF they own
+-- 4️⃣ RLS Policy: Users can update embeddings only when the embedding belongs to a Document they own
 CREATE POLICY "Users can update their own embeddings" ON embeddings
     FOR UPDATE
     USING (
@@ -72,7 +72,7 @@ CREATE POLICY "Users can update their own embeddings" ON embeddings
         auth.uid() = user_id
     );
 
--- 5️⃣ RLS Policy: Users can delete embeddings belonging to their PDFs
+-- 5️⃣ RLS Policy: Users can delete embeddings belonging to their Documents
 CREATE POLICY "Users can delete their own embeddings" ON embeddings
     FOR DELETE
     USING (
@@ -80,8 +80,8 @@ CREATE POLICY "Users can delete their own embeddings" ON embeddings
     );
 
 -- Comments
-COMMENT ON TABLE embeddings IS 'Embeddings extracted from PDFs; access is restricted to the PDF owner by RLS policies';
-COMMENT ON COLUMN embeddings.document_id IS 'Reference to the PDF this embedding chunk belongs to';
-COMMENT ON COLUMN embeddings.chunk_index IS 'Index of the chunk inside the original PDF';
+COMMENT ON TABLE embeddings IS 'Embeddings extracted from Documents; access is restricted to the Document owner by RLS policies';
+COMMENT ON COLUMN embeddings.document_id IS 'Reference to the Document this embedding chunk belongs to';
+COMMENT ON COLUMN embeddings.chunk_index IS 'Index of the chunk inside the original Document';
 COMMENT ON COLUMN embeddings.token_count IS 'Number of tokens in the chunk (if available)';
 COMMENT ON COLUMN embeddings.metadata IS 'Flexible JSONB for chunk-level metadata (page range, heading, etc.)';

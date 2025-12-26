@@ -5,7 +5,7 @@ export class Note {
   private userId: string;
   private title?: string;
   private content?: JSONContent;
-  private pdfId?: string;
+  private documentId?: string;
   private createdAt: Date;
   private updatedAt: Date;
 
@@ -14,14 +14,14 @@ export class Note {
     userId: string,
     title?: string,
     content?: JSONContent,
-    pdfId?: string,
+    documentId?: string,
     createdAt?: Date,
     updatedAt?: Date
   ) {
     this.id = id;
     this.title = title;
     this.content = content;
-    this.pdfId = pdfId;
+    this.documentId = documentId;
     this.userId = userId;
     this.createdAt = createdAt || new Date();
     this.updatedAt = updatedAt || new Date();
@@ -38,8 +38,8 @@ export class Note {
     return this.content;
   }
 
-  public getPdfId(): string | undefined {
-    return this.pdfId;
+  public getDocumentId(): string | undefined {
+    return this.documentId;
   }
   public getUserId(): string {
     return this.userId;
@@ -59,7 +59,7 @@ export class Note {
       title: this.title,
       content: this.content,
       userId: this.userId,
-      pdfId: this.pdfId,
+      documentId: this.documentId,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

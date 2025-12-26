@@ -20,8 +20,8 @@ const nextConfig: NextConfig = {
         destination: "http://localhost:3000/api/v1/integrations/:path*",
       },
       {
-        source: "/api/v1/files/:path*",
-        destination: "http://localhost:3000/api/v1/files/:path*",
+        source: "/api/v1/documents/:path*",
+        destination: "http://localhost:3000/api/v1/documents/:path*",
       },
       {
         source: "/api/v1/quizzes/:path*",

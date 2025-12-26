@@ -51,10 +51,10 @@ const navigationItems = [
     hoverColor: "hover:bg-blue-500/10 hover:border-blue-500/20",
   },
   {
-    name: "My files",
-    href: "/dashboard/pdfs",
+    name: "My documents",
+    href: "/dashboard/documents",
     icon: FileText,
-    description: "View and manage all your PDFs",
+    description: "View and manage all your Documents",
     gradient: "from-emerald-500 to-teal-500",
     hoverColor: "hover:bg-emerald-500/10 hover:border-emerald-500/20",
   },
@@ -236,7 +236,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
           </div>
         </nav>
 
-        {/* User Profile Section */}
+        {/* User Prodocument Section */}
         <div
           className={cn(
             "border-t border-sidebar-border relative transition-[padding] duration-300 ease-out",
@@ -286,7 +286,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                   <DropdownMenuGroup>
                     <DropdownMenuItem>
                       <User className="mr-2 h-4 w-4" />
-                      Profile
+                      Prodocument
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <Settings className="mr-2 h-4 w-4" />
@@ -364,7 +364,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                     <DropdownMenuGroup>
                       <DropdownMenuItem>
                         <User className="mr-2 h-4 w-4" />
-                        Profile
+                        Prodocument
                       </DropdownMenuItem>
                       <DropdownMenuItem>
                         <Settings className="mr-2 h-4 w-4" />

@@ -35,7 +35,7 @@ export interface HighlightContent {
  */
 export interface CreateHighlightDTO {
   id: string;
-  pdfId: string;
+  documentId: string;
   type?: "text" | "area";
   content?: HighlightContent;
   position: ScaledPosition;
@@ -102,7 +102,7 @@ export const createHighlightSchema: JSONSchemaType<CreateHighlightDTO> = {
       pattern:
         "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
-    pdfId: {
+    documentId: {
       type: "string",
       pattern:
         "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
@@ -142,7 +142,7 @@ export const createHighlightSchema: JSONSchemaType<CreateHighlightDTO> = {
       nullable: true,
     },
   },
-  required: ["id", "pdfId", "position"],
+  required: ["id", "documentId", "position"],
   additionalProperties: false,
 } as any;
 
@@ -156,7 +156,7 @@ export interface UpdateHighlightDTO {
   noteId?: string | null;
   position?: ScaledPosition;
   type?: "text" | "area";
-  pdfId?: string;
+  documentId?: string;
   tags?: string[];
   style?: "highlight" | "tagged";
 }
@@ -191,7 +191,7 @@ export const updateHighlightSchema: JSONSchemaType<UpdateHighlightDTO> = {
       enum: ["text", "area"],
       nullable: true,
     },
-    pdfId: {
+    documentId: {
       type: "string",
       pattern:
         "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
@@ -236,13 +236,13 @@ export const highlightIdParamsSchema: JSONSchemaType<HighlightIdParams> = {
  * Query parameters for getting highlights
  */
 export interface GetHighlightsQuery {
-  pdfId?: string;
+  documentId?: string;
 }
 
 export const getHighlightsQuerySchema: JSONSchemaType<GetHighlightsQuery> = {
   type: "object",
   properties: {
-    pdfId: {
+    documentId: {
       type: "string",
       pattern:
         "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",

@@ -1,14 +1,14 @@
-# File API Endpoints
+# Document API Endpoints
 
-Base URL: `/api/v1/files`
+Base URL: `/api/v1/documents`
 
 ## Overview
-All file endpoints require authentication unless noted otherwise. Responses follow a standard format with `success`, `message`, `data`, and `error` fields.
+All document endpoints require authentication unless noted otherwise. Responses follow a standard format with `success`, `message`, `data`, and `error` fields.
 
 ---
 
-## 1. Get All Files
-Retrieves all files for the authenticated user.
+## 1. Get All Documents
+Retrieves all documents for the authenticated user.
 
 - **URL**: `/`
 - **Method**: `GET`
@@ -18,17 +18,17 @@ Retrieves all files for the authenticated user.
 ```json
 {
   "success": true,
-  "message": "Files fetched successfully",
+  "message": "Documents fetched successfully",
   "data": {
-    "pdfs": [
+    "documents": [
       {
         "id": "string (UUID)",
-        "filename": "string",
-        "fileSize": "number",
+        "documentname": "string",
+        "documentSize": "number",
         "mimeType": "string",
         "uploadedAt": "string (ISO 8601)",
         "folderId": "string | null",
-        "isGoogleDriveFile": "boolean"
+        "isGoogleDriveDocument": "boolean"
       }
     ],
     "totalCount": "number"
@@ -42,8 +42,8 @@ Retrieves all files for the authenticated user.
 
 ---
 
-## 2. Get File by ID
-Retrieves a specific file's metadata by ID.
+## 2. Get Document by ID
+Retrieves a specific document's metadata by ID.
 
 - **URL**: `/:id`
 - **Method**: `GET`
@@ -54,16 +54,16 @@ Retrieves a specific file's metadata by ID.
 ```json
 {
   "success": true,
-  "message": "File fetched successfully",
+  "message": "Document fetched successfully",
   "data": {
     "id": "string (UUID)",
-    "filename": "string",
-    "fileUrl": "string",
-    "fileSize": "number",
+    "documentname": "string",
+    "documentUrl": "string",
+    "documentSize": "number",
     "mimeType": "string",
     "uploadedAt": "string (ISO 8601)",
     "folderId": "string | null",
-    "isGoogleDriveFile": "boolean"
+    "isGoogleDriveDocument": "boolean"
   },
   "error": null
 }
@@ -71,32 +71,32 @@ Retrieves a specific file's metadata by ID.
 
 **Error Responses**:
 - **401 Unauthorized**: User not authenticated
-- **404 Not Found**: File does not exist
+- **404 Not Found**: Document does not exist
 
 ---
 
-## 3. Upload File
-Uploads a new file to storage and saves metadata to database.
+## 3. Upload Document
+Uploads a new document to storage and saves metadata to database.
 
 - **URL**: `/upload`
 - **Method**: `POST`
 - **Auth Required**: Yes
 - **Content-Type**: `multipart/form-data`
 - **Form Parameters**:
-  - `file` (file, required): The file to upload
-  - `folderId` (string, optional): Folder ID to organize file
+  - `document` (document, required): The document to upload
+  - `folderId` (string, optional): Folder ID to organize document
 
 **Success Response** (200 OK):
 ```json
 {
   "success": true,
-  "message": "File uploaded successfully",
+  "message": "Document uploaded successfully",
   "data": {
     "id": "string (UUID)",
-    "filename": "string",
-    "fileSize": "number",
+    "documentname": "string",
+    "documentSize": "number",
     "uploadedAt": "string (ISO 8601)",
-    "fileUrl": "string",
+    "documentUrl": "string",
     "storagePath": "string"
   },
   "error": null
@@ -104,13 +104,13 @@ Uploads a new file to storage and saves metadata to database.
 ```
 
 **Error Responses**:
-- **400 Bad Request**: No file provided
+- **400 Bad Request**: No document provided
 - **401 Unauthorized**: User not authenticated
 
 ---
 
-## 4. Delete File
-Deletes a file from storage and database.
+## 4. Delete Document
+Deletes a document from storage and database.
 
 - **URL**: `/:id`
 - **Method**: `DELETE`
@@ -121,7 +121,7 @@ Deletes a file from storage and database.
 ```json
 {
   "success": true,
-  "message": "File deleted successfully",
+  "message": "Document deleted successfully",
   "data": null,
   "error": null
 }
@@ -129,12 +129,12 @@ Deletes a file from storage and database.
 
 **Error Responses**:
 - **401 Unauthorized**: User not authenticated
-- **404 Not Found**: File does not exist
+- **404 Not Found**: Document does not exist
 
 ---
 
-## 5. Move File
-Moves a file to a different folder.
+## 5. Move Document
+Moves a document to a different folder.
 
 - **URL**: `/:id/move`
 - **Method**: `PATCH`
@@ -151,7 +151,7 @@ Moves a file to a different folder.
 ```json
 {
   "success": true,
-  "message": "File moved successfully",
+  "message": "Document moved successfully",
   "data": null,
   "error": null
 }
@@ -159,12 +159,12 @@ Moves a file to a different folder.
 
 **Error Responses**:
 - **401 Unauthorized**: User not authenticated
-- **404 Not Found**: File does not exist
+- **404 Not Found**: Document does not exist
 
 ---
 
-## 6. Rename File
-Renames a file.
+## 6. Rename Document
+Renames a document.
 
 - **URL**: `/:id/rename`
 - **Method**: `PUT`
@@ -173,7 +173,7 @@ Renames a file.
 - **Request Body**:
 ```json
 {
-  "filename": "string"
+  "documentname": "string"
 }
 ```
 
@@ -181,7 +181,7 @@ Renames a file.
 ```json
 {
   "success": true,
-  "message": "File renamed successfully",
+  "message": "Document renamed successfully",
   "data": null,
   "error": null
 }
@@ -189,12 +189,12 @@ Renames a file.
 
 **Error Responses**:
 - **401 Unauthorized**: User not authenticated
-- **404 Not Found**: File does not exist
+- **404 Not Found**: Document does not exist
 
 ---
 
 ## 7. Create Signed URL
-Creates a signed JWT token for secure file streaming without authentication.
+Creates a signed JWT token for secure document streaming without authentication.
 
 - **URL**: `/:id/signed-url`
 - **Method**: `POST`
@@ -215,17 +215,17 @@ Creates a signed JWT token for secure file streaming without authentication.
 
 **Error Responses**:
 - **401 Unauthorized**: User not authenticated
-- **404 Not Found**: File does not exist
+- **404 Not Found**: Document does not exist
 
-**Usage**: Use the returned token to stream the file:
+**Usage**: Use the returned token to stream the document:
 ```
-GET /api/v1/files/stream?token={url}
+GET /api/v1/documents/stream?token={url}
 ```
 
 ---
 
-## 8. Stream File (with Signed URL)
-Streams a file for download/viewing using a signed JWT token. Supports both GET (full stream) and HEAD (headers only) requests.
+## 8. Stream Document (with Signed URL)
+Streams a document for download/viewing using a signed JWT token. Supports both GET (full stream) and HEAD (headers only) requests.
 
 - **URL**: `/stream`
 - **Method**: `GET` or `HEAD`
@@ -233,25 +233,25 @@ Streams a file for download/viewing using a signed JWT token. Supports both GET 
 - **Query Parameters**: `token` (string, required) - JWT from `/signed-url` endpoint
 
 **Success Response** (200 OK):
-- **Content**: Binary PDF stream
+- **Content**: Binary Document stream
 - **Headers**:
-  - `Content-Type`: `application/pdf`
-  - `Content-Disposition`: `inline; filename=file.pdf`
+  - `Content-Type`: `application/document`
+  - `Content-Disposition`: `inline; documentname=document.document`
   - `Accept-Ranges`: `bytes` (for range requests)
 
-**HEAD Request**: Returns headers only without file content (useful for PDF.js preflight checks)
+**HEAD Request**: Returns headers only without document content (useful for Document.js preflight checks)
 
 **Error Responses**:
 - **400 Bad Request**: Missing token
 - **401 Unauthorized**: Invalid or expired token
 - **403 Forbidden**: Wrong token purpose
-- **404 Not Found**: File not found
+- **404 Not Found**: Document not found
 - **500 Internal Server Error**: Google Classroom tokens expired
 
 ---
 
-## 9. Add File from Google Drive
-Adds a reference to a Google Drive file into the system.
+## 9. Add Document from Google Drive
+Adds a reference to a Google Drive document into the system.
 
 - **URL**: `/google-drive`
 - **Method**: `POST`
@@ -259,7 +259,7 @@ Adds a reference to a Google Drive file into the system.
 - **Request Body**:
 ```json
 {
-  "fileGoogleDriveId": "string"
+  "documentGoogleDriveId": "string"
 }
 ```
 
@@ -267,7 +267,7 @@ Adds a reference to a Google Drive file into the system.
 ```json
 {
   "success": true,
-  "message": "File added successfully",
+  "message": "Document added successfully",
   "data": null,
   "error": null
 }
@@ -275,24 +275,24 @@ Adds a reference to a Google Drive file into the system.
 
 **Error Responses**:
 - **401 Unauthorized**: User not authenticated
-- **404 Not Found**: File not found in Google Drive
+- **404 Not Found**: Document not found in Google Drive
 
 ---
 
-## 10. Get File from Google Drive
-Retrieves a file's content from Google Drive via the system.
+## 10. Get Document from Google Drive
+Retrieves a document's content from Google Drive via the system.
 
-- **URL**: `/google-drive/:fileId`
+- **URL**: `/google-drive/:documentId`
 - **Method**: `GET`
 - **Auth Required**: Yes
-- **URL Parameters**: `fileId` (string) - Internal file ID
+- **URL Parameters**: `documentId` (string) - Internal document ID
 
 **Success Response** (200 OK):
-- **Content**: Binary file stream
+- **Content**: Binary document stream
 - **Headers**:
-  - `Content-Type`: File's MIME type (e.g., `application/pdf`)
-  - `Content-Disposition`: `inline; filename="<filename>"`
+  - `Content-Type`: Document's MIME type (e.g., `application/document`)
+  - `Content-Disposition`: `inline; documentname="<documentname>"`
 
 **Error Responses**:
 - **401 Unauthorized**: User not authenticated
-- **404 Not Found**: File does not exist in DB or Google Drive
+- **404 Not Found**: Document does not exist in DB or Google Drive

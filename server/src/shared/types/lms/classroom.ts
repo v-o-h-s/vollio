@@ -98,13 +98,13 @@ export interface CourseMaterialSet {
 }
 
 export interface CourseMaterial {
-  driveFile?: DriveFile;
+  driveDocument?: DriveDocument;
   youTubeVideo?: YouTubeVideo;
   link?: Link;
   form?: Form;
 }
 
-export interface DriveFile {
+export interface DriveDocument {
   id: string;
   title: string;
   alternateLink?: string;
@@ -168,14 +168,14 @@ export interface Announcement {
 // --------------------------------------
 
 export interface Material {
-  driveFile?: DriveFileMaterial;
+  driveDocument?: DriveDocumentMaterial;
   youtubeVideo?: YouTubeVideoMaterial;
   link?: LinkMaterial;
   form?: FormMaterial;
 }
 
-export interface DriveFileMaterial {
-  driveFile: {
+export interface DriveDocumentMaterial {
+  driveDocument: {
     id: string;
     title: string;
     alternateLink: string;
@@ -229,7 +229,7 @@ export interface ClassroomAnnouncementResponse {
   updatedAt: string;
 
   materials: {
-    driveFiles: {
+    driveDocuments: {
       id: string;
       title: string;
     }[];
@@ -344,7 +344,7 @@ export interface ClassroomCourseWorkResponse {
   alternateLink: string;
   updatedAt: string;
   materials: {
-    driveFiles: {
+    driveDocuments: {
       id: string;
       title: string;
       thumbnailUrl?: string;

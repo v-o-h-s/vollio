@@ -3,7 +3,7 @@
  * Matches the database schema for the highlights table
  */
 
-import { CreateHighlightDTO } from "@shared/validation/highlightSchemas";
+import { CreateHighlightDTO } from "@vollio/shared";
 
 // Allowed highlight types
 export type HighlightType = "text" | "area";
@@ -32,7 +32,7 @@ export interface ScaledPosition {
   usePdfCoordinates?: boolean;
 }
 
-// Main Highlight interface (not used in the code , it is from react-pdf-highlighter-extended)
+// Main Highlight interface (not used in the code , it is from react-document-highlighter-extended)
 export interface Highlight {
   id: string;
   type?: HighlightType;
@@ -54,7 +54,7 @@ export interface MyHighlight extends Highlight {
 // Main Highlight interface matching database schema
 export interface SupabaseHighlightResponse {
   id: string;
-  pdf_id: string;
+  document_id: string;
   user_id: string;
   type: HighlightType;
   content: Content;
@@ -78,7 +78,7 @@ export const mapSupabaseHighlightResponseToHighlight = (
 ): HighlightwithDetails => {
   return {
     id: highlight.id,
-    pdfId: highlight.pdf_id,
+    documentId: highlight.document_id,
     type: highlight.type,
     content: highlight.content,
     position: highlight.position,

@@ -9,13 +9,13 @@ import {
   RefreshAccessTokenResponse as RefreshTokenResponse,
   TokenStatus,
   GetCourseContentResponse,
-} from "@shared/types/responses/googleClassroomRoutes";
+} from "@vollio/shared";
 import {
   CourseContent,
   CourseListResponse,
   CourseWithContent,
-} from "@shared/types/lms/classroom";
-import { GetCoursesResponse as ListCoursesResponse } from "@shared/types/responses/googleClassroomRoutes";
+} from "@vollio/shared";
+import { GetCoursesResponse as ListCoursesResponse } from "@vollio/shared";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 export const googleClassroomEndpoints = (builder: ApiBuilder) => ({

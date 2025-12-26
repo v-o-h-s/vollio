@@ -63,7 +63,7 @@ function NotionEditorInner({
   autoSaveDelay = 500,
   onAutoSaveStatusChange,
   onNoteCreated,
-  fileId,
+  documentId,
   lastUpdatedAt,
 }: NotionEditorProps) {
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
@@ -119,14 +119,14 @@ function NotionEditorInner({
         console.log(
           "📝 Creating new note with title:",
           title,
-          "fileId:",
-          fileId
+          "documentId:",
+          documentId
         );
 
         const newNote = await createNote({
           title,
           content,
-          pdfId: fileId,
+          documentId: documentId,
         }).unwrap();
         const newNoteId = newNote.id;
 

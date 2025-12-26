@@ -1,7 +1,7 @@
 /**
- * Main types file - re-exports all organized type definitions
+ * Main types document - re-exports all organized type definitions
  * 
- * This file maintains backward compatibility while organizing types
+ * This document maintains backward compatibility while organizing types
  * into separate modules by subject matter.
  */
 

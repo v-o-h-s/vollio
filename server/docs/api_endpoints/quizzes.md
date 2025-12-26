@@ -32,7 +32,7 @@ Generates a new quiz from a document.
       "data": {
         "id": "string (UUID)",
         "title": "string",
-        "fileId": "string (UUID)",
+        "documentId": "string (UUID)",
         "language": "string",
         "settings": {
             "difficultyLevel": "string",
@@ -85,7 +85,7 @@ Retrieves all quizzes for the authenticated user. Note: Question details are typ
         {
           "id": "string (UUID)",
           "title": "string",
-          "fileId": "string (UUID)",
+          "documentId": "string (UUID)",
           "language": "string",
           "settings": {...},
           "createdAt": "string (ISO timestamp)"

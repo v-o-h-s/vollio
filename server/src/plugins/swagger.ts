@@ -57,7 +57,7 @@ export default fp(async (fastify: FastifyInstance) => {
       info: {
         title: "Vollio API",
         description:
-          "API documentation for Vollio - PDF annotation and note-taking platform",
+          "API documentation for Vollio - Document annotation and note-taking platform",
         version: "1.0.0",
         contact: {
           name: "API Support",
@@ -101,8 +101,8 @@ export default fp(async (fastify: FastifyInstance) => {
           description: "Note management endpoints",
         },
         {
-          name: "Files",
-          description: "File and PDF management endpoints",
+          name: "Documents",
+          description: "Document and Document management endpoints",
         },
         {
           name: "Folders",
@@ -110,7 +110,7 @@ export default fp(async (fastify: FastifyInstance) => {
         },
         {
           name: "Highlights",
-          description: "PDF highlight and annotation endpoints",
+          description: "Document highlight and annotation endpoints",
         },
         {
           name: "Google Classroom",

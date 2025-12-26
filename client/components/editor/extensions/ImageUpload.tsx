@@ -22,7 +22,7 @@ declare module '@tiptap/core' {
       /**
        * Upload an image
        */
-      uploadImage: (file: File) => ReturnType;
+      uploadImage: (document: Document) => ReturnType;
     };
   }
 }
@@ -99,22 +99,22 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
           });
         },
       uploadImage:
-        (file) =>
+        (document) =>
         ({ commands, editor }) => {
           // Insert a loading placeholder
           const loadingNode = {
             type: this.name,
             attrs: {
               src: '',
-              alt: file.name,
+              alt: document.name,
               loading: true,
             },
           };
 
           commands.insertContent(loadingNode);
 
-          // Upload the file
-          this.uploadFile(file, editor);
+          // Upload the document
+          this.uploadDocument(document, editor);
 
           return true;
         },
@@ -145,14 +145,14 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
         props: {
           handleDOMEvents: {
             drop: (view, event) => {
-              const hasFiles = event.dataTransfer?.files?.length;
+              const hasDocuments = event.dataTransfer?.files?.length;
 
-              if (!hasFiles) {
+              if (!hasDocuments) {
                 return false;
               }
 
-              const images = Array.from(event.dataTransfer.files).filter((file) =>
-                /image/i.test(file.type)
+              const images = Array.from(event.dataTransfer.files).filter((document) =>
+                /image/i.test(document.type)
               );
 
               if (images.length === 0) {
@@ -179,20 +179,20 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
                 const transaction = view.state.tr.insert(coordinates.pos, node);
                 view.dispatch(transaction);
 
-                this.uploadFile(image, this.editor);
+                this.uploadDocument(image, this.editor);
               });
 
               return true;
             },
             paste: (view, event) => {
-              const hasFiles = event.clipboardData?.files?.length;
+              const hasDocuments = event.clipboardData?.files?.length;
 
-              if (!hasFiles) {
+              if (!hasDocuments) {
                 return false;
               }
 
-              const images = Array.from(event.clipboardData.files).filter((file) =>
-                /image/i.test(file.type)
+              const images = Array.from(event.clipboardData.files).filter((document) =>
+                /image/i.test(document.type)
               );
 
               if (images.length === 0) {
@@ -211,7 +211,7 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
                 const transaction = view.state.tr.replaceSelectionWith(node);
                 view.dispatch(transaction);
 
-                this.uploadFile(image, this.editor);
+                this.uploadDocument(image, this.editor);
               });
 
               return true;
@@ -223,9 +223,9 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
   },
 
   // Custom upload method
-  uploadFile(file: File, editor: any) {
+  uploadDocument(document: Document, editor: any) {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('document', document);
 
     fetch('/api/images/upload', {
       method: 'POST',
@@ -243,7 +243,7 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
             if (
               node.type.name === 'imageUpload' &&
               node.attrs.loading &&
-              node.attrs.alt === file.name
+              node.attrs.alt === document.name
             ) {
               pos = nodePos;
               return false;
@@ -264,16 +264,16 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
           }
         } else {
           // Handle upload error
-          this.handleUploadError(file.name, data.error, editor);
+          this.handleUploadError(document.name, data.error, editor);
         }
       })
       .catch((error) => {
         console.error('Upload error:', error);
-        this.handleUploadError(file.name, 'Upload failed', editor);
+        this.handleUploadError(document.name, 'Upload failed', editor);
       });
   },
 
-  handleUploadError(fileName: string, error: string, editor: any) {
+  handleUploadError(documentName: string, error: string, editor: any) {
     const { state } = editor;
     const { doc } = state;
     let pos = -1;
@@ -282,7 +282,7 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
       if (
         node.type.name === 'imageUpload' &&
         node.attrs.loading &&
-        node.attrs.alt === fileName
+        node.attrs.alt === documentName
       ) {
         pos = nodePos;
         return false;

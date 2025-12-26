@@ -18,7 +18,7 @@ import { toast } from "react-toastify";
  *
  * Modern, responsive notes list with enhanced design system.
  * Features adaptive grid layout, advanced filtering/sorting, and smooth animations.
- * Integrates with the PDF annotation system to show linked notes.
+ * Integrates with the Document annotation system to show linked notes.
  */
 const NotesPage: React.FC = () => {
   const router = useRouter();
@@ -56,7 +56,7 @@ const NotesPage: React.FC = () => {
     ...note,
     userId: "", // Default userId for list view
     content: { type: "doc", content: [] }, // Empty valid JSONContent
-    pdfAnnotationId: undefined,
+    documentAnnotationId: undefined,
   }));
 
   const [deleteNote, { isLoading: isDeleting }] = useDeleteNoteMutation();
@@ -119,9 +119,9 @@ const NotesPage: React.FC = () => {
     router.push(`/dashboard/notes/${noteId}`);
   };
 
-  const handleViewPDFAnnotation = (annotationId: string) => {
-    // Navigate to the PDF with the annotation highlighted
-    // This would require additional logic to find the PDF and page
+  const handleViewDocumentAnnotation = (annotationId: string) => {
+    // Navigate to the Document with the annotation highlighted
+    // This would require additional logic to find the Document and page
     router.push(`/dashboard/annotations/${annotationId}`);
   };
 
@@ -196,7 +196,7 @@ const NotesPage: React.FC = () => {
               Notes
             </h1>
             <p className="text-sm text-muted-foreground/80">
-              Organize your thoughts and link them to PDF annotations
+              Organize your thoughts and link them to Document annotations
             </p>
           </div>
           <Button
@@ -223,7 +223,7 @@ const NotesPage: React.FC = () => {
               Notes
             </h1>
             <p className="text-sm text-muted-foreground/80">
-              Organize your thoughts and link them to PDF annotations
+              Organize your thoughts and link them to Document annotations
             </p>
           </div>
           <Button
@@ -283,7 +283,7 @@ const NotesPage: React.FC = () => {
               Notes
             </h1>
             <p className="text-sm text-muted-foreground/80">
-              Organize your thoughts and link them to PDF annotations
+              Organize your thoughts and link them to Document annotations
             </p>
           </div>
 
@@ -320,7 +320,7 @@ const NotesPage: React.FC = () => {
           filterBy={filterBy}
           onCreateNote={handleCreateNote}
           onEditNote={handleEditNote}
-          onViewAnnotation={handleViewPDFAnnotation}
+          onViewAnnotation={handleViewDocumentAnnotation}
           onDeleteNote={handleDeleteNote}
           onDuplicateNote={handleDuplicateNote}
           onToggleStarNote={handleToggleStarNote}

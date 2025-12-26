@@ -1,6 +1,6 @@
 import { ApiBuilder } from "@/lib/store/endpoints/types";
-import { GetAllFoldersResponse } from "@shared/types/responses/folderRoutes";
-import { ServerErrorResponse } from "@shared/types/responses/general";
+import { GetAllFoldersResponse } from "@vollio/shared";
+import { ServerErrorResponse } from "@vollio/shared";
 
 interface TransformedFolder {
   id: string;
@@ -9,7 +9,7 @@ interface TransformedFolder {
   parent_id: string | null;
   created_at: string;
   updated_at: string;
-  pdf_count?: number;
+  document_count?: number;
 }
 
 interface FolderQueryResponse {
@@ -34,7 +34,7 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
         parent_id: folder.parent_id,
         created_at: folder.created_at,
         updated_at: folder.updated_at,
-        pdf_count: folder.pdf_count,
+        document_count: folder.document_count,
       }));
       return { folders, count };
     },
@@ -57,7 +57,7 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
         parent_id: folder.parent_id,
         created_at: folder.created_at,
         updated_at: folder.updated_at,
-        pdf_count: folder.pdf_count,
+        document_count: folder.document_count,
       };
     },
     providesTags: (_result, _error, id) => [{ type: "Folder", id }],
@@ -117,7 +117,7 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Folder", id: "LIST" },
       { type: "Folder", id },
-      { type: "File", id: "LIST" },
+      { type: "Document", id: "LIST" },
     ],
   }),
 });

@@ -8,7 +8,7 @@ import {
   STORAGE_CONFIG,
   TABLES,
   API_CONFIG,
-  validatePDFFile,
+  validateDocumentDocument,
   generateStoragePath,
   handleSupabaseError,
   withRetry,
@@ -21,14 +21,14 @@ describe("Supabase Client Configuration", () => {
 
   describe("Configuration Constants", () => {
     it("should have correct storage configuration", () => {
-      expect(STORAGE_CONFIG.BUCKET_NAME).toBe("pdfs");
+      expect(STORAGE_CONFIG.BUCKET_NAME).toBe("documents");
       expect(STORAGE_CONFIG.MAX_FILE_SIZE).toBe(50 * 1024 * 1024);
-      expect(STORAGE_CONFIG.ALLOWED_MIME_TYPES).toEqual(["application/pdf"]);
+      expect(STORAGE_CONFIG.ALLOWED_MIME_TYPES).toEqual(["application/document"]);
       expect(STORAGE_CONFIG.SIGNED_URL_EXPIRY).toBe(3600);
     });
 
     it("should have correct table names", () => {
-      expect(TABLES.PDFS).toBe("pdfs");
+      expect(TABLES.DocumentS).toBe("documents");
       expect(TABLES.USER_ACTIVITY).toBe("user_activity");
       expect(TABLES.ANNOTATIONS).toBe("annotations");
     });
@@ -40,72 +40,72 @@ describe("Supabase Client Configuration", () => {
     });
   });
 
-  describe("File Validation", () => {
-    it("should validate PDF files correctly", () => {
-      const validFile = new File(["test"], "test.pdf", {
-        type: "application/pdf",
+  describe("Document Validation", () => {
+    it("should validate Document documents correctly", () => {
+      const validDocument = new File(["test"], "test.document", {
+        type: "application/document",
       });
-      Object.defineProperty(validFile, "size", { value: 1024 * 1024 }); // 1MB
+      Object.defineProperty(validDocument, "size", { value: 1024 * 1024 }); // 1MB
 
-      const result = validatePDFFile(validFile);
+      const result = validateDocumentDocument(validDocument);
       expect(result.valid).toBe(true);
       expect(result.error).toBeUndefined();
     });
 
-    it("should reject non-PDF files", () => {
-      const invalidFile = new File(["test"], "test.txt", {
+    it("should reject non-Document documents", () => {
+      const invalidDocument = new File(["test"], "test.txt", {
         type: "text/plain",
       });
 
-      const result = validatePDFFile(invalidFile);
+      const result = validateDocumentDocument(invalidDocument);
       expect(result.valid).toBe(false);
-      expect(result.error).toBe("Only PDF files are allowed");
+      expect(result.error).toBe("Only Document documents are allowed");
     });
 
-    it("should reject files that are too large", () => {
-      const largeFile = new File(["test"], "test.pdf", {
-        type: "application/pdf",
+    it("should reject documents that are too large", () => {
+      const largeDocument = new File(["test"], "test.document", {
+        type: "application/document",
       });
-      Object.defineProperty(largeFile, "size", {
+      Object.defineProperty(largeDocument, "size", {
         value: 60 * 1024 * 1024,
       }); // 60MB
 
-      const result = validatePDFFile(largeFile);
+      const result = validateDocumentDocument(largeDocument);
       expect(result.valid).toBe(false);
-      expect(result.error).toBe("File size must be less than 50MB");
+      expect(result.error).toBe("Document size must be less than 50MB");
     });
 
-    it("should reject empty files", () => {
-      const emptyFile = new File([""], "test.pdf", {
-        type: "application/pdf",
+    it("should reject empty documents", () => {
+      const emptyDocument = new File([""], "test.document", {
+        type: "application/document",
       });
-      Object.defineProperty(emptyFile, "size", { value: 0 });
+      Object.defineProperty(emptyDocument, "size", { value: 0 });
 
-      const result = validatePDFFile(emptyFile);
+      const result = validateDocumentDocument(emptyDocument);
       expect(result.valid).toBe(false);
-      expect(result.error).toBe("File appears to be empty");
+      expect(result.error).toBe("Document appears to be empty");
     });
   });
 
   describe("Storage Path Generation", () => {
     it("should generate unique storage paths", () => {
       const userId = "user123";
-      const filename = "test document.pdf";
+      const name = "test document.document";
 
-      const path1 = generateStoragePath(userId, filename);
-      const path2 = generateStoragePath(userId, filename);
+      const path1 = generateStoragePath(userId, name);
+      const path2 = generateStoragePath(userId, name);
 
-      expect(path1).toMatch(/^user123\/\d+_test_document\.pdf$/);
-      expect(path2).toMatch(/^user123\/\d+_test_document\.pdf$/);
+      expect(path1).toMatch(/^user123\/\d+_test_document\.document$/);
+      expect(path2).toMatch(/^user123\/\d+_test_document\.document$/);
       expect(path1).not.toBe(path2); // Should be unique due to timestamp
     });
 
-    it("should sanitize filenames", () => {
+    it("should sanitize names", () => {
       const userId = "user123";
-      const filename = "test@#$%^&*()document!.pdf";
+      const name = "test@#$%^&*()document!.document";
 
-      const path = generateStoragePath(userId, filename);
-      expect(path).toMatch(/^user123\/\d+_test_______document_\.pdf$/);
+      const path = generateStoragePath(userId, name);
+      expect(path).toMatch(/^user123\/\d+_test_______document_\.document$/);
     });
   });
 

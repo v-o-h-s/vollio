@@ -12,7 +12,7 @@ import { errorHandler } from "./shared/utils/errorHanlder";
 import { noteRoutes } from "./interface/routes/note.route";
 import { fastifyAwilixPlugin } from "@fastify/awilix";
 import { googleClassroomRoutes } from "./interface/routes/googleClassroom.route";
-import { fileRoutes } from "./interface/routes/file.route";
+import { documentRoutes } from "./interface/routes/document.route";
 import { testRoutes } from "./interface/routes/test.route";
 import { folderRoutes } from "./interface/routes/folder.route";
 import { highlightRoutes } from "./interface/routes/highlight.route";
@@ -56,7 +56,7 @@ app.register(fastifyCors, {
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 });
 
-// Register multipart for file uploads
+// Register multipart for document uploads
 app.register(fastifyMultipart, {
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB
@@ -85,8 +85,8 @@ app.register(noteRoutes, { prefix: "/api/v1/notes" });
 app.register(googleClassroomRoutes, {
   prefix: "/api/v1/integrations/lms/google-classroom",
 });
-app.register(fileRoutes, {
-  prefix: "/api/v1/files",
+app.register(documentRoutes, {
+  prefix: "/api/v1/documents",
 });
 app.register(folderRoutes, {
   prefix: "/api/v1/folders",

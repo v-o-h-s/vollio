@@ -38,7 +38,7 @@ export class QuizRepository implements IQuizRepository {
       .insert({
         id: quiz.getId(),
         title: quiz.getTitle(),
-        document_id: quiz.getFileId(),
+        document_id: quiz.getDocumentId(),
         language: quiz.getLanguage(),
         difficulty_level: quiz.getDifficultyLevel(),
         number_of_questions:

@@ -1,5 +1,5 @@
 /**
- * @file rtk-query-error.tsx
+ * @document rtk-query-error.tsx
  * @description Reusable error display component for RTK Query errors with comprehensive server error response visualization
  */
 

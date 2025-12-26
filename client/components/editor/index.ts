@@ -5,7 +5,7 @@ export { EditorErrorBoundary } from './EditorErrorBoundary';
 
 // Toolbar components
 export { FloatingToolbar } from './FloatingToolbar';
-export { PDFAnnotationToolbar } from './PDFAnnotationToolbar';
+export { DocumentAnnotationToolbar } from './DocumentAnnotationToolbar';
 export { EditorToolbar } from './EditorToolbar';
 
 // Enhanced editor variants

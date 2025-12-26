@@ -1,7 +1,7 @@
 /**
  * Editor types - Re-exported from lib/types.ts for convenience
  * 
- * This file maintains backward compatibility for existing imports
+ * This document maintains backward compatibility for existing imports
  * while centralizing all types in lib/types.ts
  */
 

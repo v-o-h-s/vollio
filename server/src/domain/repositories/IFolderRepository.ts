@@ -15,9 +15,9 @@ export interface IFolderRepository {
   getFolderEntity(id: string, userId: string): Promise<Folder | null>;
 
   /**
-   * Get all folders for a user with PDF counts
+   * Get all folders for a user with Document counts
    */
-  getAllUserFolders(userId: string): Promise<Array<Folder & { pdfCount: number }>>;
+  getAllUserFolders(userId: string): Promise<Array<Folder & { documentCount: number }>>;
 
   /**
    * Create a new folder
@@ -50,7 +50,7 @@ export interface IFolderRepository {
   getFolderDescendants(folderId: string): Promise<Array<{ id: string }>>;
 
   /**
-   * Move PDFs to another folder
+   * Move Documents to another folder
    */
   movePdfsBetweenFolders(
     sourceFolderId: string,

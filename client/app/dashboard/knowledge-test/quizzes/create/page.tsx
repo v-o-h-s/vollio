@@ -44,7 +44,7 @@ import {
 import { DocumentSelectionTabs } from "@/features/knowldge-test/quizzes/components/DocumentSelectionTabs";
 import { QuestionDistribution } from "@/features/knowldge-test/quizzes/components/QuestionDistribution";
 import {
-  useGetAllFilesQuery,
+  useGetAllDocumentsQuery,
   useCreateQuizMutation,
 } from "@/lib/store/apiSlice";
 import {
@@ -108,7 +108,7 @@ export default function CreateQuizPage() {
   const router = useRouter();
 
   const { data: documentsData, isLoading: isLoadingDocuments } =
-    useGetAllFilesQuery();
+    useGetAllDocumentsQuery();
   const [createQuiz] = useCreateQuizMutation();
 
   // Initialize React Hook Form
@@ -149,7 +149,7 @@ export default function CreateQuizPage() {
   const selectedDocument = useMemo(() => {
     if (!documentId || !documentsData) return null;
     const doc = documentsData.find((p: any) => p.id === documentId);
-    return doc ? { id: doc.id, title: doc.filename } : null;
+    return doc ? { id: doc.id, title: doc.name } : null;
   }, [documentId, documentsData]);
 
   const totalDistribution = useMemo(() => {
@@ -246,14 +246,14 @@ export default function CreateQuizPage() {
                       availableDocuments={
                         (documentsData || []).map((p: any) => ({
                           id: p.id,
-                          title: p.filename ?? "Untitled",
+                          title: p.name ?? "Untitled",
                         })) as any
                       }
                       onSelectDocument={(d: any) =>
                         handleSelectDocument({ id: d.id })
                       }
                       selectedDocumentId={documentId}
-                      isLoadingPDFs={isLoadingDocuments}
+                      isLoadingDocuments={isLoadingDocuments}
                     />
                     {isSubmitted && errors.documentId && (
                       <p className="text-sm text-destructive mt-2 flex items-center gap-2">

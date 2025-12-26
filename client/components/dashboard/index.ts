@@ -5,7 +5,7 @@
  * These components work together to provide a comprehensive dashboard experience.
  *
  * Components:
- * - RecentActivityDisplay: Shows user's recent PDF activity
+ * - RecentActivityDisplay: Shows user's recent Document activity
  * - AutoSaveStatusProvider: Context provider for auto-save status
  * - FloatingAutoSaveStatus: Floating auto-save status display
  *

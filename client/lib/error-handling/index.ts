@@ -8,7 +8,7 @@
  * 
  * ```typescript
  * // Authentication errors
- * throw AuthError.authenticationRequired("User not logged in", { component: "PDFViewer" });
+ * throw AuthError.authenticationRequired("User not logged in", { component: "DocumentViewer" });
  * throw AuthError.authorizationDenied("No permission", { action: "delete" });
  * throw AuthError.tokenExpired();
  * 
@@ -19,9 +19,9 @@
  * 
  * // Validation errors
  * throw ValidationError.general("Invalid input");
- * throw ValidationError.fileTooLarge(100); // 100MB limit
- * throw ValidationError.invalidFileType("PDF");
- * throw ValidationError.invalidFileFormat();
+ * throw ValidationError.documentTooLarge(100); // 100MB limit
+ * throw ValidationError.invalidDocumentType("Document");
+ * throw ValidationError.invalidDocumentFormat();
  * 
  * // Storage errors
  * throw StorageError.general("Upload failed");
@@ -39,11 +39,11 @@
  * throw NetworkError.timeout();
  * throw NetworkError.connectionFailed();
  * 
- * // PDF errors
- * throw PDFError.general("PDF operation failed");
- * throw PDFError.loadingError();
- * throw PDFError.renderingError();
- * throw PDFError.corrupted();
+ * // Document errors
+ * throw DocumentError.general("Document operation failed");
+ * throw DocumentError.loadingError();
+ * throw DocumentError.renderingError();
+ * throw DocumentError.corrupted();
  * 
  * // General errors
  * throw GeneralError.unknown();
@@ -66,7 +66,7 @@ export { AuthError, AuthErrorType } from "./AuthError";
 export { AIError } from "./AIError";
 
 // Validation errors
-export { FileValidationError, FileValidationErrorType } from "./files/FileValidationError";
+export { DocumentValidationError, DocumentValidationErrorType } from "./documents/DocumentValidationError";
 
 // Storage errors
 export { StorageError, StorageErrorType } from "./StorageError";
@@ -77,8 +77,8 @@ export { DatabaseError } from "./DatabaseError";
 // Network errors
 export { NetworkError, NetworkErrorType } from "./NetworkError";
 
-// PDF errors
-export { FileError, FileErrorType } from "./files/FileError";
+// Document errors
+export { DocumentError, DocumentErrorType } from "./documents/DocumentError";
 
 // General errors
 export { GeneralError, GeneralErrorType } from "./GeneralError";

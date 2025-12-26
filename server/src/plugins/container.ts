@@ -22,17 +22,17 @@ import { EnsureValidTokenUseCase } from "../application/use-cases/google-Classro
 import { IsConnectedToGoogleClassroomUseCase } from "../application/use-cases/google-Classroom/IsConnectedToGoogleClassroomUseCase";
 import { GetCourseContentUseCase } from "../application/use-cases/google-Classroom/GetCourseContentUseCase";
 import { GetCoursesWithContentUseCase } from "../application/use-cases/google-Classroom/GetCoursesWithContentUseCase";
-import { AddFileFromGoogleDriveUseCase } from "../application/use-cases/files/AddFileFromGoogleDriveUseCase";
+import { AddDocumentFromGoogleDriveUseCase } from "../application/use-cases/documents/AddDocumentFromGoogleDriveUseCase";
 import { GoogleDriveService } from "../infrastructure/services/GoogleDriveService";
-import { FileRepository } from "../infrastructure/repositories/FileRepository";
-import { FileController } from "../interface/controllers/file.controller";
-import { GetFileFromGoogleDriveUseCase } from "../application/use-cases/files/GetFileFromGoogleDriveUseCase";
-import { UploadFileUseCase } from "../application/use-cases/files/UploadFileUseCase";
-import { GetAllFilesUseCase } from "../application/use-cases/files/GetAllFilesUseCase";
-import { GetFileByIdUseCase } from "../application/use-cases/files/GetFileByIdUseCase";
-import { DeleteFileUseCase } from "../application/use-cases/files/DeleteFileUseCase";
-import { MoveFileUseCase } from "../application/use-cases/files/MoveFileUseCase";
-import { RenameFileUseCase } from "../application/use-cases/files/RenameFileUseCase";
+import { DocumentRepository } from "../infrastructure/repositories/DocumentRepository";
+import { DocumentController } from "../interface/controllers/document.controller";
+import { GetDocumentFromGoogleDriveUseCase } from "../application/use-cases/documents/GetDocumentFromGoogleDriveUseCase";
+import { UploadDocumentUseCase } from "../application/use-cases/documents/UploadDocumentUseCase";
+import { GetAllDocumentsUseCase } from "../application/use-cases/documents/GetAllDocumentsUseCase";
+import { GetDocumentByIdUseCase } from "../application/use-cases/documents/GetDocumentByIdUseCase";
+import { DeleteDocumentUseCase } from "../application/use-cases/documents/DeleteDocumentUseCase";
+import { MoveDocumentUseCase } from "../application/use-cases/documents/MoveDocumentUseCase";
+import { RenameDocumentUseCase } from "../application/use-cases/documents/RenameDocumentUseCase";
 import { StorageService } from "../infrastructure/services/StorageService";
 import { FolderRepository } from "../infrastructure/repositories/FolderRepository";
 import { GetAllUserFoldersUseCase } from "../application/use-cases/folders/GetAllUserFoldersUseCase";
@@ -49,17 +49,17 @@ import { DeleteHighlightUseCase } from "../application/use-cases/highlights/Dele
 import { HighlightRepository } from "../infrastructure/repositories/HighlightRepository";
 import { HighlightController } from "../interface/controllers/highlight.controller";
 import { GetHighlightsByDocumentIdUseCase } from "../application/use-cases/highlights/GetHighlightsByDocumentIdUseCase";
-import { StreamFileUseCase } from "../application/use-cases/files/StreamFileUseCase";
-import { GetFileContentUseCase } from "../application/use-cases/files/GetFileContentUseCase";
+import { StreamDocumentUseCase } from "../application/use-cases/documents/StreamDocumentUseCase";
+import { GetDocumentContentUseCase } from "../application/use-cases/documents/GetDocumentContentUseCase";
 import { ChunkingService } from "../infrastructure/services/ChunkingService";
 import { EmbeddingService } from "../infrastructure/services/EmbeddingService";
 import { SemanticSearchService } from "../application/services/SemanticSearchService";
-import { FileProcessingService } from "../infrastructure/services/FileProcessingService";
+import { DocumentProcessingService } from "../infrastructure/services/DocumentProcessingService";
 import { GenerativeAiService } from "../infrastructure/services/GenerativeAiService";
 import { QuizController } from "../interface/controllers/quiz.controller";
 import { CreateGeneralQuizUseCase } from "../application/use-cases/quizzes/CreateGeneralQuizUseCase";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../application/use-cases/embedding/EnsureExistingOfDocumentEmbeddingUseCase";
-import { EmbedFileByIdUseCase } from "../application/use-cases/embedding/EmbedFileByIdUseCase";
+import { EmbedDocumentByIdUseCase } from "../application/use-cases/embedding/EmbedDocumentByIdUseCase";
 import { QuizRepository } from "../infrastructure/repositories/QuizRepository";
 import { CreateUserPromptQuizUseCase } from "../application/use-cases/quizzes/CreateUserPromptQuizUseCase";
 import { FlashCardsSetRepository } from "../infrastructure/repositories/FlashCardsSetRepository";
@@ -97,7 +97,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.diContainer.register({
-    streamFileUseCase: asClass(StreamFileUseCase, {
+    streamDocumentUseCase: asClass(StreamDocumentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
@@ -164,7 +164,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    fileRepository: asClass(FileRepository, {
+    documentRepository: asClass(DocumentRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
@@ -172,7 +172,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    addFileFromGoogleDriveUseCase: asClass(AddFileFromGoogleDriveUseCase, {
+    addDocumentFromGoogleDriveUseCase: asClass(AddDocumentFromGoogleDriveUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
@@ -206,31 +206,31 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
     }),
   });
   fastify.diContainer.register({
-    getFileFromGoogleDriveUseCase: asClass(GetFileFromGoogleDriveUseCase, {
+    getDocumentFromGoogleDriveUseCase: asClass(GetDocumentFromGoogleDriveUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    getAllFilesUseCase: asClass(GetAllFilesUseCase, {
+    getAllDocumentsUseCase: asClass(GetAllDocumentsUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    getFileByIdUseCase: asClass(GetFileByIdUseCase, {
+    getDocumentByIdUseCase: asClass(GetDocumentByIdUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    uploadFileUseCase: asClass(UploadFileUseCase, {
+    uploadDocumentUseCase: asClass(UploadDocumentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    deleteFileUseCase: asClass(DeleteFileUseCase, {
+    deleteDocumentUseCase: asClass(DeleteDocumentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    moveFileUseCase: asClass(MoveFileUseCase, {
+    moveDocumentUseCase: asClass(MoveDocumentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    renameFileUseCase: asClass(RenameFileUseCase, {
+    renameDocumentUseCase: asClass(RenameDocumentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
@@ -242,12 +242,12 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    fileController: asClass(FileController, {
+    documentController: asClass(DocumentController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
 
-    getFileContentUseCase: asClass(GetFileContentUseCase, {
+    getDocumentContentUseCase: asClass(GetDocumentContentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
@@ -327,9 +327,9 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
     }),
   });
 
-  // file processing
+  // document processing
   fastify.diContainer.register({
-    fileProcessingService: asClass(FileProcessingService, {
+    documentProcessingService: asClass(DocumentProcessingService, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
@@ -349,7 +349,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    embedFileByIdUseCase: asClass(EmbedFileByIdUseCase, {
+    embedDocumentByIdUseCase: asClass(EmbedDocumentByIdUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

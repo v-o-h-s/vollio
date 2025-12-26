@@ -18,7 +18,7 @@ if ! command -v supabase &> /dev/null; then
     echo "   1. Install it: npm install -g supabase"
     echo "   2. Or manually run the migration SQL in your Supabase dashboard"
     echo ""
-    echo "📄 Migration file: src/infrastructure/database/supabase/migrations/038_rename_flashcard_explanation_to_hint.sql"
+    echo "📄 Migration document: src/infrastructure/database/supabase/migrations/038_rename_flashcard_explanation_to_hint.sql"
     exit 1
 fi
 

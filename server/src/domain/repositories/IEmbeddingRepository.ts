@@ -12,6 +12,6 @@ export interface IEmbeddingRepository {
     matchThreshold: number,
     matchCount: number
   ): Promise<Embedding[] | null>;
-  isFileEmbedded(fileId: string): Promise<boolean>;
+  isDocumentEmbedded(documentId: string): Promise<boolean>;
   getDocumentEmbeddings(documentId: string): Promise<Embedding[]>;
 }

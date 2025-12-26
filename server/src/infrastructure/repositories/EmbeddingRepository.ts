@@ -81,15 +81,15 @@ export class EmbeddingRepository implements IEmbeddingRepository {
 
     return results;
   }
-  async isFileEmbedded(fileId: string): Promise<boolean> {
+  async isDocumentEmbedded(documentId: string): Promise<boolean> {
     const { data, error } = await this.supabaseClient
       .from("embeddings")
       .select("id")
-      .eq("document_id", fileId)
+      .eq("document_id", documentId)
       .limit(1);
 
     if (error) {
-      this.logger?.error({ err: error }, "Failed to check if file is embedded");
+      this.logger?.error({ err: error }, "Failed to check if document is embedded");
       throw new DatabaseError(error);
     }
 

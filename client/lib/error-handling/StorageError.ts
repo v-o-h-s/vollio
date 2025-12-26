@@ -47,7 +47,7 @@ export class StorageError extends BaseAppError {
     return new StorageError(StorageErrorType.GENERAL_ERROR, message, {
       severity: ErrorSeverity.MEDIUM,
       retryable: true,
-      userMessage: "There was an error saving your file. Please try again.",
+      userMessage: "There was an error saving your document. Please try again.",
       actionLabel: "Retry Upload",
       statusCode: 500,
       context,
@@ -65,7 +65,7 @@ export class StorageError extends BaseAppError {
       severity: ErrorSeverity.MEDIUM,
       retryable: false,
       userMessage:
-        "You've reached your storage limit. Please delete some files or upgrade your plan.",
+        "You've reached your storage limit. Please delete some documents or upgrade your plan.",
       actionLabel: "Manage Storage",
       statusCode: 507,
       context,
@@ -83,7 +83,7 @@ export class StorageError extends BaseAppError {
       severity: ErrorSeverity.MEDIUM,
       retryable: true,
       userMessage:
-        "Failed to upload your file. Please check your connection and try again.",
+        "Failed to upload your document. Please check your connection and try again.",
       actionLabel: "Retry Upload",
       statusCode: 500,
       context,
@@ -100,7 +100,7 @@ export class StorageError extends BaseAppError {
     return new StorageError(StorageErrorType.ACCESS_DENIED, message, {
       severity: ErrorSeverity.HIGH,
       retryable: false,
-      userMessage: "You don't have permission to access this file.",
+      userMessage: "You don't have permission to access this document.",
       actionLabel: "Go Back",
       statusCode: 403,
       context,
@@ -137,14 +137,14 @@ export class StorageError extends BaseAppError {
   }
 
   static deleteFailed(
-    message: string = "Failed to delete file from storage",
+    message: string = "Failed to delete document from storage",
     context?: any,
     cause?: Error
   ): StorageError {
     return new StorageError(StorageErrorType.DELETE_FAILED, message, {
       severity: ErrorSeverity.MEDIUM,
       retryable: true,
-      userMessage: "Failed to delete file from storage. Please try again.",
+      userMessage: "Failed to delete document from storage. Please try again.",
       actionLabel: "Retry Delete",
       statusCode: 500,
       context,

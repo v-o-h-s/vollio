@@ -7,7 +7,7 @@ interface GetAllUserFoldersInput {
 }
 
 interface FolderWithPdfCount extends Folder {
-  pdfCount: number;
+  documentCount: number;
 }
 
 export class GetAllUserFoldersUseCase {

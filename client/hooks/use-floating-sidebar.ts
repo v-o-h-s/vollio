@@ -5,11 +5,11 @@ import { useEffect, useCallback } from 'react';
  * Allows pages to listen for and respond to sidebar action triggers
  */
 export function useFloatingSidebar() {
-  // PDF page event handlers
-  const onUploadPDF = useCallback((handler: () => void) => {
+  // Document page event handlers
+  const onUploadDocument = useCallback((handler: () => void) => {
     const handleEvent = () => handler();
-    window.addEventListener('trigger-pdf-upload', handleEvent);
-    return () => window.removeEventListener('trigger-pdf-upload', handleEvent);
+    window.addEventListener('trigger-document-upload', handleEvent);
+    return () => window.removeEventListener('trigger-document-upload', handleEvent);
   }, []);
 
   const onCreateFolder = useCallback((handler: () => void) => {
@@ -18,16 +18,16 @@ export function useFloatingSidebar() {
     return () => window.removeEventListener('trigger-folder-create', handleEvent);
   }, []);
 
-  const onSearchFiles = useCallback((handler: () => void) => {
+  const onSearchDocuments = useCallback((handler: () => void) => {
     const handleEvent = () => handler();
-    window.addEventListener('trigger-file-search', handleEvent);
-    return () => window.removeEventListener('trigger-file-search', handleEvent);
+    window.addEventListener('trigger-document-search', handleEvent);
+    return () => window.removeEventListener('trigger-document-search', handleEvent);
   }, []);
 
-  const onFilterFiles = useCallback((handler: () => void) => {
+  const onFilterDocuments = useCallback((handler: () => void) => {
     const handleEvent = () => handler();
-    window.addEventListener('trigger-file-filter', handleEvent);
-    return () => window.removeEventListener('trigger-file-filter', handleEvent);
+    window.addEventListener('trigger-document-filter', handleEvent);
+    return () => window.removeEventListener('trigger-document-filter', handleEvent);
   }, []);
 
   const onToggleView = useCallback((handler: () => void) => {
@@ -118,10 +118,10 @@ export function useFloatingSidebar() {
     Object.entries(handlers).forEach(([eventType, handler]) => {
       const cleanup = (() => {
         switch (eventType) {
-          case 'uploadPDF': return onUploadPDF(handler);
+          case 'uploadDocument': return onUploadDocument(handler);
           case 'createFolder': return onCreateFolder(handler);
-          case 'searchFiles': return onSearchFiles(handler);
-          case 'filterFiles': return onFilterFiles(handler);
+          case 'searchDocuments': return onSearchDocuments(handler);
+          case 'filterDocuments': return onFilterDocuments(handler);
           case 'toggleView': return onToggleView(handler);
           case 'searchNotes': return onSearchNotes(handler);
           case 'filterNotes': return onFilterNotes(handler);
@@ -149,18 +149,18 @@ export function useFloatingSidebar() {
       cleanupFunctions.forEach(cleanup => cleanup());
     };
   }, [
-    onUploadPDF, onCreateFolder, onSearchFiles, onFilterFiles, onToggleView,
+    onUploadDocument, onCreateFolder, onSearchDocuments, onFilterDocuments, onToggleView,
     onSearchNotes, onFilterNotes, onSortNotes, onToggleNotesView, onFilterStarred,
     onSearchQuizzes, onFilterCategory, onFilterDifficulty, onFilterBookmarked, onShowQuizStats,
     onSearchFlashcards, onShowDueCards
   ]);
 
   return {
-    // PDF page handlers
-    onUploadPDF,
+    // Document page handlers
+    onUploadDocument,
     onCreateFolder,
-    onSearchFiles,
-    onFilterFiles,
+    onSearchDocuments,
+    onFilterDocuments,
     onToggleView,
     
     // Notes page handlers
@@ -194,9 +194,9 @@ export function useFloatingSidebar() {
  * 
  * useEffect(() => {
  *   return registerHandlers({
- *     uploadPDF: () => setShowUploadDialog(true),
- *     searchFiles: () => focusSearchInput(),
- *     filterFiles: () => setShowFilters(true),
+ *     uploadDocument: () => setShowUploadDialog(true),
+ *     searchDocuments: () => focusSearchInput(),
+ *     filterDocuments: () => setShowFilters(true),
  *   });
  * }, []);
  */

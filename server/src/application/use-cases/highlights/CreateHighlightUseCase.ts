@@ -5,7 +5,7 @@ import { FastifyBaseLogger } from "fastify";
 
 interface CreateHighlightInput {
   userId: string;
-  pdfId: string;
+  documentId: string;
   type?: HighlightType;
   content?: { text?: string; image?: string };
   position: ScaledPosition;
@@ -24,7 +24,7 @@ export class CreateHighlightUseCase {
 
   async execute(input: CreateHighlightInput): Promise<Highlight> {
     this.logger.info(
-      { pdfId: input.pdfId, userId: input.userId },
+      { documentId: input.documentId, userId: input.userId },
       "🎨 Creating new highlight"
     );
 
@@ -32,7 +32,7 @@ export class CreateHighlightUseCase {
     const highlight = new Highlight(
       randomUUID(),
       input.userId,
-      input.pdfId,
+      input.documentId,
       input.type || "text",
       input.content || {},
       input.position,
@@ -46,7 +46,7 @@ export class CreateHighlightUseCase {
     );
 
     this.logger.info(
-      { highlightId: highlight.getId(), pdfId: input.pdfId },
+      { highlightId: highlight.getId(), documentId: input.documentId },
       "💾 Inserting highlight into database"
     );
 
@@ -57,7 +57,7 @@ export class CreateHighlightUseCase {
     this.logger.info(
       {
         highlightId: createdHighlight.getId(),
-        pdfId: input.pdfId,
+        documentId: input.documentId,
         userId: input.userId,
       },
       "✅ Highlight created successfully"

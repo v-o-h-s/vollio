@@ -4,13 +4,13 @@ Base URL: `/api/v1/highlights`
 
 ## 1. Get All Highlights
 
-Retrieves all highlights for the authenticated user, optionally filtered by PDF.
+Retrieves all highlights for the authenticated user, optionally filtered by Document.
 
 - **URL**: `/`
 - **Method**: `GET`
 - **Auth Required**: Yes
 - **Query Parameters**:
-  - `pdfId` (string, optional): Filter highlights by PDF ID (UUID format)
+  - `documentId` (string, optional): Filter highlights by Document ID (UUID format)
 
 - **Success Response**:
   - **Code**: 200 OK
@@ -23,7 +23,7 @@ Retrieves all highlights for the authenticated user, optionally filtered by PDF.
         {
           "id": "string (UUID)",
           "userId": "string (UUID)",
-          "pdfId": "string (UUID)",
+          "documentId": "string (UUID)",
           "type": "string (text|area)",
           "content": {
             "text": "string | null",
@@ -77,13 +77,13 @@ Retrieves all highlights for the authenticated user, optionally filtered by PDF.
 
 ## 2. Create Highlight
 
-Creates a new highlight on a PDF.
+Creates a new highlight on a Document.
 
 - **URL**: `/`
 - **Method**: `POST`
 - **Auth Required**: Yes
 - **Body Parameters**:
-  - `pdfId` (string, required): UUID of the PDF to highlight
+  - `documentId` (string, required): UUID of the Document to highlight
   - `type` (string, required): Type of highlight - "text" or "area"
   - `content` (object, required): Highlight content
     - `text` (string, optional): Text content of highlight
@@ -113,7 +113,7 @@ Creates a new highlight on a PDF.
       "data": {
         "id": "string (UUID)",
         "userId": "string (UUID)",
-        "pdfId": "string (UUID)",
+        "documentId": "string (UUID)",
         "type": "string (text|area)",
         "content": {
           "text": "string | null",
@@ -138,7 +138,7 @@ Creates a new highlight on a PDF.
 - **Error Responses**:
   - **Code**: 400 Bad Request (invalid position data, invalid type, etc.)
   - **Code**: 401 Unauthorized
-  - **Code**: 404 Not Found (PDF doesn't exist)
+  - **Code**: 404 Not Found (Document doesn't exist)
 
 ## 3. Get Highlight by ID
 
@@ -160,7 +160,7 @@ Retrieves a specific highlight.
       "data": {
         "id": "string (UUID)",
         "userId": "string (UUID)",
-        "pdfId": "string (UUID)",
+        "documentId": "string (UUID)",
         "type": "string (text|area)",
         "content": {
           "text": "string | null",
@@ -215,7 +215,7 @@ Updates highlight properties with partial updates support.
       "data": {
         "id": "string (UUID)",
         "userId": "string (UUID)",
-        "pdfId": "string (UUID)",
+        "documentId": "string (UUID)",
         "type": "string (text|area)",
         "content": { /* as above */ },
         "position": { /* as above */ },
@@ -272,7 +272,7 @@ Deletes a specific highlight.
   - pageNumber must be non-negative integer
   - x1 < x2, y1 < y2
 - **Color**: Must be valid hex color code if provided (e.g., #FFFF00)
-- **PDF ID**: Must be valid UUID and must exist in user's PDFs
+- **Document ID**: Must be valid UUID and must exist in user's Documents
 - **Note ID**: If provided, must be valid UUID and valid note owned by user
 
 ## Notes
@@ -280,7 +280,7 @@ Deletes a specific highlight.
 - All highlight operations enforce user isolation - users can only access their own highlights
 - `hasNote` is automatically calculated based on whether `noteId` is set
 - Tags can be used for organizing and searching highlights
-- Coordinates are in PDF coordinate system (not screen coordinates)
+- Coordinates are in Document coordinate system (not screen coordinates)
 - Position data is immutable - cannot change after creation, only content and metadata
 - Multiple highlights can reference the same note
 - Deleted highlights cannot be recovered

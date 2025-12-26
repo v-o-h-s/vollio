@@ -6,7 +6,7 @@ import { HighlightsMapper } from "../../../shared/mappers/HighlightsMapper";
 
 interface GetAllHighlightsInput {
   userId: string;
-  pdfId?: string;
+  documentId?: string;
 }
 
 export class GetAllHighlightsUseCase {
@@ -17,13 +17,13 @@ export class GetAllHighlightsUseCase {
 
   async execute(input: GetAllHighlightsInput): Promise<HighlightData[]> {
     this.logger.info(
-      { userId: input.userId, pdfId: input.pdfId },
+      { userId: input.userId, documentId: input.documentId },
       "🎨 Fetching highlights"
     );
 
     const highlights = await this.highlightRepository.getAllHighlights(
       input.userId,
-      input.pdfId
+      input.documentId
     );
 
     this.logger.info(

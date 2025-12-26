@@ -1,6 +1,6 @@
 export const shortcuts = {
   global: [],
-  pdf: [
+  document: [
     // Focus mode shortcuts (avoid Ctrl+F which Syncfusion uses for search)
     { key: "Alt+F", action: "toggleFocusMode" },
     { key: "Alt+H", action: "toggleHeader" },
@@ -25,5 +25,5 @@ export const shortcuts = {
     { key: "Ctrl+-", action: "zoomOut" },
     { key: "Ctrl+0", action: "resetZoom" },
   ],
-  pdfs: [],
+  documents: [],
 };

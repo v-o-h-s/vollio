@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { useGetPDFsQuery } from "@/lib/store/apiSlice";
+import { useGetDocumentsQuery } from "@/lib/store/apiSlice";
 import { useGetNotesQuery } from "@/lib/store/apiSlice";
 
 export interface PageStatistics {
@@ -26,7 +26,7 @@ export function usePageStatistics(): PageStatistics {
   });
 
   // API queries
-  const { data: pdfData, isLoading: pdfsLoading, error: pdfsError } = useGetPDFsQuery();
+  const { data: documentData, isLoading: documentsLoading, error: documentsError } = useGetDocumentsQuery();
   const { data: notes, isLoading: notesLoading, error: notesError } = useGetNotesQuery({});
 
   useEffect(() => {
@@ -34,26 +34,26 @@ export function usePageStatistics(): PageStatistics {
     
     const calculateStatistics = () => {
       switch (basePath) {
-        case "/dashboard/pdfs":
-          if (pdfData?.pdfs) {
-            const pdfs = pdfData.pdfs;
-            const totalFiles = pdfs.length;
+        case "/dashboard/documents":
+          if (documentData?.files) {
+            const documents = documentData.files;
+            const totalDocuments = documents.length;
             const oneWeekAgo = new Date();
             oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
             
-            const recentFiles = pdfs.filter(pdf => 
-              new Date(pdf.uploadedAt) > oneWeekAgo
+            const recentDocuments = documents.filter(document => 
+              new Date(document.uploadedAt) > oneWeekAgo
             ).length;
             
-            const totalSize = pdfs.reduce((sum, pdf) => sum + (pdf.fileSize || 0), 0);
+            const totalSize = documents.reduce((sum, document) => sum + (document.size || 0), 0);
             const sizeInMB = (totalSize / (1024 * 1024)).toFixed(1);
             
             setStatistics({
-              totalItems: totalFiles,
-              recentItems: recentFiles,
+              totalItems: totalDocuments,
+              recentItems: recentDocuments,
               storageUsed: `${sizeInMB} MB`,
-              loading: pdfsLoading,
-              error: pdfsError ? "Failed to load PDF statistics" : undefined,
+              loading: documentsLoading,
+              error: documentsError ? "Failed to load Document statistics" : undefined,
             });
           }
           break;
@@ -113,16 +113,16 @@ export function usePageStatistics(): PageStatistics {
 
         case "/dashboard/summarize":
           // Summarize statistics based on available documents
-          if (pdfData?.pdfs) {
-            const pdfs = pdfData.pdfs;
-            const processedDocs = pdfs.filter(pdf => pdf.processingStatus === 'completed').length;
+          if (documentData?.files) {
+            const documents = documentData.files;
+            const processedDocs = documents.filter(document => document.processingStatus === 'completed').length;
             
             setStatistics({
               totalItems: processedDocs,
               recentItems: Math.floor(processedDocs * 0.3), // Estimate recent summaries
               storageUsed: "0.5 MB", // Summaries are typically small
-              loading: pdfsLoading,
-              error: pdfsError ? "Failed to load document statistics" : undefined,
+              loading: documentsLoading,
+              error: documentsError ? "Failed to load document statistics" : undefined,
             });
           }
           break;
@@ -130,43 +130,43 @@ export function usePageStatistics(): PageStatistics {
         case "/dashboard":
         default:
           // Dashboard overview statistics
-          const pdfs = pdfData?.pdfs || [];
-          const totalFiles = pdfs.length;
+          const documents = documentData?.files || [];
+          const totalDocuments = documents.length;
           const totalNotes = notes?.length || 0;
-          const totalItems = totalFiles + totalNotes;
+          const totalItems = totalDocuments + totalNotes;
           
           const oneWeekAgo = new Date();
           oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
           
-          const recentFiles = pdfs.filter(pdf => 
-            new Date(pdf.uploadedAt) > oneWeekAgo
+          const recentDocuments = documents.filter(document => 
+            new Date(document.uploadedAt) > oneWeekAgo
           ).length;
           
           const recentNotes = notes?.filter(note => 
             new Date(note.createdAt) > oneWeekAgo
           ).length || 0;
           
-          const totalFileSize = pdfs.reduce((sum, pdf) => sum + (pdf.fileSize || 0), 0);
+          const totalDocumentSize = documents.reduce((sum, document) => sum + (document.size || 0), 0);
           const totalNoteSize = notes?.reduce((sum, note) => 
             sum + (note.content?.length || 0) + (note.title?.length || 0), 0
           ) || 0;
           
-          const totalSizeInMB = ((totalFileSize + totalNoteSize) / (1024 * 1024)).toFixed(1);
+          const totalSizeInMB = ((totalDocumentSize + totalNoteSize) / (1024 * 1024)).toFixed(1);
           
           setStatistics({
             totalItems,
-            recentItems: recentFiles + recentNotes,
+            recentItems: recentDocuments + recentNotes,
             storageUsed: `${totalSizeInMB} MB`,
             studyStreak: 7, // Mock data
-            loading: pdfsLoading || notesLoading,
-            error: (pdfsError || notesError) ? "Failed to load statistics" : undefined,
+            loading: documentsLoading || notesLoading,
+            error: (documentsError || notesError) ? "Failed to load statistics" : undefined,
           });
           break;
       }
     };
 
     calculateStatistics();
-  }, [pathname, pdfData, notes, pdfsLoading, notesLoading, pdfsError, notesError]);
+  }, [pathname, documentData, notes, documentsLoading, notesLoading, documentsError, notesError]);
 
   return statistics;
 }
