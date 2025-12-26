@@ -203,7 +203,9 @@ function DocumentPageContent() {
           </div>
           <div className="text-center">
             <h3 className="text-2xl font-semibold text-foreground">
-              {statusCode === 404 ? "Document Not Found" : "Error Loading Document"}
+              {statusCode === 404
+                ? "Document Not Found"
+                : "Error Loading Document"}
             </h3>
             <p className="text-base mt-2 text-muted-foreground wrap-break-word">
               {message ?? "Failed to load Document. Please try again."}
@@ -272,7 +274,7 @@ function DocumentPageContent() {
           <div
             className={cn(
               "h-full rounded-lg flex flex-row overflow-hidden",
-              "border border-border bg-card",
+              "border border-primary/20 bg-card",
               "shadow-md",
               "transition-none"
             )}
@@ -303,7 +305,7 @@ function DocumentPageContent() {
                 "transition-all duration-200",
                 isAssistantDividerDragging
                   ? "w-1 bg-primary"
-                  : "w-0.5 bg-border group-hover:w-1 group-hover:bg-primary/80"
+                  : "w-0.5 bg-primary/30 group-hover:w-1 group-hover:bg-primary/80"
               )}
             />
             <div
@@ -323,7 +325,7 @@ function DocumentPageContent() {
                 "pointer-events-none z-20 whitespace-nowrap",
                 "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
                 "bg-popover text-popover-foreground text-xs px-2 py-1",
-                "rounded-md border border-border"
+                "rounded-md border border-primary/20"
               )}
             >
               Drag to resize
@@ -336,7 +338,7 @@ function DocumentPageContent() {
       <div
         className={cn(
           "h-full rounded-lg flex flex-row overflow-hidden",
-          "border border-border bg-card",
+          "border border-primary/20 bg-card",
           "shadow-md",
           "transition-none"
         )}
@@ -383,7 +385,7 @@ function DocumentPageContent() {
                 "transition-all duration-200",
                 isNoterDividerDragging
                   ? "w-1 bg-primary"
-                  : "w-0.5 bg-border group-hover:w-1 group-hover:bg-primary/80"
+                  : "w-0.5 bg-primary/30 group-hover:w-1 group-hover:bg-primary/80"
               )}
             />
             <div
@@ -403,7 +405,7 @@ function DocumentPageContent() {
                 "pointer-events-none z-20 whitespace-nowrap",
                 "opacity-0 group-hover:opacity-100 transition-opacity duration-200",
                 "bg-popover text-popover-foreground text-xs px-2 py-1",
-                "rounded-md border border-border"
+                "rounded-md border border-primary/20"
               )}
             >
               Drag to resize
@@ -413,7 +415,7 @@ function DocumentPageContent() {
           <div
             className={cn(
               "h-full rounded-lg flex flex-row overflow-hidden pt-1 relative",
-              "border border-border",
+              "border border-primary/20",
               "shadow-md",
               "transition-none"
             )}
