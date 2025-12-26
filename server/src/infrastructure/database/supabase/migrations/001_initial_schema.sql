@@ -22,7 +22,7 @@ CREATE TABLE documents (
   documentname TEXT NOT NULL,
   document_size BIGINT NOT NULL,
   storage_path TEXT NOT NULL, -- Path in Supabase Storage
-  mime_type TEXT NOT NULL DEFAULT 'application/document',
+  mime_type TEXT NOT NULL DEFAULT 'application/pdf',
   uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 

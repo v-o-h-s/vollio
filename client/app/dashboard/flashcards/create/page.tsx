@@ -36,7 +36,7 @@ import {
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { FlashcardPreview, FlashcardEditor } from "@/components/flashcards";
-import { DocumentSelectionTabs } from "@/components/quiz/DocumentSelectionTabs";
+import { DocumentSelectionTabs } from "@/features/knowldge-test/quizzes/components/DocumentSelectionTabs";
 import { useGetAllDocumentsQuery } from "@/lib/store/apiSlice";
 
 // Flashcard interface
@@ -115,7 +115,8 @@ export default function CreateFlashCardsPage() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Fetch Documents for AI generation
-  const { data: documentsData, isLoading: isLoadingDocuments } = useGetAllDocumentsQuery();
+  const { data: documentsData, isLoading: isLoadingDocuments } =
+    useGetAllDocumentsQuery();
 
   // If opened from a quiz, prefill title and show banner
   useEffect(() => {

@@ -2,7 +2,7 @@
 export const STORAGE_CONFIG = {
   BUCKET_NAME: "documents" as const,
   MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
-  ALLOWED_MIME_TYPES: ["application/document"] as string[],
+  ALLOWED_MIME_TYPES: ["application/pdf"] as string[],
   SIGNED_URL_EXPIRY: 3600, // 1 hour
 };
 

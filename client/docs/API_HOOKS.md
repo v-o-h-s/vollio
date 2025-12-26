@@ -20,7 +20,7 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ### Queries
 
 - `useGetPDFsQuery()` - Fetch all user's PDFs with folders
-- `useGetPDFQuery(pdfId: string)` - Fetch a single PDF by ID
+- `useGetPDFQuery(documentId: string)` - Fetch a single PDF by ID
 
 ### Mutations
 
@@ -85,7 +85,7 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 ### Queries
 
 - `useGetHighlightsQuery()` - Fetch all highlights
-- `useGetPDFHighlightsQuery(pdfId: string)` - Fetch highlights for a specific PDF
+- `useGetPDFHighlightsQuery(documentId: string)` - Fetch highlights for a specific PDF
 
 ### Mutations
 
@@ -101,7 +101,7 @@ This document provides a comprehensive list of all available RTK Query hooks in 
 
 ### Queries
 
-- `useGetSummaryByPdfIdQuery(pdfId: string)` - Fetch summary for a specific PDF
+- `useGetSummaryByPdfIdQuery(documentId: string)` - Fetch summary for a specific PDF
 
 ### Mutations
 

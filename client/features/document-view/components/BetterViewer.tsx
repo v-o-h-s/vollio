@@ -1,6 +1,6 @@
 "use client";
 
-// SSR safeguard for document.js evaluation
+// SSR safeguard for pdf.js evaluation
 if (typeof window === "undefined") {
   (global as any).window = {};
   (global as any).document = {
@@ -67,7 +67,9 @@ export const BetterViewer = ({
   const highlighterUtilsRef = useRef<PdfHighlighterUtils | null>(null);
 
   // Summary actions hook
-  const { summary, addMainPoint, removeMainPoint } = useSummaryActions(document.id);
+  const { summary, addMainPoint, removeMainPoint } = useSummaryActions(
+    document.id
+  );
 
   const {
     isTagDialogOpen,
@@ -85,7 +87,7 @@ export const BetterViewer = ({
     currentHighlightColor,
   });
 
-  // Map API highlights to react-document-highlighter format
+  // Map API highlights to react-pdf-highlighter format
   const highlights = useMemo<Array<MyHighlight>>(() => {
     if (!apiHighlights) return [];
     return apiHighlights.map((h) => ({
@@ -100,7 +102,7 @@ export const BetterViewer = ({
     })) as MyHighlight[];
   }, [apiHighlights]);
 
-  // Adapter to make ViewerHeader work with react-document-highlighter-extended
+  // Adapter to make ViewerHeader work with react-pdf-highlighter-extended
   const documentViewerAdapter = useRef<any>({
     // Getters will be added in useEffect to access current refs
     navigation: {},
@@ -218,13 +220,13 @@ export const BetterViewer = ({
           // //workerSrc="//cdnjs.cloudflare.com/ajax/libs/document.js/4.10.38/document.worker.min.mjs"
           beforeLoad={(progress) => <DocumentLoading progress={progress} />}
         >
-          {(documentDocument) => (
+          {(pdfDocument) => (
             <PdfHighlighter
-              documentScaleValue={zoomValue}
+              pdfScaleValue={zoomValue}
               enableAreaSelection={(event) => event.altKey}
-              documentDocument={documentDocument}
-              utilsRef={(_documentHighlighterUtils) => {
-                highlighterUtilsRef.current = _documentHighlighterUtils;
+              pdfDocument={pdfDocument}
+              utilsRef={(_pdfHighlighterUtils) => {
+                highlighterUtilsRef.current = _pdfHighlighterUtils;
               }}
               selectionTip={
                 <ExpandableTip

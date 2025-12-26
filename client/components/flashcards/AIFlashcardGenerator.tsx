@@ -64,9 +64,8 @@ export function AIFlashcardGenerator({
   const [activeTab, setActiveTab] = useState<"library" | "upload" | "topic">(
     "library"
   );
-  const [selectedDocument, setSelectedDocument] = useState<DocumentDocument | null>(
-    null
-  );
+  const [selectedDocument, setSelectedDocument] =
+    useState<DocumentDocument | null>(null);
   const [topicInput, setTopicInput] = useState("");
   const [contextInput, setContextInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -183,7 +182,7 @@ export function AIFlashcardGenerator({
     simulateProgress();
 
     try {
-      const response = await fetch("/api/flashcards/generate-from-topic", {
+      const response = await fetch("/api/v1/flashcards/generate-from-topic", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -219,15 +218,15 @@ export function AIFlashcardGenerator({
   };
 
   // Handle document upload
-  const handleDocumentUpload = async (documents: Document[]) => {
+  const handleDocumentUpload = async (files: File[]) => {
     setIsUploading(true);
 
-    for (const document of files) {
+    for (const file of files) {
       const formData = new FormData();
-      formData.append("document", document);
+      formData.append("document", file);
 
       try {
-        const response = await fetch("/api/documents/upload", {
+        const response = await fetch("/api/v1/documents/upload", {
           method: "POST",
           body: formData,
         });
@@ -236,10 +235,10 @@ export function AIFlashcardGenerator({
           throw new Error("Upload failed");
         }
 
-        toast.success(`${document.name} has been uploaded successfully.`);
+        toast.success(`${file.name} has been uploaded successfully.`);
       } catch (error) {
-        console.error(`Failed to upload ${document.name}:`, error);
-        toast.error(`Failed to upload ${document.name}.`);
+        console.error(`Failed to upload ${file.name}:`, error);
+        toast.error(`Failed to upload ${file.name}.`);
       }
     }
 
@@ -255,13 +254,15 @@ export function AIFlashcardGenerator({
     e.stopPropagation();
     setIsDragOver(false);
 
-    const files = Array.from(e.dataTransfer.files);
-    const documentDocuments = documents.filter((document) => document.type === "application/document");
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    const validDocuments = droppedFiles.filter(
+      (file) => file.type === "application/pdf"
+    );
 
-    if (documentDocuments.length > 0) {
-      handleDocumentUpload(documentDocuments);
+    if (validDocuments.length > 0) {
+      handleDocumentUpload(validDocuments);
     } else {
-      toast.error("Please upload Document documents only.");
+      toast.error("Please upload documents only.");
     }
   };
 
@@ -372,7 +373,11 @@ export function AIFlashcardGenerator({
                   <p className="text-sm text-muted-foreground mb-2">
                     Failed to load documents
                   </p>
-                  <Button variant="outline" size="sm" onClick={refetchDocuments}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={refetchDocuments}
+                  >
                     Try Again
                   </Button>
                 </div>
@@ -457,7 +462,9 @@ export function AIFlashcardGenerator({
 
                   <div>
                     <h3 className="font-medium mb-1">
-                      {isDragOver ? "Drop documents here" : "Drag & drop Document documents"}
+                      {isDragOver
+                        ? "Drop documents here"
+                        : "Drag & drop documents"}
                     </h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       or click to browse your computer
@@ -484,7 +491,7 @@ export function AIFlashcardGenerator({
 
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <FileText className="w-3 h-3" />
-                    <span>Document documents only • Max 50MB per document</span>
+                    <span>documents only • Max 50MB per document</span>
                   </div>
                 </div>
               </div>
@@ -735,11 +742,11 @@ export function AIFlashcardGenerator({
             <p className="font-medium mb-1">AI Generation Tips:</p>
             <ul className="text-xs space-y-1 list-disc list-inside">
               <li>
-                <strong>From Library:</strong> Select existing Documents to generate
-                flashcards from your uploaded documents
+                <strong>From Library:</strong> Select existing Documents to
+                generate flashcards from your uploaded documents
               </li>
               <li>
-                <strong>Upload New:</strong> Drag & drop or upload new Document documents
+                <strong>Upload New:</strong> Drag & drop or upload new documents
                 to expand your library
               </li>
               <li>

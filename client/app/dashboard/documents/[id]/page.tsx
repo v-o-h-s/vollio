@@ -245,7 +245,7 @@ function DocumentPageContent() {
               No Document Data
             </h3>
             <p className="text-sm text-muted-foreground mt-2 break-words">
-              Unable to load the requested Document document.
+              Unable to load the requested document.
             </p>
           </div>
           <Button

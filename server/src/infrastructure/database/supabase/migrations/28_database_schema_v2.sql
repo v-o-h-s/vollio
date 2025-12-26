@@ -49,7 +49,7 @@ CREATE TABLE public.documents (
   documentname text NOT NULL CHECK (char_length(documentname) > 0),
   document_size bigint NOT NULL CHECK (document_size > 0),
   storage_path text,
-  mime_type text NOT NULL DEFAULT 'application/document'::text,
+  mime_type text NOT NULL DEFAULT 'application/pdf'::text,
   uploaded_at timestamp with time zone DEFAULT now(),
   updated_at timestamp with time zone DEFAULT now(),
   folder_id uuid,

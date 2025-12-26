@@ -1,7 +1,7 @@
 import { DocumentDetails } from "@/features/document-view/types/document";
 
 export interface DocumentViewerHeaderProps {
-  /** Document document being viewed */
+  /** document being viewed */
   document: DocumentDetails;
   /** Whether the header is visible */
   isHeaderVisible: boolean;

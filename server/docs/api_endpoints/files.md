@@ -235,7 +235,7 @@ Streams a document for download/viewing using a signed JWT token. Supports both 
 **Success Response** (200 OK):
 - **Content**: Binary Document stream
 - **Headers**:
-  - `Content-Type`: `application/document`
+  - `Content-Type`: `application/pdf`
   - `Content-Disposition`: `inline; documentname=document.document`
   - `Accept-Ranges`: `bytes` (for range requests)
 
@@ -290,7 +290,7 @@ Retrieves a document's content from Google Drive via the system.
 **Success Response** (200 OK):
 - **Content**: Binary document stream
 - **Headers**:
-  - `Content-Type`: Document's MIME type (e.g., `application/document`)
+  - `Content-Type`: Document's MIME type (e.g., `application/pdf`)
   - `Content-Disposition`: `inline; documentname="<documentname>"`
 
 **Error Responses**:

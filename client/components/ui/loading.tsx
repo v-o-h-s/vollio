@@ -80,7 +80,7 @@ export function DocumentLoadingIndicator({
       title: "Uploading Document",
       description: documentName
         ? `Uploading ${documentName}...`
-        : "Uploading your Document document...",
+        : "Uploading your document...",
     },
     processing: {
       icon: FileText,

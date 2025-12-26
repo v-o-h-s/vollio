@@ -74,7 +74,7 @@ export interface Highlight {
 }
 
 /**
- * Document document metadata and storage information
+ * document metadata and storage information
  */
 export interface DocumentDocument {
   id: string;

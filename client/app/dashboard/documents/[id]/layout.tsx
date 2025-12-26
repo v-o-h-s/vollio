@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "View Document - Vollio",
-  description: "View your Document document and its AI-powered summary.",
+  description: "View your document and its AI-powered summary.",
 };
 
 export default function Layout({

@@ -80,7 +80,7 @@ export class DocumentError extends BaseAppError {
    * Create a corrupted document error
    */
   static corrupted(
-    message: string = "Document document is corrupted",
+    message: string = "document is corrupted",
     documentName: string = "document",
     context?: any ,
   ): DocumentError {

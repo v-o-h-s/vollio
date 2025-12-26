@@ -69,7 +69,7 @@ interface AnnotationState {
 - `createAnnotation(annotation)` - Create PDF annotation with coordinates
 - `updateAnnotation({id, updates})` - Update annotation content and styling
 - `deleteAnnotation(id)` - Delete annotation with highlight cleanup
-- `getAnnotations(pdfId)` - Get annotations for specific PDF
+- `getAnnotations(documentId)` - Get annotations for specific PDF
 
 ### Response Types
 
@@ -116,7 +116,7 @@ function PDFComponent() {
   const { data: pdfList, error, isLoading } = useGetPDFsQuery();
   
   // Get individual PDF with fresh signed URL
-  const { data: pdfData, refetch } = useGetPDFQuery(pdfId, {
+  const { data: pdfData, refetch } = useGetPDFQuery(documentId, {
     pollingInterval: 30 * 60 * 1000 // Refresh every 30 minutes
   });
 

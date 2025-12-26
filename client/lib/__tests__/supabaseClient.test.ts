@@ -23,7 +23,7 @@ describe("Supabase Client Configuration", () => {
     it("should have correct storage configuration", () => {
       expect(STORAGE_CONFIG.BUCKET_NAME).toBe("documents");
       expect(STORAGE_CONFIG.MAX_FILE_SIZE).toBe(50 * 1024 * 1024);
-      expect(STORAGE_CONFIG.ALLOWED_MIME_TYPES).toEqual(["application/document"]);
+      expect(STORAGE_CONFIG.ALLOWED_MIME_TYPES).toEqual(["application/pdf"]);
       expect(STORAGE_CONFIG.SIGNED_URL_EXPIRY).toBe(3600);
     });
 
@@ -41,9 +41,9 @@ describe("Supabase Client Configuration", () => {
   });
 
   describe("Document Validation", () => {
-    it("should validate Document documents correctly", () => {
+    it("should validate documents correctly", () => {
       const validDocument = new File(["test"], "test.document", {
-        type: "application/document",
+        type: "application/pdf",
       });
       Object.defineProperty(validDocument, "size", { value: 1024 * 1024 }); // 1MB
 
@@ -52,19 +52,19 @@ describe("Supabase Client Configuration", () => {
       expect(result.error).toBeUndefined();
     });
 
-    it("should reject non-Document documents", () => {
+    it("should reject non-documents", () => {
       const invalidDocument = new File(["test"], "test.txt", {
         type: "text/plain",
       });
 
       const result = validateDocumentDocument(invalidDocument);
       expect(result.valid).toBe(false);
-      expect(result.error).toBe("Only Document documents are allowed");
+      expect(result.error).toBe("Only documents are allowed");
     });
 
     it("should reject documents that are too large", () => {
       const largeDocument = new File(["test"], "test.document", {
-        type: "application/document",
+        type: "application/pdf",
       });
       Object.defineProperty(largeDocument, "size", {
         value: 60 * 1024 * 1024,
@@ -77,7 +77,7 @@ describe("Supabase Client Configuration", () => {
 
     it("should reject empty documents", () => {
       const emptyDocument = new File([""], "test.document", {
-        type: "application/document",
+        type: "application/pdf",
       });
       Object.defineProperty(emptyDocument, "size", { value: 0 });
 

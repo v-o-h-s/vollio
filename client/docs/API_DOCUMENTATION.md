@@ -224,7 +224,7 @@ Delete folder and optionally move contents to parent or root.
 Get all highlights for the authenticated user with filtering options.
 
 **Query Parameters:**
-- `pdfId` (optional): Filter highlights by PDF ID
+- `documentId` (optional): Filter highlights by PDF ID
 - `type` (optional): Filter by highlight type (quick, comment, note)
 - `page` (optional): Filter by page number
 
@@ -236,7 +236,7 @@ Get all highlights for the authenticated user with filtering options.
     {
       "id": "highlight_uuid",
       "userId": "user_123",
-      "pdfId": "pdf_uuid",
+      "documentId": "pdf_uuid",
       "noteId": "note_uuid",
       "content": "Selected text content",
       "title": "Highlight title",
@@ -265,7 +265,7 @@ Create a new highlight with multi-mode support.
 **Request Body:**
 ```json
 {
-  "pdfId": "pdf_uuid",
+  "documentId": "pdf_uuid",
   "noteId": "note_uuid", // optional for quick highlights
   "content": "Selected text content",
   "title": "Highlight title", // optional
@@ -441,7 +441,7 @@ Delete a note with enhanced confirmation and cleanup.
 Get annotations for the authenticated user with enhanced filtering.
 
 **Query Parameters:**
-- `pdfId` (optional): Filter annotations by PDF ID
+- `documentId` (optional): Filter annotations by PDF ID
 - `page` (optional): Filter annotations by page number
 - `noteId` (optional): Filter annotations by linked note
 
@@ -453,7 +453,7 @@ Get annotations for the authenticated user with enhanced filtering.
     {
       "id": "annotation_uuid",
       "userId": "user_123",
-      "pdfId": "pdf_uuid",
+      "documentId": "pdf_uuid",
       "noteId": "note_uuid",
       "pageNumber": 1,
       "selectedText": "Selected text from PDF",
@@ -477,7 +477,7 @@ Create a new annotation with enhanced coordinate handling.
 **Request Body:**
 ```json
 {
-  "pdfId": "pdf_uuid",
+  "documentId": "pdf_uuid",
   "noteId": "note_uuid",
   "pageNumber": 1,
   "selectedText": "Selected text from PDF",
@@ -570,7 +570,7 @@ Get all PDFs for the authenticated user with recent activity and signed URLs.
       }
     ],
     "recentActivity": {
-      "pdfId": "uuid-generated-id",
+      "documentId": "uuid-generated-id",
       "filename": "document.pdf",
       "accessedAt": "2025-01-08T11:00:00.000Z",
       "fileUrl": "https://supabase-signed-url",
@@ -778,7 +778,7 @@ The application uses Supabase for both database and file storage with comprehens
 2. **List PDFs**: `GET /api/pdfs` to get all user PDFs with recent activity
 3. **Access PDF**: `GET /api/pdfs/[id]` to get individual PDF with fresh signed URL
 4. **Create annotation**: `POST /api/annotations` (when annotation system is implemented)
-5. **Get annotations**: `GET /api/annotations?pdfId={id}` (when annotation system is implemented)
+5. **Get annotations**: `GET /api/annotations?documentId={id}` (when annotation system is implemented)
 
 ### Complete Notes workflow:
 
@@ -812,7 +812,7 @@ const handleUpload = async (file: File) => {
 const { data: pdfList, error, isLoading } = useGetPDFsQuery();
 
 // Get individual PDF with automatic signed URL refresh
-const { data: pdfData } = useGetPDFQuery(pdfId, {
+const { data: pdfData } = useGetPDFQuery(documentId, {
   pollingInterval: 30 * 60 * 1000 // Refresh every 30 minutes
 });
 

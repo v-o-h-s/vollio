@@ -157,7 +157,7 @@ interface PDFDocument {
 
 interface Annotation {
   id: string;
-  pdfId: string;
+  documentId: string;
   content: string;
   coordinates: AnnotationCoordinates;
   createdAt: string;
@@ -332,9 +332,9 @@ export function isPDFDocument(obj: any): obj is PDFDocument {
 ```typescript
 // Memoized selectors for Redux
 export const selectAnnotationsByPdf = createSelector(
-  [selectAnnotations, (state, pdfId) => pdfId],
-  (annotations, pdfId) => 
-    Object.values(annotations).filter(a => a.pdfId === pdfId)
+  [selectAnnotations, (state, documentId) => documentId],
+  (annotations, documentId) => 
+    Object.values(annotations).filter(a => a.documentId === documentId)
 );
 ```
 

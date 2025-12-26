@@ -41,7 +41,7 @@ The project uses Supabase as the backend database. We manage the database schema
 ## Best Practices
 
 - **Row Level Security (RLS)**: Always enable RLS on tables and define appropriate policies.
-- **Indexes**: Add indexes for columns that are frequently queried (e.g., `user_id`, `pdf_id`).
+- **Indexes**: Add indexes for columns that are frequently queried (e.g., `user_id`, `document_id`).
 - **Foreign Keys**: Use foreign keys to maintain data integrity.
 - **Backups**: Ensure database backups are configured (handled by Supabase platform).
 

@@ -55,7 +55,7 @@ export function FilterDropdown({ filters, onFiltersChange }: FilterDropdownProps
           checked={filters.showDocuments}
           onCheckedChange={(checked) => handleFilterChange("showDocuments", checked)}
         >
-          Document Documents
+          documents
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={filters.showDocs}

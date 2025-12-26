@@ -51,7 +51,7 @@ export function useDocumentsViewState(documents: Document[], folders: Folder[]) 
       }
 
       // Document type filters
-      const isDocument = document.mimeType === "application/document";
+      const isDocument = document.mimeType === "application/pdf";
       const isDoc = document.mimeType.includes("document") || document.mimeType.includes("word");
       const isImage = document.mimeType.includes("image");
 

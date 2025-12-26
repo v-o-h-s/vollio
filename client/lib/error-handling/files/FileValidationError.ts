@@ -217,7 +217,7 @@ export class DocumentValidationError extends BaseAppError {
       case DocumentValidationErrorType.INVALID_FILE_FORMAT:
         return "Choose Another Document";
       case DocumentValidationErrorType.INVALID_FILE_TYPE:
-        return "Choose Document Document";
+        return "Choose document";
       default:
         return "Try Again";
     }

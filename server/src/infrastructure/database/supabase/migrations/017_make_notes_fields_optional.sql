@@ -21,7 +21,7 @@ ALTER COLUMN content SET DEFAULT NULL;
 -- Add comment to document the change
 COMMENT ON COLUMN notes.title IS 'Note title - optional, can be NULL';
 COMMENT ON COLUMN notes.content IS 'TipTap JSONContent format - optional, can be NULL';
-COMMENT ON COLUMN notes.document_id IS 'Direct reference to the Document document - optional, can be NULL';
+COMMENT ON COLUMN notes.document_id IS 'Direct reference to the document - optional, can be NULL';
 
 
 
