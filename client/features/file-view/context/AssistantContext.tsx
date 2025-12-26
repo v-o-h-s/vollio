@@ -1,3 +1,9 @@
+/**
+ * Exposes assistant messages to the file viewer.
+ * Use case: Triggered when a user selects "Explain" from the expandable toolbar.
+ */
+
+
 "use client";
 
 import { JSONContent } from "@tiptap/core";

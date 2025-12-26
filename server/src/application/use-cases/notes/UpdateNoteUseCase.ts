@@ -22,6 +22,12 @@ export class UpdateNoteUseCase {
       { noteId: input.noteId, userId: input.userId },
       "Executing UpdateNoteUseCase"
     );
+    if (input.data.content) {
+      this.logger.debug(
+        { noteId: input.noteId, content: input.data.content },
+        "Content updated in UpdateNoteUseCase"
+      );
+    }
     // Fetch existing note
     const existingNote = await this.noteRepository.getNoteById(input.noteId);
 

@@ -137,9 +137,13 @@ export interface Note {
  * Create note request payload
  */
 export interface CreateNoteRequest {
+  id?: string;
+  documentId?: string;
   title?: string;
   content?: JSONContent | null;
   pdfId?: string;
+  color?: string;
+  is_auto_generated?: boolean;
 }
 
 /**

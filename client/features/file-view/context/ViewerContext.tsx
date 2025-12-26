@@ -1,3 +1,8 @@
+/**
+ * ViewerContext manages the visibility and state of auxiliary panels within the file viewer,
+ * specifically the AI Assistant and the Noter tool.
+ */
+
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";

@@ -3,6 +3,7 @@ import { Bot, User, Copy, Plus, Trash2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotionEditor } from "@/components/editor/NotionEditor";
 import type { JSONContent } from "@tiptap/core";
+import { useAssistantActions } from "../../hooks/useAssistantActions";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -18,44 +19,11 @@ export function ChatMessage({
   timestamp,
   onDelete,
 }: ChatMessageProps) {
-  console.log("this is content",content)
+  
+  const { handleCopy, handleAddToNotes, copied } = useAssistantActions({
+    content,
+  });
   const isUser = role === "user";
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    // it is fuckign recursion dawg
-    let textToCopy = "";
-    if (typeof content === "string") {
-      textToCopy = content;
-    } else {
-      // Helper to extract text from Tiptap JSONContent
-      const extractText = (node: JSONContent): string => {
-        if (node.text) return node.text;
-        if (!node.content) return "";
-
-        const contentText = node.content.map(extractText).join("");
-
-        // Add formatting for common block types
-        if (node.type === "paragraph" || node.type?.startsWith("heading")) {
-          return contentText + "\n";
-        }
-        if (node.type === "listItem") {
-          return "• " + contentText + "\n";
-        }
-        return contentText;
-      };
-
-      textToCopy = extractText(content).trim();
-    }
-
-    try {
-      await navigator.clipboard.writeText(textToCopy);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy text: ", err);
-    }
-  };
 
   return (
     <div
@@ -129,7 +97,7 @@ export function ChatMessage({
                 )}
               </button>
               <button
-              onClick={()=>{}}
+                onClick={handleAddToNotes}
                 className="p-1 rounded-md hover:bg-muted text-muted-foreground transition-colors"
                 title="Add to notes"
               >
