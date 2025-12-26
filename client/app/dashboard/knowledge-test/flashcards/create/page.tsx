@@ -37,7 +37,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { notify } from "@/lib/notify";
+import { toast } from "react-toastify";
 import { FlashcardPreview, FlashcardEditor } from "@/components/flashcards";
 import { DocumentSelectionTabs } from "@/features/knowldge-test/quizzes/components/DocumentSelectionTabs";
 import {
@@ -185,13 +185,13 @@ export default function CreateFlashCardsPage() {
     setCurrentCardIndex(fields.length);
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 300);
-    notify.success("New card added!");
+    toast.success("New card added!");
   };
 
   const removeFlashcard = (id: string) => {
     const index = fields.findIndex((f) => f.id === id);
     if (fields.length === 1) {
-      notify.error("You need at least one card!");
+      toast.error("You need at least one card!");
       return;
     }
 
@@ -199,7 +199,7 @@ export default function CreateFlashCardsPage() {
     if (currentCardIndex >= fields.length - 1) {
       setCurrentCardIndex(Math.max(0, fields.length - 2));
     }
-    notify.success("Card removed!");
+    toast.success("Card removed!");
   };
 
   const updateFlashcard = (
@@ -259,7 +259,7 @@ export default function CreateFlashCardsPage() {
     newCards.splice(newIndex, 0, newCard);
     manualForm.setValue("flashcards", newCards);
     setCurrentCardIndex(newIndex);
-    notify.success("Card duplicated!");
+    toast.success("Card duplicated!");
   };
 
   const shuffleCards = () => {
@@ -267,7 +267,7 @@ export default function CreateFlashCardsPage() {
     const shuffled = [...currentCards].sort(() => Math.random() - 0.5);
     manualForm.setValue("flashcards", shuffled);
     setCurrentCardIndex(0);
-    notify.success("Cards shuffled!");
+    toast.success("Cards shuffled!");
   };
 
   const onManualSubmit = async (data: FlashcardManualFormData) => {
@@ -276,18 +276,18 @@ export default function CreateFlashCardsPage() {
     );
 
     if (validCards.length === 0) {
-      notify.error("Please create at least one complete card!");
+      toast.error("Please create at least one complete card!");
       return;
     }
 
     try {
       const payload = prepareFlashcardPayload("manual", data) as any;
       await createManualSet(payload).unwrap();
-      notify.success(`Deck "${data.title}" saved successfully!`);
+      toast.success(`Deck "${data.title}" saved successfully!`);
       router.push("/dashboard/knowledge-test");
     } catch (e) {
       console.error(e);
-      notify.error("Failed to save deck");
+      toast.error("Failed to save deck");
     }
   };
 
@@ -301,19 +301,17 @@ export default function CreateFlashCardsPage() {
 
   const onAutoSubmit = async (data: FlashcardAutoFormData) => {
     try {
-      notify.loading("Generating flashcards...");
+      const loadingId = toast.loading("Generating flashcards...");
       const payload = prepareFlashcardPayload("auto", data) as any;
       const response = await generateSet(payload).unwrap();
 
       if (response && response.questions) {
-        notify.success(
-          `Generated ${response.questions.length} flashcards!` // NOTE: Backend returns 'questions' even for flashcards based on QuizQuestion structure reuse or similar? Need to verify response type. Assuming response matches typical structure or need to adapt.
-          // Wait, CreateFlashCardsSetResponse is actually CreateQuizResponse structure in some places or custom?
-          // Let's check the type definition. CreateFlashCardsSetResponse import was seen in endpoints file.
-          // The endpoint file imports CreateFlashCardsSetResponse from @shared/types/responses/flashcardsRoutes.
-          // I should verify that type. But usually it returns the created entity.
-          // If generated, it might return the set with cards.
-        );
+        toast.update(loadingId, {
+          render: `Generated ${response.questions.length} flashcards!`,
+          type: "success",
+          isLoading: false,
+          autoClose: 3000,
+        });
 
         // Map response cards to form
         // Assuming response structure has 'flashCards' or 'questions'.
@@ -335,7 +333,7 @@ export default function CreateFlashCardsPage() {
           })) || [];
 
         if (generatedCards.length === 0) {
-          notify.error("No flashcards were returned.");
+          toast.error("No flashcards were returned.");
           return;
         }
 
@@ -351,7 +349,7 @@ export default function CreateFlashCardsPage() {
       }
     } catch (err: any) {
       console.error("Generation error:", err);
-      notify.error(
+      toast.error(
         err.data?.message ||
           err.message ||
           "Something went wrong during generation."

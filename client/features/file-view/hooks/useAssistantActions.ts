@@ -67,7 +67,7 @@ export const useAssistantActions = ({
             ...(content.content || []), // Spread the assistant response's child nodes
           ],
         };
-        
+
         await updateNote({
           id: activeTabId,
           updates: {

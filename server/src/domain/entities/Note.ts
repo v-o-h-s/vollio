@@ -1,4 +1,4 @@
-import { JSONContent } from '@vollio/shared';
+import { JSONContent } from "@vollio/shared";
 
 export class Note {
   private id: string;

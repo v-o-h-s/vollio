@@ -15,7 +15,7 @@ if (typeof window === "undefined") {
 
 import { useHighlightContainerContext } from "react-pdf-highlighter-extended-plus";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { CreateHighlightDTO } from "@shared/validation/highlightSchemas";
 import { ContextMenu } from "./ContextMenu";
 import { StandardHighlight } from "./StandardHighlight";
@@ -62,12 +62,12 @@ export const HighlightContainer = ({
     try {
       await deleteHighlight(highlight.id);
       toast.success("Highlight deleted", {
-        duration: 2000,
+        autoClose: 2000,
         position: "bottom-right",
       });
     } catch (error) {
       toast.error("Failed to delete highlight", {
-        duration: 3000,
+        autoClose: 3000,
         position: "bottom-right",
       });
       console.error("Failed to delete highlight:", error);

@@ -21,7 +21,7 @@ import {
   Settings,
   Library,
 } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { PremiumUpgrade } from "@/components/ui/premium-upgrade";
 import { PremiumBadge } from "@/components/ui/premium-badge";
 
@@ -303,8 +303,6 @@ export function AIFlashcardGenerator({
       focusAreas: settings.focusAreas.filter((area) => area !== areaToRemove),
     });
   };
-
-  
 
   return (
     <Card className="border-border/50 shadow-sm">

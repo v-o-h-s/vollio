@@ -9,20 +9,19 @@ import {
   Trash2,
   ExternalLink,
 } from "lucide-react";
-import { Button } from "@/components/ui/button"; 
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { NotionEditor } from "@/components/editor/NotionEditor";
 import { FloatingAutoSaveStatus } from "@/components/dashboard/FloatingAutoSaveStatus";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 
-import { useNoteSync } from "@/hooks/use-note-sync";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import {
   useGetNoteQuery,
   useUpdateNoteMutation,
   useDeleteNoteMutation,
 } from "@/lib/store/apiSlice";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import type { JSONContent } from "@tiptap/core";
 
 interface NoteContent {
@@ -46,9 +45,6 @@ export default function NoteEditPage() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
-  // Cross-tab synchronization
-  const { broadcastUpdate, broadcastDelete } = useNoteSync();
 
   // Initialize content when note loads
   useEffect(() => {
@@ -75,9 +71,6 @@ export default function NoteEditPage() {
       setIsDeleting(true);
       await deleteNote(noteId).unwrap();
 
-      // Broadcast note deletion for cross-tab sync
-      broadcastDelete(noteId);
-
       // Show success message
       toast.success("Note deleted successfully");
 
@@ -90,7 +83,7 @@ export default function NoteEditPage() {
     } finally {
       setShowDeleteDialog(false);
     }
-  }, [noteId, deleteNote, broadcastDelete, router]);
+  }, [noteId, deleteNote, router]);
 
   const handleCancelDelete = useCallback(() => {
     setShowDeleteDialog(false);
@@ -314,7 +307,6 @@ export default function NoteEditPage() {
         noteTitle={getCurrentTitle()}
         isDeleting={isDeleting}
       />
-
     </ErrorBoundary>
   );
 }

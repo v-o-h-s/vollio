@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useGetPDFsQuery } from "@/lib/store/apiSlice";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 import {
   Library,
@@ -122,7 +122,7 @@ export function DocumentSelector({
 
   const handleAddDocument = (doc: PDFDocument) => {
     // Check if document is already selected
-    if (selectedDocuments.some(selected => selected.id === doc.id)) {
+    if (selectedDocuments.some((selected) => selected.id === doc.id)) {
       toast.error("Document is already selected");
       return;
     }
@@ -134,7 +134,10 @@ export function DocumentSelector({
       uploadedAt: new Date().toISOString(),
       fileSize: 0, // We don't have this info from the API
       pageCount: doc.page_count || 1,
-      selectedPages: Array.from({ length: doc.page_count || 1 }, (_, i) => i + 1),
+      selectedPages: Array.from(
+        { length: doc.page_count || 1 },
+        (_, i) => i + 1
+      ),
     };
 
     const updatedDocuments = [...selectedDocuments, newDocument];
@@ -143,12 +146,14 @@ export function DocumentSelector({
   };
 
   const handleRemoveDocument = (docId: string) => {
-    const updatedDocuments = selectedDocuments.filter(doc => doc.id !== docId);
+    const updatedDocuments = selectedDocuments.filter(
+      (doc) => doc.id !== docId
+    );
     onDocumentsSelected(updatedDocuments);
   };
 
   const handleUpdateDocumentPages = (docId: string, pages: number[]) => {
-    const updatedDocuments = selectedDocuments.map(doc => 
+    const updatedDocuments = selectedDocuments.map((doc) =>
       doc.id === docId ? { ...doc, selectedPages: pages } : doc
     );
     onDocumentsSelected(updatedDocuments);
@@ -340,8 +345,8 @@ export function DocumentSelector({
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{doc.title}</p>
                     <p className="text-sm text-muted-foreground">
-                      {doc.selectedPages?.length || doc.pageCount || 0} of {doc.pageCount || 0} pages
-                      selected
+                      {doc.selectedPages?.length || doc.pageCount || 0} of{" "}
+                      {doc.pageCount || 0} pages selected
                     </p>
                   </div>
                   <Button
@@ -363,7 +368,10 @@ export function DocumentSelector({
                       onClick={() =>
                         handleUpdateDocumentPages(
                           doc.id,
-                          Array.from({ length: doc.pageCount || 0 }, (_, i) => i + 1)
+                          Array.from(
+                            { length: doc.pageCount || 0 },
+                            (_, i) => i + 1
+                          )
                         )
                       }
                     >
@@ -378,28 +386,29 @@ export function DocumentSelector({
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {Array.from({ length: doc.pageCount || 0 }, (_, i) => i + 1).map(
-                      (page) => (
-                        <Badge
-                          key={page}
-                          variant={
-                            doc.selectedPages?.includes(page)
-                              ? "default"
-                              : "outline"
-                          }
-                          className="cursor-pointer text-xs"
-                          onClick={() => {
-                            const currentPages = doc.selectedPages || [];
-                            const newPages = currentPages.includes(page)
-                              ? currentPages.filter((p) => p !== page)
-                              : [...currentPages, page].sort((a, b) => a - b);
-                            handleUpdateDocumentPages(doc.id, newPages);
-                          }}
-                        >
-                          {page}
-                        </Badge>
-                      )
-                    )}
+                    {Array.from(
+                      { length: doc.pageCount || 0 },
+                      (_, i) => i + 1
+                    ).map((page) => (
+                      <Badge
+                        key={page}
+                        variant={
+                          doc.selectedPages?.includes(page)
+                            ? "default"
+                            : "outline"
+                        }
+                        className="cursor-pointer text-xs"
+                        onClick={() => {
+                          const currentPages = doc.selectedPages || [];
+                          const newPages = currentPages.includes(page)
+                            ? currentPages.filter((p) => p !== page)
+                            : [...currentPages, page].sort((a, b) => a - b);
+                          handleUpdateDocumentPages(doc.id, newPages);
+                        }}
+                      >
+                        {page}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               </div>

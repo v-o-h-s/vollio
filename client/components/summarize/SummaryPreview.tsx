@@ -19,7 +19,7 @@ import {
   Maximize2,
   Minimize2,
 } from "lucide-react";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 import { formatDistanceToNow } from "date-fns";
 
 interface SummaryPreviewProps {
@@ -42,7 +42,11 @@ interface SummaryPreviewProps {
   onEdit?: () => void;
 }
 
-export function SummaryPreview({ summary, onClose, onEdit }: SummaryPreviewProps) {
+export function SummaryPreview({
+  summary,
+  onClose,
+  onEdit,
+}: SummaryPreviewProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(summary.content);
@@ -61,7 +65,9 @@ export function SummaryPreview({ summary, onClose, onEdit }: SummaryPreviewProps
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${summary.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`;
+    a.download = `${summary.title
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase()}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -107,32 +113,41 @@ export function SummaryPreview({ summary, onClose, onEdit }: SummaryPreviewProps
   };
 
   return (
-    <div className={`fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 ${
-      isFullscreen ? "p-0" : ""
-    }`}>
-      <Card className={`w-full overflow-hidden ${
-        isFullscreen 
-          ? "h-full max-w-none rounded-none" 
-          : "max-w-4xl max-h-[90vh]"
-      }`}>
+    <div
+      className={`fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 ${
+        isFullscreen ? "p-0" : ""
+      }`}
+    >
+      <Card
+        className={`w-full overflow-hidden ${
+          isFullscreen
+            ? "h-full max-w-none rounded-none"
+            : "max-w-4xl max-h-[90vh]"
+        }`}
+      >
         <CardHeader className="border-b border-border/50">
           <div className="flex items-start justify-between">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <CardTitle className="text-xl">{summary.title}</CardTitle>
-                <Badge className={getSummaryTypeColor(summary.settings.summaryType)}>
+                <Badge
+                  className={getSummaryTypeColor(summary.settings.summaryType)}
+                >
                   {summary.settings.summaryType}
                 </Badge>
               </div>
-              
+
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <FileText className="w-4 h-4" />
-                  {summary.documentCount} document{summary.documentCount !== 1 ? "s" : ""}
+                  {summary.documentCount} document
+                  {summary.documentCount !== 1 ? "s" : ""}
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  {formatDistanceToNow(new Date(summary.createdAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(summary.createdAt), {
+                    addSuffix: true,
+                  })}
                 </div>
                 <div className="flex items-center gap-1">
                   <BookOpen className="w-4 h-4" />
@@ -161,7 +176,9 @@ export function SummaryPreview({ summary, onClose, onEdit }: SummaryPreviewProps
 
           {/* Document List */}
           <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">Source Documents:</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Source Documents:
+            </p>
             <div className="flex flex-wrap gap-1">
               {summary.documentTitles.slice(0, 5).map((title, index) => (
                 <Badge key={index} variant="outline" className="text-xs">
@@ -211,19 +228,27 @@ export function SummaryPreview({ summary, onClose, onEdit }: SummaryPreviewProps
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>
                 <span className="text-muted-foreground">Type:</span>
-                <span className="ml-2 font-medium">{summary.settings.summaryType}</span>
+                <span className="ml-2 font-medium">
+                  {summary.settings.summaryType}
+                </span>
               </div>
               <div>
                 <span className="text-muted-foreground">Length:</span>
-                <span className="ml-2 font-medium">{summary.settings.length}</span>
+                <span className="ml-2 font-medium">
+                  {summary.settings.length}
+                </span>
               </div>
               <div>
                 <span className="text-muted-foreground">Focus:</span>
-                <span className="ml-2 font-medium">{summary.settings.focus}</span>
+                <span className="ml-2 font-medium">
+                  {summary.settings.focus}
+                </span>
               </div>
               <div>
                 <span className="text-muted-foreground">Tone:</span>
-                <span className="ml-2 font-medium">{summary.settings.tone}</span>
+                <span className="ml-2 font-medium">
+                  {summary.settings.tone}
+                </span>
               </div>
             </div>
           </div>
@@ -239,9 +264,7 @@ export function SummaryPreview({ summary, onClose, onEdit }: SummaryPreviewProps
                   <Button variant="outline" onClick={() => setIsEditing(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleSaveEdit}>
-                    Save Changes
-                  </Button>
+                  <Button onClick={handleSaveEdit}>Save Changes</Button>
                 </div>
               </div>
               <textarea

@@ -2,7 +2,7 @@ import {
   useGetAllFlashCardsSetsQuery,
   useDeleteFlashCardsSetMutation,
 } from "@/lib/store/apiSlice";
-import { notify } from "@/lib/notify";
+import { toast } from "react-toastify";
 
 export const useFlashcards = () => {
   const {
@@ -18,10 +18,10 @@ export const useFlashcards = () => {
   const deleteFlashcardSet = async (id: string) => {
     try {
       await deleteFlashCardsSetData(id).unwrap();
-      notify.success("Flashcard deck deleted successfully");
+      toast.success("Flashcard deck deleted successfully");
     } catch (error) {
       console.error("Failed to delete flashcard deck:", error);
-      notify.error("Failed to delete flashcard deck");
+      toast.error("Failed to delete flashcard deck");
     }
   };
 

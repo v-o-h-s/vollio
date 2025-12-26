@@ -9,6 +9,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import { toast } from "react-toastify";
 import {
   DndContext,
   DragOverlay,
@@ -150,9 +151,14 @@ export default function FilesDirectoryViewer() {
     if (files.length === 0) return;
 
     for (const file of files) {
-      const result = await uploadFile(file, currentFolder);
-      if (result.error) {
-        console.error("Failed to upload file:", file.name);
+      try {
+        await toast.promise(uploadFile(file, currentFolder), {
+          pending: `Uploading ${file.name}...`,
+          success: `Successfully uploaded ${file.name}`,
+          error: `Failed to upload ${file.name}`,
+        });
+      } catch (error) {
+        console.error("Failed to upload file:", file.name, error);
       }
     }
 
@@ -256,9 +262,14 @@ export default function FilesDirectoryViewer() {
     if (files.length === 0) return;
 
     for (const file of files) {
-      const result = await uploadFile(file, currentFolder);
-      if (result.error) {
-        console.error("Failed to upload file:", file.name);
+      try {
+        await toast.promise(uploadFile(file, currentFolder), {
+          pending: `Uploading ${file.name}...`,
+          success: `Successfully uploaded ${file.name}`,
+          error: `Failed to upload ${file.name}`,
+        });
+      } catch (error) {
+        console.error("Failed to upload file:", file.name, error);
       }
     }
 
@@ -372,7 +383,7 @@ export default function FilesDirectoryViewer() {
 
           {/* Drag overlay - Full screen popup for upload only*/}
           {isDraggingFile && (
-            <div className="fixed  inset-0 bg-background/95  backdrop-blur-sm flex items-center justify-center z-[100]">
+            <div className="fixed  inset-0 bg-background/95  backdrop-blur-sm flex items-center justify-center z-100">
               <div className="max-w-md w-full mx-4 bg-card border-2 border-dashed border-primary rounded-2xl p-12 shadow-2xl">
                 <div className="text-center space-y-4">
                   <div className="relative">
@@ -394,19 +405,6 @@ export default function FilesDirectoryViewer() {
                       Multiple files supported
                     </p>
                   </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Upload indicator */}
-          {isUploading && (
-            <div className="fixed bottom-4 right-4 bg-card border rounded-lg p-4 shadow-lg z-50 min-w-[200px]">
-              <div className="flex items-center gap-3">
-                <Loader2 className="h-5 w-5 animate-spin text-primary flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium">Uploading files...</p>
-                  <p className="text-xs text-muted-foreground">Please wait</p>
                 </div>
               </div>
             </div>

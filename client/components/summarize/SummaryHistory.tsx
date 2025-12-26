@@ -32,7 +32,7 @@ import {
   Share2,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 import { SummaryPreview } from "./SummaryPreview";
 
 interface SummaryHistoryItem {

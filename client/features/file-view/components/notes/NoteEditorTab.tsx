@@ -2,8 +2,6 @@ import { useGetNoteQuery } from "@/lib/store/apiSlice";
 import { LoadingState } from "@/components/ui/loading";
 import { NotionEditor } from "@/components/editor";
 import { useEffect } from "react";
-import { ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface NoteEditorTabProps {
   noteId: string;
@@ -48,24 +46,8 @@ export function NoteEditorTab({
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="px-8 py-2 border-b border-border flex items-center justify-between bg-background/50 backdrop-blur-sm sticky top-0 z-10">
-        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Currently Editing
-        </h3>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 gap-1.5 text-muted-foreground hover:text-primary transition-colors"
-          onClick={() =>
-            window.open(`/dashboard/notes/${noteData.id}`, "_blank")
-          }
-        >
-          <ExternalLink className="w-3.5 h-3.5" />
-          <span className="text-xs">Open Full Editor</span>
-        </Button>
-      </div>
-      <div className="flex-1 overflow-auto p-8 pt-4">
+    <div className="p-8 h-full flex flex-col">
+      <div className="flex-1 h-full">
         <NotionEditor
           noteId={noteData.id}
           content={{

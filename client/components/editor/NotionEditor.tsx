@@ -548,7 +548,7 @@ function NotionEditorInner({
 
       {/* AutoSaveStatus - Shows in bottom-right when autoSave is enabled */}
       {autoSave && (
-        <div className="absolute bottom-2 right-2 z-10">
+        <div className="absolute bottom-3 right-4 z-10">
           <AutoSaveStatus
             status={autoSaveStatus}
             lastSaved={lastSaved}

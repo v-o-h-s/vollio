@@ -26,9 +26,10 @@ export const ViewerFloatingActions = ({
             "shadow-lg hover:shadow-xl transition-all duration-300",
             "border border-white/20 dark:border-white/10",
             "backdrop-blur-xl",
+            "cursor-pointer active:scale-95",
             isAssistantOpen
               ? "bg-primary text-primary-foreground scale-110"
-              : "bg-white/90 dark:bg-gray-900/90 text-foreground hover:bg-gray-50 dark:hover:bg-gray-800"
+              : "bg-white/90 dark:bg-gray-900/90 text-foreground hover:bg-gray-50 dark:hover:bg-gray-800 hover:scale-110"
           )}
           title="Toggle Assistant"
         >
@@ -57,9 +58,10 @@ export const ViewerFloatingActions = ({
             "shadow-lg hover:shadow-xl transition-all duration-300",
             "border border-white/20 dark:border-white/10",
             "backdrop-blur-xl",
+            "cursor-pointer active:scale-95",
             isNoterOpen
               ? "bg-primary text-primary-foreground scale-110"
-              : "bg-white/90 dark:bg-gray-900/90 text-foreground hover:bg-gray-50 dark:hover:bg-gray-800"
+              : "bg-white/90 dark:bg-gray-900/90 text-foreground hover:bg-gray-50 dark:hover:bg-gray-800 hover:scale-110"
           )}
           title="Toggle Notes"
         >

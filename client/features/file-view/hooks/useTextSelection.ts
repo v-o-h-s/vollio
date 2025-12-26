@@ -51,7 +51,7 @@ export function useSelection({
     if (!activeSelection || !activeSelection.content?.text) return;
     setIsAssistantOpen(true);
     if (!activeSelection.content.text.trim()) return;
-    addUserMessage(`Explain ${activeSelection.content.text}`);
+    addUserMessage(`Explain this text:  ${activeSelection.content.text}`);
   };
 
   const handleTagConfirm = async (selectedTags: string[]) => {

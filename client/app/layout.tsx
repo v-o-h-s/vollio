@@ -3,11 +3,10 @@ import { Geist, Geist_Mono, Inter, Poppins, Outfit } from "next/font/google";
 import "./globals.css";
 
 import { ReduxProvider } from "@/lib/store/provider";
-import { Bounce } from "react-toastify";
 import { EditorProvider } from "@/components/editor";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { Toaster } from "react-hot-toast";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -85,7 +84,6 @@ export default function RootLayout({
             <EditorProvider>{children}</EditorProvider>
           </ReduxProvider>
         </ThemeProvider>
-        <Toaster />
       </body>
     </html>
   );

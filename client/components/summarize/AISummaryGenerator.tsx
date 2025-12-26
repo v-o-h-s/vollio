@@ -26,7 +26,7 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 
 interface SelectedDocument {
   id: string;
@@ -156,16 +156,21 @@ export function AISummaryGenerator({
   };
 
   const generateMockSummary = () => {
-    const documentTitles = selectedDocuments.map(doc => doc.title).join(", ");
-    const totalPages = selectedDocuments.reduce((sum, doc) => sum + (doc.pageCount || 1), 0);
-    
+    const documentTitles = selectedDocuments.map((doc) => doc.title).join(", ");
+    const totalPages = selectedDocuments.reduce(
+      (sum, doc) => sum + (doc.pageCount || 1),
+      0
+    );
+
     let summary = "";
-    
+
     switch (settings.summaryType) {
       case "executive":
         summary = `# Executive Summary
 
-This executive summary covers ${selectedDocuments.length} document(s): ${documentTitles}.
+This executive summary covers ${
+          selectedDocuments.length
+        } document(s): ${documentTitles}.
 
 ## Key Findings
 - The documents contain comprehensive information across ${totalPages} pages
@@ -180,12 +185,14 @@ This executive summary covers ${selectedDocuments.length} document(s): ${documen
 ## Conclusion
 The reviewed documents provide valuable insights that can inform decision-making and strategic planning.`;
         break;
-        
+
       case "bullet-points":
         summary = `# Summary: ${documentTitles}
 
 ## Key Points
-• Documents analyzed: ${selectedDocuments.length} files (${totalPages} total pages)
+• Documents analyzed: ${
+          selectedDocuments.length
+        } files (${totalPages} total pages)
 • Primary focus: ${settings.focus.replace("-", " ")}
 • Tone: ${settings.tone}
 • Length: ${settings.length}
@@ -204,12 +211,17 @@ The reviewed documents provide valuable insights that can inform decision-making
 • Future research directions are identified
 • Implementation strategies are outlined`;
         break;
-        
+
       case "detailed":
         summary = `# Detailed Analysis: ${documentTitles}
 
 ## Overview
-This detailed analysis examines ${selectedDocuments.length} document(s) totaling ${totalPages} pages. The analysis focuses on ${settings.focus.replace("-", " ")} with a ${settings.tone} tone.
+This detailed analysis examines ${
+          selectedDocuments.length
+        } document(s) totaling ${totalPages} pages. The analysis focuses on ${settings.focus.replace(
+          "-",
+          " "
+        )} with a ${settings.tone} tone.
 
 ## Document Structure and Content
 The reviewed documents present information in a structured manner, covering various aspects of the subject matter. Each document contributes unique perspectives and insights that collectively provide a comprehensive understanding of the topic.
@@ -231,13 +243,18 @@ The analysis reveals significant insights that have practical implications for t
 ## Recommendations for Further Study
 Based on this analysis, several recommendations emerge for future research and practical application of the concepts discussed in these documents.`;
         break;
-        
+
       default: // brief
         summary = `# Brief Summary: ${documentTitles}
 
-This summary covers ${selectedDocuments.length} document(s) with ${totalPages} total pages.
+This summary covers ${
+          selectedDocuments.length
+        } document(s) with ${totalPages} total pages.
 
-The documents provide comprehensive coverage of the subject matter with a focus on ${settings.focus.replace("-", " ")}. Key insights include practical applications, methodological approaches, and recommendations for implementation.
+The documents provide comprehensive coverage of the subject matter with a focus on ${settings.focus.replace(
+          "-",
+          " "
+        )}. Key insights include practical applications, methodological approaches, and recommendations for implementation.
 
 The analysis reveals important findings that can inform decision-making and provide direction for future work. The content is well-structured and presents information in a clear, accessible manner.
 

@@ -7,31 +7,32 @@ import { Plus, FileText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { useNoteSync } from "@/hooks/use-note-sync";
 import { EnhancedNotesListSkeleton } from "@/components/ui/enhanced-notes-list-skeleton";
 import { EnhancedNotesList } from "@/components/ui/enhanced-notes-list";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 import { useFloatingSidebarIntegration } from "@/hooks/use-floating-sidebar";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 /**
  * Notes List Page
- * 
+ *
  * Modern, responsive notes list with enhanced design system.
  * Features adaptive grid layout, advanced filtering/sorting, and smooth animations.
  * Integrates with the PDF annotation system to show linked notes.
  */
 const NotesPage: React.FC = () => {
   const router = useRouter();
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'compact'>('grid');
-  const [sortBy, setSortBy] = useState<'updated' | 'created' | 'title' | 'wordCount'>('updated');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [filterBy, setFilterBy] = useState('');
+  const [viewMode, setViewMode] = useState<"grid" | "list" | "compact">("grid");
+  const [sortBy, setSortBy] = useState<
+    "updated" | "created" | "title" | "wordCount"
+  >("updated");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [filterBy, setFilterBy] = useState("");
   const [showStarredOnly, setShowStarredOnly] = useState(false);
-  
+
   // Refs for sidebar integration
   const searchInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Delete confirmation dialog state
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
@@ -40,9 +41,9 @@ const NotesPage: React.FC = () => {
   }>({
     isOpen: false,
     noteId: null,
-    noteTitle: '',
+    noteTitle: "",
   });
-  
+
   const {
     data: notesRaw = [],
     isLoading,
@@ -51,31 +52,24 @@ const NotesPage: React.FC = () => {
   } = useGetNotesQuery({});
 
   // Transform API response to match Note type
-  const notes = notesRaw.map(note => ({
+  const notes = notesRaw.map((note) => ({
     ...note,
-    userId: '', // Default userId for list view
-    content: { type: 'doc', content: [] }, // Empty valid JSONContent
+    userId: "", // Default userId for list view
+    content: { type: "doc", content: [] }, // Empty valid JSONContent
     pdfAnnotationId: undefined,
   }));
 
   const [deleteNote, { isLoading: isDeleting }] = useDeleteNoteMutation();
-
-
-
-
-
-  // Cross-tab synchronization
-  useNoteSync({
-    enableAutoNavigation: false, // Don't auto-navigate from list page
-    enableAutoUpdate: true,
-  });
 
   // Integrate with floating sidebar
   useFloatingSidebarIntegration({
     searchNotes: () => {
       if (searchInputRef.current) {
         searchInputRef.current.focus();
-        searchInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        searchInputRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
       }
     },
     filterNotes: () => {
@@ -86,27 +80,34 @@ const NotesPage: React.FC = () => {
     },
     sortNotes: () => {
       // Cycle through sort options
-      const sortOptions: Array<'updated' | 'created' | 'title' | 'wordCount'> = ['updated', 'created', 'title', 'wordCount'];
+      const sortOptions: Array<"updated" | "created" | "title" | "wordCount"> =
+        ["updated", "created", "title", "wordCount"];
       const currentIndex = sortOptions.indexOf(sortBy);
       const nextIndex = (currentIndex + 1) % sortOptions.length;
       setSortBy(sortOptions[nextIndex]);
-      
+
       // Show toast to indicate sort change
       toast.success(`Sorted by ${sortOptions[nextIndex]}`);
     },
     toggleNotesView: () => {
       // Cycle through view modes
-      const viewModes: Array<'grid' | 'list' | 'compact'> = ['grid', 'list', 'compact'];
+      const viewModes: Array<"grid" | "list" | "compact"> = [
+        "grid",
+        "list",
+        "compact",
+      ];
       const currentIndex = viewModes.indexOf(viewMode);
       const nextIndex = (currentIndex + 1) % viewModes.length;
       setViewMode(viewModes[nextIndex]);
-      
+
       // Show toast to indicate view change
       toast.success(`Switched to ${viewModes[nextIndex]} view`);
     },
     filterStarred: () => {
       setShowStarredOnly(!showStarredOnly);
-      toast.success(showStarredOnly ? 'Showing all notes' : 'Showing starred notes only');
+      toast.success(
+        showStarredOnly ? "Showing all notes" : "Showing starred notes only"
+      );
     },
   });
 
@@ -126,9 +127,9 @@ const NotesPage: React.FC = () => {
 
   const handleDeleteNote = (noteId: string) => {
     // Find the note to get its title for confirmation
-    const noteToDelete = notes.find(note => note.id === noteId);
+    const noteToDelete = notes.find((note) => note.id === noteId);
     const noteTitle = noteToDelete?.title || "Untitled Note";
-    
+
     // Open confirmation dialog
     setDeleteDialog({
       isOpen: true,
@@ -148,39 +149,42 @@ const NotesPage: React.FC = () => {
       await deleteNote(deleteDialog.noteId).unwrap();
 
       // Close dialog
-      setDeleteDialog({ isOpen: false, noteId: null, noteTitle: '' });
+      setDeleteDialog({ isOpen: false, noteId: null, noteTitle: "" });
 
       // Show success toast
-      toast.success(`"${deleteDialog.noteTitle}" has been deleted`, {
-        id: loadingToast,
+      toast.update(loadingToast, {
+        render: `"${deleteDialog.noteTitle}" has been deleted`,
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
       });
 
       // Optionally refetch the notes list to ensure UI is in sync
       refetch();
     } catch (error) {
       console.error("Failed to delete note:", error);
-      
+
       // Show error toast
       toast.error(
-        error instanceof Error 
-          ? error.message 
+        error instanceof Error
+          ? error.message
           : "Failed to delete note. Please try again."
       );
     }
   };
 
   const handleCancelDelete = () => {
-    setDeleteDialog({ isOpen: false, noteId: null, noteTitle: '' });
+    setDeleteDialog({ isOpen: false, noteId: null, noteTitle: "" });
   };
 
   const handleDuplicateNote = (noteId: string) => {
     // TODO: Implement duplicate functionality
-    console.log('Duplicate note:', noteId);
+    console.log("Duplicate note:", noteId);
   };
 
   const handleToggleStarNote = (noteId: string) => {
     // TODO: Implement star functionality
-    console.log('Toggle star:', noteId);
+    console.log("Toggle star:", noteId);
   };
 
   if (isLoading) {
@@ -188,13 +192,15 @@ const NotesPage: React.FC = () => {
       <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Notes</h1>
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+              Notes
+            </h1>
             <p className="text-sm text-muted-foreground/80">
               Organize your thoughts and link them to PDF annotations
             </p>
           </div>
-          <Button 
-            onClick={handleCreateNote} 
+          <Button
+            onClick={handleCreateNote}
             size="sm"
             className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
@@ -202,7 +208,7 @@ const NotesPage: React.FC = () => {
             New Note
           </Button>
         </div>
-        
+
         <EnhancedNotesListSkeleton count={8} viewMode={viewMode} />
       </div>
     );
@@ -213,13 +219,15 @@ const NotesPage: React.FC = () => {
       <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Notes</h1>
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+              Notes
+            </h1>
             <p className="text-sm text-muted-foreground/80">
               Organize your thoughts and link them to PDF annotations
             </p>
           </div>
-          <Button 
-            onClick={handleCreateNote} 
+          <Button
+            onClick={handleCreateNote}
             size="sm"
             className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
           >
@@ -227,7 +235,7 @@ const NotesPage: React.FC = () => {
             New Note
           </Button>
         </div>
-        
+
         <div className="bg-card/30 backdrop-blur-sm rounded-xl p-12 text-center border border-border/40">
           <div className="max-w-md mx-auto">
             <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-destructive/10 flex items-center justify-center">
@@ -237,20 +245,21 @@ const NotesPage: React.FC = () => {
               Failed to load notes
             </h2>
             <p className="text-muted-foreground mb-6 leading-relaxed">
-              There was an error loading your notes. This might be a temporary issue with the connection.
+              There was an error loading your notes. This might be a temporary
+              issue with the connection.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button 
-                onClick={() => refetch()} 
-                variant="outline" 
+              <Button
+                onClick={() => refetch()}
+                variant="outline"
                 size="sm"
                 className="flex items-center gap-2 h-9 px-4 border-border/30 hover:border-border/50 hover:bg-card/40 backdrop-blur-sm rounded-lg"
               >
                 <Sparkles size={14} />
                 Try Again
               </Button>
-              <Button 
-                onClick={handleCreateNote} 
+              <Button
+                onClick={handleCreateNote}
                 size="sm"
                 className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
               >
@@ -270,12 +279,14 @@ const NotesPage: React.FC = () => {
         {/* Enhanced Header with Better Typography and Spacing */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Notes</h1>
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+              Notes
+            </h1>
             <p className="text-sm text-muted-foreground/80">
               Organize your thoughts and link them to PDF annotations
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
             {/* Quick Search */}
             <div className="relative">
@@ -288,9 +299,9 @@ const NotesPage: React.FC = () => {
                 className="pl-3 pr-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-48 text-sm"
               />
             </div>
-            
-            <Button 
-              onClick={handleCreateNote} 
+
+            <Button
+              onClick={handleCreateNote}
               size="sm"
               className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
             >

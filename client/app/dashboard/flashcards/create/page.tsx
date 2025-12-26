@@ -34,7 +34,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { notify } from "@/lib/notify";
+import { toast } from "react-toastify";
 import { FlashcardPreview, FlashcardEditor } from "@/components/flashcards";
 import { DocumentSelectionTabs } from "@/components/quiz/DocumentSelectionTabs";
 import { useGetAllFilesQuery } from "@/lib/store/apiSlice";
@@ -152,12 +152,12 @@ export default function CreateFlashCardsPage() {
     setCurrentCardIndex(flashcards.length);
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 300);
-    notify.success("New card added!");
+    toast.success("New card added!");
   };
 
   const removeFlashcard = (id: string) => {
     if (flashcards.length === 1) {
-      notify.error("You need at least one card!");
+      toast.error("You need at least one card!");
       return;
     }
 
@@ -165,7 +165,7 @@ export default function CreateFlashCardsPage() {
     if (currentCardIndex >= flashcards.length - 1) {
       setCurrentCardIndex(Math.max(0, flashcards.length - 2));
     }
-    notify.success("Card removed!");
+    toast.success("Card removed!");
   };
 
   const updateFlashcard = (
@@ -225,24 +225,24 @@ export default function CreateFlashCardsPage() {
     newFlashcards.splice(newIndex, 0, newCard);
     setFlashcards(newFlashcards);
     setCurrentCardIndex(newIndex);
-    notify.success("Card duplicated!");
+    toast.success("Card duplicated!");
   };
 
   const shuffleCards = () => {
     const shuffled = [...flashcards].sort(() => Math.random() - 0.5);
     setFlashcards(shuffled);
     setCurrentCardIndex(0);
-    notify.success("Cards shuffled!");
+    toast.success("Cards shuffled!");
   };
 
   const saveDeck = async () => {
     if (!deckMetadata.title.trim()) {
-      notify.error("Please enter a deck title!");
+      toast.error("Please enter a deck title!");
       return;
     }
 
     if (!autoDocument) {
-      notify.error("Please select a linked document!");
+      toast.error("Please select a linked document!");
       return;
     }
 
@@ -250,7 +250,7 @@ export default function CreateFlashCardsPage() {
       (card) => card.front.trim() && card.back.trim()
     );
     if (validCards.length === 0) {
-      notify.error("Please create at least one complete card!");
+      toast.error("Please create at least one complete card!");
       return;
     }
 
@@ -268,7 +268,7 @@ export default function CreateFlashCardsPage() {
     };
 
     try {
-      notify.loading("Saving deck...");
+      const loadingId = toast.loading("Saving deck...");
       const res = await fetch("/api/v1/flashcards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -277,11 +277,16 @@ export default function CreateFlashCardsPage() {
 
       if (!res.ok) throw new Error("Failed to save flashcard set");
 
-      notify.success(`Deck "${deckMetadata.title}" saved successfully!`);
+      toast.update(loadingId, {
+        render: `Deck "${deckMetadata.title}" saved successfully!`,
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
       router.push("/dashboard/knowledge-test");
     } catch (e) {
       console.error(e);
-      notify.error("Failed to save deck");
+      toast.error("Failed to save deck");
     }
   };
 
@@ -295,17 +300,17 @@ export default function CreateFlashCardsPage() {
 
   const handleGenerate = async () => {
     if (!autoDocument) {
-      notify.error("Please select a document first.");
+      toast.error("Please select a document first.");
       return;
     }
     if (autoCardCount < 1) {
-      notify.error("Please enter a valid number of cards.");
+      toast.error("Please enter a valid number of cards.");
       return;
     }
 
     setIsGenerating(true);
+    const loadingId = toast.loading("Generating flashcards...");
     try {
-      notify.loading("Generating flashcards...");
       const resp = await fetch("/api/v1/flashcards/generate-from-document", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -326,7 +331,12 @@ export default function CreateFlashCardsPage() {
 
       const data = await resp.json();
       if (data.success && data.flashcards) {
-        notify.success(`Generated ${data.flashcards.length} flashcards!`);
+        toast.update(loadingId, {
+          render: `Generated ${data.flashcards.length} flashcards!`,
+          type: "success",
+          isLoading: false,
+          autoClose: 3000,
+        });
         // Switch to manual mode with generated cards to allow editing
         setFlashcards(
           data.flashcards.map((c: any) => ({
@@ -344,11 +354,21 @@ export default function CreateFlashCardsPage() {
         setActiveTab("manual");
         setCurrentCardIndex(0);
       } else {
-        notify.error("No flashcards were returned.");
+        toast.update(loadingId, {
+          render: "No flashcards were returned.",
+          type: "error",
+          isLoading: false,
+          autoClose: 3000,
+        });
       }
     } catch (err: any) {
       console.error("Generation error:", err);
-      notify.error(err.message || "Something went wrong during generation.");
+      toast.update(loadingId, {
+        render: err.message || "Something went wrong during generation.",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
     } finally {
       setIsGenerating(false);
     }
