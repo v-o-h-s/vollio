@@ -1,6 +1,7 @@
 /**
  * Exposes assistant messages to the document viewer.
  * Use case: Triggered when a user selects "Explain" from the expandable toolbar.
+ * (used by better viewer to exploit the assistant)
  */
 
 "use client";

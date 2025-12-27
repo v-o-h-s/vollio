@@ -7,6 +7,7 @@ import {
 } from "@/lib/store/apiSlice";
 import { Tab } from "../components/notes";
 import { useViewer } from "../context/ViewerContext";
+import { JSONContent } from "@tiptap/core";
 export const HOME_TAB_ID = "home";
 export function useNoterActions(document: DocumentDetails) {
   const [tabs, setTabs] = useState<Tab[]>([
@@ -35,12 +36,13 @@ export function useNoterActions(document: DocumentDetails) {
     );
   }, [documentNotes]);
 
-  const handleCreateNote = async () => {
+  const handleCreateNote = async (content?: JSONContent) => {
     if (isLoadingNewNote) return;
     try {
       const newNote = await createNote({
         documentId: document.id,
         title: "Untitled note",
+        content,
       }).unwrap();
 
       const newTab: Tab = {
