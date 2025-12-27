@@ -4,6 +4,10 @@
 
 import { JSONContent } from "@tiptap/core";
 import type { Editor } from "@tiptap/react";
+export type {
+  CreateNoteDTO as CreateNoteRequest,
+  UpdateNoteDTO as UpdateNoteRequest,
+} from "@vollio/shared";
 
 // ============================================================================
 // EDITOR TYPES
@@ -131,26 +135,6 @@ export interface Note {
   updatedAt: string; // ISO string for Redux serialization
   isDeleted: boolean;
   documentId?: string | null;
-}
-
-/**
- * Create note request payload
- */
-export interface CreateNoteRequest {
-  id?: string;
-  documentId?: string;
-  title?: string;
-  content?: JSONContent | null;
-  color?: string;
-  is_auto_generated?: boolean;
-}
-
-/**
- * Update note request payload
- */
-export interface UpdateNoteRequest {
-  title?: string;
-  content?: JSONContent;
 }
 
 /**

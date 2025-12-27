@@ -19,8 +19,7 @@ export function ChatMessage({
   timestamp,
   onDelete,
 }: ChatMessageProps) {
-  const { handleCopy: contextCopy, handleAddToNotes: contextAddToNotes } =
-    useViewer();
+  const { handleCopy: contextCopy, handleAddToNotes } = useViewer();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -29,7 +28,6 @@ export function ChatMessage({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleAddToNotes = () => contextAddToNotes(content);
   const isUser = role === "user";
 
   return (
@@ -104,7 +102,7 @@ export function ChatMessage({
                 )}
               </button>
               <button
-                onClick={handleAddToNotes}
+                onClick={() => handleAddToNotes(content)}
                 className="p-1 rounded-md hover:bg-muted text-muted-foreground transition-colors"
                 title="Add to notes"
               >

@@ -1,14 +1,12 @@
 import { JSONSchemaType } from "ajv";
-import { JSONContent } from "@vollio/shared";
+import {
+  JSONContent,
+  CreateNoteDTO,
+  UpdateNoteDTO,
+  NoteIdParams,
+} from "@vollio/shared";
 
 // Schema for creating a note
-export interface CreateNoteDTO {
-  id?: string;
-  title?: string;
-  content?: JSONContent;
-  documentId?: string;
-}
-
 export const createNoteSchema: JSONSchemaType<CreateNoteDTO> = {
   type: "object",
   properties: {
@@ -21,17 +19,14 @@ export const createNoteSchema: JSONSchemaType<CreateNoteDTO> = {
     title: { type: "string", nullable: true },
     content: { type: "object", nullable: true, required: [] } as any,
     documentId: { type: "string", nullable: true },
+    color: { type: "string", nullable: true },
+    is_auto_generated: { type: "boolean", nullable: true },
   },
   required: [],
   additionalProperties: false,
 };
 
 // Schema for updating a note
-export interface UpdateNoteDTO {
-  title?: string;
-  content?: JSONContent;
-}
-
 export const updateNoteSchema: JSONSchemaType<UpdateNoteDTO> = {
   type: "object",
   properties: {
@@ -43,10 +38,6 @@ export const updateNoteSchema: JSONSchemaType<UpdateNoteDTO> = {
 };
 
 // Schema for route params with ID
-export interface NoteIdParams {
-  id: string;
-}
-
 export const noteIdParamsSchema: JSONSchemaType<NoteIdParams> = {
   type: "object",
   properties: {
