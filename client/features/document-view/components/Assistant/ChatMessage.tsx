@@ -19,7 +19,6 @@ export function ChatMessage({
   timestamp,
   onDelete,
 }: ChatMessageProps) {
-  
   const { handleCopy, handleAddToNotes, copied } = useAssistantActions({
     content,
   });
@@ -43,12 +42,12 @@ export function ChatMessage({
           className={cn(
             "rounded-2xl px-4 py-2.5 text-sm",
             isUser
-              ? "bg-card text-white rounded-tr-sm"
+              ? "bg-foreground/5 text-white rounded-tr-sm"
               : "bg-background text-foreground rounded-tl-sm"
           )}
         >
           {isUser ? (
-            <p className="whitespace-pre-wrap wrap-break-word text-black dark:text-white">
+            <p className="whitespace-pre-wrap wrap-break-word  text-black dark:text-white">
               {content as string}
             </p>
           ) : (
