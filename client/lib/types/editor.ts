@@ -47,7 +47,6 @@ export interface NotionEditorProps {
   autoSave?: boolean;
   noteId?: string;
   autoSaveDelay?: number;
-  lastUpdatedAt?: string;
   onAutoSaveStatusChange?: (status: {
     status: "idle" | "typing" | "saving" | "saved" | "error";
     lastSaved: Date | null;

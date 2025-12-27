@@ -46,6 +46,8 @@ import type { NotionEditorProps } from "@/lib/types/editor";
 import type { JSONContent } from "@tiptap/react";
 import type { NoteContent } from "@/lib/types/editor";
 import { useAppSelector } from "@/lib/store/hooks";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { setShouldReadFromProps } from "@/lib/store/slices/editorSlice";
 
 function NotionEditorInner({
   content,
@@ -65,7 +67,6 @@ function NotionEditorInner({
   onAutoSaveStatusChange,
   onNoteCreated,
   documentId,
-  lastUpdatedAt,
 }: NotionEditorProps) {
   const notesFontSize = useAppSelector((state) => state.settings.notesFontSize);
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
@@ -79,6 +80,10 @@ function NotionEditorInner({
   // RTK Query mutations for note operations
   const [createNote] = useCreateNoteMutation();
   const [updateNote] = useUpdateNoteMutation();
+  const shouldReadFromProps = useAppSelector(
+    (state) => state.editor.shouldReadFromProps
+  );
+  const dispatch = useAppDispatch();
 
   // Update title when content prop changes (only on initial load)
   const hasInitialized = useRef(false);
@@ -408,8 +413,6 @@ function NotionEditorInner({
     content?.title,
     autoSave,
   ]);
-  // Track the last update we processed to avoid loops
-  const lastProcessedUpdateRef = useRef<string | undefined>(undefined);
 
   // Handle content updates when prop changes (only on initial load or when switching notes)
   useEffect(() => {
@@ -422,17 +425,11 @@ function NotionEditorInner({
       // 1. When typing: The `lastUpdatedAt` prop from the server hasn't changed yet, so the editor remains "locked" to local state to prevent overwriting user input.
       // 2. When external update (e.g. AI Assistant): The `lastUpdatedAt` prop changes, signaling a new version. We "unlock" and synchronize the editor with the new content.
       // the unlockin and locking is about props content (use it or not) (istg this shit is goated)
-      const shouldUpdate = !hasContentInitialized.current;
-      //  ||
-      // (lastUpdatedAt && lastUpdatedAt !== lastProcessedUpdateRef.current);
+
+      const shouldUpdate =
+        !hasContentInitialized.current || shouldReadFromProps;
 
       if (shouldUpdate) {
-        console.log("🔄 Updating content from props", {
-          noteId: currentNoteId,
-          isInitial: !hasContentInitialized.current,
-          lastUpdatedAt,
-        });
-
         // Save current selection to try restoring it after update
         const previousSelection = editor.state.selection;
 
@@ -444,12 +441,10 @@ function NotionEditorInner({
         // so they are probably not typing in this exact millisecond.
 
         hasContentInitialized.current = true;
-        if (lastUpdatedAt) {
-          lastProcessedUpdateRef.current = lastUpdatedAt;
-        }
+        dispatch(setShouldReadFromProps(false));
       }
     }
-  }, [editor, content?.content, currentNoteId, lastUpdatedAt]);
+  }, [editor, content?.content, currentNoteId, shouldReadFromProps, dispatch]);
 
   // Reset content initialization when switching notes
   useEffect(() => {

@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { apiSlice } from "./apiSlice";
 import settingsReducer from "./slices/settingsSlice";
+import editorReducer from "./slices/editorSlice";
 
 export const store = configureStore({
   reducer: {
     [apiSlice.reducerPath]: apiSlice.reducer,
     settings: settingsReducer,
+    editor: editorReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

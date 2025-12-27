@@ -10,11 +10,18 @@ import { JSONContent } from "@tiptap/core";
 import { extractText } from "../utils";
 import { toast } from "react-toastify";
 import { v4 as uuidv4 } from "uuid";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { setShouldReadFromProps } from "@/lib/store/slices/editorSlice";
+import { useAppSelector } from "@/lib/store/hooks";
 export const useAssistantActions = ({
   content,
 }: {
   content: string | JSONContent;
 }) => {
+  const dispatch = useAppDispatch();
+  const shouldReadFromProps = useAppSelector(
+    (state) => state.editor.shouldReadFromProps
+  );
   const [copied, setCopied] = useState(false);
   const { activeTabId, isNoterOpen, setIsNoterOpen, setActiveTabId } =
     useViewer();
@@ -22,7 +29,7 @@ export const useAssistantActions = ({
   const documentId = params?.id as string;
   const [createNote] = useCreateNoteMutation();
   const [updateNote] = useUpdateNoteMutation();
-  const { data: currentNote } = useGetNoteQuery(activeTabId, {
+  const { data: currentNote, refetch } = useGetNoteQuery(activeTabId, {
     skip: activeTabId === "home",
   });
 
@@ -67,13 +74,14 @@ export const useAssistantActions = ({
             ...(content.content || []), // Spread the assistant response's child nodes
           ],
         };
-
         await updateNote({
           id: activeTabId,
           updates: {
             content: newContent,
           },
         }).unwrap();
+        await refetch();
+        dispatch(setShouldReadFromProps(true));
         toast.success("Added to existing note");
       } else {
         // Create new note
@@ -85,6 +93,7 @@ export const useAssistantActions = ({
           color: "#ffffff",
           is_auto_generated: false,
         }).unwrap();
+        dispatch(setShouldReadFromProps(true));
         toast.success("Created new note with content");
         setActiveTabId(noteId);
       }
