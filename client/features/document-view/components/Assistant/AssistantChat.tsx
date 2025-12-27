@@ -5,7 +5,6 @@ import { Send, Bot, SquarePen } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useAssistant } from "../../context/AssistantContext";
 import { useViewer } from "../../context/ViewerContext";
 
 export function AssistantChat() {
@@ -15,10 +14,10 @@ export function AssistantChat() {
   const {
     messages,
     addUserMessage,
-    handleDelete,
+    handleDeleteMessage: handleDelete,
     resetMessages,
     isAssistantLoading: isLoading,
-  } = useAssistant();
+  } = useViewer();
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

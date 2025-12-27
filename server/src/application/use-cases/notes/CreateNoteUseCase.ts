@@ -21,7 +21,7 @@ export class CreateNoteUseCase {
     );
     // Create the domain entity
     const note = new Note(
-      randomUUID(),
+      input.id || randomUUID(),
       input.userId,
       input.title,
       input.content,

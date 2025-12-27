@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from "uuid";
 import { DocumentDetails } from "@/features/document-view/types/document";
 import { toast } from "react-toastify";
 import { useViewer } from "../context/ViewerContext";
-import { useAssistant } from "../context/AssistantContext";
 import { useAppSelector } from "@/lib/store/hooks";
 
 interface useSelectionProps {
@@ -24,8 +23,7 @@ export function useSelection({
   document,
   currentHighlightColor,
 }: useSelectionProps) {
-  const { setIsAssistantOpen } = useViewer();
-  const { addUserMessage } = useAssistant();
+  const { setIsAssistantOpen, addUserMessage } = useViewer();
   const { aiAutoExplain } = useAppSelector((state) => state.settings);
   // ... existing code
   const [createHighlight] = useCreateHighlightMutation();

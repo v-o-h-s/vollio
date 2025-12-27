@@ -3,7 +3,7 @@ import { Bot, User, Copy, Plus, Trash2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotionEditor } from "@/components/editor/NotionEditor";
 import type { JSONContent } from "@tiptap/core";
-import { useAssistantActions } from "../../hooks/useAssistantActions";
+import { useViewer } from "../../context/ViewerContext";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -19,9 +19,17 @@ export function ChatMessage({
   timestamp,
   onDelete,
 }: ChatMessageProps) {
-  const { handleCopy, handleAddToNotes, copied } = useAssistantActions({
-    content,
-  });
+  const { handleCopy: contextCopy, handleAddToNotes: contextAddToNotes } =
+    useViewer();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await contextCopy(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleAddToNotes = () => contextAddToNotes(content);
   const isUser = role === "user";
 
   return (

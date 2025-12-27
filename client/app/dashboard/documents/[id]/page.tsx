@@ -431,14 +431,10 @@ function DocumentPageContent() {
   );
 }
 
-import { AssistantProvider } from "@/features/document-view/context/AssistantContext";
-
 export default function DocumentPage() {
   return (
-    <AssistantProvider>
-      <ViewerProvider>
-        <DocumentPageContent />
-      </ViewerProvider>
-    </AssistantProvider>
+    <ViewerProvider>
+      <DocumentPageContent />
+    </ViewerProvider>
   );
 }

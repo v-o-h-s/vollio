@@ -12,8 +12,7 @@ import { LoadingState } from "@/components/ui/loading";
 import { NoteCard } from "./NoteCard";
 import { NoteEditorTab } from "./NoteEditorTab";
 import { DocumentDetails } from "../../types/document";
-import { useViewer } from "../../context/ViewerContext";
-import { HOME_TAB_ID, useNoterActions } from "../../hooks/useNoterActions";
+import { HOME_TAB_ID, useViewer } from "../../context/ViewerContext";
 
 export default function Noter({ document }: { document: DocumentDetails }) {
   const {
@@ -28,14 +27,14 @@ export default function Noter({ document }: { document: DocumentDetails }) {
     handleTabClick,
     handleNoteCardClick,
     handleTitleChange,
-    isLoading,
-    error,
+    isLoadingNotes: isLoading,
+    notesError: error,
     sortedNotes,
     isLoadingNewNote,
     createNoteError,
-    refetch,
+    refetchNotes: refetch,
     setTabs,
-  } = useNoterActions(document);
+  } = useViewer();
 
   if (isLoading) {
     return (
@@ -72,7 +71,7 @@ export default function Noter({ document }: { document: DocumentDetails }) {
           </pre>
         )}
 
-        <Button onClick={handleCreateNote} variant="outline" size="sm">
+        <Button onClick={() => handleCreateNote()} variant="outline" size="sm">
           Try Again
         </Button>
       </div>
@@ -112,7 +111,7 @@ export default function Noter({ document }: { document: DocumentDetails }) {
         activeTabId={activeTabId}
         onReorder={setTabs}
         onDeleteNote={handleDeleteTab}
-        onAddNote={handleCreateNote}
+        onAddNote={() => handleCreateNote()}
         onTabClick={handleTabClick}
       />
 
@@ -149,7 +148,7 @@ export default function Noter({ document }: { document: DocumentDetails }) {
                   </p>
                 </div>
                 <Button
-                  onClick={handleCreateNote}
+                  onClick={() => handleCreateNote()}
                   className="cursor-pointer"
                   disabled={isLoadingNewNote}
                 >

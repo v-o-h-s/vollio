@@ -3,6 +3,7 @@ import { JSONContent } from "@vollio/shared";
 
 // Schema for creating a note
 export interface CreateNoteDTO {
+  id?: string;
   title?: string;
   content?: JSONContent;
   documentId?: string;
@@ -11,6 +12,12 @@ export interface CreateNoteDTO {
 export const createNoteSchema: JSONSchemaType<CreateNoteDTO> = {
   type: "object",
   properties: {
+    id: {
+      type: "string",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      nullable: true,
+    },
     title: { type: "string", nullable: true },
     content: { type: "object", nullable: true, required: [] } as any,
     documentId: { type: "string", nullable: true },
