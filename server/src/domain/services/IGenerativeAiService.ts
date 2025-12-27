@@ -8,7 +8,7 @@ import { CreateQuizDTO } from "../../shared/validation/quizSchemas";
  * using generative AI models.
  */
 export interface IGenerativeAiService {
-  generateText(prompt: string): Promise<any>;
+  generateText(prompt: string, model?: string): Promise<any>;
   refineUserPrompt(initialPrompt: string): Promise<string>;
   generateQuizQuestions(
     prompt: string

@@ -12,4 +12,6 @@ export interface AssistantChatMessage {
 export interface AssistantDTO {
   message: string;
   history?: AssistantChatMessage[];
+  model?: "fast" | "smart" | "creative";
+  tone?: "academic" | "friendly" | "concise";
 }

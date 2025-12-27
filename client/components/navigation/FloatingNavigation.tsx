@@ -44,7 +44,7 @@ const navigationItems = [
     icon: Home,
     description: "Overview and analytics",
   },
-  
+
   {
     name: "Notes",
     href: "/dashboard/notes",
@@ -52,13 +52,11 @@ const navigationItems = [
     description: "Create and manage notes",
   },
   {
-    name:"Knowledge Test",
-    href:"/dashboard/knowledge-test",
-    icon:Brain,
-    description:"Interactive knowledge tests"
-  }
- 
- 
+    name: "Knowledge Test",
+    href: "/dashboard/knowledge-test",
+    icon: Brain,
+    description: "Interactive knowledge tests",
+  },
 ];
 
 interface FloatingNavigationProps {
@@ -235,10 +233,12 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                     <User className="mr-3 h-4 w-4 text-muted-foreground" />
                     <span className="text-foreground">Prodocument</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
-                    <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
-                    <span className="text-foreground">Settings</span>
-                  </DropdownMenuItem>
+                  <Link href="/dashboard/settings" className="w-full">
+                    <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3 cursor-pointer">
+                      <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
+                      <span className="text-foreground">Settings</span>
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
                       {theme === "dark" ? (
@@ -440,10 +440,12 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                         <User className="mr-3 h-4 w-4 text-muted-foreground" />
                         <span className="text-foreground">Prodocument</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
-                        <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
-                        <span className="text-foreground">Settings</span>
-                      </DropdownMenuItem>
+                      <Link href="/dashboard/settings" className="w-full">
+                        <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3 cursor-pointer">
+                          <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
+                          <span className="text-foreground">Settings</span>
+                        </DropdownMenuItem>
+                      </Link>
                       <DropdownMenuSub>
                         <DropdownMenuSubTrigger className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
                           {theme === "dark" ? (

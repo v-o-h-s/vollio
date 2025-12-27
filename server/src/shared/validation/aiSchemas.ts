@@ -27,6 +27,16 @@ export const AssistantDTOSchema: JSONSchemaType<AssistantDTO> = {
       },
       nullable: true,
     },
+    model: {
+      type: "string",
+      enum: ["fast", "smart", "creative"],
+      nullable: true,
+    },
+    tone: {
+      type: "string",
+      enum: ["academic", "friendly", "concise"],
+      nullable: true,
+    },
   },
   required: ["message"],
   additionalProperties: false,

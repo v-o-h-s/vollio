@@ -2,14 +2,29 @@ import { AssistantChatMessage } from "@vollio/shared";
 
 export const assistantChatPromptGenerator = (
   message: string,
-  history: AssistantChatMessage[] = []
+  history: AssistantChatMessage[] = [],
+  model?: string,
+  tone?: string
 ) => {
   const historyString = history
     .map((msg) => `${msg.role.toUpperCase()}: ${msg.content}`)
     .join("\n");
 
+  let toneInstruction = "";
+  if (tone === "academic") {
+    toneInstruction =
+      "Use an academic and formal tone. Be precise and thorough.";
+  } else if (tone === "friendly") {
+    toneInstruction =
+      "Use a friendly and helpful tone. Be encouraging and accessible.";
+  } else if (tone === "concise") {
+    toneInstruction =
+      "Be extremely concise and direct. Minimal explanation, maximum density.";
+  }
+
   return `SYSTEM ROLE:
 You are Vollio, a student assistant acting as a teacher.
+${toneInstruction}
 You explain concepts clearly, correct mistakes directly, and challenge incorrect assumptions.
 If minor details are missing, make reasonable assumptions and state them briefly.
 Only ask for clarification if the task cannot be completed meaningfully without it.

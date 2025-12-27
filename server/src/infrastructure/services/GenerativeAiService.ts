@@ -5,10 +5,24 @@ import { FastifyBaseLogger } from "fastify";
 
 export class GenerativeAiService implements IGenerativeAiService {
   constructor(private logger: FastifyBaseLogger) {}
-  async generateText(prompt: string): Promise<string> {
+
+  private getModelId(model?: string): string {
+    switch (model) {
+      case "fast":
+        return "google/gemini-2.0-flash-exp:free";
+      case "smart":
+        return "google/gemini-2.0-flash-001";
+      case "creative":
+        return "anthropic/claude-3.5-sonnet";
+      default:
+        return "google/gemini-2.0-flash-001";
+    }
+  }
+
+  async generateText(prompt: string, model?: string): Promise<string> {
     try {
       const completion = await openRouter.chat.send({
-        model: "google/gemini-2.0-flash-001",
+        model: this.getModelId(model),
         messages: [
           {
             role: "user",
@@ -21,7 +35,7 @@ export class GenerativeAiService implements IGenerativeAiService {
       const content = completion.choices[0].message.content;
       return typeof content === "string" ? content : "";
     } catch (error) {
-      console.error("GenerativeAiService.generateText failed:", error);
+      this.logger.error({ error }, "GenerativeAiService.generateText failed");
       return "";
     }
   }

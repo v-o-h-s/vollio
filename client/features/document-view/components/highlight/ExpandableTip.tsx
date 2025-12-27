@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { useAppSelector } from "@/lib/store/hooks";
 
 interface ExpandableTipProps {
   onHighlight: () => void;
@@ -26,6 +28,14 @@ export const ExpandableTip = ({
   onAddToSummary,
   onExplain,
 }: ExpandableTipProps) => {
+  const { aiAutoExplain } = useAppSelector((state) => state.settings);
+
+  useEffect(() => {
+    if (aiAutoExplain && onExplain) {
+      onExplain();
+    }
+  }, [aiAutoExplain, onExplain]);
+
   return (
     <Card className="shadow-lg border-muted animate-in fade-in zoom-in duration-200">
       <CardContent className="p-1.5 flex items-center gap-1">

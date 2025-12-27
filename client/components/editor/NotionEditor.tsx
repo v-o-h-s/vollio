@@ -45,6 +45,7 @@ import {
 import type { NotionEditorProps } from "@/lib/types/editor";
 import type { JSONContent } from "@tiptap/react";
 import type { NoteContent } from "@/lib/types/editor";
+import { useAppSelector } from "@/lib/store/hooks";
 
 function NotionEditorInner({
   content,
@@ -66,6 +67,7 @@ function NotionEditorInner({
   documentId,
   lastUpdatedAt,
 }: NotionEditorProps) {
+  const notesFontSize = useAppSelector((state) => state.settings.notesFontSize);
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState(content?.title || "");
 
@@ -420,9 +422,9 @@ function NotionEditorInner({
       // 1. When typing: The `lastUpdatedAt` prop from the server hasn't changed yet, so the editor remains "locked" to local state to prevent overwriting user input.
       // 2. When external update (e.g. AI Assistant): The `lastUpdatedAt` prop changes, signaling a new version. We "unlock" and synchronize the editor with the new content.
       // the unlockin and locking is about props content (use it or not) (istg this shit is goated)
-      const shouldUpdate =
-        !hasContentInitialized.current ||
-        (lastUpdatedAt && lastUpdatedAt !== lastProcessedUpdateRef.current);
+      const shouldUpdate = !hasContentInitialized.current;
+      //  ||
+      // (lastUpdatedAt && lastUpdatedAt !== lastProcessedUpdateRef.current);
 
       if (shouldUpdate) {
         console.log("🔄 Updating content from props", {
@@ -536,6 +538,7 @@ function NotionEditorInner({
           "focus-within:outline-none",
           "transition-all duration-200"
         )}
+        style={{ fontSize: `${notesFontSize}px` }}
       />
 
       {editor && (

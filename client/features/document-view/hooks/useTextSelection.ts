@@ -11,6 +11,7 @@ import { DocumentDetails } from "@/features/document-view/types/document";
 import { toast } from "react-toastify";
 import { useViewer } from "../context/ViewerContext";
 import { useAssistant } from "../context/AssistantContext";
+import { useAppSelector } from "@/lib/store/hooks";
 
 interface useSelectionProps {
   highlighterUtilsRef: React.RefObject<PdfHighlighterUtils | null>;
@@ -25,6 +26,7 @@ export function useSelection({
 }: useSelectionProps) {
   const { setIsAssistantOpen } = useViewer();
   const { addUserMessage } = useAssistant();
+  const { aiAutoExplain } = useAppSelector((state) => state.settings);
   // ... existing code
   const [createHighlight] = useCreateHighlightMutation();
   const [selection, setSelection] = useState<any>(null);
@@ -51,7 +53,14 @@ export function useSelection({
     if (!activeSelection || !activeSelection.content?.text) return;
     setIsAssistantOpen(true);
     if (!activeSelection.content.text.trim()) return;
-    addUserMessage(`Explain this text:  ${activeSelection.content.text}`);
+    addUserMessage(`Explain the following:  "${activeSelection.content.text}"`);
+  };
+
+  const onSelectionFinished = (selection: any) => {
+    setSelection(selection);
+    if (aiAutoExplain && selection && selection.content?.text) {
+      handleExplain();
+    }
   };
 
   const handleTagConfirm = async (selectedTags: string[]) => {
@@ -143,5 +152,6 @@ export function useSelection({
     handleAddNote,
     handleCopy,
     handleExplain,
+    onSelectionFinished,
   };
 }

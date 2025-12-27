@@ -16,12 +16,17 @@ export class AssistantChatUseCase {
   async execute(data: AssistantDTO): Promise<AssistantResponseData> {
     const prompt = assistantChatPromptGenerator(
       data.message,
-      data.history || []
+      data.history || [],
+      (data as any).model,
+      (data as any).tone
     );
 
     this.logger.info({ prompt }, "Executing AssistantChatUseCase");
 
-    const result = await this.generativeAiService.generateText(prompt);
+    const result = await this.generativeAiService.generateText(
+      prompt,
+      (data as any).model
+    );
 
     if (typeof result === "string") {
       try {

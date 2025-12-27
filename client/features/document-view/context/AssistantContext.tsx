@@ -9,6 +9,7 @@ import { JSONContent } from "@tiptap/core";
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { useAssistantChatMutation } from "@/lib/store/apiSlice";
 import { AssistantChatMessage } from "@vollio/shared";
+import { useAppSelector } from "@/lib/store/hooks";
 
 interface Message {
   role: "user" | "assistant";
@@ -31,6 +32,9 @@ const AssistantContext = createContext<AssistantContextType | undefined>(
 export function AssistantProvider({ children }: { children: ReactNode }) {
   // Assistant State
   const [messages, setMessages] = useState<Message[]>([]);
+  const { aiAssistantModel, aiAssistantTone } = useAppSelector(
+    (state) => state.settings
+  );
   const [assistantChat, { isLoading: isAssistantLoading }] =
     useAssistantChatMutation();
 
@@ -69,7 +73,9 @@ export function AssistantProvider({ children }: { children: ReactNode }) {
       const response = await assistantChat({
         message,
         history,
-      }).unwrap();
+        model: aiAssistantModel,
+        tone: aiAssistantTone,
+      } as any).unwrap();
 
       const assistantMsg: Message = {
         role: "assistant",

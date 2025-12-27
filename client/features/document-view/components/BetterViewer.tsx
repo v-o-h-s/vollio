@@ -81,6 +81,7 @@ export const BetterViewer = ({
     handleCopy,
     handleAddTag,
     handleExplain,
+    onSelectionFinished,
   } = useSelection({
     highlighterUtilsRef,
     document,
