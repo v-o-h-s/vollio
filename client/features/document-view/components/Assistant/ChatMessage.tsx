@@ -5,6 +5,7 @@ import { NotionEditor } from "@/components/editor/NotionEditor";
 import type { JSONContent } from "@tiptap/core";
 import { useViewer } from "../../context/ViewerContext";
 import { MessageSource } from "../../hooks/useAssistantLogic";
+import { useAppSelector } from "@/lib/store/hooks";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -33,6 +34,9 @@ export function ChatMessage({
     handleAddToNotes,
     handleAddToNoteAsInsight,
   } = useViewer();
+  const assistantFontSize = useAppSelector(
+    (state) => state.settings.assistantFontSize
+  );
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -66,7 +70,10 @@ export function ChatMessage({
           )}
         >
           {isUser ? (
-            <p className="whitespace-pre-wrap wrap-break-word  text-black dark:text-white">
+            <p
+              className="whitespace-pre-wrap wrap-break-word  text-black dark:text-white"
+              style={{ fontSize: `${assistantFontSize}px` }}
+            >
               {content as string}
             </p>
           ) : (
@@ -74,7 +81,8 @@ export function ChatMessage({
               content={{ content: content as JSONContent }}
               editable={false}
               showTitle={false}
-              className="text-sm min-h-0 p-0 bg-transparent"
+              className="min-h-0 p-0 bg-transparent"
+              fontSize={assistantFontSize}
             />
           )}
         </div>

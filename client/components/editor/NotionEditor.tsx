@@ -67,8 +67,12 @@ function NotionEditorInner({
   onAutoSaveStatusChange,
   onNoteCreated,
   documentId,
+  fontSize,
 }: NotionEditorProps) {
-  const notesFontSize = useAppSelector((state) => state.settings.notesFontSize);
+  const noterFontSizeFromStore = useAppSelector(
+    (state) => state.settings.noterFontSize
+  );
+  const noterFontSize = fontSize || noterFontSizeFromStore;
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState(content?.title || "");
 
@@ -535,7 +539,7 @@ function NotionEditorInner({
           "focus-within:outline-none",
           "transition-all duration-200"
         )}
-        style={{ fontSize: `${notesFontSize}px` }}
+        style={{ fontSize: `${noterFontSize}px` }}
       />
 
       {editor && (

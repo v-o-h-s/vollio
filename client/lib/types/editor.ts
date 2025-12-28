@@ -57,6 +57,7 @@ export interface NotionEditorProps {
     error: string | null;
   }) => void;
   onNoteCreated?: (noteId: string) => void;
+  fontSize?: number;
 }
 
 /**

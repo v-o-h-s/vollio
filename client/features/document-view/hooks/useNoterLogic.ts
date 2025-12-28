@@ -166,7 +166,6 @@ export function useNoterLogic(documentId: string) {
         }).unwrap();
         await refetchCurrentNote();
         dispatch(setShouldReadFromProps(true));
-        toast.success("Added to existing note");
       } else {
         // Create new note
         const noteId = uuidv4();

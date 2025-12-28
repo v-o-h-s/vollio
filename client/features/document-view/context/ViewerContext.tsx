@@ -3,7 +3,6 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { useParams } from "next/navigation";
 import { JSONContent } from "@tiptap/core";
-import { toast } from "react-toastify";
 import { Tab } from "../components/notes";
 import { Note } from "@/lib/types/editor";
 import { extractText } from "../utils";
@@ -100,10 +99,8 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
 
     try {
       await navigator.clipboard.writeText(textToCopy);
-      toast.success("Copied to clipboard");
     } catch (err) {
       console.error("Failed to copy text: ", { ...(err as any) });
-      toast.error("Failed to copy text");
     }
   };
 

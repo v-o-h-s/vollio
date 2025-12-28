@@ -1,40 +1,24 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SettingsState {
-  notesFontSize: number;
-  aiAssistantModel: "fast" | "smart" | "creative";
-  aiAssistantTone: "formal" | "friendly" | "concise";
-  aiAutoExplain: boolean;
+  noterFontSize: number;
+  assistantFontSize: number;
 }
 
 const initialState: SettingsState = {
-  notesFontSize: 16, // Default font size
-  aiAssistantModel: "smart",
-  aiAssistantTone: "friendly",
-  aiAutoExplain: false,
+  noterFontSize: 16,
+  assistantFontSize: 14,
 };
 
 const settingsSlice = createSlice({
   name: "settings",
   initialState,
   reducers: {
-    setNotesFontSize: (state, action: PayloadAction<number>) => {
-      state.notesFontSize = action.payload;
+    setNoterFontSize: (state, action: PayloadAction<number>) => {
+      state.noterFontSize = action.payload;
     },
-    setAiAssistantModel: (
-      state,
-      action: PayloadAction<SettingsState["aiAssistantModel"]>
-    ) => {
-      state.aiAssistantModel = action.payload;
-    },
-    setAiAssistantTone: (
-      state,
-      action: PayloadAction<SettingsState["aiAssistantTone"]>
-    ) => {
-      state.aiAssistantTone = action.payload;
-    },
-    setAiAutoExplain: (state, action: PayloadAction<boolean>) => {
-      state.aiAutoExplain = action.payload;
+    setAssistantFontSize: (state, action: PayloadAction<number>) => {
+      state.assistantFontSize = action.payload;
     },
     resetSettings: (state) => {
       return initialState;
@@ -42,13 +26,8 @@ const settingsSlice = createSlice({
   },
 });
 
-export const {
-  setNotesFontSize,
-  setAiAssistantModel,
-  setAiAssistantTone,
-  setAiAutoExplain,
-  resetSettings,
-} = settingsSlice.actions;
+export const { setNoterFontSize, setAssistantFontSize, resetSettings } =
+  settingsSlice.actions;
 
 export default settingsSlice.reducer;
 

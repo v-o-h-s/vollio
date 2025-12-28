@@ -172,10 +172,13 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    addDocumentFromGoogleDriveUseCase: asClass(AddDocumentFromGoogleDriveUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
+    addDocumentFromGoogleDriveUseCase: asClass(
+      AddDocumentFromGoogleDriveUseCase,
+      {
+        lifetime: Lifetime.SCOPED,
+        injectionMode: InjectionMode.CLASSIC,
+      }
+    ),
   });
 
   fastify.diContainer.register({
@@ -206,10 +209,13 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
     }),
   });
   fastify.diContainer.register({
-    getDocumentFromGoogleDriveUseCase: asClass(GetDocumentFromGoogleDriveUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
+    getDocumentFromGoogleDriveUseCase: asClass(
+      GetDocumentFromGoogleDriveUseCase,
+      {
+        lifetime: Lifetime.SCOPED,
+        injectionMode: InjectionMode.CLASSIC,
+      }
+    ),
     getAllDocumentsUseCase: asClass(GetAllDocumentsUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,

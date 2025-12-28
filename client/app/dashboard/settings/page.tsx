@@ -3,10 +3,8 @@
 import React from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
-  setNotesFontSize,
-  setAiAssistantModel,
-  setAiAssistantTone,
-  setAiAutoExplain,
+  setNoterFontSize,
+  setAssistantFontSize,
 } from "@/lib/store/slices/settingsSlice";
 import {
   Card,
@@ -36,9 +34,6 @@ import {
   Sparkles,
   ChevronRight,
   Bot,
-  MessageSquare,
-  Zap,
-  Target,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -46,11 +41,16 @@ import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
-  const { notesFontSize, aiAssistantModel, aiAssistantTone, aiAutoExplain } =
-    useAppSelector((state) => state.settings);
+  const { noterFontSize, assistantFontSize } = useAppSelector(
+    (state) => state.settings
+  );
 
-  const handleFontSizeChange = (value: number[]) => {
-    dispatch(setNotesFontSize(value[0]));
+  const handleNoterFontSizeChange = (value: number[]) => {
+    dispatch(setNoterFontSize(value[0]));
+  };
+
+  const handleAssistantFontSizeChange = (value: number[]) => {
+    dispatch(setAssistantFontSize(value[0]));
   };
 
   return (
@@ -229,28 +229,28 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <Label className="text-base font-semibold flex items-center gap-2">
-                          Font Size
+                          Noter Font Size
                         </Label>
                         <p className="text-sm text-muted-foreground max-w-md">
                           Adjust the reading and editing font size of your
-                          notes.
+                          noter.
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20 shadow-sm">
-                          {notesFontSize}px
+                          {noterFontSize}px
                         </span>
                       </div>
                     </div>
 
                     <div className="pt-2">
                       <Slider
-                        defaultValue={[notesFontSize]}
-                        value={[notesFontSize]}
+                        defaultValue={[noterFontSize]}
+                        value={[noterFontSize]}
                         max={32}
                         min={12}
                         step={1}
-                        onValueChange={handleFontSizeChange}
+                        onValueChange={handleNoterFontSizeChange}
                         className="w-full"
                       />
                       <div className="flex justify-between mt-2 px-1">
@@ -272,12 +272,12 @@ export default function SettingsPage() {
                       </div>
                       <div
                         className="p-8 pt-10"
-                        style={{ fontSize: `${notesFontSize}px` }}
+                        style={{ fontSize: `${noterFontSize}px` }}
                       >
                         <h4
                           className="font-bold mb-3 text-foreground transition-all duration-300"
                           style={{
-                            fontSize: `${notesFontSize * 1.5}px`,
+                            fontSize: `${noterFontSize * 1.5}px`,
                             lineHeight: "1.2",
                           }}
                         >
@@ -339,92 +339,37 @@ export default function SettingsPage() {
                 <CardContent className="space-y-8">
                   <Separator className="opacity-50" />
 
-                  {/* Model Selection */}
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label className="text-base font-semibold flex items-center gap-2">
-                        <Zap className="w-4 h-4 text-amber-500" />
-                        AI Intelligence
-                      </Label>
-                      <p className="text-sm text-muted-foreground max-w-md">
-                        Choose the model that powers your assistant's responses.
-                      </p>
+                  {/* Assistant Font Size */}
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label className="text-base font-semibold flex items-center gap-2">
+                          <Type className="w-4 h-4 text-purple-500" />
+                          Assistant Font Size
+                        </Label>
+                        <p className="text-sm text-muted-foreground max-w-md">
+                          Adjust the font size for the AI Assistant chat and
+                          responses.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20 shadow-sm">
+                          {assistantFontSize}px
+                        </span>
+                      </div>
                     </div>
-                    <Select
-                      value={aiAssistantModel}
-                      onValueChange={(v: any) =>
-                        dispatch(setAiAssistantModel(v))
-                      }
-                    >
-                      <SelectTrigger className="w-[180px] bg-background/50 border-border/50 rounded-xl">
-                        <SelectValue placeholder="Select model" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-border/50">
-                        <SelectItem value="fast">Fast (Concise)</SelectItem>
-                        <SelectItem value="smart">Smart (Balanced)</SelectItem>
-                        <SelectItem value="creative">
-                          Creative (Exploratory)
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
 
-                  <Separator className="opacity-30" />
-
-                  {/* Tone Selection */}
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label className="text-base font-semibold flex items-center gap-2">
-                        <MessageSquare className="w-4 h-4 text-blue-500" />
-                        Assistant Tone
-                      </Label>
-                      <p className="text-sm text-muted-foreground max-w-md">
-                        How should the assistant sound when answering your
-                        questions?
-                      </p>
+                    <div className="pt-2">
+                      <Slider
+                        defaultValue={[assistantFontSize]}
+                        value={[assistantFontSize]}
+                        max={24}
+                        min={10}
+                        step={1}
+                        onValueChange={handleAssistantFontSizeChange}
+                        className="w-full"
+                      />
                     </div>
-                    <Select
-                      value={aiAssistantTone}
-                      onValueChange={(v: any) =>
-                        dispatch(setAiAssistantTone(v))
-                      }
-                    >
-                      <SelectTrigger className="w-[180px] bg-background/50 border-border/50 rounded-xl">
-                        <SelectValue placeholder="Select tone" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-border/50">
-                        <SelectItem value="academic">
-                          Academic / Formal
-                        </SelectItem>
-                        <SelectItem value="friendly">
-                          Friendly / Helpful
-                        </SelectItem>
-                        <SelectItem value="concise">
-                          Direct / Concise
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Separator className="opacity-30" />
-
-                  {/* Auto-Explain */}
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <Label className="text-base font-semibold flex items-center gap-2">
-                        <Target className="w-4 h-4 text-emerald-500" />
-                        Smart Selection
-                      </Label>
-                      <p className="text-sm text-muted-foreground max-w-md">
-                        Automatically trigger AI explanations when you highlight
-                        text.
-                      </p>
-                    </div>
-                    <Switch
-                      checked={aiAutoExplain}
-                      onCheckedChange={(v) => dispatch(setAiAutoExplain(v))}
-                      className="data-[state=checked]:bg-primary"
-                    />
                   </div>
 
                   {/* AI Status Card */}

@@ -6,6 +6,7 @@ import { ChatMessage } from "./ChatMessage";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useViewer } from "../../context/ViewerContext";
+import { useAppSelector } from "@/lib/store/hooks";
 
 export function AssistantChat() {
   const [input, setInput] = useState("");
@@ -18,6 +19,9 @@ export function AssistantChat() {
     resetMessages,
     isAssistantLoading: isLoading,
   } = useViewer();
+  const assistantFontSize = useAppSelector(
+    (state) => state.settings.assistantFontSize
+  );
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -151,11 +155,12 @@ export function AssistantChat() {
             placeholder="Ask a question..."
             className={cn(
               "flex-1 resize-none rounded-xl border border-border bg-background px-4 py-3",
-              "text-sm text-foreground placeholder:text-muted-foreground",
+              "text-foreground placeholder:text-muted-foreground",
               "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
               "transition-all duration-200",
               "max-h-32 min-h-[44px]"
             )}
+            style={{ fontSize: `${assistantFontSize}px` }}
             rows={1}
             disabled={isLoading}
           />

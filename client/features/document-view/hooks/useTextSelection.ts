@@ -8,7 +8,6 @@ import { useState } from "react";
 import { PdfHighlighterUtils } from "react-pdf-highlighter-extended-plus";
 import { v4 as uuidv4 } from "uuid";
 import { DocumentDetails } from "@/features/document-view/types/document";
-import { toast } from "react-toastify";
 import { useViewer } from "../context/ViewerContext";
 import { useAppSelector } from "@/lib/store/hooks";
 
@@ -89,10 +88,8 @@ export function useSelection({
       };
 
       await createHighlight(newHighlightDto).unwrap();
-      toast.success(`Highlight created with ${selectedTags.length} tag(s)`);
       setSelection(null);
     } catch (error) {
-      toast.error("Failed to create highlight with tags.");
     }
   };
 
@@ -112,23 +109,17 @@ export function useSelection({
       noteId: null,
     };
 
-    toast.promise(createHighlight(newHighlightDto).unwrap(), {
-      pending: "Creating highlight...",
-      success: "Highlight created",
-      error: "Failed to create highlight",
-    });
+   
   };
 
   const handleAddNote = () => {
     const activeSelection = captureSelection();
     if (!activeSelection) return;
-    toast.success("Note feature coming soon!");
   };
 
   const handleAddToSummary = async () => {
     const activeSelection = captureSelection();
     if (!activeSelection || !activeSelection.content.text) return;
-    toast.success("Added to summary main points");
   };
 
   const handleCopy = async () => {
@@ -137,10 +128,8 @@ export function useSelection({
 
     try {
       await navigator.clipboard.writeText(activeSelection.content.text);
-      toast.success("Text copied to clipboard");
       highlighterUtilsRef.current?.removeGhostHighlight();
     } catch (error) {
-      toast.error("Failed to copy text");
     }
   };
 
