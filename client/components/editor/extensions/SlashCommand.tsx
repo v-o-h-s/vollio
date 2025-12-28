@@ -179,18 +179,36 @@ export const slashCommandItems: SlashCommandItem[] = [
     keywords: ["table", "grid", "rows", "columns"],
   },
   {
-    title: "AI Callout",
-    description: "Insert an AI-generated callout box.",
+    title: "AI Insight",
+    description: "Insert an AI-generated insight box.",
     icon: Sparkles,
     command: ({ editor, range }) => {
       editor
         .chain()
         .focus()
         .deleteRange(range)
-        .setAICallout({ title: "AI Insight" })
+        .setInsight({
+          selectedText: "Selected text from source",
+          metadata: {
+            documentName: "Source Document",
+            pageNumber: 1,
+            createdAt: new Date(),
+          },
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: "AI-generated insight will appear here.",
+                },
+              ],
+            },
+          ],
+        })
         .run();
     },
-    keywords: ["ai", "callout", "sparkles", "insight"],
+    keywords: ["ai", "insight", "sparkles", "callout"],
   },
 ];
 
