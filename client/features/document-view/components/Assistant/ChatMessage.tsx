@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, User, Copy, Plus, Trash2, Check } from "lucide-react";
+import { Bot, User, Copy, Plus, Trash2, Check, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NotionEditor } from "@/components/editor/NotionEditor";
 import type { JSONContent } from "@tiptap/core";
@@ -19,7 +19,11 @@ export function ChatMessage({
   timestamp,
   onDelete,
 }: ChatMessageProps) {
-  const { handleCopy: contextCopy, handleAddToNotes } = useViewer();
+  const {
+    handleCopy: contextCopy,
+    handleAddToNotes,
+    handleAddToNoteAsInsight,
+  } = useViewer();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -107,6 +111,13 @@ export function ChatMessage({
                 title="Add to notes"
               >
                 <Plus className="w-3.5 h-3.5" />
+              </button>
+              <button
+                className="p-1 rounded-md hover:bg-muted text-muted-foreground transition-colors group"
+                title="Add as Insight"
+                onClick={() => handleAddToNoteAsInsight(content)}
+              >
+                <Sparkles className="w-3.5 h-3.5 group-hover:text-primary transition-colors" />
               </button>
               <button
                 className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"

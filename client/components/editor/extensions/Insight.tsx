@@ -3,7 +3,7 @@
 import { Node, mergeAttributes, type RawCommands } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { NodeViewWrapper, NodeViewContent } from "@tiptap/react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Commands, JSONContent } from "@tiptap/core";
 interface Metadata {
@@ -35,24 +35,24 @@ export const InsightComponent = (props: any) => {
     <NodeViewWrapper className="insight-wrapper my-8 group/insight">
       <div
         className={cn(
-          "relative rounded-2xl border border-sky-200 dark:border-sky-800/40",
-          "bg-linear-to-br from-sky-50/50 to-indigo-50/30 dark:from-sky-950/20 dark:to-indigo-950/10",
+          "relative rounded-2xl border border-border",
+          "bg-card/50 dark:bg-card/20",
           "p-6 shadow-sm transition-all duration-300",
-          "hover:shadow-md hover:border-sky-300 dark:hover:border-sky-700/50"
+          "hover:shadow-md hover:border-primary/30"
         )}
       >
-        {/* Decorative glow */}
-        <div className="absolute -inset-px rounded-2xl bg-linear-to-br from-sky-500/5 to-indigo-500/5 blur-lg -z-10 opacity-60" />
+        {/* Subtle decorative background */}
+        <div className="absolute -inset-px rounded-2xl bg-linear-to-br from-primary/5 to-transparent -z-10 opacity-50" />
 
         {/* Header Section */}
         <div className="flex flex-col gap-3 mb-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary">
                 <Sparkles size={16} className="fill-current" />
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400 leading-none mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary leading-none mb-1">
                   AI Insight
                 </span>
                 <span className="text-[10px] font-medium text-muted-foreground/60 leading-none">
@@ -62,31 +62,41 @@ export const InsightComponent = (props: any) => {
               </div>
             </div>
 
-            {editor.isEditable && (
+            <div className="flex items-center gap-2">
               <button
-                onClick={deleteNode}
-                className="opacity-0 group-hover/insight:opacity-100 transition-opacity p-1.5 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg"
-                title="Remove insight"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-background border border-border shadow-xs hover:bg-muted/50 text-[10px] font-medium text-foreground/70 transition-colors"
+                title="View original source"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 6 6 18" />
-                  <path d="m6 6 12 12" />
-                </svg>
+                <span>View Original</span>
+                <ExternalLink size={10} className="opacity-70" />
               </button>
-            )}
+
+              {editor.isEditable && (
+                <button
+                  onClick={deleteNode}
+                  className="opacity-0 group-hover/insight:opacity-100 transition-opacity p-1.5 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg"
+                  title="Remove insight"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M18 6 6 18" />
+                    <path d="m6 6 12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="relative pl-4 border-l-2 border-sky-500/20 dark:border-sky-500/10 py-1">
+          <div className="relative pl-4 border-l-2 border-primary/20 py-1">
             <p className="text-sm font-medium text-foreground/80 italic leading-relaxed">
               "{selectedText}"
             </p>
@@ -106,7 +116,7 @@ export const InsightComponent = (props: any) => {
 
         {/* Subtle AI badge */}
         <div className="absolute bottom-3 right-4 opacity-30 select-none pointer-events-none">
-          <span className="text-[8px] font-bold uppercase tracking-widest text-sky-600 dark:text-sky-400">
+          <span className="text-[8px] font-bold uppercase tracking-widest text-primary">
             V-AI
           </span>
         </div>

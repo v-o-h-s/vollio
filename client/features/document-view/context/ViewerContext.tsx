@@ -83,6 +83,7 @@ interface ViewerContextType {
 
   // Shared Actions (Assistant Actions)
   handleAddToNotes: (content: string | JSONContent) => Promise<void>;
+  handleAddToNoteAsInsight: (content: string | JSONContent) => Promise<void>;
   handleCopy: (content: string | JSONContent) => Promise<void>;
 }
 
@@ -397,7 +398,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
       toast.error("Failed to add to notes");
     }
   };
-
+  
   return (
     <ViewerContext.Provider
       value={{
@@ -440,6 +441,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
 
         // Actions
         handleAddToNotes,
+        handleAddToNoteAsInsight,
         handleCopy,
       }}
     >
