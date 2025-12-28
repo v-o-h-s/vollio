@@ -16,6 +16,11 @@ export interface Message {
   content: string | JSONContent;
   timestamp: Date;
   source: MessageSource;
+  metadata?: {
+    documentName: string;
+    pageNumber: number;
+    selectedText?: string;
+  };
 }
 
 export function useAssistantLogic() {
@@ -35,6 +40,7 @@ export function useAssistantLogic() {
       content: message,
       timestamp: new Date(),
       source: metadata ? MessageSource.DOCUMENT : MessageSource.USER,
+      metadata,
     };
 
     setMessages((prev) => [...prev, userMsg]);
@@ -55,6 +61,7 @@ export function useAssistantLogic() {
         content: response.content,
         timestamp: new Date(),
         source: metadata ? MessageSource.DOCUMENT : MessageSource.USER,
+        metadata,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
@@ -78,6 +85,7 @@ export function useAssistantLogic() {
         },
         timestamp: new Date(),
         source: metadata ? MessageSource.DOCUMENT : MessageSource.USER,
+        metadata,
       };
       setMessages((prev) => [...prev, errorMsg]);
     }

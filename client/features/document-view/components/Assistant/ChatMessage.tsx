@@ -13,6 +13,11 @@ interface ChatMessageProps {
   timestamp?: Date;
   onDelete?: () => void;
   isLast?: boolean;
+  metadata?: {
+    documentName: string;
+    pageNumber: number;
+    selectedText?: string;
+  };
 }
 
 export function ChatMessage({
@@ -21,6 +26,7 @@ export function ChatMessage({
   content,
   timestamp,
   onDelete,
+  metadata,
 }: ChatMessageProps) {
   const {
     handleCopy: contextCopy,
@@ -119,7 +125,7 @@ export function ChatMessage({
                 <button
                   className="p-1 rounded-md hover:bg-muted text-muted-foreground transition-colors group"
                   title="Add as Insight"
-                  onClick={() => handleAddToNoteAsInsight(content)}
+                  onClick={() => handleAddToNoteAsInsight(content, metadata)}
                 >
                   <Sparkles className="w-3.5 h-3.5 group-hover:text-primary transition-colors" />
                 </button>

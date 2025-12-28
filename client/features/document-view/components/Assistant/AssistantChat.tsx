@@ -106,6 +106,7 @@ export function AssistantChat() {
                 source={message.source}
                 content={message.content}
                 timestamp={message.timestamp}
+                metadata={message.metadata}
                 onDelete={() => handleDelete(index)}
               />
             ))}

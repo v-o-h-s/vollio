@@ -50,7 +50,11 @@ interface ViewerContextType {
   messages: Message[];
   addUserMessage: (
     message: string,
-    metadata?: { documentName: string; pageNumber: number }
+    metadata?: {
+      documentName: string;
+      pageNumber: number;
+      selectedText?: string;
+    }
   ) => Promise<void>;
   handleDeleteMessage: (index: number) => void;
   resetMessages: () => void;
@@ -58,7 +62,14 @@ interface ViewerContextType {
 
   // Shared Actions (Assistant Actions)
   handleAddToNotes: (content: string | JSONContent) => Promise<void>;
-  handleAddToNoteAsInsight: (content: string | JSONContent) => Promise<void>;
+  handleAddToNoteAsInsight: (
+    content: string | JSONContent,
+    metadata?: {
+      documentName: string;
+      pageNumber: number;
+      selectedText?: string;
+    }
+  ) => Promise<void>;
   handleCopy: (content: string | JSONContent) => Promise<void>;
 }
 
@@ -110,7 +121,14 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleAddToNoteAsInsight = async (content: string | JSONContent) => {
+  const handleAddToNoteAsInsight = async (
+    content: string | JSONContent,
+    metadata?: {
+      documentName: string;
+      pageNumber: number;
+      selectedText?: string;
+    }
+  ) => {
     if (typeof content === "string") return;
 
     if (!ui.isNoterOpen) {
@@ -125,10 +143,10 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
           {
             type: "insight",
             attrs: {
-              selectedText: "AI Insight",
+              selectedText: metadata?.selectedText || "AI Insight",
               metadata: {
-                documentName: "Assistant",
-                pageNumber: 1,
+                documentName: metadata?.documentName || "Assistant",
+                pageNumber: metadata?.pageNumber || 1,
                 createdAt: new Date().toISOString(),
               },
             },

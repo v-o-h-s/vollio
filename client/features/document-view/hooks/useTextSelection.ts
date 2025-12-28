@@ -54,12 +54,13 @@ export function useSelection({
 
     const pageNumber = activeSelection.position.boundingRect.pageNumber;
     const documentName = document.name;
-    console.log(documentName, pageNumber);
-    addUserMessage(`Explain the following: "${activeSelection.content.text}"`, {
+    const selectedText = activeSelection.content.text;
+
+    addUserMessage(`Explain the following: "${selectedText}"`, {
       documentName,
       pageNumber,
+      selectedText,
     });
-    
   };
 
   const onSelectionFinished = (selection: any) => {
