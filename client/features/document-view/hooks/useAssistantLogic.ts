@@ -7,27 +7,34 @@ import { useAssistantChatMutation } from "@/lib/store/apiSlice";
 import { AssistantChatMessage } from "@vollio/shared";
 import { extractTextFromContent } from "../utils";
 
+export enum MessageSource {
+  USER,
+  DOCUMENT,
+}
 export interface Message {
   role: "user" | "assistant";
   content: string | JSONContent;
   timestamp: Date;
+  source: MessageSource;
 }
 
 export function useAssistantLogic() {
   const [messages, setMessages] = useState<Message[]>([]);
-  
+
   const [assistantChat, { isLoading: isAssistantLoading }] =
     useAssistantChatMutation();
 
-  
-
-  const addUserMessage = async (message: string) => {
+  const addUserMessage = async (
+    message: string,
+    metadata?: { documentName: string; pageNumber: number }
+  ) => {
     if (!message.trim()) return;
 
     const userMsg: Message = {
       role: "user",
       content: message,
       timestamp: new Date(),
+      source: metadata ? MessageSource.DOCUMENT : MessageSource.USER,
     };
 
     setMessages((prev) => [...prev, userMsg]);
@@ -47,6 +54,7 @@ export function useAssistantLogic() {
         role: "assistant",
         content: response.content,
         timestamp: new Date(),
+        source: metadata ? MessageSource.DOCUMENT : MessageSource.USER,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
@@ -69,6 +77,7 @@ export function useAssistantLogic() {
           ],
         },
         timestamp: new Date(),
+        source: metadata ? MessageSource.DOCUMENT : MessageSource.USER,
       };
       setMessages((prev) => [...prev, errorMsg]);
     }

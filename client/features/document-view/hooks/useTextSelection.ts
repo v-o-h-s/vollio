@@ -51,7 +51,15 @@ export function useSelection({
     if (!activeSelection || !activeSelection.content?.text) return;
     setIsAssistantOpen(true);
     if (!activeSelection.content.text.trim()) return;
-    addUserMessage(`Explain the following:  "${activeSelection.content.text}"`);
+
+    const pageNumber = activeSelection.position.boundingRect.pageNumber;
+    const documentName = document.name;
+    console.log(documentName, pageNumber);
+    addUserMessage(`Explain the following: "${activeSelection.content.text}"`, {
+      documentName,
+      pageNumber,
+    });
+    
   };
 
   const onSelectionFinished = (selection: any) => {

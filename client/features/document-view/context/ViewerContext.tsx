@@ -48,7 +48,10 @@ interface ViewerContextType {
 
   // Assistant State & Actions
   messages: Message[];
-  addUserMessage: (message: string) => Promise<void>;
+  addUserMessage: (
+    message: string,
+    metadata?: { documentName: string; pageNumber: number }
+  ) => Promise<void>;
   handleDeleteMessage: (index: number) => void;
   resetMessages: () => void;
   isAssistantLoading: boolean;

@@ -4,9 +4,11 @@ import { cn } from "@/lib/utils";
 import { NotionEditor } from "@/components/editor/NotionEditor";
 import type { JSONContent } from "@tiptap/core";
 import { useViewer } from "../../context/ViewerContext";
+import { MessageSource } from "../../hooks/useAssistantLogic";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
+  source: MessageSource;
   content: string | JSONContent;
   timestamp?: Date;
   onDelete?: () => void;
@@ -15,6 +17,7 @@ interface ChatMessageProps {
 
 export function ChatMessage({
   role,
+  source,
   content,
   timestamp,
   onDelete,
@@ -112,13 +115,15 @@ export function ChatMessage({
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
-              <button
-                className="p-1 rounded-md hover:bg-muted text-muted-foreground transition-colors group"
-                title="Add as Insight"
-                onClick={() => handleAddToNoteAsInsight(content)}
-              >
-                <Sparkles className="w-3.5 h-3.5 group-hover:text-primary transition-colors" />
-              </button>
+              {source === MessageSource.DOCUMENT && (
+                <button
+                  className="p-1 rounded-md hover:bg-muted text-muted-foreground transition-colors group"
+                  title="Add as Insight"
+                  onClick={() => handleAddToNoteAsInsight(content)}
+                >
+                  <Sparkles className="w-3.5 h-3.5 group-hover:text-primary transition-colors" />
+                </button>
+              )}
               <button
                 className="p-1 rounded-md hover:bg-muted text-muted-foreground hover:text-destructive transition-colors"
                 title="Delete message"

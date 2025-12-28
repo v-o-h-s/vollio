@@ -103,6 +103,7 @@ export function AssistantChat() {
               <ChatMessage
                 key={index}
                 role={message.role}
+                source={message.source}
                 content={message.content}
                 timestamp={message.timestamp}
                 onDelete={() => handleDelete(index)}
