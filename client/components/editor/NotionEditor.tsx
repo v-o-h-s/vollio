@@ -433,15 +433,17 @@ function NotionEditorInner({
         // Save current selection to try restoring it after update
         const previousSelection = editor.state.selection;
 
-        editor.commands.setContent(content.content, { emitUpdate: false });
+        // Defer update to avoid flushSync errors during render
+        setTimeout(() => {
+          if (editor.isDestroyed) return;
 
-        // Restore selection if document didn't change too much, otherwise cursor jumps to start/end
-        // Ideally we'd map the selection, but for now specific "append" operations might be jarring
-        // if user is typing. However, this mostly happens when user clicks "Add to note",
-        // so they are probably not typing in this exact millisecond.
+          editor.commands.setContent(content.content || "", {
+            emitUpdate: false,
+          });
 
-        hasContentInitialized.current = true;
-        dispatch(setShouldReadFromProps(false));
+          hasContentInitialized.current = true;
+          dispatch(setShouldReadFromProps(false));
+        }, 0);
       }
     }
   }, [editor, content?.content, currentNoteId, shouldReadFromProps, dispatch]);
