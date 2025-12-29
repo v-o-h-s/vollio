@@ -23,7 +23,7 @@ export function useSelection({
   currentHighlightColor,
 }: useSelectionProps) {
   const { setIsAssistantOpen, addUserMessage } = useViewer();
-  const { aiAutoExplain } = useAppSelector((state) => state.settings);
+
   // ... existing code
   const [createHighlight] = useCreateHighlightMutation();
   const [selection, setSelection] = useState<any>(null);
@@ -64,7 +64,7 @@ export function useSelection({
 
   const onSelectionFinished = (selection: any) => {
     setSelection(selection);
-    if (aiAutoExplain && selection && selection.content?.text) {
+    if (selection && selection.content?.text) {
       handleExplain();
     }
   };
@@ -89,8 +89,7 @@ export function useSelection({
 
       await createHighlight(newHighlightDto).unwrap();
       setSelection(null);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const handleCreateHighlight = async () => {
@@ -108,18 +107,11 @@ export function useSelection({
       hasNote: false,
       noteId: null,
     };
-
-   
   };
 
   const handleAddNote = () => {
     const activeSelection = captureSelection();
     if (!activeSelection) return;
-  };
-
-  const handleAddToSummary = async () => {
-    const activeSelection = captureSelection();
-    if (!activeSelection || !activeSelection.content.text) return;
   };
 
   const handleCopy = async () => {
@@ -129,8 +121,7 @@ export function useSelection({
     try {
       await navigator.clipboard.writeText(activeSelection.content.text);
       highlighterUtilsRef.current?.removeGhostHighlight();
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   return {
@@ -144,7 +135,6 @@ export function useSelection({
     handleAddTag,
     handleTagConfirm,
     handleCreateHighlight,
-    handleAddToSummary,
     handleAddNote,
     handleCopy,
     handleExplain,

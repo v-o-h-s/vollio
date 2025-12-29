@@ -4,7 +4,6 @@ import { JSONSchemaType } from "ajv";
  */
 export interface CreateSummaryDTO {
   documentId: string;
-  mainPoints: string[];
   text?: string;
 }
 
@@ -12,10 +11,9 @@ export const CreateSummaryDTOSchema: JSONSchemaType<CreateSummaryDTO> = {
   type: "object",
   properties: {
     documentId: { type: "string" },
-    mainPoints: { type: "array", items: { type: "string" } },
     text: { type: "string", nullable: true },
   },
-  required: ["documentId", "mainPoints"],
+  required: ["documentId"],
   additionalProperties: false,
 };
 
@@ -24,7 +22,6 @@ export const CreateSummaryDTOSchema: JSONSchemaType<CreateSummaryDTO> = {
  */
 export interface UpdateSummaryDTO {
   id: string;
-  mainPoints?: string[];
   text?: string;
 }
 
@@ -32,7 +29,6 @@ export const UpdateSummaryDTOSchema: JSONSchemaType<UpdateSummaryDTO> = {
   type: "object",
   properties: {
     id: { type: "string" },
-    mainPoints: { type: "array", items: { type: "string" }, nullable: true },
     text: { type: "string", nullable: true },
   },
   required: ["id"],

@@ -33,7 +33,6 @@ import { useHighlightActions } from "@/features/document-view/hooks/useHighlight
 import { MyHighlight } from "@/lib/types/highlight";
 import { ViewerHeader } from "./viewheader";
 import { useSummaryActions } from "@/features/document-view/hooks/useSummaryActions";
-import { SummarySidebar } from "./summary/SummarySidebar";
 import { ViewerFloatingActions } from "./ViewerFloatingActions";
 import { DocumentDetails } from "../types/document";
 export const BetterViewer = ({
@@ -58,7 +57,6 @@ export const BetterViewer = ({
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isTagSidebarOpen, setIsTagSidebarOpen] = useState(false);
-  const [isSummarySidebarOpen, setIsSummarySidebarOpen] = useState(false);
   const [isExplanationBoxOpen, setIsExplanationBoxOpen] = useState(false);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const [zoomValue, setZoomValue] = useState<PdfScaleValue>("page-width");
@@ -67,16 +65,13 @@ export const BetterViewer = ({
   const highlighterUtilsRef = useRef<PdfHighlighterUtils | null>(null);
 
   // Summary actions hook
-  const { summary, addMainPoint, removeMainPoint } = useSummaryActions(
-    document.id
-  );
+  const { summary } = useSummaryActions(document.id);
 
   const {
     isTagDialogOpen,
     setIsTagDialogOpen,
     handleTagConfirm,
     handleCreateHighlight,
-    handleAddToSummary,
     handleAddNote,
     handleCopy,
     handleAddTag,
@@ -190,8 +185,6 @@ export const BetterViewer = ({
           onHighlightColorChange={setCurrentHighlightColor}
           onToggleTags={() => setIsTagSidebarOpen(!isTagSidebarOpen)}
           isTagsOpen={isTagSidebarOpen}
-          onToggleSummary={() => setIsSummarySidebarOpen(!isSummarySidebarOpen)}
-          isSummaryOpen={isSummarySidebarOpen}
         />
       ) : (
         <button
@@ -235,7 +228,6 @@ export const BetterViewer = ({
                   onCopy={handleCopy}
                   onAddTag={handleAddTag}
                   onAddNote={handleAddNote}
-                  onAddToSummary={handleAddToSummary}
                   onExplain={handleExplain}
                 />
               }
@@ -263,13 +255,6 @@ export const BetterViewer = ({
         onClose={() => setIsTagSidebarOpen(false)}
         highlights={highlights}
         onScrollToHighlight={handleScrollToHighlight}
-      />
-
-      <SummarySidebar
-        isOpen={isSummarySidebarOpen}
-        onClose={() => setIsSummarySidebarOpen(false)}
-        summary={summary ?? null}
-        onRemoveMainPoint={removeMainPoint}
       />
 
       <ViewerFloatingActions

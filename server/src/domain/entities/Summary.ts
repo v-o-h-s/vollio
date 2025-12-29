@@ -1,13 +1,11 @@
 export class Summary {
   private id: string;
   private documentId: string;
-  private mainPoints: string[];
   private createdAt: string;
   private updatedAt: string;
   private text?: string;
   constructor(
     documentId: string,
-    mainPoints: string[],
     createdAt?: string,
     updatedAt?: string,
     text?: string,
@@ -15,7 +13,6 @@ export class Summary {
   ) {
     this.id = id ?? crypto.randomUUID();
     this.documentId = documentId;
-    this.mainPoints = mainPoints;
     this.createdAt = createdAt ?? new Date().toISOString();
     this.updatedAt = updatedAt ?? new Date().toISOString();
     this.text = text;
@@ -34,10 +31,6 @@ export class Summary {
     return this.documentId;
   }
 
-  public getMainPoints(): string[] {
-    return this.mainPoints;
-  }
-
   public getCreatedAt(): string {
     return this.createdAt;
   }
@@ -45,8 +38,4 @@ export class Summary {
   public getUpdatedAt(): string {
     return this.updatedAt;
   }
-  public setMainPoints(mainPoints: string[]): void {
-    this.mainPoints = mainPoints;
-  }
- 
 }

@@ -12,7 +12,6 @@ Creates a new summary for a document.
 - **Body Parameters**:
 
   - `documentId` (string, required): UUID of the document
-  - `mainPoints` (string[], required): List of key points summarized from the document
   - `text` (string, optional): Full text of the summary
 
 - **Success Response**:
@@ -26,7 +25,6 @@ Creates a new summary for a document.
       "data": {
         "id": "string (UUID)",
         "documentId": "string (UUID)",
-        "mainPoints": ["string"],
         "text": "string"
       }
     }
@@ -48,7 +46,6 @@ Updates an existing summary's main points or text.
 - **Body Parameters**:
 
   - `id` (string, required): UUID of the summary to update
-  - `mainPoints` (string[], optional): Updated list of key points
   - `text` (string, optional): Updated full text
 
 - **Success Response**:
@@ -62,7 +59,6 @@ Updates an existing summary's main points or text.
       "data": {
         "id": "string (UUID)",
         "documentId": "string (UUID)",
-        "mainPoints": ["string"],
         "text": "string"
       }
     }
@@ -125,7 +121,6 @@ Retrieves all summaries associated with a specific document.
         {
           "id": "string (UUID)",
           "documentId": "string (UUID)",
-          "mainPoints": ["string"],
           "text": "string"
         }
       ]
@@ -159,7 +154,6 @@ Retrieves a specific summary by its ID.
       "data": {
         "id": "string (UUID)",
         "documentId": "string (UUID)",
-        "mainPoints": ["string"],
         "text": "string"
       }
     }

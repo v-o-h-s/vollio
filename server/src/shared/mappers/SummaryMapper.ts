@@ -6,7 +6,6 @@ export class SummaryMapper {
   static fromPersistenceToDomain(row: any): Summary {
     return new Summary(
       row.document_id,
-      row.main_points,
       row.created_at,
       row.updated_at,
       row.text,
@@ -17,7 +16,6 @@ export class SummaryMapper {
     return {
       id: summary.getId(),
       documentId: summary.getDocumentId(),
-      mainPoints: summary.getMainPoints(),
       text: summary.getText() ?? null,
     };
   }
@@ -25,7 +23,6 @@ export class SummaryMapper {
     return {
       id: summary.getId(),
       document_id: summary.getDocumentId(),
-      main_points: summary.getMainPoints(),
       text: summary.getText() ?? null,
       created_at: summary.getCreatedAt(),
       updated_at: summary.getUpdatedAt(),

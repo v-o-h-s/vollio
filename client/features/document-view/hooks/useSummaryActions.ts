@@ -14,52 +14,7 @@ export const useSummaryActions = (documentId: string) => {
     return summaries && summaries.length > 0 ? summaries[0] : null;
   }, [summaries]);
 
-  const addMainPoint = useCallback(
-    async (text: string) => {
-      const currentMainPoints = summary?.mainPoints || [];
-
-      // Avoid duplicates
-      if (currentMainPoints.includes(text)) {
-        console.log("Main point already exists");
-        return;
-      }
-
-      const updatedMainPoints = [...currentMainPoints, text];
-
-      if (summary) {
-        await updateSummary({
-          id: summary.id,
-          mainPoints: updatedMainPoints,
-        });
-      } else {
-        await createSummary({
-          documentId,
-          mainPoints: updatedMainPoints,
-        });
-      }
-    },
-    [documentId, summary, createSummary, updateSummary]
-  );
-
-  const removeMainPoint = useCallback(
-    async (text: string) => {
-      if (!summary) return;
-
-      const updatedMainPoints = summary.mainPoints.filter(
-        (point) => point !== text
-      );
-
-      await updateSummary({
-        id: summary.id,
-        mainPoints: updatedMainPoints,
-      });
-    },
-    [summary, updateSummary]
-  );
-
   return {
     summary,
-    addMainPoint,
-    removeMainPoint,
   };
 };

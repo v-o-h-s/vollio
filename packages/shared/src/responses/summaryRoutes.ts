@@ -3,7 +3,6 @@ import { ServerSuccessResponse } from "./general";
 export interface SummaryData {
   id: string;
   documentId: string;
-  mainPoints: string[];
   text: string | null;
 }
 
@@ -14,9 +13,6 @@ export type GetSummaryByIdResponse = ServerSuccessResponse<SummaryData>;
 export type GetSummariesByDocumentIdResponse = ServerSuccessResponse<
   SummaryData[]
 >;
-
-// PATCH /api/v1/summaries/:id/main-points
-export type UpdateSummaryMainPointsResponse = ServerSuccessResponse<null>;
 
 // PATCH /api/v1/summaries/:id/text
 export type UpdateSummaryTextResponse = ServerSuccessResponse<null>;

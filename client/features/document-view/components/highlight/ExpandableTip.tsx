@@ -1,11 +1,4 @@
-import {
-  Highlighter,
-  Tag,
-  StickyNote,
-  ListChecks,
-  Copy,
-  Bot,
-} from "lucide-react";
+import { Highlighter, Tag, StickyNote, Copy, Bot } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
@@ -16,7 +9,6 @@ interface ExpandableTipProps {
   onCopy?: () => void;
   onAddTag?: () => void;
   onAddNote?: () => void;
-  onAddToSummary?: () => void;
   onExplain?: () => void;
 }
 
@@ -25,17 +17,8 @@ export const ExpandableTip = ({
   onCopy,
   onAddTag,
   onAddNote,
-  onAddToSummary,
   onExplain,
 }: ExpandableTipProps) => {
-  const { aiAutoExplain } = useAppSelector((state) => state.settings);
-
-  useEffect(() => {
-    if (aiAutoExplain && onExplain) {
-      onExplain();
-    }
-  }, [aiAutoExplain, onExplain]);
-
   return (
     <Card className="shadow-lg border-muted animate-in fade-in zoom-in duration-200">
       <CardContent className="p-1.5 flex items-center gap-1">
@@ -97,20 +80,6 @@ export const ExpandableTip = ({
           </Button>
         )}
 
-        {/* Add to Summary Button */}
-        {onAddToSummary && (
-          <Button
-            onClick={onAddToSummary}
-            variant="ghost"
-            size="sm"
-            className="group h-8 px-2 gap-2 font-normal hover:bg-accent cursor-pointer transition-all duration-200 overflow-hidden"
-          >
-            <ListChecks className="h-4 w-4 shrink-0" />
-            <span className="text-sm max-w-0 group-hover:max-w-[200px] overflow-hidden whitespace-nowrap transition-all duration-200">
-              add to summary main points
-            </span>
-          </Button>
-        )}
         {/* Explain Button */}
         {onExplain && (
           <Button

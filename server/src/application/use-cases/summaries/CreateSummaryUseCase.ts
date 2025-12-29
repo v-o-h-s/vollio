@@ -8,7 +8,6 @@ export class CreateSummaryUseCase {
   async execute(data: CreateSummaryDTO) {
     const summary = new Summary(
       data.documentId,
-      data.mainPoints,
       undefined,
       undefined,
       data.text

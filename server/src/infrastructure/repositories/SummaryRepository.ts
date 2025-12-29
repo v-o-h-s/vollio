@@ -65,18 +65,7 @@ export class SummaryRepository implements ISummaryRepository {
       throw new DatabaseError(error);
     }
   }
-  async updateSummaryMainPoints(
-    summaryId: string,
-    mainPoints: string[]
-  ): Promise<void> {
-    const { error } = await this.supabaseClient
-      .from("summaries")
-      .update({ main_points: mainPoints })
-      .eq("id", summaryId);
-    if (error) {
-      throw new DatabaseError(error);
-    }
-  }
+
   async updateSummaryText(
     summaryId: string,
     text: string | null

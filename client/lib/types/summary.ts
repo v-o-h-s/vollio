@@ -3,7 +3,6 @@
 export interface Summary {
   id: string;
   documentId: string;
-  mainPoints: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -11,7 +10,6 @@ export interface Summary {
 export interface SupabaseSummaryResponse {
   id: string;
   document_id: string;
-  main_points: string[];
   created_at: string;
   updated_at: string;
 }
@@ -30,7 +28,6 @@ export const mapSupabaseSummaryResponseToSummary = (
   return {
     id: data.id,
     documentId: data.document_id,
-    mainPoints: data.main_points || [],
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };

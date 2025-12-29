@@ -21,8 +21,6 @@ export class AssistantChatUseCase {
       (data as any).tone
     );
 
-    this.logger.info({ prompt }, "Executing AssistantChatUseCase");
-
     const result = await this.generativeAiService.generateText(
       prompt,
       (data as any).model

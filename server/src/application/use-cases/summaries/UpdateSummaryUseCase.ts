@@ -10,9 +10,7 @@ export class UpdateSummaryUseCase {
     if (!summary) {
       throw new NotFoundError("Summary not found");
     }
-    if (data.mainPoints) {
-      summary.setMainPoints(data.mainPoints);
-    }
+
     if (data.text) {
       summary.setText(data.text);
     }

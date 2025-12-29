@@ -9,7 +9,6 @@ import {
   Eye,
   Home,
   Tag as TagIcon,
-  ScrollText,
   MessageSquare,
 } from "lucide-react";
 import {
@@ -33,8 +32,6 @@ export function ViewerHeader({
   onHighlightColorChange,
   onToggleTags,
   isTagsOpen,
-  onToggleSummary,
-  isSummaryOpen,
   viewerWidth = "100%",
 }: DocumentViewerHeaderProps) {
   const router = useRouter();
@@ -166,18 +163,6 @@ export function ViewerHeader({
                       <span>Tags</span>
                     </button>
 
-                    {/* Summary Toggle */}
-                    <button
-                      onClick={onToggleSummary}
-                      className={cn(
-                        "w-full text-left px-3 py-2 rounded text-sm font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer flex items-center gap-2",
-                        isSummaryOpen && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <ScrollText size={16} />
-                      <span>Summary</span>
-                    </button>
-
                     <DropdownMenuSeparator />
 
                     {/* Hide Header */}
@@ -247,21 +232,6 @@ export function ViewerHeader({
                 >
                   <TagIcon size={14} />
                   <span className="text-xs ml-1">Tags</span>
-                </Button>
-
-                {/* Summary Toggle */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onToggleSummary}
-                  className={cn(
-                    "cursor-pointer h-8 px-2 flex-shrink-0",
-                    isSummaryOpen && "bg-accent text-accent-foreground"
-                  )}
-                  title="Summary"
-                >
-                  <ScrollText size={14} />
-                  <span className="text-xs ml-1">Summary</span>
                 </Button>
 
                 {/* Hide Header */}
