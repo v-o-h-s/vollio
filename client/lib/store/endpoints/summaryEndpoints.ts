@@ -1,12 +1,31 @@
 import { ApiBuilder } from "./types";
 import { SummaryData } from "@vollio/shared";
+import { CreateSummaryDTO, UpdateSummaryDTO } from "@vollio/shared";
 import {
-  CreateSummaryDTO,
-  UpdateSummaryDTO,
+  ServerSuccessResponse,
+  GenerateSummaryDTO,
+  GenerateSummaryResponseData,
 } from "@vollio/shared";
-import { ServerSuccessResponse } from "@vollio/shared";
 
 export const summaryEndpoints = (builder: ApiBuilder) => ({
+  generateSummary: builder.mutation<
+    GenerateSummaryResponseData,
+    GenerateSummaryDTO
+  >({
+    query: (data) => ({
+      url: "summaries/generate",
+      method: "POST",
+      body: data,
+    }),
+    transformResponse: (
+      response: ServerSuccessResponse<GenerateSummaryResponseData>
+    ) => {
+      if (!response.data) throw new Error("Failed to generate summary");
+      return response.data;
+    },
+    invalidatesTags: [{ type: "Summary", id: "LIST" }],
+  }),
+
   getSummariesByDocumentId: builder.query<SummaryData[], string>({
     query: (documentId) => `summaries?documentId=${documentId}`,
     transformResponse: (response: ServerSuccessResponse<SummaryData[]>) =>

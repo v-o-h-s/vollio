@@ -16,8 +16,8 @@ export class GoogleDriveService implements IGoogleDriveService {
     auth.setCredentials({ access_token: accessToken });
     const drive = google.drive({ version: "v3", auth });
 
-    const res = await drive.documents.get({
-      documentId,
+    const res = await drive.files.get({
+      fileId: documentId,
       fields: "id,name,mimeType,size",
     });
     const data = res.data;
@@ -31,9 +31,12 @@ export class GoogleDriveService implements IGoogleDriveService {
     }
     throw new NotFoundError("Document not found");
   }
-  async getDocumentById(accessToken: string, documentId: string): Promise<Buffer> {
+  async getDocumentById(
+    accessToken: string,
+    documentId: string
+  ): Promise<Buffer> {
     const res = await fetch(
-      `https://www.googleapis.com/drive/v3/documents/${documentId}?alt=media`,
+      `https://www.googleapis.com/drive/v3/files/${documentId}?alt=media`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -51,8 +54,8 @@ export class GoogleDriveService implements IGoogleDriveService {
     const auth = new google.auth.OAuth2();
     auth.setCredentials({ access_token: accessToken });
     const drive = google.drive({ version: "v3", auth });
-    const driveRes = await drive.documents.get(
-      { documentId: documentId, alt: "media" },
+    const driveRes = await drive.files.get(
+      { fileId: documentId, alt: "media" },
       { responseType: "stream" }
     );
     return driveRes.data;
@@ -64,6 +67,5 @@ export class GoogleDriveService implements IGoogleDriveService {
      Client simply gets bytes
      Document.js / react-highlighter-extended loads it just fine
     */
-
   }
 }

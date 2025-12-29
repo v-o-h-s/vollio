@@ -4,18 +4,12 @@ import {
   FastifyPluginOptions,
 } from "fastify";
 import fp from "fastify-plugin";
-import {
-  ExplainTextDTO,
-  AssistantDTO,
-  GenerateSummaryDTO,
-} from "@vollio/shared";
+import { ExplainTextDTO, AssistantDTO } from "@vollio/shared";
 import {
   ExplainTextDTOSchema,
   AssistantDTOSchema,
-  GenerateSummaryDTOSchema,
 } from "../../shared/validation/aiSchemas";
 import { validateBody } from "../../shared/validation/validator";
-
 const aiRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
   options: FastifyPluginOptions
@@ -24,10 +18,7 @@ const aiRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/explain`,
     {
       schema: {
-        
-        
         body: ExplainTextDTOSchema,
-        
       },
       preHandler: validateBody(ExplainTextDTOSchema),
     },
@@ -41,32 +32,13 @@ const aiRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/assistant`,
     {
       schema: {
-        
-        
         body: AssistantDTOSchema,
-        
       },
       preHandler: validateBody(AssistantDTOSchema),
     },
     async (request, reply) => {
       const aiController = request.diScope.resolve("aiController");
       return aiController.assistantChat(request, reply);
-    }
-  );
-
-  fastify.post<{ Body: GenerateSummaryDTO }>(
-    `${options.prefix}/generate-summary`,
-    {
-      schema: {
-        
-        
-        body: GenerateSummaryDTOSchema,
-      },
-      preHandler: validateBody(GenerateSummaryDTOSchema),
-    },
-    async (request, reply) => {
-      const aiController = request.diScope.resolve("aiController");
-      return aiController.generateSummary(request, reply);
     }
   );
 };

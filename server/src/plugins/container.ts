@@ -82,7 +82,7 @@ import { SummaryRepository } from "../infrastructure/repositories/SummaryReposit
 import { GetSummariesByDocumentIdUseCase } from "../application/use-cases/summaries/GetSummariesByDocumentIdUseCase";
 import { ExplainTextUseCase } from "../application/use-cases/ai/ExplainTextUseCase";
 import { AssistantChatUseCase } from "../application/use-cases/ai/AssistantChatUseCase";
-import { SummarizeDocumentUseCase } from "../application/use-cases/ai/SummarizeDocumentUseCase";
+import { SummarizeDocumentUseCase } from "../application/use-cases/summaries/SummarizeDocumentUseCase";
 import { AiController } from "../interface/controllers/ai.controller";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger

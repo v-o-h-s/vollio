@@ -6,17 +6,13 @@ import {
   ExplainTextResponse,
   AssistantDTO,
   AssistantResponse,
-  GenerateSummaryDTO,
-  GenerateSummaryResponse,
 } from "@vollio/shared";
-import { SummarizeDocumentUseCase } from "../../application/use-cases/ai/SummarizeDocumentUseCase";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 
 export class AiController {
   constructor(
     private explainTextUseCase: ExplainTextUseCase,
-    private assistantChatUseCase: AssistantChatUseCase,
-    private summarizeDocumentUseCase: SummarizeDocumentUseCase
+    private assistantChatUseCase: AssistantChatUseCase
   ) {}
 
   async explainText(
@@ -44,20 +40,6 @@ export class AiController {
       reply,
       result,
       "Assistant response generated successfully"
-    );
-  }
-
-  async generateSummary(
-    request: FastifyRequest<{ Body: GenerateSummaryDTO }>,
-    reply: FastifyReply
-  ): Promise<void> {
-    const data = request.body;
-    const result = await this.summarizeDocumentUseCase.execute(data);
-
-    ResponseFormatter.success<GenerateSummaryResponse["data"]>(
-      reply,
-      result,
-      "Summary generated successfully"
     );
   }
 }

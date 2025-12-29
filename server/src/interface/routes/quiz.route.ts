@@ -17,31 +17,11 @@ const quizHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
   opts: FastifyPluginOptions
 ): Promise<void> => {
-  fastify.post<{ Body: CreateQuizDTO }>(
-    `${opts.prefix}`,
-    {
-      schema: {
-        
-        
-        body: createQuizSchema,
-        
-      },
-      preHandler: validateBody(createQuizSchema),
-    },
-    async (request, reply) => {
-      const quizController = request.diScope.resolve("quizController");
-      return quizController.createQuiz(request, reply);
-    }
-  );
-
   fastify.get<{ Params: { id: string } }>(
     `${opts.prefix}/:id`,
     {
       schema: {
-        
-        
         params: quizIdParamsSchema,
-        
       },
       preHandler: validateParams(quizIdParamsSchema),
     },
@@ -55,10 +35,7 @@ const quizHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       schema: {
-        
-        
         params: quizIdParamsSchema,
-        
       },
       preHandler: validateParams(quizIdParamsSchema),
     },
@@ -71,11 +48,7 @@ const quizHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}`,
     {
-      schema: {
-        
-        
-        
-      },
+      schema: {},
     },
     async (request, reply) => {
       const quizController = request.diScope.resolve("quizController");

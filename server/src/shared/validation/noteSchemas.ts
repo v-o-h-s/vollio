@@ -6,6 +6,8 @@ import {
   NoteIdParams,
 } from "@vollio/shared";
 
+export { JSONContent, CreateNoteDTO, UpdateNoteDTO, NoteIdParams };
+
 // Schema for creating a note
 export const createNoteSchema: JSONSchemaType<CreateNoteDTO> = {
   type: "object",

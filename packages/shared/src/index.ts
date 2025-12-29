@@ -22,3 +22,4 @@ export * from "./requests/highlightRequests";
 export * from "./requests/folderRequests";
 export * from "./requests/googleClassroomRequests";
 export * from "./requests/aiRequests";
+export * from "./requests/summaryRequests";

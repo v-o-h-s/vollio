@@ -19,3 +19,12 @@ export type UpdateSummaryTextResponse = ServerSuccessResponse<null>;
 
 // DELETE /api/v1/summaries/:id
 export type DeleteSummaryResponse = ServerSuccessResponse<null>;
+
+export interface GenerateSummaryResponseData {
+  id: string;
+  documentId: string;
+  text: string;
+}
+
+export type GenerateSummaryResponse =
+  ServerSuccessResponse<GenerateSummaryResponseData>;

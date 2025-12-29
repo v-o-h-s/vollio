@@ -15,7 +15,3 @@ export interface AssistantDTO {
   model?: "fast" | "smart" | "creative";
   tone?: "academic" | "friendly" | "concise";
 }
-
-export interface GenerateSummaryDTO {
-  documentId: string;
-}

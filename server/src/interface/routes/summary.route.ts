@@ -15,6 +15,9 @@ import {
   UpdateSummaryDTO,
   UpdateSummaryDTOSchema,
 } from "../../shared/validation/summarySchema";
+import { GenerateSummaryDTO, CreateQuizDTO } from "@vollio/shared";
+import { GenerateSummaryDTOSchema } from "../../shared/validation/aiSchemas";
+import { createQuizSchema } from "../../shared/validation/quizSchemas";
 import {
   validateBody,
   validateParams,
@@ -26,14 +29,39 @@ const summaryHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
   opts: FastifyPluginOptions
 ): Promise<void> => {
+  fastify.post<{ Body: GenerateSummaryDTO }>(
+    `${opts.prefix}/generate`,
+    {
+      schema: {
+        body: GenerateSummaryDTOSchema,
+      },
+      preHandler: validateBody(GenerateSummaryDTOSchema),
+    },
+    async (request, reply) => {
+      const summaryController = request.diScope.resolve("summaryController");
+      return (summaryController as any).generateSummary(request, reply);
+    }
+  );
+
+  fastify.post<{ Body: CreateQuizDTO }>(
+    `${opts.prefix}/quizzes`,
+    {
+      schema: {
+        body: createQuizSchema,
+      },
+      preHandler: validateBody(createQuizSchema),
+    },
+    async (request, reply) => {
+      const summaryController = request.diScope.resolve("summaryController");
+      return (summaryController as any).createQuiz(request, reply);
+    }
+  );
+
   fastify.post<{ Body: CreateSummaryDTO }>(
     `${opts.prefix}`,
     {
       schema: {
-        
-        
         body: CreateSummaryDTOSchema,
-        
       },
       preHandler: validateBody(CreateSummaryDTOSchema),
     },
@@ -47,10 +75,7 @@ const summaryHandler: FastifyPluginAsync = async (
     `${opts.prefix}`,
     {
       schema: {
-        
-        
         body: DeleteSummaryDTOSchema,
-        
       },
       preHandler: validateBody(DeleteSummaryDTOSchema),
     },
@@ -64,10 +89,7 @@ const summaryHandler: FastifyPluginAsync = async (
     `${opts.prefix}`,
     {
       schema: {
-        
-        
         body: UpdateSummaryDTOSchema,
-        
       },
       preHandler: validateBody(UpdateSummaryDTOSchema),
     },
@@ -81,10 +103,7 @@ const summaryHandler: FastifyPluginAsync = async (
     `${opts.prefix}`,
     {
       schema: {
-        
-        
         querystring: GetSummaryByDocumentIdDTOSchema,
-        
       },
       preHandler: validateQuery(GetSummaryByDocumentIdDTOSchema),
     },
@@ -98,10 +117,7 @@ const summaryHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       schema: {
-        
-        
         params: GetSummaryByIdDTOSchema,
-        
       },
       preHandler: validateParams(GetSummaryByIdDTOSchema),
     },

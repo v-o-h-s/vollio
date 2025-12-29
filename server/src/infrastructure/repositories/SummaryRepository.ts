@@ -3,12 +3,14 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Summary } from "../../domain/entities/Summary";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 import { SummaryMapper } from "../../shared/mappers/SummaryMapper";
+import { FastifyBaseLogger } from "fastify";
 
 export class SummaryRepository implements ISummaryRepository {
   private supabaseClient: SupabaseClient;
-
-  constructor(supabaseClient: SupabaseClient) {
+  private logger:FastifyBaseLogger;
+  constructor(supabaseClient: SupabaseClient, logger: FastifyBaseLogger) {
     this.supabaseClient = supabaseClient;
+    this.logger = logger;
   }
   async createSummary(summary: Summary): Promise<Summary> {
     const persistenceData = SummaryMapper.fromDomainToPersistence(summary);
@@ -18,6 +20,7 @@ export class SummaryRepository implements ISummaryRepository {
     if (error) {
       throw new DatabaseError(error);
     }
+
     return summary;
   }
 
