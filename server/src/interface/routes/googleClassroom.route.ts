@@ -11,7 +11,6 @@ import {
   ClassroomContentResponseSchema,
   ClassroomCourseResponseSchema,
   ClassroomCourseWithContentResponseSchema,
-  createApiResponseSchema,
 } from "../../shared/validation/googleClassroomSchemas";
 
 const googleClassroomRoutesHandler: FastifyPluginAsync = async (
@@ -21,19 +20,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/connect`,
     {
-      schema: {
-        tags: ["Google Classroom"],
-        summary: "Initiate Google Classroom connection",
-        response: {
-          200: createApiResponseSchema({
-            type: "object",
-            properties: {
-              authUrl: { type: "string" },
-            },
-            required: ["authUrl"],
-          }),
-        },
-      },
+      schema: {},
     },
     async (request, reply) => {
       const googleClassroomController = request.diScope.resolve(
@@ -47,12 +34,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/callback`,
     {
       schema: {
-        tags: ["Google Classroom"],
-        summary: "Callback for Google OAuth",
         querystring: GoogleCallbackQuerySchema,
-        response: {
-          200: createApiResponseSchema({ type: "null" }),
-        },
       },
       preHandler: validateQuery(GoogleCallbackQuerySchema),
     },
@@ -67,13 +49,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/refresh`,
     {
-      schema: {
-        tags: ["Google Classroom"],
-        summary: "Refresh Google OAuth token",
-        response: {
-          200: createApiResponseSchema({ type: "null" }),
-        },
-      },
+      schema: {},
     },
     async (request, reply) => {
       const googleClassroomController = request.diScope.resolve(
@@ -86,20 +62,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/check`,
     {
-      schema: {
-        tags: ["Google Classroom"],
-        summary: "Check Google token status",
-        response: {
-          200: createApiResponseSchema({
-            type: "object",
-            properties: {
-              isConnected: { type: "boolean" },
-              isExpired: { type: "boolean" },
-            },
-            required: ["isConnected", "isExpired"],
-          }),
-        },
-      },
+      schema: {},
     },
     async (request, reply) => {
       const googleClassroomController = request.diScope.resolve(
@@ -112,13 +75,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.delete(
     `${opts.prefix}/disconnect`,
     {
-      schema: {
-        tags: ["Google Classroom"],
-        summary: "Disconnect Google Classroom",
-        response: {
-          200: createApiResponseSchema({ type: "null" }),
-        },
-      },
+      schema: {},
     },
     async (request, reply) => {
       const googleClassroomController = request.diScope.resolve(
@@ -131,19 +88,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/status`,
     {
-      schema: {
-        tags: ["Google Classroom"],
-        summary: "Get Google Classroom connection status",
-        response: {
-          200: createApiResponseSchema({
-            type: "object",
-            properties: {
-              isConnected: { type: "boolean" },
-            },
-            required: ["isConnected"],
-          }),
-        },
-      },
+      schema: {},
     },
     async (request, reply) => {
       const googleClassroomController = request.diScope.resolve(
@@ -156,16 +101,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/courses/list`,
     {
-      schema: {
-        tags: ["Google Classroom"],
-        summary: "List Google Classroom courses",
-        response: {
-          200: createApiResponseSchema({
-            type: "array",
-            items: ClassroomCourseResponseSchema,
-          }),
-        },
-      },
+      schema: {},
     },
     async (request, reply) => {
       const googleClassroomController = request.diScope.resolve(
@@ -178,16 +114,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/courses`,
     {
-      schema: {
-        tags: ["Google Classroom"],
-        summary: "Get Google Classroom courses with content",
-        response: {
-          200: createApiResponseSchema({
-            type: "array",
-            items: ClassroomCourseWithContentResponseSchema,
-          }),
-        },
-      },
+      schema: {},
     },
     async (request, reply) => {
       const googleClassroomController = request.diScope.resolve(
@@ -201,17 +128,12 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/courses/:courseId/content`,
     {
       schema: {
-        tags: ["Google Classroom"],
-        summary: "Get Google Classroom course content",
         params: {
           type: "object",
           properties: {
             courseId: { type: "string" },
           },
           required: ["courseId"],
-        },
-        response: {
-          200: createApiResponseSchema(ClassroomContentResponseSchema),
         },
       },
     },

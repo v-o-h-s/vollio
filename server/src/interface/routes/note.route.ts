@@ -8,7 +8,6 @@ import fp from "fastify-plugin";
 import {
   validateBody,
   validateParams,
-  createApiResponseSchema,
 } from "../../shared/validation/validator";
 import { CreateNoteDTO, UpdateNoteDTO, NoteIdParams } from "@vollio/shared";
 import {
@@ -26,15 +25,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/`,
     {
       schema: {
-        tags: ["Notes"],
-        summary: "Create a new note",
         body: createNoteSchema,
-        response: {
-          200: createApiResponseSchema({
-            type: "object",
-            additionalProperties: true,
-          }),
-        },
       },
       preHandler: validateBody(createNoteSchema),
     },
@@ -48,16 +39,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${options.prefix}/`,
     {
-      schema: {
-        tags: ["Notes"],
-        summary: "Get all user notes",
-        response: {
-          200: createApiResponseSchema({
-            type: "array",
-            items: { type: "object", additionalProperties: true },
-          }),
-        },
-      },
+      schema: {},
     },
     async (request, reply) => {
       const noteController = request.diScope.resolve("noteController");
@@ -70,15 +52,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       schema: {
-        tags: ["Notes"],
-        summary: "Get note by ID",
         params: noteIdParamsSchema,
-        response: {
-          200: createApiResponseSchema({
-            type: "object",
-            additionalProperties: true,
-          }),
-        },
       },
       preHandler: validateParams(noteIdParamsSchema),
     },
@@ -93,16 +67,8 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       schema: {
-        tags: ["Notes"],
-        summary: "Update note",
         params: noteIdParamsSchema,
         body: updateNoteSchema,
-        response: {
-          200: createApiResponseSchema({
-            type: "object",
-            additionalProperties: true,
-          }),
-        },
       },
       preHandler: [
         validateParams(noteIdParamsSchema),
@@ -120,12 +86,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       schema: {
-        tags: ["Notes"],
-        summary: "Delete note",
         params: noteIdParamsSchema,
-        response: {
-          200: createApiResponseSchema({ type: "null" }),
-        },
       },
       preHandler: validateParams(noteIdParamsSchema),
     },

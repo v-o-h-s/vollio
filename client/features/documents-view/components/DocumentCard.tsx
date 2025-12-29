@@ -8,6 +8,8 @@ import {
   Trash2,
   MoveRight,
   Loader2,
+  Sparkles,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +23,13 @@ import { useDocument } from "../hooks/useDocument";
 import { RenameDialog } from "./dialogs/RenameDialog";
 import { MoveItemDialog } from "./dialogs/MoveItemDialog";
 import { ConfirmationDialog } from "@/components/ConfirmationDialog";
+import {
+  useGetSummariesByDocumentIdQuery,
+  useGenerateSummaryMutation,
+} from "@/lib/store/apiSlice";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+
 interface DocumentCardProps {
   id: string;
   name: string;
@@ -40,12 +49,36 @@ export function DocumentCard({
   onOpen,
   allFolders,
 }: DocumentCardProps) {
+  const router = useRouter();
   const { renameDocument, moveDocument, deleteDocument, refetch } =
     useDocument();
+
+  const { data: summaries, isLoading: isLoadingSummaries } =
+    useGetSummariesByDocumentIdQuery(id);
+
+  const [generateSummary, { isLoading: isGeneratingSummary }] =
+    useGenerateSummaryMutation();
+
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const hasSummary = summaries && summaries.length > 0;
+
+  const handleGenerateSummary = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await toast.promise(generateSummary({ documentId: id }).unwrap(), {
+        pending: "Generating summary...",
+        success: "Summary generated successfully!",
+        error: "Failed to generate summary",
+      });
+    } catch (error) {
+      console.error("Failed to generate summary:", error);
+    }
+  };
+
   const deleteDocumentHandler = async () => {
     setIsDeleting(true);
     try {
@@ -101,6 +134,32 @@ export function DocumentCard({
               <MoveRight className="h-4 w-4 mr-2" />
               Move
             </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
+            {!hasSummary ? (
+              <DropdownMenuItem
+                onClick={handleGenerateSummary}
+                disabled={isGeneratingSummary || isLoadingSummaries}
+              >
+                {isGeneratingSummary ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4 mr-2 text-purple-500" />
+                )}
+                Summarize
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(`/dashboard/summarize/${summaries[0].id}`)
+                }
+              >
+                <Eye className="h-4 w-4 mr-2 text-blue-500" />
+                View Summary
+              </DropdownMenuItem>
+            )}
+
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => setDeleteDialogOpen(true)}
@@ -112,6 +171,7 @@ export function DocumentCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
       {/** rename dialog */}
       <RenameDialog
         open={renameDialogOpen}

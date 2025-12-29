@@ -30,22 +30,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/`,
     {
       schema: {
-        tags: ["Documents"],
-        summary: "Get all user documents",
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: {
-                type: "array",
-                items: { type: "object", additionalProperties: true },
-              },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
+        
+        
       },
     },
     async (request, reply) => {
@@ -58,8 +45,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/google-drive/:documentId`,
     {
       schema: {
-        tags: ["Documents"],
-        summary: "Get document from Google Drive",
+        
+        
         params: {
           type: "object",
           properties: {
@@ -67,17 +54,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
           },
           required: ["documentId"],
         },
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
     },
     async (request, reply) => {
@@ -90,8 +67,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/stream`,
     {
       schema: {
-        tags: ["Documents"],
-        summary: "Get document stream metadata (HEAD)",
+        
+        
         querystring: {
           type: "object",
           properties: {
@@ -99,7 +76,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
           },
           required: ["token"],
         },
-        security: [],
+        
       },
     },
     async (request, reply) => {
@@ -112,8 +89,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/stream`,
     {
       schema: {
-        tags: ["Documents"],
-        summary: "Stream document content",
+        
+        
         querystring: {
           type: "object",
           properties: {
@@ -121,7 +98,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
           },
           required: ["token"],
         },
-        security: [],
+        
       },
     },
     async (request, reply) => {
@@ -134,8 +111,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/google-drive`,
     {
       schema: {
-        tags: ["Documents"],
-        summary: "Add document from Google Drive",
+        
+        
         body: {
           type: "object",
           properties: {
@@ -143,17 +120,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
           },
           required: ["documentGoogleDriveId"],
         },
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
     },
     async (request, reply) => {
@@ -166,20 +133,10 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/upload`,
     {
       schema: {
-        tags: ["Documents"],
-        summary: "Upload document",
-        consumes: ["multipart/form-data"],
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
+        
+        
+        
       },
     },
     async (request, reply) => {
@@ -192,20 +149,10 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       schema: {
-        tags: ["Documents"],
-        summary: "Get document by ID",
+        
+        
         params: documentIdParamsSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateParams(documentIdParamsSchema),
     },
@@ -219,20 +166,10 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       schema: {
-        tags: ["Documents"],
-        summary: "Delete document by ID",
+        
+        
         params: documentIdParamsSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "null" },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateParams(documentIdParamsSchema),
     },
@@ -246,21 +183,11 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id/move`,
     {
       schema: {
-        tags: ["Documents"],
-        summary: "Move document to folder",
+        
+        
         params: documentIdParamsSchema,
         body: moveDocumentSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: [
         validateParams(documentIdParamsSchema),
@@ -277,21 +204,11 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id/rename`,
     {
       schema: {
-        tags: ["Documents"],
-        summary: "Rename document",
+        
+        
         params: documentIdParamsSchema,
         body: renameDocumentSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: [
         validateParams(documentIdParamsSchema),

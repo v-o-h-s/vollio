@@ -29,22 +29,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/`,
     {
       schema: {
-        tags: ["Folders"],
-        summary: "Get all user folders",
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: {
-                type: "array",
-                items: { type: "object", additionalProperties: true },
-              },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
+        
+        
       },
     },
     async (request, reply) => {
@@ -60,20 +47,10 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/`,
     {
       schema: {
-        tags: ["Folders"],
-        summary: "Create a new folder",
+        
+        
         body: createFolderSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateBody(createFolderSchema),
     },
@@ -90,20 +67,10 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       schema: {
-        tags: ["Folders"],
-        summary: "Get folder by ID",
+        
+        
         params: folderIdParamsSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateParams(folderIdParamsSchema),
     },
@@ -120,21 +87,11 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       schema: {
-        tags: ["Folders"],
-        summary: "Update folder",
+        
+        
         params: folderIdParamsSchema,
         body: updateFolderSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: [
         validateParams(folderIdParamsSchema),
@@ -157,21 +114,11 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       schema: {
-        tags: ["Folders"],
-        summary: "Delete folder",
+        
+        
         params: folderIdParamsSchema,
         querystring: deleteFolderQuerySchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "null" },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: [
         validateParams(folderIdParamsSchema),

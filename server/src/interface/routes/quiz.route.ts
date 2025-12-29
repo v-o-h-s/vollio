@@ -21,20 +21,10 @@ const quizHandler: FastifyPluginAsync = async (
     `${opts.prefix}`,
     {
       schema: {
-        tags: ["Quizzes"],
-        summary: "Create a new quiz",
+        
+        
         body: createQuizSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateBody(createQuizSchema),
     },
@@ -48,20 +38,10 @@ const quizHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       schema: {
-        tags: ["Quizzes"],
-        summary: "Get quiz by ID",
+        
+        
         params: quizIdParamsSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateParams(quizIdParamsSchema),
     },
@@ -75,20 +55,10 @@ const quizHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       schema: {
-        tags: ["Quizzes"],
-        summary: "Delete quiz by ID",
+        
+        
         params: quizIdParamsSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "null" },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateParams(quizIdParamsSchema),
     },
@@ -102,22 +72,9 @@ const quizHandler: FastifyPluginAsync = async (
     `${opts.prefix}`,
     {
       schema: {
-        tags: ["Quizzes"],
-        summary: "Get all user quizzes",
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: {
-                type: "array",
-                items: { type: "object", additionalProperties: true },
-              },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
+        
+        
       },
     },
     async (request, reply) => {

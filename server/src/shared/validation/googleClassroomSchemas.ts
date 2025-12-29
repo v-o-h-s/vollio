@@ -137,22 +137,3 @@ export const ClassroomCourseWithContentResponseSchema = {
   required: ["id", "name", "content"], // Add other required fields as needed based on ClassroomCourse
   additionalProperties: true,
 };
-
-// Generic API Response Schema Wrapper
-export const createApiResponseSchema = (dataSchema: any) => ({
-  type: "object",
-  properties: {
-    success: { type: "boolean" },
-    message: { type: "string" },
-    data: dataSchema,
-    error: {
-      type: "object",
-      nullable: true,
-      properties: {
-        message: { type: "string" },
-        code: { type: "string" },
-      },
-    },
-  },
-  required: ["success", "message"],
-});

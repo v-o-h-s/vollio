@@ -27,20 +27,10 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/`,
     {
       schema: {
-        tags: ["Flashcards"],
-        summary: "Create flashcards set manually",
+        
+        
         body: createManualFlashCardsSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateBody(createManualFlashCardsSchema),
     },
@@ -57,20 +47,10 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/generate-from-document`,
     {
       schema: {
-        tags: ["Flashcards"],
-        summary: "Generate flashcards set using AI",
+        
+        
         body: createFlashCardsSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateBody(createFlashCardsSchema),
     },
@@ -86,20 +66,10 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       schema: {
-        tags: ["Flashcards"],
-        summary: "Get flashcards set by ID",
+        
+        
         params: flashCardsSetIdParamsSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "object", additionalProperties: true },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateParams(flashCardsSetIdParamsSchema),
     },
@@ -115,8 +85,8 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/document/:documentId`,
     {
       schema: {
-        tags: ["Flashcards"],
-        summary: "Get flashcards sets by Document ID",
+        
+        
         params: {
           type: "object",
           properties: {
@@ -124,20 +94,7 @@ const flashcardsHandler: FastifyPluginAsync = async (
           },
           required: ["documentId"],
         },
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: {
-                type: "array",
-                items: { type: "object", additionalProperties: true },
-              },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
     },
     async (request, reply) => {
@@ -152,20 +109,10 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       schema: {
-        tags: ["Flashcards"],
-        summary: "Delete flashcards set",
+        
+        
         params: flashCardsSetIdParamsSchema,
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: { type: "null" },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
       },
       preHandler: validateParams(flashCardsSetIdParamsSchema),
     },
@@ -181,22 +128,9 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/`,
     {
       schema: {
-        tags: ["Flashcards"],
-        summary: "Get all user flashcards sets",
-        response: {
-          200: {
-            type: "object",
-            properties: {
-              success: { type: "boolean" },
-              message: { type: "string" },
-              data: {
-                type: "array",
-                items: { type: "object", additionalProperties: true },
-              },
-              error: { type: "object", nullable: true },
-            },
-          },
-        },
+        
+        
+        
       },
     },
     async (request, reply) => {

@@ -8,7 +8,6 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { containerPlugin } from "./plugins/container";
 import { loggerConfig } from "./shared/utils/logger";
 import { authPlugin } from "./plugins/auth";
-import swaggerPlugin from "./plugins/swagger";
 import { errorHandler } from "./shared/utils/errorHanlder";
 import { noteRoutes } from "./interface/routes/note.route";
 import { fastifyAwilixPlugin } from "@fastify/awilix";
@@ -74,9 +73,6 @@ app.register(fastifyAwilixPlugin, {
 // Register our container configuration after Awilix
 
 app.register(containerPlugin);
-
-// Register swagger plugin (before routes, but after basic plugins)
-app.register(swaggerPlugin);
 
 // Register auth plugin globally (it will handle public vs protected routes)
 app.register(authPlugin);
