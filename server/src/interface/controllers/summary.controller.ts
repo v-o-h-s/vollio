@@ -113,8 +113,18 @@ export class SummaryController {
       reply.status(401).send({ error: "Unauthorized" });
       return;
     }
+
+    const documentId = request.query.documentId;
+    if (!documentId || documentId === "undefined") {
+      reply.status(400).send({
+        success: false,
+        error: "documentId is required and must be a valid UUID",
+      });
+      return;
+    }
+
     const summaries = await this.getSummariesByDocumentIdUseCase.execute(
-      request.query.documentId
+      documentId
     );
     ResponseFormatter.success(
       reply,

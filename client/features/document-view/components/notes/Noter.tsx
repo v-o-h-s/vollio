@@ -37,9 +37,13 @@ export default function Noter({ document }: { document: DocumentDetails }) {
     setTabs,
   } = useViewer();
 
-  const { summary, generateSummary, isGenerating } = useSummaryActions(
-    document.id
-  );
+  const { summaryNote, generateSummary, isGenerating } = useSummaryActions({
+    documentId: document.id,
+    onSummaryNoteCreated: (noteId) => {
+      // Open the summary note tab after it's created
+      handleNoteCardClick(noteId);
+    },
+  });
 
   if (isLoading) {
     return (
@@ -144,35 +148,38 @@ export default function Noter({ document }: { document: DocumentDetails }) {
                     className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
                   />
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={generateSummary}
-                  disabled={isGenerating}
-                  className="shrink-0 gap-2 border-primary/20 hover:border-primary/50 hover:bg-primary/5"
-                  title="Generate AI Summary"
-                >
-                  <Sparkles
-                    className={`w-4 h-4 text-primary ${
-                      isGenerating ? "animate-spin" : ""
-                    }`}
-                  />
-                  <span>Generate Summary</span>
-                </Button>
               </div>
             </div>
 
-            {summary && (
-              <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/10 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-bold text-primary flex items-center gap-2 uppercase tracking-wider">
-                    <FileText className="w-4 h-4" />
-                    Document Summary
-                  </h3>
-                </div>
-                <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
-                  {summary.text}
-                </div>
+            {/* Show Generate Summary button only when no summary note exists */}
+            {!summaryNote && (
+              <div className="mb-6">
+                <Button
+                  onClick={generateSummary}
+                  disabled={isGenerating}
+                  className="w-full h-auto py-4 px-6 bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 border-2 border-primary/30 hover:border-primary/50 text-primary transition-all duration-300 shadow-sm hover:shadow-md group"
+                  variant="outline"
+                >
+                  <div className="flex items-center justify-center gap-3 w-full">
+                    <Sparkles
+                      className={`w-5 h-5 ${
+                        isGenerating
+                          ? "animate-spin"
+                          : "group-hover:scale-110 transition-transform"
+                      }`}
+                    />
+                    <div className="flex flex-col items-start">
+                      <span className="text-base font-semibold">
+                        {isGenerating
+                          ? "Generating Summary..."
+                          : "Generate Summary"}
+                      </span>
+                      <span className="text-xs text-muted-foreground font-normal">
+                        AI-powered document summary
+                      </span>
+                    </div>
+                  </div>
+                </Button>
               </div>
             )}
 
