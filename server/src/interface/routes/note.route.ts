@@ -8,14 +8,13 @@ import fp from "fastify-plugin";
 import {
   validateBody,
   validateParams,
+  createApiResponseSchema,
 } from "../../shared/validation/validator";
+import { CreateNoteDTO, UpdateNoteDTO, NoteIdParams } from "@vollio/shared";
 import {
   createNoteSchema,
   updateNoteSchema,
   noteIdParamsSchema,
-  CreateNoteDTO,
-  UpdateNoteDTO,
-  NoteIdParams,
 } from "../../shared/validation/noteSchemas";
 
 const noteRoutesHandler: FastifyPluginAsync = async (
@@ -26,6 +25,17 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: CreateNoteDTO }>(
     `${options.prefix}/`,
     {
+      schema: {
+        tags: ["Notes"],
+        summary: "Create a new note",
+        body: createNoteSchema,
+        response: {
+          200: createApiResponseSchema({
+            type: "object",
+            additionalProperties: true,
+          }),
+        },
+      },
       preHandler: validateBody(createNoteSchema),
     },
     async (request, reply) => {
@@ -35,15 +45,41 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   );
 
   // Get all notes for the authenticated user
-  fastify.get("/api/v1/notes/", async (request, reply) => {
-    const noteController = request.diScope.resolve("noteController");
-    return noteController.getAllNotes(request, reply);
-  });
+  fastify.get(
+    `${options.prefix}/`,
+    {
+      schema: {
+        tags: ["Notes"],
+        summary: "Get all user notes",
+        response: {
+          200: createApiResponseSchema({
+            type: "array",
+            items: { type: "object", additionalProperties: true },
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const noteController = request.diScope.resolve("noteController");
+      return noteController.getAllNotes(request, reply);
+    }
+  );
 
   // Get a specific note by ID
   fastify.get<{ Params: NoteIdParams }>(
     `${options.prefix}/:id`,
     {
+      schema: {
+        tags: ["Notes"],
+        summary: "Get note by ID",
+        params: noteIdParamsSchema,
+        response: {
+          200: createApiResponseSchema({
+            type: "object",
+            additionalProperties: true,
+          }),
+        },
+      },
       preHandler: validateParams(noteIdParamsSchema),
     },
     async (request, reply) => {
@@ -56,6 +92,18 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   fastify.put<{ Params: NoteIdParams; Body: UpdateNoteDTO }>(
     `${options.prefix}/:id`,
     {
+      schema: {
+        tags: ["Notes"],
+        summary: "Update note",
+        params: noteIdParamsSchema,
+        body: updateNoteSchema,
+        response: {
+          200: createApiResponseSchema({
+            type: "object",
+            additionalProperties: true,
+          }),
+        },
+      },
       preHandler: [
         validateParams(noteIdParamsSchema),
         validateBody(updateNoteSchema),
@@ -71,6 +119,14 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: NoteIdParams }>(
     `${options.prefix}/:id`,
     {
+      schema: {
+        tags: ["Notes"],
+        summary: "Delete note",
+        params: noteIdParamsSchema,
+        response: {
+          200: createApiResponseSchema({ type: "null" }),
+        },
+      },
       preHandler: validateParams(noteIdParamsSchema),
     },
     async (request, reply) => {

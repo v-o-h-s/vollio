@@ -120,4 +120,35 @@ export class GenerativeAiService implements IGenerativeAiService {
       return { flashCards: [] };
     }
   }
+
+  async generateSummary(prompt: string): Promise<{ summary: string }> {
+    try {
+      const completion = await openRouter.chat.send({
+        model: "google/gemini-2.0-flash-001",
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        stream: false,
+      });
+
+      const content = completion.choices?.[0]?.message?.content || "{}";
+
+      const contentStr = String(content);
+      const cleanContent = contentStr
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+      const parsed = JSON.parse(cleanContent);
+
+      return {
+        summary: typeof parsed.summary === "string" ? parsed.summary : "",
+      };
+    } catch (error) {
+      this.logger.error("GenerativeAiService.generateSummary failed: " + error);
+      return { summary: "" };
+    }
+  }
 }

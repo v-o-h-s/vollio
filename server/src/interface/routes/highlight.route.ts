@@ -30,6 +30,25 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Querystring: HighlightDocumentIdParams }>(
     `${_options.prefix}`,
     {
+      schema: {
+        tags: ["Highlights"],
+        summary: "Get highlights by Document ID",
+        querystring: highlightDocumentIdParamsSchema,
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+              data: {
+                type: "array",
+                items: { type: "object", additionalProperties: true },
+              },
+              error: { type: "object", nullable: true },
+            },
+          },
+        },
+      },
       preHandler: validateQuery(highlightDocumentIdParamsSchema),
     },
     async (request, reply) => {
@@ -44,6 +63,22 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: CreateHighlightDTO }>(
     `${_options.prefix}`,
     {
+      schema: {
+        tags: ["Highlights"],
+        summary: "Create a new highlight",
+        body: createHighlightSchema,
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+              data: { type: "object", additionalProperties: true },
+              error: { type: "object", nullable: true },
+            },
+          },
+        },
+      },
       preHandler: validateBody(createHighlightSchema),
     },
     async (request, reply) => {
@@ -58,6 +93,22 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: HighlightIdParams }>(
     `${_options.prefix}/:id`,
     {
+      schema: {
+        tags: ["Highlights"],
+        summary: "Get highlight by ID",
+        params: highlightIdParamsSchema,
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+              data: { type: "object", additionalProperties: true },
+              error: { type: "object", nullable: true },
+            },
+          },
+        },
+      },
       preHandler: validateParams(highlightIdParamsSchema),
     },
     async (request, reply) => {
@@ -75,6 +126,23 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   }>(
     `${_options.prefix}/:id`,
     {
+      schema: {
+        tags: ["Highlights"],
+        summary: "Update highlight",
+        params: highlightIdParamsSchema,
+        body: updateHighlightSchema,
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+              data: { type: "object", additionalProperties: true },
+              error: { type: "object", nullable: true },
+            },
+          },
+        },
+      },
       preHandler: [
         validateParams(highlightIdParamsSchema),
         validateBody(updateHighlightSchema),
@@ -92,6 +160,22 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: HighlightIdParams }>(
     `${_options.prefix}/:id`,
     {
+      schema: {
+        tags: ["Highlights"],
+        summary: "Delete highlight",
+        params: highlightIdParamsSchema,
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+              data: { type: "null" },
+              error: { type: "object", nullable: true },
+            },
+          },
+        },
+      },
       preHandler: validateParams(highlightIdParamsSchema),
     },
     async (request, reply) => {

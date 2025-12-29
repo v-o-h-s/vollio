@@ -55,9 +55,8 @@ export function NoteEditorTab({
             content: noteData.content,
           }}
           documentId={documentId}
-          autoSave={isActive} // Only auto-save when this tab is active
+          autoSave={isActive}
           autoSaveDelay={500}
-          lastUpdatedAt={noteData.updatedAt}
         />
       </div>
     </div>

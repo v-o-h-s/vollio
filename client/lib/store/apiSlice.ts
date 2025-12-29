@@ -28,7 +28,7 @@ const baseQuery = fetchBaseQuery({
       endpoint !== "uploadDocument" &&
       endpoint !== "uploadDocument" &&
       endpoint !== "deleteDocument" &&
-      endpoint !== "deleteFolder"&&
+      endpoint !== "deleteFolder" &&
       endpoint !== "deleteNote"
     ) {
       headers.set("Content-Type", "application/json");
@@ -126,7 +126,7 @@ export const {
   useExplainTextQuery,
   useLazyExplainTextQuery,
   useAssistantChatMutation,
-
+  useGenerateSummaryMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

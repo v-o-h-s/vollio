@@ -139,13 +139,20 @@ export const ClassroomCourseWithContentResponseSchema = {
 };
 
 // Generic API Response Schema Wrapper
-export const createApiResponseSchema = <T>(dataSchema: any) => ({
+export const createApiResponseSchema = (dataSchema: any) => ({
   type: "object",
   properties: {
     success: { type: "boolean" },
     message: { type: "string" },
     data: dataSchema,
-    error: { type: "string", nullable: true },
+    error: {
+      type: "object",
+      nullable: true,
+      properties: {
+        message: { type: "string" },
+        code: { type: "string" },
+      },
+    },
   },
-  required: ["success", "message", "data", "error"],
+  required: ["success", "message"],
 });

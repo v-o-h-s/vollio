@@ -83,3 +83,31 @@ Generates a response from the AI assistant based on the provided message and his
       "error": null
     }
     ```
+
+## 3. Generate Summary
+
+Generates an AI summary for the provided document.
+
+- **URL**: `/generate-summary`
+- **Method**: `POST`
+- **Auth Required**: Yes
+- **Body Parameters**:
+
+  - `documentId` (string): The document ID to summarize.
+
+- **Success Response**:
+
+  - **Code**: 200 OK
+  - **Content**:
+    ```json
+    {
+      "success": true,
+      "message": "Summary generated successfully",
+      "data": {
+        "id": "string",
+        "documentId": "string",
+        "text": "string"
+      },
+      "error": null
+    }
+    ```

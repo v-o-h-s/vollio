@@ -4,10 +4,15 @@ import {
   FastifyPluginOptions,
 } from "fastify";
 import fp from "fastify-plugin";
-import { ExplainTextDTO, AssistantDTO } from "@vollio/shared";
+import {
+  ExplainTextDTO,
+  AssistantDTO,
+  GenerateSummaryDTO,
+} from "@vollio/shared";
 import {
   ExplainTextDTOSchema,
   AssistantDTOSchema,
+  GenerateSummaryDTOSchema,
 } from "../../shared/validation/aiSchemas";
 import { validateBody } from "../../shared/validation/validator";
 
@@ -18,6 +23,28 @@ const aiRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: ExplainTextDTO }>(
     `${options.prefix}/explain`,
     {
+      schema: {
+        tags: ["AI"],
+        summary: "Explain selected text using AI",
+        body: ExplainTextDTOSchema,
+        response: {
+          200: {
+            type: "object",
+            properties: {
+              success: { type: "boolean" },
+              message: { type: "string" },
+              data: {
+                type: "object",
+                properties: {
+                  title: { type: "string" },
+                  content: { type: "object", additionalProperties: true },
+                },
+              },
+              error: { type: "object", nullable: true },
+            },
+          },
+        },
+      },
       preHandler: validateBody(ExplainTextDTOSchema),
     },
     async (request, reply) => {
@@ -55,6 +82,22 @@ const aiRoutesHandler: FastifyPluginAsync = async (
     async (request, reply) => {
       const aiController = request.diScope.resolve("aiController");
       return aiController.assistantChat(request, reply);
+    }
+  );
+
+  fastify.post<{ Body: GenerateSummaryDTO }>(
+    `${options.prefix}/generate-summary`,
+    {
+      schema: {
+        tags: ["AI"],
+        summary: "Generate AI Summary for a document",
+        body: GenerateSummaryDTOSchema,
+      },
+      preHandler: validateBody(GenerateSummaryDTOSchema),
+    },
+    async (request, reply) => {
+      const aiController = request.diScope.resolve("aiController");
+      return aiController.generateSummary(request, reply);
     }
   );
 };

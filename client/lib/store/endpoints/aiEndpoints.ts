@@ -4,6 +4,8 @@ import {
   ExplainTextResponseData,
   AssistantDTO,
   AssistantResponseData,
+  GenerateSummaryDTO,
+  GenerateSummaryResponseData,
 } from "@vollio/shared";
 
 export const aiEndpoints = (builder: ApiBuilder) => ({
@@ -37,8 +39,27 @@ export const aiEndpoints = (builder: ApiBuilder) => ({
           (response.error as any)?.message || "Failed to get assistant response"
         );
       }
-      console.log("AssistantResponseData", response.data)
-      return response.data ;
+      console.log("AssistantResponseData", response.data);
+      return response.data;
+    },
+  }),
+
+  generateSummary: builder.mutation<
+    GenerateSummaryResponseData,
+    GenerateSummaryDTO
+  >({
+    query: (data) => ({
+      url: "ai/generate-summary",
+      method: "POST",
+      body: data,
+    }),
+    transformResponse: (response: ApiResponse<GenerateSummaryResponseData>) => {
+      if (!response.success || !response.data) {
+        throw new Error(
+          (response.error as any)?.message || "Failed to generate summary"
+        );
+      }
+      return response.data;
     },
   }),
 });

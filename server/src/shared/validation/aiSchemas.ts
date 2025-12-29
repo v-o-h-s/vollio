@@ -1,5 +1,9 @@
 import { JSONSchemaType } from "ajv";
-import { ExplainTextDTO, AssistantDTO } from "@vollio/shared";
+import {
+  ExplainTextDTO,
+  AssistantDTO,
+  GenerateSummaryDTO,
+} from "@vollio/shared";
 
 export const ExplainTextDTOSchema: JSONSchemaType<ExplainTextDTO> = {
   type: "object",
@@ -39,5 +43,14 @@ export const AssistantDTOSchema: JSONSchemaType<AssistantDTO> = {
     },
   },
   required: ["message"],
+  additionalProperties: false,
+};
+
+export const GenerateSummaryDTOSchema: JSONSchemaType<GenerateSummaryDTO> = {
+  type: "object",
+  properties: {
+    documentId: { type: "string" },
+  },
+  required: ["documentId"],
   additionalProperties: false,
 };

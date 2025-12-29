@@ -1,17 +1,4 @@
 "use client";
-
-// SSR safeguard for pdf.js evaluation
-if (typeof window === "undefined") {
-  (global as any).window = {};
-  (global as any).document = {
-    documentElement: {
-      style: {},
-    },
-  };
-  (global as any).navigator = {
-    userAgent: "",
-  };
-}
 import "@/app/styles/components/betterViewer.css";
 import { ChevronUp, MessageSquare, FileText } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";

@@ -12,17 +12,32 @@ function buildValidationPayload(errors: any[] = []) {
   for (const e of errors) {
     // e.instancePath is like '/user/email' or '/email' or '' for root
     // Transform to a dot.path like 'user.email' or 'email' or ''
-    const rawPath = typeof e.instancePath === 'string' ? e.instancePath.replace(/^\//, '') : '';
-    const path = rawPath.replace(/\//g, '.') || (e.params && e.params.missingProperty ? String(e.params.missingProperty) : 'body');
-    const msg = e.message ? String(e.message) : (e.keyword ? `${e.keyword} validation failed` : 'invalid');
+    const rawPath =
+      typeof e.instancePath === "string"
+        ? e.instancePath.replace(/^\//, "")
+        : "";
+    const path =
+      rawPath.replace(/\//g, ".") ||
+      (e.params && e.params.missingProperty
+        ? String(e.params.missingProperty)
+        : "body");
+    const msg = e.message
+      ? String(e.message)
+      : e.keyword
+      ? `${e.keyword} validation failed`
+      : "invalid";
 
     if (!fieldErrors[path]) fieldErrors[path] = [];
     fieldErrors[path].push(msg);
   }
 
   const firstPath = Object.keys(fieldErrors)[0];
-  const firstMsg = firstPath ? fieldErrors[firstPath][0] : 'invalid request payload';
-  const message = firstPath ? `Invalid input at '${firstPath}': ${firstMsg}` : `Invalid input: ${firstMsg}`;
+  const firstMsg = firstPath
+    ? fieldErrors[firstPath][0]
+    : "invalid request payload";
+  const message = firstPath
+    ? `Invalid input at '${firstPath}': ${firstMsg}`
+    : `Invalid input: ${firstMsg}`;
 
   return { message, fieldErrors, errors };
 }
@@ -40,7 +55,9 @@ export function validateBody<T>(schema: JSONSchemaType<T>) {
     const valid = validate(request.body);
 
     if (!valid) {
-      const { message, fieldErrors, errors } = buildValidationPayload(validate.errors as any[]);
+      const { message, fieldErrors, errors } = buildValidationPayload(
+        validate.errors as any[]
+      );
 
       const err: ErrorObject = {
         name: "ValidationError",
@@ -63,7 +80,9 @@ export function validateParams<T>(schema: JSONSchemaType<T>) {
     const valid = validate(request.params);
 
     if (!valid) {
-      const { message, fieldErrors, errors } = buildValidationPayload(validate.errors as any[]);
+      const { message, fieldErrors, errors } = buildValidationPayload(
+        validate.errors as any[]
+      );
 
       const err: ErrorObject = {
         name: "ValidationError",
@@ -86,7 +105,9 @@ export function validateQuery<T>(schema: JSONSchemaType<T>) {
     const valid = validate(request.query);
 
     if (!valid) {
-      const { message, fieldErrors, errors } = buildValidationPayload(validate.errors as any[]);
+      const { message, fieldErrors, errors } = buildValidationPayload(
+        validate.errors as any[]
+      );
 
       const err: ErrorObject = {
         name: "ValidationError",
@@ -101,3 +122,20 @@ export function validateQuery<T>(schema: JSONSchemaType<T>) {
     }
   };
 }
+export const createApiResponseSchema = (dataSchema: any) => ({
+  type: "object",
+  properties: {
+    success: { type: "boolean" },
+    message: { type: "string" },
+    data: dataSchema,
+    error: {
+      type: "object",
+      nullable: true,
+      properties: {
+        message: { type: "string" },
+        code: { type: "string" },
+      },
+    },
+  },
+  required: ["success", "message"],
+});

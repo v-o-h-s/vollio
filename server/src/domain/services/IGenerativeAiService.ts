@@ -16,4 +16,5 @@ export interface IGenerativeAiService {
   generateFlashCards(
     prompt: string
   ): Promise<{ flashCards: any[]; name?: string; summary?: string }>;
+  generateSummary(prompt: string): Promise<{ summary: string }>;
 }

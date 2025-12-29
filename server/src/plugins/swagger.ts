@@ -76,17 +76,11 @@ export default fp(async (fastify: FastifyInstance) => {
       ],
       components: {
         securitySchemes: {
-          bearerAuth: {
-            type: "http",
-            scheme: "bearer",
-            bearerFormat: "JWT",
-            description: "JWT Bearer token for authentication",
-          },
           cookieAuth: {
             type: "apiKey",
             in: "cookie",
-            name: "session",
-            description: "Session cookie for authentication",
+            name: "sb-access-token",
+            description: "Supabase access token cookie (prefixed with sb-)",
           },
         },
         schemas: {
@@ -95,6 +89,11 @@ export default fp(async (fastify: FastifyInstance) => {
           Timestamp: sharedSchemas.Timestamp,
         },
       },
+      security: [
+        {
+          cookieAuth: [],
+        },
+      ],
       tags: [
         {
           name: "Notes",
@@ -121,13 +120,17 @@ export default fp(async (fastify: FastifyInstance) => {
           description:
             "Generative AI endpoints for explanation and content generation",
         },
+        {
+          name: "Settings",
+          description: "User settings management endpoints",
+        },
       ],
     },
   });
 
   // Register Swagger UI
   await fastify.register(fastifySwaggerUi, {
-    routePrefix: "/api/docs",
+    routePrefix: "/api/v1/docs",
     uiConfig: {
       docExpansion: "list",
       deepLinking: false,

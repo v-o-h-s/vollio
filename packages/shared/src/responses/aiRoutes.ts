@@ -22,3 +22,16 @@ export interface AssistantResponse {
   data: AssistantResponseData | null;
   error: any;
 }
+
+export interface GenerateSummaryResponseData {
+  id: string;
+  documentId: string;
+  text: string;
+}
+
+export interface GenerateSummaryResponse {
+  success: boolean;
+  message: string;
+  data: GenerateSummaryResponseData | null;
+  error: any;
+}
