@@ -7,7 +7,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tag as TagIcon, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { MyHighlight } from "@/lib/types/highlight";
+import type { MyHighlight } from "@/features/document-view/types/highlight";
 import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
 import { TagSelectionDialog } from "./TagSelectionDialog";
 import { Button } from "@/components/ui/button";

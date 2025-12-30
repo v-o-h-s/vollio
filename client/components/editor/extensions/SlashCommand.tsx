@@ -190,9 +190,7 @@ export const slashCommandItems: SlashCommandItem[] = [
         .setInsight({
           selectedText: "Selected text from source",
           metadata: {
-            documentName: "Source Document",
             pageNumber: 1,
-            createdAt: new Date(),
           },
           content: [
             {

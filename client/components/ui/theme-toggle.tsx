@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun } from "lucide-react";
+import { LuMoon as Moon, LuSun as Sun } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -112,7 +112,6 @@ export function ThemeToggle({
           <Moon className="mr-2 h-4 w-4" />
           <span>Dark</span>
         </DropdownMenuItem>
-        
       </DropdownMenuContent>
     </DropdownMenu>
   );

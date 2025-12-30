@@ -17,9 +17,8 @@ import { DocumentLoading } from "@/components/ui/DocumentLoading";
 import { useGetDocumentHighlightsQuery } from "@/lib/store/apiSlice";
 import { useSelection } from "@/features/document-view/hooks/useTextSelection";
 import { useHighlightActions } from "@/features/document-view/hooks/useHighlightActions";
-import { MyHighlight } from "@/lib/types/highlight";
+import { MyHighlight } from "@/features/document-view/types/highlight";
 import { ViewerHeader } from "./viewheader";
-import { useSummaryActions } from "@/features/document-view/hooks/useSummaryActions";
 import { ViewerFloatingActions } from "./ViewerFloatingActions";
 import { DocumentDetails } from "../types/document";
 export const BetterViewer = ({
@@ -44,15 +43,11 @@ export const BetterViewer = ({
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isTagSidebarOpen, setIsTagSidebarOpen] = useState(false);
-  const [isExplanationBoxOpen, setIsExplanationBoxOpen] = useState(false);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const [zoomValue, setZoomValue] = useState<PdfScaleValue>("page-width");
 
   /** Refs for PdfHighlighter utilities */
   const highlighterUtilsRef = useRef<PdfHighlighterUtils | null>(null);
-
-  // Summary actions hook
-  const { summary } = useSummaryActions(document.id);
 
   const {
     isTagDialogOpen,
@@ -63,7 +58,7 @@ export const BetterViewer = ({
     handleCopy,
     handleAddTag,
     handleExplain,
-    onSelectionFinished,
+    handleAddInsight,
   } = useSelection({
     highlighterUtilsRef,
     document,
@@ -154,6 +149,42 @@ export const BetterViewer = ({
     };
   }, []);
 
+  // Listen for scroll to position events from Insight component
+  useEffect(() => {
+    const handleScrollToPdfPosition = (
+      event: CustomEvent<{ position: any }>
+    ) => {
+      const { position } = event.detail;
+      if (!position || !highlighterUtilsRef.current) return;
+
+      // First, go to the correct page
+      const viewer = highlighterUtilsRef.current.getViewer();
+      if (viewer && position.boundingRect?.pageNumber) {
+        viewer.currentPageNumber = position.boundingRect.pageNumber;
+
+        // Then scroll to the highlight position using a temporary highlight
+        setTimeout(() => {
+          highlighterUtilsRef.current?.scrollToHighlight({
+            id: "temp-scroll-highlight",
+            position: position,
+          } as any);
+        }, 100);
+      }
+    };
+
+    window.addEventListener(
+      "scrollToPdfPosition",
+      handleScrollToPdfPosition as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        "scrollToPdfPosition",
+        handleScrollToPdfPosition as EventListener
+      );
+    };
+  }, []);
+
   const handleScrollToHighlight = (highlight: MyHighlight) => {
     if (highlighterUtilsRef.current) {
       highlighterUtilsRef.current.scrollToHighlight(highlight);
@@ -216,6 +247,7 @@ export const BetterViewer = ({
                   onAddTag={handleAddTag}
                   onAddNote={handleAddNote}
                   onExplain={handleExplain}
+                  onAddInsight={handleAddInsight}
                 />
               }
               highlights={highlights}

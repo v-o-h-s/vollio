@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Bot, User, Copy, Plus, Trash2, Check, Sparkles } from "lucide-react";
+import {
+  LuUser as User,
+  LuCopy as Copy,
+  LuPlus as Plus,
+  LuTrash2 as Trash2,
+  LuCheck as Check,
+} from "react-icons/lu";
+import { RiRobot3Line as Sparkles } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 import { NotionEditor } from "@/components/editor/NotionEditor";
 import type { JSONContent } from "@tiptap/core";

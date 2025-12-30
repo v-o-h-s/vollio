@@ -2,7 +2,13 @@ import { DocumentDocument } from "@/lib/types/document";
 import NotesTabsManager, { Tab } from "./NotesTabsManager";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Home, RefreshCw, Sparkles, FileText } from "lucide-react";
+import {
+  LuPlus as Plus,
+  LuRefreshCw as RefreshCw,
+  LuFileText as FileText,
+} from "react-icons/lu";
+import { FiHome as Home } from "react-icons/fi";
+import { RiRobot3Line as Sparkles } from "react-icons/ri";
 import {
   useGetNotesQuery,
   useDeleteNoteMutation,

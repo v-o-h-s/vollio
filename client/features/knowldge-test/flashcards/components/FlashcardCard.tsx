@@ -13,7 +13,12 @@ import {
   Button,
 } from "@/components/ui";
 import Link from "next/link";
-import { GraduationCap, Layers, MoreVertical, Trash2 } from "lucide-react";
+import {
+  LuGraduationCap as GraduationCap,
+  LuLayers as Layers,
+  LuTrash2 as Trash2,
+} from "react-icons/lu";
+import { FiMoreVertical as MoreVertical } from "react-icons/fi";
 import { FlashCardsSetSummary } from "@vollio/shared";
 import { format } from "date-fns";
 

@@ -6,10 +6,9 @@ import { NodeViewWrapper, NodeViewContent } from "@tiptap/react";
 import { Sparkles, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Commands, JSONContent } from "@tiptap/core";
+
 interface Metadata {
-  documentName: string;
   pageNumber: number;
-  createdAt: Date;
 }
 
 interface InsightAttributes {
@@ -28,7 +27,7 @@ declare module "@tiptap/core" {
 }
 
 export const InsightComponent = (props: any) => {
-  const { node, updateAttributes, deleteNode, editor } = props;
+  const { node, deleteNode, editor } = props;
   const { selectedText, metadata } = node.attrs;
 
   return (
@@ -56,21 +55,12 @@ export const InsightComponent = (props: any) => {
                   AI Insight
                 </span>
                 <span className="text-[10px] font-medium text-muted-foreground/60 leading-none">
-                  Source: {metadata?.documentName || "Unknown"} • Page{" "}
-                  {metadata?.pageNumber || "N/A"}
+                  Page {metadata?.pageNumber || "N/A"}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-background border border-border shadow-xs hover:bg-muted/50 text-[10px] font-medium text-foreground/70 transition-colors"
-                title="View original source"
-              >
-                <span>View Original</span>
-                <ExternalLink size={10} className="opacity-70" />
-              </button>
-
               {editor.isEditable && (
                 <button
                   onClick={deleteNode}
@@ -172,7 +162,7 @@ export const Insight = Node.create({
     return {
       setInsight:
         (attributes: InsightAttributes) =>
-        ({ commands }) => {
+        ({ commands }: { commands: any }) => {
           return commands.insertContent({
             type: this.name,
             attrs: {

@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ZoomIn, ZoomOut } from "lucide-react";
+import { LuZoomIn as ZoomIn, LuZoomOut as ZoomOut } from "react-icons/lu";
 
 interface ZoomControlsProps {
   documentViewerRef?: React.RefObject<any>;

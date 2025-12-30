@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { MyHighlight } from "@/lib/types/highlight";
+import { MyHighlight } from "@/features/document-view/types/highlight";
 import {
   Accordion,
   AccordionContent,

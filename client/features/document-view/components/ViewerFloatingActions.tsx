@@ -1,5 +1,6 @@
 import React from "react";
-import { Bot, NotebookPen, X } from "lucide-react";
+import { LuNotebookPen as NotebookPen, LuX as X } from "react-icons/lu";
+import { RiRobot3Line as Bot } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 
 interface ViewerFloatingActionsProps {

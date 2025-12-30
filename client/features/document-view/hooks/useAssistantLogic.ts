@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { JSONContent } from "@tiptap/core";
-import { useAppSelector } from "@/lib/store/hooks";
 import { useAssistantChatMutation } from "@/lib/store/apiSlice";
 import { AssistantChatMessage } from "@vollio/shared";
 import { extractTextFromContent } from "../utils";
+import { Highlight } from "react-pdf-highlighter-extended-plus";
 
 export enum MessageSource {
   USER,
@@ -20,6 +20,7 @@ export interface Message {
     documentName: string;
     pageNumber: number;
     selectedText?: string;
+    position?: Highlight;
   };
 }
 
@@ -31,7 +32,12 @@ export function useAssistantLogic() {
 
   const addUserMessage = async (
     message: string,
-    metadata?: { documentName: string; pageNumber: number }
+    metadata?: {
+      documentName: string;
+      pageNumber: number;
+      selectedText?: string;
+      position?: Highlight;
+    }
   ) => {
     if (!message.trim()) return;
 

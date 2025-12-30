@@ -46,7 +46,7 @@ export interface Highlight {
 // Extend Highlight type to include color
 export interface MyHighlight extends Highlight {
   tags?: string[];
-  style?: "highlight" | "tagged";
+  style?: "highlight" | "tagged" | "insight";
   noteId?: string;
   color?: string;
 }
@@ -63,7 +63,7 @@ export interface SupabaseHighlightResponse {
   has_note: boolean;
   note_id?: string | null;
   tags?: string[] | null;
-  style?: "highlight" | "tagged" | null;
+  style?: "highlight" | "tagged" | "insight" | null;
   created_at: string;
   updated_at: string;
 }

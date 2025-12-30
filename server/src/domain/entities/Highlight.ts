@@ -6,7 +6,7 @@ export type HighlightType = "text" | "area";
 /**
  * Highlight visual style enum
  */
-export type HighlightStyle = "highlight" | "tagged";
+export type HighlightStyle = "highlight" | "tagged" | "insight";
 
 /**
  * Highlight content with optional text or image
@@ -106,7 +106,6 @@ export class Highlight {
   public getDocumentId(): string {
     return this.documentId;
   }
-
 
   /**
    * Get highlight type

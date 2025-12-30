@@ -1,7 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Filter, Brain, Layers, Search } from "lucide-react";
+import {
+  LuFilter as Filter,
+  LuBrain as Brain,
+  LuLayers as Layers,
+  LuSearch as Search,
+} from "react-icons/lu";
 import { Input } from "@/components/ui/input";
 
 import { CreateQuizResponse } from "@vollio/shared";

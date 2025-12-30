@@ -4,13 +4,13 @@ import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-  FileText,
-  ChevronDown,
-  Eye,
-  Home,
-  Tag as TagIcon,
-  MessageSquare,
-} from "lucide-react";
+  LuFileText as FileText,
+  LuChevronDown as ChevronDown,
+  LuEye as Eye,
+  LuTag as TagIcon,
+  LuMessageSquare as MessageSquare,
+} from "react-icons/lu";
+import { FiHome as Home } from "react-icons/fi";
 import {
   DropdownMenu,
   DropdownMenuContent,

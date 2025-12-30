@@ -138,7 +138,7 @@ export const createHighlightSchema: JSONSchemaType<CreateHighlightDTO> = {
     },
     style: {
       type: "string",
-      enum: ["highlight", "tagged"],
+      enum: ["highlight", "tagged", "insight"],
       nullable: true,
     },
   },

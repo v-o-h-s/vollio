@@ -1,5 +1,5 @@
 import { TextHighlight } from "react-pdf-highlighter-extended-plus";
-import { MyHighlight } from "@/lib/types/highlight";
+import { MyHighlight } from "@/features/document-view/types/highlight";
 import { useState } from "react";
 
 interface StandardHighlightProps {

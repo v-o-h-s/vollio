@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, SquarePen } from "lucide-react";
+import { LuSend as Send, LuSquarePen as SquarePen } from "react-icons/lu";
+import { RiRobot3Line as Bot } from "react-icons/ri";
 import { ChatMessage } from "./ChatMessage";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";

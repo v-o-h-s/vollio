@@ -1,4 +1,3 @@
-import { CreateHighlightDTO } from "@vollio/shared";
 import {
   useUpdateHighlightMutation,
   useCreateHighlightMutation,
@@ -9,8 +8,8 @@ import { PdfHighlighterUtils } from "react-pdf-highlighter-extended-plus";
 import { v4 as uuidv4 } from "uuid";
 import { DocumentDetails } from "@/features/document-view/types/document";
 import { useViewer } from "../context/ViewerContext";
-import { useAppSelector } from "@/lib/store/hooks";
-
+import { CreateHighlightDTO } from "@vollio/shared";
+import { toast } from "react-toastify";
 interface useSelectionProps {
   highlighterUtilsRef: React.RefObject<PdfHighlighterUtils | null>;
   document: DocumentDetails;
@@ -24,7 +23,6 @@ export function useSelection({
 }: useSelectionProps) {
   const { setIsAssistantOpen, addUserMessage } = useViewer();
 
-  // ... existing code
   const [createHighlight] = useCreateHighlightMutation();
   const [selection, setSelection] = useState<any>(null);
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
@@ -45,20 +43,41 @@ export function useSelection({
     setIsTagDialogOpen(true);
   };
 
+  // handle to add insight to selected text
+  const handleAddInsight = async () => {
+    const activeSelection = captureSelection();
+    if (!activeSelection) return;
+    const highlight: CreateHighlightDTO = {
+      id: uuidv4(),
+      documentId: document.id,
+      type: "text",
+      content: activeSelection.content,
+      position: activeSelection.position,
+      style: "insight",
+    };
+    try {
+      await createHighlight(highlight).unwrap();
+      toast.success("Insight added successfully")
+    } catch (error) {
+      console.log(error);
+    }
+    setSelection(null);
+  };
+
   const handleExplain = async () => {
     const activeSelection = captureSelection();
     if (!activeSelection || !activeSelection.content?.text) return;
     setIsAssistantOpen(true);
     if (!activeSelection.content.text.trim()) return;
 
-    const pageNumber = activeSelection.position.boundingRect.pageNumber;
     const documentName = document.name;
     const selectedText = activeSelection.content.text;
+    const position = activeSelection.position;
 
     addUserMessage(`Explain the following: "${selectedText}"`, {
       documentName,
-      pageNumber,
       selectedText,
+      position,
     });
   };
 
@@ -95,18 +114,6 @@ export function useSelection({
   const handleCreateHighlight = async () => {
     const activeSelection = captureSelection();
     if (!activeSelection) return;
-
-    const highlightId = uuidv4();
-    const newHighlightDto: CreateHighlightDTO = {
-      id: highlightId,
-      documentId: document.id,
-      type: activeSelection.content.image ? "area" : "text",
-      content: activeSelection.content,
-      position: activeSelection.position,
-      color: currentHighlightColor ?? "#FF0000",
-      hasNote: false,
-      noteId: null,
-    };
   };
 
   const handleAddNote = () => {
@@ -137,6 +144,7 @@ export function useSelection({
     handleCreateHighlight,
     handleAddNote,
     handleCopy,
+    handleAddInsight,
     handleExplain,
     onSelectionFinished,
   };

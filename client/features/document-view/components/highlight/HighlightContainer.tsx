@@ -20,7 +20,9 @@ import { CreateHighlightDTO } from "@vollio/shared";
 import { ContextMenu } from "./ContextMenu";
 import { StandardHighlight } from "./StandardHighlight";
 import { TaggedHighlight } from "../tags/TaggedHighlight";
-import { MyHighlight } from "@/lib/types/highlight";
+import { InsightHighlight } from "./InsightHighlight";
+import { MyHighlight } from "@/features/document-view/types/highlight";
+import { useViewer } from "../../context/ViewerContext";
 
 interface HighlightContainerProps {
   updateHighlight: (
@@ -34,9 +36,9 @@ export const HighlightContainer = ({
   updateHighlight,
   deleteHighlight,
 }: HighlightContainerProps) => {
+  // the hoook just change the key position from (x1,x2) to (top,bottom) and provide you with utils
   const { highlight, isScrolledTo } =
     useHighlightContainerContext<MyHighlight>();
-  // console.log(highlight);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -89,6 +91,22 @@ export const HighlightContainer = ({
             color={color}
             updateHighlight={updateHighlight}
             deleteHighlight={deleteHighlight}
+          />
+        );
+      case "insight":
+        return (
+          <InsightHighlight
+            highlight={highlight as any}
+            isScrolledTo={isScrolledTo}
+            color="#8B5CF6"
+            onNavigateToInsight={() => {
+              // Navigate to noter and show the associated note
+              // The noteId should be stored in the highlight
+              if (highlight.noteId) {
+                // This will be handled by the viewer context
+                console.log("Navigate to insight note:", highlight.noteId);
+              }
+            }}
           />
         );
       default: // "highlight"

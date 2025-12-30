@@ -3,13 +3,17 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { useParams } from "next/navigation";
 import { JSONContent } from "@tiptap/core";
+import { v4 as uuidv4 } from "uuid";
 import { Tab } from "../components/notes";
 import { Note } from "@/lib/types/editor";
 import { extractText } from "../utils";
+import { useCreateHighlightMutation } from "@/lib/store/apiSlice";
+import { CreateHighlightDTO } from "@vollio/shared";
 
 import { useViewerUI } from "../hooks/useViewerUI";
 import { useNoterLogic, HOME_TAB_ID } from "../hooks/useNoterLogic";
 import { useAssistantLogic, Message } from "../hooks/useAssistantLogic";
+import { Highlight } from "react-pdf-highlighter-extended-plus";
 
 export { HOME_TAB_ID };
 export type { Message };
@@ -51,8 +55,8 @@ interface ViewerContextType {
     message: string,
     metadata?: {
       documentName: string;
-      pageNumber: number;
       selectedText?: string;
+      position?: Highlight
     }
   ) => Promise<void>;
   handleDeleteMessage: (index: number) => void;
@@ -70,6 +74,14 @@ interface ViewerContextType {
     }
   ) => Promise<void>;
   handleCopy: (content: string | JSONContent) => Promise<void>;
+
+  // Insight Navigation
+  scrollToHighlight: (highlightId: string) => void;
+  setHighlighterUtilsRef: (
+    ref: React.RefObject<
+      import("react-pdf-highlighter-extended-plus").PdfHighlighterUtils | null
+    >
+  ) => void;
 }
 
 const ViewerContext = createContext<ViewerContextType | undefined>(undefined);
@@ -86,6 +98,50 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
 
   // --- Assistant State & Logic ---
   const assistant = useAssistantLogic();
+
+  // --- Highlighter Ref for PDF navigation ---
+  const [highlighterUtilsRef, setHighlighterUtilsRefState] =
+    React.useState<React.RefObject<
+      import("react-pdf-highlighter-extended-plus").PdfHighlighterUtils | null
+    > | null>(null);
+
+  const setHighlighterUtilsRef = React.useCallback(
+    (
+      ref: React.RefObject<
+        import("react-pdf-highlighter-extended-plus").PdfHighlighterUtils | null
+      >
+    ) => {
+      setHighlighterUtilsRefState(ref);
+    },
+    []
+  );
+
+  const scrollToHighlight = React.useCallback(
+    (highlightId: string) => {
+      if (!highlighterUtilsRef?.current) return;
+
+      const highlights =
+        highlighterUtilsRef.current.getViewer()?.findController;
+      // For now, we'll use scrollToHighlight with a mock highlight object
+      // This will be called by the Insight component with the actual highlight data
+      highlighterUtilsRef.current.scrollToHighlight({
+        id: highlightId,
+        position: {
+          boundingRect: {
+            x1: 0,
+            y1: 0,
+            x2: 0,
+            y2: 0,
+            width: 0,
+            height: 0,
+            pageNumber: 1,
+          },
+          rects: [],
+        },
+      } as any);
+    },
+    [highlighterUtilsRef]
+  );
 
   // --- Shared Actions ---
 
@@ -118,6 +174,9 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // --- Highlight Creation ---
+  const [createHighlight] = useCreateHighlightMutation();
+
   const handleAddToNoteAsInsight = async (
     content: string | JSONContent,
     metadata?: {
@@ -132,6 +191,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
       ui.setIsNoterOpen(true);
     }
 
+    // Create the insight note
     try {
       // Wrap content in Insight node
       const insightContent: JSONContent = {
@@ -142,9 +202,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
             attrs: {
               selectedText: metadata?.selectedText || "AI Insight",
               metadata: {
-                documentName: metadata?.documentName || "Assistant",
                 pageNumber: metadata?.pageNumber || 1,
-                createdAt: new Date().toISOString(),
               },
             },
             content: content.content || [],
@@ -153,8 +211,9 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
       };
 
       await noter.addToNote(insightContent);
-    } catch (error) {
-      // Error handled in addToNote
+    } catch (error: any) {
+      console.error("Failed to add insight to notes:", error?.message || error);
+      throw error;
     }
   };
 
@@ -174,6 +233,10 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         handleAddToNotes,
         handleAddToNoteAsInsight,
         handleCopy,
+
+        // Navigation
+        scrollToHighlight,
+        setHighlighterUtilsRef,
       }}
     >
       {children}
