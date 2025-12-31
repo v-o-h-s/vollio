@@ -16,14 +16,19 @@ export const extractText = (node: JSONContent): string => {
   }
   return contentText;
 };
-export const extractTextFromContent = (content: string | JSONContent): string => {
-    if (typeof content === "string") return content;
-    if (!content.content) return "";
-    return content.content
-      .map((node) => {
-        if (node.type === "text") return node.text;
-        if (node.content) return extractTextFromContent(node);
-        return "";
-      })
-      .join(" ");
-  };
+export const extractTextFromContent = (
+  content: string | JSONContent
+): string => {
+  if (typeof content === "string") return content;
+  if (!content.content) return "";
+  return content.content
+    .map((node) => {
+      if (node.type === "text") return node.text;
+      if (node.content) return extractTextFromContent(node);
+      return "";
+    })
+    .join(" ");
+};
+
+
+  

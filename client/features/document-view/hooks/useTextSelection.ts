@@ -57,7 +57,7 @@ export function useSelection({
     };
     try {
       await createHighlight(highlight).unwrap();
-      toast.success("Insight added successfully")
+      toast.success("Insight added successfully");
     } catch (error) {
       console.log(error);
     }
@@ -77,7 +77,6 @@ export function useSelection({
     addUserMessage(`Explain the following: "${selectedText}"`, {
       documentName,
       selectedText,
-      position,
     });
   };
 

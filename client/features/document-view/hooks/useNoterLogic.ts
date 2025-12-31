@@ -187,6 +187,7 @@ export function useNoterLogic(documentId: string) {
         toast.success("Created new note with content");
         setActiveTabId(noteId);
       }
+      
     } catch (error) {
       console.error("Failed to add to notes:", { ...(error as any) });
       toast.error("Failed to add to notes");

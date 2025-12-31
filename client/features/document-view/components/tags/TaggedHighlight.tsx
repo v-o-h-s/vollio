@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   Popover,
   PopoverTrigger,
@@ -8,29 +8,22 @@ import { Badge } from "@/components/ui/badge";
 import { Tag as TagIcon, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MyHighlight } from "@/features/document-view/types/highlight";
-import { CreateHighlightDto } from "@/lib/dto/createHighLightDto";
+import { CreateHighlightDto } from "@vollio/shared";
 import { TagSelectionDialog } from "./TagSelectionDialog";
 import { Button } from "@/components/ui/button";
-
-interface PageOffset {
-  x: number;
-  y: number;
-}
+import gsap from "gsap";
 
 interface TaggedHighlightProps {
   highlight: MyHighlight;
   isScrolledTo: boolean;
   color: string;
-  scale?: number;
-  pageOffset?: PageOffset;
-  pageWidth?: number;
   updateHighlight: (
     highlightId: string,
     highlight: Partial<CreateHighlightDto>
   ) => any;
   deleteHighlight: (highlightId: string) => any;
 }
-// todo , in the future in the settings add color customization there and tags custom
+
 const TAG_COLORS: Record<string, string> = {
   Definition: "#3b82f6", // blue-500
   Example: "#22c55e", // green-500
@@ -38,6 +31,14 @@ const TAG_COLORS: Record<string, string> = {
   "Key idea": "#a855f7", // purple-500
   "To revisit": "#f97316", // orange-500
   "Step / Process": "#14b8a6", // teal-500
+};
+
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, alpha: number = 0.4): string => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
 const hexToRgb = (hex: string) => {
@@ -92,60 +93,72 @@ const mixColors = (tags: string[]) => {
 export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
   highlight,
   isScrolledTo,
-  color: defaultColor, // We might ignore this if we use tag colors
-  scale = 1,
-  pageOffset = { x: 0, y: 0 },
-  pageWidth,
+  color: defaultColor,
   updateHighlight,
   deleteHighlight,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
+  const badgeRef = useRef<HTMLButtonElement>(null);
 
   // Calculate mixed color based on tags
   const displayColor = useMemo(() => {
     return mixColors(highlight.tags || []);
   }, [highlight.tags]);
 
-  // normalize rects once and convert to DOM coordinates (scale + page offset)
+  // Normalize rects once and convert to DOM coordinates
   const rects = useMemo(() => {
     const raw = highlight.position?.rects ?? [];
     return raw.map((r: any) => {
       return {
-        // convert to pixels in overlay coordinate space
-        left: r.left * scale + (pageOffset?.x ?? 0),
-        top: r.top * scale + (pageOffset?.y ?? 0),
-        width: r.width * scale,
-        height: r.height * scale,
+        left: r.left,
+        top: r.top,
+        width: r.width,
+        height: r.height,
       };
     });
-  }, [highlight.position?.rects, scale, pageOffset?.x, pageOffset?.y]);
+  }, [highlight.position?.rects]);
 
-  if (!rects || rects.length === 0) return null;
-  const lastRect = rects[rects.length - 1];
+  // Calculate badge position at the end of the last rect
+  const badgePosition = useMemo(() => {
+    if (!rects || rects.length === 0) return null;
 
-  // visual underline thickness
-  const baseHeight = 2;
-  const underlineHeight = isHovered ? Math.max(3, baseHeight + 1) : baseHeight;
+    const lastRect = rects[rects.length - 1];
+    const badgeSize = 20;
+    const gap = 4;
 
-  // tag button position (appear to the right of last rect)
-  const tagGap = 2; // px gap from underline
-  const tagSize = 20; // px (width/height of button)
-  let tagLeft = lastRect.left + lastRect.width + tagGap;
-  let tagTop = lastRect.top + lastRect.height;
+    let left = lastRect.left + lastRect.width + gap;
+    let top = lastRect.top - gap;
 
-  // clamp to page width if provided
-  if (pageWidth) {
-    const maxLeft = pageWidth - (tagSize + 8);
-    tagLeft = Math.min(tagLeft, maxLeft);
-  } else if (typeof window !== "undefined") {
-    // fallback clamp to viewport
-    const maxLeft = window.innerWidth - (tagSize + 8);
-    tagLeft = Math.min(tagLeft, maxLeft);
-  }
+    // Clamp to page width if provided
+    if (typeof window !== "undefined") {
+      const maxLeft = window.innerWidth - (badgeSize + 8);
+      left = Math.min(left, maxLeft);
+    }
 
-  // small upward adjustment so the button sits slightly above the underline
-  tagTop = tagTop - Math.max(6, underlineHeight);
+    return { left, top, size: badgeSize };
+  }, [rects]);
+
+  // GSAP animation for badge hover
+  useEffect(() => {
+    if (!badgeRef.current) return;
+
+    if (isHovered) {
+      gsap.to(badgeRef.current, {
+        scale: 1.25,
+        rotation: 12,
+        duration: 0.3,
+        ease: "back.out(1.7)",
+      });
+    } else {
+      gsap.to(badgeRef.current, {
+        scale: 1,
+        rotation: 0,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    }
+  }, [isHovered]);
 
   const handleRemoveTag = async (tagToRemove: string) => {
     const currentTags = highlight.tags || [];
@@ -159,71 +172,127 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
   };
 
   const handleAddTags = async (newTags: string[]) => {
-    // Merge new tags with existing ones, avoiding duplicates
     const currentTags = highlight.tags || [];
     const uniqueTags = Array.from(new Set([...currentTags, ...newTags]));
     await updateHighlight(highlight.id, { tags: uniqueTags });
   };
 
+  if (!rects || rects.length === 0) return null;
+
   return (
     <>
-      {/* per-rect underlines */}
-      {rects.map((r, idx) => {
-        // adjust top so underline sits at bottom of rect
-        const top = r.top + r.height - underlineHeight;
-        return (
+      {/* Render highlight overlays for each rect */}
+      {rects.map((rect, idx) => (
+        <div
+          key={`overlay-${idx}`}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: "absolute",
+            left: `${rect.left}px`,
+            top: `${rect.top}px`,
+            width: `${rect.width}px`,
+            height: `${rect.height}px`,
+            backgroundColor: hexToRgba(displayColor, 0.25),
+            mixBlendMode: "multiply",
+            borderRadius: "3px",
+            cursor: "pointer",
+            pointerEvents: "auto",
+            zIndex: 5,
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          {/* Animated gradient overlay */}
           <div
-            key={idx}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            className={cn(
+              "absolute inset-0 rounded-[3px] pointer-events-none transition-opacity duration-300",
+              isHovered ? "opacity-100" : "opacity-0"
+            )}
             style={{
-              position: "absolute",
-              left: `${r.left}px`,
-              top: `${top}px`,
-              width: `${r.width}px`,
-              height: `${underlineHeight}px`,
-              backgroundColor: displayColor,
-              pointerEvents: "auto",
-              transition:
-                "height 0.12s ease, top 0.12s ease, transform 0.12s ease",
-              cursor: "pointer",
-              zIndex: 6,
-              borderRadius: underlineHeight, // rounded ends
+              background: `linear-gradient(to right, ${hexToRgba(
+                displayColor,
+                0.2
+              )}, ${hexToRgba(displayColor, 0.2)})`,
+              mixBlendMode: "screen",
             }}
-            // this prevents the popover from closing when clicking the underline
-            onClick={(e) => e.stopPropagation()}
           />
-        );
-      })}
 
-      {/* tag button anchored at the end of last rect */}
-      {lastRect && (
+          {/* Glow effect on hover */}
+          <div
+            className={cn(
+              "absolute inset-0 rounded-[3px] pointer-events-none transition-all duration-300",
+              isHovered ? "opacity-100" : "opacity-0"
+            )}
+            style={{
+              boxShadow: `0 0 20px ${hexToRgba(
+                displayColor,
+                0.6
+              )}, 0 0 40px ${hexToRgba(displayColor, 0.3)}`,
+              border: `1px solid ${hexToRgba(displayColor, 0.8)}`,
+              transform: isHovered ? "scale(1.02)" : "scale(1)",
+            }}
+          />
+
+          {/* Shimmer effect */}
+          {isHovered && (
+            <div
+              className="absolute inset-0 rounded-[3px] pointer-events-none overflow-hidden"
+              style={{ mixBlendMode: "overlay" }}
+            >
+              <div
+                className="absolute inset-0 animate-shimmer"
+                style={{
+                  background:
+                    "linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent)",
+                  transform: "translateX(-100%)",
+                }}
+              />
+            </div>
+          )}
+
+          {/* Pulse animation ring when scrolled to */}
+          {isScrolledTo && (
+            <div
+              className="absolute inset-0 rounded-[3px] animate-ping pointer-events-none"
+              style={{
+                border: `2px solid ${hexToRgba(displayColor, 0.6)}`,
+                animationDuration: "2s",
+                animationIterationCount: "3",
+              }}
+            />
+          )}
+        </div>
+      ))}
+
+      {/* Tag button anchored at the end of last rect */}
+      {badgePosition && (
         <Popover>
           <PopoverTrigger asChild>
             <button
+              ref={badgeRef}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
-              className={cn(
-                "absolute z-20 flex items-center justify-center rounded-full border bg-background shadow transition-transform duration-150",
-                isHovered ? "scale-105 shadow-lg" : "scale-100"
-              )}
+              className="absolute rounded-full flex items-center justify-center cursor-pointer border-2 border-white dark:border-gray-900 shadow-lg"
               style={{
-                left: `${tagLeft}px`,
-                top: `${tagTop}px`,
-                width: `${tagSize}px`,
-                height: `${tagSize}px`,
-                borderColor: displayColor,
-                color: displayColor,
+                left: `${badgePosition.left}px`,
+                top: `${badgePosition.top}px`,
+                width: `${badgePosition.size}px`,
+                height: `${badgePosition.size}px`,
+                background: `linear-gradient(to bottom right, ${displayColor}, ${hexToRgba(
+                  displayColor,
+                  0.8
+                )})`,
                 pointerEvents: "auto",
+                zIndex: 20,
               }}
               onClick={(e) => {
-                // don't let click bubble to Document selection
                 e.stopPropagation();
               }}
               aria-label="Open tags"
               title="Tags"
             >
-              <TagIcon size={10} />
+              <TagIcon size={10} className="text-white drop-shadow-sm" />
             </button>
           </PopoverTrigger>
 
