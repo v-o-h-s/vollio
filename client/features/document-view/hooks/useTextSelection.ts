@@ -75,7 +75,7 @@ export function useSelection({
     const position = activeSelection.position;
     addUserMessage(`Explain the following: "${content.text}"`, {
       documentName,
-      content: content.text || "",
+      content: content,
       position,
     });
     setSelection(null);

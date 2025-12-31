@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { JSONContent } from "@tiptap/core";
 import { useAssistantChatMutation } from "@/lib/store/apiSlice";
-import { AssistantChatMessage } from "@vollio/shared";
+import { AssistantChatMessage, HighlightContent } from "@vollio/shared";
 import { extractTextFromContent } from "../utils";
 import { Highlight, ScaledPosition } from "react-pdf-highlighter-extended-plus";
 
@@ -18,8 +18,8 @@ export interface Message {
   source: MessageSource;
   metadata?: {
     documentName: string;
-    content: string;
-    position?: ScaledPosition;
+    content: HighlightContent;
+    position: ScaledPosition;
   };
 }
 
@@ -33,7 +33,7 @@ export function useAssistantLogic() {
     message: string,
     metadata?: {
       documentName: string;
-      content: string;
+      content: HighlightContent;
       position: ScaledPosition;
     }
   ) => {

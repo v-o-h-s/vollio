@@ -55,7 +55,7 @@ interface ViewerContextType {
     message: string,
     metadata?: {
       documentName: string;
-      content: string;
+      content: HighlightContent;
       position: ScaledPosition;
     }
   ) => Promise<void>;
@@ -197,7 +197,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
           {
             type: "insight",
             attrs: {
-              selectedText: metadata?.content || "AI Insight",
+              selectedText: metadata?.content?.text || "AI Insight",
               metadata: {
                 pageNumber: metadata?.position.boundingRect.pageNumber,
               },
