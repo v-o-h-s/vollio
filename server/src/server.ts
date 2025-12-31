@@ -20,6 +20,7 @@ import { quizRoutes } from "./interface/routes/quiz.route";
 import { flashcardRoutes } from "./interface/routes/flashcards.route";
 import { summaryRoutes } from "./interface/routes/summary.route";
 import { aiRoutes } from "./interface/routes/ai.route";
+import settingsRoutes from "./interface/routes/settings.routes";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -28,7 +29,9 @@ const HOST = process.env.HOST || "0.0.0.0";
 // APP INITIALIZATION
 export const app: FastifyInstance = Fastify({
   logger: loggerConfig,
-  ignoreTrailingSlash: true,
+  routerOptions: {
+    ignoreTrailingSlash: true,
+  },
 });
 
 // MIDDLEWARE REGISTRATION
@@ -108,6 +111,9 @@ app.register(summaryRoutes, {
 });
 app.register(aiRoutes, {
   prefix: "/api/v1/ai",
+});
+app.register(settingsRoutes, {
+  prefix: "/api/v1/settings",
 });
 
 async function start(): Promise<void> {

@@ -84,7 +84,13 @@ import { ExplainTextUseCase } from "../application/use-cases/ai/ExplainTextUseCa
 import { AssistantChatUseCase } from "../application/use-cases/ai/AssistantChatUseCase";
 import { SummarizeDocumentUseCase } from "../application/use-cases/summaries/SummarizeDocumentUseCase";
 import { AiController } from "../interface/controllers/ai.controller";
+import { SettingsRepository } from "../infrastructure/repositories/SettingsRepository";
+import { GetUserSettingsUseCase } from "../application/use-cases/settings/GetUserSettingsUseCase";
+import { UpdateUserSettingsUseCase } from "../application/use-cases/settings/UpdateUserSettingsUseCase";
+import { SettingsController } from "../interface/controllers/settings.controller";
+
 const diPlugin: FastifyPluginAsync = async (fastify) => {
+
   // Register singleton logger
   fastify.diContainer.register({
     logger: asValue(fastify.log),
@@ -499,6 +505,25 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     aiController: asClass(AiController, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+  //settings
+  fastify.diContainer.register({
+    settingsController: asClass(SettingsController, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getUserSettingsUseCase: asClass(GetUserSettingsUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    updateUserSettingsUseCase: asClass(UpdateUserSettingsUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    settingsRepository: asClass(SettingsRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

@@ -34,10 +34,12 @@ import {
   Sparkles,
   ChevronRight,
   Bot,
+  Tags,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { TagManagement } from "./components/TagManagement";
 
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
@@ -102,6 +104,21 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 <Type className="w-4 h-4" />
                 <span className="font-medium text-sm">Notes</span>
+              </div>
+              <ChevronRight className="w-4 h-4 opacity-0 group-data-[state=active]:opacity-100 transition-opacity" />
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="highlights"
+              className={cn(
+                "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group",
+                "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <Tags className="w-4 h-4" />
+                <span className="font-medium text-sm">Highlights</span>
               </div>
               <ChevronRight className="w-4 h-4 opacity-0 group-data-[state=active]:opacity-100 transition-opacity" />
             </TabsTrigger>
@@ -321,6 +338,10 @@ export default function SettingsPage() {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="highlights" className="mt-0 outline-none">
+              <TagManagement />
             </TabsContent>
 
             <TabsContent value="ai" className="mt-0 outline-none">

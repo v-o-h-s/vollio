@@ -15,6 +15,7 @@ import { testEndpoints } from "./endpoints/testEndpoints";
 import { quizEndpoints } from "./endpoints/quizEndpoints";
 import { flashcardEndpoints } from "./endpoints/flashcardEndpoints";
 import { aiEndpoints } from "./endpoints/aiEndpoints";
+import { settingsEndpoints } from "./endpoints/settingsEndpoints";
 
 // Simple base query configuration with cookie-based authentication
 const baseQuery = fetchBaseQuery({
@@ -52,6 +53,7 @@ export const apiSlice = createApi({
     "Document",
     "Quiz",
     "Flashcard",
+    "Settings",
   ],
   endpoints: (builder) => ({
     ...notesEndpoints(builder),
@@ -65,6 +67,7 @@ export const apiSlice = createApi({
     ...quizEndpoints(builder),
     ...flashcardEndpoints(builder),
     ...aiEndpoints(builder),
+    ...settingsEndpoints(builder),
   }),
 });
 
@@ -128,6 +131,10 @@ export const {
   useLazyExplainTextQuery,
   useAssistantChatMutation,
   useGenerateSummaryMutation,
+
+  // settings
+  useGetSettingsQuery,
+  useUpdateSettingsMutation,
 } = apiSlice;
 
 // Export the reducer and middleware

@@ -1,30 +1,29 @@
 import { FastifyInstance } from "fastify";
 
 export default async function settingsRoutes(fastify: FastifyInstance) {
-  const settingsController = fastify.diContainer.resolve("settingsController");
-
   fastify.get(
     "/",
     {
       schema: {
-        
-        
-        
+        // Add schema if needed
       },
     },
-    settingsController.getSettings.bind(settingsController)
+    async (request, reply) => {
+      const settingsController = request.diScope.resolve("settingsController");
+      return settingsController.getSettings(request, reply);
+    }
   );
 
   fastify.patch(
     "/",
     {
       schema: {
-        
-        
         body: { type: "object", additionalProperties: true },
-        
       },
     },
-    settingsController.updateSettings.bind(settingsController)
+    async (request, reply) => {
+      const settingsController = request.diScope.resolve("settingsController");
+      return settingsController.updateSettings(request, reply);
+    }
   );
 }

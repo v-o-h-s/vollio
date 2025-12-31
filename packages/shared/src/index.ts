@@ -1,5 +1,6 @@
 // Responses
 export * from "./note";
+export * from "./settings";
 export * from "./responses/general";
 export * from "./responses/error";
 export * from "./responses/documentRoutes";
