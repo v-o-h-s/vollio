@@ -21,7 +21,13 @@ import { DocumentDetails } from "../../types/document";
 import { HOME_TAB_ID, useViewer } from "../../context/ViewerContext";
 import { useSummaryActions } from "../../hooks/useSummaryActions";
 
-export default function Noter({ document }: { document: DocumentDetails }) {
+export default function Noter({
+  document,
+  isFocused,
+}: {
+  document: DocumentDetails;
+  isFocused?: boolean;
+}) {
   const {
     tabs,
     activeTabId,
@@ -128,6 +134,7 @@ export default function Noter({ document }: { document: DocumentDetails }) {
         onDeleteNote={handleDeleteTab}
         onAddNote={() => handleCreateNote()}
         onTabClick={handleTabClick}
+        isFocused={isFocused}
       />
 
       <div className="mt-12 h-[calc(100%-3rem)] overflow-auto custom-scrollbar">

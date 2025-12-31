@@ -33,6 +33,7 @@ export function ViewerHeader({
   onToggleTags,
   isTagsOpen,
   viewerWidth = "100%",
+  isFocused,
 }: DocumentViewerHeaderProps) {
   const router = useRouter();
   const headerRef = useRef<HTMLDivElement>(null);
@@ -76,7 +77,14 @@ export function ViewerHeader({
       }}
     >
       {/* Enhanced stylish header with glassmorphism effect */}
-      <div className="bg-white dark:bg-background backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl shadow-black/10 dark:shadow-black/30">
+      <div
+        className={cn(
+          "bg-white dark:bg-background backdrop-blur-xl border rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl transition-all duration-300",
+          isFocused
+            ? "border-primary/40 shadow-primary/10 ring-1 ring-primary/20"
+            : "border-white/20 dark:border-white/10 shadow-black/10 dark:shadow-black/30"
+        )}
+      >
         <div className="bg-gradient-to-r from-white/5 to-transparent dark:from-white/5 dark:to-transparent rounded-xl sm:rounded-2xl">
           {/* Always horizontal layout */}
           <div className="flex flex-row items-center justify-between px-2 sm:px-3 lg:px-4 py-2 gap-2">
@@ -93,10 +101,20 @@ export function ViewerHeader({
               </Button>
 
               <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
-                <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded flex items-center justify-center flex-shrink-0 shadow-md">
+                <div
+                  className={cn(
+                    "w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center flex-shrink-0 shadow-md transition-all",
+                    "bg-gradient-to-br from-red-500 via-red-600 to-red-700"
+                  )}
+                >
                   <FileText size={10} className="sm:w-3 sm:h-3 text-white" />
                 </div>
-                <h1 className="text-xs sm:text-sm font-semibold text-foreground truncate">
+                <h1
+                  className={cn(
+                    "text-xs sm:text-sm font-semibold truncate transition-colors",
+                    isFocused ? "text-primary" : "text-foreground"
+                  )}
+                >
                   {document.name}
                 </h1>
               </div>

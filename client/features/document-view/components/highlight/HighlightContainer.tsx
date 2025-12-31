@@ -95,6 +95,7 @@ export const HighlightContainer = ({
             highlight={highlight as any}
             isScrolledTo={isScrolledTo}
             color={color}
+            onClickHighlights={onClickHighlights}
           />
         );
     }

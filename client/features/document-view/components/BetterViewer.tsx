@@ -29,12 +29,14 @@ export const BetterViewer = ({
   onToggleAssistant,
   isNoterOpen,
   isAssistantOpen,
+  isFocused,
 }: {
   document: DocumentDetails;
   onToggleNoter?: () => void;
   onToggleAssistant?: () => void;
   isNoterOpen?: boolean;
   isAssistantOpen?: boolean;
+  isFocused?: boolean;
 }) => {
   // Fetch highlights for this Document from API
   const { data: apiHighlights, isLoading: isLoadingHighlights } =
@@ -91,8 +93,18 @@ export const BetterViewer = ({
     magnification: {},
   });
 
-  // handle copy if pressed 
-
+  // handle copy if pressed
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === "c") {
+        handleCopy();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => {
+      window.removeEventListener("keydown", handler);
+    };
+  }, []);
   // Initialize adapter methods
   useEffect(() => {
     const adapter = documentViewerAdapter.current;
@@ -209,6 +221,7 @@ export const BetterViewer = ({
           onHighlightColorChange={setCurrentHighlightColor}
           onToggleTags={() => setIsTagSidebarOpen(!isTagSidebarOpen)}
           isTagsOpen={isTagSidebarOpen}
+          isFocused={isFocused}
         />
       ) : (
         <button

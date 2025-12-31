@@ -21,4 +21,6 @@ export interface DocumentViewerHeaderProps {
 
   /** Width of the viewer container (for responsive resizing) */
   viewerWidth?: string;
+  /** Whether the viewer is currently focused */
+  isFocused?: boolean;
 }

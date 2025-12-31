@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { useViewer } from "../../context/ViewerContext";
 import { useAppSelector } from "@/lib/store/hooks";
 
-export function AssistantChat() {
+export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -58,13 +58,20 @@ export function AssistantChat() {
   return (
     <div className="h-full flex flex-col bg-background w-full">
       {/* Header */}
-      <div className="shrink-0 border-b border-border bg-card/20 px-4 py-3 flex items-center justify-between">
+      <div
+        className={cn(
+          "shrink-0 border-b px-4 py-3 flex items-center justify-between transition-colors duration-300",
+          isFocused
+            ? "border-primary/30 bg-primary/5"
+            : "border-border bg-card/20"
+        )}
+      >
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full  flex items-center justify-center">
-            <Bot className="w-4 h-4 dark:text-white" />
+            <Bot className={cn("w-4 h-4", isFocused ? "text-primary" : "dark:text-white")} />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-foreground">
+            <h2 className={cn("text-sm font-semibold transition-colors", isFocused ? "text-primary" : "text-foreground")}>
               AI Assistant
             </h2>
             <p className="text-xs text-muted-foreground">

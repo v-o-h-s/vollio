@@ -99,6 +99,7 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const badgeRef = useRef<HTMLButtonElement>(null);
 
   // Calculate mixed color based on tags
@@ -177,17 +178,22 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
     await updateHighlight(highlight.id, { tags: uniqueTags });
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsPopoverOpen((prev) => !prev);
+  };
+
   if (!rects || rects.length === 0) return null;
 
   return (
-    <>
+    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
       {/* Render highlight overlays for each rect */}
       {rects.map((rect, idx) => (
         <div
           key={`overlay-${idx}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          onClick={(e) => e.stopPropagation()}
+          onClick={handleClick}
           style={{
             position: "absolute",
             left: `${rect.left}px`,
@@ -267,84 +273,80 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
 
       {/* Tag button anchored at the end of last rect */}
       {badgePosition && (
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              ref={badgeRef}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              className="absolute rounded-full flex items-center justify-center cursor-pointer border-2 border-white dark:border-gray-900 shadow-lg"
-              style={{
-                left: `${badgePosition.left}px`,
-                top: `${badgePosition.top}px`,
-                width: `${badgePosition.size}px`,
-                height: `${badgePosition.size}px`,
-                background: `linear-gradient(to bottom right, ${displayColor}, ${hexToRgba(
-                  displayColor,
-                  0.8
-                )})`,
-                pointerEvents: "auto",
-                zIndex: 20,
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              aria-label="Open tags"
-              title="Tags"
-            >
-              <TagIcon size={10} className="text-white drop-shadow-sm" />
-            </button>
-          </PopoverTrigger>
-
-          <PopoverContent className="w-auto max-w-xs p-3" align="start">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-muted-foreground">
-                  Tags
-                </p>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-5 w-5 rounded-full hover:bg-muted"
-                  onClick={() => setIsTagDialogOpen(true)}
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
-              </div>
-
-              <div className="flex flex-wrap gap-1.5">
-                {(highlight.tags || []).length > 0 ? (
-                  highlight.tags!.map((tag) => {
-                    const tagColor = TAG_COLORS[tag] || defaultColor;
-                    return (
-                      <Badge
-                        key={tag}
-                        variant="outline"
-                        className="text-xs font-normal flex items-center gap-1 pr-1"
-                        style={{ borderColor: tagColor, color: tagColor }}
-                      >
-                        {tag}
-                        <div
-                          role="button"
-                          className="rounded-full hover:bg-muted p-0.5 cursor-pointer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveTag(tag);
-                          }}
-                        >
-                          <X size={10} />
-                        </div>
-                      </Badge>
-                    );
-                  })
-                ) : (
-                  <span className="text-xs text-muted-foreground">No tags</span>
-                )}
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <PopoverTrigger asChild>
+          <button
+            ref={badgeRef}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            className="absolute rounded-full flex items-center justify-center cursor-pointer border-2 border-white dark:border-gray-900 shadow-lg"
+            style={{
+              left: `${badgePosition.left}px`,
+              top: `${badgePosition.top}px`,
+              width: `${badgePosition.size}px`,
+              height: `${badgePosition.size}px`,
+              background: `linear-gradient(to bottom right, ${displayColor}, ${hexToRgba(
+                displayColor,
+                0.8
+              )})`,
+              pointerEvents: "auto",
+              zIndex: 20,
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            aria-label="Open tags"
+            title="Tags"
+          >
+            <TagIcon size={10} className="text-white drop-shadow-sm" />
+          </button>
+        </PopoverTrigger>
       )}
+
+      <PopoverContent className="w-auto max-w-xs p-3" align="start">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-muted-foreground">Tags</p>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-5 w-5 rounded-full hover:bg-muted"
+              onClick={() => setIsTagDialogOpen(true)}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            {(highlight.tags || []).length > 0 ? (
+              highlight.tags!.map((tag) => {
+                const tagColor = TAG_COLORS[tag] || defaultColor;
+                return (
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className="text-xs font-normal flex items-center gap-1 pr-1"
+                    style={{ borderColor: tagColor, color: tagColor }}
+                  >
+                    {tag}
+                    <div
+                      role="button"
+                      className="rounded-full hover:bg-muted p-0.5 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveTag(tag);
+                      }}
+                    >
+                      <X size={10} />
+                    </div>
+                  </Badge>
+                );
+              })
+            ) : (
+              <span className="text-xs text-muted-foreground">No tags</span>
+            )}
+          </div>
+        </div>
+      </PopoverContent>
 
       <TagSelectionDialog
         open={isTagDialogOpen}
@@ -352,6 +354,6 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
         onConfirm={handleAddTags}
         initialTags={highlight.tags || []}
       />
-    </>
+    </Popover>
   );
 };

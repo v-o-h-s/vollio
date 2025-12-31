@@ -16,6 +16,7 @@ import {
   horizontalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import { NoteAddButton } from "./NoteAddButton";
 import NoteTab from "./NoteTab";
 
@@ -32,6 +33,7 @@ interface NotesTabsManagerProps {
   onAddNote: () => void;
   onDeleteNote: (id: string) => void;
   onTabClick: (tabId: string) => void;
+  isFocused?: boolean;
 }
 
 export default function NotesTabsManager({
@@ -41,6 +43,7 @@ export default function NotesTabsManager({
   onAddNote,
   onDeleteNote,
   onTabClick,
+  isFocused,
 }: NotesTabsManagerProps) {
   // Configure sensors with activation constraints
   // This allows clicks to work normally while still enabling drag after 8px movement
@@ -115,7 +118,12 @@ export default function NotesTabsManager({
           </div>
         </SortableContext>
         {/* Divider: change color and height for better visibility */}
-        <div className="w-full h-px bg-border  rounded" />
+        <div
+          className={cn(
+            "w-full h-px transition-colors duration-300 rounded",
+            isFocused ? "bg-primary/50" : "bg-border"
+          )}
+        />
       </div>
     </DndContext>
   );

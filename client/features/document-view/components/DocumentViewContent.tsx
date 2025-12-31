@@ -13,6 +13,7 @@ import {
   DocumentNotFoundState,
 } from "./states";
 import { useViewer } from "../context/ViewerContext";
+import { ViewerComponents } from "../types/types";
 
 const BetterViewer = dynamic(
   () => import("./BetterViewer").then((mod) => mod.BetterViewer),
@@ -57,6 +58,11 @@ export function DocumentViewContent() {
     refetch,
   } = useGetDocumentByIdQuery(id as string);
 
+  // Focus helper
+  const handleClickComponent = useCallback((component: ViewerComponents) => {
+    setFocusedComponent(component);
+  }, [setFocusedComponent]);
+
   // Mouse handlers for Assistant divider
   const handleMouseMoveAssistant = useCallback(
     (e: MouseEvent) => {
@@ -74,7 +80,6 @@ export function DocumentViewContent() {
     },
     [isAssistantDividerDragging]
   );
-
 
   const handleMouseUpAssistant = useCallback(() => {
     setIsAssistantDividerDragging(false);
@@ -173,17 +178,19 @@ export function DocumentViewContent() {
       {isAssistantOpen && (
         <>
           <div
+            onClick={() => handleClickComponent(ViewerComponents.V_AI)}
             className={cn(
-              "h-full rounded-lg flex flex-row overflow-hidden",
-              "border border-primary/20 bg-card",
-              "shadow-md",
-              "transition-none"
+              "h-full rounded-lg flex flex-row overflow-hidden transition-all duration-300",
+              "border bg-card shadow-md",
+              focusedComponent === ViewerComponents.V_AI
+                ? "border-primary/50 "
+                : "border-primary/20"
             )}
             style={{
               width: `${assistantWidth}%`,
             }}
           >
-            <AssistantChat />
+            <AssistantChat isFocused={focusedComponent === ViewerComponents.V_AI} />
           </div>
 
           {/* Divider after assistant */}
@@ -226,11 +233,13 @@ export function DocumentViewContent() {
 
       {/* Middle Panel: BetterViewer (always visible) */}
       <div
+        onClick={() => handleClickComponent(ViewerComponents.V_DOC)}
         className={cn(
-          "h-full rounded-lg flex flex-row overflow-hidden",
-          "border border-primary/20 bg-card",
-          "shadow-md",
-          "transition-none"
+          "h-full rounded-lg flex flex-row overflow-hidden transition-all duration-300",
+          "border bg-card shadow-md",
+          focusedComponent === ViewerComponents.V_DOC
+            ? "border-primary/50 "
+            : "border-primary/20"
         )}
         style={{
           width:
@@ -249,6 +258,7 @@ export function DocumentViewContent() {
           onToggleAssistant={toggleAssistant}
           isNoterOpen={isNoterOpen}
           isAssistantOpen={isAssistantOpen}
+          isFocused={focusedComponent === ViewerComponents.V_DOC}
         />
       </div>
 
@@ -292,17 +302,22 @@ export function DocumentViewContent() {
           </div>
 
           <div
+            onClick={() => handleClickComponent(ViewerComponents.V_NOTES)}
             className={cn(
-              "h-full rounded-lg flex flex-row overflow-hidden pt-1 relative",
-              "border border-primary/20",
-              "shadow-md",
-              "transition-none"
+              "h-full rounded-lg flex flex-row overflow-hidden transition-all duration-300",
+              "border shadow-md",
+              focusedComponent === ViewerComponents.V_NOTES
+                ? "border-primary/50 "
+                : "border-primary/20"
             )}
             style={{
               width: `${noterWidth}%`,
             }}
           >
-            <Noter document={documentData} />
+            <Noter
+              document={documentData}
+              isFocused={focusedComponent === ViewerComponents.V_NOTES}
+            />
           </div>
         </>
       )}
