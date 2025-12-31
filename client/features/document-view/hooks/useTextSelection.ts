@@ -71,13 +71,14 @@ export function useSelection({
     if (!activeSelection.content.text.trim()) return;
 
     const documentName = document.name;
-    const selectedText = activeSelection.content.text;
+    const content = activeSelection.content;
     const position = activeSelection.position;
-
-    addUserMessage(`Explain the following: "${selectedText}"`, {
+    addUserMessage(`Explain the following: "${content.text}"`, {
       documentName,
-      selectedText,
+      content: content.text || "",
+      position,
     });
+    setSelection(null);
   };
 
   const onSelectionFinished = (selection: any) => {

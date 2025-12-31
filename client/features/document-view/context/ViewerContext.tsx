@@ -8,12 +8,12 @@ import { Tab } from "../components/notes";
 import { Note } from "@/lib/types/editor";
 import { extractText } from "../utils";
 import { useCreateHighlightMutation } from "@/lib/store/apiSlice";
-import { CreateHighlightDTO } from "@vollio/shared";
+import { CreateHighlightDTO, HighlightContent } from "@vollio/shared";
 
 import { useViewerUI } from "../hooks/useViewerUI";
 import { useNoterLogic, HOME_TAB_ID } from "../hooks/useNoterLogic";
 import { useAssistantLogic, Message } from "../hooks/useAssistantLogic";
-import { Highlight } from "react-pdf-highlighter-extended-plus";
+import { Highlight, ScaledPosition } from "react-pdf-highlighter-extended-plus";
 
 export { HOME_TAB_ID };
 export type { Message };
@@ -55,8 +55,8 @@ interface ViewerContextType {
     message: string,
     metadata?: {
       documentName: string;
-      selectedText?: string;
-      position?: Highlight
+      content: string;
+      position: ScaledPosition;
     }
   ) => Promise<void>;
   handleDeleteMessage: (index: number) => void;
@@ -69,8 +69,8 @@ interface ViewerContextType {
     content: string | JSONContent,
     metadata?: {
       documentName: string;
-      pageNumber: number;
-      selectedText?: string;
+      content: HighlightContent;
+      position: ScaledPosition;
     }
   ) => Promise<void>;
   handleCopy: (content: string | JSONContent) => Promise<void>;
@@ -174,15 +174,12 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // --- Highlight Creation ---
-  const [createHighlight] = useCreateHighlightMutation();
-
   const handleAddToNoteAsInsight = async (
     content: string | JSONContent,
     metadata?: {
       documentName: string;
-      pageNumber: number;
-      selectedText?: string;
+      content: HighlightContent;
+      position: ScaledPosition;
     }
   ) => {
     if (typeof content === "string") return;
@@ -200,17 +197,21 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
           {
             type: "insight",
             attrs: {
-              selectedText: metadata?.selectedText || "AI Insight",
+              selectedText: metadata?.content || "AI Insight",
               metadata: {
-                pageNumber: metadata?.pageNumber || 1,
+                pageNumber: metadata?.position.boundingRect.pageNumber,
               },
             },
             content: content.content || [],
           },
         ],
       };
-
-      await noter.addToNote(insightContent);
+      if (metadata) {
+        await noter.addToNote(insightContent, {
+          HighlightContent: metadata.content,
+          HighlightPosition: metadata.position,
+        });
+      }
     } catch (error: any) {
       console.error("Failed to add insight to notes:", error?.message || error);
       throw error;

@@ -12,10 +12,12 @@ import {
   useCreateNoteMutation,
   useUpdateNoteMutation,
   useGetNoteQuery,
+  useCreateHighlightMutation,
 } from "@/lib/store/apiSlice";
 import { Tab } from "../components/notes";
-import { Note } from "@/lib/types/editor";
-
+import { CreateHighlightDTO } from "@vollio/shared";
+import { ScaledPosition } from "react-pdf-highlighter-extended-plus";
+import { HighlightContent } from "@vollio/shared";
 export const HOME_TAB_ID = "home";
 
 export function useNoterLogic(documentId: string) {
@@ -39,7 +41,7 @@ export function useNoterLogic(documentId: string) {
   const [createNote, { error: createNoteError, isLoading: isLoadingNewNote }] =
     useCreateNoteMutation();
   const [updateNote] = useUpdateNoteMutation();
-
+  const [createHighlight] = useCreateHighlightMutation();
   const { data: currentNote, refetch: refetchCurrentNote } = useGetNoteQuery(
     activeTabId,
     {
@@ -55,8 +57,15 @@ export function useNoterLogic(documentId: string) {
     );
   }, [documentNotes]);
 
-  const handleCreateNote = async (content?: JSONContent) => {
+  const handleCreateNote = async (
+    content?: JSONContent,
+    highlight?: {
+      HighlightContent: string;
+      HighlightPosition: number;
+    }
+  ) => {
     if (isLoadingNewNote || !documentId) return;
+
     try {
       const newNote = await createNote({
         documentId: documentId,
@@ -143,7 +152,13 @@ export function useNoterLogic(documentId: string) {
     );
   }, []);
 
-  const addToNote = async (content: string | JSONContent) => {
+  const addToNote = async (
+    content: string | JSONContent,
+    Highlight?: {
+      HighlightContent: HighlightContent;
+      HighlightPosition: ScaledPosition;
+    }
+  ) => {
     if (typeof content === "string") return;
 
     try {
@@ -164,8 +179,26 @@ export function useNoterLogic(documentId: string) {
             content: newContent,
           },
         }).unwrap();
+
         await refetchCurrentNote();
         dispatch(setShouldReadFromProps(true));
+        if (Highlight) {
+          const highlight: CreateHighlightDTO = {
+            id: uuidv4(),
+            noteId: activeTabId,
+            documentId: documentId,
+            type: "text",
+            content: Highlight.HighlightContent,
+            position: Highlight.HighlightPosition,
+            style: "insight",
+          };
+          try {
+            await createHighlight(highlight).unwrap();
+          } catch (error) {
+            console.error("Failed to create highlight:", { ...(error as any) });
+            toast.error("Failed to create highlight");
+          }
+        }
       } else {
         // Create new note
         const noteId = uuidv4();
@@ -182,12 +215,28 @@ export function useNoterLogic(documentId: string) {
           label: "Created from Assistant",
         };
         setTabs((prev) => [...prev, newTab]);
-
+        // set the targetNote to the new note
         dispatch(setShouldReadFromProps(true));
         toast.success("Created new note with content");
         setActiveTabId(noteId);
+        if (Highlight) {
+          const highlight: CreateHighlightDTO = {
+            id: uuidv4(),
+            noteId: noteId,
+            documentId: documentId,
+            type: "text",
+            content: Highlight.HighlightContent,
+            position: Highlight.HighlightPosition,
+            style: "insight",
+          };
+          try {
+            await createHighlight(highlight).unwrap();
+          } catch (error) {
+            console.error("Failed to create highlight:", { ...(error as any) });
+            toast.error("Failed to create highlight");
+          }
+        }
       }
-      
     } catch (error) {
       console.error("Failed to add to notes:", { ...(error as any) });
       toast.error("Failed to add to notes");

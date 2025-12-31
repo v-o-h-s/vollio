@@ -5,7 +5,7 @@ import { JSONContent } from "@tiptap/core";
 import { useAssistantChatMutation } from "@/lib/store/apiSlice";
 import { AssistantChatMessage } from "@vollio/shared";
 import { extractTextFromContent } from "../utils";
-import { Highlight } from "react-pdf-highlighter-extended-plus";
+import { Highlight, ScaledPosition } from "react-pdf-highlighter-extended-plus";
 
 export enum MessageSource {
   USER,
@@ -18,9 +18,8 @@ export interface Message {
   source: MessageSource;
   metadata?: {
     documentName: string;
-    pageNumber: number;
-    selectedText?: string;
-    position?: Highlight;
+    content: string;
+    position?: ScaledPosition;
   };
 }
 
@@ -34,9 +33,8 @@ export function useAssistantLogic() {
     message: string,
     metadata?: {
       documentName: string;
-      pageNumber: number;
-      selectedText?: string;
-      position?: Highlight;
+      content: string;
+      position: ScaledPosition;
     }
   ) => {
     if (!message.trim()) return;
@@ -45,7 +43,7 @@ export function useAssistantLogic() {
       role: "user",
       content: message,
       timestamp: new Date(),
-      source: metadata ? MessageSource.DOCUMENT : MessageSource.USER,
+      source: MessageSource.USER,
       metadata,
     };
 
@@ -90,7 +88,7 @@ export function useAssistantLogic() {
           ],
         },
         timestamp: new Date(),
-        source: metadata ? MessageSource.DOCUMENT : MessageSource.USER,
+        source: MessageSource.USER,
         metadata,
       };
       setMessages((prev) => [...prev, errorMsg]);

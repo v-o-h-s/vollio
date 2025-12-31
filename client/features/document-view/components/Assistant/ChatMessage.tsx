@@ -13,6 +13,8 @@ import type { JSONContent } from "@tiptap/core";
 import { useViewer } from "../../context/ViewerContext";
 import { MessageSource } from "../../hooks/useAssistantLogic";
 import { useAppSelector } from "@/lib/store/hooks";
+import { ScaledPosition } from "react-pdf-highlighter-extended-plus";
+import { HighlightContent } from "@vollio/shared";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
@@ -23,8 +25,8 @@ interface ChatMessageProps {
   isLast?: boolean;
   metadata?: {
     documentName: string;
-    pageNumber: number;
-    selectedText?: string;
+    content: HighlightContent;
+    position: ScaledPosition;
   };
 }
 
