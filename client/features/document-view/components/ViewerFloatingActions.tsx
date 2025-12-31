@@ -30,7 +30,7 @@ export const ViewerFloatingActions = ({
             "cursor-pointer active:scale-95",
             isAssistantOpen
               ? "bg-purple-500 text-white scale-110"
-              : "bg-white/90 dark:bg-gray-900/90 text-foreground hover:bg-gray-50 dark:hover:bg-gray-800 hover:scale-110"
+              : "bg-white/90 dark:bg-black text-foreground hover:bg-gray-50 dark:hover:bg-black/50 hover:scale-110"
           )}
           title="Toggle Assistant"
         >
@@ -62,7 +62,7 @@ export const ViewerFloatingActions = ({
             "cursor-pointer active:scale-95",
             isNoterOpen
               ? "bg-indigo-500 text-white scale-110"
-              : "bg-white/90 dark:bg-gray-900/90 text-foreground hover:bg-gray-50 dark:hover:bg-gray-800 hover:scale-110"
+              : "bg-white/90 dark:bg-black text-foreground hover:bg-gray-50 dark:hover:bg-black/50 hover:scale-110"
           )}
           title="Toggle Notes"
         >

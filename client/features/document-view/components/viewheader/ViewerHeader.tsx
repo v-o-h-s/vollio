@@ -94,7 +94,7 @@ export function ViewerHeader({
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push("/dashboard")}
-                className="cursor-pointer h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-full flex-shrink-0"
+                className="cursor-pointer h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-full flex-shrink-0 hover:bg-primary/10 hover:text-primary hover:scale-110 active:scale-95 transition-all duration-200"
                 title="Back to Documents"
               >
                 <Home size={12} className="sm:w-4 sm:h-4" />
@@ -197,45 +197,7 @@ export function ViewerHeader({
             ) : (
               // Desktop: Inline Tool Buttons (when header is wide enough)
               <div className="flex items-center gap-2 justify-end">
-                {/* Highlight Color */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-2 cursor-pointer px-2 h-8 flex-shrink-0"
-                      title="Highlight color"
-                    >
-                      <div
-                        className="w-4 h-4 rounded-full border border-white/30"
-                        style={{ backgroundColor: currentHighlightColor }}
-                      />
-                      <span className="text-xs">Color</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <div className="p-2">
-                      <p className="text-xs font-medium mb-2 text-muted-foreground">
-                        Highlight
-                      </p>
-                      <div className="grid grid-cols-5 gap-2">
-                        {HIGHLIGHT_COLORS.map((color) => (
-                          <button
-                            key={color.value}
-                            onClick={() => handleColorChange(color.value)}
-                            className={`w-8 h-8 rounded-full border-2 hover:scale-110 active:scale-95 transition-transform cursor-pointer ${
-                              currentHighlightColor === color.value
-                                ? "border-primary ring-2 ring-primary ring-offset-2"
-                                : "border-border hover:border-primary/50"
-                            }`}
-                            style={{ backgroundColor: color.value }}
-                            title={color.name}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                
 
                 {/* Tags Toggle */}
                 <Button
