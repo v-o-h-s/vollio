@@ -13,9 +13,9 @@ import {
   Copy,
   Check,
   AlertCircle,
-  Sparkles,
   Zap,
 } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 
 interface FlashcardItem {
   id: string;
@@ -99,7 +99,7 @@ export function FlashcardEditor({
         {/* Front Side */}
         <div className="space-y-2">
           <Label htmlFor={`front-${card.id}`} className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-pink-500" />
+            <RobotIcon className="w-4 h-4 text-pink-500" />
             Front Side *
           </Label>
           <Textarea

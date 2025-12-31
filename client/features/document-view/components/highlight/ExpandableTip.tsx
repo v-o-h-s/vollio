@@ -1,14 +1,13 @@
 import {
-  LuHighlighter as Highlighter,
-  LuTag as Tag,
-  LuStickyNote as StickyNote,
   LuCopy as Copy,
   LuInfo as Info,
-  LuSparkles as Sparkles,
   LuLightbulb as Lightbulb,
   LuFilePenLine as FilePenLine,
   LuNotebookPen as NotebookPen,
 } from "react-icons/lu";
+import { FaHighlighter as Highlighter } from "react-icons/fa";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
+import { HiTag as Tag } from "react-icons/hi2";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,7 +69,7 @@ const FeatureInfo = ({
         </div>
         <div className="aspect-video rounded-lg bg-muted/50 flex flex-col items-center justify-center text-sm text-muted-foreground border-2 border-dashed border-muted-foreground/20 group-hover:border-primary/20 transition-colors">
           <div className="mb-2 p-2 rounded-full bg-background/50 shadow-inner">
-            <Sparkles className="h-5 w-5 text-primary/40" />
+            <RobotIcon className="h-5 w-5 text-primary/40" />
           </div>
           <span>Tutorial video coming soon</span>
         </div>
@@ -99,7 +98,7 @@ export const ExpandableTip = ({
                 onClick={onCopy}
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-200 hover:scale-105 active:scale-95"
+                className="cursor-pointer h-10 w-10 rounded-full bg-white text-neutral-900 shadow-sm border border-neutral-200 hover:bg-neutral-50 transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 <Copy className="h-4.5 w-4.5" />
                 <span className="sr-only">Copy</span>
@@ -116,7 +115,7 @@ export const ExpandableTip = ({
               onClick={onHighlight}
               variant="ghost"
               size="icon"
-              className="h-10 w-10 rounded-full hover:bg-yellow-500/10 hover:text-yellow-600 dark:hover:text-yellow-400 transition-all duration-200 hover:scale-105 active:scale-95"
+              className="cursor-pointer h-10 w-10 rounded-full hover:bg-yellow-500/10 hover:text-yellow-600 dark:hover:text-yellow-400 transition-all duration-200 hover:scale-105 active:scale-95"
             >
               <Highlighter className="h-4.5 w-4.5" />
               <span className="sr-only">Highlight</span>
@@ -133,7 +132,7 @@ export const ExpandableTip = ({
                 onClick={onAddTag}
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 rounded-full hover:bg-blue-500/10 hover:text-blue-600 transition-all duration-200 hover:scale-105 active:scale-95"
+                className="cursor-pointer h-10 w-10 rounded-full hover:bg-neutral-500/10 hover:text-neutral-600 transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 <Tag className="h-4.5 w-4.5" />
                 <span className="sr-only">Add Tag</span>
@@ -152,9 +151,9 @@ export const ExpandableTip = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 rounded-full hover:bg-green-500/10 hover:text-green-600 transition-all duration-200 hover:scale-105 active:scale-95"
+                    className="cursor-pointer h-10 w-10 rounded-full hover:bg-green-500/10 hover:text-green-600 transition-all duration-200 hover:scale-105 active:scale-95"
                   >
-                    <StickyNote className="h-4.5 w-4.5" />
+                    <NotebookPen className="h-4.5 w-4.5" />
                     <span className="sr-only">Note</span>
                   </Button>
                 </DropdownMenuTrigger>
@@ -215,7 +214,7 @@ export const ExpandableTip = ({
                 size="icon"
                 className="h-10 w-10 rounded-full hover:bg-purple-500/10 hover:text-purple-600 transition-all duration-200 hover:scale-105 active:scale-95"
               >
-                <Sparkles className="h-4.5 w-4.5" />
+                <RobotIcon className="h-4.5 w-4.5" />
                 <span className="sr-only">Explain</span>
               </Button>
               <FeatureInfo

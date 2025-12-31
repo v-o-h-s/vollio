@@ -16,14 +16,13 @@ import {
   Image,
   Link,
   Table,
-  LucideIcon,
-  Sparkles,
 } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 
 export interface SlashCommandItem {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: any;
   command: ({ editor, range }: { editor: any; range: any }) => void;
   keywords?: string[];
 }
@@ -181,7 +180,7 @@ export const slashCommandItems: SlashCommandItem[] = [
   {
     title: "AI Insight",
     description: "Insert an AI-generated insight box.",
-    icon: Sparkles,
+    icon: RobotIcon,
     command: ({ editor, range }) => {
       editor
         .chain()

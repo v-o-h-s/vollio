@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
   Home,
-  NotebookPen,
   Brain,
   CreditCard,
   DocumentBarChart,
@@ -19,8 +18,9 @@ import {
   HelpCircle,
   ChevronUp,
   ChevronDown,
-  Sparkles,
 } from "lucide-react";
+import { LuNotebookPen as NotebookPen } from "react-icons/lu";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
 import {
@@ -387,7 +387,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                     </div>
                     {isActive && (
                       <div className="absolute top-2 right-2">
-                        <Sparkles className="w-4 h-4 text-primary-foreground/60" />
+                        <RobotIcon className="w-4 h-4 text-primary-foreground/60" />
                       </div>
                     )}
                   </Link>

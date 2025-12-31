@@ -3,7 +3,8 @@
 import React, { useState, useRef } from "react";
 import { useGetNotesQuery, useDeleteNoteMutation } from "@/lib/store/apiSlice";
 import { useRouter } from "next/navigation";
-import { Plus, FileText, Sparkles } from "lucide-react";
+import { Plus, FileText } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -255,7 +256,7 @@ const NotesPage: React.FC = () => {
                 size="sm"
                 className="flex items-center gap-2 h-9 px-4 border-border/30 hover:border-border/50 hover:bg-card/40 backdrop-blur-sm rounded-lg"
               >
-                <Sparkles size={14} />
+                <RobotIcon size={14} />
                 Try Again
               </Button>
               <Button

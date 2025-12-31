@@ -2,7 +2,7 @@
 -- Description: Stores user-specific settings including custom highlight tags
 
 CREATE TABLE IF NOT EXISTS public.user_preferences (
-    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     tags JSONB DEFAULT '[]'::jsonb NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
@@ -11,6 +11,27 @@ CREATE TABLE IF NOT EXISTS public.user_preferences (
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_user_preferences_tags ON public.user_preferences USING GIN (tags);
 CREATE INDEX IF NOT EXISTS idx_user_preferences_updated_at ON public.user_preferences (updated_at);
+
+-- Trigger to auto-populate user_id from auth.uid() on INSERT
+CREATE OR REPLACE FUNCTION auto_set_user_id_for_user_preferences()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- If user_id is not provided or is NULL, set it from the authenticated user
+    IF NEW.user_id IS NULL THEN
+        NEW.user_id = auth.uid();
+    END IF;
+    -- Ensure the user_id matches the authenticated user (security check)
+    IF auth.uid() IS NOT NULL AND NEW.user_id != auth.uid() THEN
+        RAISE EXCEPTION 'user_id must match authenticated user';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER user_preferences_set_user_id
+    BEFORE INSERT ON public.user_preferences
+    FOR EACH ROW
+    EXECUTE FUNCTION auto_set_user_id_for_user_preferences();
 
 -- Enable Row Level Security
 ALTER TABLE public.user_preferences ENABLE ROW LEVEL SECURITY;

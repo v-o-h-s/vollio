@@ -7,11 +7,11 @@ import {
   Italic, 
   Underline, 
   Strikethrough, 
-  Highlighter,
   MessageSquare,
   Save,
   X
 } from 'lucide-react';
+import { FaHighlighter as Highlighter } from "react-icons/fa";
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';

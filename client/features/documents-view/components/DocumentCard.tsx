@@ -8,9 +8,9 @@ import {
   Trash2,
   MoveRight,
   Loader2,
-  Sparkles,
   Eye,
 } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -145,7 +145,7 @@ export function DocumentCard({
                 {isGeneratingSummary ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
-                  <Sparkles className="h-4 w-4 mr-2 text-purple-500" />
+                  <RobotIcon className="h-4 w-4 mr-2 text-purple-500" />
                 )}
                 Summarize
               </DropdownMenuItem>

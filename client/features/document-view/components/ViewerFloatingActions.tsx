@@ -1,6 +1,6 @@
 import React from "react";
 import { LuNotebookPen as NotebookPen, LuX as X } from "react-icons/lu";
-import { RiRobot3Line as Bot } from "react-icons/ri";
+import { RiRobot3Fill as Bot } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 
 interface ViewerFloatingActionsProps {
@@ -17,7 +17,7 @@ export const ViewerFloatingActions = ({
   isAssistantOpen,
 }: ViewerFloatingActionsProps) => {
   return (
-    <div className="absolute bottom-8 right-8 z-50 flex flex-col gap-3 pointer-events-auto">
+  <div className=" absolute bottom-8 right-8 z-50 flex flex-col gap-3 pointer-events-auto">
       {onToggleAssistant && (
         <button
           onClick={onToggleAssistant}

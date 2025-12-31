@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Crown,
-  Sparkles,
   Zap,
   Check,
   ArrowRight,
   Star,
 } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 
 interface PremiumUpgradeProps {
   feature: string;
@@ -35,7 +35,7 @@ export function PremiumUpgrade({ feature, description, onUpgrade }: PremiumUpgra
         <div className="flex items-center justify-center mb-3">
           <div className="relative">
             <Crown className="w-12 h-12 text-amber-500" />
-            <Sparkles className="w-4 h-4 text-amber-400 absolute -top-1 -right-1 animate-pulse" />
+            <RobotIcon className="w-4 h-4 text-amber-400 absolute -top-1 -right-1 animate-pulse" />
           </div>
         </div>
         <CardTitle className="flex items-center justify-center gap-2 text-xl">

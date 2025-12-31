@@ -11,7 +11,6 @@ import {
   Filter,
   FolderPlus,
   FileText,
-  NotebookPen,
   Brain,
   Settings,
   MoreHorizontal,
@@ -23,7 +22,6 @@ import {
   Target,
   Bookmark,
   DocumentBarChart,
-  Sparkles,
   History,
   Download,
   Copy,
@@ -35,6 +33,10 @@ import {
   CreditCard,
   School,
 } from "lucide-react";
+import { 
+  LuNotebookPen as NotebookPen,
+} from "react-icons/lu";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -208,7 +210,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           {
             id: "generate-summary",
             label: "Generate Summary",
-            icon: Sparkles,
+            icon: RobotIcon,
             onClick: () => {
               const generateEvent = new CustomEvent("trigger-summary-generate");
               window.dispatchEvent(generateEvent);
@@ -479,7 +481,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           {
             label: "Recent Summaries",
             value: statistics.loading ? "..." : statistics.recentItems.toString(),
-            icon: Sparkles,
+            icon: RobotIcon,
             color: "text-purple-600 dark:text-purple-400",
           },
           {

@@ -3,7 +3,8 @@
 import { Node, mergeAttributes, type RawCommands } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { NodeViewWrapper, NodeViewContent } from "@tiptap/react";
-import { Sparkles, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 import type { Commands, JSONContent } from "@tiptap/core";
 
@@ -48,7 +49,7 @@ export const InsightComponent = (props: any) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary">
-                <Sparkles size={16} className="fill-current" />
+                <RobotIcon size={16} className="fill-current" />
               </div>
               <div className="flex flex-col">
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary leading-none mb-1">

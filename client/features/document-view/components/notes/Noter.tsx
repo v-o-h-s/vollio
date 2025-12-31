@@ -8,7 +8,7 @@ import {
   LuFileText as FileText,
 } from "react-icons/lu";
 import { FiHome as Home } from "react-icons/fi";
-import { RiRobot3Line as Sparkles } from "react-icons/ri";
+import { RiRobot3Fill as Sparkles } from "react-icons/ri";
 import {
   useGetNotesQuery,
   useDeleteNoteMutation,

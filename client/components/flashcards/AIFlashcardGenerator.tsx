@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import {
-  Sparkles,
   FileText,
   Brain,
   Wand2,
@@ -21,6 +20,7 @@ import {
   Settings,
   Library,
 } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { toast } from "react-toastify";
 import { PremiumUpgrade } from "@/components/ui/premium-upgrade";
 import { PremiumBadge } from "@/components/ui/premium-badge";
@@ -309,7 +309,7 @@ export function AIFlashcardGenerator({
     <Card className="border-border/50 shadow-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-purple-500" />
+          <RobotIcon className="w-5 h-5 text-purple-500" />
           AI Flashcard Generator
           <PremiumBadge variant="crown" />
         </CardTitle>

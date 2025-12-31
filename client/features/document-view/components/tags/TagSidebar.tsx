@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { X, Tag as TagIcon, ChevronRight } from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
+import { HiTag as TagIcon } from "react-icons/hi2";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useGetSettingsQuery } from "@/lib/store/apiSlice";
@@ -71,7 +72,7 @@ export const TagSidebar = ({
     <div className="absolute top-20 right-4 w-80 max-h-[calc(100vh-8rem)] z-30 flex flex-col bg-background/80 backdrop-blur-md border border-border rounded-xl shadow-2xl animate-in slide-in-from-right-10 fade-in duration-300">
       <div className="flex items-center justify-between p-4 border-b border-border/50">
         <div className="flex items-center gap-2">
-          <TagIcon className="w-4 h-4 text-primary" />
+          <TagIcon className="w-4 h-4 text-neutral-500" />
           <h3 className="font-semibold text-sm">Tags Overview</h3>
         </div>
         <Button

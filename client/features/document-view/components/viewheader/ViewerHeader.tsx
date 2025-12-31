@@ -7,9 +7,9 @@ import {
   LuFileText as FileText,
   LuChevronDown as ChevronDown,
   LuEye as Eye,
-  LuTag as TagIcon,
   LuMessageSquare as MessageSquare,
 } from "react-icons/lu";
+import { HiTag as TagIcon } from "react-icons/hi2";
 import { FiHome as Home } from "react-icons/fi";
 import {
   DropdownMenu,

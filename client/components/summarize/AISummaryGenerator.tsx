@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Sparkles,
   FileText,
   Download,
   Copy,
@@ -26,6 +25,7 @@ import {
   CheckCircle,
   AlertCircle,
 } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { toast } from "react-toastify";
 
 interface SelectedDocument {
@@ -475,7 +475,7 @@ Overall, these documents serve as valuable resources for understanding the topic
             {isGenerating ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <Sparkles className="w-5 h-5" />
+              <RobotIcon className="w-5 h-5" />
             )}
             {isGenerating ? "Generating Summary..." : "Generate AI Summary"}
           </Button>

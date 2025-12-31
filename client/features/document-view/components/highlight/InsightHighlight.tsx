@@ -3,7 +3,7 @@
 import { TextHighlight } from "react-pdf-highlighter-extended-plus";
 import { MyHighlight } from "@/features/document-view/types/highlight";
 import { useState, useMemo, useEffect, useRef } from "react";
-import { RiRobot3Line as Sparkles } from "react-icons/ri";
+import { RiRobot3Fill as Sparkles } from "react-icons/ri";
 import { cn } from "@/lib/utils";
 import gsap from "gsap";
 

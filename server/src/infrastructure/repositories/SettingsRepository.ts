@@ -35,19 +35,10 @@ export class SettingsRepository implements ISettingsRepository {
   async upsertUserTags(tags: Tag[]): Promise<Tag[]> {
     this.logger.info({ count: tags.length }, "Upserting user tags to database");
 
-    // Get the authenticated user ID
-    const { data: { user }, error: authError } = await this.supabaseClient.auth.getUser();
-    
-    if (authError || !user) {
-      this.logger.error({ error: authError }, "Unauthorized: Could not get user for upserting tags");
-      throw new DatabaseError({ message: "Unauthorized: User not found", code: "401" } as any);
-    }
-
     const { data, error } = await this.supabaseClient
       .from("user_preferences")
       .upsert(
         {
-          user_id: user.id,
           tags: tags,
           updated_at: new Date().toISOString(),
         },

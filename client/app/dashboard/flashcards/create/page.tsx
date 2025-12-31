@@ -23,7 +23,6 @@ import {
   Shuffle,
   Eye,
   EyeOff,
-  Sparkles,
   Wand2,
   Check,
   BookOpen,
@@ -33,6 +32,7 @@ import {
   Loader2,
   HelpCircle,
 } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { FlashcardPreview, FlashcardEditor } from "@/components/flashcards";
@@ -439,7 +439,7 @@ export default function CreateFlashCardsPage() {
                 value="automatic"
                 className="flex items-center gap-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm"
               >
-                <Sparkles className="w-4 h-4" />
+                <RobotIcon className="w-4 h-4" />
                 Automatic (AI)
               </TabsTrigger>
               <TabsTrigger
@@ -577,7 +577,7 @@ export default function CreateFlashCardsPage() {
                         </>
                       ) : (
                         <>
-                          <Sparkles className="w-4 h-4 mr-2" />
+                          <RobotIcon className="w-4 h-4 mr-2" />
                           Generate Flashcards
                         </>
                       )}

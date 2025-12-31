@@ -18,8 +18,8 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
   FileText,
-  NotebookPen,
   Brain,
+  BookOpen,
   CreditCard,
   PanelLeftClose,
   PanelLeftOpen,
@@ -33,6 +33,7 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
+import { LuNotebookPen as NotebookPen } from "react-icons/lu";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/use-theme";
 import { createClient } from "@/lib/supabase/client";

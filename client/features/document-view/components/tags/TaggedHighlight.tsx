@@ -5,7 +5,8 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { Tag as TagIcon, X, Plus } from "lucide-react";
+import { X, Plus } from "lucide-react";
+import { HiTag as TagIcon } from "react-icons/hi2";
 import { cn } from "@/lib/utils";
 import type { MyHighlight } from "@/features/document-view/types/highlight";
 import { CreateHighlightDTO, Tag } from "@vollio/shared";

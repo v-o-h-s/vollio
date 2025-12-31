@@ -31,11 +31,11 @@ import {
   User,
   Shield,
   Bell,
-  Sparkles,
   ChevronRight,
   Bot,
-  Tags,
 } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
+import { HiTag as Tags } from "react-icons/hi2";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -396,7 +396,7 @@ export default function SettingsPage() {
                   {/* AI Status Card */}
                   <div className="mt-6 p-4 rounded-2xl border border-primary/20 bg-primary/5 flex items-start gap-4">
                     <div className="p-2 rounded-lg bg-primary/10">
-                      <Sparkles className="w-5 h-5 text-primary" />
+                      <RobotIcon className="w-5 h-5 text-primary" />
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-foreground">

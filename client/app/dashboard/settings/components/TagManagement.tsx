@@ -21,13 +21,13 @@ import { Label } from "@/components/ui/label";
 import {
   Plus,
   Trash2,
-  Tags,
   Loader2,
   AlertCircle,
   Pencil,
   Check,
   X,
 } from "lucide-react";
+import { HiTag as Tags } from "react-icons/hi2";
 import {
   Dialog,
   DialogContent,
