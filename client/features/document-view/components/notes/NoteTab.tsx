@@ -53,11 +53,11 @@ export default function NoteTab({
       className={`flex items-center ${
         isHome ? "min-w-[40px] px-2" : "min-w-[110px] max-w-[180px] px-3"
       } h-8 flex-row justify-center text-sm border rounded-lg
-                 hover:bg-primary/10 cursor-pointer transition-all duration-150 font-medium
+                 hover:bg-indigo-500/10 cursor-pointer transition-all duration-150 font-medium
                  ${
                    isActive
-                     ? "bg-primary/20 border-primary text-primary"
-                     : "bg-background border-border text-foreground hover:text-primary"
+                     ? "bg-indigo-500/20 border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                     : "bg-background border-border text-foreground hover:text-indigo-600 dark:hover:text-indigo-400"
                  }`}
     >
       {isHome ? (

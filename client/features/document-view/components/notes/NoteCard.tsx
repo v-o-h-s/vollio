@@ -47,12 +47,12 @@ export const NoteCard = ({
       className={`group p-3 border border-border rounded-lg transition-all duration-200 flex items-center gap-3 ${
         isDeleting
           ? "opacity-60 cursor-not-allowed bg-muted/50"
-          : "cursor-pointer hover:border-primary/50 hover:bg-accent/50"
+          : "cursor-pointer hover:border-indigo-500/50 hover:bg-indigo-500/5"
       }`}
     >
       <div
-        className={`p-2 rounded-md bg-primary/10 text-primary transition-colors shrink-0 ${
-          !isDeleting && "group-hover:bg-primary/20"
+        className={`p-2 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 transition-colors shrink-0 ${
+          !isDeleting && "group-hover:bg-indigo-500/20"
         }`}
       >
         <FileText className="w-4 h-4" />
@@ -60,7 +60,7 @@ export const NoteCard = ({
       <div className="flex-1 min-w-0">
         <h3
           className={`font-medium text-sm truncate transition-colors ${
-            !isDeleting && "group-hover:text-primary"
+            !isDeleting && "group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
           }`}
         >
           {note.title || "Untitled Note"}
@@ -74,7 +74,7 @@ export const NoteCard = ({
           variant="ghost"
           size="icon"
           disabled={isDeleting}
-          className={`cursor-pointer transition-opacity shrink-0 h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/10 ${
+          className={`cursor-pointer transition-opacity shrink-0 h-8 w-8 text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-500/10 ${
             isDeleting ? "opacity-50" : "opacity-0 group-hover:opacity-100"
           }`}
           onClick={handleOpenInNewTab}

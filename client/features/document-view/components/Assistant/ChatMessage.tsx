@@ -90,7 +90,7 @@ export function ChatMessage({
               content={{ content: content as JSONContent }}
               editable={false}
               showTitle={false}
-              className="min-h-0 p-0 bg-transparent"
+              className="min-h-0 p-0 bg-transparent [&_a]:text-purple-500 [&_a]:hover:text-purple-600 [&_a]:transition-colors"
               fontSize={assistantFontSize}
             />
           )}
@@ -144,7 +144,7 @@ export function ChatMessage({
                   title="Add as Insight"
                   onClick={() => handleAddToNoteAsInsight(content, metadata)}
                 >
-                  <Sparkles className="w-3.5 h-3.5 group-hover:text-primary transition-colors" />
+                  <Sparkles className="w-3.5 h-3.5 group-hover:text-purple-500 transition-colors" />
                 </button>
               )}
               <button

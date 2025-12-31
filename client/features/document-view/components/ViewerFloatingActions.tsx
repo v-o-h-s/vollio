@@ -29,7 +29,7 @@ export const ViewerFloatingActions = ({
             "backdrop-blur-xl",
             "cursor-pointer active:scale-95",
             isAssistantOpen
-              ? "bg-primary text-primary-foreground scale-110"
+              ? "bg-purple-500 text-white scale-110"
               : "bg-white/90 dark:bg-gray-900/90 text-foreground hover:bg-gray-50 dark:hover:bg-gray-800 hover:scale-110"
           )}
           title="Toggle Assistant"
@@ -43,8 +43,8 @@ export const ViewerFloatingActions = ({
           />
           {isAssistantOpen && (
             <span className="absolute -left-1 top-0 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500"></span>
             </span>
           )}
         </button>
@@ -61,7 +61,7 @@ export const ViewerFloatingActions = ({
             "backdrop-blur-xl",
             "cursor-pointer active:scale-95",
             isNoterOpen
-              ? "bg-primary text-primary-foreground scale-110"
+              ? "bg-indigo-500 text-white scale-110"
               : "bg-white/90 dark:bg-gray-900/90 text-foreground hover:bg-gray-50 dark:hover:bg-gray-800 hover:scale-110"
           )}
           title="Toggle Notes"
@@ -72,8 +72,8 @@ export const ViewerFloatingActions = ({
           />
           {isNoterOpen && (
             <span className="absolute -left-1 top-0 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
             </span>
           )}
         </button>

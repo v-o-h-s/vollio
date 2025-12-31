@@ -57,6 +57,7 @@ export function NoteEditorTab({
           documentId={documentId}
           autoSave={isActive}
           autoSaveDelay={500}
+          className="[&_a]:text-indigo-600 dark:[&_a]:text-indigo-400 [&_a]:hover:text-indigo-700 dark:[&_a]:hover:text-indigo-300 [&_a]:transition-colors"
         />
       </div>
     </div>

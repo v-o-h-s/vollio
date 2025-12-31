@@ -62,16 +62,16 @@ export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
         className={cn(
           "shrink-0 border-b px-4 py-3 flex items-center justify-between transition-colors duration-300",
           isFocused
-            ? "border-primary/30 bg-primary/5"
+            ? "border-purple-500/30 bg-purple-500/5"
             : "border-border bg-card/20"
         )}
       >
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full  flex items-center justify-center">
-            <Bot className={cn("w-4 h-4", isFocused ? "text-primary" : "dark:text-white")} />
+            <Bot className={cn("w-4 h-4", isFocused ? "text-purple-500" : "dark:text-white")} />
           </div>
           <div>
-            <h2 className={cn("text-sm font-semibold transition-colors", isFocused ? "text-primary" : "text-foreground")}>
+            <h2 className={cn("text-sm font-semibold transition-colors", isFocused ? "text-purple-500" : "text-foreground")}>
               AI Assistant
             </h2>
             <p className="text-xs text-muted-foreground">
@@ -84,7 +84,7 @@ export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
             variant="ghost"
             size="icon"
             onClick={resetMessages}
-            className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors"
+            className="h-8 w-8 text-muted-foreground hover:text-purple-500 transition-colors"
             title="New Chat"
           >
             <SquarePen className="w-4 h-4" />
@@ -97,7 +97,7 @@ export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
         {messages.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-center space-y-2 max-w-sm px-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-black flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto rounded-full bg-purple-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
                 <Bot className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-foreground">
@@ -124,22 +124,22 @@ export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
             ))}
             {isLoading && (
               <div className="flex gap-3 p-4 animate-in fade-in duration-300">
-                <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-500 to-purple-600 flex items-center justify-center shrink-0 shadow-sm">
                   <Bot className="w-4 h-4 text-white animate-pulse" />
                 </div>
                 <div className="flex flex-col gap-1">
                   <div className="rounded-2xl rounded-tl-sm bg-muted px-4 py-2.5">
                     <div className="flex gap-1">
                       <span
-                        className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-purple-500/40 rounded-full animate-bounce"
                         style={{ animationDelay: "0ms" }}
                       />
                       <span
-                        className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-purple-500/40 rounded-full animate-bounce"
                         style={{ animationDelay: "150ms" }}
                       />
                       <span
-                        className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce"
+                        className="w-2 h-2 bg-purple-500/40 rounded-full animate-bounce"
                         style={{ animationDelay: "300ms" }}
                       />
                     </div>
@@ -164,7 +164,7 @@ export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
             className={cn(
               "flex-1 resize-none rounded-xl border border-border bg-background px-4 py-3",
               "text-foreground placeholder:text-muted-foreground",
-              "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
+              "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent",
               "transition-all duration-200",
               "max-h-32 min-h-[44px]"
             )}
@@ -175,7 +175,7 @@ export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
           <Button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="h-11 w-11 rounded-xl shrink-0 p-0"
+            className="h-11 w-11 rounded-xl shrink-0 p-0 bg-purple-500 hover:bg-purple-600 text-white shadow-sm"
             title="Send message (Enter)"
           >
             <Send className="w-4 h-4" />

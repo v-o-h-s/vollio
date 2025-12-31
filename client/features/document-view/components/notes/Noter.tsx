@@ -170,7 +170,7 @@ export default function Noter({
                 <Button
                   onClick={generateSummary}
                   disabled={isGenerating}
-                  className="w-full h-auto py-4 px-6 bg-gradient-to-r from-primary/10 to-primary/5 hover:from-primary/20 hover:to-primary/10 border-2 border-primary/30 hover:border-primary/50 text-primary transition-all duration-300 shadow-sm hover:shadow-md group"
+                  className="w-full h-auto py-4 px-6 bg-gradient-to-r from-indigo-500/10 to-indigo-500/5 hover:from-indigo-500/20 hover:to-indigo-500/10 border-2 border-indigo-500/30 hover:border-indigo-500/50 text-indigo-600 dark:text-indigo-400 transition-all duration-300 shadow-sm hover:shadow-md group"
                   variant="outline"
                 >
                   <div className="flex items-center justify-center gap-3 w-full">
@@ -206,7 +206,7 @@ export default function Noter({
                 </div>
                 <Button
                   onClick={() => handleCreateNote()}
-                  className="cursor-pointer"
+                  className="cursor-pointer bg-indigo-500 hover:bg-indigo-600 text-white"
                   disabled={isLoadingNewNote}
                 >
                   <Plus className="w-4 h-4 mr-2" />

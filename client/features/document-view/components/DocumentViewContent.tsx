@@ -183,7 +183,7 @@ export function DocumentViewContent() {
               "h-full rounded-lg flex flex-row overflow-hidden transition-all duration-300",
               "border bg-card shadow-md",
               focusedComponent === ViewerComponents.V_AI
-                ? "border-primary/50 "
+                ? "border-purple-500/50 "
                 : "border-primary/20"
             )}
             style={{
@@ -212,8 +212,8 @@ export function DocumentViewContent() {
                 "absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
                 "transition-all duration-200",
                 isAssistantDividerDragging
-                  ? "w-1 bg-primary"
-                  : "w-0.5 bg-primary/30 group-hover:w-1 group-hover:bg-primary/80"
+                  ? "w-1 bg-purple-500"
+                  : "w-0.5 bg-purple-500/30 group-hover:w-1 group-hover:bg-purple-500/80"
               )}
             />
             <div
@@ -221,7 +221,7 @@ export function DocumentViewContent() {
                 "relative z-10 rounded-md transition-all duration-200",
                 "flex items-center justify-center",
                 isAssistantDividerDragging
-                  ? "bg-primary text-primary-foreground scale-110 px-1 py-2"
+                  ? "bg-purple-500 text-white scale-110 px-1 py-2"
                   : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5"
               )}
             >
@@ -284,8 +284,8 @@ export function DocumentViewContent() {
                 "absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
                 "transition-all duration-200",
                 isNoterDividerDragging
-                  ? "w-1 bg-primary"
-                  : "w-0.5 bg-primary/30 group-hover:w-1 group-hover:bg-primary/80"
+                  ? "w-1 bg-indigo-500"
+                  : "w-0.5 bg-indigo-500/30 group-hover:w-1 group-hover:bg-indigo-500/80"
               )}
             />
             <div
@@ -293,7 +293,7 @@ export function DocumentViewContent() {
                 "relative z-10 rounded-md transition-all duration-200",
                 "flex items-center justify-center",
                 isNoterDividerDragging
-                  ? "bg-primary text-primary-foreground scale-110 px-1 py-2"
+                  ? "bg-indigo-500 text-white scale-110 px-1 py-2"
                   : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5"
               )}
             >
@@ -307,7 +307,7 @@ export function DocumentViewContent() {
               "h-full rounded-lg flex flex-row overflow-hidden transition-all duration-300",
               "border shadow-md",
               focusedComponent === ViewerComponents.V_NOTES
-                ? "border-primary/50 "
+                ? "border-indigo-500/50 "
                 : "border-primary/20"
             )}
             style={{

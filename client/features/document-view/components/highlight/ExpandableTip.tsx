@@ -61,14 +61,14 @@ const FeatureInfo = ({
       <div className="space-y-4">
         <div className="space-y-2">
           <h4 className="font-semibold leading-none flex items-center gap-2">
-            <Info className="h-4 w-4 text-primary" />
+            <Info className="h-4 w-4 text-purple-500" />
             {title}
           </h4>
           <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
         </div>
-        <div className="aspect-video rounded-lg bg-muted/50 flex flex-col items-center justify-center text-sm text-muted-foreground border-2 border-dashed border-muted-foreground/20 group-hover:border-primary/20 transition-colors">
+        <div className="aspect-video rounded-lg bg-muted/50 flex flex-col items-center justify-center text-sm text-muted-foreground border-2 border-dashed border-muted-foreground/20 group-hover:border-purple-500/20 transition-colors">
           <div className="mb-2 p-2 rounded-full bg-background/50 shadow-inner">
-            <RobotIcon className="h-5 w-5 text-primary/40" />
+            <RobotIcon className="h-5 w-5 text-purple-500/40" />
           </div>
           <span>Tutorial video coming soon</span>
         </div>
@@ -150,7 +150,7 @@ export const ExpandableTip = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="cursor-pointer h-10 w-10 rounded-full hover:bg-green-500/10 hover:text-green-600 transition-all duration-200 hover:scale-105 active:scale-95"
+                    className="cursor-pointer h-10 w-10 rounded-full hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 hover:scale-105 active:scale-95"
                   >
                     <NotebookPen className="h-4.5 w-4.5 " />
                     <span className="sr-only">Note</span>
@@ -163,7 +163,7 @@ export const ExpandableTip = ({
                       className="flex items-center justify-between rounded-lg py-2 cursor-pointer"
                     >
                       <div className="flex items-center gap-2">
-                        <FilePenLine className="h-4 w-4 text-green-600" />
+                        <FilePenLine className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                         <span>Add to V-Doc</span>
                       </div>
                       <FeatureInfo 
@@ -179,7 +179,7 @@ export const ExpandableTip = ({
                     className="flex items-center justify-between rounded-lg py-2 cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
-                      <NotebookPen className="h-4 w-4 text-purple-600" />
+                      <NotebookPen className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                       <span>Add to V-Notes</span>
                     </div>
                     <FeatureInfo 
@@ -211,7 +211,7 @@ export const ExpandableTip = ({
                 onClick={onExplain}
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 rounded-full hover:bg-purple-500/10 hover:text-purple-600 transition-all duration-200 hover:scale-105 active:scale-95"
+                className="h-10 w-10 rounded-full hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <RobotIcon className="h-4.5 w-4.5" />
                 <span className="sr-only">Explain</span>

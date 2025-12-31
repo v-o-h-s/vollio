@@ -121,7 +121,7 @@ export default function NotesTabsManager({
         <div
           className={cn(
             "w-full h-px transition-colors duration-300 rounded",
-            isFocused ? "bg-primary/50" : "bg-border"
+            isFocused ? "bg-indigo-500/50" : "bg-border"
           )}
         />
       </div>
