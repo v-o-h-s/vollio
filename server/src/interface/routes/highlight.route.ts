@@ -132,6 +132,28 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
       return highlightController.deleteHighlight(request, reply);
     }
   );
+
+  // Count highlights by tag
+  fastify.get<{ Params: { tagName: string } }>(
+    `${_options.prefix}/tags/:tagName/count`,
+    async (request, reply) => {
+      const highlightController = request.diScope.resolve(
+        "highlightController"
+      ) as any;
+      return highlightController.countHighlightsByTag(request, reply);
+    }
+  );
+
+  // Delete highlights by tag
+  fastify.delete<{ Params: { tagName: string } }>(
+    `${_options.prefix}/tags/:tagName`,
+    async (request, reply) => {
+      const highlightController = request.diScope.resolve(
+        "highlightController"
+      ) as any;
+      return highlightController.deleteHighlightsByTag(request, reply);
+    }
+  );
 };
 
 export const highlightRoutes = fp(highlightRoutesHandler, {

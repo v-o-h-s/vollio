@@ -2,7 +2,7 @@
 -- Description: Stores user-specific settings including custom highlight tags
 
 CREATE TABLE IF NOT EXISTS public.user_preferences (
-    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
     tags JSONB DEFAULT '[]'::jsonb NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL

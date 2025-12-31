@@ -23,6 +23,9 @@ import { FastifyBaseLogger } from "fastify";
 import { GetHighlightsByDocumentIdUseCase } from "../../application/use-cases/highlights/GetHighlightsByDocumentIdUseCase";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 
+import { CountHighlightsByTagUseCase } from "../../application/use-cases/highlights/CountHighlightsByTagUseCase";
+import { DeleteHighlightsByTagUseCase } from "../../application/use-cases/highlights/DeleteHighlightsByTagUseCase";
+
 export class HighlightController {
   constructor(
     private createHighlightUseCase: CreateHighlightUseCase,
@@ -30,7 +33,9 @@ export class HighlightController {
     private updateHighlightUseCase: UpdateHighlightUseCase,
     private deleteHighlightUseCase: DeleteHighlightUseCase,
     private logger: FastifyBaseLogger,
-    private getHighlightsByDocumentIdUseCase: GetHighlightsByDocumentIdUseCase
+    private getHighlightsByDocumentIdUseCase: GetHighlightsByDocumentIdUseCase,
+    private countHighlightsByTagUseCase: CountHighlightsByTagUseCase,
+    private deleteHighlightsByTagUseCase: DeleteHighlightsByTagUseCase
   ) {}
 
   /**
@@ -210,5 +215,43 @@ export class HighlightController {
       data: null,
       error: null,
     } satisfies DeleteHighlightResponse);
+  }
+
+  /**
+   * GET /api/v1/highlights/tags/:tagName/count - Count highlights by tag
+   */
+  async countHighlightsByTag(
+    request: FastifyRequest<{ Params: { tagName: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({ success: false, message: "Unauthorized" });
+      return;
+    }
+
+    const { tagName } = request.params;
+    const count = await this.countHighlightsByTagUseCase.execute(userId, tagName);
+
+    ResponseFormatter.success(reply, { count }, "Usage count retrieved", 200);
+  }
+
+  /**
+   * DELETE /api/v1/highlights/tags/:tagName - Delete highlights by tag
+   */
+  async deleteHighlightsByTag(
+    request: FastifyRequest<{ Params: { tagName: string } }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({ success: false, message: "Unauthorized" });
+      return;
+    }
+
+    const { tagName } = request.params;
+    await this.deleteHighlightsByTagUseCase.execute(userId, tagName);
+
+    ResponseFormatter.success(reply, null, "Highlights with tag deleted", 200);
   }
 }

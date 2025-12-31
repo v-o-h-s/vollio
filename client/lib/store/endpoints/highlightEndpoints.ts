@@ -74,4 +74,18 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
       { type: "Highlight", id: "LIST" },
     ],
   }),
+
+  countHighlightsByTag: builder.query<{ count: number }, string>({
+    query: (tagName) => `highlights/tags/${encodeURIComponent(tagName)}/count`,
+    transformResponse: (response: ServerSuccessResponse<{ count: number }>) => response.data,
+  }),
+
+  deleteHighlightsByTag: builder.mutation<null, string>({
+    query: (tagName) => ({
+      url: `highlights/tags/${encodeURIComponent(tagName)}`,
+      method: "DELETE",
+    }),
+    transformResponse: (response: ServerSuccessResponse<null>) => response.data,
+    invalidatesTags: [{ type: "Highlight", id: "LIST" }],
+  }),
 });

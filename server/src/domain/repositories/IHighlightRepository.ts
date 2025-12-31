@@ -38,4 +38,14 @@ export interface IHighlightRepository {
    * Get all highlights for a document
    */
   getHighlightsByDocumentId(documentId: string): Promise<Highlight[]>;
+
+  /**
+   * Count highlights using a specific tag
+   */
+  countHighlightsByTag(userId: string, tagName: string): Promise<number>;
+
+  /**
+   * Delete all highlights using a specific tag
+   */
+  deleteHighlightsByTag(userId: string, tagName: string): Promise<void>;
 }

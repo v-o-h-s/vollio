@@ -254,4 +254,36 @@ export class HighlightRepository implements IHighlightRepository {
     );
     return data.map((row) => HighlightsMapper.mapRowToHighlight(row));
   }
+
+  async countHighlightsByTag(userId: string, tagName: string): Promise<number> {
+    this.logger.info({ userId, tagName }, "Counting highlights by tag");
+    const { count, error } = await this.supabaseClient
+      .from("highlights")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .contains("tags", [tagName]);
+
+    if (error) {
+      this.logger.error({ error, userId, tagName }, "Error counting highlights by tag");
+      throw new DatabaseError(error);
+    }
+
+    return count || 0;
+  }
+
+  async deleteHighlightsByTag(userId: string, tagName: string): Promise<void> {
+    this.logger.info({ userId, tagName }, "Deleting highlights by tag");
+    const { error } = await this.supabaseClient
+      .from("highlights")
+      .delete()
+      .eq("user_id", userId)
+      .contains("tags", [tagName]);
+
+    if (error) {
+      this.logger.error({ error, userId, tagName }, "Error deleting highlights by tag");
+      throw new DatabaseError(error);
+    }
+
+    this.logger.info({ userId, tagName }, "Highlights with tag deleted successfully");
+  }
 }

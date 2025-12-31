@@ -87,6 +87,8 @@ import { AiController } from "../interface/controllers/ai.controller";
 import { SettingsRepository } from "../infrastructure/repositories/SettingsRepository";
 import { GetUserSettingsUseCase } from "../application/use-cases/settings/GetUserSettingsUseCase";
 import { UpdateUserSettingsUseCase } from "../application/use-cases/settings/UpdateUserSettingsUseCase";
+import { CountHighlightsByTagUseCase } from "../application/use-cases/highlights/CountHighlightsByTagUseCase";
+import { DeleteHighlightsByTagUseCase } from "../application/use-cases/highlights/DeleteHighlightsByTagUseCase";
 import { SettingsController } from "../interface/controllers/settings.controller";
 
 const diPlugin: FastifyPluginAsync = async (fastify) => {
@@ -335,6 +337,14 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       }
     ),
     highlightController: asClass(HighlightController, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    countHighlightsByTagUseCase: asClass(CountHighlightsByTagUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    deleteHighlightsByTagUseCase: asClass(DeleteHighlightsByTagUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

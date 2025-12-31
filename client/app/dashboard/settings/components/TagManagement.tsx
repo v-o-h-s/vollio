@@ -5,6 +5,8 @@ import { Tag } from "@vollio/shared";
 import {
   useGetSettingsQuery,
   useUpdateSettingsMutation,
+  useLazyCountHighlightsByTagQuery,
+  useDeleteHighlightsByTagMutation,
 } from "@/lib/store/apiSlice";
 import {
   Card,
@@ -33,10 +35,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
+import { toast } from "react-toastify";
 
 const PRESET_COLORS = [
   "#EF4444", // Red
@@ -60,6 +63,8 @@ const PRESET_COLORS = [
 export function TagManagement() {
   const { data: settings, isLoading, isError } = useGetSettingsQuery();
   const [updateSettings, { isLoading: isUpdating }] = useUpdateSettingsMutation();
+  const [countUsage] = useLazyCountHighlightsByTagQuery();
+  const [deleteHighlightsByTag] = useDeleteHighlightsByTagMutation();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newTagLabel, setNewTagLabel] = useState("");
@@ -69,8 +74,19 @@ export function TagManagement() {
   const [editTagLabel, setEditTagLabel] = useState("");
   const [editTagColor, setEditTagColor] = useState("");
 
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [tagToDelete, setTagToDelete] = useState<Tag | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [usageCount, setUsageCount] = useState(0);
+
   const handleAddTag = async () => {
     if (!newTagLabel.trim() || !settings) return;
+
+    // Check if tag with same label already exists
+    if (settings.tags.some(t => t.label.toLowerCase() === newTagLabel.trim().toLowerCase())) {
+      toast.error("A tag with this label already exists.");
+      return;
+    }
 
     const newTag: Tag = {
       id: `custom-${Date.now()}`,
@@ -86,21 +102,57 @@ export function TagManagement() {
       }).unwrap();
       setNewTagLabel("");
       setIsAddDialogOpen(false);
+      toast.success("Tag created successfully");
     } catch (err) {
       console.error("Failed to add tag:", err);
+      toast.error("Failed to create tag");
     }
   };
 
-  const handleDeleteTag = async (tagId: string) => {
+  const handleDeleteClick = async (tag: Tag) => {
     if (!settings) return;
-
+    
     try {
+      // Check usage
+      const result = await countUsage(tag.label).unwrap();
+      setUsageCount(result.count);
+      setTagToDelete(tag);
+      
+      if (result.count > 0) {
+        setDeleteConfirmOpen(true);
+      } else {
+        // Just delete if not used
+        await performDelete(tag);
+      }
+    } catch (err) {
+      console.error("Failed to check tag usage:", err);
+      toast.error("Failed to check tag usage");
+    }
+  };
+
+  const performDelete = async (tag: Tag) => {
+    if (!settings) return;
+    setIsDeleting(true);
+    try {
+      // 1. Delete highlights if any
+      if (usageCount > 0) {
+        await deleteHighlightsByTag(tag.label).unwrap();
+      }
+      
+      // 2. Remove tag from settings
       await updateSettings({
         ...settings,
-        tags: settings.tags.filter((t) => t.id !== tagId),
+        tags: settings.tags.filter((t) => t.id !== tag.id),
       }).unwrap();
+      
+      setDeleteConfirmOpen(false);
+      setTagToDelete(null);
+      toast.success("Tag deleted successfully");
     } catch (err) {
       console.error("Failed to delete tag:", err);
+      toast.error("Failed to delete tag");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -127,8 +179,10 @@ export function TagManagement() {
         ),
       }).unwrap();
       setEditingTagId(null);
+      toast.success("Tag updated successfully");
     } catch (err) {
       console.error("Failed to update tag:", err);
+      toast.error("Failed to update tag");
     }
   };
 
@@ -154,7 +208,7 @@ export function TagManagement() {
 
   return (
     <Card className="border-border/50 bg-card/20 backdrop-blur-md shadow-xl overflow-hidden relative border-none">
-      <div className="absolute top-0 right-0 p-8 opacity-5">
+      <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
         <Tags className="w-48 h-48" />
       </div>
       <CardHeader className="pb-4">
@@ -165,15 +219,22 @@ export function TagManagement() {
               Manage tags for your document highlights and notes.
             </CardDescription>
           </div>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="rounded-xl gap-2 shadow-lg shadow-primary/20">
-                <Plus className="w-4 h-4" />
-                Add Tag
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="rounded-2xl border-none shadow-2xl">
-              <DialogHeader>
+          
+          <Button 
+            className="rounded-xl gap-2 shadow-lg shadow-primary/20"
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            <Plus className="w-4 h-4" />
+            Add Tag
+          </Button>
+
+                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+
+                      <DialogContent className="rounded-2xl border-none shadow-2xl sm:max-w-[425px] w-[95vw]">
+
+                        <DialogHeader>
+
+          
                 <DialogTitle>Create New Tag</DialogTitle>
                 <DialogDescription>
                   Choose a label and color for your new highlight tag.
@@ -353,7 +414,7 @@ export function TagManagement() {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                          onClick={() => handleDeleteTag(tag.id)}
+                          onClick={() => handleDeleteClick(tag)}
                           disabled={isUpdating}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -367,6 +428,19 @@ export function TagManagement() {
           )}
         </div>
       </CardContent>
+
+      <ConfirmationDialog
+        open={deleteConfirmOpen}
+        title="Delete Tag & Highlights?"
+        message={`The tag "${tagToDelete?.label}" is currently used in ${usageCount} highlight${usageCount > 1 ? 's' : ''}.`}
+        description="Deleting this tag will also permanently delete all associated highlights. This action cannot be undone."
+        confirmText="Delete Tag and Highlights"
+        cancelText="Cancel"
+        onConfirm={() => tagToDelete && performDelete(tagToDelete)}
+        onCancel={() => setDeleteConfirmOpen(false)}
+        style="destructive"
+        isLoading={isDeleting}
+      />
     </Card>
   );
 }
