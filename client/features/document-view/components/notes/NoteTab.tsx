@@ -49,7 +49,7 @@ export default function NoteTab({
       {...(isHome ? {} : listeners)} // Only add drag listeners if not home tab
       {...(isHome ? {} : attributes)}
       onClick={() => onClick(id)}
-      title={isHome ? "Home" : displayLabel || undefined}
+      title={isHome ? "Voll-notes Home" : displayLabel || undefined}
       className={`flex items-center ${
         isHome ? "min-w-[40px] px-2" : "min-w-[110px] max-w-[180px] px-3"
       } h-8 flex-row justify-center text-sm border rounded-lg

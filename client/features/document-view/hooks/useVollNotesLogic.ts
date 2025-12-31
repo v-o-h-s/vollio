@@ -23,7 +23,7 @@ export const HOME_TAB_ID = "home";
 /**
  * Hook containing logic for managing notes, tabs, and highlights in the Document View.
  */
-export function useNoterLogic(documentId: string) {
+export function useVollNotesLogic(documentId: string) {
   const dispatch = useAppDispatch();
   const [tabs, setTabs] = useState<Tab[]>([
     { id: HOME_TAB_ID, label: "Home", isHome: true },

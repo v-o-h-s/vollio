@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { useViewer } from "../../context/ViewerContext";
 import { useAppSelector } from "@/lib/store/hooks";
 
-export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
+export function VollAiChat({ isFocused }: { isFocused?: boolean }) {
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -18,10 +18,10 @@ export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
     addUserMessage,
     handleDeleteMessage: handleDelete,
     resetMessages,
-    isAssistantLoading: isLoading,
+    isVollAiLoading: isLoading,
   } = useViewer();
-  const assistantFontSize = useAppSelector(
-    (state) => state.settings.assistantFontSize
+  const vollAiFontSize = useAppSelector(
+    (state) => state.settings.vollAiFontSize
   );
 
   // Auto-scroll to bottom when new messages arrive
@@ -72,7 +72,7 @@ export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
           </div>
           <div>
             <h2 className={cn("text-sm font-semibold transition-colors", isFocused ? "text-purple-500" : "text-foreground")}>
-              AI Assistant
+              Voll-ai
             </h2>
             <p className="text-xs text-muted-foreground">
               Ask me anything about your document
@@ -168,7 +168,7 @@ export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
               "transition-all duration-200",
               "max-h-32 min-h-[44px]"
             )}
-            style={{ fontSize: `${assistantFontSize}px` }}
+            style={{ fontSize: `${vollAiFontSize}px` }}
             rows={1}
             disabled={isLoading}
           />

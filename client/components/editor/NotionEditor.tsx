@@ -69,10 +69,10 @@ function NotionEditorInner({
   documentId,
   fontSize,
 }: NotionEditorProps) {
-  const noterFontSizeFromStore = useAppSelector(
-    (state) => state.settings.noterFontSize
+  const vollNotesFontSizeFromStore = useAppSelector(
+    (state) => state.settings.vollNotesFontSize
   );
-  const noterFontSize = fontSize || noterFontSizeFromStore;
+  const vollNotesFontSize = fontSize || vollNotesFontSizeFromStore;
   const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false);
   const [noteTitle, setNoteTitle] = useState(content?.title || "");
 
@@ -427,7 +427,7 @@ function NotionEditorInner({
 
       // Logic explanation:
       // 1. When typing: The `lastUpdatedAt` prop from the server hasn't changed yet, so the editor remains "locked" to local state to prevent overwriting user input.
-      // 2. When external update (e.g. AI Assistant): The `lastUpdatedAt` prop changes, signaling a new version. We "unlock" and synchronize the editor with the new content.
+      // 2. When external update (e.g. Voll-ai): The `lastUpdatedAt` prop changes, signaling a new version. We "unlock" and synchronize the editor with the new content.
       // the unlockin and locking is about props content (use it or not) (istg this shit is goated)
 
       const shouldUpdate =
@@ -539,7 +539,7 @@ function NotionEditorInner({
           "focus-within:outline-none",
           "transition-all duration-200"
         )}
-        style={{ fontSize: `${noterFontSize}px` }}
+        style={{ fontSize: `${vollNotesFontSize}px` }}
       />
 
       {editor && (

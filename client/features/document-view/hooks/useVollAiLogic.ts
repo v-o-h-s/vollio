@@ -23,10 +23,10 @@ export interface Message {
   };
 }
 
-export function useAssistantLogic() {
+export function useVollAiLogic() {
   const [messages, setMessages] = useState<Message[]>([]);
 
-  const [assistantChat, { isLoading: isAssistantLoading }] =
+  const [vollAiChat, { isLoading: isVollAiLoading }] =
     useAssistantChatMutation();
 
   const addUserMessage = async (
@@ -55,7 +55,7 @@ export function useAssistantLogic() {
         content: extractTextFromContent(msg.content),
       }));
 
-      const response = await assistantChat({
+      const response = await vollAiChat({
         message,
         history,
       } as any).unwrap();
@@ -116,6 +116,6 @@ export function useAssistantLogic() {
     addUserMessage,
     handleDeleteMessage,
     resetMessages,
-    isAssistantLoading,
+    isVollAiLoading,
   };
 }

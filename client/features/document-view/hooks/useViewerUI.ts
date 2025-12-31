@@ -6,19 +6,19 @@ import { ViewerComponents } from "../types/types";
 export function useViewerUI() {
   const [focusedComponent, setFocusedComponent] =
     useState<ViewerComponents | null>(ViewerComponents.V_DOC);
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
-  const [isNoterOpen, setIsNoterOpen] = useState(false);
+  const [isVollAiOpen, setIsVollAiOpen] = useState(false);
+  const [isVollNotesOpen, setIsVollNotesOpen] = useState(false);
 
-  const toggleAssistant = () => setIsAssistantOpen((prev) => !prev);
-  const toggleNoter = () => setIsNoterOpen((prev) => !prev);
+  const toggleVollAi = () => setIsVollAiOpen((prev) => !prev);
+  const toggleVollNotes = () => setIsVollNotesOpen((prev) => !prev);
 
   return {
-    isAssistantOpen,
-    setIsAssistantOpen,
-    toggleAssistant,
-    isNoterOpen,
-    setIsNoterOpen,
-    toggleNoter,
+    isVollAiOpen,
+    setIsVollAiOpen,
+    toggleVollAi,
+    isVollNotesOpen,
+    setIsVollNotesOpen,
+    toggleVollNotes,
     focusedComponent,
     setFocusedComponent,
   };

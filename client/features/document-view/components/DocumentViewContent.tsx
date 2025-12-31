@@ -6,7 +6,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { useGetDocumentByIdQuery } from "@/lib/store/apiSlice";
-import { Noter } from "./notes";
+import { VollNotes } from "./notes";
 import {
   DocumentLoadingState,
   DocumentErrorState,
@@ -20,10 +20,10 @@ const BetterViewer = dynamic(
   { ssr: false }
 );
 
-const AssistantChat = dynamic(
+const VollAiChat = dynamic(
   () =>
-    import("./Assistant/AssistantChat").then((mod) => ({
-      default: mod.AssistantChat,
+    import("./Voll-ai/VollAiChat").then((mod) => ({
+      default: mod.VollAiChat,
     })),
   { ssr: false }
 );
@@ -34,19 +34,19 @@ export function DocumentViewContent() {
 
   // Use context instead of local state
   const {
-    isAssistantOpen,
-    isNoterOpen,
-    toggleAssistant,
-    toggleNoter,
+    isVollAiOpen,
+    isVollNotesOpen,
+    toggleVollAi,
+    toggleVollNotes,
     focusedComponent,
     setFocusedComponent,
   } = useViewer();
 
-  const [assistantWidth, setAssistantWidth] = useState(25);
-  const [noterWidth, setNoterWidth] = useState(25);
-  const [isAssistantDividerDragging, setIsAssistantDividerDragging] =
+  const [vollAiWidth, setVollAiWidth] = useState(25);
+  const [vollNotesWidth, setVollNotesWidth] = useState(25);
+  const [isVollAiDividerDragging, setIsVollAiDividerDragging] =
     useState(false);
-  const [isNoterDividerDragging, setIsNoterDividerDragging] = useState(false);
+  const [isVollNotesDividerDragging, setIsVollNotesDividerDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Fetch Document data using RTK Query
@@ -63,10 +63,10 @@ export function DocumentViewContent() {
     setFocusedComponent(component);
   }, [setFocusedComponent]);
 
-  // Mouse handlers for Assistant divider
-  const handleMouseMoveAssistant = useCallback(
+  // Mouse handlers for Voll-ai divider
+  const handleMouseMoveVollAi = useCallback(
     (e: MouseEvent) => {
-      if (!isAssistantDividerDragging || !containerRef.current) return;
+      if (!isVollAiDividerDragging || !containerRef.current) return;
 
       const container = containerRef.current;
       const rect = container.getBoundingClientRect();
@@ -75,24 +75,24 @@ export function DocumentViewContent() {
 
       // Constrain between 15% and 50%
       if (newWidth >= 20 && newWidth <= 50) {
-        setAssistantWidth(newWidth);
+        setVollAiWidth(newWidth);
       }
     },
-    [isAssistantDividerDragging]
+    [isVollAiDividerDragging]
   );
 
-  const handleMouseUpAssistant = useCallback(() => {
-    setIsAssistantDividerDragging(false);
+  const handleMouseUpVollAi = useCallback(() => {
+    setIsVollAiDividerDragging(false);
   }, []);
 
-  const handleMouseDownAssistant = useCallback(() => {
-    setIsAssistantDividerDragging(true);
+  const handleMouseDownVollAi = useCallback(() => {
+    setIsVollAiDividerDragging(true);
   }, []);
 
-  // Mouse handlers for Noter divider
-  const handleMouseMoveNoter = useCallback(
+  // Mouse handlers for Voll-notes divider
+  const handleMouseMoveVollNotes = useCallback(
     (e: MouseEvent) => {
-      if (!isNoterDividerDragging || !containerRef.current) return;
+      if (!isVollNotesDividerDragging || !containerRef.current) return;
 
       const container = containerRef.current;
       const rect = container.getBoundingClientRect();
@@ -105,54 +105,54 @@ export function DocumentViewContent() {
 
       // Constrain between 15% and 50%
       if (newWidth >= 20 && newWidth <= 50) {
-        setNoterWidth(newWidth);
+        setVollNotesWidth(newWidth);
       }
     },
-    [isNoterDividerDragging]
+    [isVollNotesDividerDragging]
   );
 
-  const handleMouseUpNoter = useCallback(() => {
-    setIsNoterDividerDragging(false);
+  const handleMouseUpVollNotes = useCallback(() => {
+    setIsVollNotesDividerDragging(false);
   }, []);
 
-  const handleMouseDownNoter = useCallback(() => {
-    setIsNoterDividerDragging(true);
+  const handleMouseDownVollNotes = useCallback(() => {
+    setIsVollNotesDividerDragging(true);
   }, []);
 
   // Add document-level event listeners for dragging
   useEffect(() => {
-    if (isAssistantDividerDragging) {
-      document.addEventListener("mousemove", handleMouseMoveAssistant);
-      document.addEventListener("mouseup", handleMouseUpAssistant);
+    if (isVollAiDividerDragging) {
+      document.addEventListener("mousemove", handleMouseMoveVollAi);
+      document.addEventListener("mouseup", handleMouseUpVollAi);
     } else {
-      document.removeEventListener("mousemove", handleMouseMoveAssistant);
-      document.removeEventListener("mouseup", handleMouseUpAssistant);
+      document.removeEventListener("mousemove", handleMouseMoveVollAi);
+      document.removeEventListener("mouseup", handleMouseUpVollAi);
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMoveAssistant);
-      document.removeEventListener("mouseup", handleMouseUpAssistant);
+      document.removeEventListener("mousemove", handleMouseMoveVollAi);
+      document.removeEventListener("mouseup", handleMouseUpVollAi);
     };
   }, [
-    isAssistantDividerDragging,
-    handleMouseMoveAssistant,
-    handleMouseUpAssistant,
+    isVollAiDividerDragging,
+    handleMouseMoveVollAi,
+    handleMouseUpVollAi,
   ]);
 
   useEffect(() => {
-    if (isNoterDividerDragging) {
-      document.addEventListener("mousemove", handleMouseMoveNoter);
-      document.addEventListener("mouseup", handleMouseUpNoter);
+    if (isVollNotesDividerDragging) {
+      document.addEventListener("mousemove", handleMouseMoveVollNotes);
+      document.addEventListener("mouseup", handleMouseUpVollNotes);
     } else {
-      document.removeEventListener("mousemove", handleMouseMoveNoter);
-      document.removeEventListener("mouseup", handleMouseUpNoter);
+      document.removeEventListener("mousemove", handleMouseMoveVollNotes);
+      document.removeEventListener("mouseup", handleMouseUpVollNotes);
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMoveNoter);
-      document.removeEventListener("mouseup", handleMouseUpNoter);
+      document.removeEventListener("mousemove", handleMouseMoveVollNotes);
+      document.removeEventListener("mouseup", handleMouseUpVollNotes);
     };
-  }, [isNoterDividerDragging, handleMouseMoveNoter, handleMouseUpNoter]);
+  }, [isVollNotesDividerDragging, handleMouseMoveVollNotes, handleMouseUpVollNotes]);
 
   // Enhanced loading state
   if (isLoading) {
@@ -174,8 +174,8 @@ export function DocumentViewContent() {
       ref={containerRef}
       className="flex h-screen w-screen p-2 gap-2 relative"
     >
-      {/* Left Panel: AI Assistant (when isAssistantOpen) */}
-      {isAssistantOpen && (
+      {/* Left Panel: Voll-ai (when isVollAiOpen) */}
+      {isVollAiOpen && (
         <>
           <div
             onClick={() => handleClickComponent(ViewerComponents.V_AI)}
@@ -187,20 +187,20 @@ export function DocumentViewContent() {
                 : "border-primary/20"
             )}
             style={{
-              width: `${assistantWidth}%`,
+              width: `${vollAiWidth}%`,
             }}
           >
-            <AssistantChat isFocused={focusedComponent === ViewerComponents.V_AI} />
+            <VollAiChat isFocused={focusedComponent === ViewerComponents.V_AI} />
           </div>
 
-          {/* Divider after assistant */}
+          {/* Divider after Voll-ai */}
           <div
-            onMouseDown={handleMouseDownAssistant}
+            onMouseDown={handleMouseDownVollAi}
             className={cn(
               "relative flex items-center justify-center shrink-0 group",
               "transition-all duration-200 ease-in-out cursor-col-resize select-none",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              isAssistantDividerDragging ? "w-8" : "w-2 hover:w-8"
+              isVollAiDividerDragging ? "w-8" : "w-2 hover:w-8"
             )}
             style={{ cursor: "col-resize" }}
             role="separator"
@@ -211,7 +211,7 @@ export function DocumentViewContent() {
               className={cn(
                 "absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
                 "transition-all duration-200",
-                isAssistantDividerDragging
+                isVollAiDividerDragging
                   ? "w-1 bg-purple-500"
                   : "w-0.5 bg-purple-500/30 group-hover:w-1 group-hover:bg-purple-500/80"
               )}
@@ -220,7 +220,7 @@ export function DocumentViewContent() {
               className={cn(
                 "relative z-10 rounded-md transition-all duration-200",
                 "flex items-center justify-center",
-                isAssistantDividerDragging
+                isVollAiDividerDragging
                   ? "bg-purple-500 text-white scale-110 px-1 py-2"
                   : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5"
               )}
@@ -243,36 +243,36 @@ export function DocumentViewContent() {
         )}
         style={{
           width:
-            isNoterOpen && isAssistantOpen
-              ? `${100 - assistantWidth - noterWidth}%`
-              : isNoterOpen
-              ? `${100 - noterWidth}%`
-              : isAssistantOpen
-              ? `${100 - assistantWidth}%`
+            isVollNotesOpen && isVollAiOpen
+              ? `${100 - vollAiWidth - vollNotesWidth}%`
+              : isVollNotesOpen
+              ? `${100 - vollNotesWidth}%`
+              : isVollAiOpen
+              ? `${100 - vollAiWidth}%`
               : "100%",
         }}
       >
         <BetterViewer
           document={documentData}
-          onToggleNoter={toggleNoter}
-          onToggleAssistant={toggleAssistant}
-          isNoterOpen={isNoterOpen}
-          isAssistantOpen={isAssistantOpen}
+          onToggleVollNotes={toggleVollNotes}
+          onToggleVollAi={toggleVollAi}
+          isVollNotesOpen={isVollNotesOpen}
+          isVollAiOpen={isVollAiOpen}
           isFocused={focusedComponent === ViewerComponents.V_DOC}
         />
       </div>
 
-      {/* Right Panel: Noter (when isNoterOpen) */}
-      {isNoterOpen && (
+      {/* Right Panel: Voll-notes (when isVollNotesOpen) */}
+      {isVollNotesOpen && (
         <>
-          {/* Divider before Noter */}
+          {/* Divider before Voll-notes */}
           <div
-            onMouseDown={handleMouseDownNoter}
+            onMouseDown={handleMouseDownVollNotes}
             className={cn(
               "relative flex items-center justify-center shrink-0 group",
               "transition-all duration-200 ease-in-out cursor-col-resize select-none",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              isNoterDividerDragging ? "w-8" : "w-2 hover:w-8"
+              isVollNotesDividerDragging ? "w-8" : "w-2 hover:w-8"
             )}
             style={{ cursor: "col-resize" }}
             role="separator"
@@ -283,7 +283,7 @@ export function DocumentViewContent() {
               className={cn(
                 "absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
                 "transition-all duration-200",
-                isNoterDividerDragging
+                isVollNotesDividerDragging
                   ? "w-1 bg-indigo-500"
                   : "w-0.5 bg-indigo-500/30 group-hover:w-1 group-hover:bg-indigo-500/80"
               )}
@@ -292,7 +292,7 @@ export function DocumentViewContent() {
               className={cn(
                 "relative z-10 rounded-md transition-all duration-200",
                 "flex items-center justify-center",
-                isNoterDividerDragging
+                isVollNotesDividerDragging
                   ? "bg-indigo-500 text-white scale-110 px-1 py-2"
                   : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5"
               )}
@@ -311,10 +311,10 @@ export function DocumentViewContent() {
                 : "border-primary/20"
             )}
             style={{
-              width: `${noterWidth}%`,
+              width: `${vollNotesWidth}%`,
             }}
           >
-            <Noter
+            <VollNotes
               document={documentData}
               isFocused={focusedComponent === ViewerComponents.V_NOTES}
             />

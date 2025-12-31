@@ -25,17 +25,17 @@ import { useViewer } from "../context/ViewerContext";
 
 export const BetterViewer = ({
   document,
-  onToggleNoter,
-  onToggleAssistant,
-  isNoterOpen,
-  isAssistantOpen,
+  onToggleVollNotes,
+  onToggleVollAi,
+  isVollNotesOpen,
+  isVollAiOpen,
   isFocused,
 }: {
   document: DocumentDetails;
-  onToggleNoter?: () => void;
-  onToggleAssistant?: () => void;
-  isNoterOpen?: boolean;
-  isAssistantOpen?: boolean;
+  onToggleVollNotes?: () => void;
+  onToggleVollAi?: () => void;
+  isVollNotesOpen?: boolean;
+  isVollAiOpen?: boolean;
   isFocused?: boolean;
 }) => {
   // Fetch highlights for this Document from API
@@ -304,10 +304,10 @@ export const BetterViewer = ({
       />
 
       <ViewerFloatingActions
-        onToggleNoter={onToggleNoter}
-        onToggleAssistant={onToggleAssistant}
-        isNoterOpen={isNoterOpen}
-        isAssistantOpen={isAssistantOpen}
+        onToggleVollNotes={onToggleVollNotes}
+        onToggleVollAi={onToggleVollAi}
+        isVollNotesOpen={isVollNotesOpen}
+        isVollAiOpen={isVollAiOpen}
       />
     </div>
   );

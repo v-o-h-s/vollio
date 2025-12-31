@@ -21,7 +21,7 @@ import { DocumentDetails } from "../../types/document";
 import { HOME_TAB_ID, useViewer } from "../../context/ViewerContext";
 import { useSummaryActions } from "../../hooks/useSummaryActions";
 
-export default function Noter({
+export default function VollNotes({
   document,
   isFocused,
 }: {
@@ -61,7 +61,7 @@ export default function Noter({
     return (
       <div className="flex justify-center items-center h-full w-full">
         <LoadingState
-          title="Loading notes..."
+          title="Loading Voll-notes..."
           description="Please wait while we fetch your notes."
           className="text-white"
         />
@@ -143,7 +143,7 @@ export default function Noter({
           <div className="p-6 h-full flex flex-col">
             <div className="mb-6 flex items-center justify-between shrink-0">
               <div>
-                <h2 className="text-2xl font-semibold mb-2">Your Notes</h2>
+                <h2 className="text-2xl font-semibold mb-2">Voll-notes</h2>
                 <p className="text-sm text-muted-foreground">
                   Click on a note to open it, or create a new one
                 </p>

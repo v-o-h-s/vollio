@@ -11,8 +11,8 @@ import { useCreateHighlightMutation } from "@/lib/store/apiSlice";
 import { CreateHighlightDTO, HighlightContent } from "@vollio/shared";
 
 import { useViewerUI } from "../hooks/useViewerUI";
-import { useNoterLogic, HOME_TAB_ID } from "../hooks/useNoterLogic";
-import { useAssistantLogic, Message } from "../hooks/useAssistantLogic";
+import { useVollNotesLogic, HOME_TAB_ID } from "../hooks/useVollNotesLogic";
+import { useVollAiLogic, Message } from "../hooks/useVollAiLogic";
 import { Highlight, ScaledPosition } from "react-pdf-highlighter-extended-plus";
 
 export { HOME_TAB_ID };
@@ -20,18 +20,18 @@ export type { Message };
 
 interface ViewerContextType {
   // UI State
-  isAssistantOpen: boolean;
-  setIsAssistantOpen: (isOpen: boolean) => void;
-  toggleAssistant: () => void;
-  isNoterOpen: boolean;
-  setIsNoterOpen: (isOpen: boolean) => void;
-  toggleNoter: () => void;
+  isVollAiOpen: boolean;
+  setIsVollAiOpen: (isOpen: boolean) => void;
+  toggleVollAi: () => void;
+  isVollNotesOpen: boolean;
+  setIsVollNotesOpen: (isOpen: boolean) => void;
+  toggleVollNotes: () => void;
   activeTabId: string;
   setActiveTabId: (id: string) => void;
   focusedComponent: "v-ai" | "v-notes" | "v-doc" | null;
   setFocusedComponent: (component: "v-ai" | "v-notes" | "v-doc" | null) => void;
 
-  // Noter Actions & State
+  // Voll-notes Actions & State
   tabs: Tab[];
   setTabs: React.Dispatch<React.SetStateAction<Tab[]>>;
   isRefreshing: boolean;
@@ -52,7 +52,7 @@ interface ViewerContextType {
   refetchNotes: () => void;
   openNote: (noteId: string) => void;
 
-  // Assistant State & Actions
+  // Voll-ai State & Actions
   messages: Message[];
   addUserMessage: (
     message: string,
@@ -64,9 +64,9 @@ interface ViewerContextType {
   ) => Promise<void>;
   handleDeleteMessage: (index: number) => void;
   resetMessages: () => void;
-  isAssistantLoading: boolean;
+  isVollAiLoading: boolean;
 
-  // Shared Actions (Assistant Actions)
+  // Shared Actions (Voll-ai Actions)
   handleAddToNotes: (content: string | JSONContent) => Promise<void>;
   handleAddToNoteAsInsight: (
     content: string | JSONContent,
@@ -96,11 +96,11 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
   // --- UI State ---
   const ui = useViewerUI();
 
-  // --- Noter State & Logic ---
-  const noter = useNoterLogic(documentId);
+  // --- Voll-notes State & Logic ---
+  const vollNotes = useVollNotesLogic(documentId);
 
-  // --- Assistant State & Logic ---
-  const assistant = useAssistantLogic();
+  // --- Voll-ai State & Logic ---
+  const vollAi = useVollAiLogic();
 
   // --- Highlighter Ref for PDF navigation ---
   const [highlighterUtilsRef, setHighlighterUtilsRefState] =
@@ -166,12 +166,12 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
   const handleAddToNotes = async (content: string | JSONContent) => {
     if (typeof content === "string") return;
 
-    if (!ui.isNoterOpen) {
-      ui.setIsNoterOpen(true);
+    if (!ui.isVollNotesOpen) {
+      ui.setIsVollNotesOpen(true);
     }
 
     try {
-      await noter.addToNote(content);
+      await vollNotes.addToNote(content);
     } catch (error) {
       // Error handled in addToNote
     }
@@ -187,8 +187,8 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
   ) => {
     if (typeof content === "string") return;
 
-    if (!ui.isNoterOpen) {
-      ui.setIsNoterOpen(true);
+    if (!ui.isVollNotesOpen) {
+      ui.setIsVollNotesOpen(true);
     }
 
     // Create the insight note
@@ -210,7 +210,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         ],
       };
       if (metadata) {
-        await noter.addToNote(insightContent, {
+        await vollNotes.addToNote(insightContent, {
           HighlightContent: metadata.content,
           HighlightPosition: metadata.position,
         });
@@ -222,10 +222,10 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
   };
 
   const openNote = (noteId: string) => {
-    if (!ui.isNoterOpen) {
-      ui.setIsNoterOpen(true);
+    if (!ui.isVollNotesOpen) {
+      ui.setIsVollNotesOpen(true);
     }
-    noter.openNote(noteId);
+    vollNotes.openNote(noteId);
   };
 
   return (
@@ -234,11 +234,11 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         // UI
         ...ui,
 
-        // Noter
-        ...noter,
+        // Voll-notes
+        ...vollNotes,
 
-        // Assistant
-        ...assistant,
+        // Voll-ai
+        ...vollAi,
 
         // Actions
         handleAddToNotes,

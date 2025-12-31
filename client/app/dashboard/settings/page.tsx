@@ -3,8 +3,8 @@
 import React from "react";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import {
-  setNoterFontSize,
-  setAssistantFontSize,
+  setVollNotesFontSize,
+  setVollAiFontSize,
 } from "@/lib/store/slices/settingsSlice";
 import {
   Card,
@@ -43,16 +43,16 @@ import { TagManagement } from "./components/TagManagement";
 
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
-  const { noterFontSize, assistantFontSize } = useAppSelector(
+  const { vollNotesFontSize, vollAiFontSize } = useAppSelector(
     (state) => state.settings
   );
 
-  const handleNoterFontSizeChange = (value: number[]) => {
-    dispatch(setNoterFontSize(value[0]));
+  const handleVollNotesFontSizeChange = (value: number[]) => {
+    dispatch(setVollNotesFontSize(value[0]));
   };
 
-  const handleAssistantFontSizeChange = (value: number[]) => {
-    dispatch(setAssistantFontSize(value[0]));
+  const handleVollAiFontSizeChange = (value: number[]) => {
+    dispatch(setVollAiFontSize(value[0]));
   };
 
   return (
@@ -103,7 +103,7 @@ export default function SettingsPage() {
             >
               <div className="flex items-center gap-3">
                 <Type className="w-4 h-4" />
-                <span className="font-medium text-sm">Notes</span>
+                <span className="font-medium text-sm">Voll-notes</span>
               </div>
               <ChevronRight className="w-4 h-4 opacity-0 group-data-[state=active]:opacity-100 transition-opacity" />
             </TabsTrigger>
@@ -133,7 +133,7 @@ export default function SettingsPage() {
             >
               <div className="flex items-center gap-3">
                 <Bot className="w-4 h-4" />
-                <span className="font-medium text-sm">AI Assistant</span>
+                <span className="font-medium text-sm">Voll-ai</span>
               </div>
               <ChevronRight className="w-4 h-4 opacity-0 group-data-[state=active]:opacity-100 transition-opacity" />
             </TabsTrigger>
@@ -234,7 +234,7 @@ export default function SettingsPage() {
                 </div>
                 <CardHeader className="pb-4">
                   <CardTitle className="text-2xl font-bold">
-                    Note Preferences
+                    Voll-notes Preferences
                   </CardTitle>
                   <CardDescription>
                     Fine-tune the editing experience for your notes.
@@ -246,28 +246,28 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <Label className="text-base font-semibold flex items-center gap-2">
-                          Noter Font Size
+                          Voll-notes Font Size
                         </Label>
                         <p className="text-sm text-muted-foreground max-w-md">
                           Adjust the reading and editing font size of your
-                          noter.
+                          voll-notes.
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20 shadow-sm">
-                          {noterFontSize}px
+                          {vollNotesFontSize}px
                         </span>
                       </div>
                     </div>
 
                     <div className="pt-2">
                       <Slider
-                        defaultValue={[noterFontSize]}
-                        value={[noterFontSize]}
+                        defaultValue={[vollNotesFontSize]}
+                        value={[vollNotesFontSize]}
                         max={32}
                         min={12}
                         step={1}
-                        onValueChange={handleNoterFontSizeChange}
+                        onValueChange={handleVollNotesFontSizeChange}
                         className="w-full"
                       />
                       <div className="flex justify-between mt-2 px-1">
@@ -289,12 +289,12 @@ export default function SettingsPage() {
                       </div>
                       <div
                         className="p-8 pt-10"
-                        style={{ fontSize: `${noterFontSize}px` }}
+                        style={{ fontSize: `${vollNotesFontSize}px` }}
                       >
                         <h4
                           className="font-bold mb-3 text-foreground transition-all duration-300"
                           style={{
-                            fontSize: `${noterFontSize * 1.5}px`,
+                            fontSize: `${vollNotesFontSize * 1.5}px`,
                             lineHeight: "1.2",
                           }}
                         >
@@ -351,7 +351,7 @@ export default function SettingsPage() {
                 </div>
                 <CardHeader className="pb-4">
                   <CardTitle className="text-2xl font-bold">
-                    AI Assistant
+                    Voll-ai
                   </CardTitle>
                   <CardDescription>
                     Configure how your AI companion interacts with you.
@@ -366,28 +366,28 @@ export default function SettingsPage() {
                       <div className="space-y-1">
                         <Label className="text-base font-semibold flex items-center gap-2">
                           <Type className="w-4 h-4 text-purple-500" />
-                          Assistant Font Size
+                          Voll-ai Font Size
                         </Label>
                         <p className="text-sm text-muted-foreground max-w-md">
-                          Adjust the font size for the AI Assistant chat and
+                          Adjust the font size for the Voll-ai chat and
                           responses.
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-bold border border-primary/20 shadow-sm">
-                          {assistantFontSize}px
+                          {vollAiFontSize}px
                         </span>
                       </div>
                     </div>
 
                     <div className="pt-2">
                       <Slider
-                        defaultValue={[assistantFontSize]}
-                        value={[assistantFontSize]}
+                        defaultValue={[vollAiFontSize]}
+                        value={[vollAiFontSize]}
                         max={24}
                         min={10}
                         step={1}
-                        onValueChange={handleAssistantFontSizeChange}
+                        onValueChange={handleVollAiFontSizeChange}
                         className="w-full"
                       />
                     </div>
@@ -400,7 +400,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-foreground">
-                        Pro Assistant Active
+                        Pro Voll-ai Active
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         You're using the premium AI engine. All responses are

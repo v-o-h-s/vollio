@@ -1,24 +1,24 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface SettingsState {
-  noterFontSize: number;
-  assistantFontSize: number;
+  vollNotesFontSize: number;
+  vollAiFontSize: number;
 }
 
 const initialState: SettingsState = {
-  noterFontSize: 16,
-  assistantFontSize: 14,
+  vollNotesFontSize: 16,
+  vollAiFontSize: 14,
 };
 
 const settingsSlice = createSlice({
   name: "settings",
   initialState,
   reducers: {
-    setNoterFontSize: (state, action: PayloadAction<number>) => {
-      state.noterFontSize = action.payload;
+    setVollNotesFontSize: (state, action: PayloadAction<number>) => {
+      state.vollNotesFontSize = action.payload;
     },
-    setAssistantFontSize: (state, action: PayloadAction<number>) => {
-      state.assistantFontSize = action.payload;
+    setVollAiFontSize: (state, action: PayloadAction<number>) => {
+      state.vollAiFontSize = action.payload;
     },
     resetSettings: (state) => {
       return initialState;
@@ -26,7 +26,7 @@ const settingsSlice = createSlice({
   },
 });
 
-export const { setNoterFontSize, setAssistantFontSize, resetSettings } =
+export const { setVollNotesFontSize, setVollAiFontSize, resetSettings } =
   settingsSlice.actions;
 
 export default settingsSlice.reducer;

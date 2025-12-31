@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { NotionEditor } from "@/components/editor/NotionEditor";
 import type { JSONContent } from "@tiptap/core";
 import { useViewer } from "../../context/ViewerContext";
-import { MessageSource } from "../../hooks/useAssistantLogic";
+import { MessageSource } from "../../hooks/useVollAiLogic";
 import { useAppSelector } from "@/lib/store/hooks";
 import { ScaledPosition } from "react-pdf-highlighter-extended-plus";
 import { HighlightContent } from "@vollio/shared";
@@ -43,8 +43,8 @@ export function ChatMessage({
     handleAddToNotes,
     handleAddToNoteAsInsight,
   } = useViewer();
-  const assistantFontSize = useAppSelector(
-    (state) => state.settings.assistantFontSize
+  const vollAiFontSize = useAppSelector(
+    (state) => state.settings.vollAiFontSize
   );
   const [copied, setCopied] = useState(false);
 
@@ -81,7 +81,7 @@ export function ChatMessage({
           {isUser ? (
             <p
               className="whitespace-pre-wrap wrap-break-word  text-black dark:text-white"
-              style={{ fontSize: `${assistantFontSize}px` }}
+              style={{ fontSize: `${vollAiFontSize}px` }}
             >
               {content as string}
             </p>
@@ -91,7 +91,7 @@ export function ChatMessage({
               editable={false}
               showTitle={false}
               className="min-h-0 p-0 bg-transparent [&_a]:text-purple-500 [&_a]:hover:text-purple-600 [&_a]:transition-colors"
-              fontSize={assistantFontSize}
+              fontSize={vollAiFontSize}
             />
           )}
         </div>
