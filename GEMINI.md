@@ -60,21 +60,33 @@ You can run commands for specific workspaces using the `-w` or `--workspace` fla
     *   `docs/`: Frontend-specific documentation (Architecture, UI Style, Notes System, etc.).
     *   `lib/`: Utility functions and types.
     *   `hooks/`: Custom React hooks.
-*   **`server/`**: Fastify backend.
-    *   `src/server.ts`: Entry point.
-    *   `docs/`: Backend-specific documentation (Auth, Quiz, API Endpoints, etc.).
-    *   `src/infrastructure/`: Database and external service integrations.
-    *   `src/plugins/`: Fastify plugins.
+*   **`server/`**: Fastify backend implementing **Clean Architecture**.
+    *   `src/`: Main source code directory (Domain, Application, Interface, Infrastructure).
+    *   `docs/`: Backend-specific documentation including:
+        *   `api_endpoints/`: Detailed summaries of available API endpoints.
+        *   `AUTH.md`, `QUIZ.md`, `EMBEDDING.md`: Feature-specific logic and implementation details.
+        *   `RULES.md`: Backend coding standards and architectural rules.
+    *   `src/domain/`: Core business entities, repository interfaces, and domain services.
+    *   `src/application/`: Use cases implementing business logic and application services.
+    *   `src/interface/`: API entry points, including Fastify routes and controllers.
+    *   `src/infrastructure/`: Concrete implementations of repositories (Supabase), AI services, and external integrations.
+    *   `src/plugins/`: Fastify plugins for Dependency Injection (Awilix), Auth, and more.
+    *   `src/shared/`: Common utilities, constants, and global error handlers.
 *   **`.agent/rules/`**: Specific project rules for AI agents.
 
 ## Development Standards
 
 ### Technology Stack
 *   **Language:** TypeScript
-*   **Frontend:** Next.js, Tailwind CSS, Redux Toolkit, Radix UI, TipTap (Editor).
-*   **Backend:** Fastify, Awilix (DI), Supabase (DB/Auth).
-*   **AI:** OpenRouter, HuggingFace, VoyageAI.
+*   **Frontend:** Next.js (App Router), Tailwind CSS, Redux Toolkit, Radix UI, TipTap (Editor).
+*   **Backend:** Fastify, Awilix (Dependency Injection), Supabase (Database & Auth).
+*   **AI:** OpenRouter, HuggingFace, VoyageAI (Embeddings).
 *   **Testing:** Vitest.
+
+### Architectural Principles (Backend)
+1.  **Dependency Rule:** Dependencies only point inwards. Domain and Application layers are independent of Infrastructure.
+2.  **Dependency Injection:** All services and repositories are managed by Awilix and injected into controllers/use-cases.
+3.  **Encapsulation:** Use-cases encapsulate a single business action.
 
 ### Coding Rules (from `.agent/rules`)
 1.  **Type Consistency:** Ensure type changes (Entity, DTO, Server Response) maintain compatibility across the application.
