@@ -1,17 +1,9 @@
 "use client";
 
-// SSR safeguard for document.js evaluation
-if (typeof window === "undefined") {
-  (global as any).window = {};
-  (global as any).document = {
-    documentElement: {
-      style: {},
-    },
-  };
-  (global as any).navigator = {
-    userAgent: "",
-  };
-}
+/**
+ *  @important
+ *  this component opens different portal so it cannot use contexts
+ */
 
 import { useHighlightContainerContext } from "react-pdf-highlighter-extended-plus";
 import { useState } from "react";
@@ -30,11 +22,14 @@ interface HighlightContainerProps {
     highlight: Partial<CreateHighlightDTO>
   ) => any;
   deleteHighlight: (highlightId: string) => any;
+  
+  onClickHighlights: (noteId: string) => void;
 }
 
 export const HighlightContainer = ({
   updateHighlight,
   deleteHighlight,
+  onClickHighlights,
 }: HighlightContainerProps) => {
   // the hoook just change the key position from (x1,x2) to (top,bottom) and provide you with utils
   const { highlight, isScrolledTo } =
@@ -63,10 +58,6 @@ export const HighlightContainer = ({
   const handleDelete = async () => {
     try {
       await deleteHighlight(highlight.id);
-      toast.success("Highlight deleted", {
-        autoClose: 2000,
-        position: "bottom-right",
-      });
     } catch (error) {
       toast.error("Failed to delete highlight", {
         autoClose: 3000,
@@ -74,10 +65,6 @@ export const HighlightContainer = ({
       });
       console.error("Failed to delete highlight:", error);
     }
-  };
-
-  const handleChangeColor = async (newColor: string) => {
-    await updateHighlight(highlight.id, { color: newColor });
   };
 
   // Render different highlight types based on style
@@ -96,17 +83,10 @@ export const HighlightContainer = ({
       case "insight":
         return (
           <InsightHighlight
+            onClickHighlights={onClickHighlights}
             highlight={highlight as any}
             isScrolledTo={isScrolledTo}
             color="#8B5CF6"
-            onNavigateToInsight={() => {
-              // Navigate to noter and show the associated note
-              // The noteId should be stored in the highlight
-              if (highlight.noteId) {
-                // This will be handled by the viewer context
-                console.log("Navigate to insight note:", highlight.noteId);
-              }
-            }}
           />
         );
       default: // "highlight"
@@ -132,8 +112,6 @@ export const HighlightContainer = ({
           y={contextMenu.y}
           onClose={() => setContextMenu(null)}
           onDelete={handleDelete}
-          onChangeColor={handleChangeColor}
-          currentColor={color}
         />
       )}
     </>

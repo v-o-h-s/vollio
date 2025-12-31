@@ -77,8 +77,7 @@ You can run commands for specific workspaces using the `-w` or `--workspace` fla
 *   **Testing:** Vitest.
 
 ### Coding Rules (from `.agent/rules`)
-1.  **Server Documentation:** When adding a new backend endpoint, update Swagger/API documentation in `docs/api`.
-2.  **Type Consistency:** Ensure type changes (Entity, DTO, Server Response) maintain compatibility across the application.
+1.  **Type Consistency:** Ensure type changes (Entity, DTO, Server Response) maintain compatibility across the application.
 
 ## Configuration
 *   **Environment Variables:**

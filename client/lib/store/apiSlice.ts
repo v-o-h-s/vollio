@@ -29,7 +29,8 @@ const baseQuery = fetchBaseQuery({
       endpoint !== "uploadDocument" &&
       endpoint !== "deleteDocument" &&
       endpoint !== "deleteFolder" &&
-      endpoint !== "deleteNote"
+      endpoint !== "deleteNote"&&
+      endpoint !== "deleteHighlight"
     ) {
       headers.set("Content-Type", "application/json");
     }

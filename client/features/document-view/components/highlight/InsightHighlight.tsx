@@ -11,7 +11,7 @@ interface InsightHighlightProps {
   highlight: MyHighlight;
   isScrolledTo: boolean;
   color?: string;
-  onNavigateToInsight?: () => void;
+  onClickHighlights: (noteId: string) => void;
 }
 
 // Helper function to convert hex to rgba
@@ -26,7 +26,7 @@ export const InsightHighlight = ({
   highlight,
   isScrolledTo,
   color = "#8B5CF6", // Default to purple/primary color for insights
-  onNavigateToInsight,
+  onClickHighlights,
 }: InsightHighlightProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
@@ -110,8 +110,9 @@ export const InsightHighlight = ({
   }, [isHovered]);
 
   const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onNavigateToInsight?.();
+    console.log("highlight clicked")
+    if (!highlight.noteId) return;
+    onClickHighlights(highlight.noteId);
   };
 
   if (!rects || rects.length === 0) return null;

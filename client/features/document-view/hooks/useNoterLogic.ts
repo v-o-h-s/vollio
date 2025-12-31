@@ -20,6 +20,9 @@ import { ScaledPosition } from "react-pdf-highlighter-extended-plus";
 import { HighlightContent } from "@vollio/shared";
 export const HOME_TAB_ID = "home";
 
+/**
+ * Hook containing logic for managing notes, tabs, and highlights in the Document View.
+ */
 export function useNoterLogic(documentId: string) {
   const dispatch = useAppDispatch();
   const [tabs, setTabs] = useState<Tab[]>([
@@ -29,7 +32,7 @@ export function useNoterLogic(documentId: string) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
 
-  // RTK Queries
+  // RTK Queries for fetching and mutating notes/highlights
   const {
     data: documentNotes,
     isLoading: isLoadingNotes,
@@ -49,6 +52,9 @@ export function useNoterLogic(documentId: string) {
     }
   );
 
+  /**
+   * Memoized list of notes sorted by their last updated timestamp.
+   */
   const sortedNotes = useMemo(() => {
     if (!documentNotes) return [];
     return [...documentNotes].sort(
@@ -57,6 +63,9 @@ export function useNoterLogic(documentId: string) {
     );
   }, [documentNotes]);
 
+  /**
+   * Creates a new note for the current document.
+   */
   const handleCreateNote = async (
     content?: JSONContent,
     highlight?: {
@@ -85,6 +94,9 @@ export function useNoterLogic(documentId: string) {
     }
   };
 
+  /**
+   * Closes a tab and updates the active tab if necessary.
+   */
   const handleDeleteTab = (id: string) => {
     if (activeTabId === id) {
       const currentIndex = tabs.findIndex((tab) => tab.id === id);
@@ -101,6 +113,9 @@ export function useNoterLogic(documentId: string) {
     setTabs((prev) => prev.filter((tab) => tab.id !== id));
   };
 
+  /**
+   * Deletes a note and removes its associated tab.
+   */
   const handleDeleteNote = async (noteId: string) => {
     setDeletingNoteId(noteId);
     try {
@@ -116,16 +131,25 @@ export function useNoterLogic(documentId: string) {
     }
   };
 
+  /**
+   * Refetches all notes for the current document.
+   */
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await refetchNotes();
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
+  /**
+   * Switches the active tab.
+   */
   const handleTabClick = (tabId: string) => {
     setActiveTabId(tabId);
   };
 
+  /**
+   * Opens a note in a new tab or switches to it if already open.
+   */
   const handleNoteCardClick = (noteId: string) => {
     const existingTab = tabs.find((tab) => tab.id === noteId);
     if (existingTab) {
@@ -144,6 +168,9 @@ export function useNoterLogic(documentId: string) {
     setActiveTabId(noteId);
   };
 
+  /**
+   * Updates the label of a tab when a note title changes.
+   */
   const handleTitleChange = useCallback((noteId: string, newTitle: string) => {
     setTabs((prevTabs) =>
       prevTabs.map((tab) =>
@@ -152,6 +179,10 @@ export function useNoterLogic(documentId: string) {
     );
   }, []);
 
+  /**
+   * Adds content to the active note or creates a new one if on Home.
+   * Also creates an associated highlight if provided.
+   */
   const addToNote = async (
     content: string | JSONContent,
     Highlight?: {
@@ -244,6 +275,13 @@ export function useNoterLogic(documentId: string) {
     }
   };
 
+  /**
+   * Opens a specific note by its ID, creating a tab if it doesn't exist and making it active.
+   */
+  const openNote = (noteId: string) => {
+    handleNoteCardClick(noteId);
+  };
+
   return {
     tabs,
     setTabs,
@@ -266,5 +304,6 @@ export function useNoterLogic(documentId: string) {
     handleNoteCardClick,
     handleTitleChange,
     addToNote,
+    openNote,
   };
 }

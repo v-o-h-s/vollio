@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tag as TagIcon, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MyHighlight } from "@/features/document-view/types/highlight";
-import { CreateHighlightDto } from "@vollio/shared";
+import { CreateHighlightDTO } from "@vollio/shared";
 import { TagSelectionDialog } from "./TagSelectionDialog";
 import { Button } from "@/components/ui/button";
 import gsap from "gsap";
@@ -19,7 +19,7 @@ interface TaggedHighlightProps {
   color: string;
   updateHighlight: (
     highlightId: string,
-    highlight: Partial<CreateHighlightDto>
+    highlight: Partial<CreateHighlightDTO>
   ) => any;
   deleteHighlight: (highlightId: string) => any;
 }

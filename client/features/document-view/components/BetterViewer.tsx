@@ -21,6 +21,8 @@ import { MyHighlight } from "@/features/document-view/types/highlight";
 import { ViewerHeader } from "./viewheader";
 import { ViewerFloatingActions } from "./ViewerFloatingActions";
 import { DocumentDetails } from "../types/document";
+import { useViewer } from "../context/ViewerContext";
+
 export const BetterViewer = ({
   document,
   onToggleNoter,
@@ -40,6 +42,8 @@ export const BetterViewer = ({
 
   const { handleUpdateAllHighlight, handleDeleteAllHighlight } =
     useHighlightActions();
+
+  const { openNote: HandleClickInsightHighlight } = useViewer();
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isTagSidebarOpen, setIsTagSidebarOpen] = useState(false);
@@ -255,6 +259,7 @@ export const BetterViewer = ({
               <HighlightContainer
                 updateHighlight={handleUpdateAllHighlight}
                 deleteHighlight={handleDeleteAllHighlight}
+                onClickHighlights={HandleClickInsightHighlight}
               />
             </PdfHighlighter>
           )}

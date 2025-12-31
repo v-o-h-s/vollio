@@ -48,6 +48,7 @@ interface ViewerContextType {
   isLoadingNewNote: boolean;
   createNoteError: any;
   refetchNotes: () => void;
+  openNote: (noteId: string) => void;
 
   // Assistant State & Actions
   messages: Message[];
@@ -218,6 +219,13 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const openNote = (noteId: string) => {
+    if (!ui.isNoterOpen) {
+      ui.setIsNoterOpen(true);
+    }
+    noter.openNote(noteId);
+  };
+
   return (
     <ViewerContext.Provider
       value={{
@@ -238,6 +246,9 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         // Navigation
         scrollToHighlight,
         setHighlighterUtilsRef,
+        
+        // Overrides
+        openNote,
       }}
     >
       {children}

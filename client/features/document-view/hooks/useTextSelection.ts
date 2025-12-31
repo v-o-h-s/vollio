@@ -21,7 +21,7 @@ export function useSelection({
   document,
   currentHighlightColor,
 }: useSelectionProps) {
-  const { setIsAssistantOpen, addUserMessage } = useViewer();
+  const { setIsAssistantOpen, addUserMessage   } = useViewer();
 
   const [createHighlight] = useCreateHighlightMutation();
   const [selection, setSelection] = useState<any>(null);
