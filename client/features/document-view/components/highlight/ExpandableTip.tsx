@@ -22,7 +22,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-
 interface ExpandableTipProps {
   onHighlight: () => void;
   onCopy?: () => void;
@@ -132,7 +131,7 @@ export const ExpandableTip = ({
                 onClick={onAddTag}
                 variant="ghost"
                 size="icon"
-                className="cursor-pointer h-10 w-10 rounded-full hover:bg-neutral-500/10 hover:text-neutral-600 transition-all duration-200 hover:scale-105 active:scale-95"
+                className="cursor-pointer h-10 w-10 rounded-full hover:bg-neutral-500/10 dark:hover:text-white/70 transition-all duration-200 hover:scale-105 active:scale-95"
               >
                 <Tag className="h-4.5 w-4.5" />
                 <span className="sr-only">Add Tag</span>
@@ -153,7 +152,7 @@ export const ExpandableTip = ({
                     size="icon"
                     className="cursor-pointer h-10 w-10 rounded-full hover:bg-green-500/10 hover:text-green-600 transition-all duration-200 hover:scale-105 active:scale-95"
                   >
-                    <NotebookPen className="h-4.5 w-4.5" />
+                    <NotebookPen className="h-4.5 w-4.5 " />
                     <span className="sr-only">Note</span>
                   </Button>
                 </DropdownMenuTrigger>

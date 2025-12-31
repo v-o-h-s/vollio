@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { X, Home } from "lucide-react";
+import { LuNotebookPen } from "react-icons/lu";
 
 type NoteTabProps = {
   id: string;
@@ -60,7 +61,7 @@ export default function NoteTab({
                  }`}
     >
       {isHome ? (
-        <Home className="w-4 h-4" />
+        <LuNotebookPen className="w-4 h-4" />
       ) : (
         <span className="truncate">{displayLabel}</span>
       )}

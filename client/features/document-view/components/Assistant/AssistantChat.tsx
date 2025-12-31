@@ -97,8 +97,8 @@ export function AssistantChat({ isFocused }: { isFocused?: boolean }) {
         {messages.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-center space-y-2 max-w-sm px-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-linear-to-br from-purple-500/10 to-purple-600/10 flex items-center justify-center">
-                <Bot className="w-8 h-8 text-purple-500" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-black flex items-center justify-center">
+                <Bot className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-foreground">
                 Start a conversation
