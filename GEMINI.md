@@ -57,10 +57,12 @@ You can run commands for specific workspaces using the `-w` or `--workspace` fla
 *   **`client/`**: Next.js 16 App Router application.
     *   `app/`: App router pages and layouts.
     *   `components/`: React components (UI, Editor, Dashboard, etc.).
+    *   `docs/`: Frontend-specific documentation (Architecture, UI Style, Notes System, etc.).
     *   `lib/`: Utility functions and types.
     *   `hooks/`: Custom React hooks.
 *   **`server/`**: Fastify backend.
     *   `src/server.ts`: Entry point.
+    *   `docs/`: Backend-specific documentation (Auth, Quiz, API Endpoints, etc.).
     *   `src/infrastructure/`: Database and external service integrations.
     *   `src/plugins/`: Fastify plugins.
 *   **`.agent/rules/`**: Specific project rules for AI agents.
