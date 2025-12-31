@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { X, Tag as TagIcon, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useGetSettingsQuery } from "@/lib/store/apiSlice";
 
 interface TagSidebarProps {
   isOpen: boolean;
@@ -19,15 +20,6 @@ interface TagSidebarProps {
   onScrollToHighlight: (highlight: MyHighlight) => void;
 }
 
-const TAG_COLORS: Record<string, string> = {
-  Definition: "#3b82f6", // blue-500
-  Example: "#22c55e", // green-500
-  "Important detail": "#ef4444", // red-500
-  "Key idea": "#a855f7", // purple-500
-  "To revisit": "#f97316", // orange-500
-  "Step / Process": "#14b8a6", // teal-500
-};
-
 export const TagSidebar = ({
   isOpen,
   onClose,
@@ -35,6 +27,18 @@ export const TagSidebar = ({
   onScrollToHighlight,
 }: TagSidebarProps) => {
   const [expandedTags, setExpandedTags] = useState<string[]>([]);
+  
+  const { data: settings } = useGetSettingsQuery();
+  const tags = settings?.tags || [];
+
+  // Create a map for quick color lookup
+  const tagColorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    tags.forEach(t => {
+      map[t.label] = t.color;
+    });
+    return map;
+  }, [tags]);
 
   // Group highlights by tag
   const highlightsByTag = useMemo(() => {
@@ -87,62 +91,64 @@ export const TagSidebar = ({
           value={expandedTags}
           onValueChange={setExpandedTags}
         >
-          {sortedTags.map((tag) => (
-            <AccordionItem
-              key={tag}
-              value={tag}
-              className="border border-border/50 rounded-lg overflow-hidden bg-card/50"
-            >
-              <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-accent/50 transition-colors">
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="text-xs font-normal"
-                    style={{
-                      borderColor: TAG_COLORS[tag],
-                      color: TAG_COLORS[tag],
-                      backgroundColor: `${TAG_COLORS[tag]}10`,
-                    }}
-                  >
-                    {tag}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground ml-auto mr-2">
-                    {highlightsByTag.grouped[tag].length}
-                  </span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-3 pb-3 pt-1">
-                <div className="space-y-2">
-                  {highlightsByTag.grouped[tag].map((highlight) => (
-                    <div
-                      key={highlight.id}
-                      className="group flex flex-col gap-2 p-2 rounded-md hover:bg-accent/50 border border-transparent hover:border-border/50 transition-all cursor-pointer"
-                      onClick={() => onScrollToHighlight(highlight)}
+          {sortedTags.map((tag) => {
+            const tagColor = tagColorMap[tag] || "#3b82f6";
+            return (
+              <AccordionItem
+                key={tag}
+                value={tag}
+                className="border border-border/50 rounded-lg overflow-hidden bg-card/50"
+              >
+                <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-accent/50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className="text-xs font-normal"
+                      style={{
+                        borderColor: tagColor,
+                        color: tagColor,
+                        backgroundColor: `${tagColor}10`,
+                      }}
                     >
-                      {highlight.content?.text && (
-                        <p className="text-xs text-muted-foreground line-clamp-3 italic border-l-2 pl-2 border-primary/20">
-                          "{highlight.content.text}"
-                        </p>
-                      )}
-                      {highlight.content?.image && (
-                        <div className="relative h-16 w-full overflow-hidden rounded-md bg-muted">
-                          {/* Placeholder for image content if we had a way to display it easily */}
-                          <span className="absolute inset-0 flex items-center justify-center text-[10px] text-muted-foreground">
-                            Image Content
+                      {tag}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground ml-auto mr-2">
+                      {highlightsByTag.grouped[tag].length}
+                    </span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-3 pb-3 pt-1">
+                  <div className="space-y-2">
+                    {highlightsByTag.grouped[tag].map((highlight) => (
+                      <div
+                        key={highlight.id}
+                        className="group flex flex-col gap-2 p-2 rounded-md hover:bg-accent/50 border border-transparent hover:border-border/50 transition-all cursor-pointer"
+                        onClick={() => onScrollToHighlight(highlight)}
+                      >
+                        {highlight.content?.text && (
+                          <p className="text-xs text-muted-foreground line-clamp-3 italic border-l-2 pl-2 border-primary/20">
+                            "{highlight.content.text}"
+                          </p>
+                        )}
+                        {highlight.content?.image && (
+                          <div className="relative h-16 w-full overflow-hidden rounded-md bg-muted">
+                            <span className="absolute inset-0 flex items-center justify-center text-[10px] text-muted-foreground">
+                              Image Content
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-[10px] text-primary flex items-center gap-0.5">
+                            Go to <ChevronRight className="w-3 h-3" />
                           </span>
                         </div>
-                      )}
-                      <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-[10px] text-primary flex items-center gap-0.5">
-                          Go to <ChevronRight className="w-3 h-3" />
-                        </span>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
 
           {sortedTags.length === 0 && (
             <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">

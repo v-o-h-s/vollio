@@ -15,14 +15,15 @@ export type ApiTag =
   | "Summary"
   | "GoogleClassroom"
   | "Document"
-  | "Quiz";
+  | "Quiz"
+  | "Settings";
 
 export type ApiBuilder = EndpointBuilder<
   BaseQueryFn<
     string | FetchArgs,
     unknown,
     FetchBaseQueryError,
-    Record<string, unknown>,
+    {},
     FetchBaseQueryMeta
   >,
   ApiTag,

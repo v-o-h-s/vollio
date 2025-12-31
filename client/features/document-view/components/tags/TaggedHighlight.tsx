@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tag as TagIcon, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MyHighlight } from "@/features/document-view/types/highlight";
-import { CreateHighlightDTO } from "@vollio/shared";
+import { CreateHighlightDTO, Tag } from "@vollio/shared";
 import { TagSelectionDialog } from "./TagSelectionDialog";
 import { Button } from "@/components/ui/button";
 import gsap from "gsap";
@@ -22,16 +22,8 @@ interface TaggedHighlightProps {
     highlight: Partial<CreateHighlightDTO>
   ) => any;
   deleteHighlight: (highlightId: string) => any;
+  userTags?: Tag[];
 }
-
-const TAG_COLORS: Record<string, string> = {
-  Definition: "#3b82f6", // blue-500
-  Example: "#22c55e", // green-500
-  "Important detail": "#ef4444", // red-500
-  "Key idea": "#a855f7", // purple-500
-  "To revisit": "#f97316", // orange-500
-  "Step / Process": "#14b8a6", // teal-500
-};
 
 // Helper function to convert hex to rgba
 const hexToRgba = (hex: string, alpha: number = 0.4): string => {
@@ -59,53 +51,60 @@ const rgbToHex = (r: number, g: number, b: number) => {
   );
 };
 
-const mixColors = (tags: string[]) => {
-  if (!tags || tags.length === 0) return "#FFEB3B"; // Default yellow
-
-  const validColors = tags
-    .map((tag) => TAG_COLORS[tag])
-    .filter((c) => c !== undefined);
-
-  if (validColors.length === 0) return "#FFEB3B";
-  if (validColors.length === 1) return validColors[0];
-
-  let r = 0,
-    g = 0,
-    b = 0;
-
-  validColors.forEach((hex) => {
-    const rgb = hexToRgb(hex);
-    if (rgb) {
-      r += rgb.r;
-      g += rgb.g;
-      b += rgb.b;
-    }
-  });
-
-  const count = validColors.length;
-  return rgbToHex(
-    Math.round(r / count),
-    Math.round(g / count),
-    Math.round(b / count)
-  );
-};
-
 export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
   highlight,
   isScrolledTo,
   color: defaultColor,
   updateHighlight,
   deleteHighlight,
+  userTags = [],
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const badgeRef = useRef<HTMLButtonElement>(null);
 
+  // Create a map for quick color lookup
+  const tagColorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    userTags.forEach(t => {
+      map[t.label] = t.color;
+    });
+    return map;
+  }, [userTags]);
+
   // Calculate mixed color based on tags
   const displayColor = useMemo(() => {
-    return mixColors(highlight.tags || []);
-  }, [highlight.tags]);
+    const highlightTags = highlight.tags || [];
+    if (highlightTags.length === 0) return "#FFEB3B"; // Default yellow
+
+    const validColors = highlightTags
+      .map((tagLabel) => tagColorMap[tagLabel])
+      .filter((c) => c !== undefined);
+
+    if (validColors.length === 0) return "#FFEB3B";
+    if (validColors.length === 1) return validColors[0];
+
+    let r = 0,
+      g = 0,
+      b = 0;
+
+    validColors.forEach((hex) => {
+      const rgb = hexToRgb(hex);
+      if (rgb) {
+        r += rgb.r;
+        g += rgb.g;
+        b += rgb.b;
+      }
+    });
+
+    const count = validColors.length;
+    return rgbToHex(
+      Math.round(r / count),
+      Math.round(g / count),
+      Math.round(b / count)
+    );
+  }, [highlight.tags, tagColorMap]);
 
   // Normalize rects once and convert to DOM coordinates
   const rects = useMemo(() => {
@@ -318,22 +317,22 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
 
           <div className="flex flex-wrap gap-1.5">
             {(highlight.tags || []).length > 0 ? (
-              highlight.tags!.map((tag) => {
-                const tagColor = TAG_COLORS[tag] || defaultColor;
+              highlight.tags!.map((tagName) => {
+                const tagColor = tagColorMap[tagName] || defaultColor;
                 return (
                   <Badge
-                    key={tag}
+                    key={tagName}
                     variant="outline"
                     className="text-xs font-normal flex items-center gap-1 pr-1"
                     style={{ borderColor: tagColor, color: tagColor }}
                   >
-                    {tag}
+                    {tagName}
                     <div
                       role="button"
                       className="rounded-full hover:bg-muted p-0.5 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleRemoveTag(tag);
+                        handleRemoveTag(tagName);
                       }}
                     >
                       <X size={10} />
@@ -353,6 +352,7 @@ export const TaggedHighlight: React.FC<TaggedHighlightProps> = ({
         onOpenChange={setIsTagDialogOpen}
         onConfirm={handleAddTags}
         initialTags={highlight.tags || []}
+        userTags={userTags}
       />
     </Popover>
   );

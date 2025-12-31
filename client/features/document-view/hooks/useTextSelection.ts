@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from "uuid";
 import { DocumentDetails } from "@/features/document-view/types/document";
 import { useViewer } from "../context/ViewerContext";
 import { CreateHighlightDTO } from "@vollio/shared";
-import { toast } from "react-toastify";
 interface useSelectionProps {
   highlighterUtilsRef: React.RefObject<PdfHighlighterUtils | null>;
   document: DocumentDetails;
@@ -57,7 +56,6 @@ export function useSelection({
     };
     try {
       await createHighlight(highlight).unwrap();
-      toast.success("Insight added successfully");
     } catch (error) {
       console.log(error);
     }

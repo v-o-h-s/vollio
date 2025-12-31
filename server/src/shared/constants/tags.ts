@@ -14,21 +14,9 @@ export const DEFAULT_TAGS: Tag[] = [
     isDefault: true,
   },
   {
-    id: "default-important",
-    label: "Important detail",
-    color: "#EF4444",
-    isDefault: true,
-  },
-  {
-    id: "default-key-idea",
-    label: "Key idea",
-    color: "#10B981",
-    isDefault: true,
-  },
-  {
     id: "default-to-revisit",
     label: "To revisit",
     color: "#8B5CF6",
     isDefault: true,
-},
+  },
 ];

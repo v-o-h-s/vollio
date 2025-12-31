@@ -14,7 +14,7 @@ import { TagSelectionDialog } from "./tags/TagSelectionDialog";
 import { HighlightContainer } from "./highlight/HighlightContainer";
 import { TagSidebar } from "./tags/TagSidebar";
 import { DocumentLoading } from "@/components/ui/DocumentLoading";
-import { useGetDocumentHighlightsQuery } from "@/lib/store/apiSlice";
+import { useGetDocumentHighlightsQuery, useGetSettingsQuery } from "@/lib/store/apiSlice";
 import { useSelection } from "@/features/document-view/hooks/useTextSelection";
 import { useHighlightActions } from "@/features/document-view/hooks/useHighlightActions";
 import { MyHighlight } from "@/features/document-view/types/highlight";
@@ -41,6 +41,10 @@ export const BetterViewer = ({
   // Fetch highlights for this Document from API
   const { data: apiHighlights, isLoading: isLoadingHighlights } =
     useGetDocumentHighlightsQuery(document.id);
+    
+  // Fetch user settings (including tags)
+  const { data: settings, isLoading: isLoadingSettings } = useGetSettingsQuery();
+  const userTags = settings?.tags || [];
 
   const { handleUpdateAllHighlight, handleDeleteAllHighlight } =
     useHighlightActions();
@@ -275,6 +279,7 @@ export const BetterViewer = ({
                 updateHighlight={handleUpdateAllHighlight}
                 deleteHighlight={handleDeleteAllHighlight}
                 onClickHighlights={HandleClickInsightHighlight}
+                userTags={userTags}
               />
             </PdfHighlighter>
           )}
@@ -286,6 +291,8 @@ export const BetterViewer = ({
         open={isTagDialogOpen}
         onOpenChange={setIsTagDialogOpen}
         onConfirm={handleTagConfirm}
+        userTags={userTags}
+        isLoadingSettings={isLoadingSettings}
       />
 
       {/* Tag Sidebar Overlay */}

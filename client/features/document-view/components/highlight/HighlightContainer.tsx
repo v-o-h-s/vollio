@@ -8,7 +8,7 @@
 import { useHighlightContainerContext } from "react-pdf-highlighter-extended-plus";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { CreateHighlightDTO } from "@vollio/shared";
+import { CreateHighlightDTO, Tag } from "@vollio/shared";
 import { ContextMenu } from "./ContextMenu";
 import { StandardHighlight } from "./StandardHighlight";
 import { TaggedHighlight } from "../tags/TaggedHighlight";
@@ -24,12 +24,14 @@ interface HighlightContainerProps {
   deleteHighlight: (highlightId: string) => any;
   
   onClickHighlights: (noteId: string) => void;
+  userTags?: Tag[];
 }
 
 export const HighlightContainer = ({
   updateHighlight,
   deleteHighlight,
   onClickHighlights,
+  userTags = [],
 }: HighlightContainerProps) => {
   // the hoook just change the key position from (x1,x2) to (top,bottom) and provide you with utils
   const { highlight, isScrolledTo } =
@@ -78,6 +80,7 @@ export const HighlightContainer = ({
             color={color}
             updateHighlight={updateHighlight}
             deleteHighlight={deleteHighlight}
+            userTags={userTags}
           />
         );
       case "insight":
