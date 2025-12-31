@@ -28,6 +28,8 @@ interface ViewerContextType {
   toggleNoter: () => void;
   activeTabId: string;
   setActiveTabId: (id: string) => void;
+  focusedComponent: "v-ai" | "v-notes" | "v-doc" | null;
+  setFocusedComponent: (component: "v-ai" | "v-notes" | "v-doc" | null) => void;
 
   // Noter Actions & State
   tabs: Tab[];

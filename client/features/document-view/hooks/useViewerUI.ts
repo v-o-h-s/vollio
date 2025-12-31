@@ -3,6 +3,9 @@
 import { useState } from "react";
 
 export function useViewerUI() {
+  const [focusedComponent, setFocusedComponent] = useState<
+    "v-ai" | "v-notes" | "v-doc" | null
+  >("v-doc");
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isNoterOpen, setIsNoterOpen] = useState(false);
 
@@ -16,5 +19,7 @@ export function useViewerUI() {
     isNoterOpen,
     setIsNoterOpen,
     toggleNoter,
+    focusedComponent,
+    setFocusedComponent,
   };
 }

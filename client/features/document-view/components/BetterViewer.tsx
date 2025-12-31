@@ -91,6 +91,8 @@ export const BetterViewer = ({
     magnification: {},
   });
 
+  // handle copy if pressed 
+
   // Initialize adapter methods
   useEffect(() => {
     const adapter = documentViewerAdapter.current;
