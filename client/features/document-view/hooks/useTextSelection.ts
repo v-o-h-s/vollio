@@ -20,7 +20,7 @@ export function useSelection({
   document,
   currentHighlightColor,
 }: useSelectionProps) {
-  const { setIsAssistantOpen, addUserMessage } = useViewer();
+  const { setIsVollAiOpen, addUserMessage } = useViewer();
 
   const [createHighlight] = useCreateHighlightMutation();
   const [selection, setSelection] = useState<any>(null);
@@ -65,7 +65,7 @@ export function useSelection({
   const handleExplain = async () => {
     const activeSelection = captureSelection();
     if (!activeSelection || !activeSelection.content?.text) return;
-    setIsAssistantOpen(true);
+    setIsVollAiOpen(true);
     if (!activeSelection.content.text.trim()) return;
 
     const documentName = document.name;

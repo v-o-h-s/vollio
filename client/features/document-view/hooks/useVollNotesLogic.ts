@@ -248,7 +248,7 @@ export function useVollNotesLogic(documentId: string) {
         setTabs((prev) => [...prev, newTab]);
         // set the targetNote to the new note
         dispatch(setShouldReadFromProps(true));
-        toast.success("Created new note with content");
+       
         setActiveTabId(noteId);
         if (Highlight) {
           const highlight: CreateHighlightDTO = {

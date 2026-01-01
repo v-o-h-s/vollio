@@ -63,7 +63,7 @@ export function ContextMenu({ x, y, onClose, onDelete }: ContextMenuProps) {
   return (
     <div
       ref={menuRef}
-      className="fixed z-[1000] min-w-[180px] rounded-md border border-border bg-white dark:bg-black p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-100"
+      className="fixed z-[1000] min-w-[180px] rounded-md border border-border bg-white dark:bg-black  p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-100"
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
@@ -79,7 +79,7 @@ export function ContextMenu({ x, y, onClose, onDelete }: ContextMenuProps) {
         }}
       >
         <Trash2 className="h-4.5 w-4.5 text-red-600 dark:text-red-500" />
-        <div className="text-[14px] font-semibold">Delete Highlight</div>
+        <div className="text-[14px] font-semibold  text-white">Delete Highlight</div>
       </Button>
     </div>
   );
