@@ -15,11 +15,17 @@ import { useVollNotesLogic, HOME_TAB_ID } from "../hooks/useVollNotesLogic";
 import { useVollAiLogic, Message } from "../hooks/useVollAiLogic";
 import { Highlight, ScaledPosition } from "react-pdf-highlighter-extended-plus";
 
+import { ViewerComponents } from "../types/types";
+
 export { HOME_TAB_ID };
 export type { Message };
 
+/**
+ * Defines the complete state and action set for the Document Viewer.
+ * This context synchronizes the PDF viewer, AI assistant, and note-taking features.
+ */
 interface ViewerContextType {
-  // UI State
+  // --- UI State ---
   isVollAiOpen: boolean;
   setIsVollAiOpen: (isOpen: boolean) => void;
   toggleVollAi: () => void;
@@ -28,21 +34,21 @@ interface ViewerContextType {
   toggleVollNotes: () => void;
   activeTabId: string;
   setActiveTabId: (id: string) => void;
-  focusedComponent: "v-ai" | "v-notes" | "v-doc" | null;
-  setFocusedComponent: (component: "v-ai" | "v-notes" | "v-doc" | null) => void;
+  focusedComponent: ViewerComponents | null;
+  setFocusedComponent: React.Dispatch<React.SetStateAction<ViewerComponents | null>>;
 
-  // Voll-notes Actions & State
+  // --- Voll-notes Actions & State ---
   tabs: Tab[];
   setTabs: React.Dispatch<React.SetStateAction<Tab[]>>;
   isRefreshing: boolean;
   deletingNoteId: string | null;
-  handleCreateNote: (content?: JSONContent) => Promise<void>;
-  handleDeleteTab: (id: string) => void;
-  handleDeleteNote: (noteId: string) => Promise<void>;
-  handleRefresh: () => Promise<void>;
-  handleTabClick: (tabId: string) => void;
-  handleNoteCardClick: (noteId: string) => void;
-  handleTitleChange: (noteId: string, newTitle: string) => void;
+  createNewEmptyNote: (content?: JSONContent) => Promise<void>;
+  closeNoteTab: (id: string) => void;
+  permanentlyDeleteNote: (noteId: string) => Promise<void>;
+  refreshDocumentNotes: () => Promise<void>;
+  switchToActiveNoteTab: (tabId: string) => void;
+  openNoteFromList: (noteId: string) => void;
+  syncNoteTitleWithTab: (noteId: string, newTitle: string) => void;
   isLoadingNotes: boolean;
   notesError: any;
   documentNotes: Note[] | undefined;
@@ -52,7 +58,7 @@ interface ViewerContextType {
   refetchNotes: () => void;
   openNote: (noteId: string) => void;
 
-  // Voll-ai State & Actions
+  // --- Voll-ai State & Actions ---
   messages: Message[];
   addUserMessage: (
     message: string,
@@ -66,9 +72,9 @@ interface ViewerContextType {
   resetMessages: () => void;
   isVollAiLoading: boolean;
 
-  // Shared Actions (Voll-ai Actions)
-  handleAddToNotes: (content: string | JSONContent) => Promise<void>;
-  handleAddToNoteAsInsight: (
+  // --- Shared Actions (Cross-component features) ---
+  appendContentToActiveNote: (content: string | JSONContent) => Promise<void>;
+  addInsightToVollNotes: (
     content: string | JSONContent,
     metadata?: {
       documentName: string;
@@ -76,7 +82,7 @@ interface ViewerContextType {
       position: ScaledPosition;
     }
   ) => Promise<void>;
-  handleAddHighLightNoteSecondType: (
+  addSelectionToVollNotes: (
     metadata: {
       documentName: string;
       content: HighlightContent;
@@ -86,7 +92,7 @@ interface ViewerContextType {
   ) => Promise<void>;
   handleCopy: (content: string | JSONContent) => Promise<void>;
 
-  // Insight Navigation
+  // --- Insight Navigation ---
   scrollToHighlight: (highlightId: string) => void;
   setHighlighterUtilsRef: (
     ref: React.RefObject<
@@ -97,25 +103,32 @@ interface ViewerContextType {
 
 const ViewerContext = createContext<ViewerContextType | undefined>(undefined);
 
+/**
+ * Provider component that wraps the document viewer, providing centralized
+ * state management for AI chat, note-taking, and PDF interactions.
+ */
 export function ViewerProvider({ children }: { children: ReactNode }) {
   const params = useParams();
   const documentId = params?.id as string;
 
-  // --- UI State ---
+  // Manages panel visibility and focus state
   const ui = useViewerUI();
 
-  // --- Voll-notes State & Logic ---
+  // Manages note-taking logic (CRUD, tabs)
   const vollNotes = useVollNotesLogic(documentId);
 
-  // --- Voll-ai State & Logic ---
+  // Manages AI chat logic (history, API calls)
   const vollAi = useVollAiLogic();
 
-  // --- Highlighter Ref for PDF navigation ---
+  // Stores a reference to the PDF highlighter utility for programmatic scrolling/selections
   const [highlighterUtilsRef, setHighlighterUtilsRefState] =
     React.useState<React.RefObject<
       import("react-pdf-highlighter-extended-plus").PdfHighlighterUtils | null
     > | null>(null);
 
+  /**
+   * Sets the highlighter utility reference from the PDF viewer component.
+   */
   const setHighlighterUtilsRef = React.useCallback(
     (
       ref: React.RefObject<
@@ -127,14 +140,13 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  /**
+   * Programmatically scrolls the PDF viewer to a specific highlight by its ID.
+   */
   const scrollToHighlight = React.useCallback(
     (highlightId: string) => {
       if (!highlighterUtilsRef?.current) return;
 
-      const highlights =
-        highlighterUtilsRef.current.getViewer()?.findController;
-      // For now, we'll use scrollToHighlight with a mock highlight object
-      // This will be called by the Insight component with the actual highlight data
       highlighterUtilsRef.current.scrollToHighlight({
         id: highlightId,
         position: {
@@ -154,8 +166,9 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     [highlighterUtilsRef]
   );
 
-  // --- Shared Actions ---
-
+  /**
+   * Copies provided content (string or rich-text JSON) to the system clipboard.
+   */
   const handleCopy = async (content: string | JSONContent) => {
     let textToCopy = "";
     if (typeof content === "string") {
@@ -171,7 +184,11 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleAddToNotes = async (content: string | JSONContent) => {
+  /**
+   * Appends plain text or rich-text content to the currently active note.
+   * Automatically opens the notes panel if closed.
+   */
+  const appendContentToActiveNote = async (content: string | JSONContent) => {
     if (typeof content === "string") return;
 
     if (!ui.isVollNotesOpen) {
@@ -179,12 +196,17 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      await vollNotes.addToNote(content);
+      await vollNotes.addContentAndLinkedHighlight(content);
     } catch (error) {
       // Error handled in addToNote
     }
   };
-  const handleAddHighLightNoteSecondType = async (
+
+  /**
+   * Creates a "V-Note" (note-linked highlight) and appends it to the active note.
+   * Uses the "note" highlight style for visual distinction.
+   */
+  const addSelectionToVollNotes = async (
     metadata: {
       documentName: string;
       content: HighlightContent;
@@ -212,7 +234,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
           },
         ],
       };
-      await vollNotes.addToNote(HighlightNoteContent, "note", {
+      await vollNotes.addContentAndLinkedHighlight(HighlightNoteContent, "note", {
         HighlightContent: metadata.content,
         HighlightPosition: metadata.position,
       });
@@ -221,7 +243,12 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
       throw error;
     }
   };
-  const handleAddToNoteAsInsight = async (
+
+  /**
+   * Wraps selected text in an "AI Insight" block and appends it to the active note.
+   * Automatically creates a corresponding "insight" style highlight in the PDF.
+   */
+  const addInsightToVollNotes = async (
     content: string | JSONContent,
     metadata?: {
       documentName: string;
@@ -254,7 +281,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         ],
       };
       if (metadata) {
-        await vollNotes.addToNote(insightContent, "insight", {
+        await vollNotes.addContentAndLinkedHighlight(insightContent, "insight", {
           HighlightContent: metadata.content,
           HighlightPosition: metadata.position,
         });
@@ -265,6 +292,9 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  /**
+   * Opens a specific note by ID, switching focus to its tab and ensuring the notes panel is open.
+   */
   const openNote = (noteId: string) => {
     if (!ui.isVollNotesOpen) {
       ui.setIsVollNotesOpen(true);
@@ -275,26 +305,26 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
   return (
     <ViewerContext.Provider
       value={{
-        // UI
+        // UI State
         ...ui,
 
-        // Voll-notes
+        // Voll-notes State
         ...vollNotes,
 
-        // Voll-ai
+        // Voll-ai State
         ...vollAi,
 
-        // Actions
-        handleAddToNotes,
-        handleAddToNoteAsInsight,
-        handleAddHighLightNoteSecondType,
+        // Shared Actions
+        appendContentToActiveNote,
+        addInsightToVollNotes,
+        addSelectionToVollNotes,
         handleCopy,
 
         // Navigation
         scrollToHighlight,
         setHighlighterUtilsRef,
 
-        // Overrides
+        // Action Overrides
         openNote,
       }}
     >
@@ -303,6 +333,10 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Custom hook to access the ViewerContext.
+ * Must be used within a ViewerProvider.
+ */
 export function useViewer() {
   const context = useContext(ViewerContext);
   if (context === undefined) {

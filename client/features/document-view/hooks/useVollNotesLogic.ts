@@ -21,7 +21,8 @@ import { HighlightContent } from "@vollio/shared";
 export const HOME_TAB_ID = "home";
 
 /**
- * Hook containing logic for managing notes, tabs, and highlights in the Document View.
+ * Manages the logic for notes within the document viewer, including CRUD operations,
+ * tab management, and linking highlights to specific notes.
  */
 export function useVollNotesLogic(documentId: string) {
   const dispatch = useAppDispatch();
@@ -32,7 +33,7 @@ export function useVollNotesLogic(documentId: string) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [deletingNoteId, setDeletingNoteId] = useState<string | null>(null);
 
-  // RTK Queries for fetching and mutating notes/highlights
+  // Fetches all notes associated with the current document
   const {
     data: documentNotes,
     isLoading: isLoadingNotes,
@@ -40,11 +41,14 @@ export function useVollNotesLogic(documentId: string) {
     refetch: refetchNotes,
   } = useGetNotesQuery({ documentId }, { skip: !documentId });
 
+  // API mutations for managing notes and highlights
   const [deleteNote] = useDeleteNoteMutation();
   const [createNote, { error: createNoteError, isLoading: isLoadingNewNote }] =
     useCreateNoteMutation();
   const [updateNote] = useUpdateNoteMutation();
   const [createHighlight] = useCreateHighlightMutation();
+  
+  // Fetches the full content of the currently active note (if any)
   const { data: currentNote, refetch: refetchCurrentNote } = useGetNoteQuery(
     activeTabId,
     {
@@ -53,7 +57,7 @@ export function useVollNotesLogic(documentId: string) {
   );
 
   /**
-   * Memoized list of notes sorted by their last updated timestamp.
+   * Provides a list of document notes sorted by their last updated timestamp.
    */
   const sortedNotes = useMemo(() => {
     if (!documentNotes) return [];
@@ -64,9 +68,9 @@ export function useVollNotesLogic(documentId: string) {
   }, [documentNotes]);
 
   /**
-   * Creates a new note for the current document.
+   * Creates a new blank note for the document and opens it in a new tab.
    */
-  const handleCreateNote = async (
+  const createNewEmptyNote = async (
     content?: JSONContent,
     highlight?: {
       HighlightContent: string;
@@ -95,9 +99,10 @@ export function useVollNotesLogic(documentId: string) {
   };
 
   /**
-   * Closes a tab and updates the active tab if necessary.
+   * Closes a specific tab and automatically switches focus to an adjacent tab 
+   * or the Home screen.
    */
-  const handleDeleteTab = (id: string) => {
+  const closeNoteTab = (id: string) => {
     if (activeTabId === id) {
       const currentIndex = tabs.findIndex((tab) => tab.id === id);
       let newActiveTabId = HOME_TAB_ID;
@@ -114,9 +119,9 @@ export function useVollNotesLogic(documentId: string) {
   };
 
   /**
-   * Deletes a note and removes its associated tab.
+   * Permanently deletes a note from the database and removes its tab if open.
    */
-  const handleDeleteNote = async (noteId: string) => {
+  const permanentlyDeleteNote = async (noteId: string) => {
     setDeletingNoteId(noteId);
     try {
       await deleteNote(noteId).unwrap();
@@ -132,25 +137,26 @@ export function useVollNotesLogic(documentId: string) {
   };
 
   /**
-   * Refetches all notes for the current document.
+   * Triggers a manual refresh of the document's notes list.
    */
-  const handleRefresh = async () => {
+  const refreshDocumentNotes = async () => {
     setIsRefreshing(true);
     await refetchNotes();
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
   /**
-   * Switches the active tab.
+   * Switches the active focus to the specified tab.
    */
-  const handleTabClick = (tabId: string) => {
+  const switchToActiveNoteTab = (tabId: string) => {
     setActiveTabId(tabId);
   };
 
   /**
-   * Opens a note in a new tab or switches to it if already open.
+   * Handles clicking on a note card in the Home list, opening it in a tab 
+   * or switching to it if already open.
    */
-  const handleNoteCardClick = (noteId: string) => {
+  const openNoteFromList = (noteId: string) => {
     const existingTab = tabs.find((tab) => tab.id === noteId);
     if (existingTab) {
       setActiveTabId(noteId);
@@ -169,9 +175,9 @@ export function useVollNotesLogic(documentId: string) {
   };
 
   /**
-   * Updates the label of a tab when a note title changes.
+   * Syncs the tab label with the note's title when it is updated.
    */
-  const handleTitleChange = useCallback((noteId: string, newTitle: string) => {
+  const syncNoteTitleWithTab = useCallback((noteId: string, newTitle: string) => {
     setTabs((prevTabs) =>
       prevTabs.map((tab) =>
         tab.id === noteId ? { ...tab, label: newTitle } : tab
@@ -180,10 +186,10 @@ export function useVollNotesLogic(documentId: string) {
   }, []);
 
   /**
-   * Adds content to the active note or creates a new one if on Home.
-   * Also creates an associated highlight if provided.
+   * Adds rich-text content to the current note or creates a new one if on Home.
+   * Optionally creates a linked PDF highlight (Insight or Note style).
    */
-  const addToNote = async (
+  const addContentAndLinkedHighlight = async (
     content: string | JSONContent,
     highlightStyle: "insight" | "note" = "insight",
     Highlight?: {
@@ -277,10 +283,10 @@ export function useVollNotesLogic(documentId: string) {
   };
 
   /**
-   * Opens a specific note by its ID, creating a tab if it doesn't exist and making it active.
+   * Helper function to open a specific note by ID and switch to its tab.
    */
   const openNote = (noteId: string) => {
-    handleNoteCardClick(noteId);
+    openNoteFromList(noteId);
   };
 
   return {
@@ -297,14 +303,14 @@ export function useVollNotesLogic(documentId: string) {
     isLoadingNewNote,
     createNoteError,
     refetchNotes,
-    handleCreateNote,
-    handleDeleteTab,
-    handleDeleteNote,
-    handleRefresh,
-    handleTabClick,
-    handleNoteCardClick,
-    handleTitleChange,
-    addToNote,
+    createNewEmptyNote,
+    closeNoteTab,
+    permanentlyDeleteNote,
+    refreshDocumentNotes,
+    switchToActiveNoteTab,
+    openNoteFromList,
+    syncNoteTitleWithTab,
+    addContentAndLinkedHighlight,
     openNote,
   };
 }

@@ -7,10 +7,19 @@ import { AssistantChatMessage, HighlightContent } from "@vollio/shared";
 import { extractTextFromContent } from "../utils";
 import { Highlight, ScaledPosition } from "react-pdf-highlighter-extended-plus";
 
+/**
+ * Distinguishes between messages originating from general user queries 
+ * and those specifically referencing document content.
+ */
 export enum MessageSource {
   USER,
   DOCUMENT,
 }
+
+/**
+ * Represents a single message in the AI chat history, including its role,
+ * content, and optional document-specific metadata.
+ */
 export interface Message {
   role: "user" | "assistant";
   content: string | JSONContent;
@@ -23,12 +32,21 @@ export interface Message {
   };
 }
 
+/**
+ * Handles the logic for the Voll-AI chat interface, including sending messages
+ * to the API, managing chat history, and handling errors.
+ */
 export function useVollAiLogic() {
   const [messages, setMessages] = useState<Message[]>([]);
 
+  // Mutation hook for sending chat requests to the server
   const [vollAiChat, { isLoading: isVollAiLoading }] =
     useAssistantChatMutation();
 
+  /**
+   * Adds a user message to the chat, sends the full history to the AI assistant,
+   * and appends the assistant's response to the message list.
+   */
   const addUserMessage = async (
     message: string,
     metadata?: {
@@ -95,6 +113,10 @@ export function useVollAiLogic() {
     }
   };
 
+  /**
+   * Removes a message from the history by its index. If deleting an assistant 
+   * message, it also removes the preceding user question for consistency.
+   */
   const handleDeleteMessage = (index: number) => {
     setMessages((prev) => {
       const newMessages = [...prev];
@@ -107,6 +129,9 @@ export function useVollAiLogic() {
     });
   };
 
+  /**
+   * Clears the entire chat history.
+   */
   const resetMessages = () => {
     setMessages([]);
   };

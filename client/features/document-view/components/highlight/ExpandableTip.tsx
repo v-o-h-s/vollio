@@ -16,6 +16,7 @@ import React, { useState } from "react";
 import MinimalEditor from "@/features/document-view/components/highlight/MinimalEditor";
 import { FeatureInfo, FeatureInfoDual } from "@/components/FeatureExplanation";
 import { NoteMenu } from "./NoteMenu";
+
 interface ExpandableTipProps {
   onHighlight: () => void;
   onCopy?: () => void;
@@ -24,8 +25,8 @@ interface ExpandableTipProps {
   onExplain?: () => void;
   onAddInsight?: () => void;
   onSaveVDocNote?: (html: string) => void;
-  onAddNoteTypeTwo?: () => void;
-  onAddNoteTypeOne?: () => void;
+  onAddVNote?: () => void;
+  onAddVDocNote?: () => void;
 }
 
 export const ExpandableTip = ({
@@ -36,11 +37,12 @@ export const ExpandableTip = ({
   onExplain,
   onAddInsight,
   onSaveVDocNote,
-  onAddNoteTypeTwo,
-  onAddNoteTypeOne,
+  onAddVDocNote,
+  onAddVNote,
 }: ExpandableTipProps) => {
   const [openNoteMenu, setOpenNoteMenu] = useState(false);
   const [openVDocMenu, setOpenVDocMenu] = useState(false);
+
   return (
     <div className="relative">
       <Card className="rounded-full shadow-2xl border-white/10 animate-in fade-in zoom-in duration-300 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 overflow-visible">
@@ -99,7 +101,7 @@ export const ExpandableTip = ({
               </div>
             )}
 
-            {(onAddNote || onAddNoteTypeTwo) && (
+            {(onAddNote || onAddVNote) && (
               <div className="relative group">
                 <Button
                   onClick={() => setOpenNoteMenu(!openNoteMenu)}
@@ -156,15 +158,33 @@ export const ExpandableTip = ({
                 />
               </div>
             )}
+
+            {onAddInsight && (
+              <div className="relative group">
+                <Button
+                  onClick={onAddInsight}
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 rounded-full hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+                >
+                  <Lightbulb className="h-4.5 w-4.5" />
+                  <span className="sr-only">Insight</span>
+                </Button>
+                <FeatureInfo
+                  title="AI Insight"
+                  description="Save the selected text as an AI-powered insight in your notes."
+                />
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
       {openNoteMenu && (
         <NoteMenu
-          onAddNoteTypeOne={onAddNoteTypeOne}
+          onAddVDocNote={onAddVDocNote}
+          onAddVNote={onAddVNote}
           onClose={() => setOpenNoteMenu(false)}
           setOpenVDocMenu={setOpenVDocMenu}
-          onAddNoteTypeTwo={onAddNoteTypeTwo}
         />
       )}
       {openVDocMenu && (

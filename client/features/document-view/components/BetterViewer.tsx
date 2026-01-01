@@ -49,9 +49,13 @@ export const BetterViewer = ({
     useGetSettingsQuery();
   const userTags = settings?.tags || [];
 
-  const { handleUpdateAllHighlight, handleDeleteAllHighlight } =
-    useHighlightActions();
-  const { openNote: HandleClickInsightHighlight } = useViewer();
+    const { updateHighlightMetadata, removeHighlight } =
+
+      useHighlightActions();
+
+  
+
+    const { openNote: handleInsightClick } = useViewer();
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isTagSidebarOpen, setIsTagSidebarOpen] = useState(false);
@@ -64,14 +68,13 @@ export const BetterViewer = ({
   const {
     isTagDialogOpen,
     setIsTagDialogOpen,
-    handleTagConfirm,
-    handleCreateHighlight,
-    handleAddNote,
-    handleCopy,
-    handleAddTag,
-    handleExplain,
-    handleSaveVDocNote,
-    createHighlightTypeTwo,
+    finalizeTagging,
+    createSimpleHighlight,
+    copySelectionToClipboard,
+    initiateTagging,
+    askAiToExplainSelection,
+    createRichTextVDocNote,
+    linkSelectionToNewVNote,
   } = useSelection({
     highlighterUtilsRef,
     document,
@@ -105,7 +108,7 @@ export const BetterViewer = ({
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === "c") {
-        handleCopy();
+        copySelectionToClipboard();
       }
     };
     window.addEventListener("keydown", handler);
@@ -269,22 +272,22 @@ export const BetterViewer = ({
               }}
               selectionTip={
                 <ExpandableTip
-                  onHighlight={handleCreateHighlight} // add default highlight
-                  onCopy={handleCopy} // copy selected text
-                  onAddTag={handleAddTag} // add tag to highlight
-                  onExplain={handleExplain} // explain selected text
-                  onAddInsight={createHighlightTypeTwo} // add insight to highlight
-                  onSaveVDocNote={handleSaveVDocNote}
-                  onAddNoteTypeTwo={createHighlightTypeTwo}
-                  onAddNoteTypeOne={handleAddNote}
+                  onHighlight={createSimpleHighlight} // add default highlight
+                  onCopy={copySelectionToClipboard} // copy selected text
+                  onAddTag={initiateTagging} // add tag to highlight
+                  onExplain={askAiToExplainSelection} // explain selected text
+                  onAddInsight={linkSelectionToNewVNote} // add insight to highlight
+                  onSaveVDocNote={createRichTextVDocNote}
+                  onAddVNote={linkSelectionToNewVNote}
+                  onAddVDocNote={() => {}} // Placeholder for initial V-Doc creation if different from save
                 />
               }
               highlights={highlights}
             >
               <HighlightContainer
-                updateHighlight={handleUpdateAllHighlight}
-                deleteHighlight={handleDeleteAllHighlight}
-                onClickHighlights={HandleClickInsightHighlight}
+                updateHighlight={updateHighlightMetadata}
+                deleteHighlight={removeHighlight}
+                onClickHighlights={handleInsightClick}
                 userTags={userTags}
               />
             </PdfHighlighter>
@@ -296,7 +299,7 @@ export const BetterViewer = ({
       <TagSelectionDialog
         open={isTagDialogOpen}
         onOpenChange={setIsTagDialogOpen}
-        onConfirm={handleTagConfirm}
+        onConfirm={finalizeTagging}
         userTags={userTags}
         isLoadingSettings={isLoadingSettings}
       />

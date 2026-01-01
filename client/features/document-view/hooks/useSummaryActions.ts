@@ -14,10 +14,15 @@ interface UseSummaryActionsProps {
   onSummaryNoteCreated?: (noteId: string) => void;
 }
 
+/**
+ * Manages the logic for generating and retrieving document summaries, 
+ * including automatic creation of summary notes.
+ */
 export const useSummaryActions = ({
   documentId,
   onSummaryNoteCreated,
 }: UseSummaryActionsProps) => {
+  // Retrieves existing summaries for the current document
   const { data: summaries, refetch } = useGetSummariesByDocumentIdQuery(
     documentId,
     {
@@ -25,18 +30,26 @@ export const useSummaryActions = ({
     }
   );
 
+  // Retrieves all notes to check for existing summary notes
   const { data: notes } = useGetNotesQuery(undefined);
 
+  // Mutation hooks for generating summaries and creating notes
   const [generateSummaryMutation, { isLoading: isGenerating }] =
     useGenerateSummaryMutation();
 
   const [createNote] = useCreateNoteMutation();
 
+  /**
+   * Provides the most recent summary for the document if available.
+   */
   const summary = useMemo(() => {
     return summaries && summaries.length > 0 ? summaries[0] : null;
   }, [summaries]);
 
-  // Check if a summary note already exists
+  /**
+   * Searches through document notes to find one titled "Summary",
+   * preventing duplicate summary notes.
+   */
   const summaryNote = useMemo(() => {
     return notes?.find(
       (note) =>
@@ -45,6 +58,10 @@ export const useSummaryActions = ({
     );
   }, [notes, documentId]);
 
+  /**
+   * Triggers the AI summarization process, updates the local summaries state,
+   * and automatically creates a new "Summary" note with the generated text.
+   */
   const generateSummary = useCallback(async () => {
     try {
       const result = await generateSummaryMutation({ documentId }).unwrap();

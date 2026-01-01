@@ -39,9 +39,10 @@ export function ChatMessage({
   metadata,
 }: ChatMessageProps) {
   const {
-    handleCopy: contextCopy,
-    handleAddToNotes,
-    handleAddToNoteAsInsight,
+    handleCopy,
+    addInsightToVollNotes,
+    appendContentToActiveNote,
+    openNote,
   } = useViewer();
   const vollAiFontSize = useAppSelector(
     (state) => state.settings.vollAiFontSize
@@ -131,18 +132,18 @@ export function ChatMessage({
                   <Copy className="w-3.5 h-3.5" />
                 )}
               </button>
-              <button
-                onClick={() => handleAddToNotes(content)}
-                className="p-1 rounded-md hover:bg-muted text-muted-foreground transition-colors"
-                title="Add to notes"
-              >
+                <button
+                  onClick={() => appendContentToActiveNote(content)}
+                  className="flex items-center gap-1 hover:text-indigo-400 transition-colors"
+                  title="Add to active note"
+                >
                 <Plus className="w-3.5 h-3.5" />
               </button>
               {source === MessageSource.DOCUMENT && (
                 <button
                   className="p-1 rounded-md hover:bg-muted text-muted-foreground transition-colors group"
                   title="Add as Insight"
-                  onClick={() => handleAddToNoteAsInsight(content, metadata)}
+                  onClick={() => addInsightToVollNotes(content, metadata)}
                 >
                   <Sparkles className="w-3.5 h-3.5 group-hover:text-purple-500 transition-colors" />
                 </button>

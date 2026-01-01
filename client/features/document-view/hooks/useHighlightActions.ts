@@ -1,11 +1,20 @@
 import { useUpdateHighlightMutation } from "@/lib/store/apiSlice";
 import { useDeleteHighlightMutation } from "@/lib/store/apiSlice";
 import { CreateHighlightDTO } from "@vollio/shared";
+
+/**
+ * Provides actions for managing individual PDF highlights, including updating
+ * their properties (color, tags, notes) and deleting them.
+ */
 export const useHighlightActions = () => {
   const [updateHighlight] = useUpdateHighlightMutation();
   const [deleteHighlight] = useDeleteHighlightMutation();
 
-  const handleUpdateAllHighlight = async (
+  /**
+   * Updates an existing highlight's metadata (e.g., color, tags, or linked note content)
+   * in the database via RTK Query mutation.
+   */
+  const updateHighlightMetadata = async (
     highlightId: string,
     highlight: Partial<CreateHighlightDTO>
   ) => {
@@ -19,16 +28,19 @@ export const useHighlightActions = () => {
     }
   };
 
-  // handler to delete a highlight
-  const handleDeleteAllHighlight = async (highlightId: string) => {
+  /**
+   * Permanently removes a highlight from the document by its unique ID.
+   */
+  const removeHighlight = async (highlightId: string) => {
     try {
       await deleteHighlight(highlightId).unwrap();
     } catch (error) {
       console.error("Failed to delete highlight:", error);
     }
   };
+
   return {
-    handleUpdateAllHighlight,
-    handleDeleteAllHighlight,
+    updateHighlightMetadata,
+    removeHighlight,
   };
 };

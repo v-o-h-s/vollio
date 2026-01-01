@@ -33,13 +33,13 @@ export default function VollNotes({
     activeTabId,
     isRefreshing,
     deletingNoteId,
-    handleCreateNote,
-    handleDeleteTab,
-    handleDeleteNote,
-    handleRefresh,
-    handleTabClick,
-    handleNoteCardClick,
-    handleTitleChange,
+    createNewEmptyNote,
+    closeNoteTab,
+    permanentlyDeleteNote,
+    refreshDocumentNotes,
+    switchToActiveNoteTab,
+    openNoteFromList,
+    syncNoteTitleWithTab,
     isLoadingNotes: isLoading,
     notesError: error,
     sortedNotes,
@@ -53,7 +53,7 @@ export default function VollNotes({
     documentId: document.id,
     onSummaryNoteCreated: (noteId) => {
       // Open the summary note tab after it's created
-      handleNoteCardClick(noteId);
+      openNoteFromList(noteId);
     },
   });
 
@@ -92,7 +92,7 @@ export default function VollNotes({
           </pre>
         )}
 
-        <Button onClick={() => handleCreateNote()} variant="outline" size="sm">
+        <Button onClick={() => createNewEmptyNote()} variant="outline" size="sm">
           Try Again
         </Button>
       </div>
@@ -131,9 +131,9 @@ export default function VollNotes({
         tabs={tabs}
         activeTabId={activeTabId}
         onReorder={setTabs}
-        onDeleteNote={handleDeleteTab}
-        onAddNote={() => handleCreateNote()}
-        onTabClick={handleTabClick}
+        onDeleteNote={closeNoteTab}
+        onAddNote={() => createNewEmptyNote()}
+        onTabClick={switchToActiveNoteTab}
         isFocused={isFocused}
       />
 
@@ -152,7 +152,7 @@ export default function VollNotes({
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={handleRefresh}
+                  onClick={refreshDocumentNotes}
                   disabled={isRefreshing}
                   className="shrink-0"
                   title="Refresh Notes"
@@ -205,7 +205,7 @@ export default function VollNotes({
                   </p>
                 </div>
                 <Button
-                  onClick={() => handleCreateNote()}
+                  onClick={() => createNewEmptyNote()}
                   className="cursor-pointer bg-indigo-500 hover:bg-indigo-600 text-white"
                   disabled={isLoadingNewNote}
                 >
@@ -220,8 +220,8 @@ export default function VollNotes({
                     <NoteCard
                       key={note.id}
                       note={note}
-                      onClick={handleNoteCardClick}
-                      onDelete={handleDeleteNote}
+                      onClick={openNoteFromList}
+                      onDelete={permanentlyDeleteNote}
                       isDeleting={deletingNoteId === note.id}
                     />
                   ))}
@@ -245,7 +245,7 @@ export default function VollNotes({
                 noteId={tab.id}
                 documentId={document.id}
                 isActive={activeTabId === tab.id}
-                onTitleChange={handleTitleChange}
+                onTitleChange={syncNoteTitleWithTab}
               />
             </div>
           ))}
