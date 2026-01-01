@@ -9,21 +9,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import React, { useState } from "react";
 export const NoteMenu = ({
-  onAddNote,
-  onAddVNote,
+  onAddNoteTypeOne,
+  onAddNoteTypeTwo,
   onClose,
   setOpenVDocMenu,
 }: {
-  onAddNote?: (e: React.MouseEvent) => void;
-  onAddVNote?: () => void;
+  onAddNoteTypeOne?: (e: React.MouseEvent) => void;
   onClose: () => void;
   setOpenVDocMenu: (open: boolean) => void;
+  onAddNoteTypeTwo?: () => void;
 }) => {
   return (
     <div className="absolute rounded-[2rem] top-full mt-2 left-1/2 -translate-x-1/2 z-50 animate-in fade-in zoom-in slide-in-from-top-2 duration-200 bg-background/20 backdrop-blur-xl supports-[backdrop-filter]:bg-background/20">
       <Card className="rounded-[2rem] shadow-2xl border-white/10 overflow-hidden min-w-[180px] bg-background/70">
         <CardContent className="p-1.5 flex flex-col gap-1">
-          {onAddNote && (
+          {onAddNoteTypeOne && (
             <Button
               onClick={(e) => {
                 onClose();
@@ -42,10 +42,10 @@ export const NoteMenu = ({
               </div>
             </Button>
           )}
-          {onAddVNote && (
+          {onAddNoteTypeTwo && (
             <Button
               onClick={() => {
-                onAddVNote();
+                onAddNoteTypeTwo();
                 onClose();
               }}
               variant="ghost"

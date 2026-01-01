@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useRef, useState, useEffect, useCallback } from "react";
 import {
   Bold,
@@ -66,17 +66,17 @@ export default function MinimalEditor({
     editorRef.current?.focus();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editorRef.current) {
-      onSave(editorRef.current.innerHTML);
+      await onSave(editorRef.current.innerHTML);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = async (e: React.KeyboardEvent) => {
     if (e.ctrlKey || e.metaKey) {
       if (e.key === "s") {
         e.preventDefault();
-        handleSave();
+        await handleSave();
       }
     }
     setTimeout(updateActiveStates, 0);
@@ -85,8 +85,8 @@ export default function MinimalEditor({
   return (
     <Card
       className={cn(
-        "w-[500px] border-white/20 shadow-2xl transition-all duration-300 absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 overflow-hidden bg-black",
-        
+        "w-[500px] border-white/20 shadow-2xl transition-all duration-300 absolute top-full mt-2 left-1/2 -translate-x-1/2 z-999 overflow-hidden bg-black ",
+
         className
       )}
     >
@@ -155,10 +155,10 @@ export default function MinimalEditor({
           <Button
             size="sm"
             onClick={handleSave}
-            className="h-8 gap-2 bg-white hover:bg-zinc-200 text-black border-none font-semibold shadow-lg"
+            className="h-8 gap-2 bg-white hover:bg-zinc-200 text-black border-none font-bold shadow-lg"
           >
             <Save className="h-3.5 w-3.5" />
-            <span className="text-xs">Save</span>
+            <p className="text-xs">Save</p>
           </Button>
         </div>
       </div>

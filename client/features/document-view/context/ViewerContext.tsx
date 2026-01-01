@@ -76,6 +76,14 @@ interface ViewerContextType {
       position: ScaledPosition;
     }
   ) => Promise<void>;
+  handleAddHighLightNoteSecondType: (
+    metadata: {
+      documentName: string;
+      content: HighlightContent;
+      position: ScaledPosition;
+    },
+    content?: JSONContent
+  ) => Promise<void>;
   handleCopy: (content: string | JSONContent) => Promise<void>;
 
   // Insight Navigation
@@ -176,7 +184,43 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
       // Error handled in addToNote
     }
   };
+  const handleAddHighLightNoteSecondType = async (
+    metadata: {
+      documentName: string;
+      content: HighlightContent;
+      position: ScaledPosition;
+    },
+    content?: JSONContent
+  ) => {
+    if (!ui.isVollNotesOpen) {
+      ui.setIsVollNotesOpen(true);
+    }
 
+    try {
+      const HighlightNoteContent: JSONContent = {
+        type: "doc",
+        content: [
+          {
+            type: "note",
+            attrs: {
+              selectedText: metadata.content.text || "Note",
+              metadata: {
+                pageNumber: metadata.position.boundingRect.pageNumber,
+              },
+            },
+            content: content?.content || [],
+          },
+        ],
+      };
+      await vollNotes.addToNote(HighlightNoteContent, {
+        HighlightContent: metadata.content,
+        HighlightPosition: metadata.position,
+      });
+    } catch (error) {
+      console.error("Failed to add note to notes:", error);
+      throw error;
+    }
+  };
   const handleAddToNoteAsInsight = async (
     content: string | JSONContent,
     metadata?: {
@@ -243,12 +287,13 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         // Actions
         handleAddToNotes,
         handleAddToNoteAsInsight,
+        handleAddHighLightNoteSecondType,
         handleCopy,
 
         // Navigation
         scrollToHighlight,
         setHighlighterUtilsRef,
-        
+
         // Overrides
         openNote,
       }}

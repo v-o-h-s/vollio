@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import { DocumentDetails } from "@/features/document-view/types/document";
 import { useViewer } from "../context/ViewerContext";
 import { CreateHighlightDTO } from "@vollio/shared";
+import { JSONContent } from "@tiptap/core";
 interface useSelectionProps {
   highlighterUtilsRef: React.RefObject<PdfHighlighterUtils | null>;
   document: DocumentDetails;
@@ -20,7 +21,8 @@ export function useSelection({
   document,
   currentHighlightColor,
 }: useSelectionProps) {
-  const { setIsVollAiOpen, addUserMessage } = useViewer();
+  const { setIsVollAiOpen, addUserMessage, handleAddHighLightNoteSecondType } =
+    useViewer();
 
   const [createHighlight] = useCreateHighlightMutation();
   const [selection, setSelection] = useState<any>(null);
@@ -174,6 +176,30 @@ export function useSelection({
     } catch (error) {}
   };
 
+  const createHighlightTypeTwo = async () => {
+    const activeSelection = captureSelection();
+    if (!activeSelection) return;
+    const content: JSONContent = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "start typing",
+            },
+          ],
+        },
+      ],
+    };
+    await handleAddHighLightNoteSecondType({
+      documentName: document.name,
+      content: activeSelection.content,
+      position: activeSelection.position,
+    });
+  };
+
   return {
     // Selection state
     selection,
@@ -191,5 +217,6 @@ export function useSelection({
     handleAddInsight,
     handleExplain,
     onSelectionFinished,
+    createHighlightTypeTwo,
   };
 }

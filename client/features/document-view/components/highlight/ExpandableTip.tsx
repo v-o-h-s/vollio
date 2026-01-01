@@ -21,23 +21,23 @@ interface ExpandableTipProps {
   onCopy?: () => void;
   onAddTag?: () => void;
   onAddNote?: () => void;
-  onAddVNote?: () => void;
   onExplain?: () => void;
   onAddInsight?: () => void;
   onSaveVDocNote?: (html: string) => void;
+  onAddNoteTypeTwo?: () => void;
+  onAddNoteTypeOne?: () => void;
 }
-
-
 
 export const ExpandableTip = ({
   onHighlight,
   onCopy,
   onAddTag,
   onAddNote,
-  onAddVNote,
   onExplain,
   onAddInsight,
   onSaveVDocNote,
+  onAddNoteTypeTwo,
+  onAddNoteTypeOne,
 }: ExpandableTipProps) => {
   const [openNoteMenu, setOpenNoteMenu] = useState(false);
   const [openVDocMenu, setOpenVDocMenu] = useState(false);
@@ -99,7 +99,7 @@ export const ExpandableTip = ({
               </div>
             )}
 
-            {(onAddNote || onAddVNote) && (
+            {(onAddNote || onAddNoteTypeTwo) && (
               <div className="relative group">
                 <Button
                   onClick={() => setOpenNoteMenu(!openNoteMenu)}
@@ -161,10 +161,10 @@ export const ExpandableTip = ({
       </Card>
       {openNoteMenu && (
         <NoteMenu
-          onAddNote={onAddNote}
-          onAddVNote={onAddVNote}
+          onAddNoteTypeOne={onAddNoteTypeOne}
           onClose={() => setOpenNoteMenu(false)}
           setOpenVDocMenu={setOpenVDocMenu}
+          onAddNoteTypeTwo={onAddNoteTypeTwo}
         />
       )}
       {openVDocMenu && (

@@ -14,7 +14,10 @@ import { TagSelectionDialog } from "./tags/TagSelectionDialog";
 import { HighlightContainer } from "./highlight/HighlightContainer";
 import { TagSidebar } from "./tags/TagSidebar";
 import { DocumentLoading } from "@/components/ui/DocumentLoading";
-import { useGetDocumentHighlightsQuery, useGetSettingsQuery } from "@/lib/store/apiSlice";
+import {
+  useGetDocumentHighlightsQuery,
+  useGetSettingsQuery,
+} from "@/lib/store/apiSlice";
 import { useSelection } from "@/features/document-view/hooks/useTextSelection";
 import { useHighlightActions } from "@/features/document-view/hooks/useHighlightActions";
 import { MyHighlight } from "@/features/document-view/types/highlight";
@@ -22,7 +25,6 @@ import { ViewerHeader } from "./viewheader";
 import { ViewerFloatingActions } from "./ViewerFloatingActions";
 import { DocumentDetails } from "../types/document";
 import { useViewer } from "../context/ViewerContext";
-
 export const BetterViewer = ({
   document,
   onToggleVollNotes,
@@ -41,14 +43,14 @@ export const BetterViewer = ({
   // Fetch highlights for this Document from API
   const { data: apiHighlights, isLoading: isLoadingHighlights } =
     useGetDocumentHighlightsQuery(document.id);
-    
+
   // Fetch user settings (including tags)
-  const { data: settings, isLoading: isLoadingSettings } = useGetSettingsQuery();
+  const { data: settings, isLoading: isLoadingSettings } =
+    useGetSettingsQuery();
   const userTags = settings?.tags || [];
 
   const { handleUpdateAllHighlight, handleDeleteAllHighlight } =
     useHighlightActions();
-
   const { openNote: HandleClickInsightHighlight } = useViewer();
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -68,8 +70,8 @@ export const BetterViewer = ({
     handleCopy,
     handleAddTag,
     handleExplain,
-    handleAddInsight,
     handleSaveVDocNote,
+    createHighlightTypeTwo,
   } = useSelection({
     highlighterUtilsRef,
     document,
@@ -267,14 +269,14 @@ export const BetterViewer = ({
               }}
               selectionTip={
                 <ExpandableTip
-                  onHighlight={handleCreateHighlight}
-                  onCopy={handleCopy}
-                  onAddTag={handleAddTag}
-                  onAddNote={handleAddNote}
-                  onAddVNote={onToggleVollNotes}
-                  onExplain={handleExplain}
-                  onAddInsight={handleAddInsight}
+                  onHighlight={handleCreateHighlight} // add default highlight
+                  onCopy={handleCopy} // copy selected text
+                  onAddTag={handleAddTag} // add tag to highlight
+                  onExplain={handleExplain} // explain selected text
+                  onAddInsight={createHighlightTypeTwo} // add insight to highlight
                   onSaveVDocNote={handleSaveVDocNote}
+                  onAddNoteTypeTwo={createHighlightTypeTwo}
+                  onAddNoteTypeOne={handleAddNote}
                 />
               }
               highlights={highlights}
