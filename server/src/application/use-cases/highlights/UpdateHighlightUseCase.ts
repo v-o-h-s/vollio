@@ -1,5 +1,5 @@
 import { IHighlightRepository } from "../../../domain/repositories/IHighlightRepository";
-import { Highlight, HighlightContent, ScaledPosition } from "../../../domain/entities/Highlight";
+import { Highlight, HighlightContent, ScaledPosition, HighlightStyle } from "../../../domain/entities/Highlight";
 import { FastifyBaseLogger } from "fastify";
 
 interface UpdateHighlightInput {
@@ -9,11 +9,12 @@ interface UpdateHighlightInput {
   content?: HighlightContent;
   hasNote?: boolean;
   noteId?: string | null;
+  noteContent?: string | null;
   position?: ScaledPosition;
   type?: "text" | "area";
   documentId?: string;
   tags?: string[];
-  style?: "highlight" | "tagged";
+  style?: HighlightStyle;
 }
 
 export class UpdateHighlightUseCase {
@@ -51,6 +52,9 @@ export class UpdateHighlightUseCase {
     }
     if (input.noteId !== undefined) {
       existingHighlight.setNoteId(input.noteId);
+    }
+    if (input.noteContent !== undefined) {
+      existingHighlight.setNoteContent(input.noteContent);
     }
     if (input.tags !== undefined) {
       existingHighlight.setTags(input.tags);

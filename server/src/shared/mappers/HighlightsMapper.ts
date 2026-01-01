@@ -21,7 +21,8 @@ export class HighlightsMapper {
       row.color,
       row.note_id,
       row.tags,
-      row.style as HighlightStyle | undefined
+      row.style as HighlightStyle | undefined,
+      row.note_content
     );
   }
   static mapEntityToResponse(highlight: Highlight): HighlightData {
@@ -37,8 +38,9 @@ export class HighlightsMapper {
       updatedAt: highlight.getUpdatedAt().toISOString(),
       color: highlight.getColor(),
       noteId: highlight.getNoteId(),
+      noteContent: highlight.getNoteContent(),
       tags: highlight.getTags(),
-      style: highlight.getStyle(),
+      style: highlight.getStyle() as any,
     };
   }
 }

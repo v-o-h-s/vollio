@@ -31,7 +31,7 @@ export interface ExtractedContent {
 /**
  * Extract text from Document with page structure (full text, paragraphs, pages(pageNum, text))
  */
-export async function extractFromDocument(
+export async function extractFromDocument (
   data: Uint8Array
 ): Promise<ExtractedContent> {
   const loadingTask = pdfjsLib.getDocument({ data });

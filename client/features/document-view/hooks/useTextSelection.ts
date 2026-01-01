@@ -133,6 +133,32 @@ export function useSelection({
     }
   };
 
+  const handleSaveVDocNote = async (noteContent: string) => {
+    const activeSelection = captureSelection();
+    if (!activeSelection) return;
+    const highlightId = uuidv4();
+    const newHighlightDto: CreateHighlightDTO = {
+      id: highlightId,
+      documentId: document.id,
+      type: activeSelection.content.image ? "area" : "text",
+      content: activeSelection.content,
+      position: activeSelection.position,
+      color: currentHighlightColor,
+      hasNote: false,
+      noteId: null,
+      noteContent: noteContent,
+      tags: [],
+      style: "note",
+    };
+    try {
+      await createHighlight(newHighlightDto).unwrap();
+      setSelection(null);
+      highlighterUtilsRef.current?.removeGhostHighlight();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleAddNote = () => {
     const activeSelection = captureSelection();
     if (!activeSelection) return;
@@ -159,6 +185,7 @@ export function useSelection({
     handleAddTag,
     handleTagConfirm,
     handleCreateHighlight,
+    handleSaveVDocNote,
     handleAddNote,
     handleCopy,
     handleAddInsight,

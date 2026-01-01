@@ -69,6 +69,7 @@ export const BetterViewer = ({
     handleAddTag,
     handleExplain,
     handleAddInsight,
+    handleSaveVDocNote,
   } = useSelection({
     highlighterUtilsRef,
     document,
@@ -87,6 +88,7 @@ export const BetterViewer = ({
       tags: h.tags || undefined,
       style: h.style || undefined,
       noteId: h.noteId ?? undefined,
+      noteContent: h.noteContent ?? undefined,
     })) as MyHighlight[];
   }, [apiHighlights]);
 
@@ -272,6 +274,7 @@ export const BetterViewer = ({
                   onAddVNote={onToggleVollNotes}
                   onExplain={handleExplain}
                   onAddInsight={handleAddInsight}
+                  onSaveVDocNote={handleSaveVDocNote}
                 />
               }
               highlights={highlights}

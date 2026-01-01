@@ -1,5 +1,5 @@
 import { IHighlightRepository } from "../../../domain/repositories/IHighlightRepository";
-import { Highlight, HighlightType, ScaledPosition } from "../../../domain/entities/Highlight";
+import { Highlight, HighlightType, ScaledPosition, HighlightStyle } from "../../../domain/entities/Highlight";
 import { randomUUID } from "crypto";
 import { FastifyBaseLogger } from "fastify";
 
@@ -12,8 +12,9 @@ interface CreateHighlightInput {
   color?: string;
   hasNote?: boolean;
   noteId?: string | null;
+  noteContent?: string | null;
   tags?: string[];
-  style?: "highlight" | "tagged";
+  style?: HighlightStyle;
 }
 
 export class CreateHighlightUseCase {
@@ -42,7 +43,8 @@ export class CreateHighlightUseCase {
       input.color,
       input.noteId,
       input.tags,
-      input.style
+      input.style,
+      input.noteContent
     );
 
     this.logger.info(

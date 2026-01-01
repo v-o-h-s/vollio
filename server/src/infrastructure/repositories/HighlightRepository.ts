@@ -111,6 +111,7 @@ export class HighlightRepository implements IHighlightRepository {
         color: highlight.getColor(),
         has_note: highlight.hasNoteAttached(),
         note_id: highlight.getNoteId(),
+        note_content: highlight.getNoteContent(),
         tags: highlight.getTags(),
         style: highlight.getStyle(),
       })
@@ -144,6 +145,7 @@ export class HighlightRepository implements IHighlightRepository {
         content: highlight.getContent(),
         has_note: highlight.hasNoteAttached(),
         note_id: highlight.getNoteId(),
+        note_content: highlight.getNoteContent(),
         position: highlight.getPosition(),
         type: highlight.getType(),
         document_id: highlight.getDocumentId(),

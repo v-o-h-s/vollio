@@ -97,8 +97,9 @@ export class HighlightController {
       color: request.body.color,
       hasNote: request.body.hasNote,
       noteId: request.body.noteId,
+      noteContent: request.body.noteContent,
       tags: request.body.tags,
-      style: request.body.style,
+      style: request.body.style as any,
     });
 
     reply.status(201).send({
@@ -170,11 +171,12 @@ export class HighlightController {
       content: request.body.content,
       hasNote: request.body.hasNote,
       noteId: request.body.noteId,
+      noteContent: request.body.noteContent,
       position: request.body.position,
       type: request.body.type,
       documentId: request.body.documentId,
       tags: request.body.tags,
-      style: request.body.style,
+      style: request.body.style as any,
     });
 
     reply.status(200).send({

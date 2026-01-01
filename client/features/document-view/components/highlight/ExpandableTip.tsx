@@ -24,6 +24,7 @@ interface ExpandableTipProps {
   onAddVNote?: () => void;
   onExplain?: () => void;
   onAddInsight?: () => void;
+  onSaveVDocNote?: (html: string) => void;
 }
 
 
@@ -36,6 +37,7 @@ export const ExpandableTip = ({
   onAddVNote,
   onExplain,
   onAddInsight,
+  onSaveVDocNote,
 }: ExpandableTipProps) => {
   const [openNoteMenu, setOpenNoteMenu] = useState(false);
   const [openVDocMenu, setOpenVDocMenu] = useState(false);
@@ -165,7 +167,14 @@ export const ExpandableTip = ({
           setOpenVDocMenu={setOpenVDocMenu}
         />
       )}
-      {openVDocMenu && <MinimalEditor />}
+      {openVDocMenu && (
+        <MinimalEditor
+          onSave={(html) => {
+            onSaveVDocNote?.(html);
+            setOpenVDocMenu(false);
+          }}
+        />
+      )}
     </div>
   );
 };

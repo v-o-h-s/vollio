@@ -6,7 +6,7 @@ export type HighlightType = "text" | "area";
 /**
  * Highlight visual style enum
  */
-export type HighlightStyle = "highlight" | "tagged" | "insight";
+export type HighlightStyle = "highlight" | "tagged" | "insight" | "note";
 
 /**
  * Highlight content with optional text or image
@@ -51,6 +51,7 @@ export class Highlight {
   private color?: string;
   private hasNote: boolean;
   private noteId?: string | null;
+  private noteContent?: string | null;
   private tags?: string[];
   private style?: HighlightStyle;
   private createdAt: Date;
@@ -69,7 +70,8 @@ export class Highlight {
     color?: string,
     noteId?: string | null,
     tags?: string[],
-    style?: HighlightStyle
+    style?: HighlightStyle,
+    noteContent?: string | null
   ) {
     this.id = id;
     this.userId = userId;
@@ -84,6 +86,7 @@ export class Highlight {
     this.noteId = noteId;
     this.tags = tags;
     this.style = style;
+    this.noteContent = noteContent;
   }
 
   /**
@@ -210,6 +213,21 @@ export class Highlight {
   }
 
   /**
+   * Get note content
+   */
+  public getNoteContent(): string | null | undefined {
+    return this.noteContent;
+  }
+
+  /**
+   * Set note content
+   */
+  public setNoteContent(noteContent: string | null | undefined): void {
+    this.noteContent = noteContent;
+    this.updatedAt = new Date();
+  }
+
+  /**
    * Get creation date
    */
   public getCreatedAt(): Date {
@@ -237,6 +255,7 @@ export class Highlight {
       color: this.color,
       has_note: this.hasNote,
       note_id: this.noteId,
+      note_content: this.noteContent,
       tags: this.tags,
       style: this.style,
       created_at: this.createdAt.toISOString(),

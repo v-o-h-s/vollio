@@ -33,8 +33,9 @@ export interface HighlightData {
     color?: string | null;
     hasNote: boolean;
     noteId?: string | null;
+    noteContent?: string | null;
     tags?: string[] | null;
-    style?: "highlight" | "tagged" | null;
+    style?: "highlight" | "tagged" | "insight" | "note" | null;
     createdAt: string;
     updatedAt: string;
 }

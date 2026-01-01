@@ -42,8 +42,9 @@ export interface CreateHighlightDTO {
   color?: string;
   hasNote?: boolean;
   noteId?: string | null;
+  noteContent?: string | null;
   tags?: string[];
-  style?: "highlight" | "tagged";
+  style?: "highlight" | "tagged" | "insight" | "note";
 }
 
 const scaledSchema: JSONSchemaType<Scaled> = {
@@ -131,6 +132,10 @@ export const createHighlightSchema: JSONSchemaType<CreateHighlightDTO> = {
       pattern:
         "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
+    noteContent: {
+      type: "string",
+      nullable: true,
+    },
     tags: {
       type: "array",
       items: { type: "string" },
@@ -138,7 +143,7 @@ export const createHighlightSchema: JSONSchemaType<CreateHighlightDTO> = {
     },
     style: {
       type: "string",
-      enum: ["highlight", "tagged", "insight"],
+      enum: ["highlight", "tagged", "insight", "note"],
       nullable: true,
     },
   },
@@ -154,11 +159,12 @@ export interface UpdateHighlightDTO {
   content?: HighlightContent;
   hasNote?: boolean;
   noteId?: string | null;
+  noteContent?: string | null;
   position?: ScaledPosition;
   type?: "text" | "area";
   documentId?: string;
   tags?: string[];
-  style?: "highlight" | "tagged";
+  style?: "highlight" | "tagged" | "insight" | "note";
 }
 
 export const updateHighlightSchema: JSONSchemaType<UpdateHighlightDTO> = {
@@ -182,6 +188,10 @@ export const updateHighlightSchema: JSONSchemaType<UpdateHighlightDTO> = {
       pattern:
         "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
+    noteContent: {
+      type: "string",
+      nullable: true,
+    },
     position: {
       ...scaledPositionSchema,
       nullable: true,
@@ -204,7 +214,7 @@ export const updateHighlightSchema: JSONSchemaType<UpdateHighlightDTO> = {
     },
     style: {
       type: "string",
-      enum: ["highlight", "tagged"],
+      enum: ["highlight", "tagged", "insight", "note"],
       nullable: true,
     },
   },

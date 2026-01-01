@@ -13,6 +13,7 @@ import { ContextMenu } from "./ContextMenu";
 import { StandardHighlight } from "./StandardHighlight";
 import { TaggedHighlight } from "./TaggedHighlight";
 import { InsightHighlight } from "./InsightHighlight";
+import { NoteHighlight } from "./NoteHighlight";
 import { MyHighlight } from "@/features/document-view/types/highlight";
 import { useViewer } from "../../context/ViewerContext";
 
@@ -90,6 +91,15 @@ export const HighlightContainer = ({
             highlight={highlight as any}
             isScrolledTo={isScrolledTo}
             color="#8B5CF6"
+          />
+        );
+      case "note":
+        return (
+          <NoteHighlight
+            highlight={highlight as any}
+            isScrolledTo={isScrolledTo}
+            color="#4F46E5"
+            updateHighlight={updateHighlight}
           />
         );
       default: // "highlight"
