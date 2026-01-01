@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import { CreateHighlightDTO, Tag } from "@vollio/shared";
 import { ContextMenu } from "./ContextMenu";
 import { StandardHighlight } from "./StandardHighlight";
-import { TaggedHighlight } from "../tags/TaggedHighlight";
+import { TaggedHighlight } from "./TaggedHighlight";
 import { InsightHighlight } from "./InsightHighlight";
 import { MyHighlight } from "@/features/document-view/types/highlight";
 import { useViewer } from "../../context/ViewerContext";

@@ -10,14 +10,12 @@ import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { HiTag as Tag } from "react-icons/hi2";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
-import MinimalEditor from "@/components/MinimalEditor";
+import MinimalEditor from "@/features/document-view/components/highlight/MinimalEditor";
+import { FeatureInfo, FeatureInfoDual } from "@/components/FeatureExplanation";
+import { NoteMenu } from "./NoteMenu";
 interface ExpandableTipProps {
   onHighlight: () => void;
   onCopy?: () => void;
@@ -28,127 +26,7 @@ interface ExpandableTipProps {
   onAddInsight?: () => void;
 }
 
-const FeatureInfo = ({
-  title,
-  description,
-  isInline = false,
-}: {
-  title: string;
-  description: string;
-  isInline?: boolean;
-}) => (
-  <Popover>
-    <PopoverTrigger asChild>
-      <Button
-        variant="secondary"
-        size="icon"
-        onClick={(e) => e.stopPropagation()}
-        className={cn(
-          "rounded-full shadow-sm z-10 transition-all duration-200",
-          isInline
-            ? "h-5 w-5 ml-2 opacity-70 hover:opacity-100 hover:bg-muted"
-            : "absolute -top-1.5 -right-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 hover:scale-110"
-        )}
-      >
-        <Info
-          className={cn(
-            isInline ? "h-3 w-3" : "h-2.5 w-2.5",
-            "text-muted-foreground"
-          )}
-        />
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent
-      className="w-80 shadow-2xl border-muted/50 backdrop-blur-xl"
-      side="top"
-    >
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <h4 className="font-semibold leading-none flex items-center gap-2">
-            <Info className="h-4 w-4 text-purple-500" />
-            {title}
-          </h4>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {description}
-          </p>
-        </div>
-        <div className="aspect-video rounded-lg bg-muted/50 flex flex-col items-center justify-center text-sm text-muted-foreground border-2 border-dashed border-muted-foreground/20 group-hover:border-purple-500/20 transition-colors">
-          <div className="mb-2 p-2 rounded-full bg-background/50 shadow-inner">
-            <RobotIcon className="h-5 w-5 text-purple-500/40" />
-          </div>
-          <span>Tutorial video coming soon</span>
-        </div>
-      </div>
-    </PopoverContent>
-  </Popover>
-);
 
-const NoteMenu = ({
-  onAddNote,
-  onAddVNote,
-  onClose,
-  setOpenVDocMenu,
-}: {
-  onAddNote?: (e: React.MouseEvent) => void;
-  onAddVNote?: () => void;
-  onClose: () => void;
-  setOpenVDocMenu: (open: boolean) => void;
-}) => {
-  return (
-    <div className="absolute rounded-[2rem] top-full mt-2 left-1/2 -translate-x-1/2 z-50 animate-in fade-in zoom-in slide-in-from-top-2 duration-200 bg-background/20 backdrop-blur-xl supports-[backdrop-filter]:bg-background/20">
-      <Card className="rounded-[2rem] shadow-2xl border-white/10 overflow-hidden min-w-[180px] bg-background/70">
-        <CardContent className="p-1.5 flex flex-col gap-1">
-          {onAddNote && (
-            <Button
-              onClick={(e) => {
-                onClose();
-                setOpenVDocMenu(true);
-              }}
-              variant="ghost"
-              className="w-full flex cursor-pointer items-center justify-start gap-3 px-3 py-2.5 h-auto rounded-full hover:bg-indigo-500/10 transition-all duration-200"
-            >
-              <div className="p-2 rounded-full bg-indigo-500/10">
-                <FilePenLine className="h-4.5 w-4.5 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <div className="flex flex-col items-start gap-0.5">
-                <span className="text-sm font-semibold leading-none text-foreground">
-                  V-Doc
-                </span>
-              </div>
-            </Button>
-          )}
-          {onAddVNote && (
-            <Button
-              onClick={() => {
-                onAddVNote();
-                onClose();
-              }}
-              variant="ghost"
-              className="w-full flex cursor-pointer items-center justify-start gap-3 px-3 py-2.5 h-auto rounded-full hover:bg-purple-500/10 transition-all duration-200"
-            >
-              <div className="p-2 rounded-full bg-purple-500/10">
-                <NotebookPen className="h-4.5 w-4.5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div className="flex flex-col items-start gap-0.5">
-                <span className="text-sm font-semibold leading-none text-foreground">
-                  V-Notes
-                </span>
-              </div>
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-      {/* Click outside to close invisible backdrop */}
-      <div
-        className="fixed inset-0 -z-10"
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
-      />
-    </div>
-  );
-};
 
 export const ExpandableTip = ({
   onHighlight,
@@ -236,9 +114,17 @@ export const ExpandableTip = ({
                   <span className="sr-only">Note</span>
                 </Button>
 
-                <FeatureInfo
-                  title="Annotate"
-                  description="Add your own thoughts, questions, or summaries to the selected passage."
+                <FeatureInfoDual
+                  featureA={{
+                    title: "V-Doc",
+                    description:
+                      "Create a rich document linked to this highlight for detailed analysis.",
+                  }}
+                  featureB={{
+                    title: "V-Notes",
+                    description:
+                      "Quickly jot down brief notes and thoughts without leaving the page.",
+                  }}
                 />
               </div>
             )}

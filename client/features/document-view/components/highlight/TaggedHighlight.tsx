@@ -10,7 +10,7 @@ import { HiTag as TagIcon } from "react-icons/hi2";
 import { cn } from "@/lib/utils";
 import type { MyHighlight } from "@/features/document-view/types/highlight";
 import { CreateHighlightDTO, Tag } from "@vollio/shared";
-import { TagSelectionDialog } from "./TagSelectionDialog";
+import { TagSelectionDialog } from "../tags/TagSelectionDialog";
 import { Button } from "@/components/ui/button";
 import gsap from "gsap";
 
