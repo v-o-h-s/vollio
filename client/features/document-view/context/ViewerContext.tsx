@@ -212,7 +212,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
           },
         ],
       };
-      await vollNotes.addToNote(HighlightNoteContent, {
+      await vollNotes.addToNote(HighlightNoteContent, "note", {
         HighlightContent: metadata.content,
         HighlightPosition: metadata.position,
       });
@@ -254,7 +254,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         ],
       };
       if (metadata) {
-        await vollNotes.addToNote(insightContent, {
+        await vollNotes.addToNote(insightContent, "insight", {
           HighlightContent: metadata.content,
           HighlightPosition: metadata.position,
         });

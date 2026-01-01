@@ -185,6 +185,7 @@ export function useVollNotesLogic(documentId: string) {
    */
   const addToNote = async (
     content: string | JSONContent,
+    highlightStyle: "insight" | "note" = "insight",
     Highlight?: {
       HighlightContent: HighlightContent;
       HighlightPosition: ScaledPosition;
@@ -221,7 +222,7 @@ export function useVollNotesLogic(documentId: string) {
             type: "text",
             content: Highlight.HighlightContent,
             position: Highlight.HighlightPosition,
-            style: "insight",
+            style: highlightStyle,
           };
           try {
             await createHighlight(highlight).unwrap();
@@ -248,7 +249,7 @@ export function useVollNotesLogic(documentId: string) {
         setTabs((prev) => [...prev, newTab]);
         // set the targetNote to the new note
         dispatch(setShouldReadFromProps(true));
-       
+
         setActiveTabId(noteId);
         if (Highlight) {
           const highlight: CreateHighlightDTO = {
@@ -258,7 +259,7 @@ export function useVollNotesLogic(documentId: string) {
             type: "text",
             content: Highlight.HighlightContent,
             position: Highlight.HighlightPosition,
-            style: "insight",
+            style: highlightStyle,
           };
           try {
             await createHighlight(highlight).unwrap();
