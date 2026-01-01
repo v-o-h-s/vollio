@@ -269,6 +269,7 @@ export const BetterViewer = ({
                   onCopy={handleCopy}
                   onAddTag={handleAddTag}
                   onAddNote={handleAddNote}
+                  onAddVNote={onToggleVollNotes}
                   onExplain={handleExplain}
                   onAddInsight={handleAddInsight}
                 />

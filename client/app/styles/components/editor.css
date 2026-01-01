@@ -1,3 +1,28 @@
+/* Minimal Editor Content Styles */
+.minimal-editor-content {
+  outline: none;
+  line-height: 1.6;
+}
+
+.minimal-editor-content ul,
+.minimal-editor-content ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem !important;
+}
+
+.minimal-editor-content ul {
+  list-style-type: disc !important;
+}
+
+.minimal-editor-content ol {
+  list-style-type: decimal !important;
+}
+
+.minimal-editor-content li {
+  margin: 0.25rem 0;
+  display: list-item !important;
+}
+
 /* TipTap Editor Styles */
 .ProseMirror {
   outline: none;
