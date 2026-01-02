@@ -8,6 +8,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,16 +22,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  HelpCircle,
+  Trophy,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGetQuizQuery } from "@/lib/store/apiSlice";
 import { QuizQuestionsTypeEnum } from "@vollio/shared";
 import { MCQQuestion, TrueFalseQuestion } from "@server/domain/entities/Quiz";
-import { Badge } from "@/components/ui";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 // Helper type for stored answers
-// For MCQ: selected option ID(s)
-// For True/False: boolean value
 type UserAnswer = string | boolean;
 
 export default function QuizDetailPage() {
@@ -110,10 +113,6 @@ export default function QuizDetailPage() {
 
       if (q.type === QuizQuestionsTypeEnum.MCQ) {
         const mcqQ = q as MCQQuestion;
-        // Assuming single choice for now, checking if selected ID is in correctOptionIds
-        // If multiple choice allowed, logic needs to check if all correct options are selected
-        // For now, let's assume one correct answer for simplicity if data structure implies it,
-        // but the type says correctOptionIds string[].
         if (
           mcqQ.correctOptionIds &&
           mcqQ.correctOptionIds.includes(userAnswer as string)
@@ -135,21 +134,28 @@ export default function QuizDetailPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mb-4" />
-        <p className="text-muted-foreground">Loading quiz...</p>
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+        <p className="text-muted-foreground font-medium">Loading your quiz...</p>
       </div>
     );
   }
 
   if (isError || !quiz) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <XCircle className="w-16 h-16 text-red-500" />
-        <h2 className="text-2xl font-bold">Failed to load quiz</h2>
-        <Button onClick={() => refetch()}>Try Again</Button>
-        <Button variant="ghost" onClick={() => router.back()}>
-          Go Back
-        </Button>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center px-4">
+        <div className="p-4 rounded-full bg-destructive/10 text-destructive">
+            <AlertCircle className="w-10 h-10" />
+        </div>
+        <div className="space-y-2">
+            <h2 className="text-2xl font-bold">Quiz Not Found</h2>
+            <p className="text-muted-foreground max-w-sm">We couldn't load the quiz you're looking for. It might have been deleted or doesn't exist.</p>
+        </div>
+        <div className="flex gap-3">
+            <Button variant="outline" onClick={() => router.back()}>
+            Go Back
+            </Button>
+            <Button onClick={() => refetch()}>Try Again</Button>
+        </div>
       </div>
     );
   }
@@ -157,56 +163,61 @@ export default function QuizDetailPage() {
   // --- START SCREEN ---
   if (!quizStarted) {
     return (
-      <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen flex flex-col bg-background/50">
+        <div className="container max-w-3xl mx-auto px-4 py-8 flex-1 flex flex-col justify-center">
           <Button
             variant="ghost"
             onClick={() => router.back()}
-            className="mb-6"
+            className="w-fit mb-8 -ml-4 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Quizzes
+            Back to Dashboard
           </Button>
 
-          <Card className="max-w-2xl mx-auto border-t-4 border-t-indigo-500 shadow-lg">
-            <CardHeader className="text-center pb-2">
+          <Card className="border-border/60 shadow-xl bg-card/50 backdrop-blur-sm overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500" />
+            <CardHeader className="text-center pb-8 pt-10">
               <Badge
                 variant="outline"
-                className="w-fit mx-auto mb-4 border-indigo-200 bg-indigo-50 text-indigo-700"
+                className="w-fit mx-auto mb-6 px-3 py-1 text-sm border-primary/20 bg-primary/5 text-primary"
               >
                 {quiz.language.toUpperCase()}
               </Badge>
-              <CardTitle className="text-3xl mb-2">
+              <CardTitle className="text-4xl font-black tracking-tight mb-3">
                 {quiz.title || "Untitled Quiz"}
               </CardTitle>
-              <CardDescription className="text-base">
-                Generated from your document
+              <CardDescription className="text-lg">
+                Ready to test your knowledge?
               </CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-8 pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div className="p-4 bg-muted/40 rounded-xl border border-border/50">
-                  <BookOpen className="w-6 h-6 mx-auto mb-2 text-indigo-500" />
-                  <div className="font-bold text-xl">
-                    {quiz.questions.length}
+            <CardContent className="space-y-10 pb-10">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="flex flex-col items-center justify-center p-6 bg-muted/30 rounded-2xl border border-border/50">
+                  <div className="p-3 rounded-full bg-indigo-500/10 text-indigo-500 mb-3">
+                    <BookOpen className="w-6 h-6" />
                   </div>
+                  <div className="font-bold text-2xl">{quiz.questions.length}</div>
                   <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Questions
                   </div>
                 </div>
-                <div className="p-4 bg-muted/40 rounded-xl border border-border/50">
-                  <Clock className="w-6 h-6 mx-auto mb-2 text-amber-500" />
-                  <div className="font-bold text-xl">
-                    {quiz.settings.timeLimitMinutes || "∞"} min
+                <div className="flex flex-col items-center justify-center p-6 bg-muted/30 rounded-2xl border border-border/50">
+                  <div className="p-3 rounded-full bg-amber-500/10 text-amber-500 mb-3">
+                    <Clock className="w-6 h-6" />
+                  </div>
+                  <div className="font-bold text-2xl">
+                    {quiz.settings.timeLimitMinutes || "∞"}
                   </div>
                   <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Duration
+                    Minutes
                   </div>
                 </div>
-                <div className="p-4 bg-muted/40 rounded-xl border border-border/50">
-                  <Flag className="w-6 h-6 mx-auto mb-2 text-rose-500" />
-                  <div className="font-bold text-xl capitalize">
+                <div className="flex flex-col items-center justify-center p-6 bg-muted/30 rounded-2xl border border-border/50">
+                  <div className="p-3 rounded-full bg-rose-500/10 text-rose-500 mb-3">
+                    <Flag className="w-6 h-6" />
+                  </div>
+                  <div className="font-bold text-2xl capitalize">
                     {quiz.settings.difficultyLevel || "Medium"}
                   </div>
                   <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -215,11 +226,11 @@ export default function QuizDetailPage() {
                 </div>
               </div>
 
-              <div className="text-center pt-2">
+              <div className="flex justify-center">
                 <Button
                   size="lg"
                   onClick={() => setQuizStarted(true)}
-                  className="w-full sm:w-auto min-w-[200px] h-12 text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-300"
+                  className="w-full sm:w-auto min-w-[240px] h-14 text-lg font-bold rounded-full shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 hover:scale-105"
                 >
                   Start Quiz
                 </Button>
@@ -250,32 +261,43 @@ export default function QuizDetailPage() {
     }, 0);
 
     return (
-      <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
-        <div className="max-w-4xl mx-auto">
-          <Card className="max-w-3xl mx-auto border-t-4 border-t-green-500 shadow-xl">
-            <CardHeader className="text-center border-b border-border/50 bg-muted/10 pb-8">
-              <CardTitle className="text-3xl mb-2">Quiz Complete!</CardTitle>
-              <CardDescription>Results for {quiz.title}</CardDescription>
-              <div className="mt-6 flex flex-col items-center justify-center">
-                <div
-                  className={cn(
-                    "text-7xl font-black mb-2 bg-clip-text text-transparent bg-gradient-to-b",
-                    score >= 70
-                      ? "from-green-500 to-green-700"
-                      : score >= 40
-                      ? "from-amber-500 to-amber-700"
-                      : "from-red-500 to-red-700"
-                  )}
-                >
-                  {score}%
-                </div>
-                <Badge variant={score >= 70 ? "default" : "secondary"}>
-                  {correctCount} out of {quiz.questions.length} correct
-                </Badge>
+      <div className="min-h-screen bg-background py-8">
+        <div className="container max-w-4xl mx-auto px-4 space-y-8">
+          <Card className="border-border/60 shadow-xl overflow-hidden">
+            <div className={cn(
+                "h-3 w-full",
+                score >= 70 ? "bg-emerald-500" : score >= 40 ? "bg-amber-500" : "bg-rose-500"
+            )} />
+            <CardHeader className="text-center pb-8 pt-10 bg-muted/10">
+              <div className="mx-auto mb-6 p-4 rounded-full bg-background shadow-sm ring-1 ring-border">
+                <Trophy className={cn(
+                    "w-12 h-12",
+                    score >= 70 ? "text-emerald-500" : score >= 40 ? "text-amber-500" : "text-rose-500"
+                )} />
+              </div>
+              <CardTitle className="text-3xl font-bold mb-2">Quiz Complete!</CardTitle>
+              <CardDescription className="text-lg">
+                You scored <span className="font-bold text-foreground">{score}%</span> on {quiz.title}
+              </CardDescription>
+              
+              <div className="mt-8 flex justify-center gap-4">
+                 <Badge variant="secondary" className="px-4 py-2 text-sm">
+                    <CheckCircle className="w-4 h-4 mr-2 text-emerald-500" />
+                    {correctCount} Correct
+                 </Badge>
+                 <Badge variant="secondary" className="px-4 py-2 text-sm">
+                    <XCircle className="w-4 h-4 mr-2 text-rose-500" />
+                    {quiz.questions.length - correctCount} Incorrect
+                 </Badge>
               </div>
             </CardHeader>
 
-            <CardContent className="space-y-6 pt-8">
+            <CardContent className="space-y-6 pt-8 px-6 sm:px-10">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                Detailed Analysis
+              </h3>
+              
               <div className="space-y-4">
                 {quiz.questions.map((question, index) => {
                   const userAnswer = selectedAnswers[question.id];
@@ -302,35 +324,37 @@ export default function QuizDetailPage() {
                     <div
                       key={question.id}
                       className={cn(
-                        "p-4 border rounded-xl transition-all",
+                        "p-5 border rounded-xl transition-all",
                         isCorrect
-                          ? "bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-900"
-                          : "bg-red-50/50 border-red-200 dark:bg-red-900/10 dark:border-red-900"
+                          ? "bg-emerald-50/50 border-emerald-200 dark:bg-emerald-950/10 dark:border-emerald-900/50"
+                          : "bg-rose-50/50 border-rose-200 dark:bg-rose-950/10 dark:border-rose-900/50"
                       )}
                     >
-                      <div className="flex items-start gap-3">
-                        {isCorrect ? (
-                          <CheckCircle className="w-5 h-5 text-green-600 mt-1 shrink-0" />
-                        ) : (
-                          <XCircle className="w-5 h-5 text-red-600 mt-1 shrink-0" />
-                        )}
-                        <div className="flex-1 space-y-2">
-                          <div className="font-medium text-base">
-                            <span className="text-muted-foreground mr-2 text-sm font-bold">
-                              Q{index + 1}.
+                      <div className="flex items-start gap-4">
+                        <div className={cn(
+                            "mt-0.5 p-1 rounded-full shrink-0",
+                            isCorrect ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-400" : "bg-rose-100 text-rose-600 dark:bg-rose-900 dark:text-rose-400"
+                        )}>
+                            {isCorrect ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                        </div>
+                        
+                        <div className="flex-1 space-y-3">
+                          <div className="font-medium text-base leading-relaxed">
+                            <span className="text-muted-foreground mr-2 font-mono text-sm">
+                              {String(index + 1).padStart(2, '0')}.
                             </span>
                             {question.text}
                           </div>
 
-                          <div className="pl-6 space-y-1 text-sm">
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold text-muted-foreground w-20 text-xs uppercase tracking-wider">
-                                Your Answer:
+                          <div className="grid sm:grid-cols-2 gap-4 text-sm mt-2">
+                            <div className="p-3 rounded-lg bg-background/50 border border-border/50">
+                              <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
+                                Your Answer
                               </span>
                               <span
                                 className={cn(
                                   "font-medium",
-                                  isCorrect ? "text-green-700" : "text-red-700"
+                                  isCorrect ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                                 )}
                               >
                                 {question.type === QuizQuestionsTypeEnum.MCQ
@@ -346,39 +370,40 @@ export default function QuizDetailPage() {
                             </div>
 
                             {!isCorrect && (
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold text-muted-foreground w-20 text-xs uppercase tracking-wider">
-                                  Correct:
+                              <div className="p-3 rounded-lg bg-background/50 border border-border/50">
+                                <span className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
+                                  Correct Answer
                                 </span>
-                                <span className="font-medium text-green-700">
+                                <span className="font-medium text-emerald-600 dark:text-emerald-400">
                                   {correctAnswerLabel}
                                 </span>
                               </div>
                             )}
-
-                            {question.explanation && (
-                              <div className="mt-2 pt-2 border-t border-border/50 text-muted-foreground">
-                                <span className="font-semibold text-xs uppercase tracking-wider mr-2">
-                                  Explanation:
-                                </span>
-                                {question.explanation}
-                              </div>
-                            )}
                           </div>
+
+                          {question.explanation && (
+                            <div className="mt-3 pt-3 border-t border-border/10 text-sm text-muted-foreground bg-muted/20 p-3 rounded-lg">
+                              <div className="flex items-center gap-2 mb-1 font-semibold text-foreground/80">
+                                <HelpCircle className="w-4 h-4" /> Explanation
+                              </div>
+                              {question.explanation}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
                   );
                 })}
               </div>
-
-              <div className="flex gap-4 justify-center pt-6">
+            </CardContent>
+            
+            <CardFooter className="bg-muted/10 p-6 flex flex-col sm:flex-row gap-4 justify-center border-t border-border/50">
                 <Button
                   variant="outline"
                   onClick={() => router.push("/dashboard/knowledge-test")}
-                  className="h-12 px-6"
+                  className="h-12 px-8 min-w-[160px]"
                 >
-                  Back to Quizzes
+                  Back to Dashboard
                 </Button>
                 <Button
                   onClick={() => {
@@ -392,13 +417,12 @@ export default function QuizDetailPage() {
                         : null
                     );
                   }}
-                  className="h-12 px-6 bg-indigo-600 hover:bg-indigo-700 text-white"
+                  className="h-12 px-8 min-w-[160px] font-bold shadow-md"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   Retake Quiz
                 </Button>
-              </div>
-            </CardContent>
+            </CardFooter>
           </Card>
         </div>
       </div>
@@ -410,77 +434,64 @@ export default function QuizDetailPage() {
   const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-20 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.back()}
-                className="hover:bg-muted"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Exit
-              </Button>
-              <div className="h-6 w-px bg-border mx-2" />
-              <div className="text-sm font-medium text-muted-foreground">
-                Question{" "}
-                <span className="text-foreground font-bold">
-                  {currentQuestionIndex + 1}
-                </span>{" "}
-                / {quiz.questions.length}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {timeLeft !== null && (
-                <div
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-md font-mono font-bold text-sm border",
-                    timeLeft < 300
-                      ? "bg-red-50 border-red-200 text-red-600 animate-pulse"
-                      : "bg-muted/50 border-border text-foreground"
-                  )}
-                >
-                  <Clock className="w-4 h-4" />
-                  {formatTime(timeLeft)}
-                </div>
-              )}
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.back()}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Exit
+            </Button>
+            <div className="h-4 w-px bg-border hidden sm:block" />
+            <div className="text-sm font-medium hidden sm:block">
+              <span className="text-muted-foreground">Question</span>{" "}
+              <span className="font-bold text-foreground">
+                {currentQuestionIndex + 1}
+              </span>
+              <span className="text-muted-foreground"> / {quiz.questions.length}</span>
             </div>
           </div>
 
-          <div className="mt-3 relative h-1.5 w-full bg-muted rounded-full overflow-hidden">
-            <div
-              className="absolute top-0 left-0 h-full bg-indigo-500 transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
+          <div className="flex items-center gap-4">
+            {timeLeft !== null && (
+              <div
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-full font-mono text-sm border font-medium transition-colors",
+                  timeLeft < 300
+                    ? "bg-red-50 border-red-200 text-red-600 animate-pulse"
+                    : "bg-muted/50 border-border text-foreground"
+                )}
+              >
+                <Clock className="w-4 h-4" />
+                {formatTime(timeLeft)}
+              </div>
+            )}
           </div>
         </div>
-      </div>
+        <Progress value={progress} className="h-1 w-full rounded-none" />
+      </header>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 max-w-4xl">
-        <Card className="border-0 shadow-lg ring-1 ring-border/50 bg-card overflow-hidden">
-          <CardHeader className="bg-muted/15 pb-8">
+      <main className="flex-1 container max-w-4xl mx-auto px-4 py-8 sm:py-12 flex flex-col">
+        <Card className="border-0 shadow-none bg-transparent sm:bg-card sm:border sm:shadow-sm">
+          <CardHeader className="px-0 sm:px-6 space-y-4">
             <div className="flex justify-between items-start gap-4">
-              <CardTitle className="text-xl leading-relaxed font-medium">
-                {currentQ.text}
-              </CardTitle>
-              <Badge
-                variant="outline"
-                className="shrink-0 uppercase text-[10px] tracking-wider font-bold"
-              >
-                {currentQ.type === QuizQuestionsTypeEnum.MCQ
-                  ? "Multi Choice"
-                  : "True / False"}
-              </Badge>
+               <Badge variant="outline" className="shrink-0">
+                  {currentQ.type === QuizQuestionsTypeEnum.MCQ ? "Multiple Choice" : "True / False"}
+               </Badge>
             </div>
+            <h2 className="text-xl sm:text-2xl font-medium leading-relaxed">
+              {currentQ.text}
+            </h2>
           </CardHeader>
 
-          <CardContent className="p-6 md:p-8 space-y-8">
-            <div className="space-y-3">
+          <CardContent className="px-0 sm:px-6 space-y-8">
+            <div className="grid gap-3">
               {currentQ.type === QuizQuestionsTypeEnum.MCQ ? (
                 (currentQ as MCQQuestion).options?.map((option, index) => {
                   const isSelected = selectedAnswers[currentQ.id] === option.id;
@@ -489,42 +500,34 @@ export default function QuizDetailPage() {
                       key={option.id}
                       onClick={() => handleAnswerSelect(currentQ.id, option.id)}
                       className={cn(
-                        "w-full p-4 text-left border-2 rounded-xl transition-all duration-200 group relative overflow-hidden",
+                        "relative w-full p-4 sm:p-5 text-left border-2 rounded-xl transition-all duration-200 group outline-none focus:ring-2 focus:ring-primary/20",
                         isSelected
-                          ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20"
-                          : "border-border hover:border-indigo-300 hover:bg-muted/30"
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-muted hover:border-primary/50 hover:bg-muted/30"
                       )}
                     >
-                      <div className="flex items-center gap-4 relative z-10">
+                      <div className="flex items-start gap-4">
                         <div
                           className={cn(
-                            "w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-bold shrink-0 transition-colors",
+                            "flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm font-bold shrink-0 transition-colors mt-0.5",
                             isSelected
-                              ? "border-indigo-500 bg-indigo-500 text-white shadow-md shadow-indigo-200 dark:shadow-none"
-                              : "border-muted-foreground/30 text-muted-foreground group-hover:border-indigo-400 group-hover:text-indigo-500"
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-muted-foreground/30 text-muted-foreground group-hover:border-primary/50 group-hover:text-primary"
                           )}
                         >
                           {String.fromCharCode(65 + index)}
                         </div>
-                        <span
-                          className={cn(
-                            "font-medium transition-colors",
-                            isSelected
-                              ? "text-indigo-900 dark:text-indigo-100"
-                              : "text-foreground"
-                          )}
-                        >
+                        <span className={cn(
+                            "text-base leading-relaxed transition-colors",
+                            isSelected ? "font-medium text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                        )}>
                           {option.text}
                         </span>
                       </div>
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-indigo-500/5 z-0" />
-                      )}
                     </button>
                   );
                 })
               ) : (
-                // TRUE / FALSE
                 <div className="grid grid-cols-2 gap-4">
                   {[true, false].map((val) => {
                     const isSelected = selectedAnswers[currentQ.id] === val;
@@ -533,12 +536,12 @@ export default function QuizDetailPage() {
                         key={String(val)}
                         onClick={() => handleAnswerSelect(currentQ.id, val)}
                         className={cn(
-                          "p-6 border-2 rounded-xl text-center transition-all duration-200 font-bold text-lg",
+                          "p-8 border-2 rounded-xl text-center transition-all duration-200 font-bold text-xl outline-none focus:ring-2 focus:ring-offset-2",
                           isSelected
                             ? val
-                              ? "border-green-500 bg-green-50 text-green-700"
-                              : "border-red-500 bg-red-50 text-red-700"
-                            : "border-border hover:bg-muted/50"
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm"
+                              : "border-rose-500 bg-rose-50 text-rose-700 shadow-sm"
+                            : "border-muted hover:border-primary/50 hover:bg-muted/30 text-muted-foreground hover:text-foreground"
                         )}
                       >
                         {val ? "True" : "False"}
@@ -548,63 +551,54 @@ export default function QuizDetailPage() {
                 </div>
               )}
             </div>
-
-            <div className="flex justify-between items-center pt-6 mt-8 border-t border-border/50">
-              <Button
+          </CardContent>
+          
+          <CardFooter className="px-0 sm:px-6 pt-6 flex justify-between items-center">
+             <Button
                 variant="ghost"
                 onClick={handlePreviousQuestion}
                 disabled={currentQuestionIndex === 0}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <ChevronLeft className="w-5 h-5 mr-2" />
+                className="hover:bg-muted"
+             >
+                <ChevronLeft className="w-4 h-4 mr-2" />
                 Previous
-              </Button>
+             </Button>
 
-              {currentQuestionIndex === quiz.questions.length - 1 ? (
+             <div className="hidden sm:flex gap-1.5">
+                {quiz.questions.map((_, idx) => (
+                    <div 
+                        key={idx}
+                        className={cn(
+                            "w-2 h-2 rounded-full transition-all",
+                            idx === currentQuestionIndex ? "bg-primary scale-125" :
+                            selectedAnswers[quiz.questions[idx].id] !== undefined ? "bg-primary/40" : "bg-muted"
+                        )}
+                    />
+                ))}
+             </div>
+
+             {currentQuestionIndex === quiz.questions.length - 1 ? (
                 <Button
                   onClick={handleSubmitQuiz}
                   disabled={selectedAnswers[currentQ.id] === undefined}
-                  className="bg-green-600 hover:bg-green-700 text-white px-8 h-12 text-base font-bold shadow-lg shadow-green-200 dark:shadow-none transition-all hover:scale-105 active:scale-95"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 px-8"
                 >
                   Submit Quiz
-                  <CheckCircle className="w-5 h-5 ml-2" />
+                  <CheckCircle className="w-4 h-4 ml-2" />
                 </Button>
               ) : (
                 <Button
                   onClick={handleNextQuestion}
                   disabled={selectedAnswers[currentQ.id] === undefined}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 h-12 text-base font-bold shadow-lg shadow-indigo-200 dark:shadow-none transition-all hover:scale-105 active:scale-95"
+                  className="px-8"
                 >
-                  Next Question
-                  <ChevronRight className="w-5 h-5 ml-2" />
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-2" />
                 </Button>
               )}
-            </div>
-          </CardContent>
+          </CardFooter>
         </Card>
-
-        {/* Navigator */}
-        <div className="mt-8 flex justify-center">
-          <div className="flex flex-wrap gap-2 justify-center max-w-2xl bg-card p-4 rounded-2xl border border-border/50 shadow-sm">
-            {quiz.questions.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentQuestionIndex(index)}
-                className={cn(
-                  "w-8 h-8 rounded-lg text-xs font-bold transition-all duration-200 border",
-                  currentQuestionIndex === index
-                    ? "border-indigo-500 bg-indigo-500 text-white shadow-md transform scale-110 z-10"
-                    : selectedAnswers[quiz.questions[index].id] !== undefined
-                    ? "border-green-500/50 bg-green-50 text-green-700"
-                    : "border-border text-muted-foreground hover:bg-muted"
-                )}
-              >
-                {index + 1}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 }

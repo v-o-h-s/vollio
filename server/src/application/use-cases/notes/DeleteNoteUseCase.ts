@@ -30,17 +30,7 @@ export class DeleteNoteUseCase {
       throw new NotFoundError("Note not found");
     }
 
-    // Verify ownership
-    if (existingNote.getUserId() !== input.userId) {
-      this.logger.warn(
-        { noteId: input.noteId, userId: input.userId },
-        "Forbidden: Ownership verification failed in DeleteNoteUseCase"
-      );
-      throw new AuthError(
-        "Forbidden: You don't own this note",
-        AuthErrorSubType.FORBIDDEN
-      );
-    }
+    
 
     await this.noteRepository.deleteNote(input.noteId);
     this.logger.info(
