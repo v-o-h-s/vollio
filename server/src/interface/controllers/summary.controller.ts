@@ -24,35 +24,7 @@ export class SummaryController {
     private getSummariesByDocumentIdUseCase: GetSummariesByDocumentIdUseCase,
     private getSummaryByIdUseCase: GetSummaryByIdUseCase,
     private summarizeDocumentUseCase: SummarizeDocumentUseCase,
-    private quizController: QuizController
   ) {}
-
-  async createQuiz(
-    request: FastifyRequest<{ Body: CreateQuizDTO }>,
-    reply: FastifyReply
-  ): Promise<void> {
-    return this.quizController.createQuiz(request, reply);
-  }
-
-  async createSummary(
-    request: FastifyRequest<{ Body: CreateSummaryDTO }>,
-    reply: FastifyReply
-  ): Promise<void> {
-    const userId = request.user?.id;
-    if (!userId) {
-      reply.status(401).send({ error: "Unauthorized" });
-      return;
-    }
-    const createdSummary = await this.createSummaryUseCase.execute({
-      ...request.body,
-    });
-    ResponseFormatter.success(
-      reply,
-      createdSummary,
-      "Summary created successfully",
-      201
-    );
-  }
 
   async generateSummary(
     request: FastifyRequest<{ Body: GenerateSummaryDTO }>,

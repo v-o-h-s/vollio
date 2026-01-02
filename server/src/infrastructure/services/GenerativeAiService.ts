@@ -143,8 +143,15 @@ export class GenerativeAiService implements IGenerativeAiService {
         .trim();
       const parsed = JSON.parse(cleanContent);
 
+      let summary = "";
+      if (typeof parsed.summary === "string") {
+        summary = parsed.summary;
+      } else if (typeof parsed.summary === "object") {
+        summary = JSON.stringify(parsed.summary);
+      }
+
       return {
-        summary: typeof parsed.summary === "string" ? parsed.summary : "",
+        summary,
       };
     } catch (error) {
       this.logger.error("GenerativeAiService.generateSummary failed: " + error);

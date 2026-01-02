@@ -39,21 +39,7 @@ const summaryHandler: FastifyPluginAsync = async (
     },
     async (request, reply) => {
       const summaryController = request.diScope.resolve("summaryController");
-      return (summaryController as any).generateSummary(request, reply);
-    }
-  );
-
-  fastify.post<{ Body: CreateQuizDTO }>(
-    `${opts.prefix}/quizzes`,
-    {
-      schema: {
-        body: createQuizSchema,
-      },
-      preHandler: validateBody(createQuizSchema),
-    },
-    async (request, reply) => {
-      const summaryController = request.diScope.resolve("summaryController");
-      return (summaryController as any).createQuiz(request, reply);
+      return summaryController.generateSummary(request, reply);
     }
   );
 
@@ -67,7 +53,7 @@ const summaryHandler: FastifyPluginAsync = async (
     },
     async (request, reply) => {
       const summaryController = request.diScope.resolve("summaryController");
-      return summaryController.createSummary(request, reply);
+      return summaryController.generateSummary(request, reply);
     }
   );
 

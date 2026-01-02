@@ -49,18 +49,6 @@ export const summaryEndpoints = (builder: ApiBuilder) => ({
       result ? [{ type: "Summary", id: result.id }] : [],
   }),
 
-  createSummary: builder.mutation<SummaryData, CreateSummaryDTO>({
-    query: (data) => ({
-      url: "summaries",
-      method: "POST",
-      body: data,
-    }),
-    transformResponse: (response: ServerSuccessResponse<SummaryData>) => {
-      if (!response.data) throw new Error("Failed to create summary");
-      return response.data;
-    },
-    invalidatesTags: [{ type: "Summary", id: "LIST" }],
-  }),
 
   updateSummary: builder.mutation<SummaryData, UpdateSummaryDTO>({
     query: (data) => ({

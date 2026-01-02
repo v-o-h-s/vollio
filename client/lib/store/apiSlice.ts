@@ -97,7 +97,6 @@ export const {
   //summaries
   useGetSummariesByDocumentIdQuery,
   useGetSummaryByIdQuery,
-  useCreateSummaryMutation,
   useUpdateSummaryMutation,
   useDeleteSummaryMutation,
 

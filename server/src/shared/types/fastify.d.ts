@@ -15,6 +15,7 @@ import { testController } from "../../interface/controllers/test.controller";
 import { QuizController } from "../../interface/controllers/quiz.controller";
 import { SummaryController } from "../../interface/controllers/summary.controller";
 import { AiController } from "../../interface/controllers/ai.controller";
+import { SettingsController } from "../../interface/controllers/settings.controller";
 export interface User {
   id: string;
   email?: string;
@@ -33,26 +34,12 @@ declare module "@fastify/session" {
 // Define the shape of our DI container
 export interface DIContainer {
   documentController: DocumentController;
-  //getDocumentFromGoogleDriveUseCase: GetDocumentFromGoogleDriveUseCase;
   supabaseClient: SupabaseClient;
-  //noteRepository: NoteRepository;
-  //createNoteUseCase: CreateNoteUseCase;
-  //updateNoteUseCase: UpdateNoteUseCase;
-  //deleteNoteUseCase: DeleteNoteUseCase;
-  //getNoteUseCase: GetNoteUseCase;
-  //getAllUserNotesUseCase: GetAllUserNotesUseCase;
+
   noteController: NoteController;
-  //userGoogleClassroomRepository: UserGoogleClassroomRepository;
-  //googleClassroomService: GoogleClassroomService;
+
   googleClassroomController: GoogleClassroomController;
-  //fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase;
-  //refreshTokenAndUpdateTheDatabaseUseCase: RefreshTokenAndUpdateTheDatabaseUseCase;
-  //checkTokenStatusUseCase: CheckTokenStatusUseCase;
-  //disconnectGoogleClassroomUseCase: DisconnectGoogleClassroomUseCase;
-  //getCoursesUseCase: GetCoursesUseCase;
-  //ensureValidTokenUseCase: EnsureValidTokenUseCase;
-  //isConnectedUseCase: IsConnectedToGoogleClassroomUseCase;
-  //getCourseContentUseCase: GetCourseContentUseCase;
+  settingsController: SettingsController;
   testController: testController;
   quizController: QuizController;
   summaryController: SummaryController;

@@ -13,6 +13,12 @@ import { ChunkMetadata } from "../../../shared/utils/chunking";
 import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/client";
 import { ServerError } from "../../../shared/errors/ServerError";
 
+/**
+ * Use case for summarizing a document
+ * @input documentId
+ * @output id, documentId, text
+ */
+
 export class SummarizeDocumentUseCase {
   constructor(
     private logger: FastifyBaseLogger,
@@ -97,6 +103,7 @@ export class SummarizeDocumentUseCase {
       { documentId: data.documentId, summaryId: createdSummary.getId() },
       "SummarizeDocumentUseCase completed successfully"
     );
+    this.logger.debug({ summary }, "Summary generated");
 
     return {
       id: createdSummary.getId(),
