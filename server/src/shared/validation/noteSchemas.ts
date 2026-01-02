@@ -4,9 +4,16 @@ import {
   CreateNoteDTO,
   UpdateNoteDTO,
   NoteIdParams,
+  GenerateSummaryDTO,
 } from "@vollio/shared";
 
-export { JSONContent, CreateNoteDTO, UpdateNoteDTO, NoteIdParams };
+export {
+  JSONContent,
+  CreateNoteDTO,
+  UpdateNoteDTO,
+  NoteIdParams,
+  GenerateSummaryDTO,
+};
 
 // Schema for creating a note
 export const createNoteSchema: JSONSchemaType<CreateNoteDTO> = {
@@ -50,5 +57,17 @@ export const noteIdParamsSchema: JSONSchemaType<NoteIdParams> = {
     },
   },
   required: ["id"],
+  additionalProperties: false,
+};
+
+// Schema for creating summary of document Id
+export const generateSummarySchema: JSONSchemaType<GenerateSummaryDTO> = {
+  type: "object",
+  properties: {
+    documentId: {
+      type: "string",
+    },
+  },
+  required: ["documentId"],
   additionalProperties: false,
 };

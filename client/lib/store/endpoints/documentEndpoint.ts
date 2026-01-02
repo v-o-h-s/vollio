@@ -2,6 +2,7 @@ import { ApiBuilder } from "@/lib/store/endpoints/types";
 import {
   GetAllDocumentsResponse,
   GetDocumentByIdResponse,
+  NoteData,
 } from "@vollio/shared";
 export interface TransformedDocument {
   id: string;
@@ -129,5 +130,16 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
       body: data,
     }),
     invalidatesTags: [{ type: "Document", id: "LIST" }],
+  }),
+
+  generateSummary: builder.mutation<NoteData, string>({
+    query: (documentId) => ({
+      url: `documents/${documentId}/generate-summary`,
+      method: "POST",
+    }),
+    transformResponse: (response: { success: boolean; data: NoteData }) => {
+      return response.data;
+    },
+    invalidatesTags: [{ type: "Note", id: "LIST" }],
   }),
 });

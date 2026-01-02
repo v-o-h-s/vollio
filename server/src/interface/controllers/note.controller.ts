@@ -8,6 +8,7 @@ import {
   CreateNoteDTO,
   UpdateNoteDTO,
   NoteIdParams,
+  GenerateSummaryDTO,
 } from "../../shared/validation/noteSchemas";
 import {
   CreateNoteResponse,
@@ -15,7 +16,8 @@ import {
   GetNoteByIdResponse,
   UpdateNoteResponse,
   DeleteNoteResponse,
-} from '@vollio/shared';
+} from "@vollio/shared";
+import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 
 export class NoteController {
   constructor(
@@ -24,7 +26,7 @@ export class NoteController {
     private deleteNoteUseCase: DeleteNoteUseCase,
     private getNoteUseCase: GetNoteUseCase,
     private getAllUserNotesUseCase: GetAllUserNotesUseCase
-  ) { }
+  ) {}
 
   /**
    * Create a new note
@@ -40,7 +42,6 @@ export class NoteController {
     }
 
     const createdNote = await this.createNoteUseCase.execute({
-      userId,
       ...request.body,
     });
 
@@ -65,7 +66,7 @@ export class NoteController {
       return;
     }
 
-    const notes = await this.getAllUserNotesUseCase.execute(userId);
+    const notes = await this.getAllUserNotesUseCase.execute();
 
     reply.status(200).send({
       success: true,
@@ -91,8 +92,7 @@ export class NoteController {
     const { id } = request.params;
 
     const note = await this.getNoteUseCase.execute({
-      noteId: id,
-      userId,
+      id,
     });
 
     reply.status(200).send({
@@ -120,7 +120,6 @@ export class NoteController {
 
     const result = await this.updateNoteUseCase.execute({
       noteId: id,
-      userId,
       data: request.body,
     });
 

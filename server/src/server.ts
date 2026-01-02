@@ -18,7 +18,6 @@ import { folderRoutes } from "./interface/routes/folder.route";
 import { highlightRoutes } from "./interface/routes/highlight.route";
 import { quizRoutes } from "./interface/routes/quiz.route";
 import { flashcardRoutes } from "./interface/routes/flashcards.route";
-import { summaryRoutes } from "./interface/routes/summary.route";
 import { aiRoutes } from "./interface/routes/ai.route";
 import settingsRoutes from "./interface/routes/settings.routes";
 
@@ -106,9 +105,7 @@ app.register(quizRoutes, {
 app.register(flashcardRoutes, {
   prefix: "/api/v1/flashcards",
 });
-app.register(summaryRoutes, {
-  prefix: "/api/v1/summaries",
-});
+
 app.register(aiRoutes, {
   prefix: "/api/v1/ai",
 });

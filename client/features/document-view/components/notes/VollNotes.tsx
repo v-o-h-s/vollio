@@ -9,17 +9,11 @@ import {
 } from "react-icons/lu";
 import { FiHome as Home } from "react-icons/fi";
 import { RiRobot3Fill as Sparkles } from "react-icons/ri";
-import {
-  useGetNotesQuery,
-  useDeleteNoteMutation,
-  useCreateNoteMutation,
-} from "@/lib/store/apiSlice";
 import { LoadingState } from "@/components/ui/loading";
 import { NoteCard } from "./NoteCard";
 import { NoteEditorTab } from "./NoteEditorTab";
 import { DocumentDetails } from "../../types/document";
 import { HOME_TAB_ID, useViewer } from "../../context/ViewerContext";
-import { useSummaryActions } from "../../hooks/useSummaryActions";
 
 export default function VollNotes({
   document,
@@ -47,15 +41,12 @@ export default function VollNotes({
     createNoteError,
     refetchNotes: refetch,
     setTabs,
+    summaryNote,
+    generateSummary,
+    isGenerating,
   } = useViewer();
 
-  const { summaryNote, generateSummary, isGenerating } = useSummaryActions({
-    documentId: document.id,
-    onSummaryNoteCreated: (noteId) => {
-      // Open the summary note tab after it's created
-      openNoteFromList(noteId);
-    },
-  });
+ 
 
   if (isLoading) {
     return (

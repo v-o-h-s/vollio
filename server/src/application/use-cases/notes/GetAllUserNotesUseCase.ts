@@ -8,11 +8,11 @@ export class GetAllUserNotesUseCase {
     private logger: FastifyBaseLogger
   ) {}
 
-  async execute(userId: string): Promise<Note[]> {
-    this.logger.info({ userId }, "Executing GetAllUserNotesUseCase");
-    const notes = await this.noteRepository.getNotesByUserId(userId);
+  async execute(): Promise<Note[]> {
+    this.logger.info("Executing GetAllUserNotesUseCase");
+    const notes = await this.noteRepository.getNotesByUserId();
     this.logger.info(
-      { userId, count: notes.length },
+      { count: notes.length },
       "GetAllUserNotesUseCase executed successfully"
     );
     return notes;

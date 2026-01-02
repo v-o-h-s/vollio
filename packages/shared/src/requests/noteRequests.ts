@@ -17,3 +17,4 @@ export interface UpdateNoteDTO {
 export interface NoteIdParams {
   id: string;
 }
+

@@ -8,7 +8,6 @@ import { annotationEndpoints } from "./endpoints/annotationEndpoints";
 import { folderEndpoints } from "./endpoints/folderEndpoints";
 import { highlightEndpoints } from "./endpoints/highlightEndpoints";
 import { notesEndpoints } from "./endpoints/notesEndpoints";
-import { summaryEndpoints } from "./endpoints/summaryEndpoints";
 import { googleClassroomEndpoints } from "./endpoints/googleClassroomEndpoints";
 import { documentEndpoints } from "./endpoints/documentEndpoint";
 import { testEndpoints } from "./endpoints/testEndpoints";
@@ -49,7 +48,6 @@ export const apiSlice = createApi({
     "Highlight",
     "Note",
     "Folder",
-    "Summary",
     "GoogleClassroom",
     "Document",
     "Quiz",
@@ -61,7 +59,6 @@ export const apiSlice = createApi({
     ...annotationEndpoints(builder),
     ...highlightEndpoints(builder),
     ...folderEndpoints(builder),
-    ...summaryEndpoints(builder),
     ...googleClassroomEndpoints(builder),
     ...documentEndpoints(builder),
     ...testEndpoints(builder),
@@ -94,11 +91,7 @@ export const {
   useCreateFolderMutation,
   useUpdateFolderMutation,
   useDeleteFolderMutation,
-  //summaries
-  useGetSummariesByDocumentIdQuery,
-  useGetSummaryByIdQuery,
-  useUpdateSummaryMutation,
-  useDeleteSummaryMutation,
+  useGenerateSummaryMutation,
 
   useConnectGoogleClassroomMutation,
   useRefreshGoogleClassroomTokenMutation,
@@ -133,7 +126,6 @@ export const {
   useExplainTextQuery,
   useLazyExplainTextQuery,
   useAssistantChatMutation,
-  useGenerateSummaryMutation,
 
   // settings
   useGetSettingsQuery,

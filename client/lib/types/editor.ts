@@ -136,6 +136,7 @@ export interface Note {
   updatedAt: string; // ISO string for Redux serialization
   isDeleted: boolean;
   documentId?: string | null;
+  isSummary?: boolean;
 }
 
 /**

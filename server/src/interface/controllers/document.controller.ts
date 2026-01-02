@@ -20,11 +20,15 @@ import {
   GetAllDocumentsResponse,
   GetDocumentByIdResponse,
   GetDocumentFromGoogleDriveResponse,
+  GetNoteByIdResponse,
   MoveDocumentResponse,
+  NoteData,
   RenameDocumentResponse,
   StreamDocumentResponse,
   UploadDocumentResponse,
 } from "@vollio/shared";
+import { GenerateSummaryUseCase } from "../../application/use-cases/documents/GenerateSummaryUseCase";
+import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 
 export class DocumentController {
   constructor(
@@ -36,7 +40,8 @@ export class DocumentController {
     private deleteDocumentUseCase: DeleteDocumentUseCase,
     private moveDocumentUseCase: MoveDocumentUseCase,
     private renameDocumentUseCase: RenameDocumentUseCase,
-    private streamDocumentUseCase: StreamDocumentUseCase
+    private streamDocumentUseCase: StreamDocumentUseCase,
+    private generateSummaryUseCase: GenerateSummaryUseCase
   ) {}
   // add document from google drive
   async addDocumentFromGoogleDrive(
@@ -399,5 +404,27 @@ export class DocumentController {
         error: { message },
       });
     }
+  }
+  /**
+   * generate note for document
+   */
+  async generateSummary(
+    request: FastifyRequest<{ Params: DocumentIdParams }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({ error: "Unauthorized" });
+      return;
+    }
+
+    const result = await this.generateSummaryUseCase.execute({
+    id: request.params.id
+    });
+    ResponseFormatter.success<NoteData>(
+      reply,
+      result,
+      "Summary generated successfully"
+    );
   }
 }

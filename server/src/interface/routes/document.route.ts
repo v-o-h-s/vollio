@@ -29,11 +29,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/`,
     {
-      schema: {
-        
-        
-        
-      },
+      schema: {},
     },
     async (request, reply) => {
       const documentController = request.diScope.resolve("documentController");
@@ -45,8 +41,6 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/google-drive/:documentId`,
     {
       schema: {
-        
-        
         params: {
           type: "object",
           properties: {
@@ -54,7 +48,6 @@ const documentRoutesHandler: FastifyPluginAsync = async (
           },
           required: ["documentId"],
         },
-        
       },
     },
     async (request, reply) => {
@@ -67,8 +60,6 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/stream`,
     {
       schema: {
-        
-        
         querystring: {
           type: "object",
           properties: {
@@ -76,7 +67,6 @@ const documentRoutesHandler: FastifyPluginAsync = async (
           },
           required: ["token"],
         },
-        
       },
     },
     async (request, reply) => {
@@ -89,8 +79,6 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/stream`,
     {
       schema: {
-        
-        
         querystring: {
           type: "object",
           properties: {
@@ -98,7 +86,6 @@ const documentRoutesHandler: FastifyPluginAsync = async (
           },
           required: ["token"],
         },
-        
       },
     },
     async (request, reply) => {
@@ -111,8 +98,6 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/google-drive`,
     {
       schema: {
-        
-        
         body: {
           type: "object",
           properties: {
@@ -120,7 +105,6 @@ const documentRoutesHandler: FastifyPluginAsync = async (
           },
           required: ["documentGoogleDriveId"],
         },
-        
       },
     },
     async (request, reply) => {
@@ -132,12 +116,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.post(
     `${opts.prefix}/upload`,
     {
-      schema: {
-        
-        
-        
-        
-      },
+      schema: {},
     },
     async (request, reply) => {
       const documentController = request.diScope.resolve("documentController");
@@ -149,10 +128,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       schema: {
-        
-        
         params: documentIdParamsSchema,
-        
       },
       preHandler: validateParams(documentIdParamsSchema),
     },
@@ -166,10 +142,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       schema: {
-        
-        
         params: documentIdParamsSchema,
-        
       },
       preHandler: validateParams(documentIdParamsSchema),
     },
@@ -183,11 +156,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id/move`,
     {
       schema: {
-        
-        
         params: documentIdParamsSchema,
         body: moveDocumentSchema,
-        
       },
       preHandler: [
         validateParams(documentIdParamsSchema),
@@ -204,11 +174,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id/rename`,
     {
       schema: {
-        
-        
         params: documentIdParamsSchema,
         body: renameDocumentSchema,
-        
       },
       preHandler: [
         validateParams(documentIdParamsSchema),
@@ -218,6 +185,19 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     async (request, reply) => {
       const documentController = request.diScope.resolve("documentController");
       return documentController.renameDocument(request, reply);
+    }
+  );
+  fastify.post<{ Params: DocumentIdParams }>(
+    `${opts.prefix}/:id/generate-summary`,
+    {
+      schema: {
+        params: documentIdParamsSchema,
+      },
+      preHandler: validateParams(documentIdParamsSchema),
+    },
+    async (request, reply) => {
+      const documentController = request.diScope.resolve("documentController");
+      return documentController.generateSummary(request, reply);
     }
   );
 };

@@ -1,6 +1,8 @@
+import { JSONContent } from "@vollio/shared";
+
 export const summarizeDocumentPromptGenerator = (
   documentText: string,
-  previousSummary?: string
+  previousSummary?: JSONContent
 ) => {
   const contextText = previousSummary
     ? `PREVIOUS SUMMARY (may be Tiptap JSON):

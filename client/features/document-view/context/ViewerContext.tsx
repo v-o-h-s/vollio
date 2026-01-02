@@ -57,6 +57,9 @@ interface ViewerContextType {
   createNoteError: any;
   refetchNotes: () => void;
   openNote: (noteId: string) => void;
+  isGenerating: boolean;
+  generateSummary: () => Promise<void>;
+  summaryNote: Note | undefined;
 
   // --- Voll-ai State & Actions ---
   messages: Message[];

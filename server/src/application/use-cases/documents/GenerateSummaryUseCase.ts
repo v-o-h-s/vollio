@@ -2,16 +2,15 @@ import { FastifyBaseLogger } from "fastify";
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
 import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
 import { ISummaryRepository } from "../../../domain/repositories/ISummaryRepository";
-import {
-  GenerateSummaryDTO,
-  GenerateSummaryResponseData,
-} from "@vollio/shared";
+import { DocumentIdParams, JSONContent, NoteData } from "@vollio/shared";
 import { summarizeDocumentPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/summarize";
-import { Summary } from "../../../domain/entities/Summary";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";
 import { ChunkMetadata } from "../../../shared/utils/chunking";
 import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/client";
 import { ServerError } from "../../../shared/errors/ServerError";
+import { Note } from "../../../domain/entities/Note";
+import { INoteRepository } from "../../../domain/repositories/INoteRepository";
+import { NoteMapper } from "../../../shared/mappers/NoteMapper";
 
 /**
  * Use case for summarizing a document
@@ -19,31 +18,27 @@ import { ServerError } from "../../../shared/errors/ServerError";
  * @output id, documentId, text
  */
 
-export class SummarizeDocumentUseCase {
+export class GenerateSummaryUseCase {
   constructor(
     private logger: FastifyBaseLogger,
     private generativeAiService: IGenerativeAiService,
     private embeddingRepository: IEmbeddingRepository,
-    private summaryRepository: ISummaryRepository,
+    private noteRepository: INoteRepository,
     private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase
   ) {}
 
-  async execute(
-    data: GenerateSummaryDTO
-  ): Promise<GenerateSummaryResponseData> {
+  async execute(data: DocumentIdParams): Promise<NoteData> {
     this.logger.info(
-      { documentId: data.documentId },
+      { documentId: data.id },
       "Executing SummarizeDocumentUseCase"
     );
 
     // 1. Ensure document is processed
-    await this.ensureExistingOfDocumentEmbeddingUseCase.execute(
-      data.documentId
-    );
+    await this.ensureExistingOfDocumentEmbeddingUseCase.execute(data.id);
 
     // 2. Get document chunks to get the text
     const chunks: { content: string; metadata: ChunkMetadata }[] = (
-      await this.embeddingRepository.getDocumentEmbeddings(data.documentId)
+      await this.embeddingRepository.getDocumentEmbeddings(data.id)
     ).map((chunk) => ({
       content: chunk.getContent(),
       metadata: chunk.getMetadata(),
@@ -51,7 +46,7 @@ export class SummarizeDocumentUseCase {
 
     if (!chunks.length) {
       this.logger.error(
-        { documentId: data.documentId },
+        { documentId: data.id },
         "No chunks found for the document"
       );
       throw new ServerError("No chunks found for the document");
@@ -64,17 +59,22 @@ export class SummarizeDocumentUseCase {
     }
 
     this.logger.info(
-      { documentId: data.documentId, batchCount: batches.length },
+      { documentId: data.id, batchCount: batches.length },
       "Starting batch processing for summary generation"
     );
 
-    let currentSummary = "";
+    let currentSummary: JSONContent = {
+      type: "doc",
+      content: [
+        /* blocks go here */
+      ],
+    };
 
     // 4. Process batches
     for (let i = 0; i < batches.length; i++) {
       this.logger.info(
         {
-          documentId: data.documentId,
+          documentId: data.id,
           currentBatch: i + 1,
           totalBatches: batches.length,
         },
@@ -94,21 +94,20 @@ export class SummarizeDocumentUseCase {
     }
 
     // 5. Save summary
-    const summary = new Summary(data.documentId);
-    summary.setText(currentSummary);
+    const note = new Note(
+      crypto.randomUUID(),
+      "document summary",
+      currentSummary,
+      data.id
+    );
+    note.setNoteIsSummary(true);
 
-    const createdSummary = await this.summaryRepository.createSummary(summary);
-
+    const createdNote = await this.noteRepository.createNote(note);
     this.logger.info(
-      { documentId: data.documentId, summaryId: createdSummary.getId() },
+      { documentId: data.id },
       "SummarizeDocumentUseCase completed successfully"
     );
-    this.logger.debug({ summary }, "Summary generated");
 
-    return {
-      id: createdSummary.getId(),
-      documentId: createdSummary.getDocumentId(),
-      text: createdSummary.getText() || "",
-    };
+    return NoteMapper.fromDomainToInterface(note);
   }
 }

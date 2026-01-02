@@ -8,12 +8,18 @@ import fp from "fastify-plugin";
 import {
   validateBody,
   validateParams,
+  validateQuery,
 } from "../../shared/validation/validator";
-import { CreateNoteDTO, UpdateNoteDTO, NoteIdParams } from "@vollio/shared";
+import {
+  CreateNoteDTO,
+  UpdateNoteDTO,
+  NoteIdParams,
+} from "@vollio/shared";
 import {
   createNoteSchema,
   updateNoteSchema,
   noteIdParamsSchema,
+  generateSummarySchema,
 } from "../../shared/validation/noteSchemas";
 
 const noteRoutesHandler: FastifyPluginAsync = async (

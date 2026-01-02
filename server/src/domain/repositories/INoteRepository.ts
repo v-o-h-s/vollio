@@ -5,5 +5,5 @@ export interface INoteRepository {
   updateNote(note: Note): Promise<Note>;
   deleteNote(noteId: string): Promise<void>;
   getNoteById(noteId: string): Promise<Note | null>;
-  getNotesByUserId(userId: string): Promise<Note[]>;
+  getNotesByUserId(): Promise<Note[]>;
 }

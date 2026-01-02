@@ -73,16 +73,8 @@ import { FlashCardsController } from "../interface/controllers/flashcards.contro
 import { GetAllQuizzesUseCase } from "../application/use-cases/quizzes/GetAllquizzesUseCase";
 import { GetQuizByIdUseCase } from "../application/use-cases/quizzes/GetQuizByIdUseCase";
 import { DeleteQuizByIdUseCase } from "../application/use-cases/quizzes/DeleteQuizByIdUseCase";
-import { SummaryController } from "../interface/controllers/summary.controller";
-import { CreateSummaryUseCase } from "../application/use-cases/summaries/CreateSummaryUseCase";
-import { GetSummaryByIdUseCase } from "../application/use-cases/summaries/GetSummaryByIdUseCase";
-import { UpdateSummaryUseCase } from "../application/use-cases/summaries/UpdateSummaryUseCase";
-import { DeleteSummaryUseCase } from "../application/use-cases/summaries/DeleteSummaryUseCase";
-import { SummaryRepository } from "../infrastructure/repositories/SummaryRepository";
-import { GetSummariesByDocumentIdUseCase } from "../application/use-cases/summaries/GetSummariesByDocumentIdUseCase";
 import { ExplainTextUseCase } from "../application/use-cases/ai/ExplainTextUseCase";
 import { AssistantChatUseCase } from "../application/use-cases/ai/AssistantChatUseCase";
-import { SummarizeDocumentUseCase } from "../application/use-cases/summaries/SummarizeDocumentUseCase";
 import { AiController } from "../interface/controllers/ai.controller";
 import { SettingsRepository } from "../infrastructure/repositories/SettingsRepository";
 import { GetUserSettingsUseCase } from "../application/use-cases/settings/GetUserSettingsUseCase";
@@ -90,9 +82,9 @@ import { UpdateUserSettingsUseCase } from "../application/use-cases/settings/Upd
 import { CountHighlightsByTagUseCase } from "../application/use-cases/highlights/CountHighlightsByTagUseCase";
 import { DeleteHighlightsByTagUseCase } from "../application/use-cases/highlights/DeleteHighlightsByTagUseCase";
 import { SettingsController } from "../interface/controllers/settings.controller";
+import { GenerateSummaryUseCase } from "../application/use-cases/documents/GenerateSummaryUseCase";
 
 const diPlugin: FastifyPluginAsync = async (fastify) => {
-
   // Register singleton logger
   fastify.diContainer.register({
     logger: asValue(fastify.log),
@@ -106,6 +98,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.diContainer.register({
+    generateSummaryUseCase: asClass(GenerateSummaryUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
     streamDocumentUseCase: asClass(StreamDocumentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -402,10 +398,6 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   // Quiz
   fastify.diContainer.register({
-    getSummariesByDocumentIdUseCase: asClass(GetSummariesByDocumentIdUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
     quizController: asClass(QuizController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -475,42 +467,11 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.diContainer.register({
-    summaryController: asClass(SummaryController, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    createSummaryUseCase: asClass(CreateSummaryUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    getSummaryByIdUseCase: asClass(GetSummaryByIdUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    updateSummaryUseCase: asClass(UpdateSummaryUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    deleteSummaryUseCase: asClass(DeleteSummaryUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    summaryRepository: asClass(SummaryRepository, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-  });
-
-  fastify.diContainer.register({
     explainTextUseCase: asClass(ExplainTextUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
     assistantChatUseCase: asClass(AssistantChatUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    summarizeDocumentUseCase: asClass(SummarizeDocumentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

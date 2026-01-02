@@ -4,6 +4,7 @@ import type {
   UpdateNoteRequest,
 } from "@/lib/types/editor";
 import type { ApiBuilder } from "./types";
+import { NoteData } from "@vollio/shared";
 
 interface BackendResponse<T> {
   success: boolean;
@@ -25,13 +26,16 @@ const transformNote = (note: any): Note => ({
   updatedAt: note.updatedAt,
   isDeleted: note.isDeleted || false,
   documentId: note.documentId || null,
+  isSummary: note.isSummary || false,
 });
 
 export const notesEndpoints = (builder: ApiBuilder) => ({
   getNotes: builder.query<Note[], { documentId?: string } | void>({
     query: (params) => ({
       url: "notes",
-      params: params?.documentId ? { documentId: params.documentId } : undefined,
+      params: params?.documentId
+        ? { documentId: params.documentId }
+        : undefined,
     }),
     transformResponse: (response: BackendResponse<any[]>, meta, arg) => {
       if (!response.success || !response.data) {

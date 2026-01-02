@@ -10,7 +10,6 @@ export * from "./responses/flashcardsRoutes";
 export * from "./responses/highlightRoutes";
 export * from "./responses/folderRoutes";
 export * from "./responses/googleClassroomRoutes";
-export * from "./responses/summaryRoutes";
 export * from "./responses/aiRoutes";
 export * from "./responses/lms/classroom";
 
@@ -23,4 +22,3 @@ export * from "./requests/highlightRequests";
 export * from "./requests/folderRequests";
 export * from "./requests/googleClassroomRequests";
 export * from "./requests/aiRequests";
-export * from "./requests/summaryRequests";

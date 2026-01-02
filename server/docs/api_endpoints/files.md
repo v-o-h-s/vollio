@@ -193,44 +193,13 @@ Renames a document.
 
 ---
 
-## 7. Create Signed URL
-Creates a signed JWT token for secure document streaming without authentication.
-
-- **URL**: `/:id/signed-url`
-- **Method**: `POST`
-- **Auth Required**: Yes
-- **URL Parameters**: `id` (string, UUID)
-
-**Success Response** (200 OK):
-```json
-{
-  "success": true,
-  "message": "Signed URL created successfully",
-  "data": {
-    "url": "string (JWT token)"
-  },
-  "error": null
-}
-```
-
-**Error Responses**:
-- **401 Unauthorized**: User not authenticated
-- **404 Not Found**: Document does not exist
-
-**Usage**: Use the returned token to stream the document:
-```
-GET /api/v1/documents/stream?token={url}
-```
-
----
-
-## 8. Stream Document (with Signed URL)
-Streams a document for download/viewing using a signed JWT token. Supports both GET (full stream) and HEAD (headers only) requests.
+## 7. Stream Document
+Streams a document for download/viewing using a token. Supports both GET (full stream) and HEAD (headers only) requests.
 
 - **URL**: `/stream`
 - **Method**: `GET` or `HEAD`
 - **Auth Required**: No (token-based)
-- **Query Parameters**: `token` (string, required) - JWT from `/signed-url` endpoint
+- **Query Parameters**: `token` (string, required) - Access token
 
 **Success Response** (200 OK):
 - **Content**: Binary Document stream
@@ -250,7 +219,7 @@ Streams a document for download/viewing using a signed JWT token. Supports both 
 
 ---
 
-## 9. Add Document from Google Drive
+## 8. Add Document from Google Drive
 Adds a reference to a Google Drive document into the system.
 
 - **URL**: `/google-drive`
@@ -279,7 +248,7 @@ Adds a reference to a Google Drive document into the system.
 
 ---
 
-## 10. Get Document from Google Drive
+## 9. Get Document from Google Drive
 Retrieves a document's content from Google Drive via the system.
 
 - **URL**: `/google-drive/:documentId`
@@ -296,3 +265,36 @@ Retrieves a document's content from Google Drive via the system.
 **Error Responses**:
 - **401 Unauthorized**: User not authenticated
 - **404 Not Found**: Document does not exist in DB or Google Drive
+
+---
+
+## 10. Generate Summary
+Generates a summary note for a document using AI.
+
+- **URL**: `/:id/generate-summary`
+- **Method**: `POST`
+- **Auth Required**: Yes
+- **URL Parameters**: `id` (string, UUID)
+
+**Success Response** (200 OK):
+```json
+{
+  "success": true,
+  "message": "Summary generated successfully",
+  "data": {
+    "id": "string (UUID)",
+    "title": "string",
+    "content": "object (JSONContent)",
+    "documentId": "string (UUID)",
+    "createdAt": "string (ISO 8601)",
+    "updatedAt": "string (ISO 8601)",
+    "isSummary": true
+  },
+  "error": null
+}
+```
+
+**Error Responses**:
+- **401 Unauthorized**: User not authenticated
+- **404 Not Found**: Document does not exist
+- **500 Internal Server Error**: No chunks found for document or AI generation failed

@@ -13,6 +13,7 @@ import {
   useUpdateNoteMutation,
   useGetNoteQuery,
   useCreateHighlightMutation,
+  useGenerateSummaryMutation,
 } from "@/lib/store/apiSlice";
 import { Tab } from "../components/notes";
 import { CreateHighlightDTO } from "@vollio/shared";
@@ -47,7 +48,9 @@ export function useVollNotesLogic(documentId: string) {
     useCreateNoteMutation();
   const [updateNote] = useUpdateNoteMutation();
   const [createHighlight] = useCreateHighlightMutation();
-  
+  const [generateSummaryMutation, { isLoading: isGenerating }] =
+    useGenerateSummaryMutation();
+
   // Fetches the full content of the currently active note (if any)
   const { data: currentNote, refetch: refetchCurrentNote } = useGetNoteQuery(
     activeTabId,
@@ -66,6 +69,25 @@ export function useVollNotesLogic(documentId: string) {
         new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
   }, [documentNotes]);
+
+  /**
+   * function to register the sumamry note
+   */
+  const summaryNote = useMemo(() => {
+    return documentNotes?.find((n) => n.isSummary);
+  }, [documentNotes]);
+
+  /**
+   * function to generate summary for document
+   */
+  const generateSummary = async () => {
+    try {
+      await generateSummaryMutation(documentId).unwrap();
+    } catch (error) {
+      console.error("Failed to generate summary:", error);
+      toast.error("Failed to generate summary");
+    }
+  };
 
   /**
    * Creates a new blank note for the document and opens it in a new tab.
@@ -99,7 +121,7 @@ export function useVollNotesLogic(documentId: string) {
   };
 
   /**
-   * Closes a specific tab and automatically switches focus to an adjacent tab 
+   * Closes a specific tab and automatically switches focus to an adjacent tab
    * or the Home screen.
    */
   const closeNoteTab = (id: string) => {
@@ -153,7 +175,7 @@ export function useVollNotesLogic(documentId: string) {
   };
 
   /**
-   * Handles clicking on a note card in the Home list, opening it in a tab 
+   * Handles clicking on a note card in the Home list, opening it in a tab
    * or switching to it if already open.
    */
   const openNoteFromList = (noteId: string) => {
@@ -177,13 +199,16 @@ export function useVollNotesLogic(documentId: string) {
   /**
    * Syncs the tab label with the note's title when it is updated.
    */
-  const syncNoteTitleWithTab = useCallback((noteId: string, newTitle: string) => {
-    setTabs((prevTabs) =>
-      prevTabs.map((tab) =>
-        tab.id === noteId ? { ...tab, label: newTitle } : tab
-      )
-    );
-  }, []);
+  const syncNoteTitleWithTab = useCallback(
+    (noteId: string, newTitle: string) => {
+      setTabs((prevTabs) =>
+        prevTabs.map((tab) =>
+          tab.id === noteId ? { ...tab, label: newTitle } : tab
+        )
+      );
+    },
+    []
+  );
 
   /**
    * Adds rich-text content to the current note or creates a new one if on Home.
@@ -312,5 +337,8 @@ export function useVollNotesLogic(documentId: string) {
     syncNoteTitleWithTab,
     addContentAndLinkedHighlight,
     openNote,
+    summaryNote,
+    generateSummary,
+    isGenerating,
   };
 }

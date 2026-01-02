@@ -6,10 +6,10 @@ export interface NoteData {
   id: string;
   title?: string;
   content?: JSONContent;
-  userId: string;
   documentId?: string;
   createdAt: Date;
   updatedAt: Date;
+  isSummary: boolean;
 }
 
 // POST /api/v1/notes

@@ -4,25 +4,17 @@ import { CreateNoteDTO } from "../../../shared/validation/noteSchemas";
 import { randomUUID } from "crypto";
 import { FastifyBaseLogger } from "fastify";
 
-interface CreateNoteInput extends CreateNoteDTO {
-  userId: string;
-}
-
 export class CreateNoteUseCase {
   constructor(
     private noteRepository: INoteRepository,
     private logger: FastifyBaseLogger
   ) {}
 
-  async execute(input: CreateNoteInput): Promise<Note> {
-    this.logger.info(
-      { userId: input.userId, title: input.title },
-      "Executing CreateNoteUseCase"
-    );
+  async execute(input: CreateNoteDTO): Promise<Note> {
+    this.logger.info({ title: input.title }, "Executing CreateNoteUseCase");
     // Create the domain entity
     const note = new Note(
       input.id || randomUUID(),
-      input.userId,
       input.title,
       input.content,
       input.documentId

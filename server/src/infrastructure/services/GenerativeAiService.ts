@@ -1,3 +1,4 @@
+import { JSONContent } from "@vollio/shared";
 import { QuizQuestion } from "../../domain/entities/Quiz";
 import { IGenerativeAiService } from "../../domain/services/IGenerativeAiService";
 import { openRouter } from "../ai/generative-ai/client";
@@ -121,41 +122,27 @@ export class GenerativeAiService implements IGenerativeAiService {
     }
   }
 
-  async generateSummary(prompt: string): Promise<{ summary: string }> {
-    try {
-      const completion = await openRouter.chat.send({
-        model: "google/gemini-2.0-flash-001",
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        stream: false,
-      });
+  async generateSummary(prompt: string): Promise<JSONContent> {
+    const completion = await openRouter.chat.send({
+      model: "google/gemini-2.0-flash-001",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      stream: false,
+    });
 
-      const content = completion.choices?.[0]?.message?.content || "{}";
+    const content = completion.choices?.[0]?.message?.content || "{}";
 
-      const contentStr = String(content);
-      const cleanContent = contentStr
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
-      const parsed = JSON.parse(cleanContent);
+    const contentStr = String(content);
+    const cleanContent = contentStr
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+    const parsed = JSON.parse(cleanContent);
 
-      let summary = "";
-      if (typeof parsed.summary === "string") {
-        summary = parsed.summary;
-      } else if (typeof parsed.summary === "object") {
-        summary = JSON.stringify(parsed.summary);
-      }
-
-      return {
-        summary,
-      };
-    } catch (error) {
-      this.logger.error("GenerativeAiService.generateSummary failed: " + error);
-      return { summary: "" };
-    }
+    return parsed;
   }
 }

@@ -10,11 +10,13 @@ Creates a new note.
 - **Method**: `POST`
 - **Auth Required**: Yes
 - **Body Parameters**:
+
   - `title` (string): Title of the note
   - `content` (string): Content of the note
   - `documentId` (string, optional): Associated Document ID
 
 - **Success Response**:
+
   - **Code**: 201 Created
   - **Content**:
     ```json
@@ -54,6 +56,7 @@ Retrieves all notes for the authenticated user.
 - **Auth Required**: Yes
 
 - **Success Response**:
+
   - **Code**: 200 OK
   - **Content**:
     ```json
@@ -86,9 +89,11 @@ Retrieves a specific note.
 - **Method**: `GET`
 - **Auth Required**: Yes
 - **URL Parameters**:
+
   - `id` (string): The UUID of the note
 
 - **Success Response**:
+
   - **Code**: 200 OK
   - **Content**:
     ```json
@@ -121,10 +126,12 @@ Updates an existing note.
 - **URL Parameters**:
   - `id` (string): The UUID of the note
 - **Body Parameters**:
+
   - `title` (string, optional): New title
   - `content` (string, optional): New content
 
 - **Success Response**:
+
   - **Code**: 200 OK
   - **Content**:
     ```json
@@ -155,9 +162,11 @@ Deletes a note.
 - **Method**: `DELETE`
 - **Auth Required**: Yes
 - **URL Parameters**:
+
   - `id` (string): The UUID of the note
 
 - **Success Response**:
+
   - **Code**: 200 OK
   - **Content**:
     ```json
@@ -169,3 +178,4 @@ Deletes a note.
 
 - **Error Response**:
   - **Code**: 401 Unauthorized
+

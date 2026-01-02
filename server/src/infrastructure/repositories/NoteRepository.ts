@@ -13,6 +13,7 @@ export class NoteRepository implements INoteRepository {
 
   async createNote(note: Note): Promise<Note> {
     this.logger.info({ noteId: note.getId() }, "Creating note");
+
     const { data, error } = await this.supabaseClient
       .from("notes")
       .insert({
@@ -22,6 +23,7 @@ export class NoteRepository implements INoteRepository {
         document_id: note.getDocumentId(),
         created_at: note.getCreatedAt(),
         updated_at: note.getUpdatedAt(),
+        is_summary: note.isNoteSummary(),
       })
       .select()
       .single();
@@ -106,35 +108,31 @@ export class NoteRepository implements INoteRepository {
     return data ? this.mapToDomain(data) : null;
   }
 
-  async getNotesByUserId(userId: string): Promise<Note[]> {
-    this.logger.info({ userId }, "Getting notes by user ID");
+  async getNotesByUserId(): Promise<Note[]> {
+    this.logger.info("Getting notes by user ID");
     const { data, error } = await this.supabaseClient
       .from("notes")
       .select("*")
-      .eq("user_id", userId)
       .order("updated_at", { ascending: false });
 
     if (error) {
-      this.logger.error({ error, userId }, "Error getting notes by user ID");
+      this.logger.error({ error }, "Error getting notes by user ID");
       throw new DatabaseError(error);
     }
 
-    this.logger.info(
-      { userId, count: data?.length || 0 },
-      "Notes retrieved for user"
-    );
+    this.logger.info({ count: data?.length || 0 }, "Notes retrieved for user");
     return (data || []).map((item) => this.mapToDomain(item));
   }
 
   private mapToDomain(data: any): Note {
     return new Note(
       data.id,
-      data.user_id,
       data.title,
       data.content,
       data.document_id,
       new Date(data.created_at),
-      new Date(data.updated_at)
+      new Date(data.updated_at),
+      data.is_summary
     );
   }
 }

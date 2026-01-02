@@ -7,7 +7,6 @@ import { FastifyBaseLogger } from "fastify";
 
 interface UpdateNoteInput {
   noteId: string;
-  userId: string;
   data: UpdateNoteDTO;
 }
 
@@ -18,10 +17,7 @@ export class UpdateNoteUseCase {
   ) {}
 
   async execute(input: UpdateNoteInput): Promise<Note> {
-    this.logger.info(
-      { noteId: input.noteId, userId: input.userId },
-      "Executing UpdateNoteUseCase"
-    );
+    this.logger.info({ noteId: input.noteId }, "Executing UpdateNoteUseCase");
     if (input.data.content) {
       this.logger.debug(
         { noteId: input.noteId, content: input.data.content },
@@ -39,22 +35,9 @@ export class UpdateNoteUseCase {
       throw new NotFoundError("Note not found");
     }
 
-    // Verify ownership
-    if (existingNote.getUserId() !== input.userId) {
-      this.logger.warn(
-        { noteId: input.noteId, userId: input.userId },
-        "Forbidden: Ownership verification failed in UpdateNoteUseCase"
-      );
-      throw new AuthError(
-        "Forbidden: You don't own this note",
-        AuthErrorSubType.FORBIDDEN
-      );
-    }
-
     // Create updated note entity with merged data
     const updatedNote = new Note(
       existingNote.getId(),
-      existingNote.getUserId(),
       input.data.title !== undefined
         ? input.data.title
         : existingNote.getTitle(),

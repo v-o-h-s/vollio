@@ -24,8 +24,8 @@ import { RenameDialog } from "./dialogs/RenameDialog";
 import { MoveItemDialog } from "./dialogs/MoveItemDialog";
 import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import {
-  useGetSummariesByDocumentIdQuery,
   useGenerateSummaryMutation,
+  useGetNotesQuery,
 } from "@/lib/store/apiSlice";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -53,8 +53,11 @@ export function DocumentCard({
   const { renameDocument, moveDocument, deleteDocument, refetch } =
     useDocument();
 
-  const { data: summaries, isLoading: isLoadingSummaries } =
-    useGetSummariesByDocumentIdQuery(id);
+  const { data: notes, isLoading: isLoadingNotes } = useGetNotesQuery({
+    documentId: id,
+  });
+
+  const summaries = notes?.filter((note) => note.isSummary) || [];
 
   const [generateSummary, { isLoading: isGeneratingSummary }] =
     useGenerateSummaryMutation();
@@ -64,12 +67,12 @@ export function DocumentCard({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const hasSummary = summaries && summaries.length > 0;
+  const hasSummary = summaries.length > 0;
 
   const handleGenerateSummary = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      await toast.promise(generateSummary({ documentId: id }).unwrap(), {
+      await toast.promise(generateSummary(id).unwrap(), {
         pending: "Generating summary...",
         success: "Summary generated successfully!",
         error: "Failed to generate summary",
@@ -140,7 +143,7 @@ export function DocumentCard({
             {!hasSummary ? (
               <DropdownMenuItem
                 onClick={handleGenerateSummary}
-                disabled={isGeneratingSummary || isLoadingSummaries}
+                disabled={isGeneratingSummary || isLoadingNotes}
               >
                 {isGeneratingSummary ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -151,9 +154,7 @@ export function DocumentCard({
               </DropdownMenuItem>
             ) : (
               <DropdownMenuItem
-                onClick={() =>
-                  router.push(`/dashboard/summarize/${summaries[0].id}`)
-                }
+                onClick={() => router.push(`/dashboard/documents/${id}`)}
               >
                 <Eye className="h-4 w-4 mr-2 text-blue-500" />
                 View Summary
