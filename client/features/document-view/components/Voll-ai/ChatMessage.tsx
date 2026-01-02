@@ -39,7 +39,7 @@ export function ChatMessage({
   metadata,
 }: ChatMessageProps) {
   const {
-    handleCopy,
+    copyContentToClipboard,
     addInsightToVollNotes,
     appendContentToActiveNote,
     openNote,
@@ -49,8 +49,8 @@ export function ChatMessage({
   );
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
-    await contextCopy(content);
+  const handleCopyClick = async () => {
+    await copyContentToClipboard(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -124,7 +124,7 @@ export function ChatMessage({
                     : "hover:bg-muted text-muted-foreground"
                 )}
                 title={copied ? "Copied!" : "Copy to clipboard"}
-                onClick={handleCopy}
+                onClick={handleCopyClick}
               >
                 {copied ? (
                   <Check className="w-3.5 h-3.5" />

@@ -159,23 +159,7 @@ export const ExpandableTip = ({
               </div>
             )}
 
-            {onAddInsight && (
-              <div className="relative group">
-                <Button
-                  onClick={onAddInsight}
-                  variant="ghost"
-                  size="icon"
-                  className="h-10 w-10 rounded-full hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
-                >
-                  <Lightbulb className="h-4.5 w-4.5" />
-                  <span className="sr-only">Insight</span>
-                </Button>
-                <FeatureInfo
-                  title="AI Insight"
-                  description="Save the selected text as an AI-powered insight in your notes."
-                />
-              </div>
-            )}
+            
           </div>
         </CardContent>
       </Card>

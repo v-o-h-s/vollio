@@ -62,12 +62,12 @@ graph TD
 
 These actions are implemented directly in `ViewerContext` because they orchestrate interactions between the specialized domains.
 
-- **`handleAddToNotes(content)`**:
-  - _Trigger_: User clicks "Add to notes" on a chat message or selection.
-  - _Logic_: Checks if a note is open. If so, updates that note. If not, creates a new note. Uses `useNoterLogic` primitives.
-- **`handleAddToNoteAsInsight(content)`**:
-  - _Trigger_: User clicks "Add as Insight".
-  - _Logic_: Wraps the content in a specialized Tiptap `insight` node structure (with metadata) before passing it to the note creation/update logic.
+- **`appendContentToActiveNote(content)`**:
+  Appends generic content to the currently active note.
+- **`addInsightToVollNotes(content)`**:
+  Wraps content in an AI Insight block and appends it to the active note.
+- **`addSelectionToVollNotes(metadata)`**:
+  Creates a note-linked highlight (V-Note) from a document selection.
 
 ## Usage
 

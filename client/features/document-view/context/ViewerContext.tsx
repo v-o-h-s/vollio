@@ -90,7 +90,7 @@ interface ViewerContextType {
     },
     content?: JSONContent
   ) => Promise<void>;
-  handleCopy: (content: string | JSONContent) => Promise<void>;
+  copyContentToClipboard: (content: string | JSONContent) => Promise<void>;
 
   // --- Insight Navigation ---
   scrollToHighlight: (highlightId: string) => void;
@@ -169,7 +169,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
   /**
    * Copies provided content (string or rich-text JSON) to the system clipboard.
    */
-  const handleCopy = async (content: string | JSONContent) => {
+  const copyContentToClipboard = async (content: string | JSONContent) => {
     let textToCopy = "";
     if (typeof content === "string") {
       textToCopy = content;
@@ -318,7 +318,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         appendContentToActiveNote,
         addInsightToVollNotes,
         addSelectionToVollNotes,
-        handleCopy,
+        copyContentToClipboard,
 
         // Navigation
         scrollToHighlight,
