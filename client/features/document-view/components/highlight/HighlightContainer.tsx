@@ -27,6 +27,12 @@ interface HighlightContainerProps {
 
   onClickHighlights: (noteId: string) => void;
   userTags?: Tag[];
+  onOpenContextMenu: (e: React.MouseEvent, highlightId: string) => void;
+  onOpenVDocEditor: (
+    highlight: MyHighlight,
+    position: { left: number; top: number }
+  ) => void;
+  activeVDocEditorId?: string;
 }
 
 export const HighlightContainer = ({
@@ -34,14 +40,13 @@ export const HighlightContainer = ({
   deleteHighlight,
   onClickHighlights,
   userTags = [],
+  onOpenContextMenu,
+  onOpenVDocEditor,
+  activeVDocEditorId,
 }: HighlightContainerProps) => {
   // the hoook just change the key position from (x1,x2) to (top,bottom) and provide you with utils
   const { highlight, isScrolledTo } =
     useHighlightContainerContext<MyHighlight>();
-  const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
 
   if (!highlight) return null;
 
@@ -52,11 +57,7 @@ export const HighlightContainer = ({
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    setContextMenu({
-      x: e.clientX,
-      y: e.clientY,
-    });
+    onOpenContextMenu(e, highlight.id);
   };
 
   const handleDelete = async () => {
@@ -102,6 +103,8 @@ export const HighlightContainer = ({
             isScrolledTo={isScrolledTo}
             color="#4F46E5"
             updateHighlight={updateHighlight}
+            onOpenEditor={onOpenVDocEditor}
+            isEditorOpen={activeVDocEditorId === highlight.id}
           />
         );
       case "vnote":
@@ -130,15 +133,6 @@ export const HighlightContainer = ({
       <div onContextMenu={handleContextMenu} style={{ cursor: "pointer" }}>
         {renderHighlight()}
       </div>
-
-      {contextMenu && (
-        <ContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          onClose={() => setContextMenu(null)}
-          onDelete={handleDelete}
-        />
-      )}
     </>
   );
 };

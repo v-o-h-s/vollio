@@ -25,6 +25,8 @@ import { ViewerHeader } from "./viewheader";
 import { ViewerFloatingActions } from "./ViewerFloatingActions";
 import { DocumentDetails } from "../types/document";
 import { useViewer } from "../context/ViewerContext";
+import { ContextMenu } from "./highlight/ContextMenu";
+import MinimalEditor from "./highlight/MinimalEditor";
 export const BetterViewer = ({
   document,
   onToggleVollNotes,
@@ -49,18 +51,26 @@ export const BetterViewer = ({
     useGetSettingsQuery();
   const userTags = settings?.tags || [];
 
-    const { updateHighlightMetadata, removeHighlight } =
+  const { updateHighlightMetadata, removeHighlight } = useHighlightActions();
 
-      useHighlightActions();
-
-  
-
-    const { openNote: handleInsightClick } = useViewer();
+  const { openNote: handleInsightClick } = useViewer();
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isTagSidebarOpen, setIsTagSidebarOpen] = useState(false);
   const [currentHighlightColor, setCurrentHighlightColor] = useState("#FFEB3B");
   const [zoomValue, setZoomValue] = useState<PdfScaleValue>("page-width");
+
+  // Global UI state for highlights - moved here because we have problems with z value
+  const [activeContextMenu, setActiveContextMenu] = useState<{
+    x: number;
+    y: number;
+    highlightId: string;
+  } | null>(null);
+
+  const [activeVDocEditor, setActiveVDocEditor] = useState<{
+    highlight: MyHighlight;
+    position: { left: number; top: number };
+  } | null>(null);
 
   /** Refs for PdfHighlighter utilities */
   const highlighterUtilsRef = useRef<PdfHighlighterUtils | null>(null);
@@ -289,6 +299,17 @@ export const BetterViewer = ({
                 deleteHighlight={removeHighlight}
                 onClickHighlights={handleInsightClick}
                 userTags={userTags}
+                onOpenContextMenu={(e, highlightId) => {
+                  setActiveContextMenu({
+                    x: e.clientX,
+                    y: e.clientY,
+                    highlightId,
+                  });
+                }}
+                onOpenVDocEditor={(highlight, position) => {
+                  setActiveVDocEditor({ highlight, position });
+                }}
+                activeVDocEditorId={activeVDocEditor?.highlight.id}
               />
             </PdfHighlighter>
           )}
@@ -318,6 +339,46 @@ export const BetterViewer = ({
         isVollNotesOpen={isVollNotesOpen}
         isVollAiOpen={isVollAiOpen}
       />
+
+      {/* Global Context Menu - Moved here because we have problems with z value */}
+      {activeContextMenu && (
+        <ContextMenu
+          x={activeContextMenu.x}
+          y={activeContextMenu.y}
+          onClose={() => setActiveContextMenu(null)}
+          onDelete={() => {
+            removeHighlight(activeContextMenu.highlightId);
+            setActiveContextMenu(null);
+          }}
+        />
+      )}
+
+      {/* Global VDoc Editor - Moved here because we have problems with z value */}
+      {activeVDocEditor && (
+        <div
+          className="fixed z-1000 -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300"
+          style={{
+            left: `${activeVDocEditor.position.left}px`,
+            top: `${activeVDocEditor.position.top}px`,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <MinimalEditor
+            initialValue={activeVDocEditor.highlight.noteContent || ""}
+            onSave={async (html) => {
+              try {
+                await updateHighlightMetadata(activeVDocEditor.highlight.id, {
+                  noteContent: html,
+                });
+                setActiveVDocEditor(null);
+              } catch (error) {
+                console.error("Failed to update note content:", error);
+              }
+            }}
+            placeholder="Write your detailed note here..."
+          />
+        </div>
+      )}
     </div>
   );
 };

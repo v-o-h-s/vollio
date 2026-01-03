@@ -16,6 +16,11 @@ interface VDocHighlightProps {
     highlightId: string,
     highlight: Partial<CreateHighlightDTO>
   ) => Promise<any>;
+  onOpenEditor: (
+    highlight: MyHighlight,
+    position: { left: number; top: number }
+  ) => void;
+  isEditorOpen: boolean;
 }
 
 const hexToRgba = (hex: string, alpha: number = 0.4): string => {
@@ -30,9 +35,10 @@ export const VDocHighlight = ({
   isScrolledTo,
   color = "#4F46E5",
   updateHighlight,
+  onOpenEditor,
+  isEditorOpen,
 }: VDocHighlightProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -64,23 +70,6 @@ export const VDocHighlight = ({
     }
 
     return { left, top, size: badgeSize };
-  }, [rects]);
-
-  // Position for the editor - under the highlight
-  const editorPosition = useMemo(() => {
-    if (!rects || rects.length === 0) return null;
-
-    // Use the bottom-most rect
-    const bottomRect = rects.reduce(
-      (prev, curr) =>
-        curr.top + curr.height > prev.top + prev.height ? curr : prev,
-      rects[0]
-    );
-
-    return {
-      left: bottomRect.left + bottomRect.width / 2,
-      top: bottomRect.top + bottomRect.height + 15,
-    };
   }, [rects]);
 
   // GSAP animation for badge hover
@@ -129,18 +118,12 @@ export const VDocHighlight = ({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsEditorOpen(!isEditorOpen);
-  };
-
-  const handleSave = async (html: string) => {
-    try {
-      await updateHighlight(highlight.id, {
-        noteContent: html,
-      });
-      setIsEditorOpen(false);
-    } catch (error) {
-      console.error("Failed to update note content:", error);
-    }
+    // Calculate global position to solve z-index (z-value) problems
+    const rect = e.currentTarget.getBoundingClientRect();
+    onOpenEditor(highlight, {
+      left: rect.left + rect.width / 2,
+      top: rect.top + rect.height + 15,
+    });
   };
 
   if (!rects || rects.length === 0) return null;
@@ -296,22 +279,7 @@ export const VDocHighlight = ({
         </div>
       )}
 
-      {isEditorOpen && editorPosition && (
-        <div
-          className="absolute z-100 -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300"
-          style={{
-            left: `${editorPosition.left}px`,
-            top: `${editorPosition.top}px`,
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <MinimalEditor
-            initialValue={highlight.noteContent || ""}
-            onSave={handleSave}
-            placeholder="Write your detailed note here..."
-          />
-        </div>
-      )}
+      {/* MinimalEditor moved to BetterViewer level because we have problems with z value */}
     </>
   );
 };
