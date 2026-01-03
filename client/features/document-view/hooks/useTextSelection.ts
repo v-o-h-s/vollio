@@ -47,7 +47,7 @@ export function useSelection({
   };
 
   /**
-   * Initiates the tagging process by capturing the current selection 
+   * Initiates the tagging process by capturing the current selection
    * and opening the tag selection dialog.
    */
   const initiateTagging = () => {
@@ -183,7 +183,7 @@ export function useSelection({
       noteId: null,
       noteContent: noteContent,
       tags: [],
-      style: "note",
+      style: "vdoc",
     };
     try {
       await createHighlight(newHighlightDto).unwrap();
@@ -214,7 +214,7 @@ export function useSelection({
   const linkSelectionToNewVNote = async () => {
     const activeSelection = getSelectionFromViewer();
     if (!activeSelection) return;
-    
+
     await addSelectionToVollNotes({
       documentName: document.name,
       content: activeSelection.content,

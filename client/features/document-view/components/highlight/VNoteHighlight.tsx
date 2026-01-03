@@ -3,19 +3,14 @@
 import { MyHighlight } from "@/features/document-view/types/highlight";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import MinimalEditor from "./MinimalEditor";
-import { FileText, X } from "lucide-react";
-import { CreateHighlightDTO } from "@vollio/shared";
+import { LuNotebookPen as NotebookPen } from "react-icons/lu";
 import gsap from "gsap";
 
-interface NoteHighlightProps {
+interface VNoteHighlightProps {
   highlight: MyHighlight;
   isScrolledTo: boolean;
   color: string;
-  updateHighlight: (
-    highlightId: string,
-    highlight: Partial<CreateHighlightDTO>
-  ) => Promise<any>;
+  onClickHighlights: (noteId: string) => void;
 }
 
 const hexToRgba = (hex: string, alpha: number = 0.4): string => {
@@ -25,14 +20,13 @@ const hexToRgba = (hex: string, alpha: number = 0.4): string => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-export const NoteHighlight = ({
+export const VNoteHighlight = ({
   highlight,
   isScrolledTo,
-  color = "#4F46E5",
-  updateHighlight,
-}: NoteHighlightProps) => {
+  color = "#8B5CF6",
+  onClickHighlights,
+}: VNoteHighlightProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const badgeRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
@@ -66,24 +60,6 @@ export const NoteHighlight = ({
     return { left, top, size: badgeSize };
   }, [rects]);
 
-  // Position for the editor - under the highlight
-  const editorPosition = useMemo(() => {
-    if (!rects || rects.length === 0) return null;
-
-    // Use the bounding box or the last rect to position the editor
-    // We'll find the bottom-most rect
-    const bottomRect = rects.reduce(
-      (prev, curr) =>
-        curr.top + curr.height > prev.top + prev.height ? curr : prev,
-      rects[0]
-    );
-
-    return {
-      left: bottomRect.left + bottomRect.width / 2,
-      top: bottomRect.top + bottomRect.height + 15,
-    };
-  }, [rects]);
-
   // GSAP animation for badge hover
   useEffect(() => {
     if (!badgeRef.current) return;
@@ -91,7 +67,7 @@ export const NoteHighlight = ({
     if (isHovered) {
       gsap.to(badgeRef.current, {
         scale: 1.25,
-        rotation: 12,
+        rotation: -12,
         duration: 0.3,
         ease: "back.out(1.7)",
       });
@@ -130,17 +106,8 @@ export const NoteHighlight = ({
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setIsEditorOpen(!isEditorOpen);
-  };
-
-  const handleSave = async (html: string) => {
-    try {
-      await updateHighlight(highlight.id, {
-        noteContent: html,
-      });
-      setIsEditorOpen(false);
-    } catch (error) {
-      console.error("Failed to update note content:", error);
+    if (highlight.noteId) {
+      onClickHighlights(highlight.noteId);
     }
   };
 
@@ -150,7 +117,7 @@ export const NoteHighlight = ({
     <>
       {rects.map((rect, idx) => (
         <div
-          key={`note-overlay-${idx}`}
+          key={`vnote-overlay-${idx}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={handleClick}
@@ -163,7 +130,7 @@ export const NoteHighlight = ({
             backgroundColor: hexToRgba(color, 0.25),
             mixBlendMode: "multiply",
             borderRadius: "3px",
-            cursor: isEditorOpen ? "default" : "pointer",
+            cursor: "pointer",
             pointerEvents: "auto",
             zIndex: 5,
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -252,13 +219,13 @@ export const NoteHighlight = ({
             zIndex: 20,
           }}
         >
-          <FileText size={10} className="text-white drop-shadow-sm" />
+          <NotebookPen size={10} className="text-white drop-shadow-sm" />
 
           {/* Tooltip on hover */}
           {isHovered && (
             <div
               ref={tooltipRef}
-              className="absolute rounded-lg shadow-2xl border border-indigo-400/30 w-[200px] flex flex-row items-center justify-center"
+              className="absolute rounded-lg shadow-2xl border border-purple-400/30 w-[140px] flex flex-row items-center justify-center"
               style={{
                 bottom: `${badgePosition.size + 8}px`,
                 left: "50%",
@@ -275,8 +242,8 @@ export const NoteHighlight = ({
                 color: "#ffffff",
               }}
             >
-              <FileText size={12} className="text-white/80" />
-              <div className="font-semibold">V-Doc Note</div>
+              <NotebookPen size={12} className="text-white/80" />
+              <div className="font-semibold">V-Note</div>
 
               {/* Tooltip arrow */}
               <div
@@ -294,23 +261,6 @@ export const NoteHighlight = ({
               />
             </div>
           )}
-        </div>
-      )}
-
-      {isEditorOpen && editorPosition && (
-        <div
-          className="absolute z-[100] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300"
-          style={{
-            left: `${editorPosition.left}px`,
-            top: `${editorPosition.top}px`,
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <MinimalEditor
-            initialValue={highlight.noteContent || ""}
-            onSave={handleSave}
-            placeholder="Write your detailed note here..."
-          />
         </div>
       )}
     </>

@@ -13,7 +13,8 @@ import { ContextMenu } from "./ContextMenu";
 import { StandardHighlight } from "./StandardHighlight";
 import { TaggedHighlight } from "./TaggedHighlight";
 import { InsightHighlight } from "./InsightHighlight";
-import { NoteHighlight } from "./NoteHighlight";
+import { VDocHighlight } from "./VDocHighlight";
+import { VNoteHighlight } from "./VNoteHighlight";
 import { MyHighlight } from "@/features/document-view/types/highlight";
 import { useViewer } from "../../context/ViewerContext";
 
@@ -23,7 +24,7 @@ interface HighlightContainerProps {
     highlight: Partial<CreateHighlightDTO>
   ) => any;
   deleteHighlight: (highlightId: string) => any;
-  
+
   onClickHighlights: (noteId: string) => void;
   userTags?: Tag[];
 }
@@ -93,13 +94,23 @@ export const HighlightContainer = ({
             color="#8B5CF6"
           />
         );
-      case "note":
+      case "vdoc":
+      case "note": // backward compatibility
         return (
-          <NoteHighlight
+          <VDocHighlight
             highlight={highlight as any}
             isScrolledTo={isScrolledTo}
             color="#4F46E5"
             updateHighlight={updateHighlight}
+          />
+        );
+      case "vnote":
+        return (
+          <VNoteHighlight
+            highlight={highlight as any}
+            isScrolledTo={isScrolledTo}
+            color="#8B5CF6"
+            onClickHighlights={onClickHighlights}
           />
         );
       default: // "highlight"

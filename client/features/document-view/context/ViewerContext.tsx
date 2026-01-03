@@ -35,7 +35,9 @@ interface ViewerContextType {
   activeTabId: string;
   setActiveTabId: (id: string) => void;
   focusedComponent: ViewerComponents | null;
-  setFocusedComponent: React.Dispatch<React.SetStateAction<ViewerComponents | null>>;
+  setFocusedComponent: React.Dispatch<
+    React.SetStateAction<ViewerComponents | null>
+  >;
 
   // --- Voll-notes Actions & State ---
   tabs: Tab[];
@@ -237,10 +239,14 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
           },
         ],
       };
-      await vollNotes.addContentAndLinkedHighlight(HighlightNoteContent, "note", {
-        HighlightContent: metadata.content,
-        HighlightPosition: metadata.position,
-      });
+      await vollNotes.addContentAndLinkedHighlight(
+        HighlightNoteContent,
+        "vnote",
+        {
+          HighlightContent: metadata.content,
+          HighlightPosition: metadata.position,
+        }
+      );
     } catch (error) {
       console.error("Failed to add note to notes:", error);
       throw error;
@@ -284,10 +290,14 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         ],
       };
       if (metadata) {
-        await vollNotes.addContentAndLinkedHighlight(insightContent, "insight", {
-          HighlightContent: metadata.content,
-          HighlightPosition: metadata.position,
-        });
+        await vollNotes.addContentAndLinkedHighlight(
+          insightContent,
+          "insight",
+          {
+            HighlightContent: metadata.content,
+            HighlightPosition: metadata.position,
+          }
+        );
       }
     } catch (error: any) {
       console.error("Failed to add insight to notes:", error?.message || error);

@@ -44,7 +44,7 @@ export interface CreateHighlightDTO {
   noteId?: string | null;
   noteContent?: string | null;
   tags?: string[];
-  style?: "highlight" | "tagged" | "insight" | "note";
+  style?: "highlight" | "tagged" | "insight" | "note" | "vdoc" | "vnote";
 }
 
 const scaledSchema: JSONSchemaType<Scaled> = {
@@ -143,7 +143,7 @@ export const createHighlightSchema: JSONSchemaType<CreateHighlightDTO> = {
     },
     style: {
       type: "string",
-      enum: ["highlight", "tagged", "insight", "note"],
+      enum: ["highlight", "tagged", "insight", "note", "vdoc", "vnote"],
       nullable: true,
     },
   },
@@ -164,7 +164,7 @@ export interface UpdateHighlightDTO {
   type?: "text" | "area";
   documentId?: string;
   tags?: string[];
-  style?: "highlight" | "tagged" | "insight" | "note";
+  style?: "highlight" | "tagged" | "insight" | "note" | "vdoc" | "vnote";
 }
 
 export const updateHighlightSchema: JSONSchemaType<UpdateHighlightDTO> = {
@@ -214,7 +214,7 @@ export const updateHighlightSchema: JSONSchemaType<UpdateHighlightDTO> = {
     },
     style: {
       type: "string",
-      enum: ["highlight", "tagged", "insight", "note"],
+      enum: ["highlight", "tagged", "insight", "note", "vdoc", "vnote"],
       nullable: true,
     },
   },
@@ -270,15 +270,16 @@ export interface HighlightDocumentIdParams {
   documentId: string;
 }
 
-export const highlightDocumentIdParamsSchema: JSONSchemaType<HighlightDocumentIdParams> = {
-  type: "object",
-  properties: {
-    documentId: {
-      type: "string",
-      pattern:
-        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+export const highlightDocumentIdParamsSchema: JSONSchemaType<HighlightDocumentIdParams> =
+  {
+    type: "object",
+    properties: {
+      documentId: {
+        type: "string",
+        pattern:
+          "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      },
     },
-  },
-  required: ["documentId"],
-  additionalProperties: false,
-} as any;
+    required: ["documentId"],
+    additionalProperties: false,
+  } as any;

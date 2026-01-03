@@ -216,7 +216,7 @@ export function useVollNotesLogic(documentId: string) {
    */
   const addContentAndLinkedHighlight = async (
     content: string | JSONContent,
-    highlightStyle: "insight" | "note" = "insight",
+    highlightStyle: "insight" | "note" | "vdoc" | "vnote" = "insight",
     Highlight?: {
       HighlightContent: HighlightContent;
       HighlightPosition: ScaledPosition;

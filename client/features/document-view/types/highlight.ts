@@ -46,7 +46,7 @@ export interface Highlight {
 // Extend Highlight type to include color
 export interface MyHighlight extends Highlight {
   tags?: string[];
-  style?: "highlight" | "tagged" | "insight" | "note";
+  style?: "highlight" | "tagged" | "insight" | "note" | "vdoc" | "vnote";
   noteId?: string;
   noteContent?: string;
   color?: string;
@@ -65,7 +65,7 @@ export interface SupabaseHighlightResponse {
   note_id?: string | null;
   note_content?: string | null;
   tags?: string[] | null;
-  style?: "highlight" | "tagged" | "insight" | "note" | null;
+  style?: "highlight" | "tagged" | "insight" | "note" | "vdoc" | "vnote" | null;
   created_at: string;
   updated_at: string;
 }
@@ -89,7 +89,7 @@ export const mapSupabaseHighlightResponseToHighlight = (
     noteId: highlight.note_id,
     noteContent: highlight.note_content || undefined,
     tags: highlight.tags || undefined,
-    style: highlight.style as any || undefined,
+    style: (highlight.style as any) || undefined,
     createdAt: highlight.created_at,
     updatedAt: highlight.updated_at,
   };
