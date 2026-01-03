@@ -37,7 +37,9 @@ import {
   Settings2,
   FileText,
   Sparkles,
+  Loader2,
 } from "lucide-react";
+import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 
 import { DocumentSelectionTabs } from "@/features/knowldge-test/quizzes/components/DocumentSelectionTabs";
 import { QuestionDistribution } from "@/features/knowldge-test/quizzes/components/QuestionDistribution";
@@ -82,13 +84,6 @@ const difficulties = [
     bg: "bg-rose-500/10",
     border: "border-rose-500/20",
   },
-] as const;
-
-const languages = [
-  { key: "en", label: "English", icon: "🇺🇸" },
-  { key: "fr", label: "French", icon: "🇫🇷" },
-  { key: "es", label: "Spanish", icon: "🇪🇸" },
-  { key: "ar", label: "Arabic", icon: "🇦🇪" },
 ] as const;
 
 const explanationLevels = [
@@ -158,29 +153,33 @@ export default function CreateQuizPage() {
   }, [documentId, documentsData]);
 
   return (
-    <div className="space-y-8 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <Link href="/dashboard/knowledge-test">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover:bg-muted text-muted-foreground mt-1"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32">
+      <div className="max-w-4xl mx-auto space-y-12">
+        <div className="flex items-center justify-between">
+          <Link href="/dashboard/knowledge-test">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full hover:bg-muted group border border-border/40"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+              Back
+            </Button>
+          </Link>
+        </div>
 
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                New Knowledge Quiz
-              </h1>
-              <p className="text-muted-foreground mt-1 text-base">
-                Configure your AI-powered quiz parameters
-              </p>
-            </div>
+        {/* Header */}
+        <div className="flex flex-col items-center text-center space-y-4">
+          <div className="p-5 rounded-[40px] bg-purple-500/10 w-fit mx-auto border border-purple-500/20 shadow-lg shadow-purple-500/5">
+            <RobotIcon className="w-12 h-12 text-purple-500" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-3xl font-black italic tracking-tighter uppercase leading-none">
+              New Quiz
+            </h1>
+            <p className="text-muted-foreground text-sm font-medium">
+              Configure your AI-powered mastery challenge.
+            </p>
           </div>
         </div>
 
@@ -220,427 +219,269 @@ export default function CreateQuizPage() {
                 }
               );
             })}
+            className="space-y-16"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left Column: Configuration */}
-              <div className="lg:col-span-8 space-y-8">
-                {/* 1. Source Material */}
-                <Card className="border-border/60 shadow-sm overflow-hidden bg-card/50 backdrop-blur-xs">
-                  <CardHeader className="bg-muted/30 border-b border-border/50 pb-4">
-                    <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                      <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                        <BookOpen className="w-5 h-5" />
-                      </div>
-                      1. Source Material
-                    </CardTitle>
-                    <CardDescription>
-                      Select the document to generate questions from.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <DocumentSelectionTabs
-                      availableDocuments={
-                        (documentsData || []).map((p: any) => ({
-                          id: p.id,
-                          title: p.name ?? "Untitled",
-                        })) as any
-                      }
-                      onSelectDocument={(d: any) =>
-                        handleSelectDocument({ id: d.id })
-                      }
-                      selectedDocumentId={documentId}
-                      isLoadingDocuments={isLoadingDocuments}
-                    />
-                    {isSubmitted && errors.documentId && (
-                      <p className="text-sm text-destructive mt-3 flex items-center gap-2 font-medium">
-                        <HelpCircle className="w-4 h-4" />{" "}
-                        {errors.documentId.message}
-                      </p>
-                    )}
-                    {!selectedDocument && !errors.documentId && (
-                      <div className="flex items-center gap-2 mt-4 p-3 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-sm border border-amber-500/20">
-                        <HelpCircle className="w-4 h-4 shrink-0" />
-                        Please select a document to proceed
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+            {/* 1. Source Material */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                <BookOpen className="w-4 h-4" />
+                Step 1: Source Material
+              </div>
+              <div className="p-2 rounded-[40px] bg-muted/10 border border-border/40 overflow-hidden shadow-2xl shadow-background/50">
+                <DocumentSelectionTabs
+                  availableDocuments={
+                    (documentsData || []).map((p: any) => ({
+                      id: p.id,
+                      title: p.name ?? "Untitled",
+                    })) as any
+                  }
+                  onSelectDocument={(d: any) =>
+                    handleSelectDocument({ id: d.id })
+                  }
+                  selectedDocumentId={documentId}
+                  isLoadingDocuments={isLoadingDocuments}
+                />
+              </div>
+              {isSubmitted && errors.documentId && (
+                <p className="text-xs text-destructive font-bold ml-4">
+                  {errors.documentId.message}
+                </p>
+              )}
+            </div>
 
-                {/* 2. Configuration */}
-                <Card className="border-border/60 shadow-sm overflow-hidden bg-card/50 backdrop-blur-xs">
-                  <CardHeader className="bg-muted/30 border-b border-border/50 pb-4">
-                    <CardTitle className="flex items-center gap-2 text-lg font-bold">
-                      <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                        <Settings2 className="w-5 h-5" />
-                      </div>
-                      2. Quiz Settings
-                    </CardTitle>
-                    <CardDescription>
-                      Customize difficulty, language, and format.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-8">
-                    {/* Prompt */}
-                    <FormField
-                      control={control}
-                      name="userPrompt"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-sm font-semibold">
-                            Specific Focus (Optional)
-                          </FormLabel>
-                          <FormControl>
-                            <Textarea
-                              {...field}
-                              rows={3}
-                              placeholder="E.g., Focus on key definitions and dates from Chapter 2..."
-                              className="resize-none bg-background focus-visible:ring-primary/30 min-h-[100px]"
-                            />
-                          </FormControl>
-                          <p className="text-[11px] text-muted-foreground">
-                            Leave empty for a comprehensive coverage.
-                          </p>
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {/* Difficulty */}
-                      <FormField
-                        control={control}
-                        name="difficulty"
-                        render={({ field }) => (
-                          <FormItem className="space-y-3">
-                            <FormLabel className="text-sm font-semibold flex items-center gap-2">
-                              Difficulty Level
-                            </FormLabel>
-                            <FormControl>
-                              <div className="grid grid-cols-3 gap-3">
-                                {difficulties.map((diff) => {
-                                  const Icon = diff.icon;
-                                  const isSelected = field.value === diff.key;
-                                  return (
-                                    <button
-                                      key={diff.key}
-                                      type="button"
-                                      onClick={() => field.onChange(diff.key)}
-                                      className={cn(
-                                        "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all duration-200 outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                                        isSelected
-                                          ? cn("border-transparent shadow-sm ring-2 ring-primary/20", diff.bg, diff.color)
-                                          : "border-border hover:border-primary/30 hover:bg-muted/50 text-muted-foreground"
-                                      )}
-                                    >
-                                      <Icon className={cn("w-5 h-5 mb-2", isSelected ? "opacity-100" : "opacity-60")} />
-                                      <span className="text-xs font-bold uppercase tracking-wider">
-                                        {diff.label}
-                                      </span>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </FormControl>
-                            {isSubmitted && <FormMessage />}
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Language */}
-                      <FormField
-                        control={control}
-                        name="language"
-                        render={({ field }) => (
-                          <FormItem className="space-y-3">
-                            <FormLabel className="text-sm font-semibold flex items-center gap-2">
-                              Language
-                            </FormLabel>
-                            <FormControl>
-                              <div className="grid grid-cols-2 gap-3">
-                                {languages.map((lang) => {
-                                  const isSelected = field.value === lang.key;
-                                  return (
-                                    <button
-                                      key={lang.key}
-                                      type="button"
-                                      onClick={() => field.onChange(lang.key)}
-                                      className={cn(
-                                        "flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200 outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                                        isSelected
-                                          ? "border-primary/50 bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
-                                          : "border-border hover:border-primary/30 hover:bg-muted/50 text-muted-foreground"
-                                      )}
-                                    >
-                                      <span className="text-xl leading-none">{lang.icon}</span>
-                                      <span className="text-xs font-bold uppercase tracking-wider">
-                                        {lang.label}
-                                      </span>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </FormControl>
-                            {isSubmitted && <FormMessage />}
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-border/40">
-                      {/* Number of Questions */}
-                      <FormField
-                        control={control}
-                        name="numberOfQuestions"
-                        render={({ field }) => (
-                          <FormItem className="space-y-4">
-                            <div className="flex justify-between items-center">
-                              <FormLabel className="text-sm font-semibold">
-                                Question Count
-                              </FormLabel>
-                              <div className="flex items-center gap-2">
-                                <Input
-                                  type="number"
-                                  min={1}
-                                  max={50}
-                                  className="w-16 h-8 text-center font-bold bg-background"
-                                  {...field}
-                                  onChange={(e) =>
-                                    field.onChange(
-                                      e.target.value
-                                        ? Math.min(50, Math.max(1, Number(e.target.value)))
-                                        : undefined
-                                    )
-                                  }
-                                />
-                              </div>
-                            </div>
-                            <FormControl>
-                              <Slider
-                                value={[field.value || 1]}
-                                min={1}
-                                max={50}
-                                step={1}
-                                onValueChange={(vals) => field.onChange(vals[0])}
-                                className="py-2"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Time Limit */}
-                      <FormField
-                        control={control}
-                        name="timeLimitMinutes"
-                        render={({ field }) => (
-                          <FormItem className="space-y-4">
-                            <div className="flex justify-between items-center">
-                              <FormLabel className="text-sm font-semibold">
-                                Time Limit
-                              </FormLabel>
-                              <div className="flex items-center gap-2">
-                                <Input
-                                  type="number"
-                                  min={0}
-                                  max={180}
-                                  placeholder="∞"
-                                  className="w-16 h-8 text-center font-bold bg-background"
-                                  value={field.value ?? ""}
-                                  onChange={(e) =>
-                                    field.onChange(
-                                      e.target.value === ""
-                                        ? undefined
-                                        : Math.min(180, Number(e.target.value))
-                                    )
-                                  }
-                                />
-                                <span className="text-xs text-muted-foreground">min</span>
-                              </div>
-                            </div>
-                            <FormControl>
-                              <Slider
-                                value={[field.value || 0]}
-                                min={0}
-                                max={60}
-                                step={5}
-                                onValueChange={(vals) =>
-                                  field.onChange(vals[0] === 0 ? undefined : vals[0])
-                                }
-                                className="py-2"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    {/* Explanation Level */}
-                    <FormField
-                      control={control}
-                      name="explanationLevel"
-                      render={({ field }) => (
-                        <FormItem className="space-y-3 pt-4 border-t border-border/40">
-                          <FormLabel className="text-sm font-semibold">
-                            Detail Level
-                          </FormLabel>
-                          <FormControl>
-                            <div className="grid grid-cols-3 gap-4">
-                              {explanationLevels.map((level) => {
-                                const isSelected = field.value === level.key;
-                                return (
-                                  <div
-                                    key={level.key}
-                                    onClick={() => field.onChange(level.key)}
-                                    className={cn(
-                                      "cursor-pointer border-2 rounded-xl p-3 text-center transition-all duration-200 outline-none ring-offset-2",
-                                      isSelected
-                                        ? "border-primary/50 bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
-                                        : "border-border hover:border-primary/30 hover:bg-muted/50 text-muted-foreground"
-                                    )}
-                                  >
-                                    <div className="text-sm font-bold uppercase tracking-wider mb-1">
-                                      {level.label}
-                                    </div>
-                                    <div className="text-[10px] opacity-80">
-                                      {level.description}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </FormControl>
-                          {isSubmitted && <FormMessage />}
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Distribution */}
-                    <div className="space-y-4 pt-4 border-t border-border/40">
-                      <div className="flex items-center justify-between">
-                        <FormLabel className="text-sm font-semibold flex items-center gap-2">
-                          Question Types <span className="text-muted-foreground font-normal text-xs">(Auto-balanced if ignored)</span>
-                        </FormLabel>
-                      </div>
-
-                      <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
-                        <QuestionDistribution
-                          totalQuestions={numberOfQuestions}
-                          distribution={questionsDistribution || {}}
-                          onChange={(
-                            key: string,
-                            value: number | undefined
-                          ) => {
-                            setValue(
-                              `questionsDistribution.${key}` as any,
-                              value,
-                              {
-                                shouldDirty: true,
-                                shouldTouch: true,
-                                shouldValidate: true,
-                              }
-                            );
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+            {/* 2. Configuration */}
+            <div className="space-y-10 bg-muted/5 p-10 rounded-[40px] border border-border/40 shadow-2xl shadow-background/50">
+              <div className="space-y-1">
+                <h3 className="font-black italic uppercase tracking-tighter text-2xl leading-none">
+                  Parameters
+                </h3>
+                <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                  Step 2: Customization
+                </p>
               </div>
 
-              {/* Right Column: Summary & Path */}
-              <div className="lg:col-span-4 relative h-full">
-                <div className="sticky top-6 space-y-6">
-                  <Card className="border-border/60 shadow-xl overflow-hidden bg-card/70 backdrop-blur-md">
-                    <CardHeader className="bg-primary/5 border-b border-border/50 pb-4">
-                      <CardTitle className="text-lg flex items-center gap-2 font-bold">
-                        <Sparkles className="w-5 h-5 text-primary" />
-                        Quiz Preview
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 space-y-6">
-                      <div className="space-y-2">
-                        <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest flex items-center gap-1.5">
-                          <FileText className="w-3 h-3" /> Source
-                        </span>
-                        <div className={cn(
-                          "font-medium text-sm p-3 rounded-lg border flex items-center gap-3 transition-colors",
-                          selectedDocument ? "bg-background border-border" : "bg-muted/30 border-transparent text-muted-foreground italic"
-                        )}>
-                          {selectedDocument ? (
-                            <span className="truncate">{selectedDocument.title}</span>
-                          ) : (
-                            "No document selected"
-                          )}
-                        </div>
-                      </div>
+              <div className="space-y-10">
+                {/* Specific Focus */}
+                <FormField
+                  control={control}
+                  name="userPrompt"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                        Specific Focus (Optional)
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          rows={3}
+                          placeholder="e.g. Focus on key dates from Chapter 2..."
+                          className="bg-background/80 border-none shadow-xl focus-visible:ring-2 focus-visible:ring-primary/20 rounded-3xl p-6 text-sm font-medium resize-none leading-relaxed transition-all duration-300"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
 
-                      <div className="grid grid-cols-2 gap-4 py-4 border-y border-border/40">
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">
-                            Difficulty
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <Brain className="w-4 h-4 text-primary" />
-                            <p className="font-bold text-sm capitalize">{difficulty}</p>
-                          </div>
+                {/* Difficulty */}
+                <FormField
+                  control={control}
+                  name="difficulty"
+                  render={({ field }) => (
+                    <FormItem className="space-y-4">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                        Complexity
+                      </FormLabel>
+                      <FormControl>
+                        <div className="flex gap-1 bg-muted/20 p-1.5 rounded-2xl">
+                          {difficulties.map((diff) => {
+                            const isSelected = field.value === diff.key;
+                            return (
+                              <button
+                                key={diff.key}
+                                type="button"
+                                onClick={() => field.onChange(diff.key)}
+                                className={cn(
+                                  "flex-1 py-3 px-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                  isSelected
+                                    ? "bg-background shadow-md text-foreground scale-105"
+                                    : "text-muted-foreground hover:text-foreground"
+                                )}
+                              >
+                                {diff.label}
+                              </button>
+                            );
+                          })}
                         </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">
-                            Language
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <Globe className="w-4 h-4 text-primary" />
-                            <p className="font-bold text-sm uppercase">{language}</p>
-                          </div>
-                        </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">
-                            Time
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-primary" />
-                            <p className="font-bold text-sm">
-                              {timeLimitMinutes ? `${timeLimitMinutes} min` : "Unlimited"}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="space-y-1">
-                          <span className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">
-                            Questions
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-primary" />
-                            <p className="font-bold text-sm">{numberOfQuestions}</p>
-                          </div>
-                        </div>
-                      </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
 
-                      <Button
-                        type="submit"
-                        disabled={!selectedDocument || isSubmitting}
-                        className="w-full h-12 text-base font-bold shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
-                        size="lg"
-                      >
-                        {isSubmitting ? (
-                          <div className="flex items-center gap-2">
-                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            Generating...
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  {/* Number of Questions */}
+                  <FormField
+                    control={control}
+                    name="numberOfQuestions"
+                    render={({ field }) => (
+                      <FormItem className="space-y-4">
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          Quantity
+                        </FormLabel>
+                        <FormControl>
+                          <div className="flex items-center gap-4 bg-muted/20 p-2 rounded-2xl focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                            <Input
+                              type="number"
+                              min={1}
+                              max={50}
+                              {...field}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? Math.min(
+                                        50,
+                                        Math.max(1, Number(e.target.value))
+                                      )
+                                    : undefined
+                                )
+                              }
+                              className="h-10 bg-transparent border-none shadow-none text-2xl font-black w-20 text-center ring-0 focus-visible:ring-0"
+                            />
+                            <span className="text-xs font-black text-muted-foreground uppercase italic pr-4">
+                              Questions
+                            </span>
                           </div>
-                        ) : (
-                          <div className="flex items-center justify-center gap-2">
-                            <Sparkles className="w-4 h-4 fill-current" />
-                            Generate Quiz
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Time Limit */}
+                  <FormField
+                    control={control}
+                    name="timeLimitMinutes"
+                    render={({ field }) => (
+                      <FormItem className="space-y-4">
+                        <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                          Duration
+                        </FormLabel>
+                        <FormControl>
+                          <div className="flex items-center gap-4 bg-muted/20 p-2 rounded-2xl focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                            <Input
+                              type="number"
+                              min={0}
+                              max={180}
+                              {...field}
+                              placeholder="∞"
+                              value={field.value ?? ""}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value === ""
+                                    ? undefined
+                                    : Math.min(180, Number(e.target.value))
+                                )
+                              }
+                              className="h-10 bg-transparent border-none shadow-none text-2xl font-black w-20 text-center ring-0 focus-visible:ring-0 placeholder:text-muted-foreground/30"
+                            />
+                            <span className="text-xs font-black text-muted-foreground uppercase italic pr-4">
+                              Minutes
+                            </span>
                           </div>
-                        )}
-                      </Button>
-                      
-                      <p className="text-xs text-center text-muted-foreground">
-                        Estimated generation time: ~15s
-                      </p>
-                    </CardContent>
-                  </Card>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {/* Explanation Level */}
+                <FormField
+                  control={control}
+                  name="explanationLevel"
+                  render={({ field }) => (
+                    <FormItem className="space-y-4">
+                      <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                        Explanation Depth
+                      </FormLabel>
+                      <FormControl>
+                        <div className="grid grid-cols-3 gap-2 bg-muted/20 p-2 rounded-3xl">
+                          {explanationLevels.map((level) => {
+                            const isSelected = field.value === level.key;
+                            return (
+                              <button
+                                key={level.key}
+                                type="button"
+                                onClick={() => field.onChange(level.key)}
+                                className={cn(
+                                  "py-4 px-2 rounded-2xl text-center transition-all duration-300",
+                                  isSelected
+                                    ? "bg-background shadow-xl scale-105"
+                                    : "hover:bg-background/40"
+                                )}
+                              >
+                                <div
+                                  className={cn(
+                                    "text-[10px] font-black uppercase tracking-widest leading-none mb-1",
+                                    isSelected
+                                      ? "text-primary"
+                                      : "text-muted-foreground"
+                                  )}
+                                >
+                                  {level.label}
+                                </div>
+                                <div className="text-[8px] font-bold opacity-60 uppercase tracking-tighter">
+                                  {level.description}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {/* Distribution */}
+                <div className="space-y-4 pt-4">
+                  <FormLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
+                    Content Distribution
+                  </FormLabel>
+                  <div className="bg-background/40 rounded-3xl p-6 border border-border/20 shadow-xl">
+                    <QuestionDistribution
+                      totalQuestions={numberOfQuestions}
+                      distribution={questionsDistribution || {}}
+                      onChange={(key: string, value: number | undefined) => {
+                        setValue(`questionsDistribution.${key}` as any, value, {
+                          shouldDirty: true,
+                          shouldTouch: true,
+                          shouldValidate: true,
+                        });
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
+
+            <Button
+              type="submit"
+              disabled={!selectedDocument || isSubmitting}
+              className="w-full h-20 bg-foreground text-background hover:bg-foreground/90 rounded-[40px] font-black text-2xl tracking-tighter shadow-2xl transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] group relative overflow-hidden"
+            >
+              {isSubmitting ? (
+                <div className="flex items-center gap-4">
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                  ANALYZING SOURCE...
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-4">
+                  GENERATE QUIZ
+                  <Sparkles className="w-6 h-6 group-hover:fill-current transition-all animate-pulse" />
+                </div>
+              )}
+            </Button>
+
+            <p className="text-[10px] text-center text-muted-foreground font-black uppercase tracking-[0.3em] opacity-40">
+              Estimated Processing Time: ~15 seconds
+            </p>
           </form>
         </Form>
       </div>

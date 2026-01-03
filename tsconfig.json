@@ -6,7 +6,7 @@
     "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true, //avoid using this cuz it skips typecheking
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,

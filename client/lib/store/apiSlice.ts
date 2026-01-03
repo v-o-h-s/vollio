@@ -31,7 +31,8 @@ const baseQuery = fetchBaseQuery({
       endpoint !== "deleteFolder" &&
       endpoint !== "deleteNote" &&
       endpoint !== "deleteHighlight" &&
-      endpoint !== "deleteHighlightsByTag"
+      endpoint !== "deleteHighlightsByTag"&&
+      endpoint !== "generateSummary"
     ) {
       headers.set("Content-Type", "application/json");
     }

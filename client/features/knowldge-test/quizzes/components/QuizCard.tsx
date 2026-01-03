@@ -54,31 +54,21 @@ export function QuizCard({
   return (
     <Card
       key={q.id}
-      className="group relative flex flex-col h-full border-border/60 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden bg-card/50 backdrop-blur-xs"
+      className="group relative flex flex-col h-full border-border/60 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden bg-card/10 backdrop-blur-xs"
     >
-      <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 hover:bg-background/80"
-            >
-              <MoreVertical className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem className="cursor-pointer">
-              <Edit2 className="w-4 h-4 mr-2" /> Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-destructive cursor-pointer focus:text-destructive"
-              onClick={() => onDelete?.(q.id)}
-            >
-              <Trash2 className="w-4 h-4 mr-2" /> Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 translate-y-1 group-hover:translate-y-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDelete?.(q.id);
+          }}
+          className="h-9 w-9 rounded-full bg-background/80 hover:bg-destructive hover:text-white shadow-xl backdrop-blur-md transition-all border border-border/20"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </div>
 
       <CardHeader className="pb-3 pt-5 px-5 space-y-3">
@@ -86,18 +76,18 @@ export function QuizCard({
           <Badge
             variant="outline"
             className={cn(
-              "px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide border",
+              "px-2.5 py-0.5 text-xs font-medium tracking-wide border",
               getDifficultyColor(difficulty)
             )}
           >
             {difficulty}
           </Badge>
         </div>
-        
-        <CardTitle className="text-lg font-bold leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+
+        <CardTitle className="text-lg font-bold leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
           {q.title || "Untitled Quiz"}
         </CardTitle>
-        
+
         <div className="flex items-center text-xs text-muted-foreground gap-2">
           <Calendar className="w-3.5 h-3.5" />
           <span>{new Date(q.createdAt).toLocaleDateString()}</span>
@@ -107,17 +97,17 @@ export function QuizCard({
       <CardContent className="px-5 py-2 grow">
         <div className="grid grid-cols-2 gap-3 mt-1">
           <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/40 text-xs font-medium text-muted-foreground">
-            <BookOpen className="w-4 h-4 text-indigo-500" />
+            <BookOpen className="w-4 h-4 " />
             <span className="truncate" title={q.documentId}>
               {q.documentId.split("-")[0]}...
             </span>
           </div>
           <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/40 text-xs font-medium text-muted-foreground">
-            <Globe className="w-4 h-4 text-blue-500" />
+            <Globe className="w-4 h-4 " />
             <span>{q.language.toUpperCase()}</span>
           </div>
           <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/40 text-xs font-medium text-muted-foreground">
-            <Clock className="w-4 h-4 text-amber-500" />
+            <Clock className="w-4 h-4 " />
             <span>~{Math.round(timeEstimate)}m</span>
           </div>
         </div>
@@ -128,10 +118,13 @@ export function QuizCard({
           <div className="text-sm font-semibold text-muted-foreground">
             <span className="text-foreground">{questionCount}</span> Questions
           </div>
-          <Link href={`/dashboard/knowledge-test/quizzes/${q.id}`} className="block">
+          <Link
+            href={`/dashboard/knowledge-test/quizzes/${q.id}`}
+            className="block"
+          >
             <Button
               size="sm"
-              className="rounded-full pl-4 pr-5 bg-primary/90 hover:bg-primary shadow-md hover:shadow-primary/20 transition-all duration-300"
+              className="rounded-full pl-4 pr-5 bg-indigo-600/90 hover:bg-indigo-600 text-white shadow-md hover:shadow-indigo-500/20 transition-all duration-300"
             >
               <Play className="w-3.5 h-3.5 mr-2 fill-current" /> Start Quiz
             </Button>

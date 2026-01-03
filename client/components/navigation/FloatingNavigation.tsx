@@ -8,7 +8,6 @@ import {
   Home,
   Brain,
   CreditCard,
-  DocumentBarChart,
   Settings,
   User,
   LogOut,
@@ -36,7 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-
+import { GrTestDesktop } from "react-icons/gr";
 const navigationItems = [
   {
     name: "Dashboard",
@@ -54,8 +53,20 @@ const navigationItems = [
   {
     name: "Knowledge Test",
     href: "/dashboard/knowledge-test",
-    icon: Brain,
+    icon: GrTestDesktop,
     description: "Interactive knowledge tests",
+  },
+  {
+    name: "Support",
+    href: "/dashboard/support",
+    icon: HelpCircle,
+    description: "Get help or suggest features",
+  },
+  {
+    name: "Settings",
+    href: "/dashboard/settings",
+    icon: Settings,
+    description: "Account and preferences",
   },
 ];
 
@@ -271,14 +282,12 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
-                  <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
-                    <Bell className="mr-3 h-4 w-4 text-muted-foreground" />
-                    <span className="text-foreground">Notifications</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
-                    <HelpCircle className="mr-3 h-4 w-4 text-muted-foreground" />
-                    <span className="text-foreground">Help & Support</span>
-                  </DropdownMenuItem>
+                  <Link href="/dashboard/support" className="w-full">
+                    <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3 cursor-pointer">
+                      <HelpCircle className="mr-3 h-4 w-4 text-muted-foreground" />
+                      <span className="text-foreground">Help & Support</span>
+                    </DropdownMenuItem>
+                  </Link>
                 </DropdownMenuGroup>
                 <div className="border-t border-border p-2">
                   <DropdownMenuItem onClick={handleSignOut}>
@@ -482,10 +491,14 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                         <Bell className="mr-3 h-4 w-4 text-muted-foreground" />
                         <span className="text-foreground">Notifications</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3">
-                        <HelpCircle className="mr-3 h-4 w-4 text-muted-foreground" />
-                        <span className="text-foreground">Help & Support</span>
-                      </DropdownMenuItem>
+                      <Link href="/dashboard/support" className="w-full">
+                        <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3 cursor-pointer">
+                          <HelpCircle className="mr-3 h-4 w-4 text-muted-foreground" />
+                          <span className="text-foreground">
+                            Help & Support
+                          </span>
+                        </DropdownMenuItem>
+                      </Link>
                     </DropdownMenuGroup>
                     <div className="border-t border-border p-2">
                       <DropdownMenuItem onClick={handleSignOut}>
