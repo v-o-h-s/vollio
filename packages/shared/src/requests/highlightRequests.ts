@@ -30,7 +30,7 @@ export interface CreateHighlightDTO {
   noteId?: string | null;
   noteContent?: string | null;
   tags?: string[];
-  style?: "highlight" | "tagged" | "insight" | "note";
+  style?: "highlight" | "tagged" | "insight" | "note" | "vdoc" | "vnote";
 }
 
 export interface UpdateHighlightDTO {
@@ -43,7 +43,7 @@ export interface UpdateHighlightDTO {
   type?: "text" | "area";
   documentId?: string;
   tags?: string[];
-  style?: "highlight" | "tagged" | "insight" | "note";
+  style?: "highlight" | "tagged" | "insight" | "note" | "vdoc" | "vnote";
 }
 
 export interface HighlightIdParams {
