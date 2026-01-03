@@ -45,7 +45,7 @@ export const ExpandableTip = ({
 
   return (
     <div className="relative">
-      <Card className="rounded-full shadow-2xl border-white/10 animate-in fade-in zoom-in duration-300 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 overflow-visible">
+      <Card className="rounded-full shadow-2xl border-white/10 animate-in fade-in zoom-in duration-300 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60 overflow-visible">
         <CardContent className="p-1.5 flex items-center gap-1">
           {/* Basic Tools Group */}
           <div className="flex items-center gap-1 px-1">
@@ -158,8 +158,6 @@ export const ExpandableTip = ({
                 />
               </div>
             )}
-
-            
           </div>
         </CardContent>
       </Card>
@@ -173,7 +171,9 @@ export const ExpandableTip = ({
       )}
       {openVDocMenu && (
         <MinimalEditor
-          onSave={(html) => {
+          className="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-999"
+          onClose={() => setOpenVDocMenu(false)}
+          onSave={async (html) => {
             onSaveVDocNote?.(html);
             setOpenVDocMenu(false);
           }}

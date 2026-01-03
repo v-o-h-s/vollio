@@ -10,6 +10,8 @@ import {
   Undo,
   Redo,
   Strikethrough,
+  X,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +20,8 @@ import { cn } from "@/lib/utils";
 
 interface MinimalEditorProps {
   initialValue?: string;
-  onSave: (html: string) => void;
+  onSave: (html: string) => Promise<void>;
+  onClose: () => void;
   className?: string;
   placeholder?: string;
 }
@@ -26,11 +29,15 @@ interface MinimalEditorProps {
 export default function MinimalEditor({
   initialValue = "",
   onSave,
+  onClose,
   className,
   placeholder = "Start typing your note...",
 }: MinimalEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [hasLoadedInitial, setHasLoadedInitial] = useState(false);
   const [activeStates, setActiveStates] = useState({
     bold: false,
@@ -54,6 +61,22 @@ export default function MinimalEditor({
   }, []);
 
   useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [onClose]);
+
+  useEffect(() => {
     if (editorRef.current && !hasLoadedInitial) {
       editorRef.current.innerHTML = initialValue;
       setHasLoadedInitial(true);
@@ -67,8 +90,13 @@ export default function MinimalEditor({
   };
 
   const handleSave = async () => {
-    if (editorRef.current) {
-      await onSave(editorRef.current.innerHTML);
+    if (editorRef.current && !isSaving) {
+      setIsSaving(true);
+      try {
+        await onSave(editorRef.current.innerHTML);
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -84,14 +112,23 @@ export default function MinimalEditor({
 
   return (
     <Card
+      ref={containerRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        "w-[500px] border-white/20 shadow-2xl transition-all duration-300 absolute top-full mt-2 left-1/2 -translate-x-1/2 z-999 overflow-hidden bg-black ",
-
+        "w-[500px] border-white/20 shadow-2xl transition-all duration-300 overflow-hidden bg-black",
         className
       )}
     >
-      {/* Toolbar */}
-      <div className="flex items-center gap-0.5 p-1.5   border-b-[1px] border-white/20   ">
+      {/* Toolbar - Only visible on hover or focus */}
+      <div
+        className={cn(
+          "flex items-center gap-0.5 p-1.5 border-b-[1px] border-white/20 transition-all duration-300",
+          isHovered || isFocused
+            ? "opacity-100 h-auto"
+            : "opacity-0 h-0 p-0 border-0 pointer-events-none"
+        )}
+      >
         <div className="flex items-center gap-0.5 px-1">
           <ToolbarButton
             onClick={() => format("undo")}
@@ -155,11 +192,22 @@ export default function MinimalEditor({
           <Button
             size="sm"
             onClick={handleSave}
-            className="h-8 gap-2 bg-white hover:bg-zinc-200 text-black border-none font-bold shadow-lg"
+            disabled={isSaving}
+            className="h-8 gap-2 bg-white hover:bg-zinc-200 text-black border-none font-bold shadow-lg min-w-[80px]"
           >
-            <Save className="h-3.5 w-3.5" />
-            <p className="text-xs">Save</p>
+            {isSaving ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Save className="h-3.5 w-3.5" />
+            )}
+            <p className="text-xs">{isSaving ? "Saving..." : "Save"}</p>
           </Button>
+
+          <ToolbarButton
+            onClick={onClose}
+            icon={<X className="h-4 w-4" />}
+            tooltip="Close"
+          />
         </div>
       </div>
 

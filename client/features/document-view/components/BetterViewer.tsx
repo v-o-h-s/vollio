@@ -365,6 +365,7 @@ export const BetterViewer = ({
         >
           <MinimalEditor
             initialValue={activeVDocEditor.highlight.noteContent || ""}
+            onClose={() => setActiveVDocEditor(null)}
             onSave={async (html) => {
               try {
                 await updateHighlightMetadata(activeVDocEditor.highlight.id, {
