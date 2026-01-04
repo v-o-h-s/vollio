@@ -61,6 +61,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
         params: noteIdParamsSchema,
       },
       preHandler: validateParams(noteIdParamsSchema),
+  
     },
     async (request, reply) => {
       const noteController = request.diScope.resolve("noteController");

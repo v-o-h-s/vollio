@@ -6,9 +6,9 @@ import { User } from "../shared/types/fastify";
 export const authPlugin = fp(async (fastify) => {
   fastify.decorateRequest("user", null);
 
-  fastify.addHook("preHandler", async (req, reply) => {
+  fastify.addHook("onRequest", async (req, reply) => {
     // Skip auth check for public routes
-    if (req.url === "/" || req.url.startsWith("/api/v1/documents/stream")) {
+    if (req.url === "/" ) {
       return;
     }
 
