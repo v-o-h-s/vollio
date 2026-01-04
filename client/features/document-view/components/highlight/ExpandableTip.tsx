@@ -16,6 +16,7 @@ import React, { useState } from "react";
 import MinimalEditor from "@/features/document-view/components/highlight/MinimalEditor";
 import { FeatureInfo, FeatureInfoDual } from "@/components/FeatureExplanation";
 import { NoteMenu } from "./NoteMenu";
+import { Check } from "lucide-react";
 
 interface ExpandableTipProps {
   onHighlight: () => void;
@@ -42,6 +43,7 @@ export const ExpandableTip = ({
 }: ExpandableTipProps) => {
   const [openNoteMenu, setOpenNoteMenu] = useState(false);
   const [openVDocMenu, setOpenVDocMenu] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   return (
     <div className="relative">
@@ -52,12 +54,23 @@ export const ExpandableTip = ({
             {onCopy && (
               <div className="relative group">
                 <Button
-                  onClick={onCopy}
+                  onClick={() => {
+                    onCopy();
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 4000);
+                  }}
                   variant="ghost"
                   size="icon"
-                  className="cursor-pointer h-10 w-10 rounded-full bg-white text-neutral-900 shadow-sm border border-neutral-200 hover:bg-neutral-50 transition-all duration-200 hover:scale-105 active:scale-95"
+                  className={cn(
+                    "cursor-pointer h-10 w-10 rounded-full bg-white text-neutral-900 shadow-sm border border-neutral-200 hover:bg-neutral-50 transition-all duration-200 hover:scale-105 active:scale-95",
+                    isCopied && "bg-green-500 text-white hover:bg-green-600"
+                  )}
                 >
-                  <Copy className="h-4.5 w-4.5" />
+                  {isCopied ? (
+                    <Check className="h-4.5 w-4.5 " />
+                  ) : (
+                    <Copy className="h-4.5 w-4.5" />
+                  )}
                   <span className="sr-only">Copy</span>
                 </Button>
                 <FeatureInfo
