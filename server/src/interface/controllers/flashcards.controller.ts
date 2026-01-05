@@ -4,7 +4,7 @@ import {
   CreateManualFlashCardsDTO,
   FlashCardsSetIdParams,
 } from "../../shared/validation/flashcardSchemas";
-import { CreateFlashCardsSetResponse } from '@vollio/shared';
+import { CreateFlashCardsSetResponse } from "@vollio/shared";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 import { GenerateGeneralFlashCardsUseCase } from "../../application/use-cases/flashcards/GenerateGeneralFlashCardsUseCase";
 import { GetAllFlashCardsSetsUseCase } from "../../application/use-cases/flashcards/GetAllFlashCardsSetsUseCase";
@@ -39,7 +39,8 @@ export class FlashCardsController {
     }
 
     const response = await this.generateGeneralFlashCardsUseCase.execute(
-      request.body
+      request.body,
+      userId
     );
     return ResponseFormatter.success(
       reply,

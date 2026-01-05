@@ -1,8 +1,6 @@
 import { FastifyBaseLogger } from "fastify";
-import { Chunk, cleanText, createChunksFromParagraphs, extractFromPdf } from "../../shared/utils/chunking";
+import { Chunk, cleanText, createChunksFromParagraphs } from "../../shared/utils/chunking";
 import { ExtractedContent } from "../../shared/utils/chunking";
-
-
 
 
 export class ChunkingService {

@@ -1,7 +1,6 @@
 import { FastifyBaseLogger } from "fastify";
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
 import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
-import { ISummaryRepository } from "../../../domain/repositories/ISummaryRepository";
 import { DocumentIdParams, JSONContent, NoteData } from "@vollio/shared";
 import { summarizeDocumentPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/summarize";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";

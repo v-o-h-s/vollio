@@ -1,7 +1,7 @@
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
 import { IFlashCardsSetRepository } from "../../../domain/repositories/IFlashCardsSetRepository";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
-import { CreateFlashCardsSetResponse } from '@vollio/shared';
+import { CreateFlashCardsSetResponse } from "@vollio/shared";
 import { CreateFlashCardsDTO } from "../../../shared/validation/flashcardSchemas";
 import { IDocumentRepository } from "../../../domain/repositories/IDocumentRepository";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";
@@ -26,13 +26,16 @@ export class GenerateGeneralFlashCardsUseCase {
   ) {}
 
   async execute(
-    data: CreateFlashCardsDTO
+    data: CreateFlashCardsDTO,
+    userId: string
   ): Promise<CreateFlashCardsSetResponse> {
     this.logger.info(
       { documentId: data.documentId },
       "Executing GenerateGeneralFlashCardsUseCase"
     );
-    const document = await this.documentRepository.getDocumentById(data.documentId);
+    const document = await this.documentRepository.getDocumentById(
+      data.documentId
+    );
     if (!document) {
       this.logger.warn(
         { documentId: data.documentId },
@@ -42,7 +45,8 @@ export class GenerateGeneralFlashCardsUseCase {
     }
 
     await this.ensureExistingOfDocumentEmbeddingUseCase.execute(
-      data.documentId
+      data.documentId,
+      userId
     );
 
     const chunks: { content: string; metadata: ChunkMetadata }[] = (

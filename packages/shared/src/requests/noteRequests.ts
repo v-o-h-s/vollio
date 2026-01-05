@@ -3,7 +3,7 @@ import { JSONContent } from "../note";
 export interface CreateNoteDTO {
   id?: string;
   title?: string;
-  content?: JSONContent | null;
+  content?: JSONContent;
   documentId?: string;
   color?: string;
   is_auto_generated?: boolean;
@@ -17,4 +17,3 @@ export interface UpdateNoteDTO {
 export interface NoteIdParams {
   id: string;
 }
-
