@@ -91,7 +91,7 @@ export class DocumentController {
     }
     const { documentId } = req.params;
     const { document, content } =
-      await this.getDocumentFromGoogleDriveUseCase.execute(documentId);
+      await this.getDocumentFromGoogleDriveUseCase.execute(documentId, userId);
 
     res.header("Content-Type", document.getMimeType());
     res.header("Content-Disposition", `inline; name="${document.getName()}"`);
@@ -149,7 +149,10 @@ export class DocumentController {
       return;
     }
 
-    const result = await this.getDocumentByIdUseCase.execute(request.params.id);
+    const result = await this.getDocumentByIdUseCase.execute(
+      request.params.id,
+      userId
+    );
 
     reply.status(200).send({
       success: true,
@@ -270,9 +273,12 @@ export class DocumentController {
       return;
     }
 
-    const result = await this.generateSummaryUseCase.execute({
-      id: request.params.id,
-    });
+    const result = await this.generateSummaryUseCase.execute(
+      {
+        id: request.params.id,
+      },
+      userId
+    );
     ResponseFormatter.success<NoteData>(
       reply,
       result,

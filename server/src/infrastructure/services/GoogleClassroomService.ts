@@ -144,8 +144,8 @@ export class GoogleClassroomService implements IGoogleClassroomService {
       );
     }
 
-    // Google Classroom API returns materials in 'materials' array
-    return data.materials ?? [];
+    // Google Classroom API returns materials in 'courseWorkMaterial' array
+    return data.courseWorkMaterial ?? [];
   }
   async getAnnouncementsByCourseId(
     accessToken: string,

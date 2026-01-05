@@ -5,21 +5,27 @@ import { DocumentProcessingService } from "../../../infrastructure/services/Docu
 import { GetDocumentContentUseCase } from "../documents/GetDocumentContentUseCase";
 
 export class EmbedDocumentByIdUseCase {
-    constructor(
-        private embeddingService: IEmbeddingService,
-        private embeddingRepository: IEmbeddingRepository,
-        private getDocumentContentUseCase: GetDocumentContentUseCase,
-        private documentProcessingService: DocumentProcessingService,
-        private chunkingService: ChunkingService,
-    ) { }
-    async execute(documentId: string) {
-
-        const document = await this.getDocumentContentUseCase.execute(documentId);
-        const text = await this.documentProcessingService.getText(
-            new Uint8Array(document.content)
-        );
-        const chunks = await this.chunkingService.chunkText(text);
-        const embeddings = await this.embeddingService.generateEmbeddings(chunks);
-        await this.embeddingRepository.storeEmbedding(documentId, embeddings, chunks);
-    }
+  constructor(
+    private embeddingService: IEmbeddingService,
+    private embeddingRepository: IEmbeddingRepository,
+    private getDocumentContentUseCase: GetDocumentContentUseCase,
+    private documentProcessingService: DocumentProcessingService,
+    private chunkingService: ChunkingService
+  ) {}
+  async execute(documentId: string, userId: string) {
+    const document = await this.getDocumentContentUseCase.execute(
+      documentId,
+      userId
+    );
+    const text = await this.documentProcessingService.getText(
+      new Uint8Array(document.content)
+    );
+    const chunks = await this.chunkingService.chunkText(text);
+    const embeddings = await this.embeddingService.generateEmbeddings(chunks);
+    await this.embeddingRepository.storeEmbedding(
+      documentId,
+      embeddings,
+      chunks
+    );
+  }
 }

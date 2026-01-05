@@ -1,10 +1,7 @@
 import { IDocumentRepository } from "../../../domain/repositories/IDocumentRepository";
 import { IStorageService } from "../../../domain/services/IStorageService";
-import { IGoogleDriveService } from "../../../domain/services/IGoogleDriveService";
-import { UserGoogleClassroomRepository } from "../../../infrastructure/repositories/UserGoogleClassroomRepository";
-import { EnsureValidTokenUseCase } from "../google-Classroom/EnsureValidTokenUseCase";
+import { GetDocumentFromGoogleDriveUseCase } from "./GetDocumentFromGoogleDriveUseCase";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
-import { ServerError } from "../../../shared/errors/ServerError";
 import { FastifyBaseLogger } from "fastify";
 
 export interface GetDocumentContentResult {
@@ -17,71 +14,45 @@ export interface GetDocumentContentResult {
 
 /**
  * Use case to retrieve document content from either Google Drive or Supabase Storage
- * based on the document's source type
+ * based on the document's source type.
+ * If fetching from Google Drive, it will now trigger the caching flow.
  */
 export class GetDocumentContentUseCase {
   constructor(
     private documentRepository: IDocumentRepository,
     private storageService: IStorageService,
-    private googleDriveService: IGoogleDriveService,
-    private ensureValidTokenUseCase: EnsureValidTokenUseCase,
-    private userGoogleClassroomRepository: UserGoogleClassroomRepository,
+    private getDocumentFromGoogleDriveUseCase: GetDocumentFromGoogleDriveUseCase,
     private logger: FastifyBaseLogger
   ) {}
 
-  async execute(documentId: string): Promise<GetDocumentContentResult> {
-    this.logger.info({ documentId }, "Executing GetDocumentContentUseCase");
-    // Get document metadata from repository
-    // Note: RLS in DocumentRepository ensures user can only access their own documents
+  async execute(
+    documentId: string,
+    userId: string
+  ): Promise<GetDocumentContentResult> {
+    this.logger.info(
+      { documentId, userId },
+      "Executing GetDocumentContentUseCase"
+    );
+
     const document = await this.documentRepository.getDocumentById(documentId);
 
     if (!document) {
-      this.logger.warn(
-        { documentId },
-        "Document not found in GetDocumentContentUseCase"
-      );
+      this.logger.warn({ documentId }, "Document not found or access denied");
       throw new NotFoundError("Document not found or access denied");
     }
 
-    const storagePath = document.getSource().storagePath;
-    const googleDriveId = document.getGoogleDocumentId();
+    const isGoogleDriveDocument = !!document.getGoogleDocumentId();
 
-    // If document is from Google Drive
-    if (!storagePath && googleDriveId) {
-      this.logger.info(
-        { documentId, googleDriveId },
-        "Fetching document from Google Drive"
-      );
-
-      // Ensure valid Google OAuth tokens
-      await this.ensureValidTokenUseCase.execute();
-
-      const tokens = await this.userGoogleClassroomRepository.getTokens();
-      if (!tokens || !tokens.access_token) {
-        this.logger.error(
-          "No access token available in GetDocumentContentUseCase"
-        );
-        throw new ServerError("No access token available");
-      }
-
-      // Fetch document content from Google Drive
-      const content = await this.googleDriveService.getDocumentById(
-        tokens.access_token,
-        googleDriveId
-      );
-
-      if (!content) {
-        this.logger.warn(
-          { googleDriveId },
-          "Document not found in Google Drive during GetDocumentContentUseCase"
-        );
-        throw new NotFoundError("Document not found in Google Drive");
-      }
-
+    if (isGoogleDriveDocument) {
       this.logger.info(
         { documentId },
-        "GetDocumentContentUseCase executed successfully (Google Drive)"
+        "Document is Google Drive file, ensuring cache and content"
       );
+      const { content } = await this.getDocumentFromGoogleDriveUseCase.execute(
+        documentId,
+        userId
+      );
+
       return {
         documentId: document.getId(),
         name: document.getName(),
@@ -91,44 +62,30 @@ export class GetDocumentContentUseCase {
       };
     }
 
-    // If document is from Supabase Storage
-    if (storagePath) {
-      this.logger.info(
-        { documentId, storagePath },
-        "Fetching document from storage"
-      );
-
-      // Download document from storage
-      const content = await this.storageService.downloadDocument(storagePath);
-
-      if (!content) {
-        this.logger.warn(
-          { storagePath },
-          "Document not found in storage during GetDocumentContentUseCase"
-        );
-        throw new NotFoundError("Document not found in storage");
-      }
-
-      this.logger.info(
+    const storagePath = document.getStoragePath();
+    if (!storagePath) {
+      this.logger.error(
         { documentId },
-        "GetDocumentContentUseCase executed successfully (Storage)"
+        "Document has no storage path and is not a Google Drive file"
       );
-      return {
-        documentId: document.getId(),
-        name: document.getName(),
-        mimeType: document.getMimeType(),
-        content,
-        isGoogleDriveDocument: false,
-      };
+      throw new Error("Document content not found");
     }
 
-    // No valid source found
-    this.logger.error(
-      { documentId },
-      "Document has no valid source in GetDocumentContentUseCase"
-    );
-    throw new ServerError(
-      "Document has no valid source (neither storage path nor Google Drive ID)"
-    );
+    const content = await this.storageService.downloadDocument(storagePath);
+    if (!content) {
+      this.logger.warn(
+        { storagePath },
+        "Document found in DB but not in storage"
+      );
+      throw new NotFoundError("Document content not found in storage");
+    }
+
+    return {
+      documentId: document.getId(),
+      name: document.getName(),
+      mimeType: document.getMimeType(),
+      content,
+      isGoogleDriveDocument: false,
+    };
   }
 }

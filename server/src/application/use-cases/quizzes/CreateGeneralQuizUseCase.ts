@@ -1,5 +1,5 @@
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
-import { CreateQuizResponse } from '@vollio/shared';
+import { CreateQuizResponse } from "@vollio/shared";
 import { CreateQuizDTO } from "../../../shared/validation/quizSchemas";
 import { Quiz, QuizQuestion } from "../../../domain/entities/Quiz";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";
@@ -24,13 +24,16 @@ export class CreateGeneralQuizUseCase {
     private quizRepository: IQuizRepository
   ) {}
 
-  async execute(data: CreateQuizDTO): Promise<CreateQuizResponse> {
+  async execute(
+    data: CreateQuizDTO,
+    userId: string
+  ): Promise<CreateQuizResponse> {
     this.logger.info(
-      { documentId: data.documentId },
+      { documentId: data.documentId, userId },
       "Executing CreateGeneralQuizUseCase"
     );
     // getting chunks relevant to the prompt
-    if (!(await this.getDocumentByIdUseCase.execute(data.documentId))) {
+    if (!(await this.getDocumentByIdUseCase.execute(data.documentId, userId))) {
       this.logger.warn(
         { documentId: data.documentId },
         "Document not found in CreateGeneralQuizUseCase"
@@ -38,7 +41,8 @@ export class CreateGeneralQuizUseCase {
       throw new NotFoundError("Document not found");
     }
     await this.ensureExistingOfDocumentEmbeddingUseCase.execute(
-      data.documentId
+      data.documentId,
+      userId
     );
     const chunks: { content: string; metadata: ChunkMetadata }[] = (
       await this.embeddingRepository.getDocumentEmbeddings(data.documentId)

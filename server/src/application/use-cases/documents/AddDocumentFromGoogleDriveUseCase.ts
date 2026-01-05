@@ -22,6 +22,7 @@ export class AddDocumentFromGoogleDriveUseCase {
       { documentGoogleDriveId },
       "Executing AddDocumentFromGoogleDriveUseCase"
     );
+    // Ensure valid token and refresh it if not valid
     await this.ensureValidTokenUseCase.execute();
     const tokens = await this.userGoogleClassroomRepository.getTokens();
     if (!tokens || !tokens.access_token) {
@@ -35,7 +36,10 @@ export class AddDocumentFromGoogleDriveUseCase {
       documentGoogleDriveId
     );
     if (!data) {
-      this.logger.warn({ documentGoogleDriveId }, "Document not found in Google Drive");
+      this.logger.warn(
+        { documentGoogleDriveId },
+        "Document not found in Google Drive"
+      );
       throw new NotFoundError("document is not found");
     }
     const documentId = crypto.randomUUID();

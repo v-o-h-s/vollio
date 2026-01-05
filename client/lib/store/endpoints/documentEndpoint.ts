@@ -131,10 +131,11 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
     ],
   }),
 
-  getDocumentFromGoogleDrive: builder.query<any, string>({
+  getDocumentFromGoogleDrive: builder.query<Blob, string>({
     query: (id: string) => ({
       url: `documents/google-drive/${id}`,
       method: "GET",
+      responseHandler: (response) => response.blob(),
     }),
     providesTags: (_result, _error, id) => [{ type: "Document", id }],
   }),

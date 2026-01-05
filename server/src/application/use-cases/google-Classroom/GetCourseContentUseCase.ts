@@ -30,23 +30,31 @@ export class GetCourseContentUseCase {
     let courseWork: any[] = [];
 
     try {
-      announcements = await this.googleClassroomService.getAnnouncementsByCourseId(
-        tokens.access_token,
-        courseId
-      );
+      announcements =
+        await this.googleClassroomService.getAnnouncementsByCourseId(
+          tokens.access_token,
+          courseId
+        );
     } catch (error: any) {
-      console.warn(`Failed to fetch announcements for course ${courseId}:`, error.message);
+      console.warn(
+        `Failed to fetch announcements for course ${courseId}:`,
+        error.message
+      );
       // Gracefully handle 404 or other errors - return empty array
       announcements = [];
     }
 
     try {
-      courseWork = await this.googleClassroomService.getCourseWorkMaterialsByCourseId(
-        tokens.access_token,
-        courseId
-      );
+      courseWork =
+        await this.googleClassroomService.getCourseWorkMaterialsByCourseId(
+          tokens.access_token,
+          courseId
+        );
     } catch (error: any) {
-      console.warn(`Failed to fetch course work for course ${courseId}:`, error.message);
+      console.warn(
+        `Failed to fetch course work for course ${courseId}:`,
+        error.message
+      );
       // Gracefully handle 404 or other errors - return empty array
       courseWork = [];
     }
@@ -54,10 +62,10 @@ export class GetCourseContentUseCase {
     const formattedAnnouncements = (announcements || [])
       .map((announcement) => {
         const driveDocuments = (announcement.materials || [])
-          .filter((m: any) => m.driveDocument && m.driveDocument.driveDocument)
+          .filter((m: any) => m.driveFile && m.driveFile.driveFile)
           .map((m: any) => ({
-            id: m.driveDocument.driveDocument.id,
-            title: m.driveDocument.driveDocument.title,
+            id: m.driveFile.driveFile.id,
+            title: m.driveFile.driveFile.title,
           }));
 
         return {
@@ -76,11 +84,11 @@ export class GetCourseContentUseCase {
     const formattedCourseWork = (courseWork || [])
       .map((work) => {
         const driveDocuments = (work.materials || [])
-          .filter((m: any) => m.driveDocument && m.driveDocument.driveDocument)
+          .filter((m: any) => m.driveFile && m.driveFile.driveFile)
           .map((m: any) => ({
-            id: m.driveDocument.driveDocument.id,
-            title: m.driveDocument.driveDocument.title,
-            thumbnailUrl: m.driveDocument.driveDocument.thumbnailUrl,
+            id: m.driveFile.driveFile.id,
+            title: m.driveFile.driveFile.title,
+            thumbnailUrl: m.driveFile.driveFile.thumbnailUrl,
           }));
 
         return {

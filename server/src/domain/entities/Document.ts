@@ -51,6 +51,9 @@ export class Document {
       googleDocumentId: this.googleDocumentId,
     };
   }
+  getStoragePath(): string | null {
+    return this.storagePath;
+  }
   getMimeType(): string {
     return this.mimeType;
   }

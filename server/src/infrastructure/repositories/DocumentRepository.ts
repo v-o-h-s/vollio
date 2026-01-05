@@ -218,4 +218,45 @@ export class DocumentRepository implements IDocumentRepository {
       data.folder_id
     );
   }
+
+  async updateDocumentStoragePath(
+    id: string,
+    storagePath: string
+  ): Promise<Document> {
+    this.logger.info(
+      { documentId: id, storagePath },
+      "Updating document storage path"
+    );
+    const { data, error } = await this.supabaseClient
+      .from("documents")
+      .update({
+        storage_path: storagePath,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      this.logger.error(
+        { error, documentId: id },
+        "Error updating document storage path"
+      );
+      throw new DatabaseError(error);
+    }
+
+    this.logger.info(
+      { documentId: id },
+      "Document storage path updated successfully"
+    );
+    return new Document(
+      data.id,
+      data.name,
+      data.size,
+      data.storage_path,
+      data.google_document_id,
+      data.mime_type,
+      data.folder_id
+    );
+  }
 }

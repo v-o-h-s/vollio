@@ -68,4 +68,16 @@ export class StorageService implements IStorageService {
 
     return data.signedUrl;
   }
+
+  async uploadDocument(storagePath: string, file: Buffer): Promise<void> {
+    const { error } = await this.supabaseAdmin.storage
+      .from(STORAGE_BUCKET)
+      .upload(storagePath, file);
+
+    if (error) {
+      throw new ServerError(
+        `Failed to upload document to storage: ${error.message}`
+      );
+    }
+  }
 }

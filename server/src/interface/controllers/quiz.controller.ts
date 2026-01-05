@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { CreateQuizDTO } from "../../shared/validation/quizSchemas";
-import { CreateQuizResponse } from '@vollio/shared';
+import { CreateQuizResponse } from "@vollio/shared";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 import { CreateGeneralQuizUseCase } from "../../application/use-cases/quizzes/CreateGeneralQuizUseCase";
 import { CreateUserPromptQuizUseCase } from "../../application/use-cases/quizzes/CreateUserPromptQuizUseCase";
@@ -33,9 +33,12 @@ export class QuizController {
 
     let quizResponse: CreateQuizResponse;
     if (data.userPrompt) {
-      quizResponse = await this.createUserPromptQuizUseCase.execute(data);
+      quizResponse = await this.createUserPromptQuizUseCase.execute(
+        data,
+        userId
+      );
     } else {
-      quizResponse = await this.createQuizUseCase.execute(data);
+      quizResponse = await this.createQuizUseCase.execute(data, userId);
     }
     return ResponseFormatter.success(
       reply,

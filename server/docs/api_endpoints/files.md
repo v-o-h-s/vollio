@@ -48,7 +48,7 @@ Retrieves all documents for the authenticated user.
 
 ## 2. Get Document by ID
 
-Retrieves a specific document's metadata by ID.
+Retrieves a specific document's metadata by ID. This is the primary endpoint for retrieving document content links.
 
 - **URL**: `/:id`
 - **Method**: `GET`
@@ -63,9 +63,9 @@ Retrieves a specific document's metadata by ID.
   "message": "Document fetched successfully",
   "data": {
     "id": "string (UUID)",
-    "documentname": "string",
-    "documentUrl": "string",
-    "documentSize": "number",
+    "name": "string",
+    "documentUrl": "string (Signed URL or Proxy URL)",
+    "size": "number",
     "mimeType": "string",
     "uploadedAt": "string (ISO 8601)",
     "folderId": "string | null",
@@ -74,6 +74,8 @@ Retrieves a specific document's metadata by ID.
   "error": null
 }
 ```
+
+> **Note on `documentUrl`**: If the document is cached, this is a direct signed URL from Supabase Storage. If it's a first-time access for a Google Drive file, this may be a proxy URL (`/google-drive/:id`) that handles on-demand caching.
 
 **Error Responses**:
 
@@ -246,36 +248,9 @@ Renames a document.
 
 ---
 
-## 8. Stream Document
-
-Streams a document for download/viewing using a token. Supports both GET (full stream) and HEAD (headers only) requests.
-
-- **URL**: `/stream`
-- **Method**: `GET` or `HEAD`
-- **Auth Required**: No (token-based)
-- **Query Parameters**: `token` (string, required) - Access token
-
-**Success Response** (200 OK):
-
-- **Content**: Binary Document stream
-- **Headers**:
-  - `Content-Type`: `application/pdf`
-  - `Content-Disposition`: `inline; documentname=document.document`
-  - `Accept-Ranges`: `bytes` (for range requests)
-
-**HEAD Request**: Returns headers only without document content (useful for Document.js preflight checks)
-
-**Error Responses**:
-
-- **400 Bad Request**: Missing token
-- **401 Unauthorized**: Invalid or expired token
-- **403 Forbidden**: Wrong token purpose
-- **404 Not Found**: Document not found
-- **500 Internal Server Error**: Google Classroom tokens expired
-
 ---
 
-## 9. Add Document from Google Drive
+## 8. Add Document from Google Drive
 
 Adds a reference to a Google Drive document into the system.
 
@@ -308,9 +283,9 @@ Adds a reference to a Google Drive document into the system.
 
 ---
 
-## 10. Get Document from Google Drive
+## 9. Get Document from Google Drive (Proxy & Cache)
 
-Retrieves a document's content from Google Drive via the system.
+Retrieves a document's content from Google Drive via the system. This endpoint also acts as a proxy that triggers the **internal caching flow** to Supabase Storage.
 
 - **URL**: `/google-drive/:documentId`
 - **Method**: `GET`
@@ -322,7 +297,7 @@ Retrieves a document's content from Google Drive via the system.
 - **Content**: Binary document stream
 - **Headers**:
   - `Content-Type`: Document's MIME type (e.g., `application/pdf`)
-  - `Content-Disposition`: `inline; documentname="<documentname>"`
+  - `Content-Disposition`: `inline; name="<filename>"`
 
 **Error Responses**:
 
@@ -331,7 +306,7 @@ Retrieves a document's content from Google Drive via the system.
 
 ---
 
-## 11. Generate Summary
+## 10. Generate Summary
 
 Generates a summary note for a document using AI.
 

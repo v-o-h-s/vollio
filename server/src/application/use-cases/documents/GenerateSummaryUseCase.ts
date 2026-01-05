@@ -27,14 +27,17 @@ export class GenerateSummaryUseCase {
     private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase
   ) {}
 
-  async execute(data: DocumentIdParams): Promise<NoteData> {
+  async execute(data: DocumentIdParams, userId: string): Promise<NoteData> {
     this.logger.info(
-      { documentId: data.id },
+      { documentId: data.id, userId },
       "Executing SummarizeDocumentUseCase"
     );
 
     // 1. Ensure document is processed
-    await this.ensureExistingOfDocumentEmbeddingUseCase.execute(data.id);
+    await this.ensureExistingOfDocumentEmbeddingUseCase.execute(
+      data.id,
+      userId
+    );
 
     // 2. Get document chunks to get the text
     const chunks: { content: string; metadata: ChunkMetadata }[] = (
