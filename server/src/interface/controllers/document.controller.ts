@@ -12,7 +12,6 @@ import {
   DocumentIdParams,
 } from "../../shared/validation/documentSchemas";
 import { getStorageUrlSchema } from "../../shared/validation/documentSchemas";
-import { StreamDocumentUseCase } from "../../application/use-cases/documents/StreamDocumentUseCase";
 import {
   AddDocumentFromGoogleDriveResponse,
   CreateSignedUrlResponse,
@@ -27,7 +26,6 @@ import {
   MoveDocumentResponse,
   NoteData,
   RenameDocumentResponse,
-  StreamDocumentResponse,
 } from "@vollio/shared";
 import { GenerateSummaryUseCase } from "../../application/use-cases/documents/GenerateSummaryUseCase";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
@@ -44,7 +42,6 @@ export class DocumentController {
     private deleteDocumentUseCase: DeleteDocumentUseCase,
     private moveDocumentUseCase: MoveDocumentUseCase,
     private renameDocumentUseCase: RenameDocumentUseCase,
-    private streamDocumentUseCase: StreamDocumentUseCase,
     private generateSummaryUseCase: GenerateSummaryUseCase,
     private getStorageUrlUseCase: GetStorageUrlUseCase,
     private createDocumentUseCase: CreateDocumentUseCase
@@ -260,102 +257,6 @@ export class DocumentController {
     } satisfies RenameDocumentResponse);
   }
 
-  async streamDocumentHead(
-    request: FastifyRequest<{ Querystring: { token: string } }>,
-    reply: FastifyReply
-  ): Promise<void> {
-    const { token } = request.query;
-
-    if (!token) {
-      reply.status(400).send({
-        success: false,
-        message: "Token is required",
-        data: null,
-        error: { message: "Token is required" },
-      });
-      return;
-    }
-
-    try {
-      // Token validation (we don't need the stream, just validate access)
-      await this.streamDocumentUseCase.execute(token);
-
-      // Send headers only with 200 OK for HEAD requests
-      reply
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
-        .header("Access-Control-Allow-Headers", "Content-Type, Range")
-        .header(
-          "Access-Control-Expose-Headers",
-          "Content-Length, Content-Range, Accept-Ranges"
-        )
-        .header("Content-Type", "application/pdf")
-        .header("Content-Disposition", "inline; filename=document.pdf")
-        .header("Accept-Ranges", "bytes")
-        .header("Cache-Control", "no-cache, no-store, must-revalidate")
-        .send();
-    } catch (err: any) {
-      const statusCode = err.statusCode || 500;
-      const message = err.message || "Failed to access document";
-
-      reply.status(statusCode).send({
-        success: false,
-        message,
-        data: null,
-        error: { message },
-      });
-    }
-  }
-
-  async streamDocument(
-    request: FastifyRequest<{ Querystring: { token: string } }>,
-    reply: FastifyReply
-  ): Promise<void> {
-    const { token } = request.query;
-
-    if (!token) {
-      reply.status(400).send({
-        success: false,
-        message: "Token is required",
-        data: null,
-        error: { message: "Token is required" },
-      });
-      return;
-    }
-
-    try {
-      // Token validation happens inside StreamDocumentUseCase.execute()
-      const stream = await this.streamDocumentUseCase.execute(token);
-
-      // Set CORS headers explicitly for Document.js and use 206 Partial Content for streaming
-      reply
-        .status(206)
-        .header("Access-Control-Allow-Origin", "*")
-        .header("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
-        .header("Access-Control-Allow-Headers", "Content-Type, Range")
-        .header(
-          "Access-Control-Expose-Headers",
-          "Content-Length, Content-Range, Accept-Ranges"
-        )
-        .header("Content-Type", "application/pdf")
-        .header("Content-Disposition", "inline; filename=document.pdf")
-        .header("Accept-Ranges", "bytes")
-        .header("Cache-Control", "no-cache, no-store, must-revalidate");
-
-      // Pipe stream directly without JSON wrapper
-      return reply.send(stream);
-    } catch (err: any) {
-      const statusCode = err.statusCode || 500;
-      const message = err.message || "Failed to stream document";
-
-      reply.status(statusCode).send({
-        success: false,
-        message,
-        data: null,
-        error: { message },
-      });
-    }
-  }
   /**
    * generate note for document
    */

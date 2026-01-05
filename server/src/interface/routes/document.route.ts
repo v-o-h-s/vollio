@@ -18,7 +18,6 @@ import {
   DocumentIdParams,
   MoveDocumentDTO,
   RenameDocumentDTO,
-  validateQuerySchema,
   getStorageUrlSchema,
   createDocumentSchema,
 } from "../../shared/validation/documentSchemas";
@@ -56,44 +55,6 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     async (request, reply) => {
       const documentController = request.diScope.resolve("documentController");
       return documentController.getDocumentFromGoogleDrive(request, reply);
-    }
-  );
-
-  fastify.head<{ Querystring: { token: string } }>(
-    `${opts.prefix}/stream`,
-    {
-      schema: {
-        querystring: {
-          type: "object",
-          properties: {
-            token: { type: "string" },
-          },
-          required: ["token"],
-        },
-      },
-    },
-    async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
-      return documentController.streamDocumentHead(request, reply);
-    }
-  );
-
-  fastify.get<{ Querystring: { token: string } }>(
-    `${opts.prefix}/stream`,
-    {
-      schema: {
-        querystring: {
-          type: "object",
-          properties: {
-            token: { type: "string" },
-          },
-          required: ["token"],
-        },
-      },
-    },
-    async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
-      return documentController.streamDocument(request, reply);
     }
   );
 
