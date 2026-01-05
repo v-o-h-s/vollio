@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 import { RTKQueryError } from "@/lib/error-handling/rtk-query-error";
 import { useGetGoogleClassroomConnectionStatusQuery } from "@/lib/store/apiSlice";
+import { DirectorySkeleton } from "./DirectorySkeleton";
 
 export default function DocumentsDirectoryViewer() {
   // Use custom hooks for data management
@@ -306,11 +307,7 @@ export default function DocumentsDirectoryViewer() {
 
   // Loading state
   if (isLoadingDocuments || isLoadingFolders) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <DirectorySkeleton />;
   }
 
   // Error state

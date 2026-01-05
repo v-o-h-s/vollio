@@ -1,14 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Folder,
-  MoreVertical,
-  Edit,
-  Trash2,
-  MoveRight,
-  Loader2,
-} from "lucide-react";
+import { MoreVertical, Edit, Trash2, MoveRight, Loader2 } from "lucide-react";
+import { FaFolderOpen } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -61,7 +55,7 @@ export function FolderCard({
         onDoubleClick={onOpen}
       >
         <div className="flex flex-col items-center gap-4">
-          <Folder className="h-12 w-12 group-hover:text-primary transition-colors" />
+          <FaFolderOpen className="h-12 w-12 text-slate-700 dark:text-slate-300 group-hover:text-primary transition-colors" />
           <p
             className="text-sm text-center font-bold px-2 line-clamp-2 wrap-break-word w-full"
             title={name}

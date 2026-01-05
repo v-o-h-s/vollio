@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  FileText,
   MoreVertical,
   Edit,
   Trash2,
@@ -10,6 +9,7 @@ import {
   Loader2,
   Eye,
 } from "lucide-react";
+import { IoDocumentTextSharp } from "react-icons/io5";
 import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { Button } from "@/components/ui/button";
 import {
@@ -108,7 +108,7 @@ export function DocumentCard({
         onDoubleClick={onOpen}
       >
         <div className="flex flex-col items-center gap-4">
-          <FileText className="h-12 w-12 group-hover:text-primary transition-colors" />
+          <IoDocumentTextSharp className="h-12 w-12 text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors" />
           <p
             className="text-sm text-center font-bold px-2 line-clamp-2 wrap-break-word w-full"
             title={name}
