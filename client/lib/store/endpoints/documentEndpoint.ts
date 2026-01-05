@@ -2,8 +2,13 @@ import { ApiBuilder } from "@/lib/store/endpoints/types";
 import {
   GetAllDocumentsResponse,
   GetDocumentByIdResponse,
+  GetStorageUrlData,
+  GetStorageUrlDto,
+  GetStorageUrlResponse,
+  CreateDocumentDto,
   NoteData,
 } from "@vollio/shared";
+
 export interface TransformedDocument {
   id: string;
   name: string;
@@ -28,19 +33,18 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
 
       return response.data.documents.map((document) => ({
         id: document.id,
-        name: document.name, // using name from shared
-        size: document.size, // using size from shared
+        name: document.name,
+        size: document.size,
         mimeType: document.mimeType,
         folderId: document.folderId,
         isGoogleDriveDocument: document.isGoogleDriveDocument,
       }));
     },
-
     providesTags: ["Document"],
   }),
 
   getDocumentById: builder.query<TransformedDocument, string>({
-    query: (id) => ({
+    query: (id: string) => ({
       url: `documents/${id}`,
       method: "GET",
     }),
@@ -63,17 +67,32 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
     providesTags: (_result, _error, id) => [{ type: "Document", id }],
   }),
 
-  uploadDocument: builder.mutation<TransformedDocument, FormData>({
-    query: (formData) => ({
-      url: "documents/upload",
+  generateUploadUrl: builder.mutation<GetStorageUrlData, GetStorageUrlDto>({
+    query: (data: GetStorageUrlDto) => ({
+      url: "documents/upload-url",
       method: "POST",
-      body: formData,
+      body: data,
+    }),
+    transformResponse: (response: GetStorageUrlResponse) => {
+      if (!response.data) {
+        throw new Error("No data returned from server");
+      }
+      return response.data;
+    },
+    invalidatesTags: [{ type: "Document", id: "LIST" }],
+  }),
+
+  createDocument: builder.mutation<{ id: string }, CreateDocumentDto>({
+    query: (data: CreateDocumentDto) => ({
+      url: "documents/finish-upload",
+      method: "POST",
+      body: data,
     }),
     invalidatesTags: [{ type: "Document", id: "LIST" }],
   }),
 
   deleteDocument: builder.mutation<{ success: boolean }, string>({
-    query: (id) => ({
+    query: (id: string) => ({
       url: `documents/${id}`,
       method: "DELETE",
       body: undefined,
@@ -88,7 +107,7 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
   }),
 
   renameDocument: builder.mutation<any, { id: string; name: string }>({
-    query: ({ id, name }) => ({
+    query: ({ id, name }: { id: string; name: string }) => ({
       url: `documents/${id}/rename`,
       method: "PUT",
       body: { name },
@@ -100,7 +119,7 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
   }),
 
   moveDocument: builder.mutation<any, { id: string; folderId: string | null }>({
-    query: ({ id, folderId }) => ({
+    query: ({ id, folderId }: { id: string; folderId: string | null }) => ({
       url: `documents/${id}/move`,
       method: "PATCH",
       body: { folderId },
@@ -113,7 +132,7 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
   }),
 
   getDocumentFromGoogleDrive: builder.query<any, string>({
-    query: (id) => ({
+    query: (id: string) => ({
       url: `documents/google-drive/${id}`,
       method: "GET",
     }),
@@ -124,7 +143,7 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
     any,
     { documentGoogleDriveId: string }
   >({
-    query: (data) => ({
+    query: (data: { documentGoogleDriveId: string }) => ({
       url: "documents/google-drive",
       method: "POST",
       body: data,
@@ -133,7 +152,7 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
   }),
 
   generateSummary: builder.mutation<NoteData, string>({
-    query: (documentId) => ({
+    query: (documentId: string) => ({
       url: `documents/${documentId}/generate-summary`,
       method: "POST",
     }),

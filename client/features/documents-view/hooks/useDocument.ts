@@ -5,7 +5,8 @@ import {
   useRenameDocumentMutation,
   useMoveDocumentMutation,
   useDeleteDocumentMutation,
-  useUploadDocumentMutation,
+  useGenerateUploadUrlMutation,
+  useCreateDocumentMutation,
   useGetDocumentByIdQuery,
 } from "@/lib/store/apiSlice";
 import { toast } from "react-toastify";
@@ -28,8 +29,11 @@ export function useDocument() {
     useMoveDocumentMutation();
   const [deleteDocumentMutation, { isLoading: isDeleting }] =
     useDeleteDocumentMutation();
-  const [uploadDocumentMutation, { isLoading: isUploading }] =
-    useUploadDocumentMutation();
+  const [generateUploadUrlMutation, { isLoading: isGeneratingUrl }] =
+    useGenerateUploadUrlMutation();
+  const [createDocumentMutation, { isLoading: isCreatingDoc }] =
+    useCreateDocumentMutation();
+  const isUploading = isGeneratingUrl || isCreatingDoc;
 
   // Document operations
   const renameDocument = async (id: string, name: string) => {
@@ -68,12 +72,41 @@ export function useDocument() {
   };
 
   const uploadDocument = async (file: File, folderId: string | null = null) => {
-    const formData = new FormData();
-    formData.append("document", file);
-    if (folderId) {
-      formData.append("folderId", folderId);
+    // Build the path including folder
+    const filePath = folderId ? `${folderId}/${file.name}` : file.name;
+
+    // Request signed upload URL from server
+    const { storageUrl, storagePath } = await generateUploadUrlMutation({
+      name: filePath,
+    }).unwrap();
+
+    // Upload directly to Supabase
+    const response = await fetch(storageUrl, {
+      method: "PUT",
+      body: file,
+      headers: {
+        "Content-Type": file.type,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to upload document");
     }
-    return uploadDocumentMutation(formData).unwrap();
+
+    // Create document metadata in the database
+    await createDocumentMutation({
+      name: file.name,
+      size: file.size,
+      folderId,
+      storagePath,
+    }).unwrap();
+
+    // Return the file path or URL
+    return {
+      success: true,
+      filePath,
+      // optionally generate a signed download URL from server if needed
+    };
   };
 
   return {

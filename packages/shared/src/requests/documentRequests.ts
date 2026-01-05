@@ -13,3 +13,14 @@ export interface RenameDocumentDTO {
 export interface QuerySchema {
   token: string;
 }
+
+export interface GetStorageUrlDto {
+  name: string;
+}
+
+export interface CreateDocumentDto {
+  name: string;
+  size: number;
+  folderId?: string | null;
+  storagePath: string;
+}

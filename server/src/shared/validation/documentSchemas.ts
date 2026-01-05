@@ -1,4 +1,31 @@
 import { JSONSchemaType } from "ajv";
+import { GetStorageUrlDto, CreateDocumentDto } from "@vollio/shared";
+
+export const getStorageUrlSchema: JSONSchemaType<GetStorageUrlDto> = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+  },
+  required: ["name"],
+  additionalProperties: false,
+};
+
+export const createDocumentSchema: JSONSchemaType<CreateDocumentDto> = {
+  type: "object",
+  properties: {
+    name: { type: "string" },
+    size: { type: "number" },
+    storagePath: { type: "string" },
+    folderId: {
+      type: "string",
+      nullable: true,
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+    },
+  },
+  required: ["name", "size", "storagePath"],
+  additionalProperties: false,
+};
 
 // Document ID params
 export interface DocumentIdParams {

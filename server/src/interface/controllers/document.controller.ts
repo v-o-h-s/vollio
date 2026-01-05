@@ -3,7 +3,6 @@ import { AddDocumentFromGoogleDriveUseCase } from "../../application/use-cases/d
 import { GetDocumentFromGoogleDriveUseCase } from "../../application/use-cases/documents/GetDocumentFromGoogleDriveUseCase";
 import { GetAllDocumentsUseCase } from "../../application/use-cases/documents/GetAllDocumentsUseCase";
 import { GetDocumentByIdUseCase } from "../../application/use-cases/documents/GetDocumentByIdUseCase";
-import { UploadDocumentUseCase } from "../../application/use-cases/documents/UploadDocumentUseCase";
 import { DeleteDocumentUseCase } from "../../application/use-cases/documents/DeleteDocumentUseCase";
 import { MoveDocumentUseCase } from "../../application/use-cases/documents/MoveDocumentUseCase";
 import { RenameDocumentUseCase } from "../../application/use-cases/documents/RenameDocumentUseCase";
@@ -12,6 +11,7 @@ import {
   RenameDocumentDTO,
   DocumentIdParams,
 } from "../../shared/validation/documentSchemas";
+import { getStorageUrlSchema } from "../../shared/validation/documentSchemas";
 import { StreamDocumentUseCase } from "../../application/use-cases/documents/StreamDocumentUseCase";
 import {
   AddDocumentFromGoogleDriveResponse,
@@ -21,14 +21,19 @@ import {
   GetDocumentByIdResponse,
   GetDocumentFromGoogleDriveResponse,
   GetNoteByIdResponse,
+  GetStorageUrlData,
+  GetStorageUrlDto,
+  GetStorageUrlResponse,
   MoveDocumentResponse,
   NoteData,
   RenameDocumentResponse,
   StreamDocumentResponse,
-  UploadDocumentResponse,
 } from "@vollio/shared";
 import { GenerateSummaryUseCase } from "../../application/use-cases/documents/GenerateSummaryUseCase";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
+import { GetStorageUrlUseCase } from "../../application/use-cases/documents/GetStorageUrlUseCase";
+import { CreateDocumentUseCase } from "../../application/use-cases/documents/CreateDocumentUseCase";
+import { CreateDocumentDto } from "@vollio/shared";
 
 export class DocumentController {
   constructor(
@@ -36,12 +41,13 @@ export class DocumentController {
     private getDocumentFromGoogleDriveUseCase: GetDocumentFromGoogleDriveUseCase,
     private getAllDocumentsUseCase: GetAllDocumentsUseCase,
     private getDocumentByIdUseCase: GetDocumentByIdUseCase,
-    private uploadDocumentUseCase: UploadDocumentUseCase,
     private deleteDocumentUseCase: DeleteDocumentUseCase,
     private moveDocumentUseCase: MoveDocumentUseCase,
     private renameDocumentUseCase: RenameDocumentUseCase,
     private streamDocumentUseCase: StreamDocumentUseCase,
-    private generateSummaryUseCase: GenerateSummaryUseCase
+    private generateSummaryUseCase: GenerateSummaryUseCase,
+    private getStorageUrlUseCase: GetStorageUrlUseCase,
+    private createDocumentUseCase: CreateDocumentUseCase
   ) {}
   // add document from google drive
   async addDocumentFromGoogleDrive(
@@ -166,61 +172,6 @@ export class DocumentController {
   }
   // upload document to supabase storage
   // pls use formdata in the frontend to send the document
-  async uploadDocument(
-    request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<void> {
-    const userId = request.user?.id;
-    if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "Not authenticated",
-        data: null,
-        error: { message: "Not authenticated" },
-      });
-      return;
-    }
-
-    const data = await request.file();
-    if (!data) {
-      reply.status(400).send({
-        success: false,
-        message: "No document provided",
-        data: null,
-        error: { message: "No document provided" },
-      });
-      return;
-    }
-
-    const documentBuffer = await data.toBuffer();
-
-    // Get folderId from form fields
-    let folderId: string | null = null;
-    const folderIdField = data.fields.folderId;
-    if (folderIdField) {
-      if (Array.isArray(folderIdField)) {
-        folderId = (folderIdField[0] as any).value || null;
-      } else {
-        folderId = (folderIdField as any).value || null;
-      }
-    }
-
-    await this.uploadDocumentUseCase.execute({
-      documentBuffer,
-      name: data.filename,
-      size: documentBuffer.length,
-      userId,
-      folderId,
-    });
-
-    reply.status(200).send({
-      success: true,
-      message: "Document uploaded successfully",
-      data: null,
-      error: null,
-    });
-  }
-
   async deleteDocument(
     request: FastifyRequest<{ Params: DocumentIdParams }>,
     reply: FastifyReply
@@ -419,12 +370,54 @@ export class DocumentController {
     }
 
     const result = await this.generateSummaryUseCase.execute({
-    id: request.params.id
+      id: request.params.id,
     });
     ResponseFormatter.success<NoteData>(
       reply,
       result,
       "Summary generated successfully"
+    );
+  }
+
+  async getStorageUrl(
+    request: FastifyRequest<{ Body: GetStorageUrlDto }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({ error: "Unauthorized" });
+      return;
+    }
+
+    const result = await this.getStorageUrlUseCase.execute({
+      userId,
+      name: request.body.name,
+    });
+    ResponseFormatter.success<GetStorageUrlData>(
+      reply,
+      result,
+      "Storage URL retrieved successfully"
+    );
+  }
+
+  async createDocument(
+    request: FastifyRequest<{ Body: CreateDocumentDto }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({ error: "Unauthorized" });
+      return;
+    }
+
+    const result = await this.createDocumentUseCase.execute({
+      ...request.body,
+      userId,
+    });
+    ResponseFormatter.success<{ id: string }>(
+      reply,
+      result,
+      "Document created successfully"
     );
   }
 }

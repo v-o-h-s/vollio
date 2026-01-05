@@ -31,7 +31,7 @@ const baseQuery = fetchBaseQuery({
       endpoint !== "deleteFolder" &&
       endpoint !== "deleteNote" &&
       endpoint !== "deleteHighlight" &&
-      endpoint !== "deleteHighlightsByTag"&&
+      endpoint !== "deleteHighlightsByTag" &&
       endpoint !== "generateSummary"
     ) {
       headers.set("Content-Type", "application/json");
@@ -103,7 +103,8 @@ export const {
   useGetGoogleClassroomCourseContentQuery,
   useGetAllDocumentsQuery,
   useGetDocumentByIdQuery,
-  useUploadDocumentMutation,
+  useGenerateUploadUrlMutation,
+  useCreateDocumentMutation,
   useDeleteDocumentMutation,
   useRenameDocumentMutation,
   useMoveDocumentMutation,

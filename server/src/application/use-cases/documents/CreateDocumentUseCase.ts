@@ -1,21 +1,18 @@
 import { IDocumentRepository } from "../../../domain/repositories/IDocumentRepository";
 import { IFolderRepository } from "../../../domain/repositories/IFolderRepository";
-import { IStorageService } from "../../../domain/services/IStorageService";
 import { Document } from "../../../domain/entities/Document";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { ServerError } from "../../../shared/errors/ServerError";
 import { randomUUID } from "crypto";
 import { FastifyBaseLogger } from "fastify";
+import { CreateDocumentDto } from "@vollio/shared";
+import { IStorageService } from "../../../domain/services/IStorageService";
 
-export interface UploadDocumentInput {
-  documentBuffer: Buffer;
-  name: string;
-  size: number;
+export interface CreateDocumentInput extends CreateDocumentDto {
   userId: string;
-  folderId?: string | null;
 }
 
-export class UploadDocumentUseCase {
+export class CreateDocumentUseCase {
   constructor(
     private documentRepository: IDocumentRepository,
     private folderRepository: IFolderRepository,
@@ -23,14 +20,14 @@ export class UploadDocumentUseCase {
     private logger: FastifyBaseLogger
   ) {}
 
-  async execute(input: UploadDocumentInput): Promise<void> {
+  async execute(input: CreateDocumentInput): Promise<{ id: string }> {
     this.logger.info(
       {
         name: input.name,
         userId: input.userId,
         folderId: input.folderId,
       },
-      "Executing UploadDocumentUseCase"
+      "Executing CreateDocumentUseCase"
     );
     // Validate folder if provided
     if (input.folderId) {
@@ -41,7 +38,7 @@ export class UploadDocumentUseCase {
       if (!folder) {
         this.logger.warn(
           { folderId: input.folderId, userId: input.userId },
-          "Folder not found in UploadDocumentUseCase"
+          "Folder not found in CreateDocumentUseCase"
         );
         throw new NotFoundError("Folder not found or does not belong to user");
       }
@@ -50,26 +47,34 @@ export class UploadDocumentUseCase {
     // Validate name
     this.validateName(input.name);
 
-    // Upload document to storage
-    let storagePath: string;
-    try {
-      this.logger.info(
-        { userId: input.userId, name: input.name },
-        "Uploading document to storage"
+    // SECURITY: Validate storagePath
+    // 1. Ensure it doesn't try to go up directory levels (path traversal)
+    if (input.storagePath.includes("..") || input.storagePath.includes("./")) {
+      this.logger.warn(
+        { storagePath: input.storagePath, userId: input.userId },
+        "Potential path traversal attempt detected in storagePath"
       );
-      storagePath = await this.storageService.uploadDocument(
-        input.documentBuffer,
-        input.name,
-        input.userId
+      throw new ServerError("Invalid storage path provided");
+    }
+
+    // 2. Ensure it belongs to the user's specific directory
+    // The path format is `${userId}/${timestamp}_${sanitizedName}`
+    if (!input.storagePath.startsWith(`${input.userId}/`)) {
+      this.logger.warn(
+        { storagePath: input.storagePath, userId: input.userId },
+        "Unauthorized storage path access attempt: path does not start with userId"
       );
-    } catch (error) {
-      this.logger.error(
-        { error, name: input.name },
-        "Failed to upload document to storage"
+      throw new ServerError("Unauthorized storage path");
+    }
+
+    // SECURITY: Validate file size (e.g., 50MB limit)
+    const MAX_SIZE = 50 * 1024 * 1024; // 50MB
+    if (input.size > MAX_SIZE) {
+      this.logger.warn(
+        { size: input.size, userId: input.userId },
+        "Document size exceeds maximum limit"
       );
-      throw new ServerError(
-        `Failed to upload document: ${(error as Error).message}`
-      );
+      throw new ServerError("Document size exceeds maximum limit (50MB)");
     }
 
     // Create document entity
@@ -78,16 +83,16 @@ export class UploadDocumentUseCase {
       documentId,
       input.name,
       input.size,
-      storagePath,
+      input.storagePath,
       null, // No Google Drive ID
-      "application/pdf",
+      "application/pdf", // TODO: Detect mime type properly if possible
       input.folderId ?? null
     );
 
-    // Save to database (cleanup storage if this fails)
+    // Save to database
     try {
       this.logger.info(
-        { documentId, storagePath },
+        { documentId, storagePath: input.storagePath },
         "Saving document metadata to repository"
       );
       await this.documentRepository.addDocument(document);
@@ -96,15 +101,18 @@ export class UploadDocumentUseCase {
         { error, documentId },
         "Error saving document metadata, cleaning up storage"
       );
-      // Cleanup: Delete uploaded document from storage
-      await this.storageService.deleteDocument(storagePath);
-      throw error; // Re-throw to inform caller
+      // Cleanup: Delete uploaded document from storage if DB save fails
+      // Since the client just uploaded it, we should clean it up to avoid orphans
+      await this.storageService.deleteDocument(input.storagePath);
+      throw error;
     }
 
     this.logger.info(
       { documentId },
-      "UploadDocumentUseCase executed successfully"
+      "CreateDocumentUseCase executed successfully"
     );
+
+    return { id: documentId };
   }
 
   private validateName(name: string): void {

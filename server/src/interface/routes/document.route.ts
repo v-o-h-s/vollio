@@ -19,7 +19,10 @@ import {
   MoveDocumentDTO,
   RenameDocumentDTO,
   validateQuerySchema,
+  getStorageUrlSchema,
+  createDocumentSchema,
 } from "../../shared/validation/documentSchemas";
+import { GetStorageUrlDto, CreateDocumentDto } from "@vollio/shared";
 
 const documentRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
@@ -113,14 +116,17 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     }
   );
 
-  fastify.post(
-    `${opts.prefix}/upload`,
+  fastify.post<{ Body: GetStorageUrlDto }>(
+    `${opts.prefix}/upload-url`,
     {
-      schema: {},
+      schema: {
+        body: getStorageUrlSchema,
+      },
+      preHandler: validateBody(getStorageUrlSchema),
     },
     async (request, reply) => {
       const documentController = request.diScope.resolve("documentController");
-      return documentController.uploadDocument(request, reply);
+      return documentController.getStorageUrl(request, reply);
     }
   );
 
@@ -198,6 +204,20 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     async (request, reply) => {
       const documentController = request.diScope.resolve("documentController");
       return documentController.generateSummary(request, reply);
+    }
+  );
+
+  fastify.post<{ Body: CreateDocumentDto }>(
+    `${opts.prefix}/finish-upload`,
+    {
+      schema: {
+        body: createDocumentSchema,
+      },
+      preHandler: validateBody(createDocumentSchema),
+    },
+    async (request, reply) => {
+      const documentController = request.diScope.resolve("documentController");
+      return documentController.createDocument(request, reply);
     }
   );
 };

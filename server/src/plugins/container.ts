@@ -27,7 +27,6 @@ import { GoogleDriveService } from "../infrastructure/services/GoogleDriveServic
 import { DocumentRepository } from "../infrastructure/repositories/DocumentRepository";
 import { DocumentController } from "../interface/controllers/document.controller";
 import { GetDocumentFromGoogleDriveUseCase } from "../application/use-cases/documents/GetDocumentFromGoogleDriveUseCase";
-import { UploadDocumentUseCase } from "../application/use-cases/documents/UploadDocumentUseCase";
 import { GetAllDocumentsUseCase } from "../application/use-cases/documents/GetAllDocumentsUseCase";
 import { GetDocumentByIdUseCase } from "../application/use-cases/documents/GetDocumentByIdUseCase";
 import { DeleteDocumentUseCase } from "../application/use-cases/documents/DeleteDocumentUseCase";
@@ -83,7 +82,8 @@ import { CountHighlightsByTagUseCase } from "../application/use-cases/highlights
 import { DeleteHighlightsByTagUseCase } from "../application/use-cases/highlights/DeleteHighlightsByTagUseCase";
 import { SettingsController } from "../interface/controllers/settings.controller";
 import { GenerateSummaryUseCase } from "../application/use-cases/documents/GenerateSummaryUseCase";
-
+import { GetStorageUrlUseCase } from "../application/use-cases/documents/GetStorageUrlUseCase";
+import { CreateDocumentUseCase } from "../application/use-cases/documents/CreateDocumentUseCase";
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton logger
   fastify.diContainer.register({
@@ -229,10 +229,6 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    uploadDocumentUseCase: asClass(UploadDocumentUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
     deleteDocumentUseCase: asClass(DeleteDocumentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -346,9 +342,17 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
     }),
   });
 
-  // document processing
+  // document
   fastify.diContainer.register({
     documentProcessingService: asClass(DocumentProcessingService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getStorageUrlUseCase: asClass(GetStorageUrlUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    createDocumentUseCase: asClass(CreateDocumentUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

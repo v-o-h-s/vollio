@@ -65,3 +65,10 @@ export type StreamDocumentResponse =
 export type CreateSignedUrlResponse = ServerSuccessResponse<{
   url: string;
 }>;
+
+// GET /api/v1/documents/storage-url
+export interface GetStorageUrlData {
+  storageUrl: string;
+  storagePath: string;
+}
+export type GetStorageUrlResponse = ServerSuccessResponse<GetStorageUrlData>;
