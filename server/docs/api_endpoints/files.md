@@ -3,11 +3,13 @@
 Base URL: `/api/v1/documents`
 
 ## Overview
+
 All document endpoints require authentication unless noted otherwise. Responses follow a standard format with `success`, `message`, `data`, and `error` fields.
 
 ---
 
 ## 1. Get All Documents
+
 Retrieves all documents for the authenticated user.
 
 - **URL**: `/`
@@ -15,6 +17,7 @@ Retrieves all documents for the authenticated user.
 - **Auth Required**: Yes
 
 **Success Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -38,11 +41,13 @@ Retrieves all documents for the authenticated user.
 ```
 
 **Error Responses**:
+
 - **401 Unauthorized**: User not authenticated
 
 ---
 
 ## 2. Get Document by ID
+
 Retrieves a specific document's metadata by ID.
 
 - **URL**: `/:id`
@@ -51,6 +56,7 @@ Retrieves a specific document's metadata by ID.
 - **URL Parameters**: `id` (string, UUID)
 
 **Success Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -70,46 +76,83 @@ Retrieves a specific document's metadata by ID.
 ```
 
 **Error Responses**:
+
 - **401 Unauthorized**: User not authenticated
 - **404 Not Found**: Document does not exist
 
 ---
 
-## 3. Upload Document
-Uploads a new document to storage and saves metadata to database.
+## 3. Generate Upload URL
 
-- **URL**: `/upload`
+Generates a signed URL for direct client-side upload to storage.
+
+- **URL**: `/upload-url`
 - **Method**: `POST`
 - **Auth Required**: Yes
-- **Content-Type**: `multipart/form-data`
-- **Form Parameters**:
-  - `document` (document, required): The document to upload
-  - `folderId` (string, optional): Folder ID to organize document
+- **Request Body**:
+
+```json
+{
+  "name": "string (filename)"
+}
+```
 
 **Success Response** (200 OK):
+
 ```json
 {
   "success": true,
-  "message": "Document uploaded successfully",
+  "message": "Storage URL retrieved successfully",
   "data": {
-    "id": "string (UUID)",
-    "documentname": "string",
-    "documentSize": "number",
-    "uploadedAt": "string (ISO 8601)",
-    "documentUrl": "string",
-    "storagePath": "string"
+    "storageUrl": "string (signed URL)",
+    "storagePath": "string (path in bucket)"
+  },
+  "error": null
+}
+```
+
+---
+
+## 4. Finish Upload
+
+Finalizes the document creation in the database after successful storage upload.
+
+- **URL**: `/finish-upload`
+- **Method**: `POST`
+- **Auth Required**: Yes
+- **Request Body**:
+
+```json
+{
+  "name": "string (original filename)",
+  "size": "number (bytes)",
+  "storagePath": "string (path from Step 3)",
+  "folderId": "string | null (optional)"
+}
+```
+
+**Success Response** (200 OK):
+
+```json
+{
+  "success": true,
+  "message": "Document created successfully",
+  "data": {
+    "id": "string (UUID of new document)"
   },
   "error": null
 }
 ```
 
 **Error Responses**:
+
 - **400 Bad Request**: No document provided
 - **401 Unauthorized**: User not authenticated
 
 ---
 
-## 4. Delete Document
+## 5. Delete Document
+
 Deletes a document from storage and database.
 
 - **URL**: `/:id`
@@ -118,6 +161,7 @@ Deletes a document from storage and database.
 - **URL Parameters**: `id` (string, UUID)
 
 **Success Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -128,12 +172,14 @@ Deletes a document from storage and database.
 ```
 
 **Error Responses**:
+
 - **401 Unauthorized**: User not authenticated
 - **404 Not Found**: Document does not exist
 
 ---
 
-## 5. Move Document
+## 6. Move Document
+
 Moves a document to a different folder.
 
 - **URL**: `/:id/move`
@@ -141,6 +187,7 @@ Moves a document to a different folder.
 - **Auth Required**: Yes
 - **URL Parameters**: `id` (string, UUID)
 - **Request Body**:
+
 ```json
 {
   "folderId": "string | null"
@@ -148,6 +195,7 @@ Moves a document to a different folder.
 ```
 
 **Success Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -158,12 +206,14 @@ Moves a document to a different folder.
 ```
 
 **Error Responses**:
+
 - **401 Unauthorized**: User not authenticated
 - **404 Not Found**: Document does not exist
 
 ---
 
-## 6. Rename Document
+## 7. Rename Document
+
 Renames a document.
 
 - **URL**: `/:id/rename`
@@ -171,6 +221,7 @@ Renames a document.
 - **Auth Required**: Yes
 - **URL Parameters**: `id` (string, UUID)
 - **Request Body**:
+
 ```json
 {
   "documentname": "string"
@@ -178,6 +229,7 @@ Renames a document.
 ```
 
 **Success Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -188,12 +240,14 @@ Renames a document.
 ```
 
 **Error Responses**:
+
 - **401 Unauthorized**: User not authenticated
 - **404 Not Found**: Document does not exist
 
 ---
 
-## 7. Stream Document
+## 8. Stream Document
+
 Streams a document for download/viewing using a token. Supports both GET (full stream) and HEAD (headers only) requests.
 
 - **URL**: `/stream`
@@ -202,6 +256,7 @@ Streams a document for download/viewing using a token. Supports both GET (full s
 - **Query Parameters**: `token` (string, required) - Access token
 
 **Success Response** (200 OK):
+
 - **Content**: Binary Document stream
 - **Headers**:
   - `Content-Type`: `application/pdf`
@@ -211,6 +266,7 @@ Streams a document for download/viewing using a token. Supports both GET (full s
 **HEAD Request**: Returns headers only without document content (useful for Document.js preflight checks)
 
 **Error Responses**:
+
 - **400 Bad Request**: Missing token
 - **401 Unauthorized**: Invalid or expired token
 - **403 Forbidden**: Wrong token purpose
@@ -219,13 +275,15 @@ Streams a document for download/viewing using a token. Supports both GET (full s
 
 ---
 
-## 8. Add Document from Google Drive
+## 9. Add Document from Google Drive
+
 Adds a reference to a Google Drive document into the system.
 
 - **URL**: `/google-drive`
 - **Method**: `POST`
 - **Auth Required**: Yes
 - **Request Body**:
+
 ```json
 {
   "documentGoogleDriveId": "string"
@@ -233,6 +291,7 @@ Adds a reference to a Google Drive document into the system.
 ```
 
 **Success Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -243,12 +302,14 @@ Adds a reference to a Google Drive document into the system.
 ```
 
 **Error Responses**:
+
 - **401 Unauthorized**: User not authenticated
 - **404 Not Found**: Document not found in Google Drive
 
 ---
 
-## 9. Get Document from Google Drive
+## 10. Get Document from Google Drive
+
 Retrieves a document's content from Google Drive via the system.
 
 - **URL**: `/google-drive/:documentId`
@@ -257,18 +318,21 @@ Retrieves a document's content from Google Drive via the system.
 - **URL Parameters**: `documentId` (string) - Internal document ID
 
 **Success Response** (200 OK):
+
 - **Content**: Binary document stream
 - **Headers**:
   - `Content-Type`: Document's MIME type (e.g., `application/pdf`)
   - `Content-Disposition`: `inline; documentname="<documentname>"`
 
 **Error Responses**:
+
 - **401 Unauthorized**: User not authenticated
 - **404 Not Found**: Document does not exist in DB or Google Drive
 
 ---
 
-## 10. Generate Summary
+## 11. Generate Summary
+
 Generates a summary note for a document using AI.
 
 - **URL**: `/:id/generate-summary`
@@ -277,6 +341,7 @@ Generates a summary note for a document using AI.
 - **URL Parameters**: `id` (string, UUID)
 
 **Success Response** (200 OK):
+
 ```json
 {
   "success": true,
@@ -295,6 +360,7 @@ Generates a summary note for a document using AI.
 ```
 
 **Error Responses**:
+
 - **401 Unauthorized**: User not authenticated
 - **404 Not Found**: Document does not exist
 - **500 Internal Server Error**: No chunks found for document or AI generation failed
