@@ -17,7 +17,7 @@ export const ViewerFloatingActions = ({
   isVollAiOpen,
 }: ViewerFloatingActionsProps) => {
   return (
-  <div className=" absolute bottom-8 right-8 z-50 flex flex-col gap-3 pointer-events-auto">
+    <div className=" absolute bottom-8 right-8 z-50 flex flex-col gap-3 pointer-events-auto">
       {onToggleVollAi && (
         <button
           onClick={onToggleVollAi}
@@ -29,17 +29,14 @@ export const ViewerFloatingActions = ({
             "backdrop-blur-xl",
             "cursor-pointer active:scale-95",
             isVollAiOpen
-              ? "bg-purple-500 text-white scale-110"
+              ? "  scale-110 dark:bg-black"
               : "bg-white/90 dark:bg-black text-foreground hover:bg-gray-50 dark:hover:bg-black/50 hover:scale-110"
           )}
           title="Toggle Voll-ai"
         >
           <Bot
             size={20}
-            className={cn(
-              "transition-transform",
-              isVollAiOpen && "scale-110"
-            )}
+            className={cn("transition-transform", isVollAiOpen && "scale-110")}
           />
           {isVollAiOpen && (
             <span className="absolute -left-1 top-0 flex h-2.5 w-2.5">
@@ -61,14 +58,17 @@ export const ViewerFloatingActions = ({
             "backdrop-blur-xl",
             "cursor-pointer active:scale-95",
             isVollNotesOpen
-              ? "bg-indigo-500 text-white scale-110"
+              ? " scale-110 dark:bg-black"
               : "bg-white/90 dark:bg-black text-foreground hover:bg-gray-50 dark:hover:bg-black/50 hover:scale-110"
           )}
           title="Toggle Voll-notes"
         >
           <NotebookPen
             size={20}
-            className={cn("transition-transform", isVollNotesOpen && "scale-110")}
+            className={cn(
+              "transition-transform",
+              isVollNotesOpen && "scale-110"
+            )}
           />
           {isVollNotesOpen && (
             <span className="absolute -left-1 top-0 flex h-2.5 w-2.5">
