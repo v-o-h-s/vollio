@@ -29,8 +29,8 @@ export const ViewerFloatingActions = ({
             "backdrop-blur-xl",
             "cursor-pointer active:scale-95",
             isVollAiOpen
-              ? "  scale-110 dark:bg-black"
-              : "bg-white/90 dark:bg-black text-foreground hover:bg-gray-50 dark:hover:bg-black/50 hover:scale-110"
+              ? "bg-white  scale-110 dark:bg-black"
+              : "bg-white dark:bg-black text-foreground hover:bg-gray-50 dark:hover:bg-black/50 hover:scale-110"
           )}
           title="Toggle Voll-ai"
         >
@@ -58,8 +58,8 @@ export const ViewerFloatingActions = ({
             "backdrop-blur-xl",
             "cursor-pointer active:scale-95",
             isVollNotesOpen
-              ? " scale-110 dark:bg-black"
-              : "bg-white/90 dark:bg-black text-foreground hover:bg-gray-50 dark:hover:bg-black/50 hover:scale-110"
+              ? " bg-white scale-110 dark:bg-black"
+              : "bg-white dark:bg-black text-foreground hover:bg-gray-50 dark:hover:bg-black/50 hover:scale-110"
           )}
           title="Toggle Voll-notes"
         >
