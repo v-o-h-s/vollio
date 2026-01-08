@@ -18,13 +18,14 @@ import {
   GetHighlightByIdResponse,
   DeleteHighlightResponse,
   HighlightData,
-} from '@vollio/shared';
+} from "@vollio/shared";
 import { FastifyBaseLogger } from "fastify";
 import { GetHighlightsByDocumentIdUseCase } from "../../application/use-cases/highlights/GetHighlightsByDocumentIdUseCase";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 
 import { CountHighlightsByTagUseCase } from "../../application/use-cases/highlights/CountHighlightsByTagUseCase";
 import { DeleteHighlightsByTagUseCase } from "../../application/use-cases/highlights/DeleteHighlightsByTagUseCase";
+import { HighlightsMapper } from "../../shared/mappers/HighlightsMapper";
 
 export class HighlightController {
   constructor(
@@ -88,7 +89,8 @@ export class HighlightController {
       return;
     }
 
-    await this.createHighlightUseCase.execute({
+    const highlight = await this.createHighlightUseCase.execute({
+      id: request.body.id,
       userId,
       documentId: request.body.documentId,
       type: request.body.type,
@@ -102,12 +104,12 @@ export class HighlightController {
       style: request.body.style as any,
     });
 
-    reply.status(201).send({
-      success: true,
-      message: "Highlight created successfully",
-      data: null,
-      error: null,
-    } satisfies CreateHighlightResponse);
+    return ResponseFormatter.success(
+      reply,
+      HighlightsMapper.mapEntityToResponse(highlight),
+      "Highlight created successfully",
+      201
+    );
   }
 
   /**
@@ -129,17 +131,17 @@ export class HighlightController {
       return;
     }
 
-    await this.getHighlightByIdUseCase.execute({
+    const highlight = await this.getHighlightByIdUseCase.execute({
       userId,
       highlightId: request.params.id,
     });
 
-    reply.status(200).send({
-      success: true,
-      message: "Highlight retrieved successfully",
-      data: null,
-      error: null,
-    } satisfies GetHighlightByIdResponse);
+    return ResponseFormatter.success(
+      reply,
+      HighlightsMapper.mapEntityToResponse(highlight as any), // Cast if needed, or update UseCase
+      "Highlight retrieved successfully",
+      200
+    );
   }
 
   /**
@@ -164,7 +166,7 @@ export class HighlightController {
       return;
     }
 
-    await this.updateHighlightUseCase.execute({
+    const highlight = await this.updateHighlightUseCase.execute({
       userId,
       highlightId: request.params.id,
       color: request.body.color,
@@ -179,12 +181,12 @@ export class HighlightController {
       style: request.body.style as any,
     });
 
-    reply.status(200).send({
-      success: true,
-      message: "Highlight updated successfully",
-      data: null,
-      error: null,
-    } satisfies UpdateHighlightResponse);
+    return ResponseFormatter.success(
+      reply,
+      HighlightsMapper.mapEntityToResponse(highlight),
+      "Highlight updated successfully",
+      200
+    );
   }
 
   /**
@@ -211,12 +213,12 @@ export class HighlightController {
       highlightId: request.params.id,
     });
 
-    reply.status(200).send({
-      success: true,
-      message: "Highlight deleted successfully",
-      data: null,
-      error: null,
-    } satisfies DeleteHighlightResponse);
+    return ResponseFormatter.success(
+      reply,
+      null,
+      "Highlight deleted successfully",
+      200
+    );
   }
 
   /**
@@ -233,7 +235,10 @@ export class HighlightController {
     }
 
     const { tagName } = request.params;
-    const count = await this.countHighlightsByTagUseCase.execute(userId, tagName);
+    const count = await this.countHighlightsByTagUseCase.execute(
+      userId,
+      tagName
+    );
 
     ResponseFormatter.success(reply, { count }, "Usage count retrieved", 200);
   }

@@ -20,7 +20,6 @@ import { quizRoutes } from "./interface/routes/quiz.route";
 import { flashcardRoutes } from "./interface/routes/flashcards.route";
 import { aiRoutes } from "./interface/routes/ai.route";
 import settingsRoutes from "./interface/routes/settings.routes";
-
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
@@ -38,7 +37,7 @@ app.register(fastifyCookie, {
   secret: process.env.COOKIE_SECRET || "dev-secret",
 });
 
-// Register sessio8n (depends on cookie)
+// Register session (depends on cookie)
 app.register(fastifySession, {
   secret:
     process.env.SESSION_SECRET ||

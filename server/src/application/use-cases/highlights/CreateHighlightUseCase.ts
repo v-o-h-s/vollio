@@ -1,11 +1,17 @@
 import { IHighlightRepository } from "../../../domain/repositories/IHighlightRepository";
-import { Highlight, HighlightType, ScaledPosition, HighlightStyle } from "../../../domain/entities/Highlight";
+import {
+  Highlight,
+  HighlightType,
+  ScaledPosition,
+  HighlightStyle,
+} from "../../../domain/entities/Highlight";
 import { randomUUID } from "crypto";
 import { FastifyBaseLogger } from "fastify";
 
 interface CreateHighlightInput {
   userId: string;
   documentId: string;
+  id?: string;
   type?: HighlightType;
   content?: { text?: string; image?: string };
   position: ScaledPosition;
@@ -31,7 +37,7 @@ export class CreateHighlightUseCase {
 
     // Create the domain entity
     const highlight = new Highlight(
-      randomUUID(),
+      input.id || randomUUID(),
       input.userId,
       input.documentId,
       input.type || "text",
