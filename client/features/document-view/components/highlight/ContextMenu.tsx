@@ -79,7 +79,7 @@ export function ContextMenu({ x, y, onClose, onDelete }: ContextMenuProps) {
         }}
       >
         <Trash2 className="h-4.5 w-4.5 text-red-600 dark:text-red-500" />
-        <div className="text-[14px] font-semibold  text-white">Delete Highlight</div>
+        <div className="text-[14px] font-semibold text-black dark:text-white">Delete Highlight</div>
       </Button>
     </div>
   );

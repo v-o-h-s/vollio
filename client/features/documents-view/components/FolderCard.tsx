@@ -133,7 +133,6 @@ export function FolderCard({
             if (result.error) {
               console.error("Failed to delete folder:", result.error);
             } else {
-              await refetch();
               setDeleteDialogOpen(false);
             }
           } catch (error) {

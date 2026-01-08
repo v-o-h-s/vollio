@@ -1,6 +1,7 @@
 import { ApiBuilder } from "@/lib/store/endpoints/types";
 import { GetAllFoldersResponse } from "@vollio/shared";
 import { ServerErrorResponse } from "@vollio/shared";
+import { apiSlice } from "../apiSlice";
 
 interface TransformedFolder {
   id: string;
@@ -72,7 +73,47 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
       method: "POST",
       body: data,
     }),
-  
+    async onQueryStarted(newFolder, { dispatch, queryFulfilled }) {
+      const tempId = "temp-" + Date.now();
+      const patchResult = dispatch(
+        apiSlice.util.updateQueryData(
+          "getAllFolders" as any,
+          undefined,
+          (draft: any) => {
+            draft.folders.unshift({
+              id: tempId,
+              name: newFolder.name,
+              parent_id: newFolder.parentId ?? null,
+              user_id: "", // Temporary placeholder
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              document_count: 0,
+            });
+            draft.count += 1;
+          }
+        )
+      );
+      try {
+        const { data: createdFolder } = await queryFulfilled;
+        dispatch(
+          apiSlice.util.updateQueryData(
+            "getAllFolders" as any,
+            undefined,
+            (draft: any) => {
+              const index = draft.folders.findIndex(
+                (f: any) => f.id === tempId
+              );
+              if (index !== -1) {
+                draft.folders[index] = createdFolder;
+              }
+            }
+          )
+        );
+      } catch {
+        patchResult.undo();
+      }
+    },
+    invalidatesTags: ["Folder"],
   }),
 
   updateFolder: builder.mutation<
@@ -84,6 +125,61 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
       method: "PUT",
       body: data,
     }),
+    async onQueryStarted({ id, ...updates }, { dispatch, queryFulfilled }) {
+      const patchResultList = dispatch(
+        apiSlice.util.updateQueryData(
+          "getAllFolders" as any,
+          undefined,
+          (draft: any) => {
+            const folder = draft.folders.find((f: any) => f.id === id);
+            if (folder) {
+              if (updates.name !== undefined) folder.name = updates.name;
+              if (updates.parentId !== undefined)
+                folder.parent_id = updates.parentId;
+            }
+          }
+        )
+      );
+      const patchResultDetail = dispatch(
+        apiSlice.util.updateQueryData(
+          "getFolderById" as any,
+          id,
+          (draft: any) => {
+            if (updates.name !== undefined) draft.name = updates.name;
+            if (updates.parentId !== undefined)
+              draft.parent_id = updates.parentId;
+          }
+        )
+      );
+      try {
+        const { data: updatedFolder } = await queryFulfilled;
+        // Update with full server data (ensure timestamps are correct)
+        dispatch(
+          apiSlice.util.updateQueryData(
+            "getAllFolders" as any,
+            undefined,
+            (draft: any) => {
+              const index = draft.folders.findIndex((f: any) => f.id === id);
+              if (index !== -1) {
+                draft.folders[index] = updatedFolder;
+              }
+            }
+          )
+        );
+        dispatch(
+          apiSlice.util.updateQueryData(
+            "getFolderById" as any,
+            id,
+            (draft: any) => {
+              Object.assign(draft, updatedFolder);
+            }
+          )
+        );
+      } catch {
+        patchResultList.undo();
+        patchResultDetail.undo();
+      }
+    },
     transformResponse: (response: any) => {
       if (!response.data) throw new Error("Failed to update folder");
       const folder = response.data;
@@ -114,6 +210,26 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
         "Content-Type": undefined,
       },
     }),
+    async onQueryStarted({ id }, { dispatch, queryFulfilled }) {
+      const patchResult = dispatch(
+        apiSlice.util.updateQueryData(
+          "getAllFolders" as any,
+          undefined,
+          (draft: any) => {
+            const index = draft.folders.findIndex((f: any) => f.id === id);
+            if (index !== -1) {
+              draft.folders.splice(index, 1);
+              draft.count -= 1;
+            }
+          }
+        )
+      );
+      try {
+        await queryFulfilled;
+      } catch {
+        patchResult.undo();
+      }
+    },
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Folder", id: "LIST" },
       { type: "Folder", id },

@@ -25,18 +25,7 @@ export function useFolder() {
   // Folder operations
   const createFolder = async (name: string, parentId: string | null = null) => {
     try {
-      toast.promise(
-        async () => {
-          await createFolderMutation({ name, parentId }).unwrap();
-          await refetch();
-        },
-        {
-          pending: "Creating folder...",
-          success: "Folder created successfully",
-          error: "Failed to create folder",
-        }
-      );
-      return true;
+      await createFolderMutation({ name, parentId }).unwrap();
     } catch (error) {
       toast.error("Failed to create folder");
       throw error;

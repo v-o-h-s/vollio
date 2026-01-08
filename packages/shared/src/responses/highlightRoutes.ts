@@ -40,9 +40,8 @@ export interface HighlightData {
   updatedAt: string;
 }
 
-export type CreateHighlightResponse = ServerSuccessResponse<null>;
-
-export type UpdateHighlightResponse = ServerSuccessResponse<null>;
+export type CreateHighlightResponse = ServerSuccessResponse<HighlightData>;
+export type UpdateHighlightResponse = ServerSuccessResponse<HighlightData>;
 
 export type GetHighlightsResponse = ServerSuccessResponse<HighlightData[]>;
 
