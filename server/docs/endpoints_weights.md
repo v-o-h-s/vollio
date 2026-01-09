@@ -12,12 +12,11 @@ This document defines the cost (weight) associated with each API endpoint for ra
 
 ## Endpoint Weights
 
-### AI (`/api/v1/ai`)
+### Assistant (`/api/v1/assistant`)
 
 | Method | Endpoint | Handler | Weight | Category |
 | :--- | :--- | :--- | :--- | :--- |
-| POST | `/explain` | `explainText` | **20** | High |
-| POST | `/assistant` | `assistantChat` | **20** | High |
+| POST | `/` | `assistantChat` | **20** | High |
 
 ### Documents (`/api/v1/documents`)
 
