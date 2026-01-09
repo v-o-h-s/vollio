@@ -13,7 +13,7 @@ import { documentEndpoints } from "./endpoints/documentEndpoint";
 import { testEndpoints } from "./endpoints/testEndpoints";
 import { quizEndpoints } from "./endpoints/quizEndpoints";
 import { flashcardEndpoints } from "./endpoints/flashcardEndpoints";
-import { aiEndpoints } from "./endpoints/aiEndpoints";
+import { assistantEndpoints } from "./endpoints/assistantEndpoints";
 import { settingsEndpoints } from "./endpoints/settingsEndpoints";
 
 // Simple base query configuration with cookie-based authentication
@@ -65,7 +65,7 @@ export const apiSlice = createApi({
     ...testEndpoints(builder),
     ...quizEndpoints(builder),
     ...flashcardEndpoints(builder),
-    ...aiEndpoints(builder),
+    ...assistantEndpoints(builder),
     ...settingsEndpoints(builder),
   }),
 });
@@ -125,8 +125,6 @@ export const {
   useDeleteFlashCardsSetMutation,
 
   //ai
-  useExplainTextQuery,
-  useLazyExplainTextQuery,
   useAssistantChatMutation,
 
   // settings

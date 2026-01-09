@@ -71,9 +71,8 @@ import { FlashCardsController } from "../interface/controllers/flashcards.contro
 import { GetAllQuizzesUseCase } from "../application/use-cases/quizzes/GetAllquizzesUseCase";
 import { GetQuizByIdUseCase } from "../application/use-cases/quizzes/GetQuizByIdUseCase";
 import { DeleteQuizByIdUseCase } from "../application/use-cases/quizzes/DeleteQuizByIdUseCase";
-import { ExplainTextUseCase } from "../application/use-cases/ai/ExplainTextUseCase";
 import { AssistantChatUseCase } from "../application/use-cases/ai/AssistantChatUseCase";
-import { AiController } from "../interface/controllers/ai.controller";
+import { AssistantController } from "../interface/controllers/assistant.controller";
 import { SettingsRepository } from "../infrastructure/repositories/SettingsRepository";
 import { GetUserSettingsUseCase } from "../application/use-cases/settings/GetUserSettingsUseCase";
 import { UpdateUserSettingsUseCase } from "../application/use-cases/settings/UpdateUserSettingsUseCase";
@@ -466,15 +465,11 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.diContainer.register({
-    explainTextUseCase: asClass(ExplainTextUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
     assistantChatUseCase: asClass(AssistantChatUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    aiController: asClass(AiController, {
+    assistantController: asClass(AssistantController, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
