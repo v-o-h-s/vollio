@@ -104,7 +104,7 @@ export default function MinimalEditor({
     if (e.ctrlKey || e.metaKey) {
       if (e.key === "s") {
         e.preventDefault();
-        await handleSave();
+        await handleSave(); 
       }
     }
     setTimeout(updateActiveStates, 0);
@@ -116,14 +116,14 @@ export default function MinimalEditor({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={cn(
-        "w-[500px] border-white/20 shadow-2xl transition-all duration-300 overflow-hidden bg-black",
+        "w-[500px] border-zinc-200 dark:border-white/20 shadow-2xl transition-all duration-300 overflow-hidden bg-white dark:bg-black",
         className
       )}
     >
       {/* Toolbar - Only visible on hover or focus */}
       <div
         className={cn(
-          "flex items-center gap-0.5 p-1.5 border-b-[1px] border-white/20 transition-all duration-300",
+          "flex items-center gap-0.5 p-1.5 border-b-[1px] border-zinc-200 dark:border-white/20 transition-all duration-300",
           isHovered || isFocused
             ? "opacity-100 h-auto"
             : "opacity-0 h-0 p-0 border-0 pointer-events-none"
@@ -142,7 +142,7 @@ export default function MinimalEditor({
           />
         </div>
 
-        <Separator orientation="vertical" className="h-6 bg-white/10 mx-1" />
+        <Separator orientation="vertical" className="h-6 bg-zinc-200 dark:bg-white/10 mx-1" />
 
         <div className="flex items-center gap-0.5 px-1">
           <ToolbarButton
@@ -171,7 +171,7 @@ export default function MinimalEditor({
           />
         </div>
 
-        <Separator orientation="vertical" className="h-6 bg-white/10 mx-1" />
+        <Separator orientation="vertical" className="h-6 bg-zinc-200 dark:bg-white/10 mx-1" />
 
         <div className="flex items-center gap-0.5 px-1">
           <ToolbarButton
@@ -188,12 +188,12 @@ export default function MinimalEditor({
           />
         </div>
 
-        <div className="ml-auto px-2">
+        <div className="ml-auto px-2 flex items-center gap-1">
           <Button
             size="sm"
             onClick={handleSave}
             disabled={isSaving}
-            className="h-8 gap-2 bg-white hover:bg-zinc-200 text-black border-none font-bold shadow-lg min-w-[80px]"
+            className="h-8 gap-2 bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 text-white dark:text-black border-none font-bold shadow-lg min-w-[80px]"
           >
             {isSaving ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -222,14 +222,15 @@ export default function MinimalEditor({
           onKeyUp={updateActiveStates}
           onMouseUp={updateActiveStates}
           className={cn(
-            "prose prose-sm prose-invert max-w-none p-4 min-h-[150px] focus:outline-none overflow-y-auto max-h-[400px] text-white",
+            "prose prose-sm dark:prose-invert max-w-none p-4 min-h-[150px] focus:outline-none overflow-y-auto max-h-[400px] text-zinc-900 dark:text-white",
             "minimal-editor-content",
-            "empty:before:content-[attr(data-placeholder)] empty:before:text-white/30 empty:before:pointer-events-none"
+            "empty:before:content-[attr(data-placeholder)] empty:before:text-zinc-400 dark:empty:before:text-white/30 empty:before:pointer-events-none"
           )}
           data-placeholder={placeholder}
         />
       </CardContent>
     </Card>
+
   );
 }
 
@@ -255,8 +256,8 @@ function ToolbarButton({
       className={cn(
         "h-8 w-8 rounded-lg transition-all duration-200",
         active
-          ? "bg-white text-black scale-105 shadow-sm"
-          : "text-white/60 hover:bg-white/10 hover:text-white"
+          ? "bg-zinc-900 dark:bg-white text-white dark:text-black scale-105 shadow-sm hover:bg-zinc-800 dark:hover:bg-zinc-100"
+          : "text-zinc-500 dark:text-white/60 hover:bg-zinc-100 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-white"
       )}
       title={tooltip}
     >

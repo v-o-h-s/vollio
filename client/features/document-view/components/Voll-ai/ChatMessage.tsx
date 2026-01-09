@@ -67,8 +67,8 @@ export function ChatMessage({
       {/* Message Content */}
       <div
         className={cn(
-          "flex flex-col gap-1 max-w-[80%] w-full ",
-          isUser && "items-end"
+          "flex flex-col gap-1  w-full ",
+          isUser && "items-end max-w-[80%]",
         )}
       >
         <div
