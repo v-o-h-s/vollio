@@ -1,7 +1,6 @@
 import {
   useUpdateHighlightMutation,
   useCreateHighlightMutation,
-  useLazyExplainTextQuery,
 } from "@/lib/store/apiSlice";
 import { useState } from "react";
 import { PdfHighlighterUtils } from "react-pdf-highlighter-extended-plus";

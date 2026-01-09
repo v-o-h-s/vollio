@@ -18,7 +18,7 @@ import { folderRoutes } from "./interface/routes/folder.route";
 import { highlightRoutes } from "./interface/routes/highlight.route";
 import { quizRoutes } from "./interface/routes/quiz.route";
 import { flashcardRoutes } from "./interface/routes/flashcards.route";
-import { aiRoutes } from "./interface/routes/ai.route";
+import { assistantRoutes } from "./interface/routes/assistant.route";
 import settingsRoutes from "./interface/routes/settings.routes";
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -105,8 +105,8 @@ app.register(flashcardRoutes, {
   prefix: "/api/v1/flashcards",
 });
 
-app.register(aiRoutes, {
-  prefix: "/api/v1/ai",
+app.register(assistantRoutes, {
+  prefix: "/api/v1/assistant",
 });
 app.register(settingsRoutes, {
   prefix: "/api/v1/settings",
