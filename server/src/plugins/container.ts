@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 import { asClass, asFunction, Lifetime, InjectionMode, asValue } from "awilix";
+import Redis from "ioredis";
 import { createUserClient } from "../infrastructure/database/supabase/supabase";
 import { NoteRepository } from "../infrastructure/repositories/NoteRepository";
 import { EmbeddingRepository } from "../infrastructure/repositories/EmbeddingRepository";
@@ -82,7 +83,27 @@ import { SettingsController } from "../interface/controllers/settings.controller
 import { GenerateSummaryUseCase } from "../application/use-cases/documents/GenerateSummaryUseCase";
 import { GetStorageUrlUseCase } from "../application/use-cases/documents/GetStorageUrlUseCase";
 import { CreateDocumentUseCase } from "../application/use-cases/documents/CreateDocumentUseCase";
+import { RateLimitingService } from "../infrastructure/services/RateLimitingService";
+
 const diPlugin: FastifyPluginAsync = async (fastify) => {
+  // Register singleton Redis client
+  const redis = new Redis({
+    host: process.env.REDIS_HOST || "127.0.0.1",
+    port: Number(process.env.REDIS_PORT) || 6379,
+  });
+
+  fastify.diContainer.register({
+    redis: asValue(redis), // by default singleton
+    rateLimitingService: asClass(RateLimitingService, {
+      lifetime: Lifetime.SINGLETON,
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => ({
+        defaultCapacity: 100,
+        defaultRefillRate: 5,
+      }),
+    }),
+  });
+
   // Register singleton logger
   fastify.diContainer.register({
     logger: asValue(fastify.log),

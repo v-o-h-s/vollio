@@ -1,22 +1,29 @@
-import Redis from 'ioredis';
-import fs from 'fs';
-import path from 'path';
-import { RateLimitOptions } from '../../shared/types/rateLimiting';
+import Redis from "ioredis";
+import fs from "fs";
+import path from "path";
+import {
+  ConsumeResult,
+  RateLimitOptions,
+} from "../../shared/types/rateLimiting";
+import { IRateLimitingService } from "../../domain/services/IRateLimitingService";
 
-export class RateLimiter {
+export class RateLimitingService implements IRateLimitingService {
   private redis: Redis;
   private lua: string;
   private defaultCapacity: number;
   private defaultRefillRate: number;
 
-
-  constructor(redis: Redis, defaultCapacity: number, defaultRefillRate: number) {
+  constructor(
+    redis: Redis,
+    defaultCapacity: number,
+    defaultRefillRate: number
+  ) {
     this.redis = redis;
     this.defaultCapacity = defaultCapacity;
     this.defaultRefillRate = defaultRefillRate;
     this.lua = fs.readFileSync(
-      path.join(__dirname, '../../shared/utils/token_bucket.lua'),
-      'utf8'
+      path.join(__dirname, "../../shared/utils/token_bucket.lua"),
+      "utf8"
     );
   }
 
@@ -35,8 +42,8 @@ export class RateLimiter {
   async tryConsume(
     userId: string,
     options: RateLimitOptions = {},
-    bucket: string = 'request'
-  ): Promise<boolean> {
+    bucket: string = "request"
+  ): Promise<ConsumeResult> {
     const now = Math.floor(Date.now() / 1000);
     const capacity = options.capacity ?? this.defaultCapacity;
     const refillRate = options.refillRate ?? this.defaultRefillRate;
@@ -54,12 +61,16 @@ export class RateLimiter {
       now
     );
 
-    // Optional: set a TTL so Redis cleans up inactive users automatically
-    if (result === 1) {
-      await this.redis.expire(key, this.defaultTTL);
-    }
+    const remaining = await this.getRemaining(userId, options, bucket);
 
-    return result === 1;
+    if (result === 1) {
+      // request allowed
+      return { allowed: true, remaining };
+    } else {
+      // calculate retry-after in seconds
+      const retryAfter = Math.ceil((cost - remaining) / refillRate);
+      return { allowed: false, remaining, retryAfter };
+    }
   }
 
   /**
@@ -72,13 +83,17 @@ export class RateLimiter {
   async getRemaining(
     userId: string,
     options: RateLimitOptions = {},
-    bucket: string = 'request'
+    bucket: string = "request"
   ): Promise<number> {
     const capacity = options.capacity ?? this.defaultCapacity;
     const refillRate = options.refillRate ?? this.defaultRefillRate;
     const key = this.getKey(userId, bucket);
 
-    const [tokensStr, lastRefillStr] = await this.redis.hmget(key, 'tokens', 'last_refill');
+    const [tokensStr, lastRefillStr] = await this.redis.hmget(
+      key,
+      "tokens",
+      "last_refill"
+    );
 
     if (tokensStr === null || lastRefillStr === null) return capacity;
 
@@ -91,5 +106,7 @@ export class RateLimiter {
     const elapsed = Math.max(0, now - lastRefill);
 
     return Math.min(capacity, tokens + elapsed * refillRate);
+    //we do  this because it is not as you think the bucket is not filled per second but per request
+    // so when you request , it fills the bucket with tokens+ elapsed(seconds since last request) * refillRate
   }
 }

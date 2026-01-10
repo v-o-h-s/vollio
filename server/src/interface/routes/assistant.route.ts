@@ -16,13 +16,16 @@ const assistantRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: AssistantDTO }>(
     `${options.prefix}/`,
     {
+      config: {
+        rateLimit: { cost: 20, category: "ai" },
+      },
       schema: {
         body: AssistantDTOSchema,
       },
       preHandler: validateBody(AssistantDTOSchema),
     },
     async (request, reply) => {
-      const assistantController = request.diScope.resolve("assistantController") as AssistantController;
+      const assistantController = request.diScope.resolve<AssistantController>("assistantController");
       return assistantController.assistantChat(request, reply);
     }
   );

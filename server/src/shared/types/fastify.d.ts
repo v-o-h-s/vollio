@@ -3,19 +3,19 @@ import "@fastify/session";
 import { AwilixContainer } from "awilix";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NoteController } from "../../interface/controllers/note.controller";
-import { NoteRepository } from "../../infrastructure/repositories/NoteRepository";
-import { CreateNoteUseCase } from "../../application/use-cases/CreateNoteUseCase";
-import { UpdateNoteUseCase } from "../../application/use-cases/notes/UpdateNoteUseCase";
-import { DeleteNoteUseCase } from "../../application/use-cases/DeleteNoteUseCase";
-import { GetNoteUseCase } from "../../application/use-cases/GetNoteByIdUseCase";
-import { GetAllUserNotesUseCase } from "../../application/use-cases/GetAllUserNotesUseCase";
-import { EnsureValidTokenUseCase } from "../../application/use-cases/google-Classroom/EnsureValidTokenUseCase";
 import { DocumentController } from "../../interface/controllers/document.controller";
 import { testController } from "../../interface/controllers/test.controller";
 import { QuizController } from "../../interface/controllers/quiz.controller";
 import { SummaryController } from "../../interface/controllers/summary.controller";
-import { AiController } from "../../interface/controllers/ai.controller";
 import { SettingsController } from "../../interface/controllers/settings.controller";
+import { RateLimitingService } from "../../infrastructure/services/RateLimitingService";
+import { AssistantController } from "../../interface/controllers/assistant.controller";
+import { FolderController } from "../../interface/controllers/folder.controller";
+import { HighlightController } from "../../interface/controllers/highlight.controller";
+import { FlashCardsController } from "../../interface/controllers/flashcards.controller";
+import { GoogleClassroomController } from "../../interface/controllers/googleClassroom.controller";
+import Redis from "ioredis";
+
 export interface User {
   id: string;
   email?: string;
@@ -35,15 +35,18 @@ declare module "@fastify/session" {
 export interface DIContainer {
   documentController: DocumentController;
   supabaseClient: SupabaseClient;
-
   noteController: NoteController;
-
   googleClassroomController: GoogleClassroomController;
   settingsController: SettingsController;
   testController: testController;
   quizController: QuizController;
   summaryController: SummaryController;
-  aiController: AiController;
+  assistantController: AssistantController;
+  folderController: FolderController;
+  highlightController: HighlightController;
+  flashCardsController: FlashCardsController;
+  rateLimitingService: RateLimitingService;
+  redis: Redis;
 }
 
 declare module "fastify" {
@@ -59,5 +62,12 @@ declare module "fastify" {
   interface FastifyInstance {
     // Global DI container
     diContainer: AwilixContainer;
+  }
+
+  interface FastifyContextConfig {
+    rateLimit?: {
+      cost?: number;
+      category?: "request" | "ai" | "upload"; // Optional: if you want different buckets later
+    };
   }
 }

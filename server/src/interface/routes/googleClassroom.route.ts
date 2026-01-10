@@ -12,6 +12,7 @@ import {
   ClassroomCourseResponseSchema,
   ClassroomCourseWithContentResponseSchema,
 } from "../../shared/validation/googleClassroomSchemas";
+import { GoogleClassroomController } from "../controllers/googleClassroom.controller";
 
 const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
@@ -23,7 +24,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
       schema: {},
     },
     async (request, reply) => {
-      const googleClassroomController = request.diScope.resolve(
+      const googleClassroomController = request.diScope.resolve<GoogleClassroomController>(
         "googleClassroomController"
       );
       return googleClassroomController.connect(request, reply);
@@ -33,13 +34,16 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Querystring: GoogleCallbackQuery }>(
     `${opts.prefix}/callback`,
     {
+      config: {
+        rateLimit: { cost: 5 },
+      },
       schema: {
         querystring: GoogleCallbackQuerySchema,
       },
       preHandler: validateQuery(GoogleCallbackQuerySchema),
     },
     async (request, reply) => {
-      const googleClassroomController = request.diScope.resolve(
+      const googleClassroomController = request.diScope.resolve<GoogleClassroomController>(
         "googleClassroomController"
       );
       return googleClassroomController.callback(request, reply);
@@ -49,10 +53,13 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/refresh`,
     {
+      config: {
+        rateLimit: { cost: 5 },
+      },
       schema: {},
     },
     async (request, reply) => {
-      const googleClassroomController = request.diScope.resolve(
+      const googleClassroomController = request.diScope.resolve<GoogleClassroomController>(
         "googleClassroomController"
       );
       return googleClassroomController.refreshAccessToken(request, reply);
@@ -65,7 +72,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
       schema: {},
     },
     async (request, reply) => {
-      const googleClassroomController = request.diScope.resolve(
+      const googleClassroomController = request.diScope.resolve<GoogleClassroomController>(
         "googleClassroomController"
       );
       return googleClassroomController.checkTokenStatus(request, reply);
@@ -78,7 +85,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
       schema: {},
     },
     async (request, reply) => {
-      const googleClassroomController = request.diScope.resolve(
+      const googleClassroomController = request.diScope.resolve<GoogleClassroomController>(
         "googleClassroomController"
       );
       return googleClassroomController.disconnect(request, reply);
@@ -91,7 +98,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
       schema: {},
     },
     async (request, reply) => {
-      const googleClassroomController = request.diScope.resolve(
+      const googleClassroomController = request.diScope.resolve<GoogleClassroomController>(
         "googleClassroomController"
       );
       return googleClassroomController.getConnectionStatus(request, reply);
@@ -101,10 +108,13 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/courses/list`,
     {
+      config: {
+        rateLimit: { cost: 5 },
+      },
       schema: {},
     },
     async (request, reply) => {
-      const googleClassroomController = request.diScope.resolve(
+      const googleClassroomController = request.diScope.resolve<GoogleClassroomController>(
         "googleClassroomController"
       );
       return googleClassroomController.getCourses(request, reply);
@@ -114,10 +124,13 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/courses`,
     {
+      config: {
+        rateLimit: { cost: 20 },
+      },
       schema: {},
     },
     async (request, reply) => {
-      const googleClassroomController = request.diScope.resolve(
+      const googleClassroomController = request.diScope.resolve<GoogleClassroomController>(
         "googleClassroomController"
       );
       return googleClassroomController.getCoursesWithContent(request, reply);
@@ -127,6 +140,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: { courseId: string } }>(
     `${opts.prefix}/courses/:courseId/content`,
     {
+      config: {
+        rateLimit: { cost: 5 },
+      },
       schema: {
         params: {
           type: "object",
@@ -138,7 +154,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
       },
     },
     async (request, reply) => {
-      const googleClassroomController = request.diScope.resolve(
+      const googleClassroomController = request.diScope.resolve<GoogleClassroomController>(
         "googleClassroomController"
       );
       return googleClassroomController.getCourseContent(request, reply);

@@ -22,6 +22,7 @@ import {
   createDocumentSchema,
 } from "../../shared/validation/documentSchemas";
 import { GetStorageUrlDto, CreateDocumentDto } from "@vollio/shared";
+import { DocumentController } from "../controllers/document.controller";
 
 const documentRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
@@ -34,7 +35,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       schema: {},
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
+      const documentController = request.diScope.resolve<DocumentController>("documentController");
       return documentController.getAllDocuments(request, reply);
     }
   );
@@ -42,6 +43,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: { documentId: string } }>(
     `${opts.prefix}/google-drive/:documentId`,
     {
+      config: {
+        rateLimit: { cost: 5 },
+      },
       schema: {
         params: {
           type: "object",
@@ -53,7 +57,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       },
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
+      const documentController = request.diScope.resolve<DocumentController>("documentController");
       return documentController.getDocumentFromGoogleDrive(request, reply);
     }
   );
@@ -61,6 +65,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: { documentGoogleDriveId: string } }>(
     `${opts.prefix}/google-drive`,
     {
+      config: {
+        rateLimit: { cost: 5 },
+      },
       schema: {
         body: {
           type: "object",
@@ -72,7 +79,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       },
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
+      const documentController = request.diScope.resolve<DocumentController>("documentController");
       return documentController.addDocumentFromGoogleDrive(request, reply);
     }
   );
@@ -86,7 +93,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateBody(getStorageUrlSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
+      const documentController = request.diScope.resolve<DocumentController>("documentController");
       return documentController.getStorageUrl(request, reply);
     }
   );
@@ -100,7 +107,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateParams(documentIdParamsSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
+      const documentController = request.diScope.resolve<DocumentController>("documentController");
       return documentController.getDocumentById(request, reply);
     }
   );
@@ -114,7 +121,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateParams(documentIdParamsSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
+      const documentController = request.diScope.resolve<DocumentController>("documentController");
       return documentController.deleteDocument(request, reply);
     }
   );
@@ -132,7 +139,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
+      const documentController = request.diScope.resolve<DocumentController>("documentController");
       return documentController.moveDocument(request, reply);
     }
   );
@@ -150,20 +157,23 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
+      const documentController = request.diScope.resolve<DocumentController>("documentController");
       return documentController.renameDocument(request, reply);
     }
   );
   fastify.post<{ Params: DocumentIdParams }>(
     `${opts.prefix}/:id/generate-summary`,
     {
+      config: {
+        rateLimit: { cost: 20, category: "ai" },
+      },
       schema: {
         params: documentIdParamsSchema,
       },
       preHandler: validateParams(documentIdParamsSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
+      const documentController = request.diScope.resolve<DocumentController>("documentController");
       return documentController.generateSummary(request, reply);
     }
   );
@@ -177,7 +187,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateBody(createDocumentSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve("documentController");
+      const documentController = request.diScope.resolve<DocumentController>("documentController");
       return documentController.createDocument(request, reply);
     }
   );

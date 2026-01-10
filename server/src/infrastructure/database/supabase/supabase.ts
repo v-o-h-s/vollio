@@ -8,7 +8,7 @@ export function createServiceClient() {
   return createClient(
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  );  
 }
 
 // User client: Created per-request with user's cookies
