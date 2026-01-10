@@ -93,13 +93,13 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.diContainer.register({
-    redis: asValue(redis), // by default singleton
+    redis: asValue(redis),
     rateLimitingService: asClass(RateLimitingService, {
       lifetime: Lifetime.SINGLETON,
       injectionMode: InjectionMode.CLASSIC,
       injector: () => ({
-        defaultCapacity: 100,
-        defaultRefillRate: 5,
+        defaultCapacity: Number(process.env.RATE_LIMIT_CAPACITY) || 100,
+        defaultRefillRate: Number(process.env.RATE_LIMIT_REFILL_RATE) || 5,
       }),
     }),
   });

@@ -30,6 +30,12 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
     reply.header("X-RateLimit-Remaining", Math.floor(result.remaining));
 
     if (!result.allowed) {
+      // Log the event for monitoring
+      request.log.warn(
+        { userId: request.user.id, bucket, cost },
+        "Rate limit exceeded"
+      );
+
       if (result.retryAfter) {
         reply.header("Retry-After", result.retryAfter);
       }
@@ -38,9 +44,9 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
         success: false,
         message: "Too Many Requests",
         data: null,
-        error: {
+        error: { 
           message: "Rate limit exceeded. Please try again later.",
-          retryAfter: result.retryAfter,
+          retryAfter: result.retryAfter
         },
       });
       return;
