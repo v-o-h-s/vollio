@@ -58,7 +58,9 @@ import { GenerativeAiService } from "../infrastructure/services/GenerativeAiServ
 import { QuizController } from "../interface/controllers/quiz.controller";
 import { CreateGeneralQuizUseCase } from "../application/use-cases/quizzes/CreateGeneralQuizUseCase";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../application/use-cases/embedding/EnsureExistingOfDocumentEmbeddingUseCase";
+import { EnsureExistingOfDocumentChunkUseCase } from "../application/use-cases/embedding/EnsureExistingOfDocumentChunkUseCase";
 import { EmbedDocumentByIdUseCase } from "../application/use-cases/embedding/EmbedDocumentByIdUseCase";
+import { ChunkDocumentByIdUseCase } from "../application/use-cases/embedding/ChunkDocumentByIdUseCase";
 import { QuizRepository } from "../infrastructure/repositories/QuizRepository";
 import { CreateUserPromptQuizUseCase } from "../application/use-cases/quizzes/CreateUserPromptQuizUseCase";
 import { FlashCardsSetRepository } from "../infrastructure/repositories/FlashCardsSetRepository";
@@ -391,12 +393,23 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
+    chunkDocumentByIdUseCase: asClass(ChunkDocumentByIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
     embeddingService: asClass(EmbeddingService, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
     ensureExistingOfDocumentEmbeddingUseCase: asClass(
       EnsureExistingOfDocumentEmbeddingUseCase,
+      {
+        lifetime: Lifetime.SCOPED,
+        injectionMode: InjectionMode.CLASSIC,
+      }
+    ),
+    ensureChunkingUseCase: asClass(
+      EnsureExistingOfDocumentChunkUseCase,
       {
         lifetime: Lifetime.SCOPED,
         injectionMode: InjectionMode.CLASSIC,

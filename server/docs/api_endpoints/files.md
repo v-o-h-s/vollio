@@ -9,7 +9,6 @@ All document endpoints require authentication unless noted otherwise. Responses 
 ---
 
 ## 1. Get All Documents
-
 Retrieves all documents for the authenticated user.
 
 - **URL**: `/`

@@ -4,14 +4,14 @@ export class Embedding {
     private id: string;
     private documentId: string;
     private content: string;
-    private embedding: number[];
+    private embedding: number[] | null;
     private tokenCount: number;
     private metadata: ChunkMetadata;
     constructor(
         id: string,
         documentId: string,
         content: string,
-        embedding: number[],
+        embedding: number[] | null,
         tokenCount: number,
         metadata: ChunkMetadata,
     ) {
@@ -37,7 +37,7 @@ export class Embedding {
         return this.content;
     }
 
-    public getEmbedding(): number[] {
+    public getEmbedding(): number[] | null {
         return this.embedding;
     }
 

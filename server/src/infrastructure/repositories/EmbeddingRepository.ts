@@ -36,7 +36,7 @@ export class EmbeddingRepository implements IEmbeddingRepository {
     const rows = chunks.map((chunk, idx) => ({
       document_id: documentId,
       content: chunk.text,
-      embedding: vectors[idx],
+      embedding: vectors[idx] && vectors[idx].length > 0 ? vectors[idx] : null,
       token_count: chunk.tokenCount,
       metadata: chunk.metadata,
     }));
