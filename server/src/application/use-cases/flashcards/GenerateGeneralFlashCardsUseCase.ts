@@ -4,7 +4,7 @@ import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { CreateFlashCardsSetResponse } from "@vollio/shared";
 import { CreateFlashCardsDTO } from "../../../shared/validation/flashcardSchemas";
 import { IDocumentRepository } from "../../../domain/repositories/IDocumentRepository";
-import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";
+import { EnsureExistingOfDocumentChunkUseCase } from "../embedding/EnsureExistingOfDocumentChunkUseCase";
 import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
 import { ChunkMetadata } from "../../../shared/utils/chunking";
 import { FlashCardsSet } from "../../../domain/entities/FlashCardsSet";
@@ -20,7 +20,7 @@ export class GenerateGeneralFlashCardsUseCase {
     private logger: FastifyBaseLogger,
     private flashCardsSetRepository: IFlashCardsSetRepository,
     private documentRepository: IDocumentRepository,
-    private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
+    private ensureChunkingUseCase: EnsureExistingOfDocumentChunkUseCase,
     private embeddingRepository: IEmbeddingRepository,
     private generativeAiService: IGenerativeAiService
   ) {}
@@ -44,7 +44,7 @@ export class GenerateGeneralFlashCardsUseCase {
       throw new NotFoundError("Document not found");
     }
 
-    await this.ensureExistingOfDocumentEmbeddingUseCase.execute(
+    await this.ensureChunkingUseCase.execute(
       data.documentId,
       userId
     );

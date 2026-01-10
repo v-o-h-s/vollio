@@ -2,7 +2,7 @@ import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiServ
 import { CreateQuizResponse } from "@vollio/shared";
 import { CreateQuizDTO } from "../../../shared/validation/quizSchemas";
 import { Quiz, QuizQuestion } from "../../../domain/entities/Quiz";
-import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";
+import { EnsureExistingOfDocumentChunkUseCase } from "../embedding/EnsureExistingOfDocumentChunkUseCase";
 import crypto from "crypto";
 import { QuizMapper } from "../../../shared/mappers/QuizMapper";
 import { FastifyBaseLogger } from "fastify";
@@ -18,7 +18,7 @@ export class CreateGeneralQuizUseCase {
   constructor(
     private logger: FastifyBaseLogger,
     private generativeAiService: IGenerativeAiService,
-    private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
+    private ensureChunkingUseCase: EnsureExistingOfDocumentChunkUseCase,
     private getDocumentByIdUseCase: GetDocumentByIdUseCase,
     private embeddingRepository: IEmbeddingRepository,
     private quizRepository: IQuizRepository
@@ -40,7 +40,7 @@ export class CreateGeneralQuizUseCase {
       );
       throw new NotFoundError("Document not found");
     }
-    await this.ensureExistingOfDocumentEmbeddingUseCase.execute(
+    await this.ensureChunkingUseCase.execute(
       data.documentId,
       userId
     );

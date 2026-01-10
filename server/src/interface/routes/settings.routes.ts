@@ -1,4 +1,5 @@
 import { FastifyInstance } from "fastify";
+import { SettingsController } from "../controllers/settings.controller";
 
 export default async function settingsRoutes(fastify: FastifyInstance) {
   fastify.get(
@@ -9,7 +10,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const settingsController = request.diScope.resolve("settingsController");
+      const settingsController = request.diScope.resolve<SettingsController>("settingsController");
       return settingsController.getSettings(request, reply);
     }
   );
@@ -22,7 +23,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const settingsController = request.diScope.resolve("settingsController");
+      const settingsController = request.diScope.resolve<SettingsController>("settingsController");
       return settingsController.updateSettings(request, reply);
     }
   );

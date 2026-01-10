@@ -21,6 +21,7 @@ import {
   noteIdParamsSchema,
   generateSummarySchema,
 } from "../../shared/validation/noteSchemas";
+import { NoteController } from "../controllers/note.controller";
 
 const noteRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
@@ -36,7 +37,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateBody(createNoteSchema),
     },
     async (request, reply) => {
-      const noteController = request.diScope.resolve("noteController");
+      const noteController = request.diScope.resolve<NoteController>("noteController");
       return noteController.createNote(request, reply);
     }
   );
@@ -48,7 +49,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
       schema: {},
     },
     async (request, reply) => {
-      const noteController = request.diScope.resolve("noteController");
+      const noteController = request.diScope.resolve<NoteController>("noteController");
       return noteController.getAllNotes(request, reply);
     }
   );
@@ -64,7 +65,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   
     },
     async (request, reply) => {
-      const noteController = request.diScope.resolve("noteController");
+      const noteController = request.diScope.resolve<NoteController>("noteController");
       return noteController.getNoteById(request, reply);
     }
   );
@@ -83,7 +84,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const noteController = request.diScope.resolve("noteController");
+      const noteController = request.diScope.resolve<NoteController>("noteController");
       return noteController.updateNote(request, reply);
     }
   );
@@ -98,7 +99,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateParams(noteIdParamsSchema),
     },
     async (request, reply) => {
-      const noteController = request.diScope.resolve("noteController");
+      const noteController = request.diScope.resolve<NoteController>("noteController");
       return noteController.deleteNote(request, reply);
     }
   );

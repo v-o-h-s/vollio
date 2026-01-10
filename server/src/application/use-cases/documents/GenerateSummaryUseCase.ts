@@ -3,7 +3,7 @@ import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiServ
 import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
 import { DocumentIdParams, JSONContent, NoteData } from "@vollio/shared";
 import { summarizeDocumentPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/summarize";
-import { EnsureExistingOfDocumentEmbeddingUseCase } from "../embedding/EnsureExistingOfDocumentEmbeddingUseCase";
+import { EnsureExistingOfDocumentChunkUseCase } from "../embedding/EnsureExistingOfDocumentChunkUseCase";
 import { ChunkMetadata } from "../../../shared/utils/chunking";
 import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/client";
 import { ServerError } from "../../../shared/errors/ServerError";
@@ -23,7 +23,7 @@ export class GenerateSummaryUseCase {
     private generativeAiService: IGenerativeAiService,
     private embeddingRepository: IEmbeddingRepository,
     private noteRepository: INoteRepository,
-    private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase
+    private ensureChunkingUseCase: EnsureExistingOfDocumentChunkUseCase
   ) {}
 
   async execute(data: DocumentIdParams, userId: string): Promise<NoteData> {
@@ -33,7 +33,7 @@ export class GenerateSummaryUseCase {
     );
 
     // 1. Ensure document is processed
-    await this.ensureExistingOfDocumentEmbeddingUseCase.execute(
+    await this.ensureChunkingUseCase.execute(
       data.id,
       userId
     );

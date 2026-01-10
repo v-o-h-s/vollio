@@ -21,6 +21,7 @@ import {
   GetHighlightsQuery,
   highlightDocumentIdParamsSchema,
 } from "../../shared/validation/highlightSchemas";
+import { HighlightController } from "../controllers/highlight.controller";
 
 const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
@@ -39,9 +40,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateQuery(highlightDocumentIdParamsSchema),
     },
     async (request, reply) => {
-      const highlightController = request.diScope.resolve(
+      const highlightController = request.diScope.resolve<HighlightController>(
         "highlightController"
-      ) as any;
+      );
       return highlightController.getHighlightsByDocumentId(request, reply);
     }
   );
@@ -59,9 +60,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateBody(createHighlightSchema),
     },
     async (request, reply) => {
-      const highlightController = request.diScope.resolve(
+      const highlightController = request.diScope.resolve<HighlightController>(
         "highlightController"
-      ) as any;
+      );
       return highlightController.createHighlight(request, reply);
     }
   );
@@ -79,9 +80,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateParams(highlightIdParamsSchema),
     },
     async (request, reply) => {
-      const highlightController = request.diScope.resolve(
+      const highlightController = request.diScope.resolve<HighlightController>(
         "highlightController"
-      ) as any;
+      );
       return highlightController.getHighlightById(request, reply);
     }
   );
@@ -106,9 +107,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const highlightController = request.diScope.resolve(
+      const highlightController = request.diScope.resolve<HighlightController>(
         "highlightController"
-      ) as any;
+      );
       return highlightController.updateHighlight(request, reply);
     }
   );
@@ -126,9 +127,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateParams(highlightIdParamsSchema),
     },
     async (request, reply) => {
-      const highlightController = request.diScope.resolve(
+      const highlightController = request.diScope.resolve<HighlightController>(
         "highlightController"
-      ) as any;
+      );
       return highlightController.deleteHighlight(request, reply);
     }
   );
@@ -137,9 +138,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: { tagName: string } }>(
     `${_options.prefix}/tags/:tagName/count`,
     async (request, reply) => {
-      const highlightController = request.diScope.resolve(
+      const highlightController = request.diScope.resolve<HighlightController>(
         "highlightController"
-      ) as any;
+      );
       return highlightController.countHighlightsByTag(request, reply);
     }
   );
@@ -148,9 +149,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: { tagName: string } }>(
     `${_options.prefix}/tags/:tagName`,
     async (request, reply) => {
-      const highlightController = request.diScope.resolve(
+      const highlightController = request.diScope.resolve<HighlightController>(
         "highlightController"
-      ) as any;
+      );
       return highlightController.deleteHighlightsByTag(request, reply);
     }
   );

@@ -20,6 +20,8 @@ import { quizRoutes } from "./interface/routes/quiz.route";
 import { flashcardRoutes } from "./interface/routes/flashcards.route";
 import { assistantRoutes } from "./interface/routes/assistant.route";
 import settingsRoutes from "./interface/routes/settings.routes";
+import { rateLimiterPlugin } from "./plugins/rateLimiter";
+
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
@@ -77,6 +79,9 @@ app.register(containerPlugin);
 
 // Register auth plugin globally (it will handle public vs protected routes)
 app.register(authPlugin);
+
+// Register rate limiter plugin (must be after authPlugin to access request.user)
+app.register(rateLimiterPlugin);
 
 // Error handler
 app.setErrorHandler(errorHandler);

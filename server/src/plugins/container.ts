@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 import { asClass, asFunction, Lifetime, InjectionMode, asValue } from "awilix";
+import Redis from "ioredis";
 import { createUserClient } from "../infrastructure/database/supabase/supabase";
 import { NoteRepository } from "../infrastructure/repositories/NoteRepository";
 import { EmbeddingRepository } from "../infrastructure/repositories/EmbeddingRepository";
@@ -57,7 +58,9 @@ import { GenerativeAiService } from "../infrastructure/services/GenerativeAiServ
 import { QuizController } from "../interface/controllers/quiz.controller";
 import { CreateGeneralQuizUseCase } from "../application/use-cases/quizzes/CreateGeneralQuizUseCase";
 import { EnsureExistingOfDocumentEmbeddingUseCase } from "../application/use-cases/embedding/EnsureExistingOfDocumentEmbeddingUseCase";
+import { EnsureExistingOfDocumentChunkUseCase } from "../application/use-cases/embedding/EnsureExistingOfDocumentChunkUseCase";
 import { EmbedDocumentByIdUseCase } from "../application/use-cases/embedding/EmbedDocumentByIdUseCase";
+import { ChunkDocumentByIdUseCase } from "../application/use-cases/embedding/ChunkDocumentByIdUseCase";
 import { QuizRepository } from "../infrastructure/repositories/QuizRepository";
 import { CreateUserPromptQuizUseCase } from "../application/use-cases/quizzes/CreateUserPromptQuizUseCase";
 import { FlashCardsSetRepository } from "../infrastructure/repositories/FlashCardsSetRepository";
@@ -82,7 +85,27 @@ import { SettingsController } from "../interface/controllers/settings.controller
 import { GenerateSummaryUseCase } from "../application/use-cases/documents/GenerateSummaryUseCase";
 import { GetStorageUrlUseCase } from "../application/use-cases/documents/GetStorageUrlUseCase";
 import { CreateDocumentUseCase } from "../application/use-cases/documents/CreateDocumentUseCase";
+import { RateLimitingService } from "../infrastructure/services/RateLimitingService";
+
 const diPlugin: FastifyPluginAsync = async (fastify) => {
+  // Register singleton Redis client
+  const redis = new Redis({
+    host: process.env.REDIS_HOST || "127.0.0.1",
+    port: Number(process.env.REDIS_PORT) || 6379,
+  });
+
+  fastify.diContainer.register({
+    redis: asValue(redis),
+    rateLimitingService: asClass(RateLimitingService, {
+      lifetime: Lifetime.SINGLETON,
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => ({
+        defaultCapacity: Number(process.env.RATE_LIMIT_CAPACITY) || 100,
+        defaultRefillRate: Number(process.env.RATE_LIMIT_REFILL_RATE) || 5,
+      }),
+    }),
+  });
+
   // Register singleton logger
   fastify.diContainer.register({
     logger: asValue(fastify.log),
@@ -370,12 +393,23 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
+    chunkDocumentByIdUseCase: asClass(ChunkDocumentByIdUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
     embeddingService: asClass(EmbeddingService, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
     ensureExistingOfDocumentEmbeddingUseCase: asClass(
       EnsureExistingOfDocumentEmbeddingUseCase,
+      {
+        lifetime: Lifetime.SCOPED,
+        injectionMode: InjectionMode.CLASSIC,
+      }
+    ),
+    ensureChunkingUseCase: asClass(
+      EnsureExistingOfDocumentChunkUseCase,
       {
         lifetime: Lifetime.SCOPED,
         injectionMode: InjectionMode.CLASSIC,
