@@ -43,39 +43,16 @@ export class GetDocumentByIdUseCase {
     const isGoogleDriveDocument = !!document.getGoogleDocumentId();
 
     // If it's a Google Drive document and not yet cached, trigger caching
-    // This follows the approach of handling classroom files specifically.
     if (isGoogleDriveDocument && !document.getStoragePath()) {
       this.logger.info(
         { documentId },
         "Document is Google Drive file and not cached, triggering cache flow"
       );
-      try {
-        const result = await this.getDocumentFromGoogleDriveUseCase.execute(
-          documentId,
-          userId
-        );
-        document = result.document;
-      } catch (error) {
-        this.logger.error(
-          { error, documentId },
-          "Failed to cache Google Drive document during GetDocumentById"
-        );
-        // Fallback: return our proxy URL so the client can still try to load/cache it
-        const proxyUrl = `${
-          process.env.APP_URL || "http://localhost:3000"
-        }/api/v1/documents/google-drive/${documentId}`;
-
-        return {
-          id: document.getId(),
-          name: document.getName(),
-          documentUrl: proxyUrl,
-          size: document.getSize(),
-          mimeType: document.getMimeType(),
-          uploadedAt: new Date().toISOString(),
-          folderId: document.getFolderId(),
-          isGoogleDriveDocument: true,
-        };
-      }
+      const result = await this.getDocumentFromGoogleDriveUseCase.execute(
+        documentId,
+        userId
+      );
+      document = result.document;
     }
 
     const storagePath = document.getStoragePath();
@@ -83,11 +60,6 @@ export class GetDocumentByIdUseCase {
 
     if (storagePath) {
       documentUrl = await this.storageService.getSignedUrl(storagePath);
-    } else if (isGoogleDriveDocument) {
-      // Should ideally be unreachable due to the logic above, but for safety:
-      documentUrl = `${
-        process.env.APP_URL || "http://localhost:3000"
-      }/api/v1/documents/google-drive/${documentId}`;
     }
 
     this.logger.info(

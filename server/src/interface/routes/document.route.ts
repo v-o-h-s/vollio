@@ -40,28 +40,6 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Params: { documentId: string } }>(
-    `${opts.prefix}/google-drive/:documentId`,
-    {
-      config: {
-        rateLimit: { cost: 5 },
-      },
-      schema: {
-        params: {
-          type: "object",
-          properties: {
-            documentId: { type: "string" },
-          },
-          required: ["documentId"],
-        },
-      },
-    },
-    async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
-      return documentController.getDocumentFromGoogleDrive(request, reply);
-    }
-  );
-
   fastify.post<{ Body: { documentGoogleDriveId: string } }>(
     `${opts.prefix}/google-drive`,
     {
