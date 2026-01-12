@@ -14,6 +14,8 @@ import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/cl
 import { ServerError } from "../../../shared/errors/ServerError";
 import { quizPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/quizzes";
 import { IQuizRepository } from "../../../domain/repositories/IQuizRepository";
+import { ITokenRateLimitingService } from "../../../domain/services/ITokenRateLimitingService";
+
 export class CreateGeneralQuizUseCase {
   constructor(
     private logger: FastifyBaseLogger,
@@ -21,7 +23,8 @@ export class CreateGeneralQuizUseCase {
     private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
     private getDocumentByIdUseCase: GetDocumentByIdUseCase,
     private embeddingRepository: IEmbeddingRepository,
-    private quizRepository: IQuizRepository
+    private quizRepository: IQuizRepository,
+    private tokenRateLimitingService: ITokenRateLimitingService
   ) {}
 
   async execute(
@@ -64,6 +67,11 @@ export class CreateGeneralQuizUseCase {
 
     const allQuestions: QuizQuestion[] = [];
     let previousSummary = "";
+
+    // Track total token usage across batches
+    let totalPromptTokens = 0;
+    let totalCompletionTokens = 0;
+    let lastModel = "";
 
     // If no chunks, return empty
     if (!chunks.length) {
@@ -139,8 +147,16 @@ export class CreateGeneralQuizUseCase {
         context
       );
 
-      const { questions, title, summary } =
-        await this.generativeAiService.generateQuizQuestions(fullPrompt);
+      const result = await this.generativeAiService.generateQuizQuestions(
+        fullPrompt
+      );
+
+      // Accumulate token usage
+      totalPromptTokens += result.usage.promptTokens;
+      totalCompletionTokens += result.usage.completionTokens;
+      lastModel = result.model;
+
+      const { questions, title, summary } = result.data;
 
       if (title && !quiz.getTitle()) {
         quiz.setTitle(title);
@@ -151,6 +167,15 @@ export class CreateGeneralQuizUseCase {
         previousSummary = summary;
       }
     }
+
+    // Record total token usage
+    await this.tokenRateLimitingService.recordUsage(userId, {
+      promptTokens: totalPromptTokens,
+      completionTokens: totalCompletionTokens,
+      model: lastModel,
+      endpoint: "create-quiz",
+    });
+
     // Safety check: ensure we didn't exceed requested total if somehow model hallucinated specific counts
     // (Optional, but strict adherence might desire slicing)
     let finalQuestions = allQuestions;
@@ -195,7 +220,12 @@ export class CreateGeneralQuizUseCase {
     });
 
     this.logger.info(
-      `Generated ${finalQuestions.length} questions for the quiz.`
+      {
+        questionCount: finalQuestions.length,
+        totalPromptTokens,
+        totalCompletionTokens,
+      },
+      "Generated quiz questions"
     );
     quiz.setQuestions(finalQuestions);
 

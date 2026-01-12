@@ -27,7 +27,7 @@ This document defines the cost (weight) associated with each API endpoint for ra
 | GET | `/google-drive/:documentId` | `getDocumentFromGoogleDrive` | **5** | Medium |
 | POST | `/google-drive` | `addDocumentFromGoogleDrive` | **5** | Medium |
 | POST | `/upload-url` | `getStorageUrl` | **1** | Low |
-| GET | `/:id` | `getDocumentById` | **10** | High |
+| GET | `/:id` | `getDocumentById` | **30** | Very High |
 | DELETE | `/:id` | `deleteDocument` | **1** | Low |
 | PATCH | `/:id/move` | `moveDocument` | **1** | Low |
 | PUT | `/:id/rename` | `renameDocument` | **1** | Low |

@@ -14,6 +14,7 @@ import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/cl
 import { flashcardPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/flashcards";
 import { FastifyBaseLogger } from "fastify";
 import crypto from "crypto";
+import { ITokenRateLimitingService } from "../../../domain/services/ITokenRateLimitingService";
 
 export class GenerateGeneralFlashCardsUseCase {
   constructor(
@@ -22,7 +23,8 @@ export class GenerateGeneralFlashCardsUseCase {
     private documentRepository: IDocumentRepository,
     private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
     private embeddingRepository: IEmbeddingRepository,
-    private generativeAiService: IGenerativeAiService
+    private generativeAiService: IGenerativeAiService,
+    private tokenRateLimitingService: ITokenRateLimitingService
   ) {}
 
   async execute(
@@ -76,6 +78,11 @@ export class GenerateGeneralFlashCardsUseCase {
     const allCards: FlashCard[] = [];
     let previousSummary = "";
 
+    // Track total token usage across batches
+    let totalPromptTokens = 0;
+    let totalCompletionTokens = 0;
+    let lastModel = "";
+
     // Create batches
     const batches: { content: string; metadata: ChunkMetadata }[][] = [];
     for (let i = 0; i < chunks.length; i += GENRATIVE_AI_CONFIG.BATCH_SIZE) {
@@ -122,11 +129,16 @@ export class GenerateGeneralFlashCardsUseCase {
         context
       );
 
-      const {
-        flashCards: generatedCards,
-        name,
-        summary,
-      } = await this.generativeAiService.generateFlashCards(fullPrompt);
+      const result = await this.generativeAiService.generateFlashCards(
+        fullPrompt
+      );
+
+      // Accumulate token usage
+      totalPromptTokens += result.usage.promptTokens;
+      totalCompletionTokens += result.usage.completionTokens;
+      lastModel = result.model;
+
+      const { flashCards: generatedCards, name, summary } = result.data;
 
       if (name && !flashCardsSet.getName()) {
         flashCardsSet.setName(name);
@@ -134,7 +146,7 @@ export class GenerateGeneralFlashCardsUseCase {
 
       // Map generated plain objects to FlashCard entities
       const batchEntities = generatedCards.map(
-        (c) =>
+        (c: any) =>
           new FlashCard(
             c.id || crypto.randomUUID(),
             flashCardsSet.getId(),
@@ -150,6 +162,14 @@ export class GenerateGeneralFlashCardsUseCase {
         previousSummary = summary;
       }
     }
+
+    // Record total token usage
+    await this.tokenRateLimitingService.recordUsage(userId, {
+      promptTokens: totalPromptTokens,
+      completionTokens: totalCompletionTokens,
+      model: lastModel,
+      endpoint: "generate-flashcards",
+    });
 
     // Safety check: ensure we didn't exceed requested total
     let finalCards = allCards;
@@ -182,9 +202,13 @@ export class GenerateGeneralFlashCardsUseCase {
     flashCardsSet.setFlashCards(finalCards);
 
     this.logger.info(
-      `Generated ${finalCards.length} flashcards for set: ${
-        flashCardsSet.getName() || "Untitled"
-      }`
+      {
+        setName: flashCardsSet.getName() || "Untitled",
+        cardCount: finalCards.length,
+        totalPromptTokens,
+        totalCompletionTokens,
+      },
+      "Generated flashcards"
     );
 
     // Save the flashcard set to the database

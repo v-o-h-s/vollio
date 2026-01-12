@@ -21,6 +21,7 @@ import { flashcardRoutes } from "./interface/routes/flashcards.route";
 import { assistantRoutes } from "./interface/routes/assistant.route";
 import settingsRoutes from "./interface/routes/settings.routes";
 import { rateLimiterPlugin } from "./plugins/rateLimiter";
+import { tokenRateLimiterPlugin } from "./plugins/tokenRateLimiter";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
@@ -82,6 +83,9 @@ app.register(authPlugin);
 
 // Register rate limiter plugin (must be after authPlugin to access request.user)
 app.register(rateLimiterPlugin);
+
+// Register token rate limiter plugin for AI endpoints
+app.register(tokenRateLimiterPlugin);
 
 // Error handler
 app.setErrorHandler(errorHandler);

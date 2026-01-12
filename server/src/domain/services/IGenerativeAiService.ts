@@ -1,21 +1,36 @@
-import { ChunkMetadata } from "../../shared/utils/chunking";
-import { Quiz, QuizQuestion } from "../entities/Quiz";
-import { CreateQuizDTO } from "../../shared/validation/quizSchemas";
+import { QuizQuestion } from "../entities/Quiz";
 import { JSONContent } from "@vollio/shared";
+import {
+  GenerativeAiResult,
+  TokenUsage,
+} from "../../shared/types/generativeAi";
 
 /**
  * Service interface for generative AI operations.
  * This service is responsible for generating and refining text prompts
  * using generative AI models.
+ *
+ * All methods return GenerativeAiResult which includes token usage for rate limiting.
  */
 export interface IGenerativeAiService {
-  generateText(prompt: string, model?: string): Promise<any>;
-  refineUserPrompt(initialPrompt: string): Promise<string>;
+  generateText(
+    prompt: string,
+    model?: string
+  ): Promise<GenerativeAiResult<string>>;
+  refineUserPrompt(initialPrompt: string): Promise<GenerativeAiResult<string>>;
   generateQuizQuestions(
     prompt: string
-  ): Promise<{ questions: QuizQuestion[]; title?: string; summary?: string }>;
+  ): Promise<
+    GenerativeAiResult<{
+      questions: QuizQuestion[];
+      title?: string;
+      summary?: string;
+    }>
+  >;
   generateFlashCards(
     prompt: string
-  ): Promise<{ flashCards: any[]; name?: string; summary?: string }>;
-  generateSummary(prompt: string): Promise<JSONContent>;
+  ): Promise<
+    GenerativeAiResult<{ flashCards: any[]; name?: string; summary?: string }>
+  >;
+  generateSummary(prompt: string): Promise<GenerativeAiResult<JSONContent>>;
 }

@@ -10,6 +10,8 @@ import { ServerError } from "../../../shared/errors/ServerError";
 import { Note } from "../../../domain/entities/Note";
 import { INoteRepository } from "../../../domain/repositories/INoteRepository";
 import { NoteMapper } from "../../../shared/mappers/NoteMapper";
+import { ITokenRateLimitingService } from "../../../domain/services/ITokenRateLimitingService";
+import { TokenUsage } from "../../../shared/types/generativeAi";
 
 /**
  * Use case for summarizing a document
@@ -17,16 +19,25 @@ import { NoteMapper } from "../../../shared/mappers/NoteMapper";
  * @output id, documentId, text
  */
 
+export interface GenerateSummaryResult {
+  note: NoteData;
+  tokenUsage: TokenUsage;
+}
+
 export class GenerateSummaryUseCase {
   constructor(
     private logger: FastifyBaseLogger,
     private generativeAiService: IGenerativeAiService,
     private embeddingRepository: IEmbeddingRepository,
     private noteRepository: INoteRepository,
-    private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase
+    private ensureExistingOfDocumentEmbeddingUseCase: EnsureExistingOfDocumentEmbeddingUseCase,
+    private tokenRateLimitingService: ITokenRateLimitingService
   ) {}
 
-  async execute(data: DocumentIdParams, userId: string): Promise<NoteData> {
+  async execute(
+    data: DocumentIdParams,
+    userId: string
+  ): Promise<GenerateSummaryResult> {
     this.logger.info(
       { documentId: data.id, userId },
       "Executing SummarizeDocumentUseCase"
@@ -72,6 +83,11 @@ export class GenerateSummaryUseCase {
       ],
     };
 
+    // Track total token usage across batches
+    let totalPromptTokens = 0;
+    let totalCompletionTokens = 0;
+    let lastModel = "";
+
     // 4. Process batches
     for (let i = 0; i < batches.length; i++) {
       this.logger.info(
@@ -90,10 +106,25 @@ export class GenerateSummaryUseCase {
       );
 
       const result = await this.generativeAiService.generateSummary(prompt);
-      if (result.summary) {
-        currentSummary = result.summary;
+
+      // Accumulate token usage
+      totalPromptTokens += result.usage.promptTokens;
+      totalCompletionTokens += result.usage.completionTokens;
+      lastModel = result.model;
+
+      // Access data from the new structure
+      if (result.data && result.data.type === "doc") {
+        currentSummary = result.data;
       }
     }
+
+    // Record total token usage
+    await this.tokenRateLimitingService.recordUsage(userId, {
+      promptTokens: totalPromptTokens,
+      completionTokens: totalCompletionTokens,
+      model: lastModel,
+      endpoint: "generate-summary",
+    });
 
     // 5. Save summary
     const note = new Note(
@@ -106,10 +137,17 @@ export class GenerateSummaryUseCase {
 
     const createdNote = await this.noteRepository.createNote(note);
     this.logger.info(
-      { documentId: data.id },
+      { documentId: data.id, totalPromptTokens, totalCompletionTokens },
       "SummarizeDocumentUseCase completed successfully"
     );
 
-    return NoteMapper.fromDomainToInterface(note);
+    return {
+      note: NoteMapper.fromDomainToInterface(note),
+      tokenUsage: {
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
+        totalTokens: totalPromptTokens + totalCompletionTokens,
+      },
+    };
   }
 }

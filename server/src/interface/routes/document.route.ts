@@ -38,7 +38,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       schema: {},
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.getAllDocuments(request, reply);
     }
   );
@@ -60,7 +61,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       },
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.getDocumentFromGoogleDrive(request, reply);
     }
   );
@@ -82,7 +84,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       },
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.addDocumentFromGoogleDrive(request, reply);
     }
   );
@@ -99,7 +102,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateBody(getStorageUrlSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.getStorageUrl(request, reply);
     }
   );
@@ -116,7 +120,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateParams(documentIdParamsSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.getDocumentById(request, reply);
     }
   );
@@ -133,7 +138,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateParams(documentIdParamsSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.deleteDocument(request, reply);
     }
   );
@@ -154,7 +160,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.moveDocument(request, reply);
     }
   );
@@ -175,7 +182,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.renameDocument(request, reply);
     }
   );
@@ -184,6 +192,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     {
       config: {
         rateLimit: { cost: 20, category: "ai" },
+        tokenRateLimit: true,
       },
       schema: {
         params: documentIdParamsSchema,
@@ -191,7 +200,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateParams(documentIdParamsSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.generateSummary(request, reply);
     }
   );
@@ -208,7 +218,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateBody(createDocumentSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.createDocument(request, reply);
     }
   );
