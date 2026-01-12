@@ -23,6 +23,7 @@ import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { TableCell } from "@tiptap/extension-table-cell";
+import { Mathematics } from "@tiptap/extension-mathematics";
 
 import {
   SlashCommand,
@@ -341,6 +342,11 @@ function NotionEditorInner({
       }),
       // Add AI Insight for AI-generated content
       Insight,
+      // Add Mathematics for LaTeX support
+      Mathematics.configure({
+        throwOnError: false,
+        evaluation: false, // We just want rendering, not live calculation
+      }),
     ],
     content: content?.content || "",
     editable,

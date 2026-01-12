@@ -7,8 +7,7 @@ import { useEditorErrorRecovery } from "@/hooks/use-editor-error-recovery";
 import { cn } from "@/lib/utils";
 import type { NotionEditorProps } from "./types";
 
-interface RobustNotionEditorProps
-  extends Omit<NotionEditorProps, "onChange"> {
+interface RobustNotionEditorProps extends Omit<NotionEditorProps, "onChange"> {
   onNoteCreated?: (noteId: string) => void;
 }
 
@@ -44,7 +43,7 @@ export function RobustNotionEditor({
     maxRetries: 3,
     onRecovery: () => {
       // Force re-render with incremented key
-      
+
       setEditorKey((prev) => prev + 1);
     },
   });

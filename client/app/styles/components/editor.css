@@ -274,7 +274,64 @@
   font-weight: 700;
 }
 
+/* Mathematics Styles */
+.ProseMirror .math-node {
+  display: inline-block;
+  padding: 0.2rem 0.4rem;
+  margin: 0 0.1rem;
+  background-color: hsl(var(--muted) / 0.3);
+  border-radius: 0.25rem;
+  border: 1px solid hsl(var(--border));
+  transition: all 0.2s ease;
+}
 
+.ProseMirror .math-node:hover {
+  background-color: hsl(var(--muted) / 0.5);
+  border-color: hsl(var(--primary) / 0.5);
+}
+
+/* Block-level math (display mode) */
+.ProseMirror .math-node[data-display="true"] {
+  display: block;
+  padding: 1rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  background-color: hsl(var(--muted) / 0.2);
+  border-left: 4px solid hsl(var(--primary));
+}
+
+/* Dark mode support for math */
+.dark .ProseMirror .math-node {
+  background-color: rgba(30, 41, 59, 0.4);
+  border-color: rgba(100, 116, 139, 0.3);
+}
+
+.dark .ProseMirror .math-node:hover {
+  background-color: rgba(30, 41, 59, 0.6);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.dark .ProseMirror .math-node[data-display="true"] {
+  background-color: rgba(30, 41, 59, 0.3);
+  border-left-color: rgba(139, 92, 246, 0.8);
+}
+
+/* KaTeX specific styling overrides */
+.ProseMirror .katex {
+  font-size: 1.1em;
+}
+
+.ProseMirror .katex-display {
+  margin: 0;
+}
+
+.ProseMirror .katex-html {
+  color: hsl(var(--foreground));
+}
+
+.dark .ProseMirror .katex-html {
+  color: hsl(var(--foreground));
+}
 
 
 /* Focus styles */
@@ -370,10 +427,11 @@
 
 /* Editor focus styles */
 .editor-container:focus-within {
-  ring: 2px;
-  ring-color: hsl(var(--ring));
-  ring-offset: 2px;
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+  outline: 2px solid transparent;
+  outline-offset: 2px;
 }
+
 
 /* Responsive editor styles */
 @media (max-width: 768px) {
