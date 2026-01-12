@@ -81,5 +81,12 @@ declare module "fastify" {
     };
     /** Enable token-based rate limiting for AI endpoints */
     tokenRateLimit?: boolean | TokenRateLimitConfig;
+    /** IP-based rate limiting for public routes */
+    ipRateLimit?: {
+      /** Maximum requests per window (default: 60) */
+      maxRequests?: number;
+      /** Window size in seconds (default: 60) */
+      windowSeconds?: number;
+    };
   }
 }

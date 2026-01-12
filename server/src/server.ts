@@ -21,6 +21,7 @@ import { quizRoutes } from "./interface/routes/quiz.route";
 import { flashcardRoutes } from "./interface/routes/flashcards.route";
 import { assistantRoutes } from "./interface/routes/assistant.route";
 import settingsRoutes from "./interface/routes/settings.routes";
+import { healthRoutes } from "./interface/routes/health.route";
 import { rateLimiterPlugin } from "./plugins/rateLimiter";
 import { tokenRateLimiterPlugin } from "./plugins/tokenRateLimiter";
 
@@ -114,6 +115,9 @@ app.register(tokenRateLimiterPlugin);
 
 // Error handler
 app.setErrorHandler(errorHandler);
+
+// HEALTH CHECK ROUTES (public, no prefix)
+app.register(healthRoutes);
 
 // API ROUTES
 app.register(noteRoutes, { prefix: "/api/v1/notes" });
