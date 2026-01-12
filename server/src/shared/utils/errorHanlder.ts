@@ -5,6 +5,7 @@ import { ErrorObject } from "../types/error";
 import { NotFoundError } from "../errors/NotFoundError";
 import { VoyageAIError } from "voyageai";
 import { RateLimitingError } from "../errors/RateLimitingError";
+import { ValidationError } from "../errors/ValidationError";
 
 export function errorHandler(
   error: any,
@@ -69,6 +70,28 @@ export function errorHandler(
     };
 
     req.log.error({ err: error }, "Not Found Error Occurred");
+
+    return res.status(error.statusCode).send({
+      success: false,
+      status: error.statusCode,
+      data: null,
+      error: errorObj,
+    });
+  }
+
+  if (error instanceof ValidationError) {
+    const errorObj: ErrorObject = {
+      name: error.name,
+      subType: error.source,
+      message: error.message,
+      details: JSON.stringify(error.fieldErrors),
+      statusCode: error.statusCode,
+      extra: {
+        fieldErrors: error.fieldErrors,
+      },
+    };
+
+    req.log.warn({ err: error }, "Validation Error Occurred");
 
     return res.status(error.statusCode).send({
       success: false,
