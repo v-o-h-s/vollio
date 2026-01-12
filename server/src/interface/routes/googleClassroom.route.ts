@@ -21,6 +21,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/connect`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {},
     },
     async (request, reply) => {
@@ -69,6 +72,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/check`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {},
     },
     async (request, reply) => {
@@ -82,6 +88,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.delete(
     `${opts.prefix}/disconnect`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {},
     },
     async (request, reply) => {
@@ -95,6 +104,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/status`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {},
     },
     async (request, reply) => {

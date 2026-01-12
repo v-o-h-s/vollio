@@ -31,6 +31,9 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: CreateNoteDTO }>(
     `${options.prefix}/`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         body: createNoteSchema,
       },
@@ -46,6 +49,9 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${options.prefix}/`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {},
     },
     async (request, reply) => {
@@ -58,6 +64,9 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: NoteIdParams }>(
     `${options.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: noteIdParamsSchema,
       },
@@ -74,6 +83,9 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   fastify.put<{ Params: NoteIdParams; Body: UpdateNoteDTO }>(
     `${options.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: noteIdParamsSchema,
         body: updateNoteSchema,
@@ -93,6 +105,9 @@ const noteRoutesHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: NoteIdParams }>(
     `${options.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: noteIdParamsSchema,
       },

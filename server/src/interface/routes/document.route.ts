@@ -32,6 +32,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {},
     },
     async (request, reply) => {
@@ -87,6 +90,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: GetStorageUrlDto }>(
     `${opts.prefix}/upload-url`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         body: getStorageUrlSchema,
       },
@@ -101,6 +107,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: DocumentIdParams }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 30 },
+      },
       schema: {
         params: documentIdParamsSchema,
       },
@@ -115,6 +124,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: DocumentIdParams }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: documentIdParamsSchema,
       },
@@ -129,6 +141,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.patch<{ Params: DocumentIdParams; Body: MoveDocumentDTO }>(
     `${opts.prefix}/:id/move`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: documentIdParamsSchema,
         body: moveDocumentSchema,
@@ -147,6 +162,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.put<{ Params: DocumentIdParams; Body: RenameDocumentDTO }>(
     `${opts.prefix}/:id/rename`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: documentIdParamsSchema,
         body: renameDocumentSchema,
@@ -181,6 +199,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: CreateDocumentDto }>(
     `${opts.prefix}/finish-upload`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         body: createDocumentSchema,
       },

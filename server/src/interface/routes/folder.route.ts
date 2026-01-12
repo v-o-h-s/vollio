@@ -29,6 +29,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${options.prefix}/`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -47,6 +50,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: CreateFolderDTO }>(
     `${options.prefix}/`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -67,6 +73,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: FolderIdParams }>(
     `${options.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -87,6 +96,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
   fastify.put<{ Params: FolderIdParams; Body: UpdateFolderDTO }>(
     `${options.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -114,6 +126,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
   }>(
     `${options.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         

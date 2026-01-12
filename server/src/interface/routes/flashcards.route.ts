@@ -26,6 +26,9 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: CreateManualFlashCardsDTO }>(
     `${opts.prefix}/`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -68,6 +71,9 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: FlashCardsSetIdParams }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -87,6 +93,9 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: { documentId: string } }>(
     `${opts.prefix}/document/:documentId`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -111,6 +120,9 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: FlashCardsSetIdParams }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -130,6 +142,9 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         

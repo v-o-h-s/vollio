@@ -31,6 +31,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Querystring: HighlightDocumentIdParams }>(
     `${_options.prefix}`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -51,6 +54,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: CreateHighlightDTO }>(
     `${_options.prefix}`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -71,6 +77,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: HighlightIdParams }>(
     `${_options.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -94,6 +103,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   }>(
     `${_options.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -118,6 +130,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: HighlightIdParams }>(
     `${_options.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         
         
@@ -137,6 +152,11 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   // Count highlights by tag
   fastify.get<{ Params: { tagName: string } }>(
     `${_options.prefix}/tags/:tagName/count`,
+    {
+      config: {
+        rateLimit: { cost: 1 },
+      },
+    },
     async (request, reply) => {
       const highlightController = request.diScope.resolve<HighlightController>(
         "highlightController"
@@ -148,6 +168,11 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
   // Delete highlights by tag
   fastify.delete<{ Params: { tagName: string } }>(
     `${_options.prefix}/tags/:tagName`,
+    {
+      config: {
+        rateLimit: { cost: 1 },
+      },
+    },
     async (request, reply) => {
       const highlightController = request.diScope.resolve<HighlightController>(
         "highlightController"

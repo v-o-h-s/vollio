@@ -38,6 +38,9 @@ const quizHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: { id: string } }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: quizIdParamsSchema,
       },
@@ -52,6 +55,9 @@ const quizHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: { id: string } }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: quizIdParamsSchema,
       },
@@ -66,6 +72,9 @@ const quizHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {},
     },
     async (request, reply) => {
