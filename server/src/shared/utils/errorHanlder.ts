@@ -4,6 +4,7 @@ import { DatabaseError } from "../errors/DatabaseError";
 import { ErrorObject } from "../types/error";
 import { NotFoundError } from "../errors/NotFoundError";
 import { VoyageAIError } from "voyageai";
+import { RateLimitingError } from "../errors/RateLimitingError";
 
 export function errorHandler(
   error: any,
@@ -68,6 +69,39 @@ export function errorHandler(
     };
 
     req.log.error({ err: error }, "Not Found Error Occurred");
+
+    return res.status(error.statusCode).send({
+      success: false,
+      status: error.statusCode,
+      data: null,
+      error: errorObj,
+    });
+  }
+
+  if (error instanceof RateLimitingError) {
+    const errorObj: ErrorObject = {
+      name: error.name,
+      subType: "rate_limit_exceeded",
+      message: error.message,
+      details: "Rate limit exceeded for " + error.source,
+      statusCode: error.statusCode,
+      extra: {
+        source: error.source,
+        retryAfter: error.retryAfter,
+        limit: error.limit,
+        remaining: error.remaining,
+        reset: error.reset,
+        details: error.details,
+      },
+    };
+
+    // Set rate limit headers
+    const headers = error.getHeaders();
+    Object.entries(headers).forEach(([key, value]) => {
+      res.header(key, value);
+    });
+
+    req.log.warn({ err: error }, "Rate Limiting Error Occurred");
 
     return res.status(error.statusCode).send({
       success: false,

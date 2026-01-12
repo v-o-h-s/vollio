@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { ITokenRateLimitingService } from "../domain/services/ITokenRateLimitingService";
+import { RateLimitingError } from "../shared/errors/RateLimitingError";
 
 /**
  * Token Rate Limiter Plugin
@@ -61,33 +62,21 @@ export const tokenRateLimiterPlugin: FastifyPluginAsync = fp(
         reply.header("X-Token-Monthly-Remaining", result.remaining.monthly);
 
         if (!result.allowed) {
-          // Log the event for monitoring
-          request.log.warn(
-            {
-              userId: request.user.id,
+          throw new RateLimitingError({
+            message: getQuotaExceededMessage(result.reason),
+            source: "token_quota_" + (result.reason || "unknown"),
+            retryAfter: result.retryAfter,
+            remaining:
+              result.reason === "daily_limit"
+                ? result.remaining.daily
+                : result.reason === "monthly_limit"
+                ? result.remaining.monthly
+                : 0,
+            details: {
               reason: result.reason,
               remaining: result.remaining,
-            },
-            "Token quota exceeded"
-          );
-
-          if (result.retryAfter) {
-            reply.header("Retry-After", result.retryAfter);
-          }
-
-          reply.status(429).send({
-            success: false,
-            message: "Token Quota Exceeded",
-            data: null,
-            error: {
-              type: "token_quota_exceeded",
-              reason: result.reason,
-              remaining: result.remaining,
-              retryAfter: result.retryAfter,
-              message: getQuotaExceededMessage(result.reason),
             },
           });
-          return;
         }
       } catch (error) {
         // Log error but don't block request - fail open

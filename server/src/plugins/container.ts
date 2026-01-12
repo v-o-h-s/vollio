@@ -90,7 +90,8 @@ import { TokenQuotaRepository } from "../infrastructure/repositories/TokenQuotaR
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton Redis client
   const redis = new Redis({
-    host: process.env.REDIS_HOST || "127.0.0.1",
+    // Defensive trim for stability
+    host: (process.env.REDIS_HOST || "127.0.0.1").trim(),
     port: Number(process.env.REDIS_PORT) || 6379,
   });
 

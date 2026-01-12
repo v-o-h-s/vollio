@@ -1,6 +1,7 @@
 import { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { IRateLimitingService } from "../domain/services/IRateLimitingService";
+import { RateLimitingError } from "../shared/errors/RateLimitingError";
 
 export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
   fastify.addHook("preHandler", async (request, reply) => {
@@ -30,26 +31,16 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
     reply.header("X-RateLimit-Remaining", Math.floor(result.remaining));
 
     if (!result.allowed) {
-      // Log the event for monitoring
-      request.log.warn(
-        { userId: request.user.id, bucket, cost },
-        "Rate limit exceeded"
-      );
-
-      if (result.retryAfter) {
-        reply.header("Retry-After", result.retryAfter);
-      }
-
-      reply.status(429).send({
-        success: false,
-        message: "Too Many Requests",
-        data: null,
-        error: { 
-          message: "Rate limit exceeded. Please try again later.",
-          retryAfter: result.retryAfter
+      throw new RateLimitingError({
+        message: "Rate limit exceeded. Please try again later.",
+        source: bucket,
+        retryAfter: result.retryAfter,
+        remaining: Math.floor(result.remaining),
+        details: {
+          bucket,
+          cost,
         },
       });
-      return;
     }
   });
 });
