@@ -7,9 +7,8 @@ This document defines the cost (weight) associated with each API endpoint for ra
 | Category | Cost (Tokens) | Description |
 | :--- | :--- | :--- |
 | **Low** | 1 | Standard database operations (CRUD), lightweight logic. |
-| **Medium** | 5 | External API calls (Google Drive/Classroom), moderately complex queries. |
-| **High** | 10 | Heavy database reads (e.g., full document content). |
-| **Very High** | 20 | AI generation (LLM), Embeddings, heavy processing. |
+| **Medium** | 5 | External API calls (Google Drive/Classroom), complex queries, file operations. |
+| **High** | 20 | AI generation (LLM), Embeddings, heavy processing, recursive external API calls. |
 
 ## Endpoint Weights
 
@@ -17,7 +16,7 @@ This document defines the cost (weight) associated with each API endpoint for ra
 
 | Method | Endpoint | Handler | Weight | Category |
 | :--- | :--- | :--- | :--- | :--- |
-| POST | `/` | `assistantChat` | **20** | Very High |
+| POST | `/` | `assistantChat` | **20** | High |
 
 ### Documents (`/api/v1/documents`)
 
@@ -27,11 +26,11 @@ This document defines the cost (weight) associated with each API endpoint for ra
 | GET | `/google-drive/:documentId` | `getDocumentFromGoogleDrive` | **5** | Medium |
 | POST | `/google-drive` | `addDocumentFromGoogleDrive` | **5** | Medium |
 | POST | `/upload-url` | `getStorageUrl` | **1** | Low |
-| GET | `/:id` | `getDocumentById` | **30** | Very High |
+| GET | `/:id` | `getDocumentById` | **1** | Low |
 | DELETE | `/:id` | `deleteDocument` | **1** | Low |
 | PATCH | `/:id/move` | `moveDocument` | **1** | Low |
 | PUT | `/:id/rename` | `renameDocument` | **1** | Low |
-| POST | `/:id/generate-summary` | `generateSummary` | **20** | Very High |
+| POST | `/:id/generate-summary` | `generateSummary` | **20** | High |
 | POST | `/finish-upload` | `createDocument` | **1** | Low |
 
 ### Flashcards (`/api/v1/flashcards`)
@@ -39,7 +38,7 @@ This document defines the cost (weight) associated with each API endpoint for ra
 | Method | Endpoint | Handler | Weight | Category |
 | :--- | :--- | :--- | :--- | :--- |
 | POST | `/` | `createFlashCardsSet` | **1** | Low |
-| POST | `/generate-from-document` | `generateFlashCardsSet` | **20** | Very High |
+| POST | `/generate-from-document` | `generateFlashCardsSet` | **20** | High |
 | GET | `/:id` | `getFlashCardsSetById` | **1** | Low |
 | GET | `/document/:documentId` | `getFlashCardsSetsByDocumentId` | **1** | Low |
 | DELETE | `/:id` | `deleteFlashCardsSet` | **1** | Low |
@@ -66,7 +65,7 @@ This document defines the cost (weight) associated with each API endpoint for ra
 | DELETE | `/disconnect` | `disconnect` | **1** | Low |
 | GET | `/status` | `getConnectionStatus` | **1** | Low |
 | GET | `/courses/list` | `getCourses` | **5** | Medium |
-| GET | `/courses` | `getCoursesWithContent` | **20** | Very High |
+| GET | `/courses` | `getCoursesWithContent` | **20** | High |
 | GET | `/courses/:courseId/content` | `getCourseContent` | **5** | Medium |
 
 ### Highlights (`/api/v1/highlights`)
@@ -95,7 +94,7 @@ This document defines the cost (weight) associated with each API endpoint for ra
 
 | Method | Endpoint | Handler | Weight | Category |
 | :--- | :--- | :--- | :--- | :--- |
-| POST | `/` | `createQuiz` | **20** | Very High |
+| POST | `/` | `createQuiz` | **20** | High |
 | GET | `/:id` | `getQuizById` | **1** | Low |
 | DELETE | `/:id` | `deleteQuizById` | **1** | Low |
 | GET | `/` | `getAllQuizzes` | **1** | Low |
@@ -111,4 +110,4 @@ This document defines the cost (weight) associated with each API endpoint for ra
 
 | Method | Endpoint | Handler | Weight | Category |
 | :--- | :--- | :--- | :--- | :--- |
-| GET | `/:id` | `embeddDocument` | **20** | Very High |
+| GET | `/:id` | `embeddDocument` | **20** | High |

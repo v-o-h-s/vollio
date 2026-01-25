@@ -9,6 +9,7 @@ import { QuizController } from "../../interface/controllers/quiz.controller";
 import { SummaryController } from "../../interface/controllers/summary.controller";
 import { SettingsController } from "../../interface/controllers/settings.controller";
 import { RateLimitingService } from "../../infrastructure/services/RateLimitingService";
+import { TokenRateLimitingService } from "../../infrastructure/services/TokenRateLimitingService";
 import { AssistantController } from "../../interface/controllers/assistant.controller";
 import { FolderController } from "../../interface/controllers/folder.controller";
 import { HighlightController } from "../../interface/controllers/highlight.controller";
@@ -46,7 +47,16 @@ export interface DIContainer {
   highlightController: HighlightController;
   flashCardsController: FlashCardsController;
   rateLimitingService: RateLimitingService;
+  tokenRateLimitingService: TokenRateLimitingService;
   redis: Redis;
+}
+
+/**
+ * Token rate limit configuration for AI routes
+ */
+export interface TokenRateLimitConfig {
+  /** Estimated tokens for this request (optional, for pre-check) */
+  estimatedTokens?: number;
 }
 
 declare module "fastify" {
@@ -67,7 +77,9 @@ declare module "fastify" {
   interface FastifyContextConfig {
     rateLimit?: {
       cost?: number;
-      category?: "request" | "ai" | "upload"; // Optional: if you want different buckets later
+      category?: "request" | "ai" | "upload";
     };
+    /** Enable token-based rate limiting for AI endpoints */
+    tokenRateLimit?: boolean | TokenRateLimitConfig;
   }
 }

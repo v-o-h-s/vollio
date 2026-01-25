@@ -18,6 +18,7 @@ const assistantRoutesHandler: FastifyPluginAsync = async (
     {
       config: {
         rateLimit: { cost: 20, category: "ai" },
+        tokenRateLimit: true,
       },
       schema: {
         body: AssistantDTOSchema,
@@ -25,7 +26,9 @@ const assistantRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateBody(AssistantDTOSchema),
     },
     async (request, reply) => {
-      const assistantController = request.diScope.resolve<AssistantController>("assistantController");
+      const assistantController = request.diScope.resolve<AssistantController>(
+        "assistantController"
+      );
       return assistantController.assistantChat(request, reply);
     }
   );

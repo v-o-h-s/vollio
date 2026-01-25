@@ -22,9 +22,5 @@
   "devDependencies": {
     "concurrently": "^9.0.0",
     "shadcn": "^3.6.2"
-  },
-  "dependencies": {
-    "@tiptap/extension-mathematics": "^3.15.3",
-    "katex": "^0.16.27"
   }
 }

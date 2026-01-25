@@ -26,18 +26,17 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: CreateManualFlashCardsDTO }>(
     `${opts.prefix}/`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
-        
-        
         body: createManualFlashCardsSchema,
-        
       },
       preHandler: validateBody(createManualFlashCardsSchema),
     },
     async (request, reply) => {
-      const flashCardsController = request.diScope.resolve<FlashCardsController>(
-        "flashCardsController"
-      );
+      const flashCardsController =
+        request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.createFlashCardsSet(request, reply);
     }
   );
@@ -48,19 +47,16 @@ const flashcardsHandler: FastifyPluginAsync = async (
     {
       config: {
         rateLimit: { cost: 20, category: "ai" },
+        tokenRateLimit: true,
       },
       schema: {
-        
-        
         body: createFlashCardsSchema,
-        
       },
       preHandler: validateBody(createFlashCardsSchema),
     },
     async (request, reply) => {
-      const flashCardsController = request.diScope.resolve<FlashCardsController>(
-        "flashCardsController"
-      );
+      const flashCardsController =
+        request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.generateFlashCardsSet(request, reply);
     }
   );
@@ -68,18 +64,17 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: FlashCardsSetIdParams }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
-        
-        
         params: flashCardsSetIdParamsSchema,
-        
       },
       preHandler: validateParams(flashCardsSetIdParamsSchema),
     },
     async (request, reply) => {
-      const flashCardsController = request.diScope.resolve<FlashCardsController>(
-        "flashCardsController"
-      );
+      const flashCardsController =
+        request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.getFlashCardsSetById(request, reply);
     }
   );
@@ -87,9 +82,10 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: { documentId: string } }>(
     `${opts.prefix}/document/:documentId`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
-        
-        
         params: {
           type: "object",
           properties: {
@@ -97,13 +93,11 @@ const flashcardsHandler: FastifyPluginAsync = async (
           },
           required: ["documentId"],
         },
-        
       },
     },
     async (request, reply) => {
-      const flashCardsController = request.diScope.resolve<FlashCardsController>(
-        "flashCardsController"
-      );
+      const flashCardsController =
+        request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.getFlashCardsSetsByDocumentId(request, reply);
     }
   );
@@ -111,18 +105,17 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: FlashCardsSetIdParams }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
-        
-        
         params: flashCardsSetIdParamsSchema,
-        
       },
       preHandler: validateParams(flashCardsSetIdParamsSchema),
     },
     async (request, reply) => {
-      const flashCardsController = request.diScope.resolve<FlashCardsController>(
-        "flashCardsController"
-      );
+      const flashCardsController =
+        request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.deleteFlashCardsSet(request, reply);
     }
   );
@@ -130,16 +123,14 @@ const flashcardsHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/`,
     {
-      schema: {
-        
-        
-        
+      config: {
+        rateLimit: { cost: 1 },
       },
+      schema: {},
     },
     async (request, reply) => {
-      const flashCardsController = request.diScope.resolve<FlashCardsController>(
-        "flashCardsController"
-      );
+      const flashCardsController =
+        request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.getAllFlashCardsSets(request, reply);
     }
   );

@@ -258,7 +258,7 @@ export class DocumentController {
     );
     ResponseFormatter.success<NoteData>(
       reply,
-      result,
+      result.note,
       "Summary generated successfully"
     );
   }

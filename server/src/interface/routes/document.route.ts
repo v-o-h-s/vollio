@@ -32,11 +32,38 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}/`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {},
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.getAllDocuments(request, reply);
+    }
+  );
+
+  fastify.get<{ Params: { documentId: string } }>(
+    `${opts.prefix}/google-drive/:documentId`,
+    {
+      config: {
+        rateLimit: { cost: 5 },
+      },
+      schema: {
+        params: {
+          type: "object",
+          properties: {
+            documentId: { type: "string" },
+          },
+          required: ["documentId"],
+        },
+      },
+    },
+    async (request, reply) => {
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
+      return documentController.getDocumentFromGoogleDrive(request, reply);
     }
   );
 
@@ -57,7 +84,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       },
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.addDocumentFromGoogleDrive(request, reply);
     }
   );
@@ -65,13 +93,17 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: GetStorageUrlDto }>(
     `${opts.prefix}/upload-url`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         body: getStorageUrlSchema,
       },
       preHandler: validateBody(getStorageUrlSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.getStorageUrl(request, reply);
     }
   );
@@ -79,13 +111,17 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.get<{ Params: DocumentIdParams }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 30 },
+      },
       schema: {
         params: documentIdParamsSchema,
       },
       preHandler: validateParams(documentIdParamsSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.getDocumentById(request, reply);
     }
   );
@@ -93,13 +129,17 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: DocumentIdParams }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: documentIdParamsSchema,
       },
       preHandler: validateParams(documentIdParamsSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.deleteDocument(request, reply);
     }
   );
@@ -107,6 +147,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.patch<{ Params: DocumentIdParams; Body: MoveDocumentDTO }>(
     `${opts.prefix}/:id/move`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: documentIdParamsSchema,
         body: moveDocumentSchema,
@@ -117,7 +160,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.moveDocument(request, reply);
     }
   );
@@ -125,6 +169,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.put<{ Params: DocumentIdParams; Body: RenameDocumentDTO }>(
     `${opts.prefix}/:id/rename`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: documentIdParamsSchema,
         body: renameDocumentSchema,
@@ -135,7 +182,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.renameDocument(request, reply);
     }
   );
@@ -144,6 +192,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     {
       config: {
         rateLimit: { cost: 20, category: "ai" },
+        tokenRateLimit: true,
       },
       schema: {
         params: documentIdParamsSchema,
@@ -151,7 +200,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateParams(documentIdParamsSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.generateSummary(request, reply);
     }
   );
@@ -159,13 +209,17 @@ const documentRoutesHandler: FastifyPluginAsync = async (
   fastify.post<{ Body: CreateDocumentDto }>(
     `${opts.prefix}/finish-upload`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         body: createDocumentSchema,
       },
       preHandler: validateBody(createDocumentSchema),
     },
     async (request, reply) => {
-      const documentController = request.diScope.resolve<DocumentController>("documentController");
+      const documentController =
+        request.diScope.resolve<DocumentController>("documentController");
       return documentController.createDocument(request, reply);
     }
   );

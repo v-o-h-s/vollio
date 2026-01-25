@@ -24,6 +24,7 @@ const quizHandler: FastifyPluginAsync = async (
     {
       config: {
         rateLimit: { cost: 20, category: "ai" },
+        tokenRateLimit: true,
       },
       schema: {
         body: createQuizSchema,
@@ -31,20 +32,25 @@ const quizHandler: FastifyPluginAsync = async (
       preHandler: validateBody(createQuizSchema),
     },
     async (request, reply) => {
-      const quizController = request.diScope.resolve<QuizController>("quizController");
+      const quizController =
+        request.diScope.resolve<QuizController>("quizController");
       return quizController.createQuiz(request, reply);
     }
   );
   fastify.get<{ Params: { id: string } }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: quizIdParamsSchema,
       },
       preHandler: validateParams(quizIdParamsSchema),
     },
     async (request, reply) => {
-      const quizController = request.diScope.resolve<QuizController>("quizController");
+      const quizController =
+        request.diScope.resolve<QuizController>("quizController");
       return quizController.getQuizById(request, reply);
     }
   );
@@ -52,13 +58,17 @@ const quizHandler: FastifyPluginAsync = async (
   fastify.delete<{ Params: { id: string } }>(
     `${opts.prefix}/:id`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         params: quizIdParamsSchema,
       },
       preHandler: validateParams(quizIdParamsSchema),
     },
     async (request, reply) => {
-      const quizController = request.diScope.resolve<QuizController>("quizController");
+      const quizController =
+        request.diScope.resolve<QuizController>("quizController");
       return quizController.deleteQuizById(request, reply);
     }
   );
@@ -66,10 +76,14 @@ const quizHandler: FastifyPluginAsync = async (
   fastify.get(
     `${opts.prefix}`,
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {},
     },
     async (request, reply) => {
-      const quizController = request.diScope.resolve<QuizController>("quizController");
+      const quizController =
+        request.diScope.resolve<QuizController>("quizController");
       return quizController.getAllQuizzes(request, reply);
     }
   );

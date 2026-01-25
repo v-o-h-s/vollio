@@ -5,6 +5,9 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
   fastify.get(
     "/",
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         // Add schema if needed
       },
@@ -18,6 +21,9 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
   fastify.patch(
     "/",
     {
+      config: {
+        rateLimit: { cost: 1 },
+      },
       schema: {
         body: { type: "object", additionalProperties: true },
       },
