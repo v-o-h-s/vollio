@@ -16,6 +16,7 @@ import {
   Image,
   Link,
   Table,
+  Sigma,
 } from "lucide-react";
 import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 
@@ -206,6 +207,23 @@ export const slashCommandItems: SlashCommandItem[] = [
         .run();
     },
     keywords: ["ai", "insight", "sparkles", "callout"],
+  },
+  {
+    title: "Math Equation",
+    description: "Insert an inline mathematical equation.",
+    icon: Sigma,
+    command: ({ editor, range }) => {
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertContent({
+          type: "text",
+          text: "$E = mc^2$",
+        })
+        .run();
+    },
+    keywords: ["math", "equation", "formula", "latex", "katex"],
   },
 ];
 
