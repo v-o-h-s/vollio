@@ -108,7 +108,6 @@ export const {
   useDeleteDocumentMutation,
   useRenameDocumentMutation,
   useMoveDocumentMutation,
-  useGetDocumentFromGoogleDriveQuery,
   useAddDocumentFromGoogleDriveMutation,
   useProcessTestMutation,
   //quizzes
