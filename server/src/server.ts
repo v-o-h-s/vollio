@@ -3,6 +3,7 @@ import fastifyCookie from "@fastify/cookie";
 import fastifySession from "@fastify/session";
 import fastifyCors from "@fastify/cors";
 import fastifyMultipart from "@fastify/multipart";
+import fastifyHelmet from "@fastify/helmet";
 import Fastify from "fastify";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { containerPlugin } from "./plugins/container";
@@ -20,6 +21,7 @@ import { quizRoutes } from "./interface/routes/quiz.route";
 import { flashcardRoutes } from "./interface/routes/flashcards.route";
 import { assistantRoutes } from "./interface/routes/assistant.route";
 import settingsRoutes from "./interface/routes/settings.routes";
+import { healthRoutes } from "./interface/routes/health.route";
 import { rateLimiterPlugin } from "./plugins/rateLimiter";
 import { tokenRateLimiterPlugin } from "./plugins/tokenRateLimiter";
 
@@ -67,6 +69,30 @@ app.register(fastifyMultipart, {
   },
 });
 
+// Register helmet for security headers
+app.register(fastifyHelmet, {
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles for editor
+      imgSrc: ["'self'", "data:", "blob:", "*.supabase.co"],
+      connectSrc: [
+        "'self'",
+        "*.supabase.co",
+        "openrouter.ai",
+        "api.voyageai.com",
+      ],
+      fontSrc: ["'self'", "fonts.gstatic.com"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: false, // Required for PDF.js and external resources
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resources
+});
+
 // Register Awilix DI plugin first
 app.register(fastifyAwilixPlugin, {
   disposeOnClose: true,
@@ -89,6 +115,9 @@ app.register(tokenRateLimiterPlugin);
 
 // Error handler
 app.setErrorHandler(errorHandler);
+
+// HEALTH CHECK ROUTES (public, no prefix)
+app.register(healthRoutes);
 
 // API ROUTES
 app.register(noteRoutes, { prefix: "/api/v1/notes" });

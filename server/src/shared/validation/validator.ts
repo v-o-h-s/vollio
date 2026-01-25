@@ -2,45 +2,11 @@ import Ajv, { JSONSchemaType } from "ajv";
 import { FastifyRequest, FastifyReply } from "fastify";
 import { ResponseFormatter } from "../utils/ResponseFormatter";
 import { ErrorObject } from "../types/error";
-
-// Format AJV errors into a frontend-friendly structure:
-// - message: short human-friendly message (e.g., "Invalid input at 'email': must have format 'email'")
-// - fieldErrors: map of field -> array of error messages
-function buildValidationPayload(errors: any[] = []) {
-  const fieldErrors: Record<string, string[]> = {};
-
-  for (const e of errors) {
-    // e.instancePath is like '/user/email' or '/email' or '' for root
-    // Transform to a dot.path like 'user.email' or 'email' or ''
-    const rawPath =
-      typeof e.instancePath === "string"
-        ? e.instancePath.replace(/^\//, "")
-        : "";
-    const path =
-      rawPath.replace(/\//g, ".") ||
-      (e.params && e.params.missingProperty
-        ? String(e.params.missingProperty)
-        : "body");
-    const msg = e.message
-      ? String(e.message)
-      : e.keyword
-      ? `${e.keyword} validation failed`
-      : "invalid";
-
-    if (!fieldErrors[path]) fieldErrors[path] = [];
-    fieldErrors[path].push(msg);
-  }
-
-  const firstPath = Object.keys(fieldErrors)[0];
-  const firstMsg = firstPath
-    ? fieldErrors[firstPath][0]
-    : "invalid request payload";
-  const message = firstPath
-    ? `Invalid input at '${firstPath}': ${firstMsg}`
-    : `Invalid input: ${firstMsg}`;
-
-  return { message, fieldErrors, errors };
-}
+import {
+  ValidationError,
+  ValidationFieldError,
+} from "../errors/ValidationError";
+import { sanitizeObject } from "../utils/sanitizer";
 
 const ajv = new Ajv({
   removeAdditional: true,
@@ -48,6 +14,12 @@ const ajv = new Ajv({
   coerceTypes: true,
 });
 
+// Fields that should be sanitized for XSS
+const DEFAULT_SANITIZABLE_FIELDS = ["name", "title", "description"];
+
+/**
+ * Validate body against AJV schema
+ */
 export function validateBody<T>(schema: JSONSchemaType<T>) {
   const validate = ajv.compile(schema);
 
@@ -55,24 +27,51 @@ export function validateBody<T>(schema: JSONSchemaType<T>) {
     const valid = validate(request.body);
 
     if (!valid) {
-      const { message, fieldErrors, errors } = buildValidationPayload(
-        validate.errors as any[]
-      );
-
-      const err: ErrorObject = {
-        name: "ValidationError",
-        subType: "Ajv",
-        message,
-        details: JSON.stringify(errors),
-        statusCode: 400,
-        extra: { errors, fieldErrors },
-      };
-
-      return ResponseFormatter.error(reply, err, 400, message);
+      throw ValidationError.fromAjvErrors(validate.errors as any[]);
     }
   };
 }
 
+/**
+ * Validate body against AJV schema AND sanitize string fields
+ */
+export function validateAndSanitizeBody<T>(
+  schema: JSONSchemaType<T>,
+  fieldsToSanitize: string[] = DEFAULT_SANITIZABLE_FIELDS
+) {
+  const validate = ajv.compile(schema);
+
+  return async (request: FastifyRequest, reply: FastifyReply) => {
+    // Step 1: AJV schema validation
+    const valid = validate(request.body);
+    if (!valid) {
+      throw ValidationError.fromAjvErrors(validate.errors as any[]);
+    }
+
+    // Step 2: Sanitization layer
+    const { sanitized, errors } = sanitizeObject(
+      request.body as Record<string, any>,
+      fieldsToSanitize
+    );
+
+    if (errors.length > 0) {
+      throw new ValidationError({
+        message: `Validation failed: ${errors
+          .map((e) => e.message)
+          .join(", ")}`,
+        fieldErrors: errors,
+        source: "sanitization",
+      });
+    }
+
+    // Replace body with sanitized version
+    (request as any).body = sanitized;
+  };
+}
+
+/**
+ * Validate params against AJV schema
+ */
 export function validateParams<T>(schema: JSONSchemaType<T>) {
   const validate = ajv.compile(schema);
 
@@ -80,24 +79,14 @@ export function validateParams<T>(schema: JSONSchemaType<T>) {
     const valid = validate(request.params);
 
     if (!valid) {
-      const { message, fieldErrors, errors } = buildValidationPayload(
-        validate.errors as any[]
-      );
-
-      const err: ErrorObject = {
-        name: "ValidationError",
-        subType: "Ajv",
-        message,
-        details: JSON.stringify(errors),
-        statusCode: 400,
-        extra: { errors, fieldErrors },
-      };
-
-      return ResponseFormatter.error(reply, err, 400, message);
+      throw ValidationError.fromAjvErrors(validate.errors as any[]);
     }
   };
 }
 
+/**
+ * Validate query against AJV schema
+ */
 export function validateQuery<T>(schema: JSONSchemaType<T>) {
   const validate = ajv.compile(schema);
 
@@ -105,20 +94,7 @@ export function validateQuery<T>(schema: JSONSchemaType<T>) {
     const valid = validate(request.query);
 
     if (!valid) {
-      const { message, fieldErrors, errors } = buildValidationPayload(
-        validate.errors as any[]
-      );
-
-      const err: ErrorObject = {
-        name: "ValidationError",
-        subType: "Ajv",
-        message,
-        details: JSON.stringify(errors),
-        statusCode: 400,
-        extra: { errors, fieldErrors },
-      };
-
-      return ResponseFormatter.error(reply, err, 400, message);
+      throw ValidationError.fromAjvErrors(validate.errors as any[]);
     }
   };
 }

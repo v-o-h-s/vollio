@@ -6,9 +6,12 @@ import { User } from "../shared/types/fastify";
 export const authPlugin = fp(async (fastify) => {
   fastify.decorateRequest("user", null);
 
+  // Public routes that don't require authentication
+  const PUBLIC_ROUTES = ["/", "/health", "/ready", "/live"];
+
   fastify.addHook("onRequest", async (req, reply) => {
     // Skip auth check for public routes
-    if (req.url === "/" ) {
+    if (PUBLIC_ROUTES.includes(req.url.split("?")[0])) {
       return;
     }
 
