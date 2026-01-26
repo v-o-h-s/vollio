@@ -1,0 +1,17 @@
+services:
+  vollio-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vollio-server:latest
+    container_name: vollio-server
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

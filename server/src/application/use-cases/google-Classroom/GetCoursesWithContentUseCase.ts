@@ -4,7 +4,7 @@ import {
   ClassroomAnnouncementResponse,
   ClassroomCourseWorkResponse,
   Course,
-} from "../../../shared/types/lms/classroom";
+} from "@vollio/shared";
 import { EnsureValidTokenUseCase } from "./EnsureValidTokenUseCase";
 
 export type CourseWithContent = Course & {

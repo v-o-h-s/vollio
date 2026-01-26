@@ -14,7 +14,6 @@ import { noteRoutes } from "./interface/routes/note.route";
 import { fastifyAwilixPlugin } from "@fastify/awilix";
 import { googleClassroomRoutes } from "./interface/routes/googleClassroom.route";
 import { documentRoutes } from "./interface/routes/document.route";
-import { testRoutes } from "./interface/routes/test.route";
 import { folderRoutes } from "./interface/routes/folder.route";
 import { highlightRoutes } from "./interface/routes/highlight.route";
 import { quizRoutes } from "./interface/routes/quiz.route";
@@ -132,9 +131,6 @@ app.register(folderRoutes, {
 });
 app.register(highlightRoutes, {
   prefix: "/api/v1/highlights",
-});
-app.register(testRoutes, {
-  prefix: "/api/v1/test",
 });
 app.register(quizRoutes, {
   prefix: "/api/v1/quizzes",

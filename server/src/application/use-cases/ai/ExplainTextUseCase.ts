@@ -23,37 +23,32 @@ export class ExplainTextUseCase {
 
     const prompt = explainTextPromptGenerator(data.text);
 
-    const result = await this.generativeAiService.generateText(prompt);
+    const { data: result } = await this.generativeAiService.generateText(prompt);
 
-    // The result from generateText might be a string (if it didn't parse) or already parsed if we updated the service.
-    // For now, let's assume we need to parse it and handle both cases.
+    // Parse the result (result is now guaranteed to be a string from GenerativeAiResult<string>)
     let parsed;
-    if (typeof result === "string") {
-      try {
-        const cleanContent = result
-          .replace(/```json/g, "")
-          .replace(/```/g, "")
-          .trim();
-        parsed = JSON.parse(cleanContent);
-      } catch (error) {
-        this.logger.error(
-          "Failed to parse AI response in ExplainTextUseCase: " + error
-        );
-        return {
-          title: "Explanation",
-          content: {
-            type: "doc",
-            content: [
-              {
-                type: "paragraph",
-                content: [{ type: "text", text: result }],
-              },
-            ],
-          },
-        };
-      }
-    } else {
-      parsed = result;
+    try {
+      const cleanContent = result
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+      parsed = JSON.parse(cleanContent);
+    } catch (error) {
+      this.logger.error(
+        "Failed to parse AI response in ExplainTextUseCase: " + error
+      );
+      return {
+        title: "Explanation",
+        content: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: result }],
+            },
+          ],
+        },
+      };
     }
 
     // Recursive function to fix unknown node types (like 'list' -> 'bulletList')

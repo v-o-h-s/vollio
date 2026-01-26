@@ -75,6 +75,41 @@ export class DocumentController {
     } satisfies AddDocumentFromGoogleDriveResponse);
   }
 
+  // get document from google drive by document ID
+  async getDocumentFromGoogleDrive(
+    request: FastifyRequest<{
+      Params: { documentId: string };
+    }>,
+    reply: FastifyReply
+  ): Promise<void> {
+    const userId = request.user?.id;
+    if (!userId) {
+      reply.status(401).send({
+        success: false,
+        message: "User not authenticated",
+        data: null,
+        error: "Unauthorized",
+      });
+      return;
+    }
+
+    const { documentId } = request.params;
+
+    const result = await this.getDocumentFromGoogleDriveUseCase.execute(
+      documentId,
+      userId
+    );
+    reply.status(200).send({
+      success: true,
+      message: "Document fetched from Google Drive successfully",
+      data: {
+        id: result.document.getId(),
+        name: result.document.getName(),
+      },
+      error: null,
+    });
+  }
+
   async getAllDocuments(
     request: FastifyRequest,
     reply: FastifyReply

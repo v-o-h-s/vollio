@@ -9,7 +9,7 @@ import { GetCoursesUseCase } from "../../application/use-cases/google-Classroom/
 import { IsConnectedToGoogleClassroomUseCase } from "../../application/use-cases/google-Classroom/IsConnectedToGoogleClassroomUseCase";
 import { GetCourseContentUseCase } from "../../application/use-cases/google-Classroom/GetCourseContentUseCase";
 import { GetCoursesWithContentUseCase } from "../../application/use-cases/google-Classroom/GetCoursesWithContentUseCase";
-import { ClassroomAnnouncementResponse } from "../../shared/types/lms/classroom";
+import { ClassroomAnnouncementResponse } from "@vollio/shared";
 import { AddDocumentFromGoogleDriveUseCase } from "../../application/use-cases/documents/AddDocumentFromGoogleDriveUseCase";
 import {
   ConnectCallbackResponse,

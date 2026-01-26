@@ -21,49 +21,32 @@ export class AssistantChatUseCase {
       (data as any).tone
     );
 
-    const result = await this.generativeAiService.generateText(
+    const { data: result } = await this.generativeAiService.generateText(
       prompt,
       (data as any).model
     );
 
-    if (typeof result === "string") {
-      try {
-        const cleanContent = result
-          .replace(/```json/g, "")
-          .replace(/```/g, "")
-          .trim();
-        return { content: JSON.parse(cleanContent) };
-      } catch (error) {
-        this.logger.error(
-          "Failed to parse AI response in AssistantChatUseCase: " + error
-        );
-        return {
-          content: {
-            type: "doc",
-            content: [
-              {
-                type: "paragraph",
-                content: [{ type: "text", text: result }],
-              },
-            ],
-          },
-        };
-      }
+    try {
+      const cleanContent = result
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+      return { content: JSON.parse(cleanContent) };
+    } catch (error) {
+      this.logger.error(
+        "Failed to parse AI response in AssistantChatUseCase: " + error
+      );
+      return {
+        content: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: result }],
+            },
+          ],
+        },
+      };
     }
-
-    this.logger.info(result, "AssistantChatUseCase result");
-    return {
-      content: result || {
-        type: "doc",
-        content: [
-          {
-            type: "paragraph",
-            content: [
-              { type: "text", text: "Failed to generate structured content." },
-            ],
-          },
-        ],
-      },
-    };
   }
 }

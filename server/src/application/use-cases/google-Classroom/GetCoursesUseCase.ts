@@ -1,6 +1,6 @@
 import { IUserGoogleClassroomRepository } from "../../../domain/repositories/IUserGoogleClassroomRepository";
 import { IGoogleClassroomService } from "../../../domain/services/IGoogleClassroomService";
-import { Course, CourseListResponse } from "../../../shared/types/lms/classroom";
+import { Course, CourseListResponse } from "@vollio/shared";
 import { EnsureValidTokenUseCase } from "./EnsureValidTokenUseCase";
 
 export class GetCoursesUseCase {

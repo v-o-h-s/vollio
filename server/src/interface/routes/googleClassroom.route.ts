@@ -145,7 +145,7 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
       const googleClassroomController = request.diScope.resolve<GoogleClassroomController>(
         "googleClassroomController"
       );
-      return googleClassroomController.getCoursesWithContent(request, reply);
+      return googleClassroomController.getCourses(request, reply);
     }
   );
 
