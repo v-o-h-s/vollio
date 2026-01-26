@@ -1,8 +1,8 @@
+**/.env*
 node_modules
 npm-debug.log
 dist
 .git
-.env
 client
 packages/shared/node_modules
 server/node_modules
