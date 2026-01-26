@@ -9,7 +9,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env
+      - server/.env
     depends_on:
       redis:
         condition: service_healthy
