@@ -39,32 +39,32 @@ import { GrTestDesktop } from "react-icons/gr";
 const navigationItems = [
   {
     name: "Dashboard",
-    href: "/dashboard",
+    href: "/",
     icon: Home,
     description: "Overview and analytics",
   },
 
   {
     name: "Notes",
-    href: "/dashboard/notes",
+    href: "/notes",
     icon: NotebookPen,
     description: "Create and manage notes",
   },
   {
     name: "Knowledge Test",
-    href: "/dashboard/knowledge-test",
+    href: "/knowledge-test",
     icon: GrTestDesktop,
     description: "Interactive knowledge tests",
   },
   {
     name: "Support",
-    href: "/dashboard/support",
+    href: "/support",
     icon: HelpCircle,
     description: "Get help or suggest features",
   },
   {
     name: "Settings",
-    href: "/dashboard/settings",
+    href: "/settings",
     icon: Settings,
     description: "Account and preferences",
   },
@@ -244,7 +244,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                     <User className="mr-3 h-4 w-4 text-muted-foreground" />
                     <span className="text-foreground">Prodocument</span>
                   </DropdownMenuItem>
-                  <Link href="/dashboard/settings" className="w-full">
+                  <Link href="/settings" className="w-full">
                     <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3 cursor-pointer">
                       <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
                       <span className="text-foreground">Settings</span>
@@ -282,7 +282,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                       </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
-                  <Link href="/dashboard/support" className="w-full">
+                  <Link href="/support" className="w-full">
                     <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3 cursor-pointer">
                       <HelpCircle className="mr-3 h-4 w-4 text-muted-foreground" />
                       <span className="text-foreground">Help & Support</span>
@@ -449,7 +449,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                         <User className="mr-3 h-4 w-4 text-muted-foreground" />
                         <span className="text-foreground">Prodocument</span>
                       </DropdownMenuItem>
-                      <Link href="/dashboard/settings" className="w-full">
+                      <Link href="/settings" className="w-full">
                         <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3 cursor-pointer">
                           <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
                           <span className="text-foreground">Settings</span>
@@ -491,7 +491,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                         <Bell className="mr-3 h-4 w-4 text-muted-foreground" />
                         <span className="text-foreground">Notifications</span>
                       </DropdownMenuItem>
-                      <Link href="/dashboard/support" className="w-full">
+                      <Link href="/support" className="w-full">
                         <DropdownMenuItem className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3 cursor-pointer">
                           <HelpCircle className="mr-3 h-4 w-4 text-muted-foreground" />
                           <span className="text-foreground">

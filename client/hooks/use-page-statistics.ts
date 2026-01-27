@@ -34,7 +34,7 @@ export function usePageStatistics(): PageStatistics {
     
     const calculateStatistics = () => {
       switch (basePath) {
-        case "/dashboard/documents":
+        case "/documents":
           if (documents) {
             const totalDocuments = documents.length;
             const oneWeekAgo = new Date();
@@ -57,7 +57,7 @@ export function usePageStatistics(): PageStatistics {
           }
           break;
 
-        case "/dashboard/notes":
+        case "/notes":
           if (notes) {
             const totalNotes = notes.length;
             const oneWeekAgo = new Date();
@@ -83,8 +83,8 @@ export function usePageStatistics(): PageStatistics {
           }
           break;
 
-        case "/dashboard/quizzes":
-        case "/dashboard/knowledge-test":
+        case "/quizzes":
+        case "/knowledge-test":
           // Mock quiz statistics - replace with real API when available
           setStatistics({
             totalItems: 6, // From dummy data
@@ -97,7 +97,7 @@ export function usePageStatistics(): PageStatistics {
           });
           break;
 
-        case "/dashboard/flashcards":
+        case "/flashcards":
           // Mock flashcards statistics - replace with real API when available
           setStatistics({
             totalItems: 4, // From dummy data
@@ -110,7 +110,7 @@ export function usePageStatistics(): PageStatistics {
           });
           break;
 
-        case "/dashboard/summarize":
+        case "/summarize":
           // Summarize statistics based on available documents
           if (documents) {
             const processedDocs = documents.length; // All documents can be summarized
@@ -125,7 +125,7 @@ export function usePageStatistics(): PageStatistics {
           }
           break;
 
-        case "/dashboard":
+        case "/":
         default:
           // Dashboard overview statistics
           const allDocuments = documents || [];

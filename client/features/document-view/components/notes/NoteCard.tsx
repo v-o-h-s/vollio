@@ -32,7 +32,7 @@ export const NoteCard = ({
 
   const handleOpenInNewTab = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(`/dashboard/notes/${note.id}`, "_blank");
+    window.open(`/notes/${note.id}`, "_blank");
   };
 
   const handleClick = () => {

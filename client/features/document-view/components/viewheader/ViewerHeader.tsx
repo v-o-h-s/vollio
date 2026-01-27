@@ -93,7 +93,7 @@ export function ViewerHeader({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.push("/")}
                 className="cursor-pointer h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-full flex-shrink-0 hover:bg-primary/10 hover:text-primary hover:scale-110 active:scale-95 transition-all duration-200"
                 title="Back to Documents"
               >

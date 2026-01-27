@@ -156,7 +156,7 @@ export default function CreateQuizPage() {
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-32">
       <div className="max-w-4xl mx-auto space-y-12">
         <div className="flex items-center justify-between">
-          <Link href="/dashboard/knowledge-test">
+          <Link href="/knowledge-test">
             <Button
               variant="ghost"
               size="sm"
@@ -193,10 +193,10 @@ export default function CreateQuizPage() {
                   .then((res) => {
                     if (res?.id) {
                       router.push(
-                        `/dashboard/knowledge-test/quizzes/${res.id}`
+                        `/knowledge-test/quizzes/${res.id}`
                       );
                     } else {
-                      router.push("/dashboard/knowledge-test");
+                      router.push("/knowledge-test");
                     }
                     return res;
                   })

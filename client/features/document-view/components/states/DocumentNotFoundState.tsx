@@ -20,7 +20,7 @@ export function DocumentNotFoundState() {
           </p>
         </div>
         <Button
-          onClick={() => router.push("/dashboard/documents")}
+          onClick={() => router.push("/documents")}
           variant="default"
           className="w-full gap-2"
         >

@@ -29,7 +29,7 @@ export default function FlashcardsListPage() {
             Review your knowledge with spaced repetition
           </p>
         </div>
-        <Link href="/dashboard/knowledge-test/flashcards/create">
+        <Link href="/knowledge-test/flashcards/create">
           <Button className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-lg shadow-pink-200 dark:shadow-none transition-all hover:scale-105 active:scale-95">
             <Plus className="w-4 h-4 mr-2" />
             Create New Deck
@@ -57,7 +57,7 @@ export default function FlashcardsListPage() {
             Create your first deck manually or let our AI generate one for you
             from your notes.
           </p>
-          <Link href="/dashboard/knowledge-test/flashcards/create">
+          <Link href="/knowledge-test/flashcards/create">
             <Button
               size="lg"
               className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white shadow-xl hover:-translate-y-1 transition-all"

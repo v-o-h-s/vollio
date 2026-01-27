@@ -67,7 +67,7 @@ export function useDocument() {
   const openDocument = (id: string) => {
     const document = documentsData?.find((f) => f.id === id);
     if (document) {
-      redirect(`/dashboard/documents/${document.id}`);
+      redirect(`/documents/${document.id}`);
     }
   };
 

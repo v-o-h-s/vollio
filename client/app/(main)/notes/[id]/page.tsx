@@ -58,7 +58,7 @@ export default function NoteEditPage() {
 
   // Handle go back
   const handleGoBack = useCallback(() => {
-    router.push("/dashboard/notes");
+    router.push("/notes");
   }, [router]);
 
   // Handle delete note
@@ -75,7 +75,7 @@ export default function NoteEditPage() {
       toast.success("Note deleted successfully");
 
       // Navigate back to notes list
-      router.push("/dashboard/notes");
+      router.push("/notes");
     } catch (error) {
       console.error("Failed to delete note:", error);
       toast.error("Failed to delete note. Please try again.");

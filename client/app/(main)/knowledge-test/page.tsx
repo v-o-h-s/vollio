@@ -69,8 +69,8 @@ export default function KnowledgeTestPage() {
           <Link
             href={
               section === "quizzes"
-                ? "/dashboard/knowledge-test/quizzes/create"
-                : "/dashboard/knowledge-test/flashcards/create"
+                ? "/knowledge-test/quizzes/create"
+                : "/knowledge-test/flashcards/create"
             }
           >
             <Button
@@ -98,8 +98,8 @@ export default function KnowledgeTestPage() {
             <Link
               href={
                 section === "quizzes"
-                  ? "/dashboard/knowledge-test/quizzes/create"
-                  : "/dashboard/knowledge-test/flashcards/create"
+                  ? "/knowledge-test/quizzes/create"
+                  : "/knowledge-test/flashcards/create"
               }
               className="h-full"
             >
@@ -179,7 +179,7 @@ export default function KnowledgeTestPage() {
                   You haven't created any quizzes yet. Generate one from your
                   documents to start testing your knowledge.
                 </p>
-                <Link href="/dashboard/knowledge-test/quizzes/create">
+                <Link href="/knowledge-test/quizzes/create">
                   <Button>Create Your First Quiz</Button>
                 </Link>
               </div>
@@ -199,7 +199,7 @@ export default function KnowledgeTestPage() {
                     Create a new deck to get started studying or adjust your
                     filters.
                   </p>
-                  <Link href="/dashboard/knowledge-test/flashcards/create">
+                  <Link href="/knowledge-test/flashcards/create">
                     <Button variant="secondary">Create New Deck</Button>
                   </Link>
                 </div>

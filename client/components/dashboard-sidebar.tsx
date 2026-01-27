@@ -45,7 +45,7 @@ interface SidebarProps {
 const navigationItems = [
   {
     name: "Dashboard",
-    href: "/dashboard",
+    href: "/",
     icon: Home,
     description: "Overview and analytics",
     gradient: "from-blue-500 to-cyan-500",
@@ -53,7 +53,7 @@ const navigationItems = [
   },
   {
     name: "My documents",
-    href: "/dashboard/documents",
+    href: "/documents",
     icon: FileText,
     description: "View and manage all your Documents",
     gradient: "from-emerald-500 to-teal-500",
@@ -61,7 +61,7 @@ const navigationItems = [
   },
   {
     name: "Notes",
-    href: "/dashboard/notes",
+    href: "/notes",
     icon: NotebookPen,
     description: "Create and manage rich text notes",
     gradient: "from-purple-500 to-pink-500",
@@ -69,7 +69,7 @@ const navigationItems = [
   },
   {
     name: "Knowledge",
-    href: "/dashboard/knowledge-test",
+    href: "/knowledge-test",
     icon: BookOpen,
     description: "Access the consolidated Knowledge Test",
     gradient: "from-pink-500 to-rose-500",

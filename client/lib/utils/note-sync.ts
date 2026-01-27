@@ -316,7 +316,7 @@ export function navigateToNoteInTab(noteId: string): boolean {
   // If we have an opener window, try to navigate it
   if (window.opener && !window.opener.closed) {
     try {
-      const noteUrl = `/dashboard/notes/${noteId}`;
+      const noteUrl = `/notes/${noteId}`;
 
       // Check if opener is accessible
       const openerLocation = window.opener.location;

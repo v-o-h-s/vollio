@@ -35,7 +35,7 @@ The primary navigation component that replaces traditional sidebars with a moder
 const navigationItems = [
   {
     name: "Dashboard",
-    href: "/dashboard",
+    href: "/",
     icon: Home,
     description: "Overview and analytics",
     gradient: "from-blue-500 to-cyan-500",
@@ -43,7 +43,7 @@ const navigationItems = [
   },
   {
     name: "Files", 
-    href: "/dashboard/pdfs",
+    href: "/pdfs",
     icon: FileText,
     description: "View and manage PDFs",
     gradient: "from-emerald-500 to-teal-500",
@@ -88,7 +88,7 @@ A context-aware floating sidebar positioned on the left side of the screen that 
 
 ### Page-Specific Actions
 
-#### PDF Management (`/dashboard/pdfs`)
+#### PDF Management (`/pdfs`)
 - **Upload PDF** (Primary) - Trigger file upload dialog
 - **New Folder** - Create new folder in current location
 - **Search Files** - Focus search input with smooth scroll
@@ -96,7 +96,7 @@ A context-aware floating sidebar positioned on the left side of the screen that 
 - **View Mode** - Cycle between grid/list/compact views
 - **Refresh** - Reload page content
 
-#### Notes Management (`/dashboard/notes`)
+#### Notes Management (`/notes`)
 - **New Note** (Primary) - Navigate to note creation
 - **Search Notes** - Focus search input
 - **Filter Notes** - Toggle filter options
@@ -104,7 +104,7 @@ A context-aware floating sidebar positioned on the left side of the screen that 
 - **View Mode** - Toggle between display modes
 - **Starred Notes** - Filter starred notes only
 
-#### Quiz Center (`/dashboard/quizzes`)
+#### Quiz Center (`/quizzes`)
 - **Create Quiz** (Primary) - Navigate to quiz creation
 - **Search Quizzes** - Focus search input
 - **Filter Category** - Cycle through categories
@@ -112,7 +112,7 @@ A context-aware floating sidebar positioned on the left side of the screen that 
 - **Bookmarked** - Filter bookmarked quizzes
 - **Statistics** - Toggle stats panel
 
-#### Dashboard Overview (`/dashboard`)
+#### Dashboard Overview (`/`)
 - **Quick Upload** (Primary) - Navigate to PDF upload
 - **New Note** - Create new note
 - **Create Quiz** - Navigate to quiz creation

@@ -371,9 +371,9 @@ Complete note management system with rich text editing and PDF integration.
 ### Note Management Components
 
 #### Note Creation/Editing Pages ✅
-- **New Note Page**: `/dashboard/notes/new` with PDF annotation linking
-- **Edit Note Page**: `/dashboard/notes/[id]` with full editing capabilities
-- **Notes List Page**: `/dashboard/notes` with search and filtering
+- **New Note Page**: `/notes/new` with PDF annotation linking
+- **Edit Note Page**: `/notes/[id]` with full editing capabilities
+- **Notes List Page**: `/notes` with search and filtering
 
 #### Optimized Components ✅
 - **NoteCard**: Memoized note display with preview and metadata

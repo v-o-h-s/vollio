@@ -74,7 +74,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
     const basePath = pathname.split("/").slice(0, 3).join("/"); // /dashboard/[page]
 
     switch (basePath) {
-      case "/dashboard/documents":
+      case "/documents":
         return [
           {
             id: "upload-document",
@@ -136,13 +136,13 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           },
         ];
 
-      case "/dashboard/notes":
+      case "/notes":
         return [
           {
             id: "create-note",
             label: "New Note",
             icon: Plus,
-            onClick: () => router.push("/dashboard/notes/new"),
+            onClick: () => router.push("/notes/new"),
             variant: "primary",
             shortcut: "Ctrl+N",
           },
@@ -194,7 +194,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           },
         ];
 
-      case "/dashboard/summarize":
+      case "/summarize":
         return [
           {
             id: "select-documents",
@@ -277,13 +277,13 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           },
         ];
 
-      case "/dashboard/knowledge-test":
+      case "/knowledge-test":
         return [
           {
             id: "create-quiz",
             label: "Create Quiz",
             icon: Plus,
-            onClick: () => router.push("/dashboard/quizzes/create"),
+            onClick: () => router.push("/quizzes/create"),
             variant: "primary",
             shortcut: "Ctrl+N",
           },
@@ -291,7 +291,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
             id: "create-flashcards",
             label: "Create Flashcards",
             icon: Plus,
-            onClick: () => router.push("/dashboard/flashcards/create"),
+            onClick: () => router.push("/flashcards/create"),
             variant: "primary",
             shortcut: "Ctrl+Shift+N",
           },
@@ -327,33 +327,33 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
 
       // /dashboard/flashcards handled via knowledge-test
 
-      case "/dashboard":
+      case "/":
       default:
         return [
           {
             id: "quick-upload",
             label: "Quick Upload",
             icon: Upload,
-            onClick: () => router.push("/dashboard/documents"),
+            onClick: () => router.push("/documents"),
             variant: "primary",
           },
           {
             id: "new-note",
             label: "New Note",
             icon: NotebookPen,
-            onClick: () => router.push("/dashboard/notes/new"),
+            onClick: () => router.push("/notes/new"),
           },
           {
             id: "create-quiz",
             label: "Create Quiz",
             icon: Brain,
-            onClick: () => router.push("/dashboard/quizzes/create"),
+            onClick: () => router.push("/quizzes/create"),
           },
           {
             id: "recent-documents",
             label: "Recent Documents",
             icon: FileText,
-            onClick: () => router.push("/dashboard/documents"),
+            onClick: () => router.push("/documents"),
           },
           {
             id: "settings",
@@ -380,17 +380,17 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
   const getPageTitle = () => {
     const basePath = pathname.split("/").slice(0, 3).join("/");
     switch (basePath) {
-      case "/dashboard/documents":
+      case "/documents":
         return "Documents";
-      case "/dashboard/notes":
+      case "/notes":
         return "Notes";
-      case "/dashboard/summarize":
+      case "/summarize":
         return "Summarize";
-      case "/dashboard/quizzes":
-      case "/dashboard/flashcards":
-      case "/dashboard/knowledge-test":
+      case "/quizzes":
+      case "/flashcards":
+      case "/knowledge-test":
         return "Knowledge";
-      case "/dashboard":
+      case "/":
         return "Dashboard";
       default:
         return "Quick Actions";
@@ -402,7 +402,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
     const basePath = pathname.split("/").slice(0, 3).join("/");
     
     switch (basePath) {
-      case "/dashboard/documents":
+      case "/documents":
         return [
           {
             label: "Total Documents",
@@ -424,7 +424,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           },
         ];
 
-      case "/dashboard/notes":
+      case "/notes":
         return [
           {
             label: "Total Notes",
@@ -446,8 +446,8 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           },
         ];
 
-      case "/dashboard/quizzes":
-      case "/dashboard/knowledge-test":
+      case "/quizzes":
+      case "/knowledge-test":
         return [
           {
             label: "Total Quizzes",
@@ -470,7 +470,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
         ];
       // flashcards metrics are shown under knowledge as well
 
-      case "/dashboard/summarize":
+      case "/summarize":
         return [
           {
             label: "Documents",
@@ -492,7 +492,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           },
         ];
 
-      case "/dashboard":
+      case "/":
       default:
         return [
           {

@@ -154,7 +154,7 @@ export function DocumentCard({
               </DropdownMenuItem>
             ) : (
               <DropdownMenuItem
-                onClick={() => router.push(`/dashboard/documents/${id}`)}
+                onClick={() => router.push(`/documents/${id}`)}
               >
                 <Eye className="h-4 w-4 mr-2 text-blue-500" />
                 View Summary

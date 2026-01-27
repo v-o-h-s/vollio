@@ -113,17 +113,17 @@ const NotesPage: React.FC = () => {
   });
 
   const handleCreateNote = () => {
-    router.push("/dashboard/notes/new");
+    router.push("/notes/new");
   };
 
   const handleEditNote = (noteId: string) => {
-    router.push(`/dashboard/notes/${noteId}`);
+    router.push(`/notes/${noteId}`);
   };
 
   const handleViewDocumentAnnotation = (annotationId: string) => {
     // Navigate to the Document with the annotation highlighted
     // This would require additional logic to find the Document and page
-    router.push(`/dashboard/annotations/${annotationId}`);
+    router.push(`/annotations/${annotationId}`);
   };
 
   const handleDeleteNote = (noteId: string) => {

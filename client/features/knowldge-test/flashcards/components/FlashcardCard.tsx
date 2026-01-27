@@ -102,7 +102,7 @@ export function FlashcardCard({
             <span className="text-foreground">{cardCount}</span> Flashcards
           </div>
           <Link
-            href={`/dashboard/knowledge-test/flashcards/${set.id}`}
+            href={`/knowledge-test/flashcards/${set.id}`}
             className="block"
           >
             <Button

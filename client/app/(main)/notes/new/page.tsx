@@ -170,7 +170,7 @@ function NewNotePageContent() {
   const handleGoBack = useCallback(() => {
     if (selectionData) {
       // Try to navigate back to the Document tab
-      const documentUrl = `/dashboard/documents?document=${selectionData.documentId}`;
+      const documentUrl = `/documents?document=${selectionData.documentId}`;
 
       // Try cross-tab navigation first
       if (window.opener && !window.opener.closed) {
@@ -187,7 +187,7 @@ function NewNotePageContent() {
       // Fallback to regular navigation
       router.push(documentUrl);
     } else {
-      router.push("/dashboard/notes");
+      router.push("/notes");
     }
   }, [router, selectionData]);
 
@@ -280,7 +280,7 @@ function NewNotePageContent() {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    const documentUrl = `/dashboard/documents?document=${selectionData.documentId}`;
+                    const documentUrl = `/documents?document=${selectionData.documentId}`;
                     if (window.opener && !window.opener.closed) {
                       try {
                         window.opener.location.href = documentUrl;

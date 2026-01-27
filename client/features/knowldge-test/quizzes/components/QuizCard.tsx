@@ -119,7 +119,7 @@ export function QuizCard({
             <span className="text-foreground">{questionCount}</span> Questions
           </div>
           <Link
-            href={`/dashboard/knowledge-test/quizzes/${q.id}`}
+            href={`/knowledge-test/quizzes/${q.id}`}
             className="block"
           >
             <Button
