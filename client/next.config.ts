@@ -10,7 +10,22 @@ const nextConfig: NextConfig = {
     ],
   },
   transpilePackages: ["@vollio/shared"],
- 
+  webpack: (config) => {
+    // Ignore pdfjs-dist CSS url() references to images that don't exist
+    config.module.rules.push({
+      test: /pdf_viewer\.css$/,
+      use: [
+        {
+          loader: "string-replace-loader",
+          options: {
+            search: /url\(images\/[^)]+\)/g,
+            replace: 'url("")',
+          },
+        },
+      ],
+    });
+    return config;
+  },
 };
 
 export default nextConfig;
