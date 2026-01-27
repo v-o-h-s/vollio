@@ -43,6 +43,9 @@ COPY server/package.json ./server/
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/server/dist ./server/dist
 
+# Copy non-TypeScript files that are needed at runtime (Lua scripts for Redis)
+COPY server/src/shared/utils/*.lua ./server/dist/shared/utils/
+
 # Install only production dependencies
 # This will also link the local workspaces correctly
 RUN npm ci --omit=dev

@@ -163,7 +163,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       {
         lifetime: Lifetime.SCOPED,
         injectionMode: InjectionMode.CLASSIC,
-      }
+      },
     ),
     checkTokenStatusUseCase: asClass(CheckTokenStatusUseCase, {
       lifetime: Lifetime.SCOPED,
@@ -174,7 +174,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       {
         lifetime: Lifetime.SCOPED,
         injectionMode: InjectionMode.CLASSIC,
-      }
+      },
     ),
     getCoursesUseCase: asClass(GetCoursesUseCase, {
       lifetime: Lifetime.SCOPED,
@@ -218,7 +218,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       {
         lifetime: Lifetime.SCOPED,
         injectionMode: InjectionMode.CLASSIC,
-      }
+      },
     ),
   });
 
@@ -255,7 +255,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       {
         lifetime: Lifetime.SCOPED,
         injectionMode: InjectionMode.CLASSIC,
-      }
+      },
     ),
     getAllDocumentsUseCase: asClass(GetAllDocumentsUseCase, {
       lifetime: Lifetime.SCOPED,
@@ -362,7 +362,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       {
         lifetime: Lifetime.SCOPED,
         injectionMode: InjectionMode.CLASSIC,
-      }
+      },
     ),
     highlightController: asClass(HighlightController, {
       lifetime: Lifetime.SCOPED,
@@ -425,15 +425,12 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       {
         lifetime: Lifetime.SCOPED,
         injectionMode: InjectionMode.CLASSIC,
-      }
+      },
     ),
-    ensureChunkingUseCase: asClass(
-      EnsureExistingOfDocumentChunkUseCase,
-      {
-        lifetime: Lifetime.SCOPED,
-        injectionMode: InjectionMode.CLASSIC,
-      }
-    ),
+    ensureChunkingUseCase: asClass(EnsureExistingOfDocumentChunkUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
     embeddingRepository: asClass(EmbeddingRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
@@ -474,7 +471,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       {
         lifetime: Lifetime.SCOPED,
         injectionMode: InjectionMode.CLASSIC,
-      }
+      },
     ),
     getAllFlashCardsSetsUseCase: asClass(GetAllFlashCardsSetsUseCase, {
       lifetime: Lifetime.SCOPED,
@@ -493,7 +490,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       {
         lifetime: Lifetime.SCOPED,
         injectionMode: InjectionMode.CLASSIC,
-      }
+      },
     ),
     createFlashCardsSetUseCase: asClass(CreateFlashCardsSetUseCase, {
       lifetime: Lifetime.SCOPED,
