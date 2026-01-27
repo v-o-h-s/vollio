@@ -3,61 +3,10 @@
  * 
  * This module provides a comprehensive error handling system with categorized error classes.
  * Each error category has a parent class with static factory methods for creating specific error types.
- * 
- * Usage Examples:
- * 
- * ```typescript
- * // Authentication errors
- * throw AuthError.authenticationRequired("User not logged in", { component: "DocumentViewer" });
- * throw AuthError.authorizationDenied("No permission", { action: "delete" });
- * throw AuthError.tokenExpired();
- * 
- * // AI errors
- * throw AIError.serviceError("DeepSeek API failed");
- * throw AIError.quotaExceeded();
- * throw AIError.modelUnavailable();
- * 
- * // Validation errors
- * throw ValidationError.general("Invalid input");
- * throw ValidationError.documentTooLarge(100); // 100MB limit
- * throw ValidationError.invalidDocumentType("Document");
- * throw ValidationError.invalidDocumentFormat();
- * 
- * // Storage errors
- * throw StorageError.general("Upload failed");
- * throw StorageError.quotaExceeded();
- * throw StorageError.uploadFailed();
- * throw StorageError.accessDenied();
- * 
- * // Database errors
- * throw DatabaseError.general("Query failed");
- * throw DatabaseError.connectionError();
- * throw DatabaseError.constraintError();
- * 
- * // Network errors
- * throw NetworkError.general("Request failed");
- * throw NetworkError.timeout();
- * throw NetworkError.connectionFailed();
- * 
- * // Document errors
- * throw DocumentError.general("Document operation failed");
- * throw DocumentError.loadingError();
- * throw DocumentError.renderingError();
- * throw DocumentError.corrupted();
- * 
- * // General errors
- * throw GeneralError.unknown();
- * throw GeneralError.internalServer();
- * throw GeneralError.serviceUnavailable();
- * throw GeneralError.externalService();
- * throw GeneralError.processing();
- * throw GeneralError.rateLimit("Too many requests", 60); // retry after 60 seconds
- * ```
  */
 
 // Base error and types
 export { BaseAppError, ErrorSeverity } from "./BaseAppError";
-import { BaseAppError, ErrorSeverity } from "./BaseAppError";
 
 // Authentication errors
 export { AuthError, AuthErrorType } from "./AuthError";
@@ -66,7 +15,7 @@ export { AuthError, AuthErrorType } from "./AuthError";
 export { AIError } from "./AIError";
 
 // Validation errors
-export { DocumentValidationError, DocumentValidationErrorType } from "./documents/DocumentValidationError";
+export { DocumentValidationError, DocumentValidationErrorType } from "./files/FileValidationError";
 
 // Storage errors
 export { StorageError, StorageErrorType } from "./StorageError";
@@ -78,11 +27,45 @@ export { DatabaseError } from "./DatabaseError";
 export { NetworkError, NetworkErrorType } from "./NetworkError";
 
 // Document errors
-export { DocumentError, DocumentErrorType } from "./documents/DocumentError";
+export { DocumentError, DocumentErrorType } from "./files/FileError";
 
 // General errors
 export { GeneralError, GeneralErrorType } from "./GeneralError";
-import { GeneralError } from "./GeneralError";
 
-// Error handling utilities
+// Legacy error types and utilities from errors.ts
+export {
+  ErrorType as LegacyErrorType,
+  ErrorSeverity as LegacyErrorSeverity,
+  AppError as LegacyAppError,
+  createAuthError,
+  createAuthorizationError,
+  createValidationError,
+  createNetworkError,
+  createServerError,
+  createDocumentError,
+  createStorageError,
+} from "./errors";
+export type { ErrorContext } from "./errors";
 
+// Frontend error handling utilities
+export {
+  ErrorType,
+  DEFAULT_RETRY_CONFIG,
+  ERROR_SEVERITY_MAP,
+  ERROR_MESSAGES,
+  createAppError,
+  mapErrorToAppError,
+  withRetry,
+  createUploadErrorContext,
+  createDocumentErrorContext,
+  createNetworkErrorContext,
+  logError,
+  shouldReportError,
+  sanitizeErrorForUser,
+  formatErrorForDisplay,
+} from "./frontend-error-handling";
+export type {
+  ErrorContext as FrontendErrorContext,
+  AppError,
+  RetryConfig,
+} from "./frontend-error-handling";

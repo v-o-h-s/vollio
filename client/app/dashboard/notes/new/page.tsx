@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { Suspense, useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Save, Loader2, FileText, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ interface SelectionData {
   documentDocumentname: string;
 }
 
-export default function NewNotePage() {
+function NewNotePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -346,5 +346,13 @@ export default function NewNotePage() {
       </div>
       <FloatingAutoSaveStatus />
     </ErrorBoundary>
+  );
+}
+
+export default function NewNotePage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
+      <NewNotePageContent />
+    </Suspense>
   );
 }

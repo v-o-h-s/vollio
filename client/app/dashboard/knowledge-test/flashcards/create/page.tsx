@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { Suspense, useEffect, useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,7 +57,7 @@ interface FlashcardItem {
 
 const difficulties = ["Easy", "Medium", "Hard"] as const;
 
-export default function CreateFlashCardsPage() {
+function CreateFlashCardsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromQuizId = searchParams?.get("fromQuizId");
@@ -118,7 +118,7 @@ export default function CreateFlashCardsPage() {
   // Document Helpers
   const getSelectedDocument = (docId: string) => {
     if (!docId || !documentsData) return null;
-    const doc = documentsData.find((p: any) => p.id === docId);
+    const doc = documentsData.find((p: any) => p.id === docId) as any;
     return doc
       ? { id: doc.id, title: doc.name ?? doc.title ?? "Untitled" }
       : null;
@@ -639,5 +639,13 @@ export default function CreateFlashCardsPage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+export default function CreateFlashCardsPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-12 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin" /></div>}>
+      <CreateFlashCardsPageContent />
+    </Suspense>
   );
 }

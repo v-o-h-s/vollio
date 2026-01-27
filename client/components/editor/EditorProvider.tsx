@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useCallback, useState, useRef } from 'react';
 import type { Editor } from '@tiptap/react';
-import type { JSONContent } from '@/lib/types';
+import type { JSONContent } from '@tiptap/core';
 
 interface EditorState {
   editor: Editor | null;

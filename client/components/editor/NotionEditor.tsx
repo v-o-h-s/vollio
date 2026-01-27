@@ -137,7 +137,7 @@ function NotionEditorInner({
 
         const newNote = await createNote({
           title,
-          content,
+          content: content ?? undefined,
           documentId: documentId,
         }).unwrap();
         const newNoteId = newNote.id;
@@ -344,8 +344,9 @@ function NotionEditorInner({
       Insight,
       // Add Mathematics for LaTeX support
       Mathematics.configure({
-        throwOnError: false,
-        evaluation: false, // We just want rendering, not live calculation
+        katexOptions: {
+          throwOnError: false,
+        },
       }),
     ],
     content: content?.content || "",

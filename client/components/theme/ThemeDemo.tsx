@@ -1,25 +1,22 @@
 'use client';
 
 import React from 'react';
-import { useTheme, useResolvedTheme, useIsDarkMode, useThemeClass } from '@/hooks/use-theme';
+import { useTheme } from '@/hooks/use-theme';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 /**
  * Demo component to test theme functionality
  */
 export function ThemeDemo() {
-  const { theme, resolvedTheme, systemPreference, setTheme, toggleTheme } = useTheme();
-  const isDarkMode = useIsDarkMode();
-  const themeClass = useThemeClass('bg-white text-black', 'bg-gray-900 text-white');
+  const { theme, setTheme, toggleTheme } = useTheme();
+  const isDarkMode = theme === 'dark';
 
   return (
-    <div className={`p-6 rounded-lg border ${themeClass}`}>
+    <div className={`p-6 rounded-lg border ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}>
       <h2 className="text-xl font-bold mb-4">Theme System Demo</h2>
       
       <div className="space-y-2 mb-4">
         <p><strong>Current Theme:</strong> {theme}</p>
-        <p><strong>Resolved Theme:</strong> {resolvedTheme}</p>
-        <p><strong>System Preference:</strong> {systemPreference}</p>
         <p><strong>Is Dark Mode:</strong> {isDarkMode ? 'Yes' : 'No'}</p>
       </div>
 
@@ -44,17 +41,6 @@ export function ThemeDemo() {
           }`}
         >
           Dark
-        </button>
-        
-        <button
-          onClick={() => setTheme('system')}
-          className={`px-3 py-1 rounded ${
-            theme === 'system' 
-              ? 'bg-blue-500 text-white' 
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
-          }`}
-        >
-          System
         </button>
       </div>
 

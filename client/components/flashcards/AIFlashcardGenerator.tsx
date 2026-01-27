@@ -729,8 +729,8 @@ export function AIFlashcardGenerator({
           className="hidden"
           onChange={(e) => {
             const files = Array.from(e.target.files || []);
-            if (documents.length > 0) {
-              handleDocumentUpload(documents);
+            if (files.length > 0) {
+              handleDocumentUpload(files);
             }
           }}
         />

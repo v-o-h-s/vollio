@@ -1,25 +1,22 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { NodeViewWrapper } from '@tiptap/react';
+import { NodeViewWrapper, NodeViewProps } from '@tiptap/react';
 import { Loader2, AlertCircle, Upload, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface ImageUploadViewProps {
-  node: {
+export interface ImageUploadViewProps extends NodeViewProps {
+  node: NodeViewProps['node'] & {
     attrs: {
-      src: string;
-      alt: string;
-      title?: string;
-      width?: number;
-      height?: number;
+      src?: string | null;
+      alt?: string | null;
+      title?: string | null;
+      width?: number | null;
+      height?: number | null;
       loading?: boolean;
-      error?: string;
+      error?: string | null;
     };
   };
-  updateAttributes: (attrs: any) => void;
-  deleteNode: () => void;
-  selected: boolean;
 }
 
 export function ImageUploadView({
@@ -257,7 +254,7 @@ export function ImageUploadView({
           ref={imageRef}
           src={src}
           alt={alt || ''}
-          title={title}
+          title={title || undefined}
           onLoad={handleImageLoad}
           className="block max-w-full h-auto rounded-lg shadow-sm"
           style={{ width: width || 'auto', height: height || 'auto' }}

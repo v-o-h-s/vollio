@@ -3,7 +3,7 @@
  * Integrates with existing PostMessage API for real-time updates
  */
 
-import { Note, JSONContent } from "@/lib/types";
+import { Note, JSONContent } from "@/lib/types/editor";
 
 export interface NoteUpdateMessage {
   type: "NOTE_UPDATE";

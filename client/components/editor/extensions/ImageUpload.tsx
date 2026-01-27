@@ -1,9 +1,8 @@
 'use client';
 
-import { Node, mergeAttributes, nodeInputRule } from '@tiptap/core';
+import { Node, mergeAttributes, nodeInputRule, Editor } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
-import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { ImageUploadView } from './ImageUploadView';
 
 export interface ImageUploadOptions {
@@ -22,12 +21,93 @@ declare module '@tiptap/core' {
       /**
        * Upload an image
        */
-      uploadImage: (document: Document) => ReturnType;
+      uploadImage: (file: File) => ReturnType;
     };
   }
 }
 
 const inputRegex = /(?:^|\s)(!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\))$/;
+
+// Helper function to handle upload errors
+function handleUploadError(fileName: string, error: string, editor: Editor) {
+  const { state } = editor;
+  const { doc } = state;
+  let pos = -1;
+
+  doc.descendants((node, nodePos) => {
+    if (
+      node.type.name === 'imageUpload' &&
+      node.attrs.loading &&
+      node.attrs.alt === fileName
+    ) {
+      pos = nodePos;
+      return false;
+    }
+  });
+
+  if (pos >= 0) {
+    editor
+      .chain()
+      .focus()
+      .setNodeSelection(pos)
+      .updateAttributes('imageUpload', {
+        loading: false,
+        error,
+      })
+      .run();
+  }
+}
+
+// Helper function to upload a file
+function uploadFile(file: File, editor: Editor) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  fetch('/api/images/upload', {
+    method: 'POST',
+    body: formData,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Find the loading image node and replace it with the uploaded image
+        const { state } = editor;
+        const { doc } = state;
+        let pos = -1;
+
+        doc.descendants((node, nodePos) => {
+          if (
+            node.type.name === 'imageUpload' &&
+            node.attrs.loading &&
+            node.attrs.alt === file.name
+          ) {
+            pos = nodePos;
+            return false;
+          }
+        });
+
+        if (pos >= 0) {
+          editor
+            .chain()
+            .focus()
+            .setNodeSelection(pos)
+            .updateAttributes('imageUpload', {
+              src: data.data.url,
+              loading: false,
+              error: null,
+            })
+            .run();
+        }
+      } else {
+        // Handle upload error
+        handleUploadError(file.name, data.error, editor);
+      }
+    })
+    .catch((error) => {
+      console.error('Upload error:', error);
+      handleUploadError(file.name, 'Upload failed', editor);
+    });
+}
 
 export const ImageUpload = Node.create<ImageUploadOptions>({
   name: 'imageUpload',
@@ -99,22 +179,22 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
           });
         },
       uploadImage:
-        (document) =>
+        (file) =>
         ({ commands, editor }) => {
           // Insert a loading placeholder
           const loadingNode = {
             type: this.name,
             attrs: {
               src: '',
-              alt: document.name,
+              alt: file.name,
               loading: true,
             },
           };
 
           commands.insertContent(loadingNode);
 
-          // Upload the document
-          this.uploadDocument(document, editor);
+          // Upload the file
+          uploadFile(file, editor);
 
           return true;
         },
@@ -139,20 +219,22 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
   },
 
   addProseMirrorPlugins() {
+    const editor = this.editor;
+
     return [
       new Plugin({
         key: new PluginKey('imageUploadPlugin'),
         props: {
           handleDOMEvents: {
             drop: (view, event) => {
-              const hasDocuments = event.dataTransfer?.files?.length;
+              const hasFiles = event.dataTransfer?.files?.length;
 
-              if (!hasDocuments) {
+              if (!hasFiles) {
                 return false;
               }
 
-              const images = Array.from(event.dataTransfer.files).filter((document) =>
-                /image/i.test(document.type)
+              const images = Array.from(event.dataTransfer.files).filter((file) =>
+                /image/i.test(file.type)
               );
 
               if (images.length === 0) {
@@ -179,20 +261,20 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
                 const transaction = view.state.tr.insert(coordinates.pos, node);
                 view.dispatch(transaction);
 
-                this.uploadDocument(image, this.editor);
+                uploadFile(image, editor);
               });
 
               return true;
             },
             paste: (view, event) => {
-              const hasDocuments = event.clipboardData?.files?.length;
+              const hasFiles = event.clipboardData?.files?.length;
 
-              if (!hasDocuments) {
+              if (!hasFiles) {
                 return false;
               }
 
-              const images = Array.from(event.clipboardData.files).filter((document) =>
-                /image/i.test(document.type)
+              const images = Array.from(event.clipboardData.files).filter((file) =>
+                /image/i.test(file.type)
               );
 
               if (images.length === 0) {
@@ -211,7 +293,7 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
                 const transaction = view.state.tr.replaceSelectionWith(node);
                 view.dispatch(transaction);
 
-                this.uploadDocument(image, this.editor);
+                uploadFile(image, editor);
               });
 
               return true;
@@ -220,85 +302,5 @@ export const ImageUpload = Node.create<ImageUploadOptions>({
         },
       }),
     ];
-  },
-
-  // Custom upload method
-  uploadDocument(document: Document, editor: any) {
-    const formData = new FormData();
-    formData.append('document', document);
-
-    fetch('/api/images/upload', {
-      method: 'POST',
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          // Find the loading image node and replace it with the uploaded image
-          const { state } = editor;
-          const { doc } = state;
-          let pos = -1;
-
-          doc.descendants((node: any, nodePos: number) => {
-            if (
-              node.type.name === 'imageUpload' &&
-              node.attrs.loading &&
-              node.attrs.alt === document.name
-            ) {
-              pos = nodePos;
-              return false;
-            }
-          });
-
-          if (pos >= 0) {
-            editor
-              .chain()
-              .focus()
-              .setNodeSelection(pos)
-              .updateAttributes('imageUpload', {
-                src: data.data.url,
-                loading: false,
-                error: null,
-              })
-              .run();
-          }
-        } else {
-          // Handle upload error
-          this.handleUploadError(document.name, data.error, editor);
-        }
-      })
-      .catch((error) => {
-        console.error('Upload error:', error);
-        this.handleUploadError(document.name, 'Upload failed', editor);
-      });
-  },
-
-  handleUploadError(documentName: string, error: string, editor: any) {
-    const { state } = editor;
-    const { doc } = state;
-    let pos = -1;
-
-    doc.descendants((node: any, nodePos: number) => {
-      if (
-        node.type.name === 'imageUpload' &&
-        node.attrs.loading &&
-        node.attrs.alt === documentName
-      ) {
-        pos = nodePos;
-        return false;
-      }
-    });
-
-    if (pos >= 0) {
-      editor
-        .chain()
-        .focus()
-        .setNodeSelection(pos)
-        .updateAttributes('imageUpload', {
-          loading: false,
-          error,
-        })
-        .run();
-    }
   },
 });

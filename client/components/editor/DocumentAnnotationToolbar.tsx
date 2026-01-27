@@ -120,7 +120,7 @@ export function DocumentAnnotationToolbar({
   const handleHighlight = (color: { name: string; value: string; class: string }) => {
     setSelectedHighlight(color);
     handleCommand(() => 
-      editor.chain().focus().setHighlight({ color: color.value }).run()
+      (editor.chain().focus() as any).setHighlight({ color: color.value }).run()
     );
   };
 

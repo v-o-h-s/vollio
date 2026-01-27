@@ -15,7 +15,7 @@ import {
   FiMoreHorizontal as MoreHorizontal,
 } from "react-icons/fi";
 import { safeFormatDistanceToNow } from "@/lib/utils/dates";
-import { Note, JSONContent } from "@/lib/types";
+import { Note, JSONContent } from "@/lib/types/editor";
 import {
   DropdownMenu,
   DropdownMenuContent,

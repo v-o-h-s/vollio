@@ -105,7 +105,7 @@ export function useVollNotesLogic(documentId: string) {
       const newNote = await createNote({
         documentId: documentId,
         title: "Untitled note",
-        content: content ?? null,
+        content: content,
       }).unwrap();
 
       const newTab: Tab = {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { useGetDocumentsQuery } from "@/lib/store/apiSlice";
+import { useGetAllDocumentsQuery } from "@/lib/store/apiSlice";
 import { useGetNotesQuery } from "@/lib/store/apiSlice";
 
 export interface PageStatistics {
@@ -26,7 +26,7 @@ export function usePageStatistics(): PageStatistics {
   });
 
   // API queries
-  const { data: documentData, isLoading: documentsLoading, error: documentsError } = useGetDocumentsQuery();
+  const { data: documents, isLoading: documentsLoading, error: documentsError } = useGetAllDocumentsQuery();
   const { data: notes, isLoading: notesLoading, error: notesError } = useGetNotesQuery({});
 
   useEffect(() => {
@@ -35,14 +35,13 @@ export function usePageStatistics(): PageStatistics {
     const calculateStatistics = () => {
       switch (basePath) {
         case "/dashboard/documents":
-          if (documentData?.files) {
-            const documents = documentData.files;
+          if (documents) {
             const totalDocuments = documents.length;
             const oneWeekAgo = new Date();
             oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
             
             const recentDocuments = documents.filter(document => 
-              new Date(document.uploadedAt) > oneWeekAgo
+              document.uploadedAt && new Date(document.uploadedAt) > oneWeekAgo
             ).length;
             
             const totalSize = documents.reduce((sum, document) => sum + (document.size || 0), 0);
@@ -113,9 +112,8 @@ export function usePageStatistics(): PageStatistics {
 
         case "/dashboard/summarize":
           // Summarize statistics based on available documents
-          if (documentData?.files) {
-            const documents = documentData.files;
-            const processedDocs = documents.filter(document => document.processingStatus === 'completed').length;
+          if (documents) {
+            const processedDocs = documents.length; // All documents can be summarized
             
             setStatistics({
               totalItems: processedDocs,
@@ -130,23 +128,23 @@ export function usePageStatistics(): PageStatistics {
         case "/dashboard":
         default:
           // Dashboard overview statistics
-          const documents = documentData?.files || [];
-          const totalDocuments = documents.length;
+          const allDocuments = documents || [];
+          const totalDocuments = allDocuments.length;
           const totalNotes = notes?.length || 0;
           const totalItems = totalDocuments + totalNotes;
           
           const oneWeekAgo = new Date();
           oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
           
-          const recentDocuments = documents.filter(document => 
-            new Date(document.uploadedAt) > oneWeekAgo
+          const recentDocuments = allDocuments.filter(document => 
+            document.uploadedAt && new Date(document.uploadedAt) > oneWeekAgo
           ).length;
           
           const recentNotes = notes?.filter(note => 
             new Date(note.createdAt) > oneWeekAgo
           ).length || 0;
           
-          const totalDocumentSize = documents.reduce((sum, document) => sum + (document.size || 0), 0);
+          const totalDocumentSize = allDocuments.reduce((sum, document) => sum + (document.size || 0), 0);
           const totalNoteSize = notes?.reduce((sum, note) => 
             sum + (note.content?.length || 0) + (note.title?.length || 0), 0
           ) || 0;
@@ -166,7 +164,7 @@ export function usePageStatistics(): PageStatistics {
     };
 
     calculateStatistics();
-  }, [pathname, documentData, notes, documentsLoading, notesLoading, documentsError, notesError]);
+  }, [pathname, documents, notes, documentsLoading, notesLoading, documentsError, notesError]);
 
   return statistics;
 }

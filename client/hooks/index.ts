@@ -12,7 +12,7 @@ export { useMobile, useIsMobile, useHasTouch } from "./use-mobile";
 export { useTouchGestures, useSwipeGestures } from "./use-touch-gestures";
 export { useAccessibilityMode } from "./use-accessibility-mode";
 export { useTheme } from "./use-theme";
-export { useShortcuts } from "./use-shortcuts";
+export { default as useShortcuts } from "./use-shortcuts";
 export { usePageStatistics } from "./use-page-statistics";
 
 // Re-export types

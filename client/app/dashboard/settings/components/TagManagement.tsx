@@ -436,7 +436,7 @@ export function TagManagement() {
         description="Deleting this tag will also permanently delete all associated highlights. This action cannot be undone."
         confirmText="Delete Tag and Highlights"
         cancelText="Cancel"
-        onConfirm={() => tagToDelete && performDelete(tagToDelete)}
+        onConfirm={() => { if (tagToDelete) performDelete(tagToDelete); }}
         onCancel={() => setDeleteConfirmOpen(false)}
         style="destructive"
         isLoading={isDeleting}

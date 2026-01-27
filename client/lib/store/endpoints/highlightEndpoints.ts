@@ -104,7 +104,12 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
         patchResultDoc.undo();
       }
     },
-    transformResponse: (response: CreateHighlightResponse) => response.data,
+    transformResponse: (response: CreateHighlightResponse) => {
+      if (!response.data) {
+        throw new Error("Failed to create highlight: No data returned");
+      }
+      return response.data;
+    },
     invalidatesTags: [{ type: "Highlight", id: "LIST" }],
   }),
 
@@ -187,7 +192,12 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
         if (patchResultDoc) patchResultDoc.undo();
       }
     },
-    transformResponse: (response: UpdateHighlightResponse) => response.data,
+    transformResponse: (response: UpdateHighlightResponse) => {
+      if (!response.data) {
+        throw new Error("Failed to update highlight: No data returned");
+      }
+      return response.data;
+    },
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Highlight", id },
       { type: "Highlight", id: "LIST" },

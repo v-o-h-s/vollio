@@ -21,7 +21,7 @@ import {
   Star,
   Target,
   Bookmark,
-  DocumentBarChart,
+  FileBarChart,
   History,
   Download,
   Copy,
@@ -498,7 +498,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           {
             label: "Total Items",
             value: statistics.loading ? "..." : statistics.totalItems.toString(),
-            icon: DocumentBarChart,
+            icon: FileBarChart,
             color: "text-blue-600 dark:text-blue-400",
           },
           {

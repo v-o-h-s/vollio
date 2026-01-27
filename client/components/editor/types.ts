@@ -15,4 +15,4 @@ export type {
   EditorExtensionConfig,
   EditorState,
   EditorContextValue,
-} from "@/lib/types";
+} from "@/lib/types/editor";

@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import type { EditorToolbarProps, EditorCommand } from "./types";
+import type { Editor } from "@tiptap/react";
 
 export function EditorToolbar({ editor, className }: EditorToolbarProps) {
   if (!editor) {
@@ -31,101 +32,101 @@ export function EditorToolbar({ editor, className }: EditorToolbarProps) {
       name: "undo",
       label: "Undo",
       icon: Undo,
-      action: (editor) => editor.chain().focus().undo().run(),
-      isDisabled: (editor) => !editor.can().undo(),
+      action: (e: Editor) => e.chain().focus().undo().run(),
+      isDisabled: (e: Editor) => !e.can().undo(),
     },
     {
       name: "redo",
       label: "Redo",
       icon: Redo,
-      action: (editor) => editor.chain().focus().redo().run(),
-      isDisabled: (editor) => !editor.can().redo(),
+      action: (e: Editor) => e.chain().focus().redo().run(),
+      isDisabled: (e: Editor) => !e.can().redo(),
     },
     {
       name: "bold",
       label: "Bold",
       icon: Bold,
-      action: (editor) => editor.chain().focus().toggleBold().run(),
-      isActive: (editor) => editor.isActive("bold"),
+      action: (e: Editor) => e.chain().focus().toggleBold().run(),
+      isActive: (e: Editor) => e.isActive("bold"),
     },
     {
       name: "italic",
       label: "Italic",
       icon: Italic,
-      action: (editor) => editor.chain().focus().toggleItalic().run(),
-      isActive: (editor) => editor.isActive("italic"),
+      action: (e: Editor) => e.chain().focus().toggleItalic().run(),
+      isActive: (e: Editor) => e.isActive("italic"),
     },
     {
       name: "underline",
       label: "Underline",
       icon: Underline,
-      action: (editor) => editor.chain().focus().toggleUnderline().run(),
-      isActive: (editor) => editor.isActive("underline"),
+      action: (e: Editor) => e.chain().focus().toggleUnderline().run(),
+      isActive: (e: Editor) => e.isActive("underline"),
     },
     {
       name: "strike",
       label: "Strikethrough",
       icon: Strikethrough,
-      action: (editor) => editor.chain().focus().toggleStrike().run(),
-      isActive: (editor) => editor.isActive("strike"),
+      action: (e: Editor) => e.chain().focus().toggleStrike().run(),
+      isActive: (e: Editor) => e.isActive("strike"),
     },
     {
       name: "heading1",
       label: "Heading 1",
       icon: Heading1,
-      action: (editor) =>
-        editor.chain().focus().toggleHeading({ level: 1 }).run(),
-      isActive: (editor) => editor.isActive("heading", { level: 1 }),
+      action: (e: Editor) =>
+        e.chain().focus().toggleHeading({ level: 1 }).run(),
+      isActive: (e: Editor) => e.isActive("heading", { level: 1 }),
     },
     {
       name: "heading2",
       label: "Heading 2",
       icon: Heading2,
-      action: (editor) =>
-        editor.chain().focus().toggleHeading({ level: 2 }).run(),
-      isActive: (editor) => editor.isActive("heading", { level: 2 }),
+      action: (e: Editor) =>
+        e.chain().focus().toggleHeading({ level: 2 }).run(),
+      isActive: (e: Editor) => e.isActive("heading", { level: 2 }),
     },
     {
       name: "heading3",
       label: "Heading 3",
       icon: Heading3,
-      action: (editor) =>
-        editor.chain().focus().toggleHeading({ level: 3 }).run(),
-      isActive: (editor) => editor.isActive("heading", { level: 3 }),
+      action: (e: Editor) =>
+        e.chain().focus().toggleHeading({ level: 3 }).run(),
+      isActive: (e: Editor) => e.isActive("heading", { level: 3 }),
     },
     {
       name: "bulletList",
       label: "Bullet List",
       icon: List,
-      action: (editor) => editor.chain().focus().toggleBulletList().run(),
-      isActive: (editor) => editor.isActive("bulletList"),
+      action: (e: Editor) => e.chain().focus().toggleBulletList().run(),
+      isActive: (e: Editor) => e.isActive("bulletList"),
     },
     {
       name: "orderedList",
       label: "Ordered List",
       icon: ListOrdered,
-      action: (editor) => editor.chain().focus().toggleOrderedList().run(),
-      isActive: (editor) => editor.isActive("orderedList"),
+      action: (e: Editor) => e.chain().focus().toggleOrderedList().run(),
+      isActive: (e: Editor) => e.isActive("orderedList"),
     },
     {
       name: "blockquote",
       label: "Blockquote",
       icon: Quote,
-      action: (editor) => editor.chain().focus().toggleBlockquote().run(),
-      isActive: (editor) => editor.isActive("blockquote"),
+      action: (e: Editor) => e.chain().focus().toggleBlockquote().run(),
+      isActive: (e: Editor) => e.isActive("blockquote"),
     },
     {
       name: "codeBlock",
       label: "Code Block",
       icon: Code,
-      action: (editor) => editor.chain().focus().toggleCodeBlock().run(),
-      isActive: (editor) => editor.isActive("codeBlock"),
+      action: (e: Editor) => e.chain().focus().toggleCodeBlock().run(),
+      isActive: (e: Editor) => e.isActive("codeBlock"),
     },
     {
       name: "horizontalRule",
       label: "Horizontal Rule",
       icon: Minus,
-      action: (editor) => editor.chain().focus().setHorizontalRule().run(),
+      action: (e: Editor) => e.chain().focus().setHorizontalRule().run(),
     },
   ];
 
