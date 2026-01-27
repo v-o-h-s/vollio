@@ -26,12 +26,12 @@
       "@/*": [
         "./*"
       ],
-      // "@vollio/shared": [
-      //   "../server/src/shared/*"
-      // ],
-      // "@server/*":[
-      //   "../server/src/*"
-      // ]
+      "@vollio/shared": [
+        "../packages/shared/src/index.ts"
+      ],
+      "@vollio/shared/*": [
+        "../packages/shared/src/*"
+      ]
     }
   },
   "include": [
