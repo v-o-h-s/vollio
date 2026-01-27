@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     ],
   },
   transpilePackages: ["@vollio/shared"],
+  // Force webpack mode since our custom loader doesn't work with Turbopack
+  turbopack: {},
   webpack: (config) => {
     // Ignore pdfjs-dist CSS url() references to images that don't exist
     config.module.rules.push({
