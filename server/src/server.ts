@@ -55,10 +55,39 @@ app.register(fastifySession, {
   saveUninitialized: false, // Don't save empty sessions
 });
 
+// CORS Configuration
+const allowedOrigins = [
+  "https://dashboard.vollio.xyz",
+  // Development
+  ...(process.env.NODE_ENV !== "production" ? ["http://localhost:3001"] : []),
+];
+
 app.register(fastifyCors, {
-  origin: true,
+  origin: (origin, cb) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) {
+      cb(null, true);
+      return;
+    }
+
+    // In development, allow all origins
+    if (process.env.NODE_ENV !== "production") {
+      cb(null, true);
+      return;
+    }
+
+    // In production, check against allowed origins
+    if (allowedOrigins.includes(origin)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Not allowed by CORS"), false);
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: ["Content-Range", "X-Content-Range"],
+  maxAge: 86400, // 24 hours - browsers can cache preflight
 });
 
 // Register multipart for document uploads
