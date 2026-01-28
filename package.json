@@ -4,6 +4,8 @@
   "private": true,
   "description": "Vollio - A full-stack note-taking application",
   "scripts": {
+    "//postinstall": "Patches pdfjs-dist CSS which references non-existent SVG images (url(images/...)) that break the Turbopack build",
+    "postinstall": "sed -i 's|url(images/[^)]*)|none|g' node_modules/react-pdf-highlighter-extended-plus/node_modules/pdfjs-dist/web/pdf_viewer.css 2>/dev/null || true",
     "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
     "build": "npm run build --workspaces",
     "start": "npm start --workspace=server",
