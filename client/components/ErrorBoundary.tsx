@@ -50,7 +50,7 @@ const DefaultFallback = ({
           )}
         </div>
 
-        {process.env.NODE_ENV === "development" && error && (
+        {process.env.NODE_ENV === "development" && error ? (
           <details className="text-left text-xs bg-muted/40 border border-border/60 rounded-lg p-3 max-h-48 overflow-auto">
             <summary className="cursor-pointer font-medium">
               Error details
@@ -59,7 +59,7 @@ const DefaultFallback = ({
               {errorStack ?? errorMessage}
             </pre>
           </details>
-        )}
+        ) : null}
 
         <div className="flex justify-center">
           <Button variant="outline" onClick={() => resetErrorBoundary()} className="gap-2">
