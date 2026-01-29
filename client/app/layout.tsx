@@ -7,6 +7,7 @@ import { EditorProvider } from "@/components/editor";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ToastContainer, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -84,6 +85,7 @@ export default function RootLayout({
             <EditorProvider>{children}</EditorProvider>
           </ReduxProvider>
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
