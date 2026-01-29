@@ -28,9 +28,7 @@ export async function GET(request: Request) {
     if (!error) {
       console.log("Session exchange successful");
       const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
-      //todo update this later
-      //const isLocalEnv = process.env.NODE_ENV === "development";
-      const isLocalEnv = true;
+      const isLocalEnv = process.env.NODE_ENV === "development";
       console.log("Environment check:", { isLocalEnv, forwardedHost });
 
       if (isLocalEnv) {
@@ -40,7 +38,7 @@ export async function GET(request: Request) {
       } else if (forwardedHost) {
         console.log(
           "Redirecting to forwarded host:",
-          `https://${forwardedHost}${next}`
+          `https://${forwardedHost}${next}`,
         );
         return NextResponse.redirect(`https://${forwardedHost}${next}`);
       } else {
