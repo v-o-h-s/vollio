@@ -18,7 +18,10 @@ import { settingsEndpoints } from "./endpoints/settingsEndpoints";
 
 // Simple base query configuration with cookie-based authentication
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:3000/api/v1/",
+  baseUrl:
+    process.env.NODE_ENV === "production"
+      ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/`
+      : "http://localhost:3000/api/v1/",
   timeout: 30000, // 30 second timeout
   credentials: "include", // Include cookies for Supabase authentication
   prepareHeaders: (headers, { endpoint }) => {
