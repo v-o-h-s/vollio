@@ -9,7 +9,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { containerPlugin } from "./plugins/container";
 import { loggerConfig } from "./shared/utils/logger";
 import { authPlugin } from "./plugins/auth";
-import { errorHandler } from "./shared/utils/errorHanlder";
+import { errorHandler } from "./shared/utils/errorHandler";
 import { noteRoutes } from "./interface/routes/note.route";
 import { fastifyAwilixPlugin } from "@fastify/awilix";
 import { googleClassroomRoutes } from "./interface/routes/googleClassroom.route";
