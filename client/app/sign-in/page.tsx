@@ -106,7 +106,7 @@ export default function SignInPage() {
 
             <Button
               variant="outline"
-              className="w-full"
+              className="w-full cursor-pointer"
               onClick={handleGoogleLogin}
               disabled={isLoading}
             >

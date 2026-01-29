@@ -56,11 +56,10 @@ app.register(fastifySession, {
 });
 
 // CORS Configuration
-const allowedOrigins = [
-  "https://dashboard.vollio.xyz",
-  // Development
-  ...(process.env.NODE_ENV !== "production" ? ["http://localhost:3001"] : []),
-];
+const allowedOrigins =
+  process.env.NODE_ENV !== "production"
+    ? ["http://localhost:3001"]
+    : (process.env.CLIENT_BASE_URL || "").split(",").map((url) => url.trim());
 
 app.register(fastifyCors, {
   origin: (origin, cb) => {
@@ -70,16 +69,20 @@ app.register(fastifyCors, {
       return;
     }
 
-    // In development, allow all origins
-    if (process.env.NODE_ENV !== "production") {
+    // DEBUG LOGGING
+    // console.log(`[CORS] Checking origin: ${origin}, Env: ${process.env.NODE_ENV}`);
+
+    // Always allow localhost/127.0.0.1 regardless of NODE_ENV for now to fix local dev issues
+    if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
       cb(null, true);
       return;
     }
 
-    // In production, check against allowed origins
+    // Check against allowed origins
     if (allowedOrigins.includes(origin)) {
       cb(null, true);
     } else {
+      console.warn(`[CORS] Blocked request from origin: ${origin}`);
       cb(new Error("Not allowed by CORS"), false);
     }
   },

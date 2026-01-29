@@ -8,13 +8,13 @@ import { FastifyBaseLogger } from "fastify";
 export class DocumentRepository implements IDocumentRepository {
   constructor(
     private supabaseClient: SupabaseClient,
-    private logger: FastifyBaseLogger
+    private logger: FastifyBaseLogger,
   ) {}
 
   async addDocument(document: Document): Promise<void> {
     this.logger.info(
       { documentId: document.getId(), name: document.getName() },
-      "Adding document to repository"
+      "Adding document to repository",
     );
     const { error } = await this.supabaseClient.from("documents").insert({
       id: document.getId(),
@@ -29,13 +29,13 @@ export class DocumentRepository implements IDocumentRepository {
     if (error) {
       this.logger.error(
         { error, documentId: document.getId() },
-        "Error adding document to repository"
+        "Error adding document to repository",
       );
       throw new DatabaseError(error);
     }
     this.logger.info(
       { documentId: document.getId() },
-      "Document added successfully to repository"
+      "Document added successfully to repository",
     );
   }
 
@@ -54,7 +54,7 @@ export class DocumentRepository implements IDocumentRepository {
       }
       this.logger.error(
         { error, documentId: id },
-        "Error getting document by ID"
+        "Error getting document by ID",
       );
       throw new DatabaseError(error);
     }
@@ -72,7 +72,7 @@ export class DocumentRepository implements IDocumentRepository {
       data.storage_path,
       data.google_document_id,
       data.mime_type,
-      data.folder_id
+      data.folder_id,
     );
   }
 
@@ -84,7 +84,7 @@ export class DocumentRepository implements IDocumentRepository {
         `
         *,
         folders(id, name, parent_id)
-      `
+      `,
       )
       .order("uploaded_at", { ascending: false });
 
@@ -95,7 +95,7 @@ export class DocumentRepository implements IDocumentRepository {
       }
       this.logger.error(
         { error, userId },
-        "Error getting all documents by user ID"
+        "Error getting all documents by user ID",
       );
       throw new DatabaseError(error);
     }
@@ -107,7 +107,7 @@ export class DocumentRepository implements IDocumentRepository {
 
     this.logger.info(
       { userId, count: data.length },
-      "Documents retrieved successfully for user"
+      "Documents retrieved successfully for user",
     );
     return data.map(
       (row) =>
@@ -118,8 +118,8 @@ export class DocumentRepository implements IDocumentRepository {
           row.storage_path,
           row.google_document_id,
           row.mime_type,
-          row.folder_id
-        )
+          row.folder_id,
+        ),
     );
   }
 
@@ -144,7 +144,7 @@ export class DocumentRepository implements IDocumentRepository {
   async updateDocumentName(id: string, name: string): Promise<Document> {
     this.logger.info(
       { documentId: id, newName: name },
-      "Updating document name"
+      "Updating document name",
     );
     const { data, error } = await this.supabaseClient
       .from("documents")
@@ -160,13 +160,13 @@ export class DocumentRepository implements IDocumentRepository {
       if (error.code === "PGRST116") {
         this.logger.warn(
           { documentId: id },
-          "Document not found for name update"
+          "Document not found for name update",
         );
         throw new NotFoundError("Document not found");
       }
       this.logger.error(
         { error, documentId: id },
-        "Error updating document name"
+        "Error updating document name",
       );
       throw new DatabaseError(error);
     }
@@ -179,14 +179,14 @@ export class DocumentRepository implements IDocumentRepository {
       data.storage_path,
       data.google_document_id,
       data.mime_type,
-      data.folder_id
+      data.folder_id,
     );
   }
 
   async moveDocument(id: string, folderId: string | null): Promise<Document> {
     this.logger.info(
       { documentId: id, targetFolderId: folderId },
-      "Moving document to folder"
+      "Moving document to folder",
     );
     const { data, error } = await this.supabaseClient
       .from("documents")
@@ -215,17 +215,17 @@ export class DocumentRepository implements IDocumentRepository {
       data.storage_path,
       data.google_document_id,
       data.mime_type,
-      data.folder_id
+      data.folder_id,
     );
   }
 
   async updateDocumentStoragePath(
     id: string,
-    storagePath: string
+    storagePath: string,
   ): Promise<Document> {
     this.logger.info(
       { documentId: id, storagePath },
-      "Updating document storage path"
+      "Updating document storage path",
     );
     const { data, error } = await this.supabaseClient
       .from("documents")
@@ -240,14 +240,14 @@ export class DocumentRepository implements IDocumentRepository {
     if (error) {
       this.logger.error(
         { error, documentId: id },
-        "Error updating document storage path"
+        "Error updating document storage path",
       );
       throw new DatabaseError(error);
     }
 
     this.logger.info(
       { documentId: id },
-      "Document storage path updated successfully"
+      "Document storage path updated successfully",
     );
     return new Document(
       data.id,
@@ -256,7 +256,7 @@ export class DocumentRepository implements IDocumentRepository {
       data.storage_path,
       data.google_document_id,
       data.mime_type,
-      data.folder_id
+      data.folder_id,
     );
   }
 }
