@@ -23,7 +23,7 @@ export interface TransformedDocument {
 export const documentEndpoints = (builder: ApiBuilder) => ({
   getAllDocuments: builder.query<TransformedDocument[], void>({
     query: () => ({
-      url: "documents/",
+      url: "documents",
       method: "GET",
     }),
     transformResponse: (

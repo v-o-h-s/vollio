@@ -21,7 +21,7 @@ interface FolderQueryResponse {
 export const folderEndpoints = (builder: ApiBuilder) => ({
   getAllFolders: builder.query<FolderQueryResponse, void>({
     query: () => ({
-      url: "folders/",
+      url: "folders",
       method: "GET",
     }),
     transformResponse: (response: GetAllFoldersResponse) => {
@@ -69,7 +69,7 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
     { name: string; parentId?: string | null }
   >({
     query: (data) => ({
-      url: "folders/",
+      url: "folders",
       method: "POST",
       body: data,
     }),
@@ -90,8 +90,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
               document_count: 0,
             });
             draft.count += 1;
-          }
-        )
+          },
+        ),
       );
       try {
         const { data: createdFolder } = await queryFulfilled;
@@ -101,13 +101,13 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
             undefined,
             (draft: any) => {
               const index = draft.folders.findIndex(
-                (f: any) => f.id === tempId
+                (f: any) => f.id === tempId,
               );
               if (index !== -1) {
                 draft.folders[index] = createdFolder;
               }
-            }
-          )
+            },
+          ),
         );
       } catch {
         patchResult.undo();
@@ -137,8 +137,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
               if (updates.parentId !== undefined)
                 folder.parent_id = updates.parentId;
             }
-          }
-        )
+          },
+        ),
       );
       const patchResultDetail = dispatch(
         apiSlice.util.updateQueryData(
@@ -148,8 +148,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
             if (updates.name !== undefined) draft.name = updates.name;
             if (updates.parentId !== undefined)
               draft.parent_id = updates.parentId;
-          }
-        )
+          },
+        ),
       );
       try {
         const { data: updatedFolder } = await queryFulfilled;
@@ -163,8 +163,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
               if (index !== -1) {
                 draft.folders[index] = updatedFolder;
               }
-            }
-          )
+            },
+          ),
         );
         dispatch(
           apiSlice.util.updateQueryData(
@@ -172,8 +172,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
             id,
             (draft: any) => {
               Object.assign(draft, updatedFolder);
-            }
-          )
+            },
+          ),
         );
       } catch {
         patchResultList.undo();
@@ -221,8 +221,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
               draft.folders.splice(index, 1);
               draft.count -= 1;
             }
-          }
-        )
+          },
+        ),
       );
       try {
         await queryFulfilled;
