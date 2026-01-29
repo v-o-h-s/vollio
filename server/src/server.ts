@@ -87,7 +87,7 @@ app.register(fastifyCors, {
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   exposedHeaders: ["Content-Range", "X-Content-Range"],
-  maxAge: 86400, // 24 hours - browsers can cache preflight
+  maxAge: 86400,  // 24 hours - browsers can cache preflight
 });
 
 // Register multipart for document uploads
