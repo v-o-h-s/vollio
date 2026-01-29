@@ -1,5 +1,6 @@
 services:
   vollio-server:
+    profiles: ["production-test"] # Only run when explicitly requested or in prod
     build:
       context: .
       dockerfile: Dockerfile

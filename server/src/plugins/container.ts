@@ -93,7 +93,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton Redis client
   const redis = new Redis({
     // Defensive trim for stability
-    host: (process.env.REDIS_HOST || "127.0.0.1").trim(),
+    host: (process.env.NODE_ENV === "production"
+      ? process.env.REDIS_HOST!
+      : "localhost"
+    ).trim(),
     port: Number(process.env.REDIS_PORT) || 6379,
   });
 
