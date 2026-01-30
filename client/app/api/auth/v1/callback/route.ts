@@ -4,43 +4,20 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   console.log("Auth callback triggered");
-  const { searchParams, origin } = new URL(request.url);
-  console.log("Auth callback params:", {
-    searchParams,
-    origin,
-  });
+  const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  // if "next" is in param, use it as the redirect URL
-  let next = "/"
-
-  console.log("Auth callback params:", {
-    code: code ? "***" : null,
-    next,
-    origin,
-  });
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      console.log("Session exchange successful");
-      const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === "development";
-      console.log("Environment check:", { isLocalEnv, forwardedHost });
 
       if (isLocalEnv) {
         // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
-        console.log("Redirecting to local origin:", `${origin}${next}`);
-        return NextResponse.redirect(`${origin}${next}`);
-      } else if (forwardedHost) {
-        console.log(
-          "Redirecting to forwarded host:",
-          `https://${forwardedHost}${next}`,
-        );
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+        return NextResponse.redirect(`http://localhost:3001`);
       } else {
-        console.log("Redirecting to origin:", `${origin}${next}`);
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}`);
       }
     } else {
       console.error("Error exchanging code for session:", error);
@@ -51,5 +28,7 @@ export async function GET(request: Request) {
 
   // return the user to an error page with instructions
   console.log("Redirecting to error page");
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+  return NextResponse.redirect(
+    `${process.env.NODE_ENV === "development" ? "http://localhost:3001/auth/auth-code-error" : process.env.NEXT_PUBLIC_APP_URL}/auth/auth-code-error`,
+  );
 }
