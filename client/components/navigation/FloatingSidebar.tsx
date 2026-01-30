@@ -71,7 +71,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
 
   // Get page-specific actions based on current route
   const getPageActions = (): QuickAction[] => {
-    const basePath = pathname.split("/").slice(0, 3).join("/"); // /dashboard/[page]
+    const basePath = pathname.split("/").slice(0, 3).join("/"); // /[page]
 
     switch (basePath) {
       case "/documents":
@@ -325,7 +325,7 @@ export function FloatingSidebar({ className }: FloatingSidebarProps) {
           },
         ];
 
-      // /dashboard/flashcards handled via knowledge-test
+      // /flashcards handled via knowledge-test
 
       case "/":
       default:

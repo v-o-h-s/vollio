@@ -97,7 +97,6 @@ export const {
   useDeleteFolderMutation,
   useGenerateSummaryMutation,
 
-  useConnectGoogleClassroomMutation,
   useRefreshGoogleClassroomTokenMutation,
   useDisconnectGoogleClassroomMutation,
   useGetGoogleClassroomConnectionStatusQuery,

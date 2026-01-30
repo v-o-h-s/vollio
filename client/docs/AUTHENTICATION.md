@@ -24,7 +24,7 @@ The interaction starts here.
 - The app calls `supabase.auth.signInWithOAuth`.
 - **Critical Detail**: The `redirectTo` URL is dynamically generated using `window.location.origin` to support both local development (`localhost`) and production (`vollio.xyz`) without code changes.
   ```typescript
-  const redirectUrl = `${window.location.origin}/api/auth/v1/callback?next=/dashboard/documents`;
+  const redirectUrl = `${window.location.origin}/api/auth/v1/callback?next=/documents`;
   ```
 
 ### 3. Callback Handler (`client/app/api/auth/v1/callback/route.ts`)
@@ -55,7 +55,7 @@ The middleware ensures the user's session remains active.
     - The server receives the `code`.
     - It talks to Supabase to get the Session.
     - Cookies are set on the response headers.
-5.  **Final Redirect**: User lands on `/dashboard/documents` with valid cookies.
+5.  **Final Redirect**: User lands on `/documents` with valid cookies.
 6.  **Subsequent Requests**:
     - Browser sends cookies with every request.
     - Middleware refreshes tokens if needed.
