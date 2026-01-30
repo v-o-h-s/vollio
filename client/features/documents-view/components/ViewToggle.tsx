@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LayoutGrid, List, LayoutList, Table } from "lucide-react";
+import { toast } from "react-toastify";
 
 export type ViewMode = "grid" | "list" | "compact" | "details";
 
@@ -39,7 +40,13 @@ export function ViewToggle({ viewMode, onViewModeChange }: ViewToggleProps) {
         {Object.entries(viewModeConfig).map(([key, { icon: Icon, label }]) => (
           <DropdownMenuItem
             key={key}
-            onClick={() => onViewModeChange(key as ViewMode)}
+            onClick={() => {
+              if (key !== "grid") {
+                toast.info("Coming soon");
+                return;
+              }
+              onViewModeChange(key as ViewMode);
+            }}
             className="cursor-pointer"
           >
             <Icon className="h-4 w-4 mr-2" />

@@ -7,9 +7,11 @@ export { useDocumentsViewState } from "./useDocumentsViewState";
 export { useBreadcrumbNavigation } from "./useBreadcrumbNavigation";
 export { useContextMenu } from "./useContextMenu";
 export { useDragAndDrop } from "./useDragAndDrop";
-export { useDocumentExplorerShortcuts } from "./useDocumentExplorerShortcuts";
 export { useFolder } from "./useFolder";
 export { useDocument } from "./useDocument";
+export { useDocumentUpload } from "./useDocumentUpload";
+export { useDocumentActions } from "./useDocumentActions";
+export { useDragMove } from "./useDragMove";
 
 // Types
 export type { Document, Folder, SelectedItem } from "./useDocumentsViewState";

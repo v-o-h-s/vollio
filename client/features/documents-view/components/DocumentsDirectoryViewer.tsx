@@ -8,8 +8,7 @@
 
 "use client";
 
-import React, { useState, useRef } from "react";
-import { toast } from "react-toastify";
+import React, { useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -20,10 +19,7 @@ import {
 } from "@dnd-kit/core";
 import { DocumentsToolbar } from "./DocumentsToolbar";
 import { Breadcrumb } from "./Breadcrumb";
-import { GridView } from "./views/GridView";
-import { ListView } from "./views/ListView";
-import { CompactView } from "./views/CompactView";
-import { DetailsView } from "./views/DetailsView";
+
 import { CreateFolderDialog } from "./dialogs/CreateFolderDialog";
 import { ClassroomImportDialog } from "./dialogs/ClassroomImportDialog";
 import { ContextMenu } from "./ContextMenu";
@@ -32,7 +28,11 @@ import { useBreadcrumbNavigation } from "../hooks/useBreadcrumbNavigation";
 import { useDragAndDrop } from "../hooks/useDragAndDrop";
 import { useFolder } from "../hooks/useFolder";
 import { useDocument } from "../hooks/useDocument";
-import { useDocumentExplorerShortcuts } from "../hooks/useDocumentExplorerShortcuts";
+import { useDocumentUpload } from "../hooks/useDocumentUpload";
+import { useDocumentActions } from "../hooks/useDocumentActions";
+import { useDragMove } from "../hooks/useDragMove";
+import { DocumentsContent } from "./DocumentsContent";
+
 import {
   Loader2,
   FolderOpen,
@@ -41,6 +41,7 @@ import {
   Upload,
   Trash2,
 } from "lucide-react";
+import { IoFolder, IoDocumentTextSharp } from "react-icons/io5";
 import { RTKQueryError } from "@/lib/error-handling/rtk-query-error";
 import { useGetGoogleClassroomConnectionStatusQuery } from "@/lib/store/apiSlice";
 import { DirectorySkeleton } from "./DirectorySkeleton";
@@ -60,7 +61,7 @@ export default function DocumentsDirectoryViewer() {
     error: documentsError,
     refetch: refetchDocuments,
     moveDocument,
-    openDocument,
+    openDocument, 
     uploadDocument,
     isUploading,
   } = useDocument();
@@ -100,14 +101,27 @@ export default function DocumentsDirectoryViewer() {
     handleDragCancel,
   } = useDragAndDrop();
 
-  // Dialog states
-  const [createFolderDialogOpen, setCreateFolderDialogOpen] = useState(false);
-  const [isDraggingDocument, setIsDraggingDocument] = useState(false);
-  const [classroomDialogOpen, setClassroomDialogOpen] = useState(false);
-  const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+  // Dialog states and actions
+  const {
+    createFolderDialogOpen,
+    setCreateFolderDialogOpen,
+    classroomDialogOpen,
+    setClassroomDialogOpen,
+    contextMenu,
+    setContextMenu,
+    handleFolderOpen,
+    handleDocumentOpen,
+    handleCreateFolder,
+    handleContextMenu,
+    handleItemSelect,
+    handleBreadcrumbNavigate,
+  } = useDocumentActions({
+    currentFolder,
+    clearSelection,
+    setCurrentFolder,
+    openDocument,
+    toggleItemSelection,
+  });
 
   // Classroom status (connection-level)
   const { data: classroomStatus, isLoading: isClassroomChecking } =
@@ -117,18 +131,6 @@ export default function DocumentsDirectoryViewer() {
     : classroomStatus?.data?.isConnected
     ? "Add from Classroom"
     : "Connect Classroom";
-  // Keyboard shortcuts
-  useDocumentExplorerShortcuts({
-    onSelectAll: selectAll,
-    onDelete: () => {
-      // Bulk delete will be handled here if needed
-      // Individual deletes are handled at component level
-    },
-    onClearSelection: clearSelection,
-    onEscape: clearSelection,
-    enabled: !createFolderDialogOpen,
-  });
-
   // Drag and drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -138,172 +140,38 @@ export default function DocumentsDirectoryViewer() {
     })
   );
 
-  const documentInputRef = useRef<HTMLInputElement>(null);
+  // Document upload hook
+  const {
+    documentInputRef,
+    isDraggingDocument,
+    handleUploadClick,
+    handleDocumentInputChange,
+    handleDocumentDragEnter,
+    handleDocumentDragLeave,
+    handleDocumentDragOver,
+    handleDocumentDrop,
+  } = useDocumentUpload({
+    currentFolder,
+    uploadDocument,
+    onUploadComplete: refetchDocuments,
+  });
 
-  // Handlers
-  const handleUploadClick = () => {
-    documentInputRef.current?.click();
-  };
+  const { handleDragEndWithMove } = useDragMove({
+    handleDragEnd,
+    moveDocument,
+    refetchDocuments,
+    refetchFolders,
+  });
 
-  const handleDocumentInputChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
 
-    for (const document of files) {
-      try {
-        await toast.promise(uploadDocument(document, currentFolder), {
-          pending: `Uploading ${document.name}...`,
-          success: `Successfully uploaded ${document.name}`,
-          error: `Failed to upload ${document.name}`,
-        });
-      } catch (error) {
-        console.error("Failed to upload document:", document.name, error);
-      }
-    }
 
-    // Clear the input so the same document can be uploaded again if needed
-    if (documentInputRef.current) {
-      documentInputRef.current.value = "";
-    }
 
-    refetchDocuments();
-  };
 
-  const handleItemSelect = (
-    type: "document" | "folder",
-    id: string,
-    e: React.MouseEvent
-  ) => {
-    const isMultiSelect = e.ctrlKey || e.metaKey;
-    toggleItemSelection(type, id, isMultiSelect);
-  };
 
-  const handleFolderOpen = (folderId: string) => {
-    setCurrentFolder(folderId);
-    clearSelection();
-  };
 
-  const handleDocumentOpen = (documentId: string) => {
-    openDocument(documentId);
-  };
 
-  const handleBreadcrumbNavigate = (folderId: string | null) => {
-    setCurrentFolder(folderId);
-    clearSelection();
-  };
 
-  const handleCreateFolder = async (name: string) => {
-    await createFolder(name, currentFolder);
-  };
 
-  const handleDragEndWithMove = (event: any) => {
-    handleDragEnd(event, async (itemType, itemId, targetFolderId) => {
-      if (targetFolderId) {
-        const cleanTargetFolderId = targetFolderId.replace(/^folder-/, "");
-        console.log(
-          "moving ",
-          itemType,
-          " from ",
-          itemId,
-          " to ",
-          cleanTargetFolderId
-        );
-        await moveDocument(itemId, cleanTargetFolderId);
-        await Promise.all([refetchDocuments(), refetchFolders()]);
-      }
-    });
-  };
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setContextMenu({ x: e.clientX, y: e.clientY });
-  };
-
-  // Document drag and drop upload handlers
-  const handleDocumentDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.dataTransfer.types.includes("Files")) {
-      setIsDraggingDocument(true);
-    }
-  };
-
-  const handleDocumentDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Only hide if leaving the main container
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX;
-    const y = e.clientY;
-
-    if (
-      x <= rect.left ||
-      x >= rect.right ||
-      y <= rect.top ||
-      y >= rect.bottom
-    ) {
-      setIsDraggingDocument(false);
-    }
-  };
-
-  const handleDocumentDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDocumentDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDraggingDocument(false);
-
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length === 0) return;
-
-    for (const document of files) {
-      try {
-        await toast.promise(uploadDocument(document, currentFolder), {
-          pending: `Uploading ${document.name}...`,
-          success: `Successfully uploaded ${document.name}`,
-          error: `Failed to upload ${document.name}`,
-        });
-      } catch (error) {
-        console.error("Failed to upload document:", document.name, error);
-      }
-    }
-
-    refetchDocuments();
-  };
-
-  // Render view based on viewMode
-  const renderView = () => {
-    const viewProps = {
-      folders: filteredFolders,
-      documents: filteredDocuments,
-      isItemSelected,
-      onItemSelect: handleItemSelect,
-      onFolderOpen: handleFolderOpen,
-      onDocumentOpen: handleDocumentOpen,
-      onEmptyAreaClick: clearSelection,
-      dragOverFolderId,
-      allFolders: folders,
-    };
-
-    switch (viewMode) {
-      case "grid":
-        return <GridView {...viewProps} />;
-      case "list":
-        return <ListView {...viewProps} />;
-      case "compact":
-        return <CompactView {...viewProps} />;
-      case "details":
-        return <DetailsView {...viewProps} />;
-      default:
-        return <GridView {...viewProps} />;
-    }
-  };
 
   // Loading state
   if (isLoadingDocuments || isLoadingFolders) {
@@ -376,7 +244,18 @@ export default function DocumentsDirectoryViewer() {
           onDrop={handleDocumentDrop}
           onContextMenu={handleContextMenu}
         >
-          {renderView()}
+          <DocumentsContent
+            viewMode={viewMode}
+            folders={filteredFolders}
+            documents={filteredDocuments}
+            isItemSelected={isItemSelected}
+            onItemSelect={handleItemSelect}
+            onFolderOpen={handleFolderOpen}
+            onDocumentOpen={handleDocumentOpen}
+            onEmptyAreaClick={clearSelection}
+            dragOverFolderId={dragOverFolderId}
+            allFolders={folders}
+          />
 
           {/* Drag overlay - Full screen popup for upload only*/}
           {isDraggingDocument && (
@@ -384,8 +263,8 @@ export default function DocumentsDirectoryViewer() {
               <div className="max-w-md w-full mx-4 bg-card border-2 border-dashed border-primary rounded-2xl p-12 shadow-2xl">
                 <div className="text-center space-y-4">
                   <div className="relative">
-                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
-                    <Upload className="h-20 w-20 text-primary mx-auto relative animate-bounce" />
+                    <div className="absolute inset-0 bg-neutral-500/20 rounded-full blur-3xl animate-pulse"></div>
+                    <Upload className="h-20 w-20 text-black dark:text-white mx-auto relative animate-bounce" />
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-2xl font-bold text-foreground">
@@ -430,9 +309,9 @@ export default function DocumentsDirectoryViewer() {
             <div className="w-full px-2">
               <div className="aspect-square  w-[90px] h-[90px] rounded-lg flex flex-col items-center justify-center mx-auto ">
                 {activeItem.type === "folder" ? (
-                  <FolderOpen className="h-12 w-12 text-white" />
+                  <IoFolder className="h-12 w-12 text-neutral-700 dark:text-neutral-300" />
                 ) : (
-                  <FileText className="h-12 w-12 text-white" />
+                  <IoDocumentTextSharp className="h-12 w-12 text-neutral-600 dark:text-neutral-400" />
                 )}
               </div>
               <p
