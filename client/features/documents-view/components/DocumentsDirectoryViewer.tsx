@@ -38,13 +38,13 @@ import {
   FolderOpen,
   FileText,
   FolderPlus,
-  Upload,
+  Upload, 
   Trash2,
 } from "lucide-react";
 import { IoFolder, IoDocumentTextSharp } from "react-icons/io5";
 import { RTKQueryError } from "@/lib/error-handling/rtk-query-error";
 import { useGetGoogleClassroomConnectionStatusQuery } from "@/lib/store/apiSlice";
-import { DirectorySkeleton } from "./DirectorySkeleton";
+import { FilesSkeleton } from "./DirectorySkeleton";
 
 export default function DocumentsDirectoryViewer() {
   // Use custom hooks for data management
@@ -172,10 +172,7 @@ export default function DocumentsDirectoryViewer() {
 
 
 
-  // Loading state
-  if (isLoadingDocuments || isLoadingFolders) {
-    return <DirectorySkeleton />;
-  }
+
 
   // Error state
   if (documentsError || foldersError) {
@@ -241,18 +238,22 @@ export default function DocumentsDirectoryViewer() {
           onDrop={handleDocumentDrop}
           onContextMenu={handleContextMenu}
         >
-          <DocumentsContent
-            viewMode={viewMode}
-            folders={filteredFolders}
-            documents={filteredDocuments}
-            isItemSelected={isItemSelected}
-            onItemSelect={handleItemSelect}
-            onFolderOpen={handleFolderOpen}
-            onDocumentOpen={handleDocumentOpen}
-            onEmptyAreaClick={clearSelection}
-            dragOverFolderId={dragOverFolderId}
-            allFolders={folders}
-          />
+          {isLoadingDocuments || isLoadingFolders ? (
+            <FilesSkeleton />
+          ) : (
+            <DocumentsContent
+              viewMode={viewMode}
+              folders={filteredFolders}
+              documents={filteredDocuments}
+              isItemSelected={isItemSelected}
+              onItemSelect={handleItemSelect}
+              onFolderOpen={handleFolderOpen}
+              onDocumentOpen={handleDocumentOpen}
+              onEmptyAreaClick={clearSelection}
+              dragOverFolderId={dragOverFolderId}
+              allFolders={folders}
+            />
+          )}
 
           {/* Drag overlay - Full screen popup for upload only*/}
           {isDraggingDocument && (

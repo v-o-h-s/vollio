@@ -12,8 +12,9 @@ import { ServerError } from "../../shared/errors/ServerError";
 export class GoogleClassroomService implements IGoogleClassroomService {
   private clientId = process.env.GOOGLE_CLIENT_ID!;
   private redirectUri =
-    process.env.GOOGLE_CLASSROOM_REDIRECT_URI! ||
-    "http://localhost:3000/api/v1/integrations/lms/google-classroom/callback";
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000/api/v1/integrations/lms/google-classroom/callback"
+      : process.env.GOOGLE_CLASSROOM_REDIRECT_URI!;
   private clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
 
   private scopes = [
@@ -43,27 +44,27 @@ export class GoogleClassroomService implements IGoogleClassroomService {
     };
   }
   async exchangeCodeForTokens(code: string): Promise<GoogleOAuthTokenResponse> {
-    const res = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        code,
-        client_id: this.clientId,
-        client_secret: this.clientSecret,
-        redirect_uri: this.redirectUri,
-        grant_type: "authorization_code",
-      }),
-    });
+      const res = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          code,
+          client_id: this.clientId,
+          client_secret: this.clientSecret,
+          redirect_uri: this.redirectUri,
+          grant_type: "authorization_code",
+        }),
+      });
 
-    const data = (await res.json()) as GoogleOAuthTokenResponse;
+      const data = (await res.json()) as GoogleOAuthTokenResponse;
     if (!res.ok)
-      throw new ServerError(
-        `Google token exchange failed: ${JSON.stringify(data)}`
-      );
-    return data;
+        throw new ServerError(
+          `Google token exchange failed: ${JSON.stringify(data)}`,
+        );
+      return data;
   }
   async refreshAccessToken(
-    refreshToken: string
+    refreshToken: string,
   ): Promise<GoogleOAuthTokenResponse> {
     const res = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -87,13 +88,13 @@ export class GoogleClassroomService implements IGoogleClassroomService {
       }
 
       throw new ServerError(
-        `Google token refresh failed: ${JSON.stringify(data)}`
+        `Google token refresh failed: ${JSON.stringify(data)}`,
       );
     }
 
     // Calculate token expiry timestamp
     const tokenExpiry = new Date(
-      Date.now() + data.expires_in * 1000
+      Date.now() + data.expires_in * 1000,
     ).toISOString();
 
     // refresh_token is usually NOT returned again
@@ -117,7 +118,7 @@ export class GoogleClassroomService implements IGoogleClassroomService {
 
     if (!res.ok) {
       throw new ServerError(
-        `Failed to fetch Google Classroom courses: ${JSON.stringify(data)}`
+        `Failed to fetch Google Classroom courses: ${JSON.stringify(data)}`,
       );
     }
 
@@ -125,7 +126,7 @@ export class GoogleClassroomService implements IGoogleClassroomService {
   }
   async getCourseWorkMaterialsByCourseId(
     accessToken: string,
-    courseId: string
+    courseId: string,
   ): Promise<any[]> {
     const res = await fetch(
       `https://classroom.googleapis.com/v1/courses/${courseId}/courseWorkMaterials`,
@@ -133,14 +134,14 @@ export class GoogleClassroomService implements IGoogleClassroomService {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     const data = (await res.json()) as any;
 
     if (!res.ok) {
       throw new ServerError(
-        `Failed to fetch course materials: ${JSON.stringify(data)}`
+        `Failed to fetch course materials: ${JSON.stringify(data)}`,
       );
     }
 
@@ -149,7 +150,7 @@ export class GoogleClassroomService implements IGoogleClassroomService {
   }
   async getAnnouncementsByCourseId(
     accessToken: string,
-    courseId: string
+    courseId: string,
   ): Promise<any[]> {
     const res = await fetch(
       `https://classroom.googleapis.com/v1/courses/${courseId}/announcements`,
@@ -157,14 +158,14 @@ export class GoogleClassroomService implements IGoogleClassroomService {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-      }
+      },
     );
 
     const data = (await res.json()) as any;
 
     if (!res.ok) {
       throw new ServerError(
-        `Failed to fetch announcements: ${JSON.stringify(data)}`
+        `Failed to fetch announcements: ${JSON.stringify(data)}`,
       );
     }
 

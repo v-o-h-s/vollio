@@ -43,29 +43,29 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       return documentController.getAllDocuments(request, reply);
     }
   );
-
-  fastify.get<{ Params: { documentId: string } }>(
-    `${opts.prefix}/google-drive/:documentId`,
-    {
-      config: {
-        rateLimit: { cost: 5 },
-      },
-      schema: {
-        params: {
-          type: "object",
-          properties: {
-            documentId: { type: "string" },
-          },
-          required: ["documentId"],
-        },
-      },
-    },
-    async (request, reply) => {
-      const documentController =
-        request.diScope.resolve<DocumentController>("documentController");
-      return documentController.getDocumentFromGoogleDrive(request, reply);
-    }
-  );
+  // should be deleted since we are trying to centerlize getting file (one endpoint for all resources of documents)
+  // fastify.get<{ Params: { documentId: string } }>(
+  //   `${opts.prefix}/google-drive/:documentId`,
+  //   {
+  //     config: {
+  //       rateLimit: { cost: 5 },
+  //     },
+  //     schema: {
+  //       params: {
+  //         type: "object",
+  //         properties: {
+  //           documentId: { type: "string" },
+  //         },
+  //         required: ["documentId"],
+  //       },
+  //     },
+  //   },
+  //   async (request, reply) => {
+  //     const documentController =
+  //       request.diScope.resolve<DocumentController>("documentController");
+  //     return documentController.getDocumentFromGoogleDrive(request, reply);
+  //   }
+  // );
 
   fastify.post<{ Body: { documentGoogleDriveId: string } }>(
     `${opts.prefix}/google-drive`,

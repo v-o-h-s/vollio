@@ -74,7 +74,7 @@ export function ClassroomImportDialog({
     selectedCourseId || "",
     {
       skip: !open || !isConnected || !selectedCourseId,
-    }
+    },
   );
   const courseContent = courseContentQuery.data;
   const isLoadingContent = courseContentQuery.isLoading;
@@ -82,7 +82,7 @@ export function ClassroomImportDialog({
   const refetchContent = courseContentQuery.refetch;
 
   const [selectedMaterialIds, setSelectedMaterialIds] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [isImporting, setIsImporting] = useState(false);
   const [addDocumentFromDrive] = useAddDocumentFromGoogleDriveMutation();
@@ -96,7 +96,7 @@ export function ClassroomImportDialog({
         title: f.title,
         source: "announcement" as const,
         courseId: a.courseId,
-      }))
+      })),
     );
     const fromCourseWork = content.materials.flatMap((m) =>
       (m.materials?.driveDocuments || []).map((f) => ({
@@ -104,7 +104,7 @@ export function ClassroomImportDialog({
         title: f.title,
         source: "coursework" as const,
         courseId: m.courseId,
-      }))
+      })),
     );
     return [...fromAnnouncements, ...fromCourseWork];
   }, [courseContent]);
@@ -137,7 +137,10 @@ export function ClassroomImportDialog({
   };
 
   const handleConnect = () => {
-    window.location.href = "/api/v1/integrations/lms/google-classroom/connect";
+    window.location.href =
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:3000/api/v1/integrations/lms/google-classroom/connect"
+        : `${process.env.NEXT_PUBLIC_APP_URL}/api/v1/integrations/lms/google-classroom/connect`;
   };
 
   return (
@@ -310,7 +313,11 @@ export function ClassroomImportDialog({
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => onOpenChange(false)} className="cursor-pointer">
+                <Button
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="cursor-pointer"
+                >
                   Cancel
                 </Button>
                 <Button

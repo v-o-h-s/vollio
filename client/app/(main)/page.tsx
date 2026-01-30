@@ -1,5 +1,5 @@
-import DocumentsDirectoryViewer from "@/features/documents-view/components/DocumentsDirectoryViewer";
 import { Library } from "lucide-react";
+import DocumentsDirectoryViewerWrapper from "@/features/documents-view/components/DocumentsDirectoryViewerWrapper";
 
 export default function DashboardPage() {
   return (
@@ -20,7 +20,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Document Directory View */}
-      <DocumentsDirectoryViewer />
+      <DocumentsDirectoryViewerWrapper />
     </div>
   );
 }

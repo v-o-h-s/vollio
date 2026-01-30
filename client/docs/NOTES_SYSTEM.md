@@ -7,6 +7,7 @@ The Vollio notes system provides complete standalone note-taking functionality w
 ## Features
 
 ### Core Functionality
+
 - **Rich Text Editing**: TipTap-based NotionEditor with full formatting capabilities
 - **Internal Auto-Save**: Editor-managed auto-save using RTK Query mutations with debounced updates
 - **Simplified Architecture**: Auto-save handled internally without complex parent callbacks
@@ -15,6 +16,7 @@ The Vollio notes system provides complete standalone note-taking functionality w
 - **Mobile Responsive**: Touch-friendly interface with adaptive layouts
 
 ### Auto-Save Architecture ✅ PRODUCTION READY
+
 - **RTK Query Integration**: All save operations use RTK Query mutations for consistency
 - **Editor-Internal**: Auto-save logic contained within NotionEditor components
 - **Automatic Note Creation**: Creates new notes automatically when content is added
@@ -28,13 +30,15 @@ The Vollio notes system provides complete standalone note-taking functionality w
 
 ### Frontend Components
 
-#### NewNotePage (`app/dashboard/notes/new/page.tsx`)
+#### NewNotePage (`app/(main)/notes/new/page.tsx`)
+
 - Simplified note creation interface with minimal props
 - Real-time word count and save status display
 - Keyboard shortcuts and navigation handling
 - Comprehensive error handling and recovery
 
 #### NotionEditor (`components/editor/NotionEditor.tsx`)
+
 - TipTap-based rich text editor with full formatting
 - **Internal auto-save using RTK Query mutations**
 - **Simplified API without complex callback props**
@@ -42,7 +46,8 @@ The Vollio notes system provides complete standalone note-taking functionality w
 - Floating toolbars and slash commands for enhanced UX
 - Mobile-responsive design with touch-friendly interactions
 
-#### NoteEditPage (`app/dashboard/notes/[id]/page.tsx`)
+#### NoteEditPage (`app/(main)/notes/[id]/page.tsx`)
+
 - **Enhanced Delete Functionality**: Custom confirmation dialog with styled UI and loading states
 - **Auto-Save Integration**: FloatingAutoSaveStatus component for real-time status updates
 - **Error Handling**: Comprehensive error boundaries with user-friendly error messages
@@ -51,6 +56,7 @@ The Vollio notes system provides complete standalone note-taking functionality w
 - **Real-time Updates**: Cross-tab synchronization using useNoteSync hook
 
 #### useAutoSave Hook (`hooks/use-auto-save.ts`)
+
 - Integrated within NotionEditor for internal auto-save management
 - RTK Query mutation integration for create/update operations
 - Status tracking (idle, typing, saving, saved, error)
@@ -60,9 +66,11 @@ The Vollio notes system provides complete standalone note-taking functionality w
 ### API Endpoints ✅ IMPLEMENTED
 
 #### GET /api/notes
+
 List all notes for the authenticated user with automatic RLS filtering.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -81,9 +89,11 @@ List all notes for the authenticated user with automatic RLS filtering.
 ```
 
 #### POST /api/notes
+
 Create a new note with title and rich text content.
 
 **Request Body:**
+
 ```json
 {
   "title": "Note Title",
@@ -95,6 +105,7 @@ Create a new note with title and rich text content.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -111,18 +122,22 @@ Create a new note with title and rich text content.
 ```
 
 #### PUT /api/notes/[id] ✅ IMPLEMENTED
+
 Update an existing note with enhanced auto-save integration.
 
 **Features:**
+
 - Auto-save integration with RTK Query
 - Real-time status tracking
 - Cross-tab synchronization
 - Comprehensive error handling
 
 #### DELETE /api/notes/[id] ✅ IMPLEMENTED
+
 Delete a specific note by ID with enhanced confirmation and cleanup.
 
 **Features:**
+
 - Custom styled confirmation dialogs
 - Loading states during deletion
 - Automatic cleanup of related data
@@ -158,6 +173,7 @@ CREATE INDEX idx_notes_pdf_annotation ON notes(pdf_annotation_id);
 ## User Experience
 
 ### Note Creation Flow
+
 1. **Navigation**: User clicks "New Note" from dashboard
 2. **Editor Load**: NotionEditor loads with auto-focus and placeholder
 3. **Content Entry**: User starts typing, triggering auto-save after 1 second
@@ -165,6 +181,7 @@ CREATE INDEX idx_notes_pdf_annotation ON notes(pdf_annotation_id);
 5. **Navigation**: User can navigate away safely after content is saved
 
 ### Auto-Save Behavior
+
 - **Initial Save**: Creates new note on first content entry
 - **Subsequent Saves**: Updates existing note with new content
 - **Error Handling**: Shows error status and provides retry options
@@ -172,6 +189,7 @@ CREATE INDEX idx_notes_pdf_annotation ON notes(pdf_annotation_id);
 - **Status Display**: Badge shows current save status and last saved time
 
 ### Mobile Experience
+
 - **Touch-Friendly**: Large touch targets and responsive design
 - **Adaptive Layout**: Optimized for various screen sizes
 - **Gesture Support**: Standard touch gestures for text selection and editing
@@ -180,12 +198,14 @@ CREATE INDEX idx_notes_pdf_annotation ON notes(pdf_annotation_id);
 ## Integration Points
 
 ### Dashboard Integration
+
 - **Note Listing**: Display all user notes with recent activity
 - **Quick Actions**: Create, edit, delete notes from dashboard
 - **Search Integration**: Full-text search across note content
 - **Recent Activity**: Track note creation, editing, and access
 
 ### PDF Integration (Future)
+
 - **Linked Notes**: Associate notes with specific PDF documents
 - **Annotation Notes**: Convert PDF annotations to standalone notes
 - **Cross-References**: Link between notes and PDF annotations
@@ -194,6 +214,7 @@ CREATE INDEX idx_notes_pdf_annotation ON notes(pdf_annotation_id);
 ## Development Guidelines
 
 ### Component Structure
+
 ```typescript
 // Note component example
 interface NoteProps {
@@ -206,14 +227,15 @@ export function NoteEditor({ noteId, initialContent, onSave }: NoteProps) {
   const { updateContent, status } = useAutoSave({
     onSave: handleAutoSave,
     delay: 1000,
-    enabled: true
+    enabled: true,
   });
-  
+
   // Implementation
 }
 ```
 
 ### Auto-Save Integration
+
 ```typescript
 // Auto-save hook usage
 const { status, lastSaved, error, updateContent } = useAutoSave({
@@ -228,39 +250,46 @@ const { status, lastSaved, error, updateContent } = useAutoSave({
     }
   },
   delay: 1000,
-  enabled: true
+  enabled: true,
 });
 ```
 
 ### Error Handling
+
 ```typescript
 // Comprehensive error handling
-const handleAutoSave = useCallback(async (content: any) => {
-  try {
-    await saveNote(content);
-  } catch (error) {
-    // Error is handled by useAutoSave hook
-    // User sees error status and retry options
-    throw error;
-  }
-}, [saveNote]);
+const handleAutoSave = useCallback(
+  async (content: any) => {
+    try {
+      await saveNote(content);
+    } catch (error) {
+      // Error is handled by useAutoSave hook
+      // User sees error status and retry options
+      throw error;
+    }
+  },
+  [saveNote],
+);
 ```
 
 ## Testing Strategy
 
 ### Unit Tests
+
 - Auto-save hook functionality and debouncing
 - Content extraction and title generation
 - Error handling and recovery mechanisms
 - Status tracking and state management
 
 ### Integration Tests
+
 - Note creation and update workflows
 - Auto-save integration with API endpoints
 - Error recovery and retry mechanisms
 - Mobile responsiveness and touch interactions
 
 ### E2E Tests
+
 - Complete note creation and editing workflow
 - Auto-save functionality across browser sessions
 - Navigation and unsaved changes handling
@@ -269,12 +298,14 @@ const handleAutoSave = useCallback(async (content: any) => {
 ## Performance Considerations
 
 ### Optimization Strategies
+
 - **Debounced Auto-Save**: Prevents excessive API calls during typing
 - **Content Memoization**: Efficient content change detection
 - **Lazy Loading**: Load editor components on demand
 - **Efficient Rendering**: Optimized TipTap editor configuration
 
 ### Memory Management
+
 - **Editor Cleanup**: Proper cleanup of TipTap editor instances
 - **Event Listeners**: Remove event listeners on component unmount
 - **Auto-Save Cleanup**: Clear auto-save timers and handlers
@@ -283,12 +314,14 @@ const handleAutoSave = useCallback(async (content: any) => {
 ## Security Considerations
 
 ### Data Protection
+
 - **User Isolation**: RLS policies ensure users only access their notes
 - **Content Sanitization**: Sanitize rich text content before storage
 - **Input Validation**: Validate note titles and content structure
 - **Rate Limiting**: Prevent abuse of auto-save functionality
 
 ### Authentication
+
 - **JWT Integration**: Use Clerk JWT tokens for API authentication
 - **Session Management**: Handle authentication state changes
 - **Secure Storage**: Store notes securely with proper encryption
@@ -297,6 +330,7 @@ const handleAutoSave = useCallback(async (content: any) => {
 ## Recent UI Improvements ✅ IMPLEMENTED
 
 ### Enhanced Delete Functionality
+
 - **Custom Confirmation Dialog**: Styled confirmation dialog replacing browser's `window.confirm()`
 - **Visual Design**: Modern card-based layout with warning icons and red color coding
 - **Loading States**: Spinner and disabled buttons during deletion process
@@ -304,6 +338,7 @@ const handleAutoSave = useCallback(async (content: any) => {
 - **Mobile Responsive**: Touch-friendly interface with proper button sizing
 
 ### Auto-Save Status Display
+
 - **FloatingAutoSaveStatus Component**: Bottom-right positioned status indicator
 - **Context-Based Architecture**: AutoSaveStatusProvider for global state management
 - **Scoped Visibility**: Only shown on note editing pages (`notes/new` and `notes/[id]`)
@@ -311,12 +346,14 @@ const handleAutoSave = useCallback(async (content: any) => {
 - **Visual Feedback**: Color-coded badges with icons and descriptive text
 
 ### Obsidian-Style Interface
+
 - **Separate Title Input**: Dedicated title field above editor content
 - **Borderless Design**: Clean interface with removed component borders
 - **Default Title Behavior**: Automatic "Untitled Note" for new notes
 - **Enhanced Layout**: Improved spacing and typography hierarchy
 
 ### Notes Management Interface
+
 - **Enhanced Delete Confirmation**: Custom styled dialogs with note title display
 - **Improved Error Handling**: Comprehensive error messages and retry mechanisms
 - **Toast Notifications**: User-friendly feedback for all operations
@@ -325,18 +362,21 @@ const handleAutoSave = useCallback(async (content: any) => {
 ## Future Enhancements
 
 ### Advanced Features
+
 - **Collaborative Editing**: Real-time multi-user note editing
 - **Version History**: Track and restore previous note versions
 - **Templates**: Pre-defined note templates for common use cases
 - **Tags and Categories**: Organize notes with tags and folders
 
 ### Integration Features
+
 - **PDF Linking**: Link notes to specific PDF pages or annotations
 - **Export Options**: Export notes to various formats (Markdown, PDF, etc.)
 - **Import Functionality**: Import notes from other applications
 - **API Integration**: Connect with external note-taking services
 
 ### AI Features
+
 - **Smart Suggestions**: AI-powered writing suggestions and improvements
 - **Content Analysis**: Automatic tagging and categorization
 - **Search Enhancement**: Semantic search across note content

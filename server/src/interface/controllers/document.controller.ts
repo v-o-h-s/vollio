@@ -2,7 +2,10 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { AddDocumentFromGoogleDriveUseCase } from "../../application/use-cases/documents/AddDocumentFromGoogleDriveUseCase";
 import { GetDocumentFromGoogleDriveUseCase } from "../../application/use-cases/documents/GetDocumentFromGoogleDriveUseCase";
 import { GetAllDocumentsUseCase } from "../../application/use-cases/documents/GetAllDocumentsUseCase";
-import { GetDocumentByIdUseCase } from "../../application/use-cases/documents/GetDocumentByIdUseCase";
+import {
+  GetDocumentByIdResult,
+  GetDocumentByIdUseCase,
+} from "../../application/use-cases/documents/GetDocumentByIdUseCase";
 import { DeleteDocumentUseCase } from "../../application/use-cases/documents/DeleteDocumentUseCase";
 import { MoveDocumentUseCase } from "../../application/use-cases/documents/MoveDocumentUseCase";
 import { RenameDocumentUseCase } from "../../application/use-cases/documents/RenameDocumentUseCase";
@@ -14,15 +17,11 @@ import {
 import { getStorageUrlSchema } from "../../shared/validation/documentSchemas";
 import {
   AddDocumentFromGoogleDriveResponse,
-  CreateSignedUrlResponse,
   DeleteDocumentResponse,
   GetAllDocumentsResponse,
   GetDocumentByIdResponse,
-  GetDocumentFromGoogleDriveResponse,
-  GetNoteByIdResponse,
   GetStorageUrlData,
   GetStorageUrlDto,
-  GetStorageUrlResponse,
   MoveDocumentResponse,
   NoteData,
   RenameDocumentResponse,
@@ -32,7 +31,8 @@ import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 import { GetStorageUrlUseCase } from "../../application/use-cases/documents/GetStorageUrlUseCase";
 import { CreateDocumentUseCase } from "../../application/use-cases/documents/CreateDocumentUseCase";
 import { CreateDocumentDto } from "@vollio/shared";
-
+import { withRetry } from "@vollio/shared";
+import { NotFoundError } from "../../shared/errors/NotFoundError";
 export class DocumentController {
   constructor(
     private addDocumentFromGoogleDriveUseCase: AddDocumentFromGoogleDriveUseCase,
@@ -44,14 +44,14 @@ export class DocumentController {
     private renameDocumentUseCase: RenameDocumentUseCase,
     private generateSummaryUseCase: GenerateSummaryUseCase,
     private getStorageUrlUseCase: GetStorageUrlUseCase,
-    private createDocumentUseCase: CreateDocumentUseCase
+    private createDocumentUseCase: CreateDocumentUseCase,
   ) {}
   // add document from google drive
   async addDocumentFromGoogleDrive(
     request: FastifyRequest<{
       Body: { documentGoogleDriveId: string };
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -75,44 +75,44 @@ export class DocumentController {
     } satisfies AddDocumentFromGoogleDriveResponse);
   }
 
-  // get document from google drive by document ID
-  async getDocumentFromGoogleDrive(
-    request: FastifyRequest<{
-      Params: { documentId: string };
-    }>,
-    reply: FastifyReply
-  ): Promise<void> {
-    const userId = request.user?.id;
-    if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "User not authenticated",
-        data: null,
-        error: "Unauthorized",
-      });
-      return;
-    }
+  // // get document from google drive by document ID
+  // async getDocumentFromGoogleDrive(
+  //   request: FastifyRequest<{
+  //     Params: { documentId: string };
+  //   }>,
+  //   reply: FastifyReply
+  // ): Promise<void> {
+  //   const userId = request.user?.id;
+  //   if (!userId) {
+  //     reply.status(401).send({
+  //       success: false,
+  //       message: "User not authenticated",
+  //       data: null,
+  //       error: "Unauthorized",
+  //     });
+  //     return;
+  //   }
 
-    const { documentId } = request.params;
+  //   const { documentId } = request.params;
 
-    const result = await this.getDocumentFromGoogleDriveUseCase.execute(
-      documentId,
-      userId
-    );
-    reply.status(200).send({
-      success: true,
-      message: "Document fetched from Google Drive successfully",
-      data: {
-        id: result.document.getId(),
-        name: result.document.getName(),
-      },
-      error: null,
-    });
-  }
+  //   const result = await this.getDocumentFromGoogleDriveUseCase.execute(
+  //     documentId,
+  //     userId
+  //   );
+  //   reply.status(200).send({
+  //     success: true,
+  //     message: "Document fetched from Google Drive successfully",
+  //     data: {
+  //       id: result.document.getId(),
+  //       name: result.document.getName(),
+  //     },
+  //     error: null,
+  //   });
+  // }
 
   async getAllDocuments(
     request: FastifyRequest,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -148,7 +148,7 @@ export class DocumentController {
   // you may use this one when like click on document from supabase storage
   async getDocumentById(
     request: FastifyRequest<{ Params: DocumentIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -161,9 +161,17 @@ export class DocumentController {
       return;
     }
 
-    const result = await this.getDocumentByIdUseCase.execute(
-      request.params.id,
-      userId
+    const result = await withRetry(
+      () => this.getDocumentByIdUseCase.execute(request.params.id, userId),
+      {
+        retries: 4,
+        shouldRetry: (error) => {
+          if (error instanceof NotFoundError) {
+            return false;
+          }
+          return true;
+        },
+      },
     );
 
     reply.status(200).send({
@@ -186,7 +194,7 @@ export class DocumentController {
   // pls use formdata in the frontend to send the document
   async deleteDocument(
     request: FastifyRequest<{ Params: DocumentIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -214,7 +222,7 @@ export class DocumentController {
       Params: DocumentIdParams;
       Body: MoveDocumentDTO;
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -246,7 +254,7 @@ export class DocumentController {
       Params: DocumentIdParams;
       Body: RenameDocumentDTO;
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -277,7 +285,7 @@ export class DocumentController {
    */
   async generateSummary(
     request: FastifyRequest<{ Params: DocumentIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -289,18 +297,18 @@ export class DocumentController {
       {
         id: request.params.id,
       },
-      userId
+      userId,
     );
     ResponseFormatter.success<NoteData>(
       reply,
       result.note,
-      "Summary generated successfully"
+      "Summary generated successfully",
     );
   }
 
   async getStorageUrl(
     request: FastifyRequest<{ Body: GetStorageUrlDto }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -315,13 +323,13 @@ export class DocumentController {
     ResponseFormatter.success<GetStorageUrlData>(
       reply,
       result,
-      "Storage URL retrieved successfully"
+      "Storage URL retrieved successfully",
     );
   }
 
   async createDocument(
     request: FastifyRequest<{ Body: CreateDocumentDto }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -336,7 +344,7 @@ export class DocumentController {
     ResponseFormatter.success<{ id: string }>(
       reply,
       result,
-      "Document created successfully"
+      "Document created successfully",
     );
   }
 }

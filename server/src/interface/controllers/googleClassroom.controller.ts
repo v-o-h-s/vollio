@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { GoogleCallbackQuery } from "../../shared/validation/googleClassroomSchemas";
-import { GoogleClassroomService } from "../../infrastructure/services/GoogleClassroomService";
+
 import { FromCodeToDatabaseUseCase } from "../../application/use-cases/google-Classroom/FromCodeToDatabaseUseCase";
 import { CheckTokenStatusUseCase } from "../../application/use-cases/google-Classroom/CheckTokenStatusUseCase";
 import { RefreshTokenAndUpdateTheDatabaseUseCase } from "../../application/use-cases/google-Classroom/RefreshTokenAndUpdateTheDatabaseUseCase";
@@ -8,8 +8,6 @@ import { DisconnectGoogleClassroomUseCase } from "../../application/use-cases/go
 import { GetCoursesUseCase } from "../../application/use-cases/google-Classroom/GetCoursesUseCase";
 import { IsConnectedToGoogleClassroomUseCase } from "../../application/use-cases/google-Classroom/IsConnectedToGoogleClassroomUseCase";
 import { GetCourseContentUseCase } from "../../application/use-cases/google-Classroom/GetCourseContentUseCase";
-import { GetCoursesWithContentUseCase } from "../../application/use-cases/google-Classroom/GetCoursesWithContentUseCase";
-import { ClassroomAnnouncementResponse } from "@vollio/shared";
 import { AddDocumentFromGoogleDriveUseCase } from "../../application/use-cases/documents/AddDocumentFromGoogleDriveUseCase";
 import {
   ConnectCallbackResponse,
@@ -20,10 +18,11 @@ import {
   GetCoursesResponse,
   GetCoursesWithContentResponse,
   GetCourseContentResponse,
-} from '@vollio/shared';
-import "dotenv/config"
+} from "@vollio/shared";
+import "dotenv/config";
+import { IGoogleClassroomService } from "../../domain/services/IGoogleClassroomService";
 export class GoogleClassroomController {
-  private googleClassroomService: GoogleClassroomService;
+  private googleClassroomService: IGoogleClassroomService;
   private fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase;
   private checkTokenStatusUseCase: CheckTokenStatusUseCase;
   private refreshTokenUseCase: RefreshTokenAndUpdateTheDatabaseUseCase;
@@ -34,7 +33,7 @@ export class GoogleClassroomController {
   private addDocumentFromGoogleDriveUseCase: AddDocumentFromGoogleDriveUseCase;
 
   constructor(
-    googleClassroomService: GoogleClassroomService,
+    googleClassroomService: IGoogleClassroomService,
     fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase,
     checkTokenStatusUseCase: CheckTokenStatusUseCase,
     refreshTokenUseCase: RefreshTokenAndUpdateTheDatabaseUseCase,
@@ -42,7 +41,7 @@ export class GoogleClassroomController {
     getCoursesUseCase: GetCoursesUseCase,
     isConnectedUseCase: IsConnectedToGoogleClassroomUseCase,
     getCourseContentUseCase: GetCourseContentUseCase,
-    addDocumentFromGoogleDriveUseCase: AddDocumentFromGoogleDriveUseCase
+    addDocumentFromGoogleDriveUseCase: AddDocumentFromGoogleDriveUseCase,
   ) {
     this.googleClassroomService = googleClassroomService;
     this.fromCodeToDatabaseUseCase = fromCodeToDatabaseUseCase;
@@ -78,7 +77,7 @@ export class GoogleClassroomController {
 
   async callback(
     request: FastifyRequest<{ Querystring: GoogleCallbackQuery }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -92,6 +91,7 @@ export class GoogleClassroomController {
     }
 
     const { code, state } = request.query;
+    // we use state to check that this code is really sent by same url we set up earlier
 
     // Verify state parameter to prevent CSRF attacks
     const storedState = request.session.oauthState;
@@ -113,12 +113,14 @@ export class GoogleClassroomController {
     await this.fromCodeToDatabaseUseCase.execute(code);
 
     // Redirect back to client after successful connect
-    reply.redirect(`${process.env.FRONTEND_URL}/dashboard/documents`);
+    reply.redirect(
+      `${process.env.NODE_ENV === "development" ? "http://localhost:3001" : process.env.CLIENT_BASE_URL}`,
+    );
   }
 
   async refreshAccessToken(
     request: FastifyRequest,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -142,7 +144,7 @@ export class GoogleClassroomController {
 
   async checkTokenStatus(
     request: FastifyRequest,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -167,7 +169,7 @@ export class GoogleClassroomController {
 
   async disconnect(
     request: FastifyRequest,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -192,7 +194,7 @@ export class GoogleClassroomController {
 
   async getConnectionStatus(
     request: FastifyRequest,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -236,7 +238,7 @@ export class GoogleClassroomController {
   }
   async getCourseContent(
     request: FastifyRequest<{ Params: { courseId: string } }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -259,5 +261,4 @@ export class GoogleClassroomController {
       error: null,
     } satisfies GetCourseContentResponse);
   }
-  
 }

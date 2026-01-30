@@ -26,7 +26,7 @@ export class UserGoogleClassroomRepository
         refresh_token: tokens.refresh_token,
         scope: tokens.scope,
         token_type: tokens.token_type,
-        token_expiry: tokenExpiry.toISOString(),
+        token_expiry: tokenExpiry.toISOString(), //date of expiry
       });
     if (error) {
       this.logger.error({ error }, "Error saving Google Classroom tokens");

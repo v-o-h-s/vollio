@@ -20,7 +20,8 @@ import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
   // 1. Connect to Google Classroom (OAuth)
-  connectGoogleClassroom: builder.mutation<void, void>({
+  // 1. Connect to Google Classroom (OAuth)
+  connectGoogleClassroom: builder.query<void, void>({
     query: () => ({
       url: "/integrations/lms/google-classroom/connect",
       method: "GET",
