@@ -5,22 +5,19 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   console.log("Auth callback triggered");
   const { searchParams, origin } = new URL(request.url);
+  console.log("Auth callback params:", {
+    searchParams,
+    origin,
+  });
   const code = searchParams.get("code");
   // if "next" is in param, use it as the redirect URL
-  let next = searchParams.get("next") ?? "/documents";
+  let next = "/"
 
   console.log("Auth callback params:", {
     code: code ? "***" : null,
     next,
     origin,
   });
-
-  if (!next.startsWith("/")) {
-    // if "next" is not a relative URL, use the default
-    console.log("Invalid next param, resetting to /dashboard/documents");
-    next = "/documents";
-  }
-
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
