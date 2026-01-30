@@ -1,4 +1,8 @@
-import "dotenv/config";
+// Sentry instrumentation MUST be imported first, before any other modules
+// Note: dotenv/config is loaded inside instrument.ts to ensure env vars are available for Sentry.init()
+import "./instrument";
+import { Sentry } from "./instrument";
+
 import fastifyCookie from "@fastify/cookie";
 import fastifySession from "@fastify/session";
 import fastifyCors from "@fastify/cors";
@@ -36,6 +40,9 @@ export const app: FastifyInstance = Fastify({
     ignoreTrailingSlash: true,
   },
 });
+
+// Sentry error handler - must be registered early to catch all errors
+Sentry.setupFastifyErrorHandler(app);
 
 // MIDDLEWARE REGISTRATION
 app.register(fastifyCookie, {
@@ -157,6 +164,13 @@ app.setErrorHandler(errorHandler);
 
 // HEALTH CHECK ROUTES (public, no prefix)
 app.register(healthRoutes);
+
+// DEBUG ROUTE - Test Sentry integration (remove in production or protect with auth)
+if (process.env.NODE_ENV !== "production") {
+  app.get("/debug-sentry", async () => {
+    throw new Error("Test Sentry error - this is intentional!");
+  });
+}
 
 // API ROUTES
 app.register(noteRoutes, { prefix: "/api/v1/notes" });
