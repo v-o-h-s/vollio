@@ -7,7 +7,7 @@ export const authPlugin = fp(async (fastify) => {
   fastify.decorateRequest("user", null);
 
   // Public routes that don't require authentication
-  const PUBLIC_ROUTES = ["/", "/health", "/ready", "/live"];
+  const PUBLIC_ROUTES = ["/", "/health", "/ready", "/live", "/debug-sentry"];
 
   fastify.addHook("onRequest", async (req, reply) => {
     // Skip auth check for public routes
