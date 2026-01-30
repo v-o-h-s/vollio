@@ -8,6 +8,7 @@ import {
   CreateDocumentDto,
   NoteData,
 } from "@vollio/shared";
+import { apiSlice } from "../apiSlice";
 
 export interface TransformedDocument {
   id: string;
@@ -27,7 +28,7 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
       method: "GET",
     }),
     transformResponse: (
-      response: GetAllDocumentsResponse
+      response: GetAllDocumentsResponse,
     ): TransformedDocument[] => {
       if (!response.data) return [];
 
@@ -100,6 +101,27 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
         "Content-Type": undefined,
       },
     }),
+    async onQueryStarted(id, { dispatch, queryFulfilled }) {
+      const patchResult = dispatch(
+        apiSlice.util.updateQueryData(
+          "getAllDocuments" as any,
+          undefined,
+          (draft: any) => {
+            const index = draft.findIndex(
+              (doc: TransformedDocument) => doc.id === id,
+            );
+            if (index !== -1) {
+              draft.splice(index, 1);
+            }
+          },
+        ),
+      );
+      try {
+        await queryFulfilled;
+      } catch {
+        patchResult.undo();
+      }
+    },
     invalidatesTags: (_result, _error, id) => [
       { type: "Document", id: "LIST" },
       { type: "Document", id },
@@ -112,6 +134,25 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
       method: "PUT",
       body: { name },
     }),
+    async onQueryStarted({ id, name }, { dispatch, queryFulfilled }) {
+      const patchResult = dispatch(
+        apiSlice.util.updateQueryData(
+          "getAllDocuments" as any,
+          undefined,
+          (draft: any) => {
+            const doc = draft.find((d: TransformedDocument) => d.id === id);
+            if (doc) {
+              doc.name = name;
+            }
+          },
+        ),
+      );
+      try {
+        await queryFulfilled;
+      } catch {
+        patchResult.undo();
+      }
+    },
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Document", id: "LIST" },
       { type: "Document", id },
@@ -124,6 +165,25 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
       method: "PATCH",
       body: { folderId },
     }),
+    async onQueryStarted({ id, folderId }, { dispatch, queryFulfilled }) {
+      const patchResult = dispatch(
+        apiSlice.util.updateQueryData(
+          "getAllDocuments" as any,
+          undefined,
+          (draft: any) => {
+            const doc = draft.find((d: TransformedDocument) => d.id === id);
+            if (doc) {
+              doc.folderId = folderId;
+            }
+          },
+        ),
+      );
+      try {
+        await queryFulfilled;
+      } catch {
+        patchResult.undo();
+      }
+    },
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Document", id: "LIST" },
       { type: "Document", id },

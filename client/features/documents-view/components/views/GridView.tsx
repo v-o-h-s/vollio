@@ -134,10 +134,12 @@ export function GridView({
   if (folders.length === 0 && documents.length === 0) {
     return (
       <div
-        className="flex items-center justify-center h-64 text-muted-foreground"
+        className="grid bg-card/20 overflow-y-auto overflow-x-hidden h-[550px] grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-9 xl:grid-cols-10 gap-4 p-4 auto-rows-max shadow-xs border rounded-xl"
         onClick={onEmptyAreaClick}
       >
-        <p>No documents or folders</p>
+        <div className="col-span-full flex items-center justify-center h-full text-muted-foreground">
+          <p>No documents or folders</p>
+        </div>
       </div>
     );
   }
@@ -152,7 +154,7 @@ export function GridView({
           key={folder.id}
           folder={folder}
           isSelected={isItemSelected("folder", folder.id)}
-          isDraggedOver={dragOverFolderId === folder.id}
+          isDraggedOver={dragOverFolderId === `folder-${folder.id}`}
           onSelect={(e) => onItemSelect("folder", folder.id, e)}
           onOpen={() => onFolderOpen(folder.id)}
           allFolders={folders}

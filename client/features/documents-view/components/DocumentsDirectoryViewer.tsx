@@ -15,7 +15,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  closestCenter,
+  pointerWithin,
 } from "@dnd-kit/core";
 import { DocumentsToolbar } from "./DocumentsToolbar";
 import { Breadcrumb } from "./Breadcrumb";
@@ -68,12 +68,11 @@ export default function DocumentsDirectoryViewer() {
 
   // Local state management with custom hook
   const {
+   
     searchQuery,
     setSearchQuery,
     viewMode,
     setViewMode,
-    filters,
-    setFilters,
     currentFolder,
     setCurrentFolder,
     filteredDocuments,
@@ -195,13 +194,13 @@ export default function DocumentsDirectoryViewer() {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEndWithMove}
       onDragCancel={handleDragCancel}
     >
-      <div className="flex flex-col h-[700px] overflow-hidden rounded-xl p-4 ">
+      <div className="flex flex-col h-[700px] overflow-hidden rounded-xl p-4 container mx-auto">
         {/* Hidden Document Input */}
         <input
           type="file"
@@ -218,8 +217,6 @@ export default function DocumentsDirectoryViewer() {
             onSearchChange={setSearchQuery}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
-            filters={filters}
-            onFiltersChange={setFilters}
             classroomLabel={classroomLabel}
             onClassroomClick={() => setClassroomDialogOpen(true)}
             onUploadClick={handleUploadClick}
@@ -305,7 +302,7 @@ export default function DocumentsDirectoryViewer() {
       {/* Drag Overlay */}
       <DragOverlay>
         {activeItem && (
-          <div className=" flex flex-col justify-center items-center    rounded-lg shadow-lg w-[140px] opacity-90">
+          <div className="cursor-pointer flex flex-col justify-center items-center    rounded-lg shadow-lg w-[140px] opacity-90">
             <div className="w-full px-2">
               <div className="aspect-square  w-[90px] h-[90px] rounded-lg flex flex-col items-center justify-center mx-auto ">
                 {activeItem.type === "folder" ? (

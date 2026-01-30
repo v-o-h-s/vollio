@@ -104,7 +104,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
                 (f: any) => f.id === tempId,
               );
               if (index !== -1) {
-                draft.folders[index] = createdFolder;
+                // Remove the temp folder and add the real one
+                draft.folders.splice(index, 1, createdFolder);
               }
             },
           ),
@@ -112,6 +113,19 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
       } catch {
         patchResult.undo();
       }
+    },
+    transformResponse: (response: any) => {
+      if (!response.data) throw new Error("Failed to create folder");
+      const folder = response.data;
+      return {
+        id: folder.id,
+        user_id: folder.user_id,
+        name: folder.name,
+        parent_id: folder.parent_id,
+        created_at: folder.created_at,
+        updated_at: folder.updated_at,
+        document_count: 0,
+      };
     },
     invalidatesTags: ["Folder"],
   }),

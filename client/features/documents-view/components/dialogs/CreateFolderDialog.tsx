@@ -71,10 +71,11 @@ export function CreateFolderDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
+              className="cursor-pointer"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!name.trim() || isSubmitting}>
+            <Button type="submit" disabled={!name.trim() || isSubmitting} className="cursor-pointer">
               {isSubmitting ? "Creating..." : "Create"}
             </Button>
           </DialogFooter>

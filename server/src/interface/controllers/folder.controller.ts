@@ -17,7 +17,7 @@ import {
   GetFolderByIdResponse,
   DeleteFolderResponse,
   FolderData,
-} from '@vollio/shared';
+} from "@vollio/shared";
 
 export class FolderController {
   constructor(
@@ -25,7 +25,7 @@ export class FolderController {
     private createFolderUseCase: CreateFolderUseCase,
     private getFolderByIdUseCase: GetFolderByIdUseCase,
     private updateFolderUseCase: UpdateFolderUseCase,
-    private deleteFolderUseCase: DeleteFolderUseCase
+    private deleteFolderUseCase: DeleteFolderUseCase,
   ) {}
 
   /**
@@ -33,7 +33,7 @@ export class FolderController {
    */
   async getAllFolders(
     request: FastifyRequest,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -69,7 +69,7 @@ export class FolderController {
    */
   async createFolder(
     request: FastifyRequest<{ Body: CreateFolderDTO }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -82,13 +82,11 @@ export class FolderController {
       return;
     }
 
-   await this.createFolderUseCase.execute({
+    await this.createFolderUseCase.execute({
       userId,
       name: request.body.name,
       parentId: request.body.parentId,
     });
-
-   
 
     reply.status(201).send({
       success: true,
@@ -103,7 +101,7 @@ export class FolderController {
    */
   async getFolderById(
     request: FastifyRequest<{ Params: FolderIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -136,7 +134,7 @@ export class FolderController {
    */
   async updateFolder(
     request: FastifyRequest<{ Params: FolderIdParams; Body: UpdateFolderDTO }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -149,7 +147,7 @@ export class FolderController {
       return;
     }
 
-   await this.updateFolderUseCase.execute({
+    await this.updateFolderUseCase.execute({
       userId,
       folderId: request.params.id,
       name: request.body.name,
@@ -172,7 +170,7 @@ export class FolderController {
       Params: FolderIdParams;
       Querystring: DeleteFolderQuery;
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
