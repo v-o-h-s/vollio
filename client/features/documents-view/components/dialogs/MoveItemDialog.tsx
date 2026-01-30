@@ -104,10 +104,11 @@ export function MoveItemDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
+              className="cursor-pointer"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="cursor-pointer">
               {isSubmitting ? <><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /> Moving...</> : "Move"}
             </Button>
           </DialogFooter>

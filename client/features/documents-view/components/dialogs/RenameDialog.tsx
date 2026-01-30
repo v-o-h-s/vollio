@@ -81,12 +81,14 @@ export function RenameDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
+              className="cursor-pointer"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={!name.trim() || name === currentName || isSubmitting}
+              className="cursor-pointer"
             >
               {isSubmitting ? "Renaming..." : "Rename"}
             </Button>

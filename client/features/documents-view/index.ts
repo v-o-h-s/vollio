@@ -29,7 +29,6 @@ export { useDocumentsViewState } from "./hooks/useDocumentsViewState";
 export { useBreadcrumbNavigation } from "./hooks/useBreadcrumbNavigation";
 export { useContextMenu } from "./hooks/useContextMenu";
 export { useDragAndDrop } from "./hooks/useDragAndDrop";
-export { useDocumentExplorerShortcuts } from "./hooks/useDocumentExplorerShortcuts";
 export { useFolder } from "./hooks/useFolder";
 export { useDocument } from "./hooks/useDocument";
 

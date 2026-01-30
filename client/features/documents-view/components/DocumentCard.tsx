@@ -101,14 +101,14 @@ export function DocumentCard({
   return (
     <>
       <div
-        className={`relative group flex flex-col justify-center h-[140px] w-[140px] cursor-pointer transition-all hover:shadow-md hover:bg-muted/5 rounded-2xl ${
-          isSelected ? "bg-blue-50 dark:bg-blue-950 border-blue-500 " : ""
+        className={`relative group flex flex-col justify-center h-[140px] w-[140px] cursor-pointer transition-all hover:shadow-md hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-2xl ${
+          isSelected ? "bg-neutral-100 dark:bg-neutral-800 border-neutral-500 ring-1 ring-neutral-500" : ""
         }`}
         onClick={onSelect}
         onDoubleClick={onOpen}
       >
         <div className="flex flex-col items-center gap-4">
-          <IoDocumentTextSharp className="h-12 w-12 text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors" />
+          <IoDocumentTextSharp className="h-12 w-12 text-neutral-600 dark:text-neutral-400 group-hover:text-black dark:group-hover:text-white transition-colors" />
           <p
             className="text-sm text-center font-bold px-2 line-clamp-2 wrap-break-word w-full"
             title={name}

@@ -165,7 +165,7 @@ export function ClassroomImportDialog({
             <Button
               onClick={handleConnect}
               disabled={isChecking}
-              className="gap-2"
+              className="gap-2 cursor-pointer"
             >
               {isChecking && <Loader2 className="h-4 w-4 animate-spin" />}
               Connect Classroom
@@ -182,7 +182,7 @@ export function ClassroomImportDialog({
                   variant="ghost"
                   size="sm"
                   onClick={() => refetchCourses()}
-                  className="gap-1"
+                  className="gap-1 cursor-pointer"
                 >
                   <RefreshCcw className="h-4 w-4" />
                   Refresh
@@ -202,7 +202,7 @@ export function ClassroomImportDialog({
                           onClick={() => {
                             setSelectedCourseId(course.id);
                           }}
-                          className={`w-full text-left px-3 py-2 hover:bg-muted/50 transition ${
+                          className={`w-full text-left px-3 py-2 hover:bg-muted/50 transition cursor-pointer ${
                             selectedCourseId === course.id
                               ? "bg-primary/10"
                               : ""
@@ -253,7 +253,7 @@ export function ClassroomImportDialog({
                     variant="ghost"
                     size="sm"
                     onClick={() => refetchContent()}
-                    className="gap-1"
+                    className="gap-1 cursor-pointer"
                   >
                     <RefreshCcw className="h-4 w-4" />
                     Refresh
@@ -310,13 +310,13 @@ export function ClassroomImportDialog({
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => onOpenChange(false)}>
+                <Button variant="outline" onClick={() => onOpenChange(false)} className="cursor-pointer">
                   Cancel
                 </Button>
                 <Button
                   onClick={handleImport}
                   disabled={selectedMaterialIds.size === 0 || isImporting}
-                  className="gap-2"
+                  className="gap-2 cursor-pointer"
                 >
                   {isImporting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
