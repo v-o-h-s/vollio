@@ -166,11 +166,9 @@ app.setErrorHandler(errorHandler);
 app.register(healthRoutes);
 
 // DEBUG ROUTE - Test Sentry integration (remove in production or protect with auth)
-if (process.env.NODE_ENV !== "production") {
-  app.get("/debug-sentry", async () => {
-    throw new Error("Test Sentry error - this is intentional!");
-  });
-}
+app.get("/debug-sentry", async () => {
+  throw new Error("Test Sentry error - this is intentional!");
+});
 
 // API ROUTES
 app.register(noteRoutes, { prefix: "/api/v1/notes" });
