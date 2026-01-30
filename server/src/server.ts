@@ -31,6 +31,7 @@ const HOST = process.env.HOST || "0.0.0.0";
 // APP INITIALIZATION
 export const app: FastifyInstance = Fastify({
   logger: loggerConfig,
+  trustProxy: true,
   routerOptions: {
     ignoreTrailingSlash: true,
   },
@@ -88,7 +89,12 @@ app.register(fastifyCors, {
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With","Cookie"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Cookie",
+  ],
   exposedHeaders: ["Content-Range", "X-Content-Range"],
   maxAge: 86400, // 24 hours - browsers can cache preflight
 });
@@ -101,7 +107,7 @@ app.register(fastifyMultipart, {
 });
 
 // Register helmet for security headers
-app.register(fastifyHelmet, {
+app.register(fastifyHelmet, { 
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
@@ -122,6 +128,7 @@ app.register(fastifyHelmet, {
   },
   crossOriginEmbedderPolicy: false, // Required for PDF.js and external resources
   crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resources
+  frameguard: { action: "deny" },
 });
 
 // Register Awilix DI plugin first
