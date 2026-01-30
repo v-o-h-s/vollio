@@ -14,15 +14,7 @@ export const authPlugin = fp(async (fastify) => {
     if (PUBLIC_ROUTES.includes(req.url.split("?")[0])) {
       return;
     }
-    if (!req.cookies) {
-      reply.status(401).send({
-        success: false,
-        status: 401,
-        data: null,
-        error: { message: "Not authenticated, no cookies found" },
-      });
-      return;
-    }
+    
     const { supabase } = await createUserClient(req);
 
     // Verify the JWT token from the cookies
@@ -33,7 +25,7 @@ export const authPlugin = fp(async (fastify) => {
         success: false,
         status: 401,
         data: null,
-        error: { message: "Not authenticated" },
+        error: { message: "Not authenticated for fun" },
       });
       return;
     }
