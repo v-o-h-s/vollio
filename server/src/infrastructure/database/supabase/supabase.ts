@@ -7,8 +7,8 @@ import { FastifyRequest } from "fastify";
 export function createServiceClient() {
   return createClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );  
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
 }
 
 // User client: Created per-request with user's cookies
@@ -20,14 +20,25 @@ export async function createUserClient(req: FastifyRequest) {
     {
       cookies: {
         getAll: () => {
-          return Object.entries(req.cookies || {})
+          const cookies = Object.entries(req.cookies || {})
             .filter(([name]) => name.startsWith("sb-"))
             .map(([name, value]) => ({ name, value: value || "" }));
+
+          // Log which auth cookies we found (names only for security)
+          if (cookies.length === 0) {
+            req.log.debug("No supabase cookies found in getAll()");
+          } else {
+            req.log.debug({
+              msg: "Supabase cookies found",
+              names: cookies.map((c) => c.name),
+            });
+          }
+
+          return cookies;
         },
       },
-    }
+    },
   );
 
   return { supabase };
 }
-

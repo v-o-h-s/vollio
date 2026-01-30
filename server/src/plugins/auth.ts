@@ -14,18 +14,27 @@ export const authPlugin = fp(async (fastify) => {
     if (PUBLIC_ROUTES.includes(req.url.split("?")[0])) {
       return;
     }
-    
+
     const { supabase } = await createUserClient(req);
 
     // Verify the JWT token from the cookies
     const { data, error } = await supabase.auth.getClaims();
 
     if (error || !data || !data.claims) {
+      req.log.warn({
+        msg: "Auth failed in production check",
+        error,
+        dataExists: !!data,
+        claimsExist: !!data?.claims,
+        cookies: Object.keys(req.cookies || {}),
+        url: req.url,
+      });
+
       reply.status(401).send({
         success: false,
         status: 401,
         data: null,
-        error: { message: "Not authenticated for fun" },
+        error: { message: "Not authenticated" },
       });
       return;
     }
