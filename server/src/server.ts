@@ -52,6 +52,7 @@ app.register(fastifySession, {
     secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
     httpOnly: true, // Prevent XSS attacks
     maxAge: 1000 * 60 * 15, // 15 minutes (enough time for OAuth flow)
+    domain: process.env.NODE_ENV === "production" ? ".vollio.xyz" : undefined,
   },
   saveUninitialized: false, // Don't save empty sessions
 });
@@ -107,7 +108,7 @@ app.register(fastifyMultipart, {
 });
 
 // Register helmet for security headers
-app.register(fastifyHelmet, { 
+app.register(fastifyHelmet, {
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
