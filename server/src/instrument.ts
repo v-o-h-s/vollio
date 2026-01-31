@@ -53,12 +53,13 @@ Sentry.init({
     integrations: [
         // Capture Pino logger calls and send them to Sentry Logs
         // This works with Fastify's built-in Pino logger (req.log, app.log)
+        // Only sending warn/error/fatal to stay within free 5GB/month tier
         Sentry.pinoIntegration({
-            // Send these log levels to Sentry Logs dashboard
+            // Send only important log levels to Sentry Logs dashboard
             log: {
-                levels: ["info", "warn", "error", "fatal"],
+                levels: ["warn", "error", "fatal"],
             },
-            // Optionally capture error/fatal logs as Sentry error events too
+            // Capture error/fatal logs as Sentry error events too
             error: {
                 levels: ["error", "fatal"],
             },
@@ -76,7 +77,41 @@ Sentry.init({
         "ValidationError",
         // 404s are expected
         "NotFoundError",
+        // Authentication errors (user not logged in, expired token)
+        "AuthError",
+        // Network errors from client disconnects
+        "ECONNRESET",
+        "ECONNABORTED",
+        "EPIPE",
+        // Request aborted by client
+        "Request aborted",
+        "Client network socket disconnected",
     ],
+
+    // Deny URLs - ignore errors from bots, crawlers, browser extensions
+    denyUrls: [
+        // Browser extensions
+        /extensions\//i,
+        /^chrome:\/\//i,
+        /^chrome-extension:\/\//i,
+        /^moz-extension:\/\//i,
+    ],
+
+    // Filter out transactions you don't need to trace
+    tracesSampler: ({ name, attributes, parentSampled }) => {
+        // Always skip health check endpoints (high volume, low value)
+        if (name.includes("/health") || name.includes("/ready") || name.includes("/live")) {
+            return 0; // Don't trace
+        }
+
+        // Skip static assets if any
+        if (name.includes("/static") || name.includes("/assets")) {
+            return 0;
+        }
+
+        // Use the default sample rate for everything else
+        return Number(process.env.SENTRY_TRACES_SAMPLE_RATE) || 0.1;
+    },
 });
 
 export { Sentry };
