@@ -4,6 +4,8 @@
  * This file MUST be imported before any other modules to ensure
  * Sentry can properly instrument all dependencies.
  *
+ * Sentry is only enabled in PRODUCTION when SENTRY_DSN is configured.
+ *
  * @see https://docs.sentry.io/platforms/javascript/guides/fastify/
  */
 
@@ -12,10 +14,14 @@ import "dotenv/config";
 
 import * as Sentry from "@sentry/node";
 
-// Debug: Log whether Sentry is enabled
-const isSentryEnabled = !!process.env.SENTRY_DSN;
+const isProduction = process.env.NODE_ENV === "production";
+const isSentryEnabled = isProduction && !!process.env.SENTRY_DSN;
+
+// Debug: Log Sentry status
 if (isSentryEnabled) {
-    console.log("[Sentry] Initializing with DSN configured");
+    console.log("[Sentry] Initializing for production");
+} else if (!isProduction) {
+    console.log("[Sentry] Disabled in development environment");
 } else {
     console.log("[Sentry] DSN not configured - Sentry is disabled");
 }
@@ -33,18 +39,34 @@ Sentry.init({
     // Release version for tracking deployments
     release: process.env.SENTRY_RELEASE,
 
-    // Tracing sample rate: 1.0 = 100% of transactions
-    // In production, use a lower value (e.g., 0.1 = 10%) to reduce costs
-    tracesSampleRate:
-        Number(process.env.SENTRY_TRACES_SAMPLE_RATE) ||
-        (process.env.NODE_ENV === "production" ? 0.1 : 1.0),
+    // Tracing sample rate: 10% in production to reduce costs
+    tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE) || 0.1,
 
     // Include request headers, cookies, and user IP for debugging
     // Disable in regions with strict privacy requirements
     sendDefaultPii: true,
 
-    // Only enable Sentry when DSN is configured
-    enabled: !!process.env.SENTRY_DSN,
+    // Only enable Sentry in production when DSN is configured
+    enabled: isSentryEnabled,
+
+    // Integrations for additional Sentry features
+    integrations: [
+        // Capture Pino logger calls and send them to Sentry Logs
+        // This works with Fastify's built-in Pino logger (req.log, app.log)
+        Sentry.pinoIntegration({
+            // Send these log levels to Sentry Logs dashboard
+            log: {
+                levels: ["info", "warn", "error", "fatal"],
+            },
+            // Optionally capture error/fatal logs as Sentry error events too
+            error: {
+                levels: ["error", "fatal"],
+            },
+        }),
+    ],
+
+    // Enable logs to be sent to Sentry
+    enableLogs: true,
 
     // Ignore common expected errors that shouldn't create noise
     ignoreErrors: [
@@ -55,16 +77,6 @@ Sentry.init({
         // 404s are expected
         "NotFoundError",
     ],
-
-    // Before sending an error, you can modify or drop it
-    beforeSend(event, hint) {
-        // Log to console in development when Sentry is disabled
-        if (!process.env.SENTRY_DSN && process.env.NODE_ENV !== "production") {
-            console.log("[Sentry] Would have sent event:", event.message);
-            return null; // Don't send
-        }
-        return event;
-    },
 });
 
 export { Sentry };
