@@ -12,6 +12,7 @@ on:
       - "Dockerfile"
       - "docker-compose.yml"
       - ".github/workflows/backend-deploy.yml"
+      - "package-lock.json"
   workflow_dispatch: # Allow manual trigger
 
 env:
