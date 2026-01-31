@@ -49,7 +49,7 @@ app.register(fastifySession, {
     process.env.COOKIE_SECRET ||
     "dev-session-secret-change-in-production",
   cookie: {
-    secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
+    secure: process.env.NODE_ENV === "production", // Only send over HTTPS in prod
     httpOnly: true, // Prevent XSS attacks
     maxAge: 1000 * 60 * 15, // 15 minutes (enough time for OAuth flow)
     domain: process.env.NODE_ENV === "production" ? ".vollio.xyz" : undefined,
