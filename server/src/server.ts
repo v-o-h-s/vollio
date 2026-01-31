@@ -1,8 +1,4 @@
-// Sentry instrumentation MUST be imported first, before any other modules
-// Note: dotenv/config is loaded inside instrument.ts to ensure env vars are available for Sentry.init()
-import "./instrument";
-import { Sentry } from "./instrument";
-
+import "dotenv/config";
 import fastifyCookie from "@fastify/cookie";
 import fastifySession from "@fastify/session";
 import fastifyCors from "@fastify/cors";
@@ -40,9 +36,6 @@ export const app: FastifyInstance = Fastify({
     ignoreTrailingSlash: true,
   },
 });
-
-// Sentry error handler - must be registered early to catch all errors
-Sentry.setupFastifyErrorHandler(app);
 
 // MIDDLEWARE REGISTRATION
 app.register(fastifyCookie, {

@@ -1,5 +1,4 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import * as Sentry from "@sentry/node";
 import { ServerError } from "../errors/ServerError";
 import { DatabaseError } from "../errors/DatabaseError";
 import { ErrorObject } from "../types/error";
@@ -28,20 +27,6 @@ export function errorHandler(
       },
     };
 
-    // Capture database errors to Sentry (these are real problems)
-    Sentry.captureException(error, {
-      tags: {
-        errorType: "DatabaseError",
-        dbCode: error.code,
-      },
-      extra: {
-        url: req.url,
-        method: req.method,
-        userId: (req as any).user?.id,
-        ...errorObj.extra,
-      },
-    });
-
     // Log the error using the request logger for context
     req.log.error({ err: error, ...errorObj }, "Database Error Occurred");
 
@@ -64,19 +49,6 @@ export function errorHandler(
       statusCode: statusCode,
       extra: {},
     };
-
-    // Capture server errors to Sentry
-    Sentry.captureException(error, {
-      tags: {
-        errorType: "ServerError",
-        subType: error.subType,
-      },
-      extra: {
-        url: req.url,
-        method: req.method,
-        userId: (req as any).user?.id,
-      },
-    });
 
     req.log.error({ err: error }, "Server Error Occurred");
 
@@ -171,21 +143,6 @@ export function errorHandler(
       extra: error.body || {},
     };
 
-    // Capture VoyageAI errors to Sentry (external service issues)
-    Sentry.captureException(error, {
-      tags: {
-        errorType: "VoyageAIError",
-        service: "embedding",
-      },
-      extra: {
-        url: req.url,
-        method: req.method,
-        userId: (req as any).user?.id,
-        statusCode: error.statusCode,
-        body: error.body,
-      },
-    });
-
     req.log.error({ err: error }, "VoyageAI Error Occurred");
 
     return res.status(error.statusCode || 500).send({
@@ -197,20 +154,6 @@ export function errorHandler(
   }
 
   // Handle unexpected errors
-  // Capture unexpected errors to Sentry (these are critical)
-  Sentry.captureException(error, {
-    tags: {
-      errorType: "UnexpectedError",
-    },
-    extra: {
-      url: req.url,
-      method: req.method,
-      userId: (req as any).user?.id,
-      originalName: error.name,
-      originalMessage: error.message,
-    },
-  });
-
   req.log.error({ err: error }, "Unexpected Error Occurred");
 
   const statusCode = error.statusCode || 500;
