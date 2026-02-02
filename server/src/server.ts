@@ -30,7 +30,7 @@ const HOST = process.env.HOST || "0.0.0.0";
 
 // APP INITIALIZATION
 // In development, use loggerConfig (pino-pretty transport)
-// In production, use logger instance directly (pino-seq stream)
+// In production, use logger instance directly (JSON output)
 const isDev = process.env.NODE_ENV !== "production";
 
 export const app: FastifyInstance = Fastify({
