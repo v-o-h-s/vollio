@@ -7,7 +7,7 @@ import fastifyHelmet from "@fastify/helmet";
 import Fastify from "fastify";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { containerPlugin } from "./plugins/container";
-import { logger, loggerConfig } from "./shared/utils/logger";
+import { loggerConfig } from "./shared/utils/logger";
 import { authPlugin } from "./plugins/auth";
 import { errorHandler } from "./shared/utils/errorHandler";
 import { noteRoutes } from "./interface/routes/note.route";
@@ -29,12 +29,9 @@ const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
 
 // APP INITIALIZATION
-// In development, use loggerConfig (pino-pretty transport)
-// In production, use logger instance directly (JSON output)
-const isDev = process.env.NODE_ENV !== "production";
-
+// Always use loggerConfig - Fastify only accepts configuration objects, not logger instances
 export const app: FastifyInstance = Fastify({
-  logger: isDev ? loggerConfig : logger,
+  logger: loggerConfig,
   trustProxy: true,
   routerOptions: {
     ignoreTrailingSlash: true,
