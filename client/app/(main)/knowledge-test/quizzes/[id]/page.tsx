@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
-  Clock,
   BookOpen,
   CheckCircle,
   XCircle,
@@ -57,32 +56,9 @@ export default function QuizDetailPage() {
     Record<string, UserAnswer>
   >({});
   const [showResults, setShowResults] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+
   const [quizStarted, setQuizStarted] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
-
-  // Initialize timer when quiz starts
-  useEffect(() => {
-    if (quizStarted && quiz?.settings.timeLimitMinutes && timeLeft === null) {
-      setTimeLeft(quiz.settings.timeLimitMinutes * 60);
-    }
-  }, [quizStarted, quiz, timeLeft]);
-
-  // Timer countdown
-  useEffect(() => {
-    if (quizStarted && timeLeft !== null && timeLeft > 0 && !showResults) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && !showResults && quizStarted) {
-      handleSubmitQuiz();
-    }
-  }, [timeLeft, quizStarted, showResults]);
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
 
   const handleAnswerSelect = (questionId: string, answer: UserAnswer) => {
     setSelectedAnswers((prev) => ({
@@ -253,15 +229,7 @@ export default function QuizDetailPage() {
                     Questions
                   </div>
                 </div>
-                <div className="h-8 w-px bg-border/40" />
-                <div className="flex flex-col items-center gap-1">
-                  <div className="text-2xl font-bold">
-                    {quiz.settings.timeLimitMinutes || "∞"}
-                  </div>
-                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    Minutes
-                  </div>
-                </div>
+
                 <div className="h-8 w-px bg-border/40" />
                 <div className="flex flex-col items-center gap-1">
                   <div className="text-2xl font-bold capitalize">
@@ -331,11 +299,6 @@ export default function QuizDetailPage() {
                 setShowResults(false);
                 setCurrentQuestionIndex(0);
                 setSelectedAnswers({});
-                setTimeLeft(
-                  quiz.settings.timeLimitMinutes
-                    ? quiz.settings.timeLimitMinutes * 60
-                    : null
-                );
               }}
               className="rounded-full font-bold"
             >
@@ -354,7 +317,7 @@ export default function QuizDetailPage() {
                 let isCorrect = false;
                 if (q.type === QuizQuestionsTypeEnum.MCQ) {
                   isCorrect = !!(q as MCQQuestion).correctOptionIds?.includes(
-                    userAnswer as string
+                    userAnswer as string,
                   );
                 } else {
                   isCorrect =
@@ -369,7 +332,7 @@ export default function QuizDetailPage() {
                     className={cn(
                       "w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ring-offset-4 ring-offset-background",
                       isCurrent ? "ring-2 ring-foreground scale-125" : "",
-                      isCorrect ? "bg-emerald-500" : "bg-rose-500"
+                      isCorrect ? "bg-emerald-500" : "bg-rose-500",
                     )}
                     title={`Question ${idx + 1}`}
                   />
@@ -408,8 +371,8 @@ export default function QuizDetailPage() {
                           isCorrect
                             ? "border-emerald-500/50 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400"
                             : isSelected && !isCorrect
-                            ? "border-rose-500/50 bg-rose-500/5 text-rose-700 dark:text-rose-400 opacity-80"
-                            : "border-transparent bg-muted/20 text-muted-foreground opacity-50"
+                              ? "border-rose-500/50 bg-rose-500/5 text-rose-700 dark:text-rose-400 opacity-80"
+                              : "border-transparent bg-muted/20 text-muted-foreground opacity-50",
                         )}
                       >
                         <div className="flex items-center justify-between gap-3">
@@ -420,8 +383,8 @@ export default function QuizDetailPage() {
                                 isCorrect
                                   ? "bg-emerald-500"
                                   : isSelected
-                                  ? "bg-rose-500"
-                                  : "bg-muted-foreground/30"
+                                    ? "bg-rose-500"
+                                    : "bg-muted-foreground/30",
                               )}
                             />
                             {option.text}
@@ -451,8 +414,8 @@ export default function QuizDetailPage() {
                             isCorrect
                               ? "border-emerald-500/50 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400"
                               : isSelected && !isCorrect
-                              ? "border-rose-500/50 bg-rose-500/5 text-rose-700 dark:text-rose-400 opacity-80"
-                              : "border-transparent bg-muted/20 text-muted-foreground opacity-50"
+                                ? "border-rose-500/50 bg-rose-500/5 text-rose-700 dark:text-rose-400 opacity-80"
+                                : "border-transparent bg-muted/20 text-muted-foreground opacity-50",
                           )}
                         >
                           {val ? "True" : "False"}
@@ -503,7 +466,7 @@ export default function QuizDetailPage() {
                   variant="ghost"
                   onClick={() =>
                     setCurrentQuestionIndex((prev) =>
-                      Math.min(quiz.questions.length - 1, prev + 1)
+                      Math.min(quiz.questions.length - 1, prev + 1),
                     )
                   }
                   disabled={currentQuestionIndex === quiz.questions.length - 1}
@@ -551,21 +514,7 @@ export default function QuizDetailPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            {timeLeft !== null && (
-              <div
-                className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-full font-mono text-sm border font-medium transition-colors",
-                  timeLeft < 300
-                    ? "bg-red-50 border-red-200 text-red-600 animate-pulse"
-                    : "bg-muted/50 border-border text-foreground"
-                )}
-              >
-                <Clock className="w-4 h-4" />
-                {formatTime(timeLeft)}
-              </div>
-            )}
-          </div>
+          <div className="flex items-center gap-4"></div>
         </div>
         <Progress value={progress} className="h-1 w-full rounded-none" />
       </header>
@@ -588,8 +537,8 @@ export default function QuizDetailPage() {
                     isCurrent
                       ? "bg-primary ring-2 ring-primary scale-125"
                       : isAnswered
-                      ? "bg-primary/40 hover:bg-primary/60"
-                      : "bg-muted hover:bg-muted-foreground/30"
+                        ? "bg-primary/40 hover:bg-primary/60"
+                        : "bg-muted hover:bg-muted-foreground/30",
                   )}
                   title={`Question ${idx + 1}`}
                 />
@@ -625,7 +574,7 @@ export default function QuizDetailPage() {
                         "w-full p-4 text-left rounded-xl transition-all duration-300 border-2 text-base font-medium cursor-pointer",
                         isSelected
                           ? "border-primary bg-primary/5 text-foreground shadow-sm"
-                          : "border-transparent bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground"
+                          : "border-transparent bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground",
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -634,7 +583,7 @@ export default function QuizDetailPage() {
                             "w-1.5 h-1.5 rounded-full transition-all duration-300",
                             isSelected
                               ? "bg-primary scale-150"
-                              : "bg-muted-foreground/30"
+                              : "bg-muted-foreground/30",
                           )}
                         />
                         {option.text}
@@ -656,7 +605,7 @@ export default function QuizDetailPage() {
                             ? val
                               ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-600 shadow-sm"
                               : "border-rose-500/30 bg-rose-500/5 text-rose-600 shadow-sm"
-                            : "border-transparent bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground"
+                            : "border-transparent bg-muted/20 hover:bg-muted/40 text-muted-foreground hover:text-foreground",
                         )}
                       >
                         {val ? "True" : "False"}

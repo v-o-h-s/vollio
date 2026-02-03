@@ -25,7 +25,6 @@ type PromptResult = {
     numberOfQuestions: number | "auto";
     distribution: NormalizedDistribution;
     explanationLevel: string | null;
-    timeLimitMinutes: number | "auto";
   };
 };
 
@@ -46,7 +45,7 @@ const sanitize = (s?: string) => {
  */
 const normalizeDistribution = (
   d?: Partial<Record<QuizQuestionsTypeEnum, number>>,
-  totalQuestions?: number
+  totalQuestions?: number,
 ): NormalizedDistribution => {
   if (
     !d ||
@@ -92,17 +91,9 @@ const normalizeDistribution = (
 
 // ------------------------------------------------------------------------
 
-export const refineUserPrompt = (userPrompt?: string): string => {
-  const text = sanitize(userPrompt);
-  if (!text) return "Generate a quiz based on the content provided.";
-
-  return `Refine the following user intent into a single clear instruction for a quiz generator:\nUser intent: "${text}"\nResult:`;
-};
-
 export const quizPromptGenerator = (data: CreateQuizDTO): PromptResult => {
-  const refinedUserPromptText = data.userPrompt
-    ? refineUserPrompt(data.userPrompt)
-    : "Generate a quiz based on the content provided.";
+  const refinedUserPromptText =
+    "Generate a quiz based on the content provided.";
 
   const language = data.language || null;
   const difficulty = data.difficultyLevel || null;
@@ -113,14 +104,9 @@ export const quizPromptGenerator = (data: CreateQuizDTO): PromptResult => {
       ? Math.floor(data.numberOfQuestions)
       : "auto";
 
-  const timeLimitMinutes: number | "auto" =
-    typeof data.timeLimitMinutes === "number" && data.timeLimitMinutes > 0
-      ? Math.floor(data.timeLimitMinutes)
-      : "auto";
-
   const distribution = normalizeDistribution(
     data.questionsDistribution,
-    typeof numberOfQuestions === "number" ? numberOfQuestions : undefined
+    typeof numberOfQuestions === "number" ? numberOfQuestions : undefined,
   );
 
   const rules = [
@@ -150,7 +136,7 @@ export const quizPromptGenerator = (data: CreateQuizDTO): PromptResult => {
     - Language: ${language ?? "auto-detect (en, fr, ar)"}
     - Difficulty: ${difficulty ?? "auto (easy, medium, hard)"}
     - Total questions: ${numberOfQuestions}
-    - Time limit (minutes): ${timeLimitMinutes}
+
     - Question distribution: ${distributionText}
     - Explanation level: ${explanationLevel ?? "none"}
 
@@ -185,7 +171,7 @@ export const quizPromptGenerator = (data: CreateQuizDTO): PromptResult => {
       "settings": {
         "difficultyLevel": "easy" | "medium" | "hard",
         "numberOfQuestions": number,
-        "timeLimitMinutes": number,
+
         "explanationLevel": "none" | "brief" | "detailed"
       },
       "language": "en" | "fr" | "ar",
@@ -201,7 +187,6 @@ export const quizPromptGenerator = (data: CreateQuizDTO): PromptResult => {
       numberOfQuestions,
       distribution,
       explanationLevel,
-      timeLimitMinutes,
     },
   };
 };

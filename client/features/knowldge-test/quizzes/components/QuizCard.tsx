@@ -49,7 +49,7 @@ export function QuizCard({
 }) {
   const difficulty = q.settings.difficultyLevel || "Medium";
   const questionCount = q.settings.numberOfQuestions || q.questions.length || 0;
-  const timeEstimate = q.settings.timeLimitMinutes || questionCount * 1.5;
+  const timeEstimate = questionCount * 1.5;
 
   return (
     <Card
@@ -77,7 +77,7 @@ export function QuizCard({
             variant="outline"
             className={cn(
               "px-2.5 py-0.5 text-xs font-medium tracking-wide border",
-              getDifficultyColor(difficulty)
+              getDifficultyColor(difficulty),
             )}
           >
             {difficulty}
@@ -118,10 +118,7 @@ export function QuizCard({
           <div className="text-sm font-semibold text-muted-foreground">
             <span className="text-foreground">{questionCount}</span> Questions
           </div>
-          <Link
-            href={`/knowledge-test/quizzes/${q.id}`}
-            className="block"
-          >
+          <Link href={`/knowledge-test/quizzes/${q.id}`} className="block">
             <Button
               size="sm"
               className="rounded-full pl-4 pr-5 bg-indigo-600/90 hover:bg-indigo-600 text-white shadow-md hover:shadow-indigo-500/20 transition-all duration-300"

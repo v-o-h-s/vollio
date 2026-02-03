@@ -10,13 +10,12 @@ Generates a new quiz from a document.
 - **Method**: `POST`
 - **Auth Required**: Yes
 - **Body Parameters**:
-
   - `documentId` (string, required): UUID of the document
   - `difficultyLevel` (string, required): "easy", "medium", or "hard"
   - `userPrompt` (string, optional): Guide for generation
   - `numberOfQuestions` (number, optional): Total questions (1-44)
   - `language` (string, optional): "en", "fr", or "ar"
-  - `timeLimitMinutes` (number, optional): Time limit in minutes
+
   - `explanationLevel` (string, optional): "none", "brief", or "detailed"
   - `questionsDistribution` (object, optional):
     - `mcq` (number): Number of MCQs
@@ -25,6 +24,7 @@ Generates a new quiz from a document.
 - **Success Response**:
   - **Code**: 200 OK
   - **Content**:
+
     ```json
     {
       "success": true,
@@ -37,7 +37,7 @@ Generates a new quiz from a document.
         "settings": {
             "difficultyLevel": "string",
             "numberOfQuestions": number,
-            "timeLimitMinutes": number,
+
             "explanationLevel": "string"
         },
         "questions": [...],
@@ -45,6 +45,7 @@ Generates a new quiz from a document.
       }
     }
     ```
+
   - **Error Responses**:
     - **Code**: 401 Unauthorized
       ```json
@@ -74,7 +75,6 @@ Retrieves all quizzes for the authenticated user. Note: Question details are typ
 - **Auth Required**: Yes
 
 - **Success Response**:
-
   - **Code**: 200 OK
   - **Content**:
     ```json
@@ -105,11 +105,9 @@ Retrieves a specific quiz with all its questions and options.
 - **Method**: `GET`
 - **Auth Required**: Yes
 - **URL Parameters**:
-
   - `id` (string): The UUID of the quiz
 
 - **Success Response**:
-
   - **Code**: 200 OK
   - **Content**:
     ```json
@@ -136,11 +134,9 @@ Deletes a quiz and all associated questions and metadata.
 - **Method**: `DELETE`
 - **Auth Required**: Yes
 - **URL Parameters**:
-
   - `id` (string): The UUID of the quiz
 
 - **Success Response**:
-
   - **Code**: 200 OK
   - **Content**:
     ```json

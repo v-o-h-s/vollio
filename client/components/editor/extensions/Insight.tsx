@@ -38,7 +38,7 @@ export const InsightComponent = (props: any) => {
           "relative rounded-2xl border border-border",
           "bg-card/50 dark:bg-card/20",
           "p-6 shadow-sm transition-all duration-300",
-          "hover:shadow-md hover:border-primary/30"
+          "hover:shadow-md hover:border-primary/30",
         )}
       >
         {/* Subtle decorative background */}
@@ -65,7 +65,7 @@ export const InsightComponent = (props: any) => {
               {editor.isEditable && (
                 <button
                   onClick={deleteNode}
-                  className="opacity-0 group-hover/insight:opacity-100 transition-opacity p-1.5 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg"
+                  className="opacity-0 group-hover/insight:opacity-100 transition-opacity p-1.5 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-lg cursor-pointer"
                   title="Remove insight"
                 >
                   <svg
@@ -100,7 +100,7 @@ export const InsightComponent = (props: any) => {
             className={cn(
               "insight-content",
               "text-foreground/90 font-normal leading-relaxed",
-              "focus:outline-none"
+              "focus:outline-none",
             )}
           />
         </div>

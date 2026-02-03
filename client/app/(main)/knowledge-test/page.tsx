@@ -21,7 +21,6 @@ type Section = "quizzes" | "flashcards";
 import {
   useGetAllQuizzesQuery,
   useDeleteQuizMutation,
-  useGetAllDocumentsQuery,
   useGetAllFlashCardsSetsQuery,
   useDeleteFlashCardsSetMutation,
 } from "@/lib/store/apiSlice";
@@ -29,7 +28,6 @@ import {
 export default function KnowledgeTestPage() {
   const { data: quizzesData, isLoading: isLoadingQuizzes } =
     useGetAllQuizzesQuery();
-  const { data: documentsData } = useGetAllDocumentsQuery();
   const [deleteQuiz] = useDeleteQuizMutation();
 
   const { data: flashcardsData, isLoading: isLoadingFlashcards } =
@@ -37,18 +35,6 @@ export default function KnowledgeTestPage() {
   const [deleteFlashcardSet] = useDeleteFlashCardsSetMutation();
 
   const [section, setSection] = useState<Section>("quizzes");
-
-  const documentsMap = useMemo(() => {
-    const map = new Map<string, string>();
-    documentsData?.forEach((document) => map.set(document.id, document.name));
-    return map;
-  }, [documentsData]);
-
-  // Clean up the mapped data to match what the cards EXPECT
-  const mappedFlashcards = useMemo(() => {
-    if (!flashcardsData) return [];
-    return flashcardsData;
-  }, [flashcardsData]);
 
   return (
     <div className="space-y-8 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">

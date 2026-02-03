@@ -134,17 +134,17 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
       className={cn(
         "fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-out",
         isVisible ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0",
-        className
+        className,
       )}
     >
       {/* Main Navigation Bar */}
       <div
         className={cn(
           "relative floating-nav-glass rounded-2xl shadow-2xl transition-all duration-500 ease-out theme-transition",
-          "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-r before:from-white/10 before:to-transparent before:pointer-events-none",
+          "before:absolute before:inset-0 before:rounded-2xl before:bg-linear-to-r before:from-white/10 before:to-transparent before:pointer-events-none",
           "backdrop-blur-xl bg-background/80 border border-border/50",
           isExpanded ? "px-4 py-3 scale-105" : "px-3 py-2 scale-100",
-          "floating-nav-enter transform-gpu"
+          "floating-nav-enter transform-gpu",
         )}
       >
         {/* Collapsed State - Floating Dock */}
@@ -153,7 +153,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
             {/* Logo/Brand */}
             <button
               onClick={() => setIsExpanded(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 transition-all duration-300 group hover:scale-105 active:scale-95"
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 hover:bg-primary/20 transition-all duration-300 group hover:scale-105 active:scale-95 cursor-pointer"
             >
               <div className="relative">
                 <Image
@@ -186,7 +186,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                       "hover:backdrop-blur-sm hover:shadow-lg transform-gpu",
                       isActive
                         ? "bg-primary text-primary-foreground shadow-lg scale-110"
-                        : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground nav-icon-scale hover:scale-110"
+                        : "bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground nav-icon-scale hover:scale-110",
                     )}
                     title={item.name}
                   >
@@ -202,7 +202,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
             {/* User Avatar */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="relative p-1 rounded-xl bg-muted/50 hover:bg-muted transition-all duration-200 group">
+                <button className="relative p-1 rounded-xl bg-muted/50 hover:bg-muted transition-all duration-200 group cursor-pointer">
                   {!isLoaded ? (
                     <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                       <User className="w-4 h-4 text-primary-foreground" />
@@ -351,7 +351,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                       "hover:scale-105 hover:shadow-lg hover:backdrop-blur-sm",
                       isActive
                         ? "bg-primary text-primary-foreground border-transparent shadow-lg scale-105"
-                        : "bg-card/50 hover:bg-card border-border/50 hover:border-border"
+                        : "bg-card/50 hover:bg-card border-border/50 hover:border-border",
                     )}
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
@@ -359,7 +359,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                       <div
                         className={cn(
                           "p-2 rounded-lg transition-colors",
-                          isActive ? "bg-primary-foreground/10" : "bg-muted"
+                          isActive ? "bg-primary-foreground/10" : "bg-muted",
                         )}
                       >
                         <Icon
@@ -367,7 +367,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                             "w-5 h-5",
                             isActive
                               ? "text-primary-foreground"
-                              : "text-muted-foreground"
+                              : "text-muted-foreground",
                           )}
                         />
                       </div>
@@ -377,7 +377,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                             "font-semibold text-sm",
                             isActive
                               ? "text-primary-foreground"
-                              : "text-foreground"
+                              : "text-foreground",
                           )}
                         >
                           {item.name}
@@ -387,7 +387,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
                             "text-xs",
                             isActive
                               ? "text-primary-foreground/70"
-                              : "text-muted-foreground"
+                              : "text-muted-foreground",
                           )}
                         >
                           {item.description}

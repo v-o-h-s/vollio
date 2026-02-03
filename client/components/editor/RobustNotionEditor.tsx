@@ -62,7 +62,7 @@ export function RobustNotionEditor({
       <div
         className={cn(
           "flex flex-col items-center justify-center p-8 text-center",
-          className
+          className,
         )}
       >
         <div className="max-w-md space-y-4">
@@ -76,7 +76,7 @@ export function RobustNotionEditor({
           {canRetry && (
             <button
               onClick={handleRetry}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
             >
               Retry ({retryCount}/3)
             </button>
@@ -98,7 +98,7 @@ export function RobustNotionEditor({
         <div
           className={cn(
             "flex flex-col items-center justify-center p-8",
-            className
+            className,
           )}
         >
           <div className="text-center space-y-4">
@@ -110,7 +110,7 @@ export function RobustNotionEditor({
             </div>
             <button
               onClick={handleRetry}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
             >
               Restart Editor
             </button>

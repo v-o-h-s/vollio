@@ -246,7 +246,7 @@ function SlashCommandList({
           return (
             <button
               key={index}
-              className={`flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors ${
+              className={`flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer ${
                 index === selectedIndex
                   ? "bg-accent text-accent-foreground"
                   : ""
@@ -331,12 +331,12 @@ export const slashCommandSuggestion = {
 
     const updateSelectedIndex = (
       newIndex: number,
-      items: SlashCommandItem[]
+      items: SlashCommandItem[],
     ) => {
       const itemCount = Array.isArray(items) ? items.length : 0;
       selectedIndex = Math.max(
         0,
-        Math.min(newIndex, Math.max(0, itemCount - 1))
+        Math.min(newIndex, Math.max(0, itemCount - 1)),
       );
       if (component && typeof component.updateProps === "function") {
         component.updateProps({ selectedIndex });

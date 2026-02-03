@@ -62,7 +62,8 @@ const PRESET_COLORS = [
 
 export function TagManagement() {
   const { data: settings, isLoading, isError } = useGetSettingsQuery();
-  const [updateSettings, { isLoading: isUpdating }] = useUpdateSettingsMutation();
+  const [updateSettings, { isLoading: isUpdating }] =
+    useUpdateSettingsMutation();
   const [countUsage] = useLazyCountHighlightsByTagQuery();
   const [deleteHighlightsByTag] = useDeleteHighlightsByTagMutation();
 
@@ -83,7 +84,11 @@ export function TagManagement() {
     if (!newTagLabel.trim() || !settings) return;
 
     // Check if tag with same label already exists
-    if (settings.tags.some(t => t.label.toLowerCase() === newTagLabel.trim().toLowerCase())) {
+    if (
+      settings.tags.some(
+        (t) => t.label.toLowerCase() === newTagLabel.trim().toLowerCase(),
+      )
+    ) {
       toast.error("A tag with this label already exists.");
       return;
     }
@@ -111,13 +116,13 @@ export function TagManagement() {
 
   const handleDeleteClick = async (tag: Tag) => {
     if (!settings) return;
-    
+
     try {
       // Check usage
       const result = await countUsage(tag.label).unwrap();
       setUsageCount(result.count);
       setTagToDelete(tag);
-      
+
       if (result.count > 0) {
         setDeleteConfirmOpen(true);
       } else {
@@ -138,13 +143,13 @@ export function TagManagement() {
       if (usageCount > 0) {
         await deleteHighlightsByTag(tag.label).unwrap();
       }
-      
+
       // 2. Remove tag from settings
       await updateSettings({
         ...settings,
         tags: settings.tags.filter((t) => t.id !== tag.id),
       }).unwrap();
-      
+
       setDeleteConfirmOpen(false);
       setTagToDelete(null);
       toast.success("Tag deleted successfully");
@@ -175,7 +180,7 @@ export function TagManagement() {
         tags: settings.tags.map((t) =>
           t.id === tagId
             ? { ...t, label: editTagLabel.trim(), color: editTagColor }
-            : t
+            : t,
         ),
       }).unwrap();
       setEditingTagId(null);
@@ -219,8 +224,8 @@ export function TagManagement() {
               Manage tags for your document highlights and notes.
             </CardDescription>
           </div>
-          
-          <Button 
+
+          <Button
             className="rounded-xl gap-2 shadow-lg shadow-primary/20"
             onClick={() => setIsAddDialogOpen(true)}
           >
@@ -228,13 +233,9 @@ export function TagManagement() {
             Add Tag
           </Button>
 
-                    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-
-                      <DialogContent className="rounded-2xl border-none shadow-2xl sm:max-w-[425px] w-[95vw]">
-
-                        <DialogHeader>
-
-          
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogContent className="rounded-2xl border-none shadow-2xl sm:max-w-[425px] w-[95vw]">
+              <DialogHeader>
                 <DialogTitle>Create New Tag</DialogTitle>
                 <DialogDescription>
                   Choose a label and color for your new highlight tag.
@@ -258,7 +259,7 @@ export function TagManagement() {
                       <button
                         key={color}
                         type="button"
-                        className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 ${
+                        className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 cursor-pointer ${
                           newTagColor === color
                             ? "border-primary"
                             : "border-transparent"
@@ -283,7 +284,9 @@ export function TagManagement() {
                   disabled={!newTagLabel.trim() || isUpdating}
                   className="rounded-xl"
                 >
-                  {isUpdating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  {isUpdating && (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  )}
                   Create Tag
                 </Button>
               </DialogFooter>
@@ -357,7 +360,7 @@ export function TagManagement() {
                             <button
                               key={color}
                               type="button"
-                              className={`w-5 h-5 rounded-full border transition-transform hover:scale-110 ${
+                              className={`w-5 h-5 rounded-full border transition-transform hover:scale-110 cursor-pointer ${
                                 editTagColor === color
                                   ? "border-primary"
                                   : "border-transparent"
@@ -374,7 +377,9 @@ export function TagManagement() {
                           className="w-4 h-4 rounded-full shadow-sm"
                           style={{ backgroundColor: tag.color }}
                         />
-                        <span className="font-semibold text-sm">{tag.label}</span>
+                        <span className="font-semibold text-sm">
+                          {tag.label}
+                        </span>
                       </>
                     )}
                   </div>
@@ -432,11 +437,13 @@ export function TagManagement() {
       <ConfirmationDialog
         open={deleteConfirmOpen}
         title="Delete Tag & Highlights?"
-        message={`The tag "${tagToDelete?.label}" is currently used in ${usageCount} highlight${usageCount > 1 ? 's' : ''}.`}
+        message={`The tag "${tagToDelete?.label}" is currently used in ${usageCount} highlight${usageCount > 1 ? "s" : ""}.`}
         description="Deleting this tag will also permanently delete all associated highlights. This action cannot be undone."
         confirmText="Delete Tag and Highlights"
         cancelText="Cancel"
-        onConfirm={() => { if (tagToDelete) performDelete(tagToDelete); }}
+        onConfirm={() => {
+          if (tagToDelete) performDelete(tagToDelete);
+        }}
         onCancel={() => setDeleteConfirmOpen(false)}
         style="destructive"
         isLoading={isDeleting}

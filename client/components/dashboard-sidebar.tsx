@@ -113,7 +113,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
       {/* Mobile Menu Button */}
       <button
         onClick={toggleMobile}
-        className="fixed top-6 left-6 z-50 flex lg:hidden items-center justify-center w-10 h-10 bg-background border border-border rounded-lg shadow-sm text-foreground"
+        className="fixed top-6 left-6 z-50 flex lg:hidden items-center justify-center w-10 h-10 bg-background border border-border rounded-lg shadow-sm text-foreground cursor-pointer"
       >
         {isMobileOpen ? <X size={16} /> : <Menu size={16} />}
       </button>
@@ -128,7 +128,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
           // Mobile styles with transform transition
           "w-64 transition-transform duration-300 ease-out",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
-          className
+          className,
         )}
         style={{
           minWidth: isCollapsed ? "4rem" : "16rem",
@@ -139,13 +139,13 @@ export function DashboardSidebar({ className }: SidebarProps) {
         <div
           className={cn(
             "border-b border-sidebar-border transition-[padding] duration-300 ease-out",
-            isCollapsed ? "px-2 py-8" : "px-6 py-8"
+            isCollapsed ? "px-2 py-8" : "px-6 py-8",
           )}
         >
           <div
             className={cn(
               "flex items-center",
-              isCollapsed ? "justify-center" : "justify-between"
+              isCollapsed ? "justify-center" : "justify-between",
             )}
           >
             {isCollapsed ? (
@@ -153,7 +153,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
               <button
                 onClick={toggleCollapse}
                 title="Expand sidebar"
-                className="w-8 h-8 bg-sidebar-accent rounded-xl flex items-center justify-center shadow-lg hover:bg-sidebar-accent/80 transition-colors duration-200"
+                className="w-8 h-8 bg-sidebar-accent rounded-xl flex items-center justify-center shadow-lg hover:bg-sidebar-accent/80 transition-colors duration-200 cursor-pointer"
               >
                 <PanelLeftOpen
                   size={16}
@@ -174,7 +174,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                 <button
                   onClick={toggleCollapse}
                   title="Collapse sidebar"
-                  className="hidden lg:flex w-7 h-7 bg-sidebar-accent hover:bg-sidebar-accent/80 rounded-lg items-center justify-center transition-colors duration-200"
+                  className="hidden lg:flex w-7 h-7 bg-sidebar-accent hover:bg-sidebar-accent/80 rounded-lg items-center justify-center transition-colors duration-200 cursor-pointer"
                 >
                   <PanelLeftClose
                     size={14}
@@ -190,7 +190,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
         <nav
           className={cn(
             "flex-1 py-6 transition-[padding] duration-300 ease-out",
-            isCollapsed ? "px-2" : "px-4"
+            isCollapsed ? "px-2" : "px-4",
           )}
         >
           <div className="space-y-1">
@@ -209,17 +209,17 @@ export function DashboardSidebar({ className }: SidebarProps) {
                     "hover:bg-sidebar-accent/50",
                     isCollapsed ? "gap-3 px-3 py-3" : "gap-3 px-3 py-3",
                     isActive
-                      ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25"
-                      : "text-sidebar-foreground/80 hover:text-sidebar-foreground"
+                      ? "bg-linear-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25"
+                      : "text-sidebar-foreground/80 hover:text-sidebar-foreground",
                   )}
                 >
                   <Icon
                     size={16}
                     className={cn(
-                      "flex-shrink-0",
+                      "shrink-0",
                       isActive
                         ? "text-white"
-                        : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground/80"
+                        : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground/80",
                     )}
                   />
                   {!isCollapsed && (
@@ -241,14 +241,14 @@ export function DashboardSidebar({ className }: SidebarProps) {
         <div
           className={cn(
             "border-t border-sidebar-border relative transition-[padding] duration-300 ease-out",
-            isCollapsed ? "px-2 py-4" : "px-4 py-4"
+            isCollapsed ? "px-2 py-4" : "px-4 py-4",
           )}
           ref={settingsRef}
         >
           <div
             className={cn(
               "flex items-center",
-              isCollapsed ? "justify-center" : "gap-3"
+              isCollapsed ? "justify-center" : "gap-3",
             )}
           >
             {/* User Avatar */}
@@ -257,7 +257,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
                 <DropdownMenuTrigger asChild>
                   <button
                     title="User menu"
-                    className="bg-sidebar-accent rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 w-9 h-9"
+                    className="bg-sidebar-accent rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 w-9 h-9 cursor-pointer"
                   >
                     {user?.user_metadata?.avatar_url ? (
                       <Image
@@ -314,7 +314,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
             ) : (
               <button
                 title={user?.user_metadata?.full_name || "User"}
-                className="bg-sidebar-accent rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 w-9 h-9"
+                className="bg-sidebar-accent rounded-xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-200 w-9 h-9 cursor-pointer"
               >
                 {user?.user_metadata?.avatar_url ? (
                   <Image
@@ -334,7 +334,7 @@ export function DashboardSidebar({ className }: SidebarProps) {
             {!isCollapsed && (
               <>
                 {/* User Info */}
-                <div className="flex-1 min-w-0 max-w-[calc(16rem-6rem)]">
+                <div className="flex-1 min-w-0 max-w-40">
                   <div className="font-semibold text-sm text-sidebar-foreground truncate">
                     {user?.user_metadata?.full_name || "User"}
                   </div>
@@ -352,8 +352,8 @@ export function DashboardSidebar({ className }: SidebarProps) {
                     <button
                       title="Settings"
                       className={cn(
-                        "p-1.5 rounded-lg transition-colors duration-200 hover:bg-sidebar-accent/50",
-                        "text-sidebar-foreground/60 hover:text-sidebar-foreground"
+                        "p-1.5 rounded-lg transition-colors duration-200 hover:bg-sidebar-accent/50 cursor-pointer",
+                        "text-sidebar-foreground/60 hover:text-sidebar-foreground",
                       )}
                     >
                       <Settings size={14} />

@@ -43,12 +43,11 @@ export interface TrueFalseQuestion extends BaseQuizQuestion {
 export type QuizQuestion = MCQQuestion | TrueFalseQuestion;
 
 export interface CreateQuizDTO {
-  userPrompt?: string;
   documentId: string;
   difficultyLevel: DifficultyLevel;
   numberOfQuestions?: number;
   language?: QuizLanguage;
-  timeLimitMinutes?: number;
+
   explanationLevel?: ExplanationLevel;
   questionsDistribution?: Partial<Record<QuizQuestionsTypeEnum, number>>;
 }

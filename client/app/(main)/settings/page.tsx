@@ -44,7 +44,7 @@ import { TagManagement } from "./components/TagManagement";
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
   const { vollNotesFontSize, vollAiFontSize } = useAppSelector(
-    (state) => state.settings
+    (state) => state.settings,
   );
 
   const handleVollNotesFontSizeChange = (value: number[]) => {
@@ -83,7 +83,7 @@ export default function SettingsPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -98,7 +98,7 @@ export default function SettingsPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -113,7 +113,7 @@ export default function SettingsPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -128,7 +128,7 @@ export default function SettingsPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -143,7 +143,7 @@ export default function SettingsPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -158,7 +158,7 @@ export default function SettingsPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -173,7 +173,7 @@ export default function SettingsPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -212,13 +212,13 @@ export default function SettingsPage() {
                       </p>
                     </div>
                     <div className="flex bg-muted p-1 rounded-lg">
-                      <button className="px-3 py-1.5 text-xs rounded-md bg-background shadow-sm font-medium">
+                      <button className="px-3 py-1.5 text-xs rounded-md bg-background shadow-sm font-medium cursor-pointer">
                         Auto
                       </button>
-                      <button className="px-3 py-1.5 text-xs rounded-md text-muted-foreground hover:text-foreground transition-colors font-medium">
+                      <button className="px-3 py-1.5 text-xs rounded-md text-muted-foreground hover:text-foreground transition-colors font-medium cursor-pointer">
                         Light
                       </button>
-                      <button className="px-3 py-1.5 text-xs rounded-md text-muted-foreground hover:text-foreground transition-colors font-medium">
+                      <button className="px-3 py-1.5 text-xs rounded-md text-muted-foreground hover:text-foreground transition-colors font-medium cursor-pointer">
                         Dark
                       </button>
                     </div>
@@ -350,9 +350,7 @@ export default function SettingsPage() {
                   <Bot className="w-48 h-48" />
                 </div>
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-2xl font-bold">
-                    Voll-ai
-                  </CardTitle>
+                  <CardTitle className="text-2xl font-bold">Voll-ai</CardTitle>
                   <CardDescription>
                     Configure how your AI companion interacts with you.
                   </CardDescription>

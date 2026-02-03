@@ -14,7 +14,7 @@ export interface CreateQuizResponse {
   settings: {
     difficultyLevel: DifficultyLevel | null;
     numberOfQuestions: number | null;
-    timeLimitMinutes: number | null;
+
     explanationLevel: ExplanationLevel;
   };
   questions: QuizQuestion[] | [];

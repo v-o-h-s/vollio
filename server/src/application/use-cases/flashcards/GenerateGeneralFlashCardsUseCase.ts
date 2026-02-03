@@ -4,8 +4,8 @@ import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { CreateFlashCardsSetResponse } from "@vollio/shared";
 import { CreateFlashCardsDTO } from "../../../shared/validation/flashcardSchemas";
 import { IDocumentRepository } from "../../../domain/repositories/IDocumentRepository";
-import { EnsureExistingOfDocumentChunkUseCase } from "../embedding/EnsureExistingOfDocumentChunkUseCase";
-import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
+import { EnsureDocumentChunkedUseCase } from "../chunking/EnsureExistingOfDocumentChunkUseCase";
+import { IChunkRepository } from "../../../domain/repositories/IChunkRepository";
 import { ChunkMetadata } from "../../../shared/utils/chunking";
 import { FlashCardsSet } from "../../../domain/entities/FlashCardsSet";
 import { FlashCard } from "../../../domain/entities/FlashCard";
@@ -21,38 +21,35 @@ export class GenerateGeneralFlashCardsUseCase {
     private logger: FastifyBaseLogger,
     private flashCardsSetRepository: IFlashCardsSetRepository,
     private documentRepository: IDocumentRepository,
-    private ensureChunkingUseCase: EnsureExistingOfDocumentChunkUseCase,
-    private embeddingRepository: IEmbeddingRepository,
+    private ensureChunkingUseCase: EnsureDocumentChunkedUseCase,
+    private chunkRepository: IChunkRepository,
     private generativeAiService: IGenerativeAiService,
-    private tokenRateLimitingService: ITokenRateLimitingService
+    private tokenRateLimitingService: ITokenRateLimitingService,
   ) {}
 
   async execute(
     data: CreateFlashCardsDTO,
-    userId: string
+    userId: string,
   ): Promise<CreateFlashCardsSetResponse> {
     this.logger.info(
       { documentId: data.documentId },
-      "Executing GenerateGeneralFlashCardsUseCase"
+      "Executing GenerateGeneralFlashCardsUseCase",
     );
     const document = await this.documentRepository.getDocumentById(
-      data.documentId
+      data.documentId,
     );
     if (!document) {
       this.logger.warn(
         { documentId: data.documentId },
-        "Document not found in GenerateGeneralFlashCardsUseCase"
+        "Document not found in GenerateGeneralFlashCardsUseCase",
       );
       throw new NotFoundError("Document not found");
     }
 
-    await this.ensureChunkingUseCase.execute(
-      data.documentId,
-      userId
-    );
+    await this.ensureChunkingUseCase.execute(data.documentId, userId);
 
     const chunks: { content: string; metadata: ChunkMetadata }[] = (
-      await this.embeddingRepository.getDocumentEmbeddings(data.documentId)
+      await this.chunkRepository.getDocumentChunks(data.documentId)
     ).map((chunk) => ({
       content: chunk.getContent(),
       metadata: chunk.getMetadata(),
@@ -62,7 +59,7 @@ export class GenerateGeneralFlashCardsUseCase {
     if (!chunks.length) {
       this.logger.error(
         { documentId: data.documentId },
-        "No chunks found for the document"
+        "No chunks found for the document",
       );
       throw new ServerError("No chunks found for the document");
     }
@@ -72,7 +69,7 @@ export class GenerateGeneralFlashCardsUseCase {
       data.documentId,
       new Date(),
       data.language,
-      []
+      [],
     );
 
     const allCards: FlashCard[] = [];
@@ -91,7 +88,7 @@ export class GenerateGeneralFlashCardsUseCase {
 
     this.logger.info(
       { documentId: data.documentId, batchCount: batches.length },
-      "Starting batch processing for flashcard generation"
+      "Starting batch processing for flashcard generation",
     );
 
     for (let i = 0; i < batches.length; i++) {
@@ -101,7 +98,7 @@ export class GenerateGeneralFlashCardsUseCase {
           currentBatch: i + 1,
           totalBatches: batches.length,
         },
-        "Processing batch for flashcards"
+        "Processing batch for flashcards",
       );
       const batch = batches[i];
 
@@ -126,12 +123,11 @@ export class GenerateGeneralFlashCardsUseCase {
 
       const fullPrompt = promptTemplate.replace(
         "<<CONTENT_GOES_HERE>>",
-        context
+        context,
       );
 
-      const result = await this.generativeAiService.generateFlashCards(
-        fullPrompt
-      );
+      const result =
+        await this.generativeAiService.generateFlashCards(fullPrompt);
 
       // Accumulate token usage
       totalPromptTokens += result.usage.promptTokens;
@@ -152,8 +148,8 @@ export class GenerateGeneralFlashCardsUseCase {
             flashCardsSet.getId(),
             c.front,
             c.back,
-            c.hint
-          )
+            c.hint,
+          ),
       );
 
       allCards.push(...batchEntities);
@@ -183,7 +179,7 @@ export class GenerateGeneralFlashCardsUseCase {
     // Ensure all card IDs are valid UUIDs (secondary check)
     const isUUID = (uuid: string) =>
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        uuid
+        uuid,
       );
 
     finalCards = finalCards.map((c) => {
@@ -193,7 +189,7 @@ export class GenerateGeneralFlashCardsUseCase {
           c.getSetId(),
           c.getFront(),
           c.getBack(),
-          c.getHint()
+          c.getHint(),
         );
       }
       return c;
@@ -201,14 +197,19 @@ export class GenerateGeneralFlashCardsUseCase {
 
     flashCardsSet.setFlashCards(finalCards);
 
+    // Ensure a name is set (database requires non-null)
+    if (!flashCardsSet.getName()) {
+      flashCardsSet.setName("Untitled Flashcards");
+    }
+
     this.logger.info(
       {
-        setName: flashCardsSet.getName() || "Untitled",
+        setName: flashCardsSet.getName(),
         cardCount: finalCards.length,
         totalPromptTokens,
         totalCompletionTokens,
       },
-      "Generated flashcards"
+      "Generated flashcards",
     );
 
     // Save the flashcard set to the database
@@ -216,7 +217,7 @@ export class GenerateGeneralFlashCardsUseCase {
 
     this.logger.info(
       { setId: flashCardsSet.getId() },
-      "GenerateGeneralFlashCardsUseCase completed successfully"
+      "GenerateGeneralFlashCardsUseCase completed successfully",
     );
 
     // Map to response

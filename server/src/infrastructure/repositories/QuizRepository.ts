@@ -22,7 +22,7 @@ import { FastifyBaseLogger } from "fastify";
 export class QuizRepository implements IQuizRepository {
   constructor(
     private supabaseClient: SupabaseClient,
-    private logger: FastifyBaseLogger
+    private logger: FastifyBaseLogger,
   ) {}
 
   /**
@@ -43,7 +43,6 @@ export class QuizRepository implements IQuizRepository {
         difficulty_level: quiz.getDifficultyLevel(),
         number_of_questions:
           quiz.getNumberOfQuestions() || quiz.getQuestions().length,
-        time_limit_minutes: quiz.getTimeLimitMinutes(),
         explanation_level: quiz.getExplanationLevel(),
         created_at: quiz.getCreatedAt().toISOString(),
       });
@@ -51,7 +50,7 @@ export class QuizRepository implements IQuizRepository {
     if (quizError) {
       this.logger.error(
         { error: quizError, quizId: quiz.getId() },
-        "Error saving quiz"
+        "Error saving quiz",
       );
       throw new DatabaseError(quizError);
     }
@@ -60,7 +59,7 @@ export class QuizRepository implements IQuizRepository {
     if (questions.length === 0) {
       this.logger.info(
         { quizId: quiz.getId() },
-        "No questions to save for quiz"
+        "No questions to save for quiz",
       );
       return;
     }
@@ -83,7 +82,7 @@ export class QuizRepository implements IQuizRepository {
     if (questionsError) {
       this.logger.error(
         { error: questionsError, quizId: quiz.getId() },
-        "Error saving quiz questions"
+        "Error saving quiz questions",
       );
       throw new DatabaseError(questionsError);
     }
@@ -120,7 +119,7 @@ export class QuizRepository implements IQuizRepository {
       if (error) {
         this.logger.error(
           { error, quizId: quiz.getId() },
-          "Error saving MCQ options"
+          "Error saving MCQ options",
         );
         throw new DatabaseError(error);
       }
@@ -133,14 +132,14 @@ export class QuizRepository implements IQuizRepository {
       if (error) {
         this.logger.error(
           { error, quizId: quiz.getId() },
-          "Error saving True/False answers"
+          "Error saving True/False answers",
         );
         throw new DatabaseError(error);
       }
     }
     this.logger.info(
       { quizId: quiz.getId(), questionsCount: questions.length },
-      "Quiz saved successfully"
+      "Quiz saved successfully",
     );
   }
 
@@ -162,7 +161,7 @@ export class QuizRepository implements IQuizRepository {
           mcq_options (*),
           true_false_answers (*)
         )
-      `
+      `,
       )
       .eq("id", id)
       .single();
@@ -174,7 +173,7 @@ export class QuizRepository implements IQuizRepository {
       }
       this.logger.error(
         { error: quizError, quizId: id },
-        "Error finding quiz by ID"
+        "Error finding quiz by ID",
       );
       throw new DatabaseError(quizError);
     }
@@ -201,7 +200,7 @@ export class QuizRepository implements IQuizRepository {
     }
     this.logger.info(
       { count: data?.length || 0 },
-      "Quizzes retrieved successfully"
+      "Quizzes retrieved successfully",
     );
     return (data || []).map((row) => QuizMapper.fromPersistenceToDomain(row));
   }

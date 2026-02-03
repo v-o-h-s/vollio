@@ -17,12 +17,12 @@ export interface ITokenQuotaRepository {
   getQuota(userId: string): Promise<TokenQuota | null>;
   createQuota(
     userId: string,
-    limits?: Partial<TokenLimits>
+    limits?: Partial<TokenLimits>,
   ): Promise<TokenQuota>;
   updateUsage(
     userId: string,
     dailyUsed: number,
-    monthlyUsed: number
+    monthlyUsed: number,
   ): Promise<void>;
   updateLimits(userId: string, limits: Partial<TokenLimits>): Promise<void>;
   resetDaily(userId: string): Promise<void>;
@@ -37,15 +37,15 @@ export interface ITokenQuotaRepository {
  */
 export class TokenQuotaRepository implements ITokenQuotaRepository {
   constructor(
-    private supabaseClient: SupabaseClient,
-    private logger: FastifyBaseLogger
+    private adminSupabaseClient: SupabaseClient,
+    private logger: FastifyBaseLogger,
   ) {}
 
   /**
    * Get quota for a user
    */
   async getQuota(userId: string): Promise<TokenQuota | null> {
-    const { data, error } = await this.supabaseClient
+    const { data, error } = await this.adminSupabaseClient
       .from("user_token_quotas")
       .select("*")
       .eq("user_id", userId)
@@ -68,7 +68,7 @@ export class TokenQuotaRepository implements ITokenQuotaRepository {
    */
   async createQuota(
     userId: string,
-    limits?: Partial<TokenLimits>
+    limits?: Partial<TokenLimits>,
   ): Promise<TokenQuota> {
     const quotaData = {
       user_id: userId,
@@ -82,7 +82,7 @@ export class TokenQuotaRepository implements ITokenQuotaRepository {
       last_monthly_reset: new Date().toISOString(),
     };
 
-    const { data, error } = await this.supabaseClient
+    const { data, error } = await this.adminSupabaseClient
       .from("user_token_quotas")
       .insert(quotaData)
       .select()
@@ -107,9 +107,9 @@ export class TokenQuotaRepository implements ITokenQuotaRepository {
   async updateUsage(
     userId: string,
     dailyUsed: number,
-    monthlyUsed: number
+    monthlyUsed: number,
   ): Promise<void> {
-    const { error } = await this.supabaseClient
+    const { error } = await this.adminSupabaseClient
       .from("user_token_quotas")
       .update({
         daily_used: dailyUsed,
@@ -129,7 +129,7 @@ export class TokenQuotaRepository implements ITokenQuotaRepository {
    */
   async updateLimits(
     userId: string,
-    limits: Partial<TokenLimits>
+    limits: Partial<TokenLimits>,
   ): Promise<void> {
     const updateData: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
@@ -145,7 +145,7 @@ export class TokenQuotaRepository implements ITokenQuotaRepository {
       updateData.burst_capacity = limits.burstCapacity;
     }
 
-    const { error } = await this.supabaseClient
+    const { error } = await this.adminSupabaseClient
       .from("user_token_quotas")
       .update(updateData)
       .eq("user_id", userId);
@@ -160,7 +160,7 @@ export class TokenQuotaRepository implements ITokenQuotaRepository {
    * Reset daily usage
    */
   async resetDaily(userId: string): Promise<void> {
-    const { error } = await this.supabaseClient
+    const { error } = await this.adminSupabaseClient
       .from("user_token_quotas")
       .update({
         daily_used: 0,
@@ -179,7 +179,7 @@ export class TokenQuotaRepository implements ITokenQuotaRepository {
    * Reset monthly usage
    */
   async resetMonthly(userId: string): Promise<void> {
-    const { error } = await this.supabaseClient
+    const { error } = await this.adminSupabaseClient
       .from("user_token_quotas")
       .update({
         monthly_used: 0,
@@ -200,10 +200,10 @@ export class TokenQuotaRepository implements ITokenQuotaRepository {
   async logUsage(userId: string, usage: TokenUsageRecord): Promise<void> {
     const weightedTokens = calculateWeightedTokens(
       usage.promptTokens,
-      usage.completionTokens
+      usage.completionTokens,
     );
 
-    const { error } = await this.supabaseClient
+    const { error } = await this.adminSupabaseClient
       .from("token_usage_logs")
       .insert({
         user_id: userId,
@@ -225,9 +225,9 @@ export class TokenQuotaRepository implements ITokenQuotaRepository {
    */
   async getUsageLogs(
     userId: string,
-    limit: number = 100
+    limit: number = 100,
   ): Promise<TokenUsageLogRow[]> {
-    const { data, error } = await this.supabaseClient
+    const { data, error } = await this.adminSupabaseClient
       .from("token_usage_logs")
       .select("*")
       .eq("user_id", userId)
@@ -264,7 +264,7 @@ export class TokenQuotaRepository implements ITokenQuotaRepository {
       {
         createdAt: new Date(row.created_at),
         updatedAt: new Date(row.updated_at),
-      }
+      },
     );
   }
 }

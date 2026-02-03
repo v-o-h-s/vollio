@@ -4,8 +4,5 @@ export {
   flashcardPromptGenerator,
   refineUserPrompt as refineFlashcardPrompt,
 } from "./flashcards";
-export {
-  quizPromptGenerator,
-  refineUserPrompt as refineQuizPrompt,
-} from "./quizzes";
+export { quizPromptGenerator } from "./quizzes";
 export { summarizeDocumentPromptGenerator } from "./summarize";
