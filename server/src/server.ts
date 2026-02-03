@@ -9,7 +9,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { containerPlugin } from "./plugins/container";
 import { loggerConfig } from "./shared/utils/logger";
 import { authPlugin } from "./plugins/auth";
-import { errorHandler } from "./shared/utils/errorHandler";
+import { errorHandler } from "./plugins/errorHandler";
 import { noteRoutes } from "./interface/routes/note.route";
 import { fastifyAwilixPlugin } from "@fastify/awilix";
 import { googleClassroomRoutes } from "./interface/routes/googleClassroom.route";
@@ -23,10 +23,15 @@ import settingsRoutes from "./interface/routes/settings.routes";
 import { healthRoutes } from "./interface/routes/health.route";
 import { rateLimiterPlugin } from "./plugins/rateLimiter";
 import { tokenRateLimiterPlugin } from "./plugins/tokenRateLimiter";
+import { SentryService } from "./infrastructure/services/SentryService";
+import { sentryPlugin } from "./plugins/sentry";
 
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
+
+// Initialize Sentry early
+SentryService.initialize();
 
 // APP INITIALIZATION
 // Always use loggerConfig - Fastify only accepts configuration objects, not logger instances
@@ -147,6 +152,9 @@ app.register(containerPlugin);
 // Register auth plugin globally (it will handle public vs protected routes)
 app.register(authPlugin);
 
+// Register sentry plugin
+app.register(sentryPlugin);
+
 // Register rate limiter plugin (must be after authPlugin to access request.user)
 app.register(rateLimiterPlugin);
 
@@ -204,6 +212,20 @@ if (require.main === module) {
 // GRACEFUL SHUTDOWN
 process.on("SIGINT", async () => {
   app.log.info("Stopping server");
+  
+  // Flush Sentry events before shutdown
+  await SentryService.flush(2000);
+  
+  await app.close();
+  process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+  app.log.info("SIGTERM received, shutting down gracefully");
+  
+  // Flush Sentry events before shutdown
+  await SentryService.flush(2000);
+  
   await app.close();
   process.exit(0);
 });
