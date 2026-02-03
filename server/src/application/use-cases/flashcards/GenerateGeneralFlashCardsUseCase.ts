@@ -197,9 +197,14 @@ export class GenerateGeneralFlashCardsUseCase {
 
     flashCardsSet.setFlashCards(finalCards);
 
+    // Ensure a name is set (database requires non-null)
+    if (!flashCardsSet.getName()) {
+      flashCardsSet.setName("Untitled Flashcards");
+    }
+
     this.logger.info(
       {
-        setName: flashCardsSet.getName() || "Untitled",
+        setName: flashCardsSet.getName(),
         cardCount: finalCards.length,
         totalPromptTokens,
         totalCompletionTokens,

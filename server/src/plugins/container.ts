@@ -2,7 +2,10 @@ import { FastifyPluginAsync } from "fastify";
 import fastifyPlugin from "fastify-plugin";
 import { asClass, asFunction, Lifetime, InjectionMode, asValue } from "awilix";
 import Redis from "ioredis";
-import { createUserClient } from "../infrastructure/database/supabase/supabase";
+import {
+  createUserClient,
+  createServiceClient,
+} from "../infrastructure/database/supabase/supabase";
 import { NoteRepository } from "../infrastructure/repositories/NoteRepository";
 import { ChunkRepository } from "../infrastructure/repositories/ChunkRepository";
 import { CreateNoteUseCase } from "../application/use-cases/notes/CreateNoteUseCase";
@@ -97,6 +100,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   fastify.diContainer.register({
     redis: asValue(redis),
+    adminSupabaseClient: asValue(createServiceClient()),
     rateLimitingService: asClass(RateLimitingService, {
       lifetime: Lifetime.SINGLETON,
       injectionMode: InjectionMode.CLASSIC,

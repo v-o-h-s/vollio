@@ -139,6 +139,9 @@ function CreateFlashCardsPageContent() {
 
   // Handlers
   const onAutoSubmit = async (data: FlashcardAutoFormData) => {
+    const loadingToast = toast.loading(
+      "Generating flashcards... This may take a moment.",
+    );
     try {
       const response = await generateSet(
         prepareFlashcardPayload("auto", data) as any,
@@ -152,6 +155,7 @@ function CreateFlashCardsPageContent() {
           hint: c.hint || "",
         })) || [];
 
+      toast.dismiss(loadingToast);
       if (generatedCards.length > 0) {
         manualForm.setValue("flashcards", generatedCards);
         manualForm.setValue(
@@ -164,6 +168,7 @@ function CreateFlashCardsPageContent() {
         toast.success(`Generated ${generatedCards.length} cards!`);
       }
     } catch (err: any) {
+      toast.dismiss(loadingToast);
       toast.error(err.data?.message || "Generation failed");
     }
   };
