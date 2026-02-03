@@ -57,7 +57,7 @@ export class SentryService {
   static captureException(error: Error, tags?: Record<string, string>): void {
     if (!this.isInitialized) {
       console.warn("Sentry not initialized. Exception not captured.");
-      return;j
+      return;
     }
 
     Sentry.captureException(error, {
