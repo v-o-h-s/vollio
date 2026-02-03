@@ -20,8 +20,7 @@ export class QuizMapper {
       language: quiz.getLanguage(),
       settings: {
         difficultyLevel: quiz.getDifficultyLevel(),
-        numberOfQuestions: quiz.getNumberOfQuestions()!,
-
+        numberOfQuestions: quiz.getNumberOfQuestions(),
         explanationLevel: quiz.getExplanationLevel(),
       },
       questions: quiz.getQuestions() || [],

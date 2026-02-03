@@ -3,14 +3,13 @@ import { ServerError } from "../errors/ServerError";
 import { DatabaseError } from "../errors/DatabaseError";
 import { ErrorObject } from "../types/error";
 import { NotFoundError } from "../errors/NotFoundError";
-import { VoyageAIError } from "voyageai";
 import { RateLimitingError } from "../errors/RateLimitingError";
 import { ValidationError } from "../errors/ValidationError";
 
 export function errorHandler(
   error: any,
   req: FastifyRequest,
-  res: FastifyReply
+  res: FastifyReply,
 ) {
   if (error instanceof DatabaseError) {
     const errorObj: ErrorObject = {
@@ -127,25 +126,6 @@ export function errorHandler(
     req.log.warn({ err: error }, "Rate Limiting Error Occurred");
 
     return res.status(error.statusCode).send({
-      success: false,
-      status: error.statusCode,
-      data: null,
-      error: errorObj,
-    });
-  }
-  if (error instanceof VoyageAIError) {
-    const errorObj: ErrorObject = {
-      name: error.name,
-      subType: "embedding error",
-      message: "failed to communicate with Embedding API",
-      details: error.message,
-      statusCode: error.statusCode as number,
-      extra: error.body || {},
-    };
-
-    req.log.error({ err: error }, "VoyageAI Error Occurred");
-
-    return res.status(error.statusCode || 500).send({
       success: false,
       status: error.statusCode,
       data: null,

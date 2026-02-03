@@ -1,11 +1,11 @@
-import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
+import { IChunkRepository } from "../../../domain/repositories/IChunkRepository";
 import { ChunkingService } from "../../../infrastructure/services/ChunkingService";
 import { DocumentProcessingService } from "../../../infrastructure/services/DocumentProcessingService";
 import { GetDocumentContentUseCase } from "../documents/GetDocumentContentUseCase";
 
 export class ChunkDocumentByIdUseCase {
   constructor(
-    private embeddingRepository: IEmbeddingRepository,
+    private chunkRepository: IChunkRepository,
     private getDocumentContentUseCase: GetDocumentContentUseCase,
     private documentProcessingService: DocumentProcessingService,
     private chunkingService: ChunkingService,
@@ -21,6 +21,6 @@ export class ChunkDocumentByIdUseCase {
     );
     const chunks = await this.chunkingService.chunkText(text);
 
-    await this.embeddingRepository.storeChunks(documentId, chunks);
+    await this.chunkRepository.storeChunks(documentId, chunks);
   }
 }

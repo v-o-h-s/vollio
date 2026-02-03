@@ -271,127 +271,123 @@ function CreateFlashCardsPageContent() {
 
       <Tabs value={activeTab} className="space-y-8">
         <TabsContent value="automatic" className="outline-none">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              {/* Document Selection */}
-              <div className="bg-background rounded-xl border p-6 space-y-4">
+          <div className="space-y-6 max-w-3xl mx-auto">
+            {/* Document Selection */}
+            <div className="bg-background rounded-xl border p-6 space-y-4">
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-primary" />
+                  Source Material
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Select a document to generate flashcards from.
+                </p>
+              </div>
+
+              <DocumentSelectionTabs
+                availableDocuments={
+                  (documentsData || []).map((p: any) => ({
+                    id: p.id,
+                    title: p.name ?? p.title ?? "Untitled",
+                  })) as any
+                }
+                selectedDocumentId={autoDocumentId}
+                onSelectDocument={(d: any) =>
+                  autoForm.setValue("documentId", d.id, {
+                    shouldValidate: true,
+                  })
+                }
+                isLoadingDocuments={isLoadingDocuments}
+              />
+            </div>
+
+            {/* Configuration */}
+            <form onSubmit={autoForm.handleSubmit(onAutoSubmit)}>
+              <div className="bg-background rounded-xl border p-6 space-y-6">
                 <div className="space-y-1">
                   <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-primary" />
-                    Source Material
+                    <Zap className="w-5 h-5 text-primary" />
+                    Configuration
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Select a document to generate flashcards from.
+                    Customize the generation parameters.
                   </p>
                 </div>
 
-                <DocumentSelectionTabs
-                  availableDocuments={
-                    (documentsData || []).map((p: any) => ({
-                      id: p.id,
-                      title: p.name ?? p.title ?? "Untitled",
-                    })) as any
-                  }
-                  selectedDocumentId={autoDocumentId}
-                  onSelectDocument={(d: any) =>
-                    autoForm.setValue("documentId", d.id, {
-                      shouldValidate: true,
-                    })
-                  }
-                  isLoadingDocuments={isLoadingDocuments}
-                />
-              </div>
-            </div>
-
-            <div className="lg:col-span-1 space-y-6">
-              {/* Configuration */}
-              <form onSubmit={autoForm.handleSubmit(onAutoSubmit)}>
-                <div className="bg-background rounded-xl border p-6 space-y-6">
-                  <div className="space-y-1">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <Zap className="w-5 h-5 text-primary" />
-                      Configuration
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Customize the generation parameters.
-                    </p>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <Label>Quantity</Label>
-                      <Controller
-                        name="numberOfCards"
-                        control={autoForm.control}
-                        render={({ field }) => (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              {...field}
-                              min={1}
-                              max={50}
-                              onChange={(e) =>
-                                field.onChange(parseInt(e.target.value) || 1)
-                              }
-                            />
-                            <span className="text-sm text-muted-foreground whitespace-nowrap">
-                              Cards
-                            </span>
-                          </div>
-                        )}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Difficulty</Label>
-                      <Controller
-                        name="difficulty"
-                        control={autoForm.control}
-                        render={({ field }) => (
-                          <div className="grid grid-cols-3 gap-2">
-                            {difficulties.map((d) => (
-                              <Button
-                                key={d}
-                                type="button"
-                                variant={
-                                  field.value === d ? "default" : "outline"
-                                }
-                                size="sm"
-                                onClick={() => field.onChange(d)}
-                                className="w-full"
-                              >
-                                {d}
-                              </Button>
-                            ))}
-                          </div>
-                        )}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-2">
-                    <Button
-                      type="submit"
-                      disabled={isGenerating || !autoDocumentId}
-                      className="w-full"
-                      size="lg"
-                    >
-                      {isGenerating ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Generate Deck
-                        </>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label>Quantity</Label>
+                    <Controller
+                      name="numberOfCards"
+                      control={autoForm.control}
+                      render={({ field }) => (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            {...field}
+                            min={1}
+                            max={50}
+                            onChange={(e) =>
+                              field.onChange(parseInt(e.target.value) || 1)
+                            }
+                          />
+                          <span className="text-sm text-muted-foreground whitespace-nowrap">
+                            Cards
+                          </span>
+                        </div>
                       )}
-                    </Button>
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Difficulty</Label>
+                    <Controller
+                      name="difficulty"
+                      control={autoForm.control}
+                      render={({ field }) => (
+                        <div className="grid grid-cols-3 gap-2">
+                          {difficulties.map((d) => (
+                            <Button
+                              key={d}
+                              type="button"
+                              variant={
+                                field.value === d ? "default" : "outline"
+                              }
+                              size="sm"
+                              onClick={() => field.onChange(d)}
+                              className="w-full"
+                            >
+                              {d}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                    />
                   </div>
                 </div>
-              </form>
-            </div>
+
+                <div className="pt-2">
+                  <Button
+                    type="submit"
+                    disabled={isGenerating || !autoDocumentId}
+                    className="w-full"
+                    size="lg"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Generate Deck
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </form>
           </div>
         </TabsContent>
 

@@ -1,6 +1,6 @@
 import { ChunkMetadata } from "../../shared/utils/chunking";
 
-export class Embedding {
+export class ChunkEntity {
   private id: string;
   private documentId: string;
   private content: string;

@@ -2,14 +2,14 @@ import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiServ
 import { CreateQuizResponse } from "@vollio/shared";
 import { CreateQuizDTO } from "../../../shared/validation/quizSchemas";
 import { Quiz, QuizQuestion } from "../../../domain/entities/Quiz";
-import { EnsureExistingOfDocumentChunkUseCase } from "../embedding/EnsureExistingOfDocumentChunkUseCase";
+import { EnsureDocumentChunkedUseCase } from "../chunking/EnsureExistingOfDocumentChunkUseCase";
 import crypto from "crypto";
 import { QuizMapper } from "../../../shared/mappers/QuizMapper";
 import { FastifyBaseLogger } from "fastify";
 import { GetDocumentByIdUseCase } from "../documents/GetDocumentByIdUseCase";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { ChunkMetadata } from "../../../shared/utils/chunking";
-import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
+import { IChunkRepository } from "../../../domain/repositories/IChunkRepository";
 import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/client";
 import { ServerError } from "../../../shared/errors/ServerError";
 import { quizPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/quizzes";
@@ -20,9 +20,9 @@ export class CreateGeneralQuizUseCase {
   constructor(
     private logger: FastifyBaseLogger,
     private generativeAiService: IGenerativeAiService,
-    private ensureChunkingUseCase: EnsureExistingOfDocumentChunkUseCase,
+    private ensureChunkingUseCase: EnsureDocumentChunkedUseCase,
     private getDocumentByIdUseCase: GetDocumentByIdUseCase,
-    private embeddingRepository: IEmbeddingRepository,
+    private chunkRepository: IChunkRepository,
     private quizRepository: IQuizRepository,
     private tokenRateLimitingService: ITokenRateLimitingService,
   ) {}
@@ -45,7 +45,7 @@ export class CreateGeneralQuizUseCase {
     }
     await this.ensureChunkingUseCase.execute(data.documentId, userId);
     const chunks: { content: string; metadata: ChunkMetadata }[] = (
-      await this.embeddingRepository.getDocumentEmbeddings(data.documentId)
+      await this.chunkRepository.getDocumentChunks(data.documentId)
     ).map((chunk) => ({
       content: chunk.getContent(),
       metadata: chunk.getMetadata(),

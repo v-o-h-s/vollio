@@ -1,9 +1,9 @@
 import { FastifyBaseLogger } from "fastify";
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
-import { IEmbeddingRepository } from "../../../domain/repositories/IEmbeddingRepository";
+import { IChunkRepository } from "../../../domain/repositories/IChunkRepository";
 import { DocumentIdParams, JSONContent, NoteData } from "@vollio/shared";
 import { summarizeDocumentPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/summarize";
-import { EnsureExistingOfDocumentChunkUseCase } from "../embedding/EnsureExistingOfDocumentChunkUseCase";
+import { EnsureDocumentChunkedUseCase } from "../chunking/EnsureExistingOfDocumentChunkUseCase";
 import { ChunkMetadata } from "../../../shared/utils/chunking";
 import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/client";
 import { ServerError } from "../../../shared/errors/ServerError";
@@ -28,30 +28,27 @@ export class GenerateSummaryUseCase {
   constructor(
     private logger: FastifyBaseLogger,
     private generativeAiService: IGenerativeAiService,
-    private embeddingRepository: IEmbeddingRepository,
+    private chunkRepository: IChunkRepository,
     private noteRepository: INoteRepository,
-    private ensureChunkingUseCase: EnsureExistingOfDocumentChunkUseCase,
-    private tokenRateLimitingService: ITokenRateLimitingService
+    private ensureChunkingUseCase: EnsureDocumentChunkedUseCase,
+    private tokenRateLimitingService: ITokenRateLimitingService,
   ) {}
 
   async execute(
     data: DocumentIdParams,
-    userId: string
+    userId: string,
   ): Promise<GenerateSummaryResult> {
     this.logger.info(
       { documentId: data.id, userId },
-      "Executing SummarizeDocumentUseCase"
+      "Executing SummarizeDocumentUseCase",
     );
 
     // 1. Ensure document is processed
-    await this.ensureChunkingUseCase.execute(
-      data.id,
-      userId
-    );
+    await this.ensureChunkingUseCase.execute(data.id, userId);
 
     // 2. Get document chunks to get the text
     const chunks: { content: string; metadata: ChunkMetadata }[] = (
-      await this.embeddingRepository.getDocumentEmbeddings(data.id)
+      await this.chunkRepository.getDocumentChunks(data.id)
     ).map((chunk) => ({
       content: chunk.getContent(),
       metadata: chunk.getMetadata(),
@@ -60,7 +57,7 @@ export class GenerateSummaryUseCase {
     if (!chunks.length) {
       this.logger.error(
         { documentId: data.id },
-        "No chunks found for the document"
+        "No chunks found for the document",
       );
       throw new ServerError("No chunks found for the document");
     }
@@ -73,7 +70,7 @@ export class GenerateSummaryUseCase {
 
     this.logger.info(
       { documentId: data.id, batchCount: batches.length },
-      "Starting batch processing for summary generation"
+      "Starting batch processing for summary generation",
     );
 
     let currentSummary: JSONContent = {
@@ -96,13 +93,13 @@ export class GenerateSummaryUseCase {
           currentBatch: i + 1,
           totalBatches: batches.length,
         },
-        "Processing batch for summary"
+        "Processing batch for summary",
       );
 
       const batchContext = batches[i].map((c) => c.content).join("\n\n");
       const prompt = summarizeDocumentPromptGenerator(
         batchContext,
-        currentSummary
+        currentSummary,
       );
 
       const result = await this.generativeAiService.generateSummary(prompt);
@@ -131,14 +128,14 @@ export class GenerateSummaryUseCase {
       crypto.randomUUID(),
       "document summary",
       currentSummary,
-      data.id
+      data.id,
     );
     note.setNoteIsSummary(true);
 
     const createdNote = await this.noteRepository.createNote(note);
     this.logger.info(
       { documentId: data.id, totalPromptTokens, totalCompletionTokens },
-      "SummarizeDocumentUseCase completed successfully"
+      "SummarizeDocumentUseCase completed successfully",
     );
 
     return {

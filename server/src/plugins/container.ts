@@ -4,7 +4,7 @@ import { asClass, asFunction, Lifetime, InjectionMode, asValue } from "awilix";
 import Redis from "ioredis";
 import { createUserClient } from "../infrastructure/database/supabase/supabase";
 import { NoteRepository } from "../infrastructure/repositories/NoteRepository";
-import { EmbeddingRepository } from "../infrastructure/repositories/EmbeddingRepository";
+import { ChunkRepository } from "../infrastructure/repositories/ChunkRepository";
 import { CreateNoteUseCase } from "../application/use-cases/notes/CreateNoteUseCase";
 import { UpdateNoteUseCase } from "../application/use-cases/notes/UpdateNoteUseCase";
 import { DeleteNoteUseCase } from "../application/use-cases/notes/DeleteNoteUseCase";
@@ -51,16 +51,12 @@ import { HighlightController } from "../interface/controllers/highlight.controll
 import { GetHighlightsByDocumentIdUseCase } from "../application/use-cases/highlights/GetHighlightsByDocumentIdUseCase";
 import { GetDocumentContentUseCase } from "../application/use-cases/documents/GetDocumentContentUseCase";
 import { ChunkingService } from "../infrastructure/services/ChunkingService";
-import { EmbeddingService } from "../infrastructure/services/EmbeddingService";
-import { SemanticSearchService } from "../application/services/SemanticSearchService";
 import { DocumentProcessingService } from "../infrastructure/services/DocumentProcessingService";
 import { GenerativeAiService } from "../infrastructure/services/GenerativeAiService";
 import { QuizController } from "../interface/controllers/quiz.controller";
 import { CreateGeneralQuizUseCase } from "../application/use-cases/quizzes/CreateGeneralQuizUseCase";
-import { EnsureExistingOfDocumentEmbeddingUseCase } from "../application/use-cases/embedding/EnsureExistingOfDocumentEmbeddingUseCase";
-import { EnsureExistingOfDocumentChunkUseCase } from "../application/use-cases/embedding/EnsureExistingOfDocumentChunkUseCase";
-import { EmbedDocumentByIdUseCase } from "../application/use-cases/embedding/EmbedDocumentByIdUseCase";
-import { ChunkDocumentByIdUseCase } from "../application/use-cases/embedding/ChunkDocumentByIdUseCase";
+import { EnsureDocumentChunkedUseCase } from "../application/use-cases/chunking/EnsureExistingOfDocumentChunkUseCase";
+import { ChunkDocumentByIdUseCase } from "../application/use-cases/chunking/ChunkDocumentByIdUseCase";
 import { QuizRepository } from "../infrastructure/repositories/QuizRepository";
 import { FlashCardsSetRepository } from "../infrastructure/repositories/FlashCardsSetRepository";
 import { GenerateGeneralFlashCardsUseCase } from "../application/use-cases/flashcards/GenerateGeneralFlashCardsUseCase";
@@ -404,36 +400,17 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
     }),
   });
 
-  // embedding
+  // chunking
   fastify.diContainer.register({
-    semanticSearchService: asClass(SemanticSearchService, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    embedDocumentByIdUseCase: asClass(EmbedDocumentByIdUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
     chunkDocumentByIdUseCase: asClass(ChunkDocumentByIdUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    embeddingService: asClass(EmbeddingService, {
+    ensureChunkingUseCase: asClass(EnsureDocumentChunkedUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    ensureExistingOfDocumentEmbeddingUseCase: asClass(
-      EnsureExistingOfDocumentEmbeddingUseCase,
-      {
-        lifetime: Lifetime.SCOPED,
-        injectionMode: InjectionMode.CLASSIC,
-      },
-    ),
-    ensureChunkingUseCase: asClass(EnsureExistingOfDocumentChunkUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    embeddingRepository: asClass(EmbeddingRepository, {
+    chunkRepository: asClass(ChunkRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

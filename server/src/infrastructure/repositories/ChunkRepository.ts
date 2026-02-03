@@ -2,10 +2,10 @@ import { Chunk } from "../../shared/utils/chunking";
 import { type SupabaseClient } from "@supabase/supabase-js";
 import { FastifyBaseLogger } from "fastify";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
-import { IEmbeddingRepository } from "../../domain/repositories/IEmbeddingRepository";
-import { Embedding } from "../entities/Embedding";
+import { IChunkRepository } from "../../domain/repositories/IChunkRepository";
+import { ChunkEntity } from "../entities/Chunk";
 
-export class EmbeddingRepository implements IEmbeddingRepository {
+export class ChunkRepository implements IChunkRepository {
   private supabaseClient: SupabaseClient;
   private logger?: FastifyBaseLogger;
 
@@ -27,24 +27,24 @@ export class EmbeddingRepository implements IEmbeddingRepository {
 
     const { error } = await this.supabaseClient.from("chunks").insert(rows);
     if (error) {
-      this.logger?.error({ err: error }, "Failed to insert embeddings");
+      this.logger?.error({ err: error }, "Failed to insert chunks");
       throw new DatabaseError(error);
     }
   }
 
-  async searchSimilarEmbeddings(
-    queryEmbedding: number[],
+  async searchSimilarChunks(
+    queryVector: number[],
     matchThreshold: number,
     matchCount: number,
-  ): Promise<Embedding[]> {
-    const { data, error } = await this.supabaseClient.rpc("search_embeddings", {
-      query_embedding: queryEmbedding,
+  ): Promise<ChunkEntity[]> {
+    const { data, error } = await this.supabaseClient.rpc("search_chunks", {
+      query_vector: queryVector,
       match_threshold: matchThreshold,
       match_count: matchCount,
     });
 
     if (error) {
-      this.logger?.error({ err: error }, "Failed to search embeddings");
+      this.logger?.error({ err: error }, "Failed to search chunks");
       throw new DatabaseError(error);
     }
     if (!data || data.length === 0) {
@@ -53,7 +53,7 @@ export class EmbeddingRepository implements IEmbeddingRepository {
 
     const results = data.map(
       (row: any) =>
-        new Embedding(
+        new ChunkEntity(
           row.id,
           row.document_id,
           row.content,
@@ -64,7 +64,8 @@ export class EmbeddingRepository implements IEmbeddingRepository {
 
     return results;
   }
-  async isDocumentEmbedded(documentId: string): Promise<boolean> {
+
+  async isDocumentChunked(documentId: string): Promise<boolean> {
     const { data, error } = await this.supabaseClient
       .from("chunks")
       .select("id")
@@ -74,27 +75,28 @@ export class EmbeddingRepository implements IEmbeddingRepository {
     if (error) {
       this.logger?.error(
         { err: error },
-        "Failed to check if document is embedded",
+        "Failed to check if document is chunked",
       );
       throw new DatabaseError(error);
     }
 
     return data && data.length > 0;
   }
-  async getDocumentEmbeddings(documentId: string): Promise<Embedding[]> {
+
+  async getDocumentChunks(documentId: string): Promise<ChunkEntity[]> {
     const { data, error } = await this.supabaseClient
       .from("chunks")
       .select("*")
       .eq("document_id", documentId);
 
     if (error) {
-      this.logger?.error({ err: error }, "Failed to get document embeddings");
+      this.logger?.error({ err: error }, "Failed to get document chunks");
       throw new DatabaseError(error);
     }
 
     return data.map(
       (row) =>
-        new Embedding(
+        new ChunkEntity(
           row.id,
           row.document_id,
           row.content,
