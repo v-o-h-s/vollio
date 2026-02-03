@@ -9,9 +9,19 @@ import {
 export class SentryService {
   private static isInitialized = false;
 
+  static isEnabled(): boolean {
+    return this.isInitialized;
+  }
+
   static initialize(): void {
+    // Only initialize Sentry in production
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Sentry disabled in non-production environment.");
+      return;
+    }
+
     const dsn = process.env.SENTRY_DSN;
-    const environment = process.env.SENTRY_ENVIRONMENT || "development";
+    const environment = process.env.SENTRY_ENVIRONMENT || "production";
     const tracesSampleRate = parseFloat(
       process.env.SENTRY_TRACES_SAMPLE_RATE || "0.1",
     );
@@ -38,8 +48,7 @@ export class SentryService {
       // Performance Monitoring
       profilesSampleRate: 0.1,
       // Capture 10% of transactions for performance monitoring
-      // In production, recommend setting to 0.1 (10%)
-      debug: process.env.NODE_ENV === "development",
+      debug: false,
       beforeSend(event, hint) {
         // Filter out sensitive data before sending to Sentry
         if (event.request?.headers) {

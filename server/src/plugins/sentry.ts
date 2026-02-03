@@ -4,6 +4,11 @@ import * as Sentry from "@sentry/node";
 import { SentryService } from "../infrastructure/services/SentryService";
 
 export const sentryPlugin = fp(async (fastify: FastifyInstance) => {
+  // Skip registering hooks if Sentry is not enabled (non-production)
+  if (!SentryService.isEnabled()) {
+    return;
+  }
+
   // Start span for each request (performance monitoring)
   fastify.addHook("onRequest", async (request, reply) => {
     // Start a new span for this request
