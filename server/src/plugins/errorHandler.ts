@@ -1,10 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { ServerError } from "../errors/ServerError";
-import { DatabaseError } from "../errors/DatabaseError";
-import { ErrorObject } from "../types/error";
-import { NotFoundError } from "../errors/NotFoundError";
-import { RateLimitingError } from "../errors/RateLimitingError";
-import { ValidationError } from "../errors/ValidationError";
+import { ServerError } from "../shared/errors/ServerError";
+import { DatabaseError } from "../shared/errors/DatabaseError";
+import { ErrorObject } from "../shared/types/error";
+import { NotFoundError } from "../shared/errors/NotFoundError";
+import { RateLimitingError } from "../shared/errors/RateLimitingError";
+import { ValidationError } from "../shared/errors/ValidationError";
+import { SentryService } from "../infrastructure/services/SentryService";
 
 export function errorHandler(
   error: any,
@@ -29,6 +30,13 @@ export function errorHandler(
     // Log the error using the request logger for context
     req.log.error({ err: error, ...errorObj }, "Database Error Occurred");
 
+    // Report to Sentry (but not rate limit errors)
+    SentryService.captureException(error, {
+      errorType: "DatabaseError",
+      userId: req.user?.id || "anonymous",
+      route: req.url,
+    });
+
     return res.status(error.statusCode).send({
       success: false,
       status: error.statusCode,
@@ -51,6 +59,13 @@ export function errorHandler(
 
     req.log.error({ err: error }, "Server Error Occurred");
 
+    // Report to Sentry
+    SentryService.captureException(error, {
+      errorType: "ServerError",
+      userId: req.user?.id || "anonymous",
+      route: req.url,
+    });
+
     return res.status(statusCode).send({
       success: false,
       status: statusCode,
@@ -69,6 +84,13 @@ export function errorHandler(
     };
 
     req.log.error({ err: error }, "Not Found Error Occurred");
+
+    // Report to Sentry
+    SentryService.captureException(error, {
+      errorType: "NotFoundError",
+      userId: req.user?.id || "anonymous",
+      route: req.url,
+    });
 
     return res.status(error.statusCode).send({
       success: false,
@@ -135,6 +157,13 @@ export function errorHandler(
 
   // Handle unexpected errors
   req.log.error({ err: error }, "Unexpected Error Occurred");
+
+  // Report to Sentry
+  SentryService.captureException(error, {
+    errorType: "UnexpectedError",
+    userId: req.user?.id || "anonymous",
+    route: req.url,
+  });
 
   const statusCode = error.statusCode || 500;
   const errorObj: ErrorObject = {
