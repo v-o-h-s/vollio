@@ -21,10 +21,10 @@ export function Sidebar({
         <button
           onClick={() => setSection("quizzes")}
           className={cn(
-            "flex items-center gap-2 py-4 px-1 transition-all duration-300 font-semibold text-sm relative",
+            "flex items-center gap-2 py-4 px-1 transition-all duration-300 font-semibold text-sm relative cursor-pointer",
             section === "quizzes"
               ? "text-foreground"
-              : "text-muted-foreground hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           <Brain
@@ -32,7 +32,7 @@ export function Sidebar({
               "w-4 h-4",
               section === "quizzes"
                 ? "text-indigo-500"
-                : "text-muted-foreground"
+                : "text-muted-foreground",
             )}
           />
           Quizzes
@@ -50,10 +50,10 @@ export function Sidebar({
         <button
           onClick={() => setSection("flashcards")}
           className={cn(
-            "flex items-center gap-2 py-4 px-1 transition-all duration-300 font-semibold text-sm relative",
+            "flex items-center gap-2 py-4 px-1 transition-all duration-300 font-semibold text-sm relative cursor-pointer",
             section === "flashcards"
               ? "text-foreground"
-              : "text-muted-foreground hover:text-foreground"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           <Layers
@@ -61,7 +61,7 @@ export function Sidebar({
               "w-4 h-4",
               section === "flashcards"
                 ? "text-rose-500"
-                : "text-muted-foreground"
+                : "text-muted-foreground",
             )}
           />
           Flashcards

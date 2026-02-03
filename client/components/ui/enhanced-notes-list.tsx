@@ -27,14 +27,14 @@ import {
   PenTool,
   Star,
   Link,
-  X
+  X,
 } from "lucide-react";
 
 interface NotesListLayoutProps {
   notes: Note[];
-  viewMode?: 'grid' | 'list' | 'compact';
-  sortBy?: 'updated' | 'created' | 'title' | 'wordCount';
-  sortOrder?: 'asc' | 'desc';
+  viewMode?: "grid" | "list" | "compact";
+  sortBy?: "updated" | "created" | "title" | "wordCount";
+  sortOrder?: "asc" | "desc";
   filterBy?: string;
   onCreateNote: () => void;
   onEditNote: (id: string) => void;
@@ -42,41 +42,47 @@ interface NotesListLayoutProps {
   onDeleteNote?: (id: string) => void;
   onDuplicateNote?: (id: string) => void;
   onToggleStarNote?: (id: string) => void;
-  onViewModeChange?: (mode: 'grid' | 'list' | 'compact') => void;
-  onSortChange?: (sortBy: 'updated' | 'created' | 'title' | 'wordCount', sortOrder: 'asc' | 'desc') => void;
+  onViewModeChange?: (mode: "grid" | "list" | "compact") => void;
+  onSortChange?: (
+    sortBy: "updated" | "created" | "title" | "wordCount",
+    sortOrder: "asc" | "desc",
+  ) => void;
   onFilterChange?: (filter: string) => void;
 }
 
 // Helper function to extract text from JSONContent for sorting/filtering
 const extractTextFromContent = (content: any): string => {
-  if (!content) return '';
-  
-  let text = '';
-  
+  if (!content) return "";
+
+  let text = "";
+
   if (content.text) {
     text += content.text;
   }
-  
+
   if (content.content && Array.isArray(content.content)) {
     for (const child of content.content) {
       text += extractTextFromContent(child);
     }
   }
-  
+
   return text;
 };
 
 // Helper function to count words
 const countWords = (text: string): number => {
-  return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  return text
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word.length > 0).length;
 };
 
 export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
   notes,
-  viewMode = 'grid',
-  sortBy = 'updated',
-  sortOrder = 'desc',
-  filterBy = '',
+  viewMode = "grid",
+  sortBy = "updated",
+  sortOrder = "desc",
+  filterBy = "",
   onCreateNote,
   onEditNote,
   onViewAnnotation,
@@ -85,7 +91,7 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
   onToggleStarNote,
   onViewModeChange,
   onSortChange,
-  onFilterChange
+  onFilterChange,
 }) => {
   // Responsive design handled via CSS
   const [currentViewMode, setCurrentViewMode] = useState(viewMode);
@@ -119,8 +125,8 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(note => {
-        const title = (note.title || '').toLowerCase();
+      filtered = filtered.filter((note) => {
+        const title = (note.title || "").toLowerCase();
         const content = extractTextFromContent(note.content).toLowerCase();
         return title.includes(query) || content.includes(query);
       });
@@ -128,12 +134,12 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
 
     // Apply additional filters
     if (activeFilters.length > 0) {
-      filtered = filtered.filter(note => {
-        return activeFilters.every(filter => {
+      filtered = filtered.filter((note) => {
+        return activeFilters.every((filter) => {
           switch (filter) {
-            case 'linked':
+            case "linked":
               return note.documentAnnotationId;
-            case 'recent':
+            case "recent":
               const dayAgo = new Date();
               dayAgo.setDate(dayAgo.getDate() - 1);
               const noteDate = note.updatedAt || note.updatedAt;
@@ -143,10 +149,12 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
               } catch {
                 return false;
               }
-            case 'long':
-              const wordCount = countWords(extractTextFromContent(note.content));
+            case "long":
+              const wordCount = countWords(
+                extractTextFromContent(note.content),
+              );
               return wordCount > 500;
-            case 'empty':
+            case "empty":
               const content = extractTextFromContent(note.content);
               return content.trim().length === 0;
             default:
@@ -161,36 +169,42 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
       let comparison = 0;
 
       switch (currentSortBy) {
-        case 'title':
-          comparison = (a.title || 'Untitled').localeCompare(b.title || 'Untitled');
+        case "title":
+          comparison = (a.title || "Untitled").localeCompare(
+            b.title || "Untitled",
+          );
           break;
-        case 'created':
+        case "created":
           const aCreated = a.createdAt || a.createdAt;
           const bCreated = b.createdAt || b.createdAt;
           try {
-            comparison = new Date(aCreated || 0).getTime() - new Date(bCreated || 0).getTime();
+            comparison =
+              new Date(aCreated || 0).getTime() -
+              new Date(bCreated || 0).getTime();
           } catch {
             comparison = 0;
           }
           break;
-        case 'wordCount':
+        case "wordCount":
           const aWords = countWords(extractTextFromContent(a.content));
           const bWords = countWords(extractTextFromContent(b.content));
           comparison = aWords - bWords;
           break;
-        case 'updated':
+        case "updated":
         default:
           const aUpdated = a.updatedAt || a.updatedAt;
           const bUpdated = b.updatedAt || b.updatedAt;
           try {
-            comparison = new Date(aUpdated || 0).getTime() - new Date(bUpdated || 0).getTime();
+            comparison =
+              new Date(aUpdated || 0).getTime() -
+              new Date(bUpdated || 0).getTime();
           } catch {
             comparison = 0;
           }
           break;
       }
 
-      return currentSortOrder === 'asc' ? comparison : -comparison;
+      return currentSortOrder === "asc" ? comparison : -comparison;
     });
 
     return sorted;
@@ -199,30 +213,33 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
   // Enhanced responsive grid layout classes based on view mode with improved adaptive columns
   const gridClasses = useMemo(() => {
     switch (currentViewMode) {
-      case 'list':
-        return 'grid gap-4 grid-cols-1';
-      case 'compact':
-        return 'grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7';
+      case "list":
+        return "grid gap-4 grid-cols-1";
+      case "compact":
+        return "grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 3xl:grid-cols-7";
       default: // grid
-        return 'grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6';
+        return "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6";
     }
   }, [currentViewMode]);
 
   const handleSortChange = (newSortBy: typeof currentSortBy) => {
-    const newSortOrder = newSortBy === currentSortBy 
-      ? (currentSortOrder === 'asc' ? 'desc' : 'asc')
-      : 'desc';
-    
+    const newSortOrder =
+      newSortBy === currentSortBy
+        ? currentSortOrder === "asc"
+          ? "desc"
+          : "asc"
+        : "desc";
+
     setCurrentSortBy(newSortBy);
     setCurrentSortOrder(newSortOrder);
-    
+
     // Notify parent component
     if (onSortChange) {
       onSortChange(newSortBy, newSortOrder);
     }
   };
 
-  const handleViewModeChange = (mode: 'grid' | 'list' | 'compact') => {
+  const handleViewModeChange = (mode: "grid" | "list" | "compact") => {
     setCurrentViewMode(mode);
     if (onViewModeChange) {
       onViewModeChange(mode);
@@ -237,16 +254,16 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
   };
 
   const toggleFilter = (filter: string) => {
-    setActiveFilters(prev => 
-      prev.includes(filter) 
-        ? prev.filter(f => f !== filter)
-        : [...prev, filter]
+    setActiveFilters((prev) =>
+      prev.includes(filter)
+        ? prev.filter((f) => f !== filter)
+        : [...prev, filter],
     );
   };
 
   const clearAllFilters = () => {
     setActiveFilters([]);
-    handleSearchChange('');
+    handleSearchChange("");
   };
 
   return (
@@ -255,9 +272,9 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search 
-            size={16} 
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground/60" 
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground/60"
           />
           <input
             type="text"
@@ -273,9 +290,9 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
           {/* View mode toggle */}
           <div className="flex items-center bg-card/40 backdrop-blur-sm rounded-lg p-1 border border-border/30">
             <button
-              onClick={() => handleViewModeChange('grid')}
-              className={`p-2 rounded-md transition-all duration-200 ${
-                currentViewMode === 'grid'
+              onClick={() => handleViewModeChange("grid")}
+              className={`p-2 rounded-md transition-all duration-200 cursor-pointer ${
+                currentViewMode === "grid"
                   ? "bg-background/70 text-foreground shadow-sm border border-border/30"
                   : "text-muted-foreground/60 hover:text-foreground hover:bg-background/30"
               }`}
@@ -284,9 +301,9 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
               <Grid3X3 size={14} />
             </button>
             <button
-              onClick={() => handleViewModeChange('list')}
-              className={`p-2 rounded-md transition-all duration-200 ${
-                currentViewMode === 'list'
+              onClick={() => handleViewModeChange("list")}
+              className={`p-2 rounded-md transition-all duration-200 cursor-pointer ${
+                currentViewMode === "list"
                   ? "bg-background/70 text-foreground shadow-sm border border-border/30"
                   : "text-muted-foreground/60 hover:text-foreground hover:bg-background/30"
               }`}
@@ -295,9 +312,9 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
               <List size={14} />
             </button>
             <button
-              onClick={() => handleViewModeChange('compact')}
-              className={`p-2 rounded-md transition-all duration-200 ${
-                currentViewMode === 'compact'
+              onClick={() => handleViewModeChange("compact")}
+              className={`p-2 rounded-md transition-all duration-200 cursor-pointer ${
+                currentViewMode === "compact"
                   ? "bg-background/70 text-foreground shadow-sm border border-border/30"
                   : "text-muted-foreground/60 hover:text-foreground hover:bg-background/30"
               }`}
@@ -310,11 +327,13 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
           {/* Filter dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className={`flex items-center gap-2 h-9 px-3 border-border/30 hover:border-border/50 hover:bg-card/40 backdrop-blur-sm rounded-lg ${
-                  activeFilters.length > 0 ? 'border-primary/50 bg-primary/10 text-primary' : ''
+                  activeFilters.length > 0
+                    ? "border-primary/50 bg-primary/10 text-primary"
+                    : ""
                 }`}
               >
                 <Filter size={14} />
@@ -326,39 +345,57 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-md border-border/50 rounded-xl shadow-xl">
-              <DropdownMenuItem onClick={() => toggleFilter('linked')} className="hover:bg-accent/30 rounded-lg">
+            <DropdownMenuContent
+              align="end"
+              className="w-48 bg-card/95 backdrop-blur-md border-border/50 rounded-xl shadow-xl"
+            >
+              <DropdownMenuItem
+                onClick={() => toggleFilter("linked")}
+                className="hover:bg-accent/30 rounded-lg"
+              >
                 <Link size={14} className="mr-2" />
                 Linked to Documents
-                {activeFilters.includes('linked') && (
+                {activeFilters.includes("linked") && (
                   <span className="ml-auto text-primary">✓</span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toggleFilter('empty')} className="hover:bg-accent/30 rounded-lg">
+              <DropdownMenuItem
+                onClick={() => toggleFilter("empty")}
+                className="hover:bg-accent/30 rounded-lg"
+              >
                 <FileText size={14} className="mr-2" />
                 Empty Notes
-                {activeFilters.includes('empty') && (
+                {activeFilters.includes("empty") && (
                   <span className="ml-auto text-primary">✓</span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toggleFilter('recent')} className="hover:bg-accent/30 rounded-lg">
+              <DropdownMenuItem
+                onClick={() => toggleFilter("recent")}
+                className="hover:bg-accent/30 rounded-lg"
+              >
                 <Clock size={14} className="mr-2" />
                 Recent (24h)
-                {activeFilters.includes('recent') && (
+                {activeFilters.includes("recent") && (
                   <span className="ml-auto text-primary">✓</span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toggleFilter('long')} className="hover:bg-accent/30 rounded-lg">
+              <DropdownMenuItem
+                onClick={() => toggleFilter("long")}
+                className="hover:bg-accent/30 rounded-lg"
+              >
                 <FileText size={14} className="mr-2" />
                 Long Notes (500+ words)
-                {activeFilters.includes('long') && (
+                {activeFilters.includes("long") && (
                   <span className="ml-auto text-primary">✓</span>
                 )}
               </DropdownMenuItem>
               {activeFilters.length > 0 && (
                 <>
                   <div className="border-t my-1" />
-                  <DropdownMenuItem onClick={clearAllFilters} className="hover:bg-accent/30 rounded-lg">
+                  <DropdownMenuItem
+                    onClick={clearAllFilters}
+                    className="hover:bg-accent/30 rounded-lg"
+                  >
                     <X size={14} className="mr-2" />
                     Clear All Filters
                   </DropdownMenuItem>
@@ -370,49 +407,68 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
           {/* Sort dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="flex items-center gap-2 h-9 px-3 border-border/30 hover:border-border/50 hover:bg-card/40 backdrop-blur-sm rounded-lg"
               >
-                {currentSortOrder === 'asc' ? <SortAsc size={14} /> : <SortDesc size={14} />}
+                {currentSortOrder === "asc" ? (
+                  <SortAsc size={14} />
+                ) : (
+                  <SortDesc size={14} />
+                )}
                 <span className="hidden sm:inline">Sort</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-md border-border/50 rounded-xl shadow-xl">
-              <DropdownMenuItem onClick={() => handleSortChange('updated')} className="hover:bg-accent/30 rounded-lg">
+            <DropdownMenuContent
+              align="end"
+              className="w-48 bg-card/95 backdrop-blur-md border-border/50 rounded-xl shadow-xl"
+            >
+              <DropdownMenuItem
+                onClick={() => handleSortChange("updated")}
+                className="hover:bg-accent/30 rounded-lg"
+              >
                 <Calendar size={14} className="mr-2" />
                 Last Updated
-                {currentSortBy === 'updated' && (
+                {currentSortBy === "updated" && (
                   <span className="ml-auto text-xs text-muted-foreground">
-                    {currentSortOrder === 'asc' ? '↑' : '↓'}
+                    {currentSortOrder === "asc" ? "↑" : "↓"}
                   </span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSortChange('created')} className="hover:bg-accent/30 rounded-lg">
+              <DropdownMenuItem
+                onClick={() => handleSortChange("created")}
+                className="hover:bg-accent/30 rounded-lg"
+              >
                 <Calendar size={14} className="mr-2" />
                 Date Created
-                {currentSortBy === 'created' && (
+                {currentSortBy === "created" && (
                   <span className="ml-auto text-xs text-muted-foreground">
-                    {currentSortOrder === 'asc' ? '↑' : '↓'}
+                    {currentSortOrder === "asc" ? "↑" : "↓"}
                   </span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSortChange('title')} className="hover:bg-accent/30 rounded-lg">
+              <DropdownMenuItem
+                onClick={() => handleSortChange("title")}
+                className="hover:bg-accent/30 rounded-lg"
+              >
                 <FileText size={14} className="mr-2" />
                 Title
-                {currentSortBy === 'title' && (
+                {currentSortBy === "title" && (
                   <span className="ml-auto text-xs text-muted-foreground">
-                    {currentSortOrder === 'asc' ? '↑' : '↓'}
+                    {currentSortOrder === "asc" ? "↑" : "↓"}
                   </span>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSortChange('wordCount')} className="hover:bg-accent/30 rounded-lg">
+              <DropdownMenuItem
+                onClick={() => handleSortChange("wordCount")}
+                className="hover:bg-accent/30 rounded-lg"
+              >
                 <Clock size={14} className="mr-2" />
                 Word Count
-                {currentSortBy === 'wordCount' && (
+                {currentSortBy === "wordCount" && (
                   <span className="ml-auto text-xs text-muted-foreground">
-                    {currentSortOrder === 'asc' ? '↑' : '↓'}
+                    {currentSortOrder === "asc" ? "↑" : "↓"}
                   </span>
                 )}
               </DropdownMenuItem>
@@ -425,21 +481,23 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <span>
-            {processedNotes.length} {processedNotes.length === 1 ? 'note' : 'notes'}
+            {processedNotes.length}{" "}
+            {processedNotes.length === 1 ? "note" : "notes"}
             {searchQuery && ` matching "${searchQuery}"`}
-            {activeFilters.length > 0 && ` with ${activeFilters.length} filter${activeFilters.length === 1 ? '' : 's'}`}
+            {activeFilters.length > 0 &&
+              ` with ${activeFilters.length} filter${activeFilters.length === 1 ? "" : "s"}`}
           </span>
           {activeFilters.length > 0 && (
             <div className="flex items-center gap-1">
-              {activeFilters.map(filter => (
-                <span 
+              {activeFilters.map((filter) => (
+                <span
                   key={filter}
                   className="px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 bg-primary text-primary-foreground"
                 >
-                  {filter === 'linked' && <Link size={10} />}
-                  {filter === 'empty' && <FileText size={10} />}
-                  {filter === 'recent' && <Clock size={10} />}
-                  {filter === 'long' && <FileText size={10} />}
+                  {filter === "linked" && <Link size={10} />}
+                  {filter === "empty" && <FileText size={10} />}
+                  {filter === "recent" && <Clock size={10} />}
+                  {filter === "long" && <FileText size={10} />}
                   {filter}
                   <button
                     onClick={() => toggleFilter(filter)}
@@ -468,17 +526,17 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
       {processedNotes.length > 0 ? (
         <div className={`${gridClasses} notes-grid`}>
           {processedNotes.map((note, index) => (
-            <div 
+            <div
               key={note.id}
               className="notes-grid-item"
-              style={{ 
-                animationDelay: `${Math.min(index * 50, 400)}ms` 
+              style={{
+                animationDelay: `${Math.min(index * 50, 400)}ms`,
               }}
             >
               <EnhancedNoteCard
                 note={note}
                 variant={currentViewMode}
-                showPreview={currentViewMode !== 'compact'}
+                showPreview={currentViewMode !== "compact"}
                 showMetadata={true}
                 onEdit={onEditNote}
                 onViewAnnotation={onViewAnnotation}
@@ -501,19 +559,22 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                 No notes found
               </h3>
               <p className="text-muted-foreground mb-6 leading-relaxed">
-                No notes match your search for <span className="font-medium text-foreground">"{searchQuery}"</span>. 
-                Try adjusting your search terms or browse all notes.
+                No notes match your search for{" "}
+                <span className="font-medium text-foreground">
+                  "{searchQuery}"
+                </span>
+                . Try adjusting your search terms or browse all notes.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button 
-                  onClick={() => handleSearchChange('')} 
+                <Button
+                  onClick={() => handleSearchChange("")}
                   variant="outline"
                   className="flex items-center gap-2"
                 >
                   <FileText size={16} />
                   Show All Notes
                 </Button>
-                <Button 
+                <Button
                   onClick={onCreateNote}
                   className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
                 >
@@ -526,10 +587,10 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
             // Default empty state
             <div className="max-w-lg mx-auto">
               <div className="relative mb-8">
-                <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                <div className="w-24 h-24 mx-auto rounded-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                   <FileText size={40} className="text-primary" />
                 </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-linear-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
                   <Plus size={16} className="text-white" />
                 </div>
               </div>
@@ -537,11 +598,12 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                 Start your note-taking journey
               </h3>
               <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
-                Create rich, interactive notes with our powerful editor. Link them to Document annotations, 
-                organize your thoughts, and build your knowledge base. Get started with your first note!
+                Create rich, interactive notes with our powerful editor. Link
+                them to Document annotations, organize your thoughts, and build
+                your knowledge base. Get started with your first note!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
+                <Button
                   onClick={onCreateNote}
                   size="lg"
                   className="flex items-center gap-2 px-8 py-4 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift bg-primary text-primary-foreground hover:bg-primary/90"
@@ -549,25 +611,28 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                   <FileText size={18} />
                   Create your first note
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   size="lg"
                   className="flex items-center gap-2 px-8 py-4 text-base"
                   onClick={() => {
                     // TODO: Add link to help or demo
-                    console.log('Show help or demo');
+                    console.log("Show help or demo");
                   }}
                 >
                   <BookOpen size={18} />
                   Learn more
                 </Button>
               </div>
-              
+
               {/* Feature highlights */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12 text-center">
                 <div className="space-y-2">
                   <div className="w-12 h-12 mx-auto rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-                    <PenTool size={20} className="text-blue-600 dark:text-blue-400" />
+                    <PenTool
+                      size={20}
+                      className="text-blue-600 dark:text-blue-400"
+                    />
                   </div>
                   <h4 className="font-semibold text-foreground">Rich Editor</h4>
                   <p className="text-sm text-muted-foreground">
@@ -576,18 +641,28 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
                 </div>
                 <div className="space-y-2">
                   <div className="w-12 h-12 mx-auto rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                    <FileText size={20} className="text-green-600 dark:text-green-400" />
+                    <FileText
+                      size={20}
+                      className="text-green-600 dark:text-green-400"
+                    />
                   </div>
-                  <h4 className="font-semibold text-foreground">Document Integration</h4>
+                  <h4 className="font-semibold text-foreground">
+                    Document Integration
+                  </h4>
                   <p className="text-sm text-muted-foreground">
                     Link notes directly to Document annotations and highlights
                   </p>
                 </div>
                 <div className="space-y-2">
                   <div className="w-12 h-12 mx-auto rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
-                    <Search size={20} className="text-purple-600 dark:text-purple-400" />
+                    <Search
+                      size={20}
+                      className="text-purple-600 dark:text-purple-400"
+                    />
                   </div>
-                  <h4 className="font-semibold text-foreground">Smart Search</h4>
+                  <h4 className="font-semibold text-foreground">
+                    Smart Search
+                  </h4>
                   <p className="text-sm text-muted-foreground">
                     Find notes quickly with powerful search and filtering
                   </p>

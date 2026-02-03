@@ -2,8 +2,7 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
@@ -13,137 +12,94 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Slider } from "@/components/ui/slider";
 import {
   ArrowLeft,
   BookOpen,
   Zap,
-  Clock,
-  HelpCircle,
-  Brain,
-  MessageSquare,
-  Globe,
-  Settings2,
   FileText,
   Sparkles,
   Loader2,
 } from "lucide-react";
-import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
-
 import { DocumentSelectionTabs } from "@/features/knowldge-test/quizzes/components/DocumentSelectionTabs";
 import { QuestionDistribution } from "@/features/knowldge-test/quizzes/components/QuestionDistribution";
-import {
-  useGetAllDocumentsQuery,
-  useCreateQuizMutation,
-} from "@/lib/store/apiSlice";
+import { useGetAllDocumentsQuery } from "@/lib/store/apiSlice";
 import {
   quizCreationSchema,
   type QuizCreationFormData,
 } from "@/features/knowldge-test/quizzes/schemas/createQuizSchema";
-import { prepareQuizPayload } from "@/features/knowldge-test/quizzes/forms/createQuiz";
-import { toast } from "react-toastify";
-import { cn } from "@/lib/utils";
-
-// Local enum-like constants mirroring server enums
-const difficulties = [
-  {
-    key: "easy",
-    label: "Easy",
-    description: "Focus on basics",
-    icon: Brain,
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
-  },
-  {
-    key: "medium",
-    label: "Medium",
-    description: "Standard level",
-    icon: Brain,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/20",
-  },
-  {
-    key: "hard",
-    label: "Hard",
-    description: "Challenging",
-    icon: Brain,
-    color: "text-rose-500",
-    bg: "bg-rose-500/10",
-    border: "border-rose-500/20",
-  },
-] as const;
-
-const explanationLevels = [
-  {
-    key: "none",
-    label: "None",
-    description: "Answers only",
-  },
-  {
-    key: "brief",
-    label: "Brief",
-    description: "Key points",
-  },
-  {
-    key: "detailed",
-    label: "Detailed",
-    description: "Full explanation",
-  },
-] as const;
+import {
+  difficulties,
+  explanationLevels,
+} from "@/features/knowldge-test/flashcards/constants";
+import { useSubmitQuiz } from "@/features/knowldge-test/quizzes/hooks/useSubmitQuiz";
 
 export default function CreateQuizPage() {
-  const router = useRouter();
+  const { onSubmit: handleQuizSubmit, isLoading: isSubmitting } =
+    useSubmitQuiz();
 
   const { data: documentsData, isLoading: isLoadingDocuments } =
     useGetAllDocumentsQuery();
-  const [createQuiz] = useCreateQuizMutation();
 
   // Initialize React Hook Form
   const form = useForm<QuizCreationFormData>({
     resolver: zodResolver(quizCreationSchema),
     defaultValues: {
-      userPrompt: "",
       difficulty: "medium",
       numberOfQuestions: 10,
       language: "en",
-      timeLimitMinutes: 10,
       explanationLevel: "none",
+      questionsDistribution: {
+        MCQ: 0,
+        TRUE_FALSE: 0,
+      },
     },
   });
 
   const {
     control,
     handleSubmit,
-    watch,
     setValue,
-    formState: { errors, isSubmitting, isSubmitted },
+    formState: { errors, isSubmitted },
   } = form;
 
-  // Watch form values
-  const documentId = watch("documentId");
-  const difficulty = watch("difficulty");
-  const numberOfQuestions = watch("numberOfQuestions");
-  const language = watch("language");
-  const timeLimitMinutes = watch("timeLimitMinutes");
-  const questionsDistribution = watch("questionsDistribution");
+  // Optimized watch - only subscribe to the fields we need
+  const watchedValues = useWatch({
+    control,
+    name: ["documentId", "numberOfQuestions", "questionsDistribution"],
+  });
 
-  // to update the documentId field in the form
+  const [documentId, numberOfQuestions, questionsDistribution] = watchedValues;
+
+  // Handler for document selection (using setValue is correct here - external to FormField)
   const handleSelectDocument = (doc: { id: string }) => {
     setValue("documentId", doc.id, { shouldValidate: true });
+  };
+
+  // Handler for distribution changes (using setValue is correct here - external component)
+  const handleDistributionChange = (key: string, value: number | undefined) => {
+    setValue(`questionsDistribution.${key as "MCQ" | "TRUE_FALSE"}`, value, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
   };
 
   // Get selected document info
   const selectedDocument = useMemo(() => {
     if (!documentId || !documentsData) return null;
-    const doc = documentsData.find((p: any) => p.id === documentId);
+    const doc = documentsData.find((p: { id: string }) => p.id === documentId);
     return doc ? { id: doc.id, title: doc.name } : null;
   }, [documentId, documentsData]);
+
+  // Transform documents for the selection component
+  const availableDocuments = useMemo(() => {
+    return (documentsData || []).map((p: { id: string; name?: string }) => ({
+      id: p.id,
+      title: p.name ?? "Untitled",
+    }));
+  }, [documentsData]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
@@ -168,42 +124,10 @@ export default function CreateQuizPage() {
 
       <Form {...form}>
         <form
-          onSubmit={handleSubmit(async (data) => {
-            const payload = prepareQuizPayload(data);
-            await toast.promise(
-              createQuiz(payload)
-                .unwrap()
-                .then((res) => {
-                  if (res?.id) {
-                    router.push(`/knowledge-test/quizzes/${res.id}`);
-                  } else {
-                    router.push("/knowledge-test");
-                  }
-                  return res;
-                })
-                .catch((err) => {
-                  console.error("Quiz creation failed:", err);
-                  throw err;
-                }),
-              {
-                pending: "Creating quiz...",
-                success: "Quiz created successfully!",
-                error: {
-                  render({ data }: any) {
-                    return (
-                      data?.data?.message ||
-                      data?.error ||
-                      "Failed to create quiz"
-                    );
-                  },
-                },
-              },
-            );
-          })}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+          onSubmit={handleSubmit(handleQuizSubmit)}
+          className="flex flex-col gap-6 max-w-2xl mx-auto"
         >
-          {/* Main Column */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6">
             {/* 1. Source Material */}
             <div className="bg-background rounded-xl border p-6 space-y-4">
               <div className="space-y-1">
@@ -218,15 +142,8 @@ export default function CreateQuizPage() {
 
               <div className="pt-2">
                 <DocumentSelectionTabs
-                  availableDocuments={
-                    (documentsData || []).map((p: any) => ({
-                      id: p.id,
-                      title: p.name ?? "Untitled",
-                    })) as any
-                  }
-                  onSelectDocument={(d: any) =>
-                    handleSelectDocument({ id: d.id })
-                  }
+                  availableDocuments={availableDocuments}
+                  onSelectDocument={(d) => handleSelectDocument({ id: d.id })}
                   selectedDocumentId={documentId}
                   isLoadingDocuments={isLoadingDocuments}
                 />
@@ -250,24 +167,43 @@ export default function CreateQuizPage() {
                 </p>
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 space-y-6">
+                {/* Number of Questions */}
+                <FormField
+                  control={control}
+                  name="numberOfQuestions"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Questions</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={50}
+                          value={field.value ?? ""}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const numVal = val
+                              ? Math.min(50, Math.max(1, Number(val)))
+                              : 0;
+                            field.onChange(numVal);
+                          }}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
                 <QuestionDistribution
-                  totalQuestions={numberOfQuestions}
+                  totalQuestions={numberOfQuestions ?? 10}
                   distribution={questionsDistribution || {}}
-                  onChange={(key: string, value: number | undefined) => {
-                    setValue(`questionsDistribution.${key}` as any, value, {
-                      shouldDirty: true,
-                      shouldTouch: true,
-                      shouldValidate: true,
-                    });
-                  }}
+                  onChange={handleDistributionChange}
                 />
               </div>
             </div>
           </div>
 
-          {/* Sidebar Column */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="space-y-6">
             {/* Configuration */}
             <div className="bg-background rounded-xl border p-6 space-y-6">
               <div className="space-y-1">
@@ -281,25 +217,6 @@ export default function CreateQuizPage() {
               </div>
 
               <div className="space-y-6">
-                {/* Specific Focus */}
-                <FormField
-                  control={control}
-                  name="userPrompt"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Specific Focus (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          {...field}
-                          rows={3}
-                          placeholder="e.g. Focus on key dates from Chapter 2..."
-                          className="resize-none"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
                 {/* Difficulty */}
                 <FormField
                   control={control}
@@ -325,66 +242,6 @@ export default function CreateQuizPage() {
                           ))}
                         </div>
                       </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                {/* Number of Questions */}
-                <FormField
-                  control={control}
-                  name="numberOfQuestions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Questions</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={50}
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value
-                                ? Math.min(
-                                    50,
-                                    Math.max(1, Number(e.target.value)),
-                                  )
-                                : undefined,
-                            )
-                          }
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                {/* Time Limit */}
-                <FormField
-                  control={control}
-                  name="timeLimitMinutes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Time Limit (Minutes)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          max={180}
-                          {...field}
-                          placeholder="∞"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? undefined
-                                : Math.min(180, Number(e.target.value)),
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <p className="text-xs text-muted-foreground">
-                        0 or empty for no limit
-                      </p>
                     </FormItem>
                   )}
                 />
@@ -441,7 +298,7 @@ export default function CreateQuizPage() {
                   )}
                 </Button>
                 <p className="text-xs text-center text-muted-foreground mt-2">
-                  Estimated time: ~15 seconds
+                  Estimated time: ~24 seconds
                 </p>
               </div>
             </div>

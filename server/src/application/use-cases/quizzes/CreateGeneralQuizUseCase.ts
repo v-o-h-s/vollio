@@ -24,29 +24,26 @@ export class CreateGeneralQuizUseCase {
     private getDocumentByIdUseCase: GetDocumentByIdUseCase,
     private embeddingRepository: IEmbeddingRepository,
     private quizRepository: IQuizRepository,
-    private tokenRateLimitingService: ITokenRateLimitingService
+    private tokenRateLimitingService: ITokenRateLimitingService,
   ) {}
 
   async execute(
     data: CreateQuizDTO,
-    userId: string
+    userId: string,
   ): Promise<CreateQuizResponse> {
     this.logger.info(
       { documentId: data.documentId, userId },
-      "Executing CreateGeneralQuizUseCase"
+      "Executing CreateGeneralQuizUseCase",
     );
     // getting chunks relevant to the prompt
     if (!(await this.getDocumentByIdUseCase.execute(data.documentId, userId))) {
       this.logger.warn(
         { documentId: data.documentId },
-        "Document not found in CreateGeneralQuizUseCase"
+        "Document not found in CreateGeneralQuizUseCase",
       );
       throw new NotFoundError("Document not found");
     }
-    await this.ensureChunkingUseCase.execute(
-      data.documentId,
-      userId
-    );
+    await this.ensureChunkingUseCase.execute(data.documentId, userId);
     const chunks: { content: string; metadata: ChunkMetadata }[] = (
       await this.embeddingRepository.getDocumentEmbeddings(data.documentId)
     ).map((chunk) => ({
@@ -62,7 +59,6 @@ export class CreateGeneralQuizUseCase {
       data.language,
       data.explanationLevel,
       data.numberOfQuestions,
-      data.timeLimitMinutes
     );
 
     const allQuestions: QuizQuestion[] = [];
@@ -77,7 +73,7 @@ export class CreateGeneralQuizUseCase {
     if (!chunks.length) {
       this.logger.error(
         { documentId: data.documentId },
-        "No chunks found for the document"
+        "No chunks found for the document",
       );
       throw new ServerError("No chunks found for the document");
     }
@@ -90,7 +86,7 @@ export class CreateGeneralQuizUseCase {
 
     this.logger.info(
       { documentId: data.documentId, batchCount: batches.length },
-      "Starting batch processing for quiz generation"
+      "Starting batch processing for quiz generation",
     );
 
     for (let i = 0; i < batches.length; i++) {
@@ -100,7 +96,7 @@ export class CreateGeneralQuizUseCase {
           currentBatch: i + 1,
           totalBatches: batches.length,
         },
-        "Processing batch for quiz"
+        "Processing batch for quiz",
       );
       const batch = batches[i];
 
@@ -144,12 +140,11 @@ export class CreateGeneralQuizUseCase {
 
       const fullPrompt = promptTemplate.replace(
         "<<CONTENT_GOES_HERE>>",
-        context
+        context,
       );
 
-      const result = await this.generativeAiService.generateQuizQuestions(
-        fullPrompt
-      );
+      const result =
+        await this.generativeAiService.generateQuizQuestions(fullPrompt);
 
       // Accumulate token usage
       totalPromptTokens += result.usage.promptTokens;
@@ -188,7 +183,7 @@ export class CreateGeneralQuizUseCase {
 
     const isUUID = (uuid: string) =>
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        uuid
+        uuid,
       );
 
     // Ensure all question and option IDs are valid UUIDs
@@ -212,7 +207,7 @@ export class CreateGeneralQuizUseCase {
 
         if (newQ.correctOptionIds) {
           newQ.correctOptionIds = newQ.correctOptionIds.map(
-            (id) => optionMap.get(id) || id
+            (id) => optionMap.get(id) || id,
           );
         }
       }
@@ -225,7 +220,7 @@ export class CreateGeneralQuizUseCase {
         totalPromptTokens,
         totalCompletionTokens,
       },
-      "Generated quiz questions"
+      "Generated quiz questions",
     );
     quiz.setQuestions(finalQuestions);
 
@@ -234,7 +229,7 @@ export class CreateGeneralQuizUseCase {
 
     this.logger.info(
       { quizId: quiz.getId() },
-      "CreateGeneralQuizUseCase completed successfully"
+      "CreateGeneralQuizUseCase completed successfully",
     );
 
     // mapping the quiz entity to response interface

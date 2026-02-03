@@ -15,33 +15,17 @@ export class EmbeddingRepository implements IEmbeddingRepository {
   }
 
   /**
-   * Store embeddings for a document.
-   * The `embedding` parameter can be either:
-   * - an array of vectors (number[][]) where each vector corresponds to a chunk, or
-   * - a single vector (number[]) which will be applied to every chunk (not typical but supported).
+   * Store chunks for a document.
    */
-  async storeEmbedding(
-    documentId: string,
-    embedding: number[][],
-    chunks: Chunk[]
-  ): Promise<void> {
-    const vectors: number[][] = embedding;
-
-    if (vectors.length !== chunks.length) {
-      throw new DatabaseError({
-        message: "Embeddings length must match chunks length",
-      });
-    }
-
-    const rows = chunks.map((chunk, idx) => ({
+  async storeChunks(documentId: string, chunks: Chunk[]): Promise<void> {
+    const rows = chunks.map((chunk) => ({
       document_id: documentId,
       content: chunk.text,
-      embedding: vectors[idx] && vectors[idx].length > 0 ? vectors[idx] : null,
       token_count: chunk.tokenCount,
       metadata: chunk.metadata,
     }));
 
-    const { error } = await this.supabaseClient.from("embeddings").insert(rows);
+    const { error } = await this.supabaseClient.from("chunks").insert(rows);
     if (error) {
       this.logger?.error({ err: error }, "Failed to insert embeddings");
       throw new DatabaseError(error);
@@ -51,7 +35,7 @@ export class EmbeddingRepository implements IEmbeddingRepository {
   async searchSimilarEmbeddings(
     queryEmbedding: number[],
     matchThreshold: number,
-    matchCount: number
+    matchCount: number,
   ): Promise<Embedding[]> {
     const { data, error } = await this.supabaseClient.rpc("search_embeddings", {
       query_embedding: queryEmbedding,
@@ -73,23 +57,25 @@ export class EmbeddingRepository implements IEmbeddingRepository {
           row.id,
           row.document_id,
           row.content,
-          row.embedding,
           row.token_count,
-          row.metadata
-        )
+          row.metadata,
+        ),
     );
 
     return results;
   }
   async isDocumentEmbedded(documentId: string): Promise<boolean> {
     const { data, error } = await this.supabaseClient
-      .from("embeddings")
+      .from("chunks")
       .select("id")
       .eq("document_id", documentId)
       .limit(1);
 
     if (error) {
-      this.logger?.error({ err: error }, "Failed to check if document is embedded");
+      this.logger?.error(
+        { err: error },
+        "Failed to check if document is embedded",
+      );
       throw new DatabaseError(error);
     }
 
@@ -97,7 +83,7 @@ export class EmbeddingRepository implements IEmbeddingRepository {
   }
   async getDocumentEmbeddings(documentId: string): Promise<Embedding[]> {
     const { data, error } = await this.supabaseClient
-      .from("embeddings")
+      .from("chunks")
       .select("*")
       .eq("document_id", documentId);
 
@@ -112,10 +98,9 @@ export class EmbeddingRepository implements IEmbeddingRepository {
           row.id,
           row.document_id,
           row.content,
-          row.embedding,
           row.token_count,
-          row.metadata
-        )
+          row.metadata,
+        ),
     );
   }
 }

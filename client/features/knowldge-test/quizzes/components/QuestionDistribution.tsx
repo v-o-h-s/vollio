@@ -6,13 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import {
-  ListTodo,
-  CheckCircle2,
-  MessageSquare,
-  Type,
-  AlertCircle,
-} from "lucide-react";
+import { ListTodo, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface QuestionType {
   key: string;
@@ -56,33 +50,12 @@ export function QuestionDistribution({
   const currentTotal = useMemo(() => {
     return Object.values(distribution).reduce(
       (acc: number, val) => acc + (val || 0),
-      0
+      0,
     );
   }, [distribution]);
 
-  const chartData = useMemo(() => {
-    let currentAngle = 0;
-    const radius = 40;
-    const circumference = 2 * Math.PI * radius;
-
-    return QUESTION_TYPES.map((type) => {
-      const count = distribution[type.key] || 0;
-      const percentage = totalQuestions > 0 ? count / totalQuestions : 0;
-      const strokeDasharray = `${percentage * circumference} ${circumference}`;
-      const rotation = currentAngle;
-
-      // Update for next segment (using 360 degrees)
-      currentAngle += percentage * 360;
-
-      return {
-        ...type,
-        count,
-        percentage,
-        strokeDasharray,
-        rotation,
-      };
-    });
-  }, [distribution, totalQuestions]);
+  // Calculate remaining questions
+  const remaining = totalQuestions - currentTotal;
 
   // Handle slider change safely
   const handleSliderChange = (key: string, value: number) => {
@@ -90,70 +63,35 @@ export function QuestionDistribution({
   };
 
   return (
-    <div className={cn("grid grid-cols-1 md:grid-cols-2 gap-8", className)}>
-      {/* Chart Section */}
-      <div className="flex flex-col items-center justify-center relative">
-        <div className="relative w-48 h-48">
-          {/* Base Circle (Background) */}
-          <svg
-            viewBox="0 0 100 100"
-            className="w-full h-full transform -rotate-90"
-          >
-            <circle
-              cx="50"
-              cy="50"
-              r="40"
-              fill="transparent"
-              stroke="currentColor"
-              strokeWidth="10"
-              className="text-muted/20"
-            />
-            {/* Segments */}
-            {chartData.map((segment) => (
-              <circle
-                key={segment.key}
-                cx="50"
-                cy="50"
-                r="40"
-                fill="transparent"
-                stroke="currentColor"
-                strokeWidth="10"
-                strokeDasharray={segment.strokeDasharray}
-                strokeDashoffset={0}
-                className={cn(
-                  "transition-all duration-500 ease-out",
-                  segment.color
-                )}
-                style={{
-                  transformBox: "fill-box",
-                  transformOrigin: "center",
-                  transform: `rotate(${segment.rotation}deg)`,
-                }}
-                strokeLinecap="round"
-              />
-            ))}
-          </svg>
-
-          {/* Center Text */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-3xl font-bold">{currentTotal}</span>
-            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+    <div className={cn("space-y-6", className)}>
+      {/* Remaining Questions Indicator */}
+      <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border">
+        <div className="flex flex-col">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Questions Remaining
+          </span>
+          <span className="text-2xl font-bold">
+            {remaining}
+            <span className="text-sm font-normal text-muted-foreground ml-1">
               / {totalQuestions}
             </span>
-          </div>
+          </span>
         </div>
-
-        {/* Status Message */}
-        <div className="mt-4 text-center h-6">
-          {currentTotal !== totalQuestions ? (
-            <div className="text-xs text-amber-500 font-medium flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
-              <AlertCircle className="w-3.5 h-3.5" />
-              Adjust counts to match total
+        <div>
+          {remaining === 0 ? (
+            <div className="flex items-center gap-1.5 text-green-500">
+              <CheckCircle2 className="w-5 h-5" />
+              <span className="text-xs font-medium">All distributed</span>
+            </div>
+          ) : remaining < 0 ? (
+            <div className="flex items-center gap-1.5 text-red-500">
+              <AlertCircle className="w-5 h-5" />
+              <span className="text-xs font-medium">Over limit</span>
             </div>
           ) : (
-            <div className="text-xs text-green-500 font-medium flex items-center gap-1.5 animate-in fade-in slide-in-from-top-2">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Perfectly distributed!
+            <div className="flex items-center gap-1.5 text-amber-500">
+              <AlertCircle className="w-5 h-5" />
+              <span className="text-xs font-medium">{remaining} left</span>
             </div>
           )}
         </div>
@@ -176,20 +114,22 @@ export function QuestionDistribution({
                   type="number"
                   min={0}
                   max={totalQuestions}
-                  value={val || ""}
+                  value={val}
                   onChange={(e) =>
                     onChange(
                       type.key,
-                      e.target.value === "" ? undefined : Number(e.target.value)
+                      e.target.value === ""
+                        ? undefined
+                        : Number(e.target.value),
                     )
                   }
-                  className="w-12 h-6 text-right text-xs p-1"
+                  className="w-14 h-7 text-right text-sm px-2"
                 />
               </div>
               <Slider
                 value={[val]}
                 min={0}
-                max={totalQuestions} // Allow going up to max individually, though user should balance
+                max={totalQuestions}
                 step={1}
                 onValueChange={(vals) => handleSliderChange(type.key, vals[0])}
                 className={cn("py-1 [&>.absolute]:bg-primary/20")}

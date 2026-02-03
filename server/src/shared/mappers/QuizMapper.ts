@@ -21,7 +21,7 @@ export class QuizMapper {
       settings: {
         difficultyLevel: quiz.getDifficultyLevel(),
         numberOfQuestions: quiz.getNumberOfQuestions()!,
-        timeLimitMinutes: quiz.getTimeLimitMinutes()!,
+
         explanationLevel: quiz.getExplanationLevel(),
       },
       questions: quiz.getQuestions() || [],
@@ -70,10 +70,10 @@ export class QuizMapper {
       row.language as QuizLanguage,
       row.explanation_level as ExplanationLevel,
       row.number_of_questions,
-      row.time_limit_minutes,
+
       new Date(row.created_at),
       questions,
-      row.title
+      row.title,
     );
   }
 }

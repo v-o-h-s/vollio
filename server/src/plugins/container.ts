@@ -62,7 +62,6 @@ import { EnsureExistingOfDocumentChunkUseCase } from "../application/use-cases/e
 import { EmbedDocumentByIdUseCase } from "../application/use-cases/embedding/EmbedDocumentByIdUseCase";
 import { ChunkDocumentByIdUseCase } from "../application/use-cases/embedding/ChunkDocumentByIdUseCase";
 import { QuizRepository } from "../infrastructure/repositories/QuizRepository";
-import { CreateUserPromptQuizUseCase } from "../application/use-cases/quizzes/CreateUserPromptQuizUseCase";
 import { FlashCardsSetRepository } from "../infrastructure/repositories/FlashCardsSetRepository";
 import { GenerateGeneralFlashCardsUseCase } from "../application/use-cases/flashcards/GenerateGeneralFlashCardsUseCase";
 import { GetAllFlashCardsSetsUseCase } from "../application/use-cases/flashcards/GetAllFlashCardsSetsUseCase";
@@ -462,10 +461,6 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     createQuizUseCase: asClass(CreateGeneralQuizUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    createUserPromptQuizUseCase: asClass(CreateUserPromptQuizUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

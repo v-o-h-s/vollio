@@ -48,7 +48,7 @@ export class Quiz {
   private language: QuizLanguage;
   private difficultyLevel?: DifficultyLevel;
   private numberOfQuestions?: number;
-  private timeLimitMinutes?: number;
+
   private explanationLevel: ExplanationLevel;
   private questions?: QuizQuestion[];
   private title?: string;
@@ -61,17 +61,17 @@ export class Quiz {
     language: QuizLanguage = QuizLanguage.EN,
     explanationLevel: ExplanationLevel = ExplanationLevel.NONE,
     numberOfQuestions?: number,
-    timeLimitMinutes?: number,
+
     createdAt: Date = new Date(),
     questions?: QuizQuestion[],
-    title?: string
+    title?: string,
   ) {
     this.id = id;
     this.documentId = documentId;
     this.difficultyLevel = difficultyLevel;
     this.language = language;
     this.numberOfQuestions = numberOfQuestions;
-    this.timeLimitMinutes = timeLimitMinutes;
+
     this.explanationLevel = explanationLevel;
     this.questions = questions || [];
     this.createdAt = createdAt || new Date();
@@ -84,10 +84,6 @@ export class Quiz {
 
   public setTitle(title: string): void {
     this.title = title;
-  }
-
-  public setTimeLimitMinutes(timeLimitMinutes: number): void {
-    this.timeLimitMinutes = timeLimitMinutes;
   }
 
   public getId(): string {
@@ -118,10 +114,6 @@ export class Quiz {
     this.numberOfQuestions = numberOfQuestions;
   }
 
-  public getTimeLimitMinutes(): number | null {
-    return this.timeLimitMinutes ?? null;
-  }
-
   public getExplanationLevel(): ExplanationLevel {
     return this.explanationLevel;
   }
@@ -146,9 +138,6 @@ export class Quiz {
       language: this.language,
       difficultyLevel: this.difficultyLevel,
       numberOfQuestions: this.numberOfQuestions,
-      timeLimitMinutes: this.timeLimitMinutes,
-      explanationLevel: this.explanationLevel,
-      questions: this.questions,
       createdAt: this.createdAt.toISOString(),
     };
   }

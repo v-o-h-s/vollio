@@ -8,27 +8,19 @@ export class ChunkDocumentByIdUseCase {
     private embeddingRepository: IEmbeddingRepository,
     private getDocumentContentUseCase: GetDocumentContentUseCase,
     private documentProcessingService: DocumentProcessingService,
-    private chunkingService: ChunkingService
+    private chunkingService: ChunkingService,
   ) {}
 
   async execute(documentId: string, userId: string) {
     const document = await this.getDocumentContentUseCase.execute(
       documentId,
-      userId
+      userId,
     );
     const text = await this.documentProcessingService.getText(
-      new Uint8Array(document.content)
+      new Uint8Array(document.content),
     );
     const chunks = await this.chunkingService.chunkText(text);
-    
-    // We store chunks with empty embeddings since we only need the text for now
-    // We'll use an array of empty arrays for embeddings
-    const emptyEmbeddings = chunks.map(() => []);
-    
-    await this.embeddingRepository.storeEmbedding(
-      documentId,
-      emptyEmbeddings,
-      chunks
-    );
+
+    await this.embeddingRepository.storeChunks(documentId, chunks);
   }
 }

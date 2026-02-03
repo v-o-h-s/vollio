@@ -13,12 +13,11 @@ export {
 } from "../../domain/entities/Quiz";
 
 export interface CreateQuizDTO {
-  userPrompt?: string;
   documentId: string; // UUID string
   difficultyLevel: DifficultyLevel;
   numberOfQuestions?: number;
   language?: QuizLanguage;
-  timeLimitMinutes?: number;
+
   explanationLevel?: ExplanationLevel;
   questionsDistribution?: Partial<Record<QuizQuestionsTypeEnum, number>>;
 }
@@ -26,7 +25,6 @@ export interface CreateQuizDTO {
 export const createQuizSchema: JSONSchemaType<CreateQuizDTO> = {
   type: "object",
   properties: {
-    userPrompt: { type: "string", nullable: true },
     documentId: {
       type: "string",
       pattern:
@@ -53,7 +51,7 @@ export const createQuizSchema: JSONSchemaType<CreateQuizDTO> = {
       nullable: true,
       enum: [QuizLanguage.EN, QuizLanguage.FR, QuizLanguage.AR] as const,
     },
-    timeLimitMinutes: { type: "integer", nullable: true, minimum: 1 },
+
     explanationLevel: {
       type: "string",
       nullable: true,

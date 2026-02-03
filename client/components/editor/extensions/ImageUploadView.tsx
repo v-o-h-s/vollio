@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useCallback } from 'react';
-import { NodeViewWrapper, NodeViewProps } from '@tiptap/react';
-import { Loader2, AlertCircle, Upload, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, useCallback } from "react";
+import { NodeViewWrapper, NodeViewProps } from "@tiptap/react";
+import { Loader2, AlertCircle, Upload, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface ImageUploadViewProps extends NodeViewProps {
-  node: NodeViewProps['node'] & {
+  node: NodeViewProps["node"] & {
     attrs: {
       src?: string | null;
       alt?: string | null;
@@ -27,7 +27,12 @@ export function ImageUploadView({
 }: ImageUploadViewProps) {
   const { src, alt, title, width, height, loading, error } = node.attrs;
   const [isResizing, setIsResizing] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [dragStart, setDragStart] = useState({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
   const imageRef = useRef<HTMLImageElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
 
@@ -71,21 +76,21 @@ export function ImageUploadView({
         let newWidth = dragStart.width;
         let newHeight = dragStart.height;
 
-        if (corner.includes('right')) {
+        if (corner.includes("right")) {
           newWidth = Math.max(100, dragStart.width + deltaX);
         }
-        if (corner.includes('left')) {
+        if (corner.includes("left")) {
           newWidth = Math.max(100, dragStart.width - deltaX);
         }
-        if (corner.includes('bottom')) {
+        if (corner.includes("bottom")) {
           newHeight = Math.max(60, dragStart.height + deltaY);
         }
-        if (corner.includes('top')) {
+        if (corner.includes("top")) {
           newHeight = Math.max(60, dragStart.height - deltaY);
         }
 
         // Maintain aspect ratio when dragging corners
-        if (corner.includes('right') || corner.includes('left')) {
+        if (corner.includes("right") || corner.includes("left")) {
           const aspectRatio = dragStart.height / dragStart.width;
           newHeight = newWidth * aspectRatio;
         }
@@ -98,14 +103,14 @@ export function ImageUploadView({
 
       const handleMouseUp = () => {
         setIsResizing(false);
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
       };
 
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
     },
-    [dragStart, isResizing, updateAttributes]
+    [dragStart, isResizing, updateAttributes],
   );
 
   const handleDocumentSelect = useCallback(
@@ -114,14 +119,14 @@ export function ImageUploadView({
       if (!document) return;
 
       // Validate document type
-      if (!document.type.startsWith('image/')) {
-        updateAttributes({ error: 'Please select an image document' });
+      if (!document.type.startsWith("image/")) {
+        updateAttributes({ error: "Please select an image document" });
         return;
       }
 
       // Validate document size (10MB)
       if (document.size > 10 * 1024 * 1024) {
-        updateAttributes({ error: 'Image must be smaller than 10MB' });
+        updateAttributes({ error: "Image must be smaller than 10MB" });
         return;
       }
 
@@ -129,10 +134,10 @@ export function ImageUploadView({
       updateAttributes({ loading: true, error: null });
 
       const formData = new FormData();
-      formData.append('document', document);
+      formData.append("document", document);
 
-      fetch('/api/images/upload', {
-        method: 'POST',
+      fetch("/api/images/upload", {
+        method: "POST",
         body: formData,
       })
         .then((response) => response.json())
@@ -147,19 +152,19 @@ export function ImageUploadView({
           } else {
             updateAttributes({
               loading: false,
-              error: data.error || 'Upload failed',
+              error: data.error || "Upload failed",
             });
           }
         })
         .catch((error) => {
-          console.error('Upload error:', error);
+          console.error("Upload error:", error);
           updateAttributes({
             loading: false,
-            error: 'Upload failed',
+            error: "Upload failed",
           });
         });
     },
-    [updateAttributes]
+    [updateAttributes],
   );
 
   // Loading state
@@ -188,13 +193,13 @@ export function ImageUploadView({
           <div className="flex items-center space-x-2">
             <button
               onClick={() => documentInputRef.current?.click()}
-              className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+              className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors cursor-pointer"
             >
               Try Again
             </button>
             <button
               onClick={deleteNode}
-              className="p-1 text-muted-foreground hover:text-destructive transition-colors"
+              className="p-1 text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
             >
               <X className="h-4 w-4" />
             </button>
@@ -223,7 +228,7 @@ export function ImageUploadView({
             </p>
             <button
               onClick={() => documentInputRef.current?.click()}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors cursor-pointer"
             >
               Choose Image
             </button>
@@ -245,19 +250,19 @@ export function ImageUploadView({
     <NodeViewWrapper className="my-4">
       <div
         className={cn(
-          'relative inline-block group',
-          selected && 'ring-2 ring-primary ring-offset-2 rounded'
+          "relative inline-block group",
+          selected && "ring-2 ring-primary ring-offset-2 rounded",
         )}
-        style={{ width: width || 'auto', height: height || 'auto' }}
+        style={{ width: width || "auto", height: height || "auto" }}
       >
         <img
           ref={imageRef}
           src={src}
-          alt={alt || ''}
+          alt={alt || ""}
           title={title || undefined}
           onLoad={handleImageLoad}
           className="block max-w-full h-auto rounded-lg shadow-sm"
-          style={{ width: width || 'auto', height: height || 'auto' }}
+          style={{ width: width || "auto", height: height || "auto" }}
           draggable={false}
         />
 
@@ -267,25 +272,25 @@ export function ImageUploadView({
             {/* Corner handles */}
             <div
               className="absolute -top-1 -left-1 w-3 h-3 bg-primary border border-background rounded-full cursor-nw-resize opacity-0 group-hover:opacity-100 transition-opacity"
-              onMouseDown={(e) => handleResizeStart(e, 'top-left')}
+              onMouseDown={(e) => handleResizeStart(e, "top-left")}
             />
             <div
               className="absolute -top-1 -right-1 w-3 h-3 bg-primary border border-background rounded-full cursor-ne-resize opacity-0 group-hover:opacity-100 transition-opacity"
-              onMouseDown={(e) => handleResizeStart(e, 'top-right')}
+              onMouseDown={(e) => handleResizeStart(e, "top-right")}
             />
             <div
               className="absolute -bottom-1 -left-1 w-3 h-3 bg-primary border border-background rounded-full cursor-sw-resize opacity-0 group-hover:opacity-100 transition-opacity"
-              onMouseDown={(e) => handleResizeStart(e, 'bottom-left')}
+              onMouseDown={(e) => handleResizeStart(e, "bottom-left")}
             />
             <div
               className="absolute -bottom-1 -right-1 w-3 h-3 bg-primary border border-background rounded-full cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity"
-              onMouseDown={(e) => handleResizeStart(e, 'bottom-right')}
+              onMouseDown={(e) => handleResizeStart(e, "bottom-right")}
             />
 
             {/* Delete button */}
             <button
               onClick={deleteNode}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/90"
+              className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/90 cursor-pointer"
             >
               <X className="h-3 w-3" />
             </button>
