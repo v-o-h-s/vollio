@@ -1,4 +1,5 @@
 import { ApiBuilder } from "./types";
+import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import {
   ConnectCallbackResponse as CallbackResponse,
   CheckTokenStatusResponse,
@@ -16,7 +17,6 @@ import {
   CourseWithContent,
 } from "@vollio/shared";
 import { GetCoursesResponse as ListCoursesResponse } from "@vollio/shared";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
   // 1. Connect to Google Classroom (OAuth)
@@ -26,6 +26,10 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: "/integrations/lms/google-classroom/connect",
       method: "GET",
     }),
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "connecting to Google Classroom",
+      }),
   }),
 
   // 3. Refresh Access Token
@@ -34,6 +38,10 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: "/integrations/lms/google-classroom/refresh",
       method: "GET",
     }),
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "refreshing Google Classroom token",
+      }),
     invalidatesTags: [{ type: "GoogleClassroom", id: "TOKEN_STATUS" }],
   }),
 
@@ -43,6 +51,10 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: "/integrations/lms/google-classroom/disconnect",
       method: "DELETE",
     }),
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "disconnecting from Google Classroom",
+      }),
     invalidatesTags: [
       { type: "GoogleClassroom", id: "TOKEN_STATUS" },
       { type: "GoogleClassroom", id: "COURSES" },
@@ -58,6 +70,10 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: "/integrations/lms/google-classroom/status",
       method: "GET",
     }),
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "checking Google Classroom connection status",
+      }),
     providesTags: [{ type: "GoogleClassroom", id: "CONNECTION_STATUS" }],
   }),
 
@@ -67,6 +83,10 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: "/integrations/lms/google-classroom/courses/list",
       method: "GET",
     }),
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "loading Google Classroom courses",
+      }),
     providesTags: [{ type: "GoogleClassroom", id: "COURSES" }],
   }),
 
@@ -79,6 +99,10 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: "/integrations/lms/google-classroom/courses",
       method: "GET",
     }),
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "loading Google Classroom courses with content",
+      }),
     providesTags: [{ type: "GoogleClassroom", id: "COURSES_CONTENT" }],
   }),
 
@@ -91,6 +115,10 @@ export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
       url: `/integrations/lms/google-classroom/courses/${courseId}/content`,
       method: "GET",
     }),
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "loading Google Classroom course content",
+      }),
     providesTags: (_result, _error, courseId) => [
       { type: "GoogleClassroom", id: courseId },
     ],

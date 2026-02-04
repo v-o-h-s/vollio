@@ -1,4 +1,5 @@
 import { ApiBuilder } from "./types";
+import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import {
   ApiResponse,
   AssistantDTO,
@@ -15,11 +16,16 @@ export const assistantEndpoints = (builder: ApiBuilder) => ({
     transformResponse: (response: ApiResponse<AssistantResponseData>) => {
       if (!response.success || !response.data) {
         throw new Error(
-          (response.error as any)?.message || "Failed to get assistant response"
+          (response.error as any)?.message ||
+            "Failed to get assistant response",
         );
       }
       console.log("AssistantResponseData", response.data);
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "getting assistant response",
+      }),
   }),
 });

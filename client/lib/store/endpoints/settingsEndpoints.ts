@@ -1,4 +1,5 @@
 import { UserSettings } from "@vollio/shared";
+import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import type { ApiBuilder } from "./types";
 
 interface BackendResponse<T> {
@@ -16,6 +17,8 @@ export const settingsEndpoints = (builder: ApiBuilder) => ({
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "loading settings" }),
     providesTags: ["Settings"],
   }),
 
@@ -31,6 +34,8 @@ export const settingsEndpoints = (builder: ApiBuilder) => ({
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "updating settings" }),
     invalidatesTags: ["Settings"],
   }),
 });

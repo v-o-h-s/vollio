@@ -1,4 +1,5 @@
 import { ApiBuilder } from "./types";
+import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import {
   GetAllFlashCardsSetsResponse,
   GetFlashCardsSetByIdResponse,
@@ -6,10 +7,7 @@ import {
   GetFlashCardsSetsByDocumentIdResponse,
 } from "@vollio/shared";
 import { ServerSuccessResponse } from "@vollio/shared";
-import {
-  CreateFlashCardsDTO,
-  CreateManualFlashCardsDTO,
-} from "@vollio/shared";
+import { CreateFlashCardsDTO, CreateManualFlashCardsDTO } from "@vollio/shared";
 
 export const flashcardEndpoints = (builder: ApiBuilder) => ({
   getFlashCardsSet: builder.query<GetFlashCardsSetByIdResponse, string>({
@@ -18,13 +16,17 @@ export const flashcardEndpoints = (builder: ApiBuilder) => ({
       method: "GET",
     }),
     transformResponse: (
-      response: ServerSuccessResponse<GetFlashCardsSetByIdResponse>
+      response: ServerSuccessResponse<GetFlashCardsSetByIdResponse>,
     ) => {
       if (!response.data) {
         throw new Error("Flashcard set not found");
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        notFoundMessage: "Flashcard set not found",
+      }),
     providesTags: (_result, _error, id) => [{ type: "Flashcard", id }],
   }),
 
@@ -34,10 +36,12 @@ export const flashcardEndpoints = (builder: ApiBuilder) => ({
       method: "GET",
     }),
     transformResponse: (
-      response: ServerSuccessResponse<GetAllFlashCardsSetsResponse>
+      response: ServerSuccessResponse<GetAllFlashCardsSetsResponse>,
     ) => {
       return response.data || [];
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "loading flashcard sets" }),
     providesTags: (result) => [
       { type: "Flashcard", id: "LIST" },
       ...(result?.map((set) => ({ type: "Flashcard" as const, id: set.id })) ||
@@ -54,10 +58,14 @@ export const flashcardEndpoints = (builder: ApiBuilder) => ({
       method: "GET",
     }),
     transformResponse: (
-      response: ServerSuccessResponse<GetFlashCardsSetsByDocumentIdResponse>
+      response: ServerSuccessResponse<GetFlashCardsSetsByDocumentIdResponse>,
     ) => {
       return response.data || [];
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "loading document flashcards",
+      }),
     providesTags: (result, _error, documentId) => [
       { type: "Flashcard", id: `DOCUMENT_${documentId}` },
       ...(result?.map((set) => ({ type: "Flashcard" as const, id: set.id })) ||
@@ -75,13 +83,15 @@ export const flashcardEndpoints = (builder: ApiBuilder) => ({
       body: data,
     }),
     transformResponse: (
-      response: ServerSuccessResponse<CreateFlashCardsSetResponse>
+      response: ServerSuccessResponse<CreateFlashCardsSetResponse>,
     ) => {
       if (!response.data) {
         throw new Error("Failed to create flashcard set");
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "creating flashcard set" }),
     invalidatesTags: [{ type: "Flashcard", id: "LIST" }],
   }),
 
@@ -95,13 +105,15 @@ export const flashcardEndpoints = (builder: ApiBuilder) => ({
       body: data,
     }),
     transformResponse: (
-      response: ServerSuccessResponse<CreateFlashCardsSetResponse>
+      response: ServerSuccessResponse<CreateFlashCardsSetResponse>,
     ) => {
       if (!response.data) {
         throw new Error("Failed to generate flashcard set");
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "generating flashcard set" }),
     invalidatesTags: [{ type: "Flashcard", id: "LIST" }],
   }),
 
@@ -111,6 +123,8 @@ export const flashcardEndpoints = (builder: ApiBuilder) => ({
       method: "DELETE",
     }),
     transformResponse: (response: ServerSuccessResponse<null>) => response.data,
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "deleting flashcard set" }),
     invalidatesTags: (_result, _error, id) => [
       { type: "Flashcard", id: "LIST" },
       { type: "Flashcard", id },

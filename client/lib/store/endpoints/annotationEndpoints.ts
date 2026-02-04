@@ -1,4 +1,5 @@
 import type { Annotation } from "@/lib/types/document";
+import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import type { ApiResponse } from "../types";
 import type { ApiBuilder } from "./types";
 
@@ -21,6 +22,8 @@ export const annotationEndpoints = (builder: ApiBuilder) => ({
         id: annotation.id,
       })) || []),
     ],
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "loading annotations" }),
   }),
 
   createAnnotation: builder.mutation<
@@ -45,6 +48,8 @@ export const annotationEndpoints = (builder: ApiBuilder) => ({
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "creating annotation" }),
     invalidatesTags: [
       { type: "Annotation", id: "LIST" },
       { type: "Document", id: "LIST" },

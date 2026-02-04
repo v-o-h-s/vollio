@@ -1,4 +1,5 @@
 import { ApiBuilder } from "./types";
+import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import {
   GetAllQuizzesResponse,
   GetQuizByIdResponse,
@@ -14,13 +15,15 @@ export const quizEndpoints = (builder: ApiBuilder) => ({
       method: "GET",
     }),
     transformResponse: (
-      response: ServerSuccessResponse<GetQuizByIdResponse>
+      response: ServerSuccessResponse<GetQuizByIdResponse>,
     ) => {
       if (!response.data) {
         throw new Error("Quiz not found");
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { notFoundMessage: "Quiz not found" }),
     providesTags: (_result, _error, id) => [{ type: "Quiz", id }],
   }),
 
@@ -30,10 +33,12 @@ export const quizEndpoints = (builder: ApiBuilder) => ({
       method: "GET",
     }),
     transformResponse: (
-      response: ServerSuccessResponse<GetAllQuizzesResponse>
+      response: ServerSuccessResponse<GetAllQuizzesResponse>,
     ) => {
       return response.data || [];
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "loading quizzes" }),
     providesTags: (result) => [
       { type: "Quiz", id: "LIST" },
       ...(result?.map((quiz) => ({ type: "Quiz" as const, id: quiz.id })) ||
@@ -48,13 +53,15 @@ export const quizEndpoints = (builder: ApiBuilder) => ({
       body: data,
     }),
     transformResponse: (
-      response: ServerSuccessResponse<CreateQuizResponse>
+      response: ServerSuccessResponse<CreateQuizResponse>,
     ) => {
       if (!response.data) {
         throw new Error("Failed to create quiz");
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "creating quiz" }),
     invalidatesTags: [{ type: "Quiz", id: "LIST" }],
   }),
 
@@ -64,6 +71,8 @@ export const quizEndpoints = (builder: ApiBuilder) => ({
       method: "DELETE",
     }),
     transformResponse: (response: ServerSuccessResponse<null>) => response.data,
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "deleting quiz" }),
     invalidatesTags: (_result, _error, id) => [
       { type: "Quiz", id: "LIST" },
       { type: "Quiz", id },

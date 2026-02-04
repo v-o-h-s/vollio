@@ -1,4 +1,5 @@
 import { ApiBuilder } from "@/lib/store/endpoints/types";
+import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import {
   GetAllDocumentsResponse,
   GetDocumentByIdResponse,
@@ -41,6 +42,11 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
         isGoogleDriveDocument: document.isGoogleDriveDocument,
       }));
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "loading documents",
+        notFoundMessage: "No documents found.",
+      }),
     providesTags: ["Document"],
   }),
 
@@ -65,6 +71,10 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
         isGoogleDriveDocument: document.isGoogleDriveDocument,
       };
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        notFoundMessage: "Document not found",
+      }),
     providesTags: (_result, _error, id) => [{ type: "Document", id }],
   }),
 
@@ -80,6 +90,8 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "generating upload URL" }),
     invalidatesTags: [{ type: "Document", id: "LIST" }],
   }),
 
@@ -89,6 +101,8 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
       method: "POST",
       body: data,
     }),
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "creating document" }),
     invalidatesTags: [{ type: "Document", id: "LIST" }],
   }),
 
@@ -122,6 +136,8 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
         patchResult.undo();
       }
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "deleting document" }),
     invalidatesTags: (_result, _error, id) => [
       { type: "Document", id: "LIST" },
       { type: "Document", id },
@@ -153,6 +169,8 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
         patchResult.undo();
       }
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "renaming document" }),
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Document", id: "LIST" },
       { type: "Document", id },
@@ -184,6 +202,8 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
         patchResult.undo();
       }
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "moving document" }),
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Document", id: "LIST" },
       { type: "Document", id },
@@ -200,6 +220,10 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
       method: "POST",
       body: data,
     }),
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "adding document from Google Drive",
+      }),
     invalidatesTags: [{ type: "Document", id: "LIST" }],
   }),
 
@@ -211,6 +235,8 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
     transformResponse: (response: { success: boolean; data: NoteData }) => {
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "generating summary" }),
     invalidatesTags: [{ type: "Note", id: "LIST" }],
   }),
 });

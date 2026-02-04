@@ -1,4 +1,5 @@
 import { ApiBuilder } from "./types";
+import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import {
   GetHighlightsResponse,
   CreateHighlightResponse,
@@ -21,6 +22,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
             { type: "Highlight", id: "LIST" },
           ]
         : [{ type: "Highlight", id: "LIST" }],
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "loading highlights" }),
   }),
 
   getDocumentHighlights: builder.query<HighlightData[], string>({
@@ -33,6 +36,10 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
             { type: "Highlight", id: "LIST" },
           ]
         : [{ type: "Highlight", id: "LIST" }],
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "loading document highlights",
+      }),
   }),
 
   createHighlight: builder.mutation<HighlightData, CreateHighlightDTO>({
@@ -62,8 +69,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
           undefined,
           (draft: any) => {
             draft.push(newHighlight);
-          }
-        )
+          },
+        ),
       );
 
       const patchResultDoc = dispatch(
@@ -72,8 +79,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
           highlight.documentId,
           (draft: any) => {
             draft.push(newHighlight);
-          }
-        )
+          },
+        ),
       );
 
       try {
@@ -86,8 +93,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
             (draft: any) => {
               const index = draft.findIndex((h: any) => h.id === highlight.id);
               if (index !== -1) draft[index] = createdHighlight;
-            }
-          )
+            },
+          ),
         );
         dispatch(
           apiSlice.util.updateQueryData(
@@ -96,8 +103,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
             (draft: any) => {
               const index = draft.findIndex((h: any) => h.id === highlight.id);
               if (index !== -1) draft[index] = createdHighlight;
-            }
-          )
+            },
+          ),
         );
       } catch {
         patchResultGlobal.undo();
@@ -110,6 +117,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "creating highlight" }),
     invalidatesTags: [{ type: "Highlight", id: "LIST" }],
   }),
 
@@ -146,8 +155,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
         apiSlice.util.updateQueryData(
           "getHighlights" as any,
           undefined,
-          updateCache
-        )
+          updateCache,
+        ),
       );
 
       let patchResultDoc: any = null;
@@ -156,8 +165,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
           apiSlice.util.updateQueryData(
             "getDocumentHighlights" as any,
             highlight.documentId,
-            updateCache
-          )
+            updateCache,
+          ),
         );
       }
 
@@ -171,8 +180,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
             (draft: any) => {
               const index = draft.findIndex((h: any) => h.id === id);
               if (index !== -1) draft[index] = updatedHighlight;
-            }
-          )
+            },
+          ),
         );
         if (highlight.documentId || updatedHighlight.documentId) {
           const docId = highlight.documentId || updatedHighlight.documentId;
@@ -183,8 +192,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
               (draft: any) => {
                 const index = draft.findIndex((h: any) => h.id === id);
                 if (index !== -1) draft[index] = updatedHighlight;
-              }
-            )
+              },
+            ),
           );
         }
       } catch {
@@ -198,6 +207,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
       }
       return response.data;
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "updating highlight" }),
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Highlight", id },
       { type: "Highlight", id: "LIST" },
@@ -225,8 +236,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
           (draft: any) => {
             const index = draft.findIndex((h: any) => h.id === id);
             if (index !== -1) draft.splice(index, 1);
-          }
-        )
+          },
+        ),
       );
 
       let patchResultDoc: any = null;
@@ -238,8 +249,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
             (draft: any) => {
               const index = draft.findIndex((h: any) => h.id === id);
               if (index !== -1) draft.splice(index, 1);
-            }
-          )
+            },
+          ),
         );
       }
 
@@ -251,6 +262,8 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
       }
     },
     transformResponse: (response: DeleteHighlightResponse) => response.data,
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "deleting highlight" }),
     invalidatesTags: (_result, _error, id) => [
       { type: "Highlight", id },
       { type: "Highlight", id: "LIST" },
@@ -269,6 +282,10 @@ export const highlightEndpoints = (builder: ApiBuilder) => ({
       method: "DELETE",
     }),
     transformResponse: (response: ServerSuccessResponse<null>) => response.data,
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, {
+        context: "deleting highlights by tag",
+      }),
     invalidatesTags: [{ type: "Highlight", id: "LIST" }],
   }),
 });

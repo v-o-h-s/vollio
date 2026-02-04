@@ -1,6 +1,6 @@
 import { ApiBuilder } from "@/lib/store/endpoints/types";
+import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import { GetAllFoldersResponse } from "@vollio/shared";
-import { ServerErrorResponse } from "@vollio/shared";
 import { apiSlice } from "../apiSlice";
 
 interface TransformedFolder {
@@ -39,7 +39,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
       }));
       return { folders, count };
     },
-
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "loading folders" }),
     providesTags: ["Folder"],
   }),
 
@@ -61,6 +62,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
         document_count: folder.document_count,
       };
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { notFoundMessage: "Folder not found" }),
     providesTags: (_result, _error, id) => [{ type: "Folder", id }],
   }),
 
@@ -127,6 +130,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
         document_count: 0,
       };
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "creating folder" }),
     invalidatesTags: ["Folder"],
   }),
 
@@ -206,6 +211,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
         updated_at: folder.updated_at,
       };
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "updating folder" }),
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Folder", id: "LIST" },
       { type: "Folder", id },
@@ -244,6 +251,8 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
         patchResult.undo();
       }
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "deleting folder" }),
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Folder", id: "LIST" },
       { type: "Folder", id },

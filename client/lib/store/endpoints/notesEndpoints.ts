@@ -3,6 +3,7 @@ import type {
   Note,
   UpdateNoteRequest,
 } from "@/lib/types/editor";
+import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import type { ApiBuilder } from "./types";
 import { NoteData } from "@vollio/shared";
 
@@ -55,6 +56,8 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
       ...(result?.map((note) => ({ type: "Note" as const, id: note.id })) ||
         []),
     ],
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "loading notes" }),
   }),
 
   getNote: builder.query<Note, string>({
@@ -65,6 +68,8 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
       }
       return transformNote(response.data);
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { notFoundMessage: "Note not found" }),
     providesTags: (_result, _error, noteId) => [{ type: "Note", id: noteId }],
   }),
 
@@ -80,6 +85,8 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
       }
       return transformNote(response.data);
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "creating note" }),
     invalidatesTags: [{ type: "Note", id: "LIST" }],
   }),
 
@@ -98,6 +105,8 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
       }
       return transformNote(response.data);
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "updating note" }),
     invalidatesTags: (_result, _error, { id }) => [
       { type: "Note", id: "LIST" },
       { type: "Note", id },
@@ -112,6 +121,8 @@ export const notesEndpoints = (builder: ApiBuilder) => ({
     transformResponse: (response: BackendResponse<any>) => {
       return { success: response.success };
     },
+    transformErrorResponse: (response) =>
+      transformRTKQueryError(response, { context: "deleting note" }),
     invalidatesTags: (_result, _error, noteId) => [
       { type: "Note", id: "LIST" },
       { type: "Note", id: noteId },

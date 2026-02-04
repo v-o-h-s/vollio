@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react";
 import { useGetNotesQuery, useDeleteNoteMutation } from "@/lib/store/apiSlice";
 import { useRouter } from "next/navigation";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, Notebook } from "lucide-react";
 import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,8 @@ import { EnhancedNotesList } from "@/components/ui/enhanced-notes-list";
 import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-dialog";
 import { useFloatingSidebarIntegration } from "@/hooks/use-floating-sidebar";
 import { toast } from "react-toastify";
+import { RobustFetchError } from "@/components/RobustFetchError";
+import { getErrorMessage } from "@/lib/utils/rtk-error-transform";
 
 /**
  * Notes List Page
@@ -107,7 +109,7 @@ const NotesPage: React.FC = () => {
     filterStarred: () => {
       setShowStarredOnly(!showStarredOnly);
       toast.success(
-        showStarredOnly ? "Showing all notes" : "Showing starred notes only"
+        showStarredOnly ? "Showing all notes" : "Showing starred notes only",
       );
     },
   });
@@ -169,7 +171,7 @@ const NotesPage: React.FC = () => {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to delete note. Please try again."
+          : "Failed to delete note. Please try again.",
       );
     }
   };
@@ -215,72 +217,14 @@ const NotesPage: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-              Notes
-            </h1>
-            <p className="text-sm text-muted-foreground/80">
-              Organize your thoughts and link them to Document annotations
-            </p>
-          </div>
-          <Button
-            onClick={handleCreateNote}
-            size="sm"
-            className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-          >
-            <Plus size={14} />
-            New Note
-          </Button>
-        </div>
-
-        <div className="bg-card/30 backdrop-blur-sm rounded-xl p-12 text-center border border-border/40">
-          <div className="max-w-md mx-auto">
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-destructive/10 flex items-center justify-center">
-              <FileText size={32} className="text-destructive" />
-            </div>
-            <h2 className="text-2xl font-semibold text-destructive mb-3">
-              Failed to load notes
-            </h2>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
-              There was an error loading your notes. This might be a temporary
-              issue with the connection.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button
-                onClick={() => refetch()}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 h-9 px-4 border-border/30 hover:border-border/50 hover:bg-card/40 backdrop-blur-sm rounded-lg"
-              >
-                <RobotIcon size={14} />
-                Try Again
-              </Button>
-              <Button
-                onClick={handleCreateNote}
-                size="sm"
-                className="flex items-center gap-2 h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-              >
-                <Plus size={14} />
-                Create Note Instead
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <ErrorBoundary>
       <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
         {/* Enhanced Header with Better Typography and Spacing */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight flex items-center gap-2">
+              <Notebook className="w-8 h-8" />
               Notes
             </h1>
             <p className="text-sm text-muted-foreground/80">
@@ -313,6 +257,13 @@ const NotesPage: React.FC = () => {
         </div>
 
         {/* Enhanced Notes List with Modern Layout */}
+        {error && (
+          <RobustFetchError
+            errorMessage={getErrorMessage(error, "Failed to load notes")}
+            onRetry={refetch}
+            onBack={() => router.back()}
+          />
+        )}
         <EnhancedNotesList
           notes={notes}
           viewMode={viewMode}

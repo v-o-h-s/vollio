@@ -8,7 +8,6 @@
 
 "use client";
 
-import React, { useState } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -33,20 +32,16 @@ import { useDocumentActions } from "../hooks/useDocumentActions";
 import { useDragMove } from "../hooks/useDragMove";
 import { DocumentsContent } from "./DocumentsContent";
 
-import {
-  Loader2,
-  FolderOpen,
-  FileText,
-  FolderPlus,
-  Upload, 
-  Trash2,
-} from "lucide-react";
+import { FileText, FolderPlus, Upload } from "lucide-react";
 import { IoFolder, IoDocumentTextSharp } from "react-icons/io5";
-import { RTKQueryError } from "@/lib/error-handling/rtk-query-error";
 import { useGetGoogleClassroomConnectionStatusQuery } from "@/lib/store/apiSlice";
 import { FilesSkeleton } from "./DirectorySkeleton";
-
+import { RobustFetchError } from "@/components/RobustFetchError";
+import { getErrorMessage } from "@/lib/utils/rtk-error-transform";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 export default function DocumentsDirectoryViewer() {
+  const router = useRouter();
   // Use custom hooks for data management
   const {
     folders,
@@ -61,14 +56,13 @@ export default function DocumentsDirectoryViewer() {
     error: documentsError,
     refetch: refetchDocuments,
     moveDocument,
-    openDocument, 
+    openDocument,
     uploadDocument,
     isUploading,
   } = useDocument();
 
   // Local state management with custom hook
   const {
-   
     searchQuery,
     setSearchQuery,
     viewMode,
@@ -128,15 +122,15 @@ export default function DocumentsDirectoryViewer() {
   const classroomLabel = isClassroomChecking
     ? "Checking..."
     : classroomStatus?.data?.isConnected
-    ? "Add from Classroom"
-    : "Connect Classroom";
+      ? "Add from Classroom"
+      : "Connect Classroom";
   // Drag and drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
   );
 
   // Document upload hook
@@ -162,27 +156,23 @@ export default function DocumentsDirectoryViewer() {
     refetchFolders,
   });
 
-
-
-
-
-
-
-
-
-
-
-
-
   // Error state
   if (documentsError || foldersError) {
     return (
-      <RTKQueryError
-        error={documentsError || foldersError}
-        errorName={documentsError ? "Documents Error" : "Folders Error"}
+      <RobustFetchError
+        errorMessage={getErrorMessage(
+          documentsError || foldersError,
+          "Failed to fetch documents",
+        )}
         onRetry={() => {
           refetchDocuments();
           refetchFolders();
+        }}
+        onBack={() => {
+          router.back();
+        }}
+        onReport={() => {
+          toast.info("Report functionality coming soon");
         }}
       />
     );

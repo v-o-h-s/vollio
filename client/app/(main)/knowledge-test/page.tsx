@@ -18,6 +18,10 @@ import { LuBrain as Brain, LuLayers as RiStackLine } from "react-icons/lu";
 import { GrTestDesktop } from "react-icons/gr";
 type Section = "quizzes" | "flashcards";
 
+import { useRouter } from "next/navigation";
+import { RobustFetchError } from "@/components/RobustFetchError";
+import { getErrorMessage } from "@/lib/utils/rtk-error-transform";
+
 import {
   useGetAllQuizzesQuery,
   useDeleteQuizMutation,
@@ -26,16 +30,24 @@ import {
 } from "@/lib/store/apiSlice";
 
 export default function KnowledgeTestPage() {
-  const { data: quizzesData, isLoading: isLoadingQuizzes } =
-    useGetAllQuizzesQuery();
+  const router = useRouter();
+  const {
+    data: quizzesData,
+    isLoading: isLoadingQuizzes,
+    error: quizzesError,
+    refetch: refetchQuizzes,
+  } = useGetAllQuizzesQuery();
   const [deleteQuiz] = useDeleteQuizMutation();
 
-  const { data: flashcardsData, isLoading: isLoadingFlashcards } =
-    useGetAllFlashCardsSetsQuery();
+  const {
+    data: flashcardsData,
+    isLoading: isLoadingFlashcards,
+    error: flashcardsError,
+    refetch: refetchFlashcards,
+  } = useGetAllFlashCardsSetsQuery();
   const [deleteFlashcardSet] = useDeleteFlashCardsSetMutation();
 
   const [section, setSection] = useState<Section>("quizzes");
-
   return (
     <div className="space-y-8 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -61,7 +73,7 @@ export default function KnowledgeTestPage() {
           >
             <Button
               className={cn(
-                "shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 font-bold border-none h-11 px-6 hover:scale-105 active:scale-95 group"
+                "shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 font-bold border-none h-11 px-6 hover:scale-105 active:scale-95 group",
               )}
             >
               <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-all duration-300" />
@@ -78,6 +90,26 @@ export default function KnowledgeTestPage() {
           quizzesData={quizzesData || []}
           flashcards={flashcardsData || []}
         />
+        {section === "quizzes" && quizzesError && (
+          <RobustFetchError
+            errorMessage={getErrorMessage(
+              quizzesError,
+              "Failed to load quizzes",
+            )}
+            onRetry={refetchQuizzes}
+            onBack={() => router.back()}
+          />
+        )}
+        {section === "flashcards" && flashcardsError && (
+          <RobustFetchError
+            errorMessage={getErrorMessage(
+              flashcardsError,
+              "Failed to load flashcards",
+            )}
+            onRetry={refetchFlashcards}
+            onBack={() => router.back()}
+          />
+        )}
 
         <main className="w-full">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -94,7 +126,7 @@ export default function KnowledgeTestPage() {
                   "h-full border-2 border-dashed border-border/60 bg-muted/5 transition-all duration-300 cursor-pointer flex flex-col items-center justify-center p-8 min-h-[240px] group relative overflow-hidden",
                   section === "quizzes"
                     ? "hover:border-indigo-500/50"
-                    : "hover:border-pink-500/50"
+                    : "hover:border-pink-500/50",
                 )}
               >
                 <div className="absolute inset-0 bg-linear-to-br from-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -103,7 +135,7 @@ export default function KnowledgeTestPage() {
                     "p-4 rounded-full mb-4 transition-transform duration-300 group-hover:scale-110 shadow-sm",
                     section === "quizzes"
                       ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
-                      : "bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400"
+                      : "bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400",
                   )}
                 >
                   {section === "quizzes" ? (
