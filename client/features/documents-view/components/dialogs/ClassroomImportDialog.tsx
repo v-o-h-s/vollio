@@ -214,7 +214,7 @@ export function ClassroomImportDialog({
         ) : (
           <div className="flex-1 flex min-h-0">
             {/* Courses Sidebar */}
-            <div className="w-[450px] border-r flex flex-col bg-muted/10 overflow-x-scroll">
+            <div className="w-[450px] border-r flex flex-col bg-muted/10 overflow-y-scroll">
               <div className="p-4 border-b flex items-center justify-between bg-background/50 backdrop-blur-sm sticky top-0 z-10">
                 <span className="text-sm font-semibold">My Courses</span>
                 <Button
