@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-toastify";
@@ -9,12 +9,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-
+import { useRouter } from "next/navigation";
 
 export default function SignInPage() {
   const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        router.replace("/");
+      }
+    };
+    checkSession();
+  }, [router, supabase]);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -32,7 +45,9 @@ export default function SignInPage() {
     setEmailLoading(true);
     // Simulate a small delay for effect
     setTimeout(() => {
-      toast.info("Coming soon: Email and password login is currently under development.");
+      toast.info(
+        "Coming soon: Email and password login is currently under development.",
+      );
       setEmailLoading(false);
     }, 600);
   };
