@@ -298,7 +298,7 @@ export function ClassroomImportDialog({
                     </div>
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold">
-                        Course Materials
+                        3333333
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {selectedCourseId
