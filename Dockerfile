@@ -1,5 +1,5 @@
 # STAGE 1: Build dependencies and compile code
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Check if build-base and python3 are needed for native modules like sharp
 RUN apk add --no-cache python3 make g++
@@ -27,7 +27,7 @@ RUN npm run build --workspace=@vollio/shared
 RUN npm run build --workspace=server
 
 # STAGE 2: Production runner
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 

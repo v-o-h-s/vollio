@@ -212,20 +212,20 @@ if (require.main === module) {
 // GRACEFUL SHUTDOWN
 process.on("SIGINT", async () => {
   app.log.info("Stopping server");
-  
+
   // Flush Sentry events before shutdown
   await SentryService.flush(2000);
-  
+
   await app.close();
   process.exit(0);
 });
 
 process.on("SIGTERM", async () => {
   app.log.info("SIGTERM received, shutting down gracefully");
-  
+
   // Flush Sentry events before shutdown
   await SentryService.flush(2000);
-  
+
   await app.close();
   process.exit(0);
 });
