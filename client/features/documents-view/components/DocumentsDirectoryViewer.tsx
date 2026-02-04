@@ -75,7 +75,6 @@ export default function DocumentsDirectoryViewer() {
     isItemSelected,
     toggleItemSelection,
     clearSelection,
-    selectAll,
   } = useDocumentsViewState(documents, folders);
 
   // Breadcrumb navigation
