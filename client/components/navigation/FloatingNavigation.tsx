@@ -72,9 +72,13 @@ const navigationItems = [
 
 interface FloatingNavigationProps {
   className?: string;
+  disableAnimation?: boolean;
 }
 
-export function FloatingNavigation({ className }: FloatingNavigationProps) {
+export function FloatingNavigation({
+  className,
+  disableAnimation = false,
+}: FloatingNavigationProps) {
   const supabase = createClient();
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -105,6 +109,8 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
 
   // Auto-hide on scroll
   useEffect(() => {
+    if (disableAnimation) return;
+
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
@@ -120,7 +126,7 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, disableAnimation]);
 
   const currentItem = navigationItems.find((item) => item.href === pathname);
 
@@ -129,22 +135,26 @@ export function FloatingNavigation({ className }: FloatingNavigationProps) {
     return null;
   }
 
+  const showNav = disableAnimation || isVisible;
+
   return (
     <div
       className={cn(
-        "fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-out",
-        isVisible ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0",
+        "fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50",
+        !disableAnimation && "transition-all duration-300 ease-out",
+        showNav ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0",
         className,
       )}
     >
       {/* Main Navigation Bar */}
       <div
         className={cn(
-          "relative floating-nav-glass rounded-2xl shadow-2xl transition-all duration-500 ease-out theme-transition",
+          "relative floating-nav-glass rounded-2xl shadow-2xl theme-transition",
+          !disableAnimation && "transition-all duration-500 ease-out",
           "before:absolute before:inset-0 before:rounded-2xl before:bg-linear-to-r before:from-white/10 before:to-transparent before:pointer-events-none",
           "backdrop-blur-xl bg-background/80 border border-border/50",
           isExpanded ? "px-4 py-3 scale-105" : "px-3 py-2 scale-100",
-          "floating-nav-enter transform-gpu",
+          !disableAnimation && "floating-nav-enter transform-gpu",
         )}
       >
         {/* Collapsed State - Floating Dock */}

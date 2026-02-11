@@ -71,7 +71,7 @@ interface ViewerContextType {
       documentName: string;
       content: HighlightContent;
       position: ScaledPosition;
-    }
+    },
   ) => Promise<void>;
   handleDeleteMessage: (index: number) => void;
   resetMessages: () => void;
@@ -85,7 +85,7 @@ interface ViewerContextType {
       documentName: string;
       content: HighlightContent;
       position: ScaledPosition;
-    }
+    },
   ) => Promise<void>;
   addSelectionToVollNotes: (
     metadata: {
@@ -93,7 +93,7 @@ interface ViewerContextType {
       content: HighlightContent;
       position: ScaledPosition;
     },
-    content?: JSONContent
+    content?: JSONContent,
   ) => Promise<void>;
   copyContentToClipboard: (content: string | JSONContent) => Promise<void>;
 
@@ -102,11 +102,13 @@ interface ViewerContextType {
   setHighlighterUtilsRef: (
     ref: React.RefObject<
       import("react-pdf-highlighter-extended-plus").PdfHighlighterUtils | null
-    >
+    >,
   ) => void;
 }
 
-const ViewerContext = createContext<ViewerContextType | undefined>(undefined);
+export const ViewerContext = createContext<ViewerContextType | undefined>(
+  undefined,
+);
 
 /**
  * Provider component that wraps the document viewer, providing centralized
@@ -138,11 +140,11 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     (
       ref: React.RefObject<
         import("react-pdf-highlighter-extended-plus").PdfHighlighterUtils | null
-      >
+      >,
     ) => {
       setHighlighterUtilsRefState(ref);
     },
-    []
+    [],
   );
 
   /**
@@ -168,7 +170,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         },
       } as any);
     },
-    [highlighterUtilsRef]
+    [highlighterUtilsRef],
   );
 
   /**
@@ -217,7 +219,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
       content: HighlightContent;
       position: ScaledPosition;
     },
-    content?: JSONContent
+    content?: JSONContent,
   ) => {
     if (!ui.isVollNotesOpen) {
       ui.setIsVollNotesOpen(true);
@@ -245,7 +247,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
         {
           HighlightContent: metadata.content,
           HighlightPosition: metadata.position,
-        }
+        },
       );
     } catch (error) {
       console.error("Failed to add note to notes:", error);
@@ -263,7 +265,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
       documentName: string;
       content: HighlightContent;
       position: ScaledPosition;
-    }
+    },
   ) => {
     if (typeof content === "string") return;
 
@@ -296,7 +298,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
           {
             HighlightContent: metadata.content,
             HighlightPosition: metadata.position,
-          }
+          },
         );
       }
     } catch (error: any) {
