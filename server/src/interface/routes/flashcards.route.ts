@@ -17,37 +17,18 @@ import {
 } from "../../shared/validation/validator";
 import { FlashCardsController } from "../controllers/flashcards.controller";
 import fp from "fastify-plugin";
+import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
 
 const flashcardsHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  opts: FastifyPluginOptions
+  opts: FastifyPluginOptions,
 ): Promise<void> => {
-  // Manual creation
-  fastify.post<{ Body: CreateManualFlashCardsDTO }>(
-    `${opts.prefix}/`,
-    {
-      config: {
-        rateLimit: { cost: 1 },
-      },
-      schema: {
-        body: createManualFlashCardsSchema,
-      },
-      preHandler: validateBody(createManualFlashCardsSchema),
-    },
-    async (request, reply) => {
-      const flashCardsController =
-        request.diScope.resolve<FlashCardsController>("flashCardsController");
-      return flashCardsController.createFlashCardsSet(request, reply);
-    }
-  );
-
   // AI Generation
   fastify.post<{ Body: CreateFlashCardsDTO }>(
     `${opts.prefix}/generate-from-document`,
     {
       config: {
-        rateLimit: { cost: 20, category: "ai" },
-        tokenRateLimit: true,
+        rateLimit: { cost: RateLimitingDegrees.VERY_HIGH, category: "ai" },
       },
       schema: {
         body: createFlashCardsSchema,
@@ -58,14 +39,14 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.generateFlashCardsSet(request, reply);
-    }
+    },
   );
 
   fastify.get<{ Params: FlashCardsSetIdParams }>(
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: flashCardsSetIdParamsSchema,
@@ -76,14 +57,14 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.getFlashCardsSetById(request, reply);
-    }
+    },
   );
 
   fastify.get<{ Params: { documentId: string } }>(
     `${opts.prefix}/document/:documentId`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: {
@@ -99,14 +80,14 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.getFlashCardsSetsByDocumentId(request, reply);
-    }
+    },
   );
 
   fastify.delete<{ Params: FlashCardsSetIdParams }>(
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: flashCardsSetIdParamsSchema,
@@ -117,14 +98,14 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.deleteFlashCardsSet(request, reply);
-    }
+    },
   );
 
   fastify.get(
     `${opts.prefix}/`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {},
     },
@@ -132,7 +113,7 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.getAllFlashCardsSets(request, reply);
-    }
+    },
   );
 };
 

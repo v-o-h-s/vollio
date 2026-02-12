@@ -29,7 +29,7 @@ describe("RateLimitingService", () => {
       // Mock getRemaining to return a valid number (tokens, last_refill)
       redisMock.hmget.mockResolvedValue(["9", (Date.now() / 1000).toString()]);
 
-      const result = await rateLimiter.tryConsume("user1");
+      const result = await rateLimiter.tryConsume({ user: "user1" });
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBeGreaterThanOrEqual(8);
@@ -42,7 +42,7 @@ describe("RateLimitingService", () => {
       // Mock getRemaining returning 0 tokens
       redisMock.hmget.mockResolvedValue(["0", (Date.now() / 1000).toString()]);
 
-      const result = await rateLimiter.tryConsume("user1");
+      const result = await rateLimiter.tryConsume({ user: "user1" });
 
       expect(result.allowed).toBe(false);
       // If 0 tokens and we tried to consume 1, remaining is 0 (or technically -1 logic depending on lua, but we mock hmget)
@@ -55,17 +55,20 @@ describe("RateLimitingService", () => {
       redisMock.eval.mockResolvedValue(1);
       redisMock.hmget.mockResolvedValue(["18", (Date.now() / 1000).toString()]);
 
-      await rateLimiter.tryConsume("user1", { cost: 2, capacity: 20 });
+      await rateLimiter.tryConsume(
+        { user: "user1" },
+        { cost: 2, capacity: 20 },
+      );
 
       // Verify Lua script was called with custom capacity (ARGV[1]) and cost (ARGV[3])
       expect(redisMock.eval).toHaveBeenCalledWith(
         expect.any(String), // script
         1, // numKeys
-        expect.stringContaining("rate:request:user1"), // key
+        expect.stringContaining("rate:request:user:user1"), // key
         20, // capacity
         1, // default refill rate
         2, // cost
-        expect.any(Number) // now
+        expect.any(Number), // now
       );
     });
   });
@@ -74,7 +77,7 @@ describe("RateLimitingService", () => {
     it("should return capacity if no data exists in Redis", async () => {
       redisMock.hmget.mockResolvedValue([null, null]);
 
-      const remaining = await rateLimiter.getRemaining("user1");
+      const remaining = await rateLimiter.getRemaining({ user: "user1" });
 
       expect(remaining).toBe(10); // default capacity
     });
@@ -91,7 +94,7 @@ describe("RateLimitingService", () => {
         lastRefill.toString(),
       ]);
 
-      const remaining = await rateLimiter.getRemaining("user1");
+      const remaining = await rateLimiter.getRemaining({ user: "user1" });
 
       // Expected: 2 + (5 * 1) = 7
 
@@ -117,7 +120,7 @@ describe("RateLimitingService", () => {
         lastRefill.toString(),
       ]);
 
-      const remaining = await rateLimiter.getRemaining("user1");
+      const remaining = await rateLimiter.getRemaining({ user: "user1" });
 
       expect(remaining).toBe(10); // Should cap at the default capacity
     });
@@ -131,14 +134,14 @@ describe("RateLimitingService", () => {
 
       // Request 1: regular request
 
-      await rateLimiter.tryConsume("user1", {}, "request");
+      await rateLimiter.tryConsume({ user: "user1" }, {}, "request");
 
       expect(redisMock.eval).toHaveBeenCalledWith(
         expect.any(String),
 
         1,
 
-        "rate:request:user1",
+        "rate:request:user:user1",
 
         10,
 
@@ -146,19 +149,19 @@ describe("RateLimitingService", () => {
 
         1,
 
-        expect.any(Number)
+        expect.any(Number),
       );
 
       // Request 2: AI request
 
-      await rateLimiter.tryConsume("user1", {}, "ai");
+      await rateLimiter.tryConsume({ user: "user1" }, {}, "ai");
 
       expect(redisMock.eval).toHaveBeenCalledWith(
         expect.any(String),
 
         1,
 
-        "rate:ai:user1",
+        "rate:ai:user:user1",
 
         10,
 
@@ -166,7 +169,7 @@ describe("RateLimitingService", () => {
 
         1,
 
-        expect.any(Number)
+        expect.any(Number),
       );
     });
   });

@@ -14,17 +14,17 @@ import {
 } from "../../shared/validation/validator";
 import fp from "fastify-plugin";
 import { QuizController } from "../controllers/quiz.controller";
+import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
 
 const quizHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  opts: FastifyPluginOptions
+  opts: FastifyPluginOptions,
 ): Promise<void> => {
   fastify.post<{ Body: CreateQuizDTO }>(
     `${opts.prefix}`,
     {
       config: {
-        rateLimit: { cost: 20, category: "ai" },
-        tokenRateLimit: true,
+        rateLimit: { cost: RateLimitingDegrees.VERY_HIGH, category: "ai" },
       },
       schema: {
         body: createQuizSchema,
@@ -35,13 +35,13 @@ const quizHandler: FastifyPluginAsync = async (
       const quizController =
         request.diScope.resolve<QuizController>("quizController");
       return quizController.createQuiz(request, reply);
-    }
+    },
   );
   fastify.get<{ Params: { id: string } }>(
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: quizIdParamsSchema,
@@ -52,14 +52,14 @@ const quizHandler: FastifyPluginAsync = async (
       const quizController =
         request.diScope.resolve<QuizController>("quizController");
       return quizController.getQuizById(request, reply);
-    }
+    },
   );
 
   fastify.delete<{ Params: { id: string } }>(
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: quizIdParamsSchema,
@@ -70,14 +70,14 @@ const quizHandler: FastifyPluginAsync = async (
       const quizController =
         request.diScope.resolve<QuizController>("quizController");
       return quizController.deleteQuizById(request, reply);
-    }
+    },
   );
 
   fastify.get(
     `${opts.prefix}`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {},
     },
@@ -85,7 +85,7 @@ const quizHandler: FastifyPluginAsync = async (
       const quizController =
         request.diScope.resolve<QuizController>("quizController");
       return quizController.getAllQuizzes(request, reply);
-    }
+    },
   );
 };
 

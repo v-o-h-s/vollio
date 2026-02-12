@@ -22,32 +22,30 @@ import {
   highlightDocumentIdParamsSchema,
 } from "../../shared/validation/highlightSchemas";
 import { HighlightController } from "../controllers/highlight.controller";
+import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
 
 const highlightRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  _options: FastifyPluginOptions
+  _options: FastifyPluginOptions,
 ): Promise<void> => {
   // get highlights by document ID
   fastify.get<{ Querystring: HighlightDocumentIdParams }>(
     `${_options.prefix}`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
-        
-        
         querystring: highlightDocumentIdParamsSchema,
-        
       },
       preHandler: validateQuery(highlightDocumentIdParamsSchema),
     },
     async (request, reply) => {
       const highlightController = request.diScope.resolve<HighlightController>(
-        "highlightController"
+        "highlightController",
       );
       return highlightController.getHighlightsByDocumentId(request, reply);
-    }
+    },
   );
 
   // Create a new highlight
@@ -55,22 +53,19 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
-        
-        
         body: createHighlightSchema,
-        
       },
       preHandler: validateBody(createHighlightSchema),
     },
     async (request, reply) => {
       const highlightController = request.diScope.resolve<HighlightController>(
-        "highlightController"
+        "highlightController",
       );
       return highlightController.createHighlight(request, reply);
-    }
+    },
   );
 
   // Get a specific highlight by ID
@@ -78,22 +73,19 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
-        
-        
         params: highlightIdParamsSchema,
-        
       },
       preHandler: validateParams(highlightIdParamsSchema),
     },
     async (request, reply) => {
       const highlightController = request.diScope.resolve<HighlightController>(
-        "highlightController"
+        "highlightController",
       );
       return highlightController.getHighlightById(request, reply);
-    }
+    },
   );
 
   // Update a highlight
@@ -104,14 +96,11 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
-        
-        
         params: highlightIdParamsSchema,
         body: updateHighlightSchema,
-        
       },
       preHandler: [
         validateParams(highlightIdParamsSchema),
@@ -120,10 +109,10 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     },
     async (request, reply) => {
       const highlightController = request.diScope.resolve<HighlightController>(
-        "highlightController"
+        "highlightController",
       );
       return highlightController.updateHighlight(request, reply);
-    }
+    },
   );
 
   // Delete a highlight
@@ -131,22 +120,19 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
-        
-        
         params: highlightIdParamsSchema,
-        
       },
       preHandler: validateParams(highlightIdParamsSchema),
     },
     async (request, reply) => {
       const highlightController = request.diScope.resolve<HighlightController>(
-        "highlightController"
+        "highlightController",
       );
       return highlightController.deleteHighlight(request, reply);
-    }
+    },
   );
 
   // Count highlights by tag
@@ -154,15 +140,15 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}/tags/:tagName/count`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
     },
     async (request, reply) => {
       const highlightController = request.diScope.resolve<HighlightController>(
-        "highlightController"
+        "highlightController",
       );
       return highlightController.countHighlightsByTag(request, reply);
-    }
+    },
   );
 
   // Delete highlights by tag
@@ -170,15 +156,15 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}/tags/:tagName`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
     },
     async (request, reply) => {
       const highlightController = request.diScope.resolve<HighlightController>(
-        "highlightController"
+        "highlightController",
       );
       return highlightController.deleteHighlightsByTag(request, reply);
-    }
+    },
   );
 };
 

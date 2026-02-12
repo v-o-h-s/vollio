@@ -14,7 +14,6 @@ import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/cl
 import { flashcardPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/flashcards";
 import { FastifyBaseLogger } from "fastify";
 import crypto from "crypto";
-import { ITokenRateLimitingService } from "../../../domain/services/ITokenRateLimitingService";
 
 export class GenerateGeneralFlashCardsUseCase {
   constructor(
@@ -24,7 +23,6 @@ export class GenerateGeneralFlashCardsUseCase {
     private ensureChunkingUseCase: EnsureDocumentChunkedUseCase,
     private chunkRepository: IChunkRepository,
     private generativeAiService: IGenerativeAiService,
-    private tokenRateLimitingService: ITokenRateLimitingService,
   ) {}
 
   async execute(
@@ -158,14 +156,6 @@ export class GenerateGeneralFlashCardsUseCase {
         previousSummary = summary;
       }
     }
-
-    // Record total token usage
-    await this.tokenRateLimitingService.recordUsage(userId, {
-      promptTokens: totalPromptTokens,
-      completionTokens: totalCompletionTokens,
-      model: lastModel,
-      endpoint: "generate-flashcards",
-    });
 
     // Safety check: ensure we didn't exceed requested total
     let finalCards = allCards;

@@ -10,11 +10,7 @@ import {
   validateParams,
   validateQuery,
 } from "../../shared/validation/validator";
-import {
-  CreateNoteDTO,
-  UpdateNoteDTO,
-  NoteIdParams,
-} from "@vollio/shared";
+import { CreateNoteDTO, UpdateNoteDTO, NoteIdParams } from "@vollio/shared";
 import {
   createNoteSchema,
   updateNoteSchema,
@@ -22,17 +18,18 @@ import {
   generateSummarySchema,
 } from "../../shared/validation/noteSchemas";
 import { NoteController } from "../controllers/note.controller";
+import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
 
 const noteRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  options: FastifyPluginOptions
+  options: FastifyPluginOptions,
 ): Promise<void> => {
   // Create a new note
   fastify.post<{ Body: CreateNoteDTO }>(
     `${options.prefix}/`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         body: createNoteSchema,
@@ -40,9 +37,10 @@ const noteRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateBody(createNoteSchema),
     },
     async (request, reply) => {
-      const noteController = request.diScope.resolve<NoteController>("noteController");
+      const noteController =
+        request.diScope.resolve<NoteController>("noteController");
       return noteController.createNote(request, reply);
-    }
+    },
   );
 
   // Get all notes for the authenticated user
@@ -50,14 +48,15 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {},
     },
     async (request, reply) => {
-      const noteController = request.diScope.resolve<NoteController>("noteController");
+      const noteController =
+        request.diScope.resolve<NoteController>("noteController");
       return noteController.getAllNotes(request, reply);
-    }
+    },
   );
 
   // Get a specific note by ID
@@ -65,18 +64,18 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: noteIdParamsSchema,
       },
       preHandler: validateParams(noteIdParamsSchema),
-  
     },
     async (request, reply) => {
-      const noteController = request.diScope.resolve<NoteController>("noteController");
+      const noteController =
+        request.diScope.resolve<NoteController>("noteController");
       return noteController.getNoteById(request, reply);
-    }
+    },
   );
 
   // Update a note
@@ -84,7 +83,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: noteIdParamsSchema,
@@ -96,9 +95,10 @@ const noteRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const noteController = request.diScope.resolve<NoteController>("noteController");
+      const noteController =
+        request.diScope.resolve<NoteController>("noteController");
       return noteController.updateNote(request, reply);
-    }
+    },
   );
 
   // Delete a note
@@ -106,7 +106,7 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: noteIdParamsSchema,
@@ -114,9 +114,10 @@ const noteRoutesHandler: FastifyPluginAsync = async (
       preHandler: validateParams(noteIdParamsSchema),
     },
     async (request, reply) => {
-      const noteController = request.diScope.resolve<NoteController>("noteController");
+      const noteController =
+        request.diScope.resolve<NoteController>("noteController");
       return noteController.deleteNote(request, reply);
-    }
+    },
   );
 };
 

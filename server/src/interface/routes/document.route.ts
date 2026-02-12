@@ -23,17 +23,18 @@ import {
 } from "../../shared/validation/documentSchemas";
 import { GetStorageUrlDto, CreateDocumentDto } from "@vollio/shared";
 import { DocumentController } from "../controllers/document.controller";
+import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
 
 const documentRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  opts: FastifyPluginOptions
+  opts: FastifyPluginOptions,
 ): Promise<void> => {
   // Get all documents - Must be before /:id route to avoid route matching issues
   fastify.get(
     `${opts.prefix}/`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {},
     },
@@ -41,7 +42,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.getAllDocuments(request, reply);
-    }
+    },
   );
   // should be deleted since we are trying to centerlize getting file (one endpoint for all resources of documents)
   // fastify.get<{ Params: { documentId: string } }>(
@@ -71,7 +72,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/google-drive`,
     {
       config: {
-        rateLimit: { cost: 5 },
+        rateLimit: { cost: RateLimitingDegrees.MEDIUM },
       },
       schema: {
         body: {
@@ -87,14 +88,14 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.addDocumentFromGoogleDrive(request, reply);
-    }
+    },
   );
 
   fastify.post<{ Body: GetStorageUrlDto }>(
     `${opts.prefix}/upload-url`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.VERY_HIGH },
       },
       schema: {
         body: getStorageUrlSchema,
@@ -105,14 +106,14 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.getStorageUrl(request, reply);
-    }
+    },
   );
 
   fastify.get<{ Params: DocumentIdParams }>(
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 30 },
+        rateLimit: { cost: RateLimitingDegrees.VERY_HIGH },
       },
       schema: {
         params: documentIdParamsSchema,
@@ -123,14 +124,14 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.getDocumentById(request, reply);
-    }
+    },
   );
 
   fastify.delete<{ Params: DocumentIdParams }>(
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: documentIdParamsSchema,
@@ -141,14 +142,14 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.deleteDocument(request, reply);
-    }
+    },
   );
 
   fastify.patch<{ Params: DocumentIdParams; Body: MoveDocumentDTO }>(
     `${opts.prefix}/:id/move`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: documentIdParamsSchema,
@@ -163,14 +164,14 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.moveDocument(request, reply);
-    }
+    },
   );
 
   fastify.put<{ Params: DocumentIdParams; Body: RenameDocumentDTO }>(
     `${opts.prefix}/:id/rename`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: documentIdParamsSchema,
@@ -185,14 +186,13 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.renameDocument(request, reply);
-    }
+    },
   );
   fastify.post<{ Params: DocumentIdParams }>(
     `${opts.prefix}/:id/generate-summary`,
     {
       config: {
-        rateLimit: { cost: 20, category: "ai" },
-        tokenRateLimit: true,
+        rateLimit: { cost: RateLimitingDegrees.VERY_HIGH, category: "ai" },
       },
       schema: {
         params: documentIdParamsSchema,
@@ -203,14 +203,14 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.generateSummary(request, reply);
-    }
+    },
   );
 
   fastify.post<{ Body: CreateDocumentDto }>(
     `${opts.prefix}/finish-upload`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         body: createDocumentSchema,
@@ -221,7 +221,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.createDocument(request, reply);
-    }
+    },
   );
 };
 

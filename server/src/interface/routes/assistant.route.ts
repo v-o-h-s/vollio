@@ -8,17 +8,17 @@ import { AssistantDTO } from "@vollio/shared";
 import { AssistantDTOSchema } from "../../shared/validation/aiSchemas";
 import { validateBody } from "../../shared/validation/validator";
 import { AssistantController } from "../controllers/assistant.controller";
+import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
 
 const assistantRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  options: FastifyPluginOptions
+  options: FastifyPluginOptions,
 ): Promise<void> => {
   fastify.post<{ Body: AssistantDTO }>(
     `${options.prefix}/`,
     {
       config: {
-        rateLimit: { cost: 20, category: "ai" },
-        tokenRateLimit: true,
+        rateLimit: { cost: RateLimitingDegrees.MEDIUM },
       },
       schema: {
         body: AssistantDTOSchema,
@@ -27,10 +27,10 @@ const assistantRoutesHandler: FastifyPluginAsync = async (
     },
     async (request, reply) => {
       const assistantController = request.diScope.resolve<AssistantController>(
-        "assistantController"
+        "assistantController",
       );
       return assistantController.assistantChat(request, reply);
-    }
+    },
   );
 };
 

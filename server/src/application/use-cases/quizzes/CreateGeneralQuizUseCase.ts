@@ -14,7 +14,6 @@ import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/cl
 import { ServerError } from "../../../shared/errors/ServerError";
 import { quizPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/quizzes";
 import { IQuizRepository } from "../../../domain/repositories/IQuizRepository";
-import { ITokenRateLimitingService } from "../../../domain/services/ITokenRateLimitingService";
 
 export class CreateGeneralQuizUseCase {
   constructor(
@@ -24,7 +23,6 @@ export class CreateGeneralQuizUseCase {
     private getDocumentByIdUseCase: GetDocumentByIdUseCase,
     private chunkRepository: IChunkRepository,
     private quizRepository: IQuizRepository,
-    private tokenRateLimitingService: ITokenRateLimitingService,
   ) {}
 
   async execute(
@@ -162,14 +160,6 @@ export class CreateGeneralQuizUseCase {
         previousSummary = summary;
       }
     }
-
-    // Record total token usage
-    await this.tokenRateLimitingService.recordUsage(userId, {
-      promptTokens: totalPromptTokens,
-      completionTokens: totalCompletionTokens,
-      model: lastModel,
-      endpoint: "create-quiz",
-    });
 
     // Safety check: ensure we didn't exceed requested total if somehow model hallucinated specific counts
     // (Optional, but strict adherence might desire slicing)
