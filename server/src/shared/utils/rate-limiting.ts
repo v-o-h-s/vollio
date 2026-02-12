@@ -9,3 +9,11 @@ export function getClientIp(request: any): string {
     "unknown"
   );
 }
+
+export enum RateLimitingDegrees {
+  EXEMPT = 0,
+  LOW = 1,
+  MEDIUM = 5,
+  HIGH = 25,
+  VERY_HIGH = 50,
+}

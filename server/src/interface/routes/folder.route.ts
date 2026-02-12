@@ -20,30 +20,26 @@ import {
   DeleteFolderQuery,
 } from "../../shared/validation/folderSchemas";
 import { FolderController } from "../controllers/folder.controller";
+import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
 
 const folderRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  options: FastifyPluginOptions
+  options: FastifyPluginOptions,
 ): Promise<void> => {
   // Get all folders for authenticated user
   fastify.get(
     `${options.prefix}/`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
-      schema: {
-        
-        
-        
-      },
+      schema: {},
     },
     async (request, reply) => {
-      const folderController = request.diScope.resolve<FolderController>(
-        "folderController"
-      );
+      const folderController =
+        request.diScope.resolve<FolderController>("folderController");
       return folderController.getAllFolders(request, reply);
-    }
+    },
   );
 
   // Create a new folder
@@ -51,22 +47,18 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
-        
-        
         body: createFolderSchema,
-        
       },
       preHandler: validateBody(createFolderSchema),
     },
     async (request, reply) => {
-      const folderController = request.diScope.resolve<FolderController>(
-        "folderController"
-      );
+      const folderController =
+        request.diScope.resolve<FolderController>("folderController");
       return folderController.createFolder(request, reply);
-    }
+    },
   );
 
   // Get a specific folder by ID
@@ -74,22 +66,18 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
-        
-        
         params: folderIdParamsSchema,
-        
       },
       preHandler: validateParams(folderIdParamsSchema),
     },
     async (request, reply) => {
-      const folderController = request.diScope.resolve<FolderController>(
-        "folderController"
-      );
+      const folderController =
+        request.diScope.resolve<FolderController>("folderController");
       return folderController.getFolderById(request, reply);
-    }
+    },
   );
 
   // Update a folder
@@ -97,14 +85,11 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
-        
-        
         params: folderIdParamsSchema,
         body: updateFolderSchema,
-        
       },
       preHandler: [
         validateParams(folderIdParamsSchema),
@@ -112,11 +97,10 @@ const folderRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const folderController = request.diScope.resolve<FolderController>(
-        "folderController"
-      );
+      const folderController =
+        request.diScope.resolve<FolderController>("folderController");
       return folderController.updateFolder(request, reply);
-    }
+    },
   );
 
   // Delete a folder
@@ -127,14 +111,11 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
-        
-        
         params: folderIdParamsSchema,
         querystring: deleteFolderQuerySchema,
-        
       },
       preHandler: [
         validateParams(folderIdParamsSchema),
@@ -142,11 +123,10 @@ const folderRoutesHandler: FastifyPluginAsync = async (
       ],
     },
     async (request, reply) => {
-      const folderController = request.diScope.resolve<FolderController>(
-        "folderController"
-      );
+      const folderController =
+        request.diScope.resolve<FolderController>("folderController");
       return folderController.deleteFolder(request, reply);
-    }
+    },
   );
 };
 
@@ -154,4 +134,3 @@ export const folderRoutes = fp(folderRoutesHandler, {
   name: "folder-routes",
   fastify: "5.x",
 });
-

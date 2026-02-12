@@ -8,6 +8,7 @@ import { AssistantDTO } from "@vollio/shared";
 import { AssistantDTOSchema } from "../../shared/validation/aiSchemas";
 import { validateBody } from "../../shared/validation/validator";
 import { AssistantController } from "../controllers/assistant.controller";
+import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
 
 const assistantRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
@@ -17,7 +18,7 @@ const assistantRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/`,
     {
       config: {
-        rateLimit: { cost: 20, category: "ai" },
+        rateLimit: { cost: RateLimitingDegrees.MEDIUM },
       },
       schema: {
         body: AssistantDTOSchema,

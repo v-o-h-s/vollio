@@ -5,6 +5,7 @@ import {
 } from "fastify";
 import fp from "fastify-plugin";
 import Redis from "ioredis";
+import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
 
 /**
  * Health check routes for load balancer and monitoring
@@ -24,7 +25,7 @@ const healthRoutesHandler: FastifyPluginAsync = async (
     "/health",
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.EXEMPT },
       },
     },
     async (request, reply) => {
@@ -43,7 +44,7 @@ const healthRoutesHandler: FastifyPluginAsync = async (
     "/ready",
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.EXEMPT },
       },
     },
     async (request, reply) => {
@@ -78,7 +79,7 @@ const healthRoutesHandler: FastifyPluginAsync = async (
     "/live",
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.EXEMPT },
       },
     },
     async (request, reply) => {

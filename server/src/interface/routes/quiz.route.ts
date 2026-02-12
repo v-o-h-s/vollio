@@ -14,6 +14,7 @@ import {
 } from "../../shared/validation/validator";
 import fp from "fastify-plugin";
 import { QuizController } from "../controllers/quiz.controller";
+import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
 
 const quizHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
@@ -23,7 +24,7 @@ const quizHandler: FastifyPluginAsync = async (
     `${opts.prefix}`,
     {
       config: {
-        rateLimit: { cost: 20, category: "ai" },
+        rateLimit: { cost: RateLimitingDegrees.VERY_HIGH, category: "ai" },
       },
       schema: {
         body: createQuizSchema,
@@ -40,7 +41,7 @@ const quizHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: quizIdParamsSchema,
@@ -58,7 +59,7 @@ const quizHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {
         params: quizIdParamsSchema,
@@ -76,7 +77,7 @@ const quizHandler: FastifyPluginAsync = async (
     `${opts.prefix}`,
     {
       config: {
-        rateLimit: { cost: 1 },
+        rateLimit: { cost: RateLimitingDegrees.LOW },
       },
       schema: {},
     },
