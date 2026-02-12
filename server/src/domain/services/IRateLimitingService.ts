@@ -2,12 +2,17 @@ import {
   ConsumeResult,
   RateLimitOptions,
 } from "../../shared/types/rateLimiting";
+import { Identifier } from "../../infrastructure/services/RateLimitingService";
 
 export interface IRateLimitingService {
   tryConsume(
-    userId: string,
+    identifier: Identifier,
     options: RateLimitOptions,
-    bucket: string
+    bucket?: string,
   ): Promise<ConsumeResult>;
-  getRemaining(userId: string, options: RateLimitOptions): Promise<number>;
+  getRemaining(
+    identifier: Identifier,
+    options: RateLimitOptions,
+    bucket?: string,
+  ): Promise<number>;
 }

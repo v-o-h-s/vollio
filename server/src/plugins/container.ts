@@ -104,7 +104,7 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
       injector: () => ({
         defaultCapacity: Number(process.env.RATE_LIMIT_CAPACITY) || 100,
-        defaultRefillRate: Number(process.env.RATE_LIMIT_REFILL_RATE) || 5,
+        defaultRefillRate: Number(process.env.RATE_LIMIT_REFILL_RATE) || 1,
       }),
     }),
   });

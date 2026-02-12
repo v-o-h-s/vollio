@@ -1,95 +1,67 @@
+import "dotenv/config";
 import { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { IRateLimitingService } from "../domain/services/IRateLimitingService";
 import { RateLimitingError } from "../shared/errors/RateLimitingError";
-
-// In-memory IP rate limit store (fallback if Redis unavailable for unauthenticated routes)
-const ipRateLimitStore = new Map<string, { count: number; resetAt: number }>();
-
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, value] of ipRateLimitStore) {
-    if (value.resetAt < now) {
-      ipRateLimitStore.delete(key);
-    }
-  }
-}, 5 * 60 * 1000);
-
-/**
- * Get client IP from request (considering proxies)
- */
-function getClientIp(request: any): string {
-  return (
-    request.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
-    request.headers["x-real-ip"] ||
-    request.ip ||
-    "unknown"
-  );
-}
+import { getClientIp } from "../shared/utils/rate-limiting";
 
 export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
   fastify.addHook("preHandler", async (request, reply) => {
-    // Handle IP-based rate limiting for public routes
-    const ipRateLimitConfig = request.routeOptions.config.ipRateLimit;
-    if (ipRateLimitConfig) {
-      const ip = getClientIp(request);
-      const maxRequests = ipRateLimitConfig.maxRequests ?? 60;
-      const windowSeconds = ipRateLimitConfig.windowSeconds ?? 60;
-      const key = `ip:${ip}:${request.url.split("?")[0]}`;
-      const now = Date.now();
+    const rateLimitingService = request.diScope.resolve<IRateLimitingService>(
+      "rateLimitingService",
+    );
 
-      let entry = ipRateLimitStore.get(key);
-      if (!entry || entry.resetAt < now) {
-        entry = { count: 0, resetAt: now + windowSeconds * 1000 };
-      }
+    // 1. IP-based rate limiting for public routes (no user)
+    if (!request.user) {
+      const rateLimitConfig = request.routeOptions.config.rateLimit;
+      const capacity = Number(process.env.PUBLIC_ROUTES_LIMIT_CAPACITY) || 10;
+      const refillRate = Number(process.env.PUBLIC_ROUTES_REFILL_RATE) || 1;
+      const cost = rateLimitConfig?.cost ?? 1;
 
-      entry.count++;
-      ipRateLimitStore.set(key, entry);
+      const result = await rateLimitingService.tryConsume(
+        { ip: getClientIp(request) },
+        {
+          cost,
+          capacity,
+          refillRate,
+        },
+        "request",
+      );
 
-      const remaining = Math.max(0, maxRequests - entry.count);
-      const retryAfter = Math.ceil((entry.resetAt - now) / 1000);
+      reply.header("X-RateLimit-Limit", capacity);
+      reply.header("X-RateLimit-Remaining", Math.floor(result.remaining));
 
-      reply.header("X-RateLimit-Limit", maxRequests);
-      reply.header("X-RateLimit-Remaining", remaining);
-      reply.header("X-RateLimit-Reset", Math.floor(entry.resetAt / 1000));
-
-      if (entry.count > maxRequests) {
+      if (!result.allowed) {
         throw new RateLimitingError({
           message: "Too many requests. Please try again later.",
           source: "ip_rate_limit",
-          retryAfter,
-          remaining: 0,
-          limit: maxRequests,
-          reset: entry.resetAt,
+          retryAfter: result.retryAfter,
+          remaining: Math.floor(result.remaining),
+          limit: capacity,
         });
       }
       return;
     }
 
-    // Skip user-based rate limiting if no user is authenticated
-    if (!request.user) {
-      return;
-    }
-
-    // Get rate limit config for this route
+    // 2. User-based rate limiting for authenticated routes
     const rateLimitConfig = request.routeOptions.config.rateLimit;
-
-    // Default cost is 1 if not specified
     const cost = rateLimitConfig?.cost ?? 1;
     const bucket = rateLimitConfig?.category ?? "request";
 
-    const rateLimitingService = request.diScope.resolve<IRateLimitingService>(
-      "rateLimitingService"
-    );
+    const capacity = Number(process.env.RATE_LIMIT_CAPACITY) || 100;
+    const refillRate = Number(process.env.RATE_LIMIT_REFILL_RATE) || 1;
 
     const result = await rateLimitingService.tryConsume(
-      request.user.id,
-      { cost },
-      bucket
+      { user: request.user.id },
+      {
+        cost,
+        capacity,
+        refillRate,
+      },
+      bucket,
     );
 
-    // Set standard rate limit headers
+    reply.header("X-RateLimit-Limit", capacity);
     reply.header("X-RateLimit-Remaining", Math.floor(result.remaining));
 
     if (!result.allowed) {
@@ -98,10 +70,8 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
         source: bucket,
         retryAfter: result.retryAfter,
         remaining: Math.floor(result.remaining),
-        details: {
-          bucket,
-          cost,
-        },
+        limit: capacity,
+        details: { bucket, cost },
       });
     }
   });

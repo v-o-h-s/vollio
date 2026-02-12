@@ -22,7 +22,7 @@ A global Fastify plugin (`src/plugins/rateLimiter.ts`) is registered to intercep
 
 ### Default Parameters
 *   **Capacity**: 100 tokens (Maximum burst size).
-*   **Refill Rate**: 5 tokens per second.
+*   **Refill Rate**: 1 tokens per second.
 
 ### Route-Specific Weights
 Endpoints are assigned costs based on their resource intensity. This is defined directly in the route declaration:

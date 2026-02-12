@@ -71,13 +71,5 @@ declare module "fastify" {
       cost?: number;
       category?: "request" | "ai" | "upload";
     };
-
-    /** IP-based rate limiting for public routes */
-    ipRateLimit?: {
-      /** Maximum requests per window (default: 60) */
-      maxRequests?: number;
-      /** Window size in seconds (default: 60) */
-      windowSeconds?: number;
-    };
   }
 }

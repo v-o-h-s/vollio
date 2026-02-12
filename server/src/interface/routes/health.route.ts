@@ -14,7 +14,7 @@ import Redis from "ioredis";
  */
 const healthRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  opts: FastifyPluginOptions
+  opts: FastifyPluginOptions,
 ): Promise<void> => {
   /**
    * Basic health check - returns 200 if server is running
@@ -24,8 +24,7 @@ const healthRoutesHandler: FastifyPluginAsync = async (
     "/health",
     {
       config: {
-        rateLimit: { cost: 0 }, // Skip user-based rate limit
-        ipRateLimit: { maxRequests: 60, windowSeconds: 60 }, // 60 requests per minute per IP
+        rateLimit: { cost: 1 },
       },
     },
     async (request, reply) => {
@@ -33,7 +32,7 @@ const healthRoutesHandler: FastifyPluginAsync = async (
         status: "healthy",
         timestamp: new Date().toISOString(),
       });
-    }
+    },
   );
 
   /**
@@ -44,8 +43,7 @@ const healthRoutesHandler: FastifyPluginAsync = async (
     "/ready",
     {
       config: {
-        rateLimit: { cost: 0 },
-        ipRateLimit: { maxRequests: 30, windowSeconds: 60 }, // 30 requests per minute per IP
+        rateLimit: { cost: 1 },
       },
     },
     async (request, reply) => {
@@ -69,7 +67,7 @@ const healthRoutesHandler: FastifyPluginAsync = async (
         checks,
         timestamp: new Date().toISOString(),
       });
-    }
+    },
   );
 
   /**
@@ -80,13 +78,12 @@ const healthRoutesHandler: FastifyPluginAsync = async (
     "/live",
     {
       config: {
-        rateLimit: { cost: 0 },
-        ipRateLimit: { maxRequests: 120, windowSeconds: 60 }, // High limit for frequent probes
+        rateLimit: { cost: 1 },
       },
     },
     async (request, reply) => {
       return reply.send({ status: "alive" });
-    }
+    },
   );
 };
 
