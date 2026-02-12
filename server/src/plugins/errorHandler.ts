@@ -5,6 +5,7 @@ import { ErrorObject } from "../shared/types/error";
 import { NotFoundError } from "../shared/errors/NotFoundError";
 import { RateLimitingError } from "../shared/errors/RateLimitingError";
 import { ValidationError } from "../shared/errors/ValidationError";
+import { ConflictError } from "../shared/errors/ConflictError";
 import { SentryService } from "../infrastructure/services/SentryService";
 
 export function errorHandler(
@@ -73,6 +74,26 @@ export function errorHandler(
       error: errorObj,
     });
   }
+  if (error instanceof ConflictError) {
+    const errorObj: ErrorObject = {
+      name: error.name,
+      subType: error.subType,
+      message: error.message,
+      details: error.message,
+      statusCode: error.statusCode,
+      extra: {},
+    };
+
+    req.log.warn({ err: error }, "Conflict Error Occurred");
+
+    return res.status(error.statusCode).send({
+      success: false,
+      status: error.statusCode,
+      data: null,
+      error: errorObj,
+    });
+  }
+
   if (error instanceof NotFoundError) {
     const errorObj: ErrorObject = {
       name: error.name,
