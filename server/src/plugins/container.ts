@@ -84,8 +84,6 @@ import { GenerateSummaryUseCase } from "../application/use-cases/documents/Gener
 import { GetStorageUrlUseCase } from "../application/use-cases/documents/GetStorageUrlUseCase";
 import { CreateDocumentUseCase } from "../application/use-cases/documents/CreateDocumentUseCase";
 import { RateLimitingService } from "../infrastructure/services/RateLimitingService";
-import { TokenRateLimitingService } from "../infrastructure/services/TokenRateLimitingService";
-import { TokenQuotaRepository } from "../infrastructure/repositories/TokenQuotaRepository";
 
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton Redis client
@@ -108,22 +106,6 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
         defaultCapacity: Number(process.env.RATE_LIMIT_CAPACITY) || 100,
         defaultRefillRate: Number(process.env.RATE_LIMIT_REFILL_RATE) || 5,
       }),
-    }),
-  });
-
-  // Token quota repository (scoped - needs supabase client)
-  fastify.diContainer.register({
-    tokenQuotaRepository: asClass(TokenQuotaRepository, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-  });
-
-  // Token rate limiting service (singleton - shares Redis connection)
-  fastify.diContainer.register({
-    tokenRateLimitingService: asClass(TokenRateLimitingService, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
     }),
   });
 

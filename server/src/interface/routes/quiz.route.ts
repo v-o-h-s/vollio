@@ -17,14 +17,13 @@ import { QuizController } from "../controllers/quiz.controller";
 
 const quizHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  opts: FastifyPluginOptions
+  opts: FastifyPluginOptions,
 ): Promise<void> => {
   fastify.post<{ Body: CreateQuizDTO }>(
     `${opts.prefix}`,
     {
       config: {
         rateLimit: { cost: 20, category: "ai" },
-        tokenRateLimit: true,
       },
       schema: {
         body: createQuizSchema,
@@ -35,7 +34,7 @@ const quizHandler: FastifyPluginAsync = async (
       const quizController =
         request.diScope.resolve<QuizController>("quizController");
       return quizController.createQuiz(request, reply);
-    }
+    },
   );
   fastify.get<{ Params: { id: string } }>(
     `${opts.prefix}/:id`,
@@ -52,7 +51,7 @@ const quizHandler: FastifyPluginAsync = async (
       const quizController =
         request.diScope.resolve<QuizController>("quizController");
       return quizController.getQuizById(request, reply);
-    }
+    },
   );
 
   fastify.delete<{ Params: { id: string } }>(
@@ -70,7 +69,7 @@ const quizHandler: FastifyPluginAsync = async (
       const quizController =
         request.diScope.resolve<QuizController>("quizController");
       return quizController.deleteQuizById(request, reply);
-    }
+    },
   );
 
   fastify.get(
@@ -85,7 +84,7 @@ const quizHandler: FastifyPluginAsync = async (
       const quizController =
         request.diScope.resolve<QuizController>("quizController");
       return quizController.getAllQuizzes(request, reply);
-    }
+    },
   );
 };
 

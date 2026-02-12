@@ -26,7 +26,7 @@ import { DocumentController } from "../controllers/document.controller";
 
 const documentRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  opts: FastifyPluginOptions
+  opts: FastifyPluginOptions,
 ): Promise<void> => {
   // Get all documents - Must be before /:id route to avoid route matching issues
   fastify.get(
@@ -41,7 +41,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.getAllDocuments(request, reply);
-    }
+    },
   );
   // should be deleted since we are trying to centerlize getting file (one endpoint for all resources of documents)
   // fastify.get<{ Params: { documentId: string } }>(
@@ -87,7 +87,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.addDocumentFromGoogleDrive(request, reply);
-    }
+    },
   );
 
   fastify.post<{ Body: GetStorageUrlDto }>(
@@ -105,7 +105,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.getStorageUrl(request, reply);
-    }
+    },
   );
 
   fastify.get<{ Params: DocumentIdParams }>(
@@ -123,7 +123,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.getDocumentById(request, reply);
-    }
+    },
   );
 
   fastify.delete<{ Params: DocumentIdParams }>(
@@ -141,7 +141,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.deleteDocument(request, reply);
-    }
+    },
   );
 
   fastify.patch<{ Params: DocumentIdParams; Body: MoveDocumentDTO }>(
@@ -163,7 +163,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.moveDocument(request, reply);
-    }
+    },
   );
 
   fastify.put<{ Params: DocumentIdParams; Body: RenameDocumentDTO }>(
@@ -185,14 +185,13 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.renameDocument(request, reply);
-    }
+    },
   );
   fastify.post<{ Params: DocumentIdParams }>(
     `${opts.prefix}/:id/generate-summary`,
     {
       config: {
         rateLimit: { cost: 20, category: "ai" },
-        tokenRateLimit: true,
       },
       schema: {
         params: documentIdParamsSchema,
@@ -203,7 +202,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.generateSummary(request, reply);
-    }
+    },
   );
 
   fastify.post<{ Body: CreateDocumentDto }>(
@@ -221,7 +220,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       const documentController =
         request.diScope.resolve<DocumentController>("documentController");
       return documentController.createDocument(request, reply);
-    }
+    },
   );
 };
 

@@ -10,7 +10,7 @@ import { ServerError } from "../../../shared/errors/ServerError";
 import { Note } from "../../../domain/entities/Note";
 import { INoteRepository } from "../../../domain/repositories/INoteRepository";
 import { NoteMapper } from "../../../shared/mappers/NoteMapper";
-import { ITokenRateLimitingService } from "../../../domain/services/ITokenRateLimitingService";
+
 import { TokenUsage } from "../../../shared/types/generativeAi";
 
 /**
@@ -31,7 +31,6 @@ export class GenerateSummaryUseCase {
     private chunkRepository: IChunkRepository,
     private noteRepository: INoteRepository,
     private ensureChunkingUseCase: EnsureDocumentChunkedUseCase,
-    private tokenRateLimitingService: ITokenRateLimitingService,
   ) {}
 
   async execute(
@@ -114,14 +113,6 @@ export class GenerateSummaryUseCase {
         currentSummary = result.data;
       }
     }
-
-    // Record total token usage
-    await this.tokenRateLimitingService.recordUsage(userId, {
-      promptTokens: totalPromptTokens,
-      completionTokens: totalCompletionTokens,
-      model: lastModel,
-      endpoint: "generate-summary",
-    });
 
     // 5. Save summary
     const note = new Note(

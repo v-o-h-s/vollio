@@ -20,7 +20,7 @@ import fp from "fastify-plugin";
 
 const flashcardsHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  opts: FastifyPluginOptions
+  opts: FastifyPluginOptions,
 ): Promise<void> => {
   // Manual creation
   fastify.post<{ Body: CreateManualFlashCardsDTO }>(
@@ -38,7 +38,7 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.createFlashCardsSet(request, reply);
-    }
+    },
   );
 
   // AI Generation
@@ -47,7 +47,6 @@ const flashcardsHandler: FastifyPluginAsync = async (
     {
       config: {
         rateLimit: { cost: 20, category: "ai" },
-        tokenRateLimit: true,
       },
       schema: {
         body: createFlashCardsSchema,
@@ -58,7 +57,7 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.generateFlashCardsSet(request, reply);
-    }
+    },
   );
 
   fastify.get<{ Params: FlashCardsSetIdParams }>(
@@ -76,7 +75,7 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.getFlashCardsSetById(request, reply);
-    }
+    },
   );
 
   fastify.get<{ Params: { documentId: string } }>(
@@ -99,7 +98,7 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.getFlashCardsSetsByDocumentId(request, reply);
-    }
+    },
   );
 
   fastify.delete<{ Params: FlashCardsSetIdParams }>(
@@ -117,7 +116,7 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.deleteFlashCardsSet(request, reply);
-    }
+    },
   );
 
   fastify.get(
@@ -132,7 +131,7 @@ const flashcardsHandler: FastifyPluginAsync = async (
       const flashCardsController =
         request.diScope.resolve<FlashCardsController>("flashCardsController");
       return flashCardsController.getAllFlashCardsSets(request, reply);
-    }
+    },
   );
 };
 

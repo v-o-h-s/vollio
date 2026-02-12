@@ -11,14 +11,13 @@ import { AssistantController } from "../controllers/assistant.controller";
 
 const assistantRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
-  options: FastifyPluginOptions
+  options: FastifyPluginOptions,
 ): Promise<void> => {
   fastify.post<{ Body: AssistantDTO }>(
     `${options.prefix}/`,
     {
       config: {
         rateLimit: { cost: 20, category: "ai" },
-        tokenRateLimit: true,
       },
       schema: {
         body: AssistantDTOSchema,
@@ -27,10 +26,10 @@ const assistantRoutesHandler: FastifyPluginAsync = async (
     },
     async (request, reply) => {
       const assistantController = request.diScope.resolve<AssistantController>(
-        "assistantController"
+        "assistantController",
       );
       return assistantController.assistantChat(request, reply);
-    }
+    },
   );
 };
 

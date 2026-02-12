@@ -22,7 +22,7 @@ import { assistantRoutes } from "./interface/routes/assistant.route";
 import settingsRoutes from "./interface/routes/settings.routes";
 import { healthRoutes } from "./interface/routes/health.route";
 import { rateLimiterPlugin } from "./plugins/rateLimiter";
-import { tokenRateLimiterPlugin } from "./plugins/tokenRateLimiter";
+
 import { SentryService } from "./infrastructure/services/SentryService";
 import { sentryPlugin } from "./plugins/sentry";
 
@@ -157,9 +157,6 @@ app.register(sentryPlugin);
 
 // Register rate limiter plugin (must be after authPlugin to access request.user)
 app.register(rateLimiterPlugin);
-
-// Register token rate limiter plugin for AI endpoints
-app.register(tokenRateLimiterPlugin);
 
 // Error handler
 app.setErrorHandler(errorHandler);
