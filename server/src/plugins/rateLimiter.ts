@@ -12,6 +12,16 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
       "rateLimitingService",
     );
     const config = request.routeOptions.config.rateLimit;
+    request.log.info(
+      {
+        url: request.url,
+        method: request.method,
+        ip: getClientIp(request),
+        userId: request.user?.id,
+        config,
+      },
+      "Rate Limiter: Processing request",
+    );
 
     // 1. IP-based general rate limiting for NO user or default
     if (!request.user) {
@@ -24,6 +34,11 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
         { type: IdentifierType.IP, value: getClientIp(request) },
         { cost, capacity: publicCapacity, refillRate: publicRefill },
         PrefixTypes.REQUEST,
+      );
+
+      request.log.info(
+        { ip: getClientIp(request), result, cost, capacity: publicCapacity },
+        "Rate Limiter: IP-based check completed",
       );
 
       if (!result.allowed) {
@@ -53,6 +68,11 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
       { type: IdentifierType.USERID, value: userId },
       { cost: requestCost, capacity, refillRate },
       PrefixTypes.REQUEST,
+    );
+
+    request.log.info(
+      { userId, result: requestResult, cost: requestCost, capacity },
+      "Rate Limiter: Authenticated General Request check completed",
     );
 
     if (!requestResult.allowed) {
@@ -135,6 +155,19 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
           remaining: Math.floor(remainingMin),
         });
       }
+
+      request.log.info(
+        {
+          userId,
+          estimatedCost,
+          remaining: {
+            month: remainingMonth,
+            day: remainingDay,
+            minute: remainingMin,
+          },
+        },
+        "Rate Limiter: AI Quota verification passed",
+      );
 
       // Add Headers for AI Quota (Effective Remaining)
       // Since we check Month -> Day -> Minute, we can set headers for transparency

@@ -52,6 +52,10 @@ export class AiQuotaService implements IAiQuotaService {
 
   async consumeTokens(userId: string, usage: TokenUsage): Promise<void> {
     const cost = this.calculateCost(usage);
+    this.logger.info(
+      { userId, usage, cost },
+      "Consuming AI tokens in AiQuotaService",
+    );
 
     // 1. Per Month (Largest bucket first - fail fast but allow force consumption)
     const monthResult = await this.rateLimitingService.tryConsume(
@@ -105,6 +109,19 @@ export class AiQuotaService implements IAiQuotaService {
         `User ${userId} exceeded minute AI quota by ${Math.abs(minuteResult.remaining)} tokens.`,
       );
     }
+
+    this.logger.info(
+      {
+        userId,
+        cost,
+        remaining: {
+          month: monthResult.remaining,
+          day: dayResult.remaining,
+          minute: minuteResult.remaining,
+        },
+      },
+      "AI token consumption completed (forced if necessary)",
+    );
   }
 
   async getRemainingQuota(userId: string): Promise<AiQuotaRemaining> {
