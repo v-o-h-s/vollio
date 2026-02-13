@@ -30,7 +30,7 @@ export interface GenerativeAiResult<T> {
  */
 export function createEmptyResult<T>(
   data: T,
-  model: string
+  model: string,
 ): GenerativeAiResult<T> {
   return {
     data,
@@ -43,14 +43,14 @@ export function createEmptyResult<T>(
  * Extract token usage from OpenRouter completion response
  */
 export function extractTokenUsage(completion: any): TokenUsage {
-  const usage = completion?.usage;
+  const usage = completion?.usage || completion?.choices?.[0]?.usage;
   if (!usage) {
     return EMPTY_TOKEN_USAGE;
   }
 
   return {
-    promptTokens: usage.prompt_tokens ?? 0,
-    completionTokens: usage.completion_tokens ?? 0,
-    totalTokens: usage.total_tokens ?? 0,
+    promptTokens: usage.prompt_tokens ?? usage.promptTokens ?? 0,
+    completionTokens: usage.completion_tokens ?? usage.completionTokens ?? 0,
+    totalTokens: usage.total_tokens ?? usage.totalTokens ?? 0,
   };
 }

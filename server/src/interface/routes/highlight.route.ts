@@ -33,7 +33,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         querystring: highlightDocumentIdParamsSchema,
@@ -53,7 +55,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         body: createHighlightSchema,
@@ -73,7 +77,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: highlightIdParamsSchema,
@@ -96,7 +102,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: highlightIdParamsSchema,
@@ -120,7 +128,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: highlightIdParamsSchema,
@@ -140,7 +150,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}/tags/:tagName/count`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
     },
     async (request, reply) => {
@@ -156,7 +168,9 @@ const highlightRoutesHandler: FastifyPluginAsync = async (
     `${_options.prefix}/tags/:tagName`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
     },
     async (request, reply) => {

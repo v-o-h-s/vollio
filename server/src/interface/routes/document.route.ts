@@ -24,6 +24,7 @@ import {
 import { GetStorageUrlDto, CreateDocumentDto } from "@vollio/shared";
 import { DocumentController } from "../controllers/document.controller";
 import {
+  AIRateLimitingDegrees,
   RateLimitingDegrees,
   PrefixTypes,
 } from "../../shared/utils/rate-limiting";
@@ -210,7 +211,8 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     {
       config: {
         rateLimit: {
-          ai: { cost: RateLimitingDegrees.VERY_HIGH },
+          request: { cost: RateLimitingDegrees.VERY_HIGH },
+          ai: { cost: AIRateLimitingDegrees.DOCUMENT },
         },
       },
       schema: {

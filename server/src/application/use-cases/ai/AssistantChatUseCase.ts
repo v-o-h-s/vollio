@@ -32,7 +32,12 @@ export class AssistantChatUseCase {
     );
     // this is will be setted using event driven architecture with rabbitMQ/supabase/redis
     // Track usage
-    await this.aiQuotaService.consumeTokens(userId, result.usage);
+    // Track usage
+    await this.aiQuotaService.consumeTokens(userId, result.usage, {
+      actionType: "chat",
+      model: result.model,
+      metadata: { tone: (data as any).tone },
+    });
 
     const text = result.data;
     try {

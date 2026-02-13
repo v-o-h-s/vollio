@@ -14,7 +14,16 @@ export interface IAiQuotaService {
    *
    * @returns {Promise<void>}
    */
-  consumeTokens(userId: string, usage: TokenUsage): Promise<void>;
+  consumeTokens(
+    userId: string,
+    usage: TokenUsage,
+    details?: {
+      actionType: "chat" | "summary" | "flashcards" | "quiz" | "other";
+      model: string;
+      resourceId?: string;
+      metadata?: any;
+    },
+  ): Promise<void>;
 
   /**
    * Get remaining quota for a user (across all buckets)

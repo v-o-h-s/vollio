@@ -25,7 +25,9 @@ const healthRoutesHandler: FastifyPluginAsync = async (
     "/health",
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.EXEMPT },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.EXEMPT },
+        },
       },
     },
     async (request, reply) => {
@@ -44,7 +46,9 @@ const healthRoutesHandler: FastifyPluginAsync = async (
     "/ready",
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.EXEMPT },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.EXEMPT },
+        },
       },
     },
     async (request, reply) => {
@@ -79,7 +83,9 @@ const healthRoutesHandler: FastifyPluginAsync = async (
     "/live",
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.EXEMPT },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.EXEMPT },
+        },
       },
     },
     async (request, reply) => {

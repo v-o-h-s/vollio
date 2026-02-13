@@ -31,7 +31,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {},
     },
@@ -47,7 +49,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         body: createFolderSchema,
@@ -66,7 +70,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: folderIdParamsSchema,
@@ -85,7 +91,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: folderIdParamsSchema,
@@ -111,7 +119,9 @@ const folderRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: folderIdParamsSchema,

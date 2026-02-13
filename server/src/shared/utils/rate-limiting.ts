@@ -19,6 +19,10 @@ export enum RateLimitingDegrees {
   HIGH = 25,
   VERY_HIGH = 50,
 }
+export enum AIRateLimitingDegrees {
+  CHAT = 5000,
+  DOCUMENT = 50000,
+}
 export enum IdentifierType {
   IP = "ip",
   USERID = "userId",

@@ -18,6 +18,7 @@ import {
 import { FlashCardsController } from "../controllers/flashcards.controller";
 import fp from "fastify-plugin";
 import {
+  AIRateLimitingDegrees,
   RateLimitingDegrees,
   PrefixTypes,
 } from "../../shared/utils/rate-limiting";
@@ -32,7 +33,8 @@ const flashcardsHandler: FastifyPluginAsync = async (
     {
       config: {
         rateLimit: {
-          ai: { cost: RateLimitingDegrees.VERY_HIGH },
+          request: { cost: RateLimitingDegrees.VERY_HIGH },
+          ai: { cost: AIRateLimitingDegrees.DOCUMENT },
         },
       },
       schema: {

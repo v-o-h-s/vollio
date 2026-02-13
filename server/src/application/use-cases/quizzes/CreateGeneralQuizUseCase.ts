@@ -245,11 +245,23 @@ export class CreateGeneralQuizUseCase {
     );
 
     // Consume tokens in the bucket
-    await this.aiQuotaService.consumeTokens(userId, {
-      promptTokens: totalPromptTokens,
-      completionTokens: totalCompletionTokens,
-      totalTokens: totalPromptTokens + totalCompletionTokens,
-    });
+    await this.aiQuotaService.consumeTokens(
+      userId,
+      {
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
+        totalTokens: totalPromptTokens + totalCompletionTokens,
+      },
+      {
+        actionType: "quiz",
+        model: lastModel || "google/gemini-2.0-flash-001",
+        resourceId: quiz.getId(),
+        metadata: {
+          difficulty: data.difficultyLevel,
+          batchCount: batches.length,
+        },
+      },
+    );
 
     // mapping the quiz entity to response interface
     return QuizMapper.fromDomainToInterface(quiz);

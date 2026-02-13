@@ -87,7 +87,7 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
 
     // B. Check AI Bucket if configured
     if (config?.ai) {
-      const estimatedCost = estimateCost(request);
+      const estimatedCost = config.ai.cost || estimateCost(request);
 
       // 1. Month check (Largest bucket first - fail fast)
       const aiMaxMonth =

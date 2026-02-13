@@ -29,7 +29,9 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         body: createNoteSchema,
@@ -48,7 +50,9 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {},
     },
@@ -64,7 +68,9 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: noteIdParamsSchema,
@@ -83,7 +89,9 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: noteIdParamsSchema,
@@ -106,7 +114,9 @@ const noteRoutesHandler: FastifyPluginAsync = async (
     `${options.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: noteIdParamsSchema,

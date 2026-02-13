@@ -235,11 +235,23 @@ export class GenerateGeneralFlashCardsUseCase {
     );
 
     // Consume tokens in the bucket
-    await this.aiQuotaService.consumeTokens(userId, {
-      promptTokens: totalPromptTokens,
-      completionTokens: totalCompletionTokens,
-      totalTokens: totalPromptTokens + totalCompletionTokens,
-    });
+    await this.aiQuotaService.consumeTokens(
+      userId,
+      {
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
+        totalTokens: totalPromptTokens + totalCompletionTokens,
+      },
+      {
+        actionType: "flashcards",
+        model: lastModel || "google/gemini-2.0-flash-001",
+        resourceId: flashCardsSet.getId(),
+        metadata: {
+          numberOfCards: data.numberOfCards,
+          batchCount: batches.length,
+        },
+      },
+    );
 
     // Map to response
     const json = flashCardsSet.toJSON();

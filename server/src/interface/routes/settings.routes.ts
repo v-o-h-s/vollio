@@ -7,7 +7,9 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
     "/",
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.HIGH },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.HIGH },
+        },
       },
       schema: {
         // Add schema if needed
@@ -24,7 +26,9 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
     "/",
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.HIGH },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.HIGH },
+        },
       },
       schema: {
         body: { type: "object", additionalProperties: true },

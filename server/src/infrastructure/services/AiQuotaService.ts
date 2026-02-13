@@ -7,6 +7,7 @@ import { IdentifierType, PrefixTypes } from "../../shared/utils/rate-limiting";
 import { TokenUsage } from "../../shared/types/generativeAi";
 import { RateLimitingError } from "../../shared/errors/RateLimitingError";
 import { FastifyBaseLogger } from "fastify";
+import { IAIUsageRepository } from "../../domain/repositories/IAIUsageRepository";
 
 export class AiQuotaService implements IAiQuotaService {
   private ratio: number;
@@ -16,6 +17,7 @@ export class AiQuotaService implements IAiQuotaService {
 
   constructor(
     private rateLimitingService: IRateLimitingService,
+    private aiUsageRepository: IAIUsageRepository,
     private logger: FastifyBaseLogger,
   ) {
     this.ratio = Number(process.env.RATIO_REQUEST_RESPONSE_TOKENS) || 1;
@@ -50,12 +52,40 @@ export class AiQuotaService implements IAiQuotaService {
     return usage.promptTokens + usage.completionTokens * this.ratio;
   }
 
-  async consumeTokens(userId: string, usage: TokenUsage): Promise<void> {
+  async consumeTokens(
+    userId: string,
+    usage: TokenUsage,
+    details?: {
+      actionType: "chat" | "summary" | "flashcards" | "quiz" | "other";
+      model: string;
+      resourceId?: string;
+      metadata?: any;
+    },
+  ): Promise<void> {
     const cost = this.calculateCost(usage);
     this.logger.info(
-      { userId, usage, cost },
+      { userId, usage, cost, action: details?.actionType },
       "Consuming AI tokens in AiQuotaService",
     );
+
+    // 0. Log to Database (Async, don't wait for it to block the response if not critical)
+    if (details) {
+      this.aiUsageRepository
+        .logUsage({
+          userId,
+          actionType: details.actionType,
+          model: details.model,
+          resourceId: details.resourceId,
+          promptTokens: usage.promptTokens,
+          completionTokens: usage.completionTokens,
+          totalTokens: usage.totalTokens,
+          costMultiplier: usage.totalTokens > 0 ? cost / usage.totalTokens : 1,
+          metadata: details.metadata,
+        })
+        .catch((err) =>
+          this.logger.error({ err }, "Background AI usage logging failed"),
+        );
+    }
 
     // 1. Per Month (Largest bucket first - fail fast but allow force consumption)
     const monthResult = await this.rateLimitingService.tryConsume(
