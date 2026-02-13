@@ -69,6 +69,7 @@ export class RateLimitingService implements IRateLimitingService {
       refillRate,
       cost,
       now,
+      options.force ? "true" : "false",
     );
 
     const remaining = await this.getRemaining(identifier, options, bucket);

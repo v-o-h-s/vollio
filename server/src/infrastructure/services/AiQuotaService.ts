@@ -53,64 +53,57 @@ export class AiQuotaService implements IAiQuotaService {
   async consumeTokens(userId: string, usage: TokenUsage): Promise<void> {
     const cost = this.calculateCost(usage);
 
-    // 1. Per Month (Largest bucket first - fail fast)
+    // 1. Per Month (Largest bucket first - fail fast but allow force consumption)
     const monthResult = await this.rateLimitingService.tryConsume(
       { type: IdentifierType.USERID, value: userId },
       {
         cost,
         ...this.monthLimit,
+        force: true, // Always record usage, even if over limit
       },
       PrefixTypes.AI_PER_MONTH,
     );
 
     if (!monthResult.allowed) {
-      throw new RateLimitingError({
-        message: "AI monthly token limit exceeded.",
-        source: "ai_token_per_month",
-        retryAfter: monthResult.retryAfter,
-        remaining: Math.floor(monthResult.remaining),
-        limit: Math.floor(this.monthLimit.capacity),
-      });
+      // Since we forced it, this should technically be true, but if the underlying service
+      // logic changes, we log a warning.
+      this.logger.warn(
+        `User ${userId} exceeded monthly AI quota by ${Math.abs(monthResult.remaining)} tokens.`,
+      );
     }
 
-    // 2. Per Day (Refills every 24h = 86400s)
+    // 2. Per Day
     const dayResult = await this.rateLimitingService.tryConsume(
       { type: IdentifierType.USERID, value: userId },
       {
         cost,
         ...this.dayLimit,
+        force: true,
       },
       PrefixTypes.AI_PER_DAY,
     );
 
     if (!dayResult.allowed) {
-      throw new RateLimitingError({
-        message: "AI daily token limit exceeded.",
-        source: "ai_token_per_day",
-        retryAfter: dayResult.retryAfter,
-        remaining: Math.floor(dayResult.remaining),
-        limit: Math.floor(this.dayLimit.capacity),
-      });
+      this.logger.warn(
+        `User ${userId} exceeded daily AI quota by ${Math.abs(dayResult.remaining)} tokens.`,
+      );
     }
 
-    // 3. Per Minute (Refills every 60s)
+    // 3. Per Minute
     const minuteResult = await this.rateLimitingService.tryConsume(
       { type: IdentifierType.USERID, value: userId },
       {
         cost,
         ...this.minuteLimit,
+        force: true,
       },
       PrefixTypes.AI_PER_MINUTE,
     );
 
     if (!minuteResult.allowed) {
-      throw new RateLimitingError({
-        message: "AI per-minute token limit exceeded.",
-        source: "ai_token_per_minute",
-        retryAfter: minuteResult.retryAfter,
-        remaining: Math.floor(minuteResult.remaining),
-        limit: Math.floor(this.minuteLimit.capacity),
-      });
+      this.logger.warn(
+        `User ${userId} exceeded minute AI quota by ${Math.abs(minuteResult.remaining)} tokens.`,
+      );
     }
   }
 
