@@ -11,6 +11,7 @@ import { Note } from "../../../domain/entities/Note";
 import { INoteRepository } from "../../../domain/repositories/INoteRepository";
 import { NoteMapper } from "../../../shared/mappers/NoteMapper";
 import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
+import { ValidationError } from "../../../shared/errors/ValidationError";
 
 import { TokenUsage } from "../../../shared/types/generativeAi";
 
@@ -44,8 +45,6 @@ export class GenerateSummaryUseCase {
       "Executing SummarizeDocumentUseCase",
     );
 
-
-
     // 1. Ensure document is processed
     await this.ensureChunkingUseCase.execute(data.id, userId);
 
@@ -69,6 +68,25 @@ export class GenerateSummaryUseCase {
     const batches: { content: string; metadata: ChunkMetadata }[][] = [];
     for (let i = 0; i < chunks.length; i += GENRATIVE_AI_CONFIG.BATCH_SIZE) {
       batches.push(chunks.slice(i, i + GENRATIVE_AI_CONFIG.BATCH_SIZE));
+    }
+
+    if (batches.length > 4) {
+      this.logger.warn(
+        { documentId: data.id, batchCount: batches.length },
+        "Document too large for summary generation",
+      );
+      throw new ValidationError({
+        message:
+          "File is too large for summary/flashcards generation (more than 4 batches).",
+        fieldErrors: [
+          {
+            field: "document",
+            message: "Document too large (max 4 batches)",
+            code: "too_long",
+          },
+        ],
+        source: "custom",
+      });
     }
 
     this.logger.info(
