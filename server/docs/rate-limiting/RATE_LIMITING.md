@@ -72,4 +72,36 @@ RATE_LIMIT_CAPACITY=100
 RATE_LIMIT_REFILL_RATE=1
 ```
 
+## 5. Usage in Routes
+
+Routes can be configured with specific costs using the `config.rateLimit` object:
+
+```typescript
+// Example: Setting a LOW cost for a standard route
+fastify.get(
+  "/notes",
+  {
+    config: {
+      rateLimit: {
+        request: { cost: RateLimitingDegrees.LOW },
+      },
+    },
+  },
+  handler,
+);
+
+// Example: Setting a HIGH cost for a resource intensive route
+fastify.post(
+  "/documents/upload-url",
+  {
+    config: {
+      rateLimit: {
+        request: { cost: RateLimitingDegrees.VERY_HIGH },
+      },
+    },
+  },
+  handler,
+);
+```
+
 For AI Quota configuration, see [AI_QUOTA.md](./AI_QUOTA.md).
