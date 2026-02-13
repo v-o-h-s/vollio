@@ -35,6 +35,10 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
           limit: publicCapacity,
         });
       }
+
+      // Add Headers for IP-based limits
+      reply.header("X-RateLimit-Limit", publicCapacity);
+      reply.header("X-RateLimit-Remaining", Math.floor(result.remaining));
       return;
     }
 
@@ -129,9 +133,14 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
             (estimatedCost - remainingMin) / aiMinuteRefill,
           ),
           remaining: Math.floor(remainingMin),
-          limit: Math.floor(aiMinuteCap),
         });
       }
+
+      // Add Headers for AI Quota (Effective Remaining)
+      // Since we check Month -> Day -> Minute, we can set headers for transparency
+      reply.header("X-AI-Remaining-Month", Math.floor(remainingMonth));
+      reply.header("X-AI-Remaining-Day", Math.floor(remainingDay));
+      reply.header("X-AI-Remaining-Minute", Math.floor(remainingMin));
     }
 
     // C. Check Upload Bucket if configured (Placeholder for future)
