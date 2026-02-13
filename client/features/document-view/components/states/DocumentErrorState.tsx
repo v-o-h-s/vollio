@@ -46,12 +46,12 @@ export function DocumentErrorState({ error, refetch }: DocumentErrorStateProps) 
             Try Again
           </Button>
           <Button
-            onClick={() => router.push("/documents")}
+            onClick={() => router.push("/")}
             variant="outline"
             className="gap-2 w-full"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Documents
+            Back to Dashboard
           </Button>
         </div>
       </div>

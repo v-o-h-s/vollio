@@ -23,7 +23,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/connect`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.HIGH },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.HIGH },
+        },
       },
       schema: {},
     },
@@ -40,7 +42,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/callback`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.MEDIUM },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.MEDIUM },
+        },
       },
       schema: {
         querystring: GoogleCallbackQuerySchema,
@@ -60,7 +64,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/refresh`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.MEDIUM },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.MEDIUM },
+        },
       },
       schema: {},
     },
@@ -77,7 +83,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/check`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.HIGH },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.HIGH },
+        },
       },
       schema: {},
     },
@@ -94,7 +102,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/disconnect`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.MEDIUM },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.MEDIUM },
+        },
       },
       schema: {},
     },
@@ -111,7 +121,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/status`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.HIGH },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.HIGH },
+        },
       },
       schema: {},
     },
@@ -128,7 +140,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/courses/list`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.MEDIUM },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.MEDIUM },
+        },
       },
       schema: {},
     },
@@ -145,7 +159,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/courses`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.HIGH },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.HIGH },
+        },
       },
       schema: {},
     },
@@ -162,7 +178,9 @@ const googleClassroomRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/courses/:courseId/content`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.HIGH },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.HIGH },
+        },
       },
       schema: {
         params: {

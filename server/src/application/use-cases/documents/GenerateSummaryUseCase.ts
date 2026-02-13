@@ -10,6 +10,8 @@ import { ServerError } from "../../../shared/errors/ServerError";
 import { Note } from "../../../domain/entities/Note";
 import { INoteRepository } from "../../../domain/repositories/INoteRepository";
 import { NoteMapper } from "../../../shared/mappers/NoteMapper";
+import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
+import { ValidationError } from "../../../shared/errors/ValidationError";
 
 import { TokenUsage } from "../../../shared/types/generativeAi";
 
@@ -31,6 +33,7 @@ export class GenerateSummaryUseCase {
     private chunkRepository: IChunkRepository,
     private noteRepository: INoteRepository,
     private ensureChunkingUseCase: EnsureDocumentChunkedUseCase,
+    private aiQuotaService: IAiQuotaService,
   ) {}
 
   async execute(
@@ -67,10 +70,24 @@ export class GenerateSummaryUseCase {
       batches.push(chunks.slice(i, i + GENRATIVE_AI_CONFIG.BATCH_SIZE));
     }
 
-    this.logger.info(
-      { documentId: data.id, batchCount: batches.length },
-      "Starting batch processing for summary generation",
-    );
+    if (batches.length > 4) {
+      this.logger.warn(
+        { documentId: data.id, batchCount: batches.length },
+        "Document too large for summary generation",
+      );
+      throw new ValidationError({
+        message:
+          "File is too large for summary/flashcards generation (more than 4 batches).",
+        fieldErrors: [
+          {
+            field: "document",
+            message: "Document too large (max 4 batches)",
+            code: "too_long",
+          },
+        ],
+        source: "custom",
+      });
+    }
 
     let currentSummary: JSONContent = {
       type: "doc",
@@ -109,8 +126,8 @@ export class GenerateSummaryUseCase {
       lastModel = result.model;
 
       // Access data from the new structure
-      if (result.data && result.data.type === "doc") {
-        currentSummary = result.data;
+      if (result.data.summary && result.data.summary.type === "doc") {
+        currentSummary = result.data.summary;
       }
     }
 
@@ -123,10 +140,25 @@ export class GenerateSummaryUseCase {
     );
     note.setNoteIsSummary(true);
 
-    const createdNote = await this.noteRepository.createNote(note);
+    await this.noteRepository.createNote(note);
     this.logger.info(
       { documentId: data.id, totalPromptTokens, totalCompletionTokens },
       "SummarizeDocumentUseCase completed successfully",
+    );
+
+    await this.aiQuotaService.consumeTokens(
+      userId,
+      {
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
+        totalTokens: totalPromptTokens + totalCompletionTokens,
+      },
+      {
+        actionType: "summary",
+        model: lastModel || "google/gemini-2.0-flash-001",
+        resourceId: data.id,
+        metadata: { batchCount: batches.length },
+      },
     );
 
     return {

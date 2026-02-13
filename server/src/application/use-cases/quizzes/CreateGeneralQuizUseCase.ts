@@ -14,6 +14,8 @@ import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/cl
 import { ServerError } from "../../../shared/errors/ServerError";
 import { quizPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/quizzes";
 import { IQuizRepository } from "../../../domain/repositories/IQuizRepository";
+import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
+import { ValidationError } from "../../../shared/errors/ValidationError";
 
 export class CreateGeneralQuizUseCase {
   constructor(
@@ -23,6 +25,7 @@ export class CreateGeneralQuizUseCase {
     private getDocumentByIdUseCase: GetDocumentByIdUseCase,
     private chunkRepository: IChunkRepository,
     private quizRepository: IQuizRepository,
+    private aiQuotaService: IAiQuotaService,
   ) {}
 
   async execute(
@@ -33,6 +36,7 @@ export class CreateGeneralQuizUseCase {
       { documentId: data.documentId, userId },
       "Executing CreateGeneralQuizUseCase",
     );
+
     // getting chunks relevant to the prompt
     if (!(await this.getDocumentByIdUseCase.execute(data.documentId, userId))) {
       this.logger.warn(
@@ -80,6 +84,24 @@ export class CreateGeneralQuizUseCase {
     const batches: { content: string; metadata: ChunkMetadata }[][] = [];
     for (let i = 0; i < chunks.length; i += GENRATIVE_AI_CONFIG.BATCH_SIZE) {
       batches.push(chunks.slice(i, i + GENRATIVE_AI_CONFIG.BATCH_SIZE));
+    }
+
+    if (batches.length > 4) {
+      this.logger.warn(
+        { documentId: data.documentId, batchCount: batches.length },
+        "Document too large for quiz generation",
+      );
+      throw new ValidationError({
+        message: "File is too large for quiz generation (more than 4 batches).",
+        fieldErrors: [
+          {
+            field: "document",
+            message: "Document too large (max 4 batches)",
+            code: "too_long",
+          },
+        ],
+        source: "custom",
+      });
     }
 
     this.logger.info(
@@ -220,6 +242,25 @@ export class CreateGeneralQuizUseCase {
     this.logger.info(
       { quizId: quiz.getId() },
       "CreateGeneralQuizUseCase completed successfully",
+    );
+
+    // Consume tokens in the bucket
+    await this.aiQuotaService.consumeTokens(
+      userId,
+      {
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
+        totalTokens: totalPromptTokens + totalCompletionTokens,
+      },
+      {
+        actionType: "quiz",
+        model: lastModel || "google/gemini-2.0-flash-001",
+        resourceId: quiz.getId(),
+        metadata: {
+          difficulty: data.difficultyLevel,
+          batchCount: batches.length,
+        },
+      },
     );
 
     // mapping the quiz entity to response interface

@@ -17,7 +17,11 @@ import {
 } from "../../shared/validation/validator";
 import { FlashCardsController } from "../controllers/flashcards.controller";
 import fp from "fastify-plugin";
-import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
+import {
+  AIRateLimitingDegrees,
+  RateLimitingDegrees,
+  PrefixTypes,
+} from "../../shared/utils/rate-limiting";
 
 const flashcardsHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
@@ -28,7 +32,10 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/generate-from-document`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.VERY_HIGH, category: "ai" },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.VERY_HIGH },
+          ai: { cost: AIRateLimitingDegrees.DOCUMENT },
+        },
       },
       schema: {
         body: createFlashCardsSchema,
@@ -46,7 +53,9 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: flashCardsSetIdParamsSchema,
@@ -64,7 +73,9 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/document/:documentId`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: {
@@ -87,7 +98,9 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: flashCardsSetIdParamsSchema,
@@ -105,7 +118,9 @@ const flashcardsHandler: FastifyPluginAsync = async (
     `${opts.prefix}/`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {},
     },

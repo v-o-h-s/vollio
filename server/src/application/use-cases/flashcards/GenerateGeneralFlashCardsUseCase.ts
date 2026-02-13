@@ -14,6 +14,8 @@ import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/cl
 import { flashcardPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/flashcards";
 import { FastifyBaseLogger } from "fastify";
 import crypto from "crypto";
+import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
+import { ValidationError } from "../../../shared/errors/ValidationError";
 
 export class GenerateGeneralFlashCardsUseCase {
   constructor(
@@ -23,6 +25,7 @@ export class GenerateGeneralFlashCardsUseCase {
     private ensureChunkingUseCase: EnsureDocumentChunkedUseCase,
     private chunkRepository: IChunkRepository,
     private generativeAiService: IGenerativeAiService,
+    private aiQuotaService: IAiQuotaService,
   ) {}
 
   async execute(
@@ -33,6 +36,8 @@ export class GenerateGeneralFlashCardsUseCase {
       { documentId: data.documentId },
       "Executing GenerateGeneralFlashCardsUseCase",
     );
+
+    // Check if user has enough quota for AI operations
     const document = await this.documentRepository.getDocumentById(
       data.documentId,
     );
@@ -82,6 +87,25 @@ export class GenerateGeneralFlashCardsUseCase {
     const batches: { content: string; metadata: ChunkMetadata }[][] = [];
     for (let i = 0; i < chunks.length; i += GENRATIVE_AI_CONFIG.BATCH_SIZE) {
       batches.push(chunks.slice(i, i + GENRATIVE_AI_CONFIG.BATCH_SIZE));
+    }
+
+    if (batches.length > 4) {
+      this.logger.warn(
+        { documentId: data.documentId, batchCount: batches.length },
+        "Document too large for flashcards generation",
+      );
+      throw new ValidationError({
+        message:
+          "File is too large for summary/flashcards generation (more than 4 batches).",
+        fieldErrors: [
+          {
+            field: "document",
+            message: "Document too large (max 4 batches)",
+            code: "too_long",
+          },
+        ],
+        source: "custom",
+      });
     }
 
     this.logger.info(
@@ -208,6 +232,25 @@ export class GenerateGeneralFlashCardsUseCase {
     this.logger.info(
       { setId: flashCardsSet.getId() },
       "GenerateGeneralFlashCardsUseCase completed successfully",
+    );
+
+    // Consume tokens in the bucket
+    await this.aiQuotaService.consumeTokens(
+      userId,
+      {
+        promptTokens: totalPromptTokens,
+        completionTokens: totalCompletionTokens,
+        totalTokens: totalPromptTokens + totalCompletionTokens,
+      },
+      {
+        actionType: "flashcards",
+        model: lastModel || "google/gemini-2.0-flash-001",
+        resourceId: flashCardsSet.getId(),
+        metadata: {
+          numberOfCards: data.numberOfCards,
+          batchCount: batches.length,
+        },
+      },
     );
 
     // Map to response
