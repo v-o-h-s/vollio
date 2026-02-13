@@ -14,6 +14,7 @@ import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/cl
 import { ServerError } from "../../../shared/errors/ServerError";
 import { quizPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/quizzes";
 import { IQuizRepository } from "../../../domain/repositories/IQuizRepository";
+import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
 
 export class CreateGeneralQuizUseCase {
   constructor(
@@ -23,6 +24,7 @@ export class CreateGeneralQuizUseCase {
     private getDocumentByIdUseCase: GetDocumentByIdUseCase,
     private chunkRepository: IChunkRepository,
     private quizRepository: IQuizRepository,
+    private aiQuotaService: IAiQuotaService,
   ) {}
 
   async execute(
@@ -33,6 +35,7 @@ export class CreateGeneralQuizUseCase {
       { documentId: data.documentId, userId },
       "Executing CreateGeneralQuizUseCase",
     );
+
     // getting chunks relevant to the prompt
     if (!(await this.getDocumentByIdUseCase.execute(data.documentId, userId))) {
       this.logger.warn(
@@ -221,6 +224,13 @@ export class CreateGeneralQuizUseCase {
       { quizId: quiz.getId() },
       "CreateGeneralQuizUseCase completed successfully",
     );
+
+    // Consume tokens in the bucket
+    await this.aiQuotaService.consumeTokens(userId, {
+      promptTokens: totalPromptTokens,
+      completionTokens: totalCompletionTokens,
+      totalTokens: totalPromptTokens + totalCompletionTokens,
+    });
 
     // mapping the quiz entity to response interface
     return QuizMapper.fromDomainToInterface(quiz);

@@ -6,14 +6,14 @@ import {
   RateLimitOptions,
 } from "../../shared/types/rateLimiting";
 import { IRateLimitingService } from "../../domain/services/IRateLimitingService";
-enum IdentifierType {
-  IP = "ip",
-  USER = "user",
-}
-export type Identifier =
-  | { [IdentifierType.IP]: string }
-  | { [IdentifierType.USER]: string };
+
+import {
+  Identifier,
+  IdentifierType,
+  PrefixTypes,
+} from "../../shared/utils/rate-limiting";
 export class RateLimitingService implements IRateLimitingService {
+  private static cachedLua: string | null = null;
   private redis: Redis;
   private lua: string;
   private defaultCapacity: number;
@@ -27,16 +27,19 @@ export class RateLimitingService implements IRateLimitingService {
     this.redis = redis;
     this.defaultCapacity = defaultCapacity;
     this.defaultRefillRate = defaultRefillRate;
-    this.lua = fs.readFileSync(
-      path.join(__dirname, "../../shared/utils/token_bucket.lua"),
-      "utf8",
-    );
+
+    if (!RateLimitingService.cachedLua) {
+      RateLimitingService.cachedLua = fs.readFileSync(
+        path.join(__dirname, "../../shared/utils/token_bucket.lua"),
+        "utf8",
+      );
+    }
+    this.lua = RateLimitingService.cachedLua;
   }
 
   /** Generate Redis key for an identifier + bucket type */
-  private getKey(identifier: Identifier, bucket: string) {
-    const key = Object.keys(identifier)[0] as keyof Identifier;
-    return `rate:${bucket}:${key}:${identifier[key]}`;
+  private getKey(identifier: Identifier, keyPrefix: string): string {
+    return `${keyPrefix}:${identifier.type}:${identifier.value}`;
   }
 
   /**
@@ -49,7 +52,7 @@ export class RateLimitingService implements IRateLimitingService {
   async tryConsume(
     identifier: Identifier,
     options: RateLimitOptions = {},
-    bucket: string = "request",
+    bucket: string = PrefixTypes.REQUEST,
   ): Promise<ConsumeResult> {
     const now = Math.floor(Date.now() / 1000);
     const capacity = options.capacity ?? this.defaultCapacity;
@@ -90,7 +93,7 @@ export class RateLimitingService implements IRateLimitingService {
   async getRemaining(
     identifier: Identifier,
     options: RateLimitOptions = {},
-    bucket: string = "request",
+    bucket: string = PrefixTypes.REQUEST,
   ): Promise<number> {
     const capacity = options.capacity ?? this.defaultCapacity;
     const refillRate = options.refillRate ?? this.defaultRefillRate;
@@ -113,5 +116,9 @@ export class RateLimitingService implements IRateLimitingService {
     const elapsed = Math.max(0, now - lastRefill);
 
     return Math.min(capacity, tokens + elapsed * refillRate);
+  }
+  async reset(identifier: Identifier, bucket: string = PrefixTypes.REQUEST) {
+    const key = this.getKey(identifier, bucket);
+    await this.redis.del(key);
   }
 }

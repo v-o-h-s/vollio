@@ -2,7 +2,7 @@ import {
   ConsumeResult,
   RateLimitOptions,
 } from "../../shared/types/rateLimiting";
-import { Identifier } from "../../infrastructure/services/RateLimitingService";
+import { Identifier } from "../../shared/utils/rate-limiting";
 
 export interface IRateLimitingService {
   tryConsume(
@@ -15,4 +15,5 @@ export interface IRateLimitingService {
     options: RateLimitOptions,
     bucket?: string,
   ): Promise<number>;
+  reset(identifier: Identifier, bucket?: string): Promise<void>;
 }

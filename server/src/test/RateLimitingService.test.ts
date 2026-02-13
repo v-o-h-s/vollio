@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from "vitest";
 import { RateLimitingService } from "../infrastructure/services/RateLimitingService";
+import { IdentifierType, PrefixTypes } from "../shared/utils/rate-limiting";
 import Redis from "ioredis";
 
 describe("RateLimitingService", () => {
@@ -29,7 +30,10 @@ describe("RateLimitingService", () => {
       // Mock getRemaining to return a valid number (tokens, last_refill)
       redisMock.hmget.mockResolvedValue(["9", (Date.now() / 1000).toString()]);
 
-      const result = await rateLimiter.tryConsume({ user: "user1" });
+      const result = await rateLimiter.tryConsume({
+        type: IdentifierType.USERID,
+        value: "user1",
+      });
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBeGreaterThanOrEqual(8);
@@ -42,7 +46,10 @@ describe("RateLimitingService", () => {
       // Mock getRemaining returning 0 tokens
       redisMock.hmget.mockResolvedValue(["0", (Date.now() / 1000).toString()]);
 
-      const result = await rateLimiter.tryConsume({ user: "user1" });
+      const result = await rateLimiter.tryConsume({
+        type: IdentifierType.USERID,
+        value: "user1",
+      });
 
       expect(result.allowed).toBe(false);
       // If 0 tokens and we tried to consume 1, remaining is 0 (or technically -1 logic depending on lua, but we mock hmget)
@@ -56,7 +63,7 @@ describe("RateLimitingService", () => {
       redisMock.hmget.mockResolvedValue(["18", (Date.now() / 1000).toString()]);
 
       await rateLimiter.tryConsume(
-        { user: "user1" },
+        { type: IdentifierType.USERID, value: "user1" },
         { cost: 2, capacity: 20 },
       );
 
@@ -64,7 +71,7 @@ describe("RateLimitingService", () => {
       expect(redisMock.eval).toHaveBeenCalledWith(
         expect.any(String), // script
         1, // numKeys
-        expect.stringContaining("rate:request:user:user1"), // key
+        expect.stringContaining(`${PrefixTypes.REQUEST}:userId:user1`), // key
         20, // capacity
         1, // default refill rate
         2, // cost
@@ -77,7 +84,10 @@ describe("RateLimitingService", () => {
     it("should return capacity if no data exists in Redis", async () => {
       redisMock.hmget.mockResolvedValue([null, null]);
 
-      const remaining = await rateLimiter.getRemaining({ user: "user1" });
+      const remaining = await rateLimiter.getRemaining({
+        type: IdentifierType.USERID,
+        value: "user1",
+      });
 
       expect(remaining).toBe(10); // default capacity
     });
@@ -94,7 +104,10 @@ describe("RateLimitingService", () => {
         lastRefill.toString(),
       ]);
 
-      const remaining = await rateLimiter.getRemaining({ user: "user1" });
+      const remaining = await rateLimiter.getRemaining({
+        type: IdentifierType.USERID,
+        value: "user1",
+      });
 
       // Expected: 2 + (5 * 1) = 7
 
@@ -120,7 +133,10 @@ describe("RateLimitingService", () => {
         lastRefill.toString(),
       ]);
 
-      const remaining = await rateLimiter.getRemaining({ user: "user1" });
+      const remaining = await rateLimiter.getRemaining({
+        type: IdentifierType.USERID,
+        value: "user1",
+      });
 
       expect(remaining).toBe(10); // Should cap at the default capacity
     });
@@ -134,14 +150,18 @@ describe("RateLimitingService", () => {
 
       // Request 1: regular request
 
-      await rateLimiter.tryConsume({ user: "user1" }, {}, "request");
+      await rateLimiter.tryConsume(
+        { type: IdentifierType.USERID, value: "user1" },
+        {},
+        "request",
+      );
 
       expect(redisMock.eval).toHaveBeenCalledWith(
         expect.any(String),
 
         1,
 
-        "rate:request:user:user1",
+        `${PrefixTypes.REQUEST}:userId:user1`,
 
         10,
 
@@ -154,14 +174,18 @@ describe("RateLimitingService", () => {
 
       // Request 2: AI request
 
-      await rateLimiter.tryConsume({ user: "user1" }, {}, "ai");
+      await rateLimiter.tryConsume(
+        { type: IdentifierType.USERID, value: "user1" },
+        {},
+        PrefixTypes.AI_PER_MINUTE,
+      );
 
       expect(redisMock.eval).toHaveBeenCalledWith(
         expect.any(String),
 
         1,
 
-        "rate:ai:user:user1",
+        `${PrefixTypes.AI_PER_MINUTE}:userId:user1`,
 
         10,
 

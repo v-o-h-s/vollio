@@ -15,6 +15,8 @@ import { FolderController } from "../../interface/controllers/folder.controller"
 import { HighlightController } from "../../interface/controllers/highlight.controller";
 import { FlashCardsController } from "../../interface/controllers/flashcards.controller";
 import { GoogleClassroomController } from "../../interface/controllers/googleClassroom.controller";
+import { AiQuotaService } from "../../infrastructure/services/AiQuotaService";
+import { FastifyBaseLogger } from "fastify";
 import Redis from "ioredis";
 
 export interface User {
@@ -47,6 +49,8 @@ export interface DIContainer {
   highlightController: HighlightController;
   flashCardsController: FlashCardsController;
   rateLimitingService: RateLimitingService;
+  aiQuotaService: AiQuotaService;
+  logger: FastifyBaseLogger;
 
   redis: Redis;
 }
@@ -66,10 +70,15 @@ declare module "fastify" {
     diContainer: AwilixContainer;
   }
 
+  export interface RateLimitConfig {
+    cost?: number;
+  }
+
   interface FastifyContextConfig {
     rateLimit?: {
-      cost?: number;
-      category?: "request" | "ai" | "upload";
+      request?: RateLimitConfig;
+      ai?: RateLimitConfig;
+      upload?: RateLimitConfig;
     };
   }
 }

@@ -84,6 +84,7 @@ import { GenerateSummaryUseCase } from "../application/use-cases/documents/Gener
 import { GetStorageUrlUseCase } from "../application/use-cases/documents/GetStorageUrlUseCase";
 import { CreateDocumentUseCase } from "../application/use-cases/documents/CreateDocumentUseCase";
 import { RateLimitingService } from "../infrastructure/services/RateLimitingService";
+import { AiQuotaService } from "../infrastructure/services/AiQuotaService";
 
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton Redis client
@@ -100,12 +101,17 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
     redis: asValue(redis),
     adminSupabaseClient: asValue(createServiceClient()),
     rateLimitingService: asClass(RateLimitingService, {
-      lifetime: Lifetime.SINGLETON,
+      // Use this for Services/Classes that you want fresh instances of (the scope one).
+      lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
       injector: () => ({
         defaultCapacity: Number(process.env.RATE_LIMIT_CAPACITY) || 100,
         defaultRefillRate: Number(process.env.RATE_LIMIT_REFILL_RATE) || 1,
       }),
+    }),
+    aiQuotaService: asClass(AiQuotaService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
     }),
   });
 
@@ -116,8 +122,11 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
 
   fastify.addHook("onRequest", async (request, reply) => {
     const { supabase } = await createUserClient(request);
+    //Use this for Objects/Values that are only created during the request lifecycle
+    //(like the User's Auth session or the Request-Traced Logger).
     request.diScope.register({
       supabaseClient: asValue(supabase),
+      logger: asValue(request.log),
     });
   });
 

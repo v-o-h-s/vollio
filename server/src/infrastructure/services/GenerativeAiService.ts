@@ -28,7 +28,7 @@ export class GenerativeAiService implements IGenerativeAiService {
 
   async generateText(
     prompt: string,
-    model?: string
+    model?: string,
   ): Promise<GenerativeAiResult<string>> {
     const modelId = this.getModelId(model);
 
@@ -59,7 +59,7 @@ export class GenerativeAiService implements IGenerativeAiService {
   }
 
   async refineUserPrompt(
-    initialPrompt: string
+    initialPrompt: string,
   ): Promise<GenerativeAiResult<string>> {
     const prompt = `Refine the following user intent into a single clear instruction for a quiz generator:\nUser intent: "${initialPrompt}"\nResult:`;
     return this.generateText(prompt);
@@ -108,14 +108,14 @@ export class GenerativeAiService implements IGenerativeAiService {
       };
     } catch (error) {
       this.logger.error(
-        "GenerativeAiService.generateQuizQuestions failed: " + error
+        "GenerativeAiService.generateQuizQuestions failed: " + error,
       );
       return createEmptyResult({ questions: [] }, modelId);
     }
   }
 
   async generateFlashCards(
-    prompt: string
+    prompt: string,
   ): Promise<
     GenerativeAiResult<{ flashCards: any[]; name?: string; summary?: string }>
   > {
@@ -155,14 +155,14 @@ export class GenerativeAiService implements IGenerativeAiService {
       };
     } catch (error) {
       this.logger.error(
-        "GenerativeAiService.generateFlashCards failed: " + error
+        "GenerativeAiService.generateFlashCards failed: " + error,
       );
       return createEmptyResult({ flashCards: [] }, modelId);
     }
   }
 
   async generateSummary(
-    prompt: string
+    prompt: string,
   ): Promise<GenerativeAiResult<JSONContent>> {
     const modelId = "google/gemini-2.0-flash-001";
 

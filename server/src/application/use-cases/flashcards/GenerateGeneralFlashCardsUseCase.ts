@@ -14,6 +14,7 @@ import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/cl
 import { flashcardPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/flashcards";
 import { FastifyBaseLogger } from "fastify";
 import crypto from "crypto";
+import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
 
 export class GenerateGeneralFlashCardsUseCase {
   constructor(
@@ -23,6 +24,7 @@ export class GenerateGeneralFlashCardsUseCase {
     private ensureChunkingUseCase: EnsureDocumentChunkedUseCase,
     private chunkRepository: IChunkRepository,
     private generativeAiService: IGenerativeAiService,
+    private aiQuotaService: IAiQuotaService,
   ) {}
 
   async execute(
@@ -33,6 +35,8 @@ export class GenerateGeneralFlashCardsUseCase {
       { documentId: data.documentId },
       "Executing GenerateGeneralFlashCardsUseCase",
     );
+
+    // Check if user has enough quota for AI operations
     const document = await this.documentRepository.getDocumentById(
       data.documentId,
     );
@@ -209,6 +213,13 @@ export class GenerateGeneralFlashCardsUseCase {
       { setId: flashCardsSet.getId() },
       "GenerateGeneralFlashCardsUseCase completed successfully",
     );
+
+    // Consume tokens in the bucket
+    await this.aiQuotaService.consumeTokens(userId, {
+      promptTokens: totalPromptTokens,
+      completionTokens: totalCompletionTokens,
+      totalTokens: totalPromptTokens + totalCompletionTokens,
+    });
 
     // Map to response
     const json = flashCardsSet.toJSON();

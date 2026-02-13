@@ -10,6 +10,7 @@ import { ServerError } from "../../../shared/errors/ServerError";
 import { Note } from "../../../domain/entities/Note";
 import { INoteRepository } from "../../../domain/repositories/INoteRepository";
 import { NoteMapper } from "../../../shared/mappers/NoteMapper";
+import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
 
 import { TokenUsage } from "../../../shared/types/generativeAi";
 
@@ -31,6 +32,7 @@ export class GenerateSummaryUseCase {
     private chunkRepository: IChunkRepository,
     private noteRepository: INoteRepository,
     private ensureChunkingUseCase: EnsureDocumentChunkedUseCase,
+    private aiQuotaService: IAiQuotaService,
   ) {}
 
   async execute(
@@ -41,6 +43,8 @@ export class GenerateSummaryUseCase {
       { documentId: data.id, userId },
       "Executing SummarizeDocumentUseCase",
     );
+
+
 
     // 1. Ensure document is processed
     await this.ensureChunkingUseCase.execute(data.id, userId);
@@ -128,6 +132,13 @@ export class GenerateSummaryUseCase {
       { documentId: data.id, totalPromptTokens, totalCompletionTokens },
       "SummarizeDocumentUseCase completed successfully",
     );
+
+    // Consume tokens in the bucket
+    await this.aiQuotaService.consumeTokens(userId, {
+      promptTokens: totalPromptTokens,
+      completionTokens: totalCompletionTokens,
+      totalTokens: totalPromptTokens + totalCompletionTokens,
+    });
 
     return {
       note: NoteMapper.fromDomainToInterface(note),

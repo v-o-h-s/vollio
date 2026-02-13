@@ -23,7 +23,10 @@ import {
 } from "../../shared/validation/documentSchemas";
 import { GetStorageUrlDto, CreateDocumentDto } from "@vollio/shared";
 import { DocumentController } from "../controllers/document.controller";
-import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
+import {
+  RateLimitingDegrees,
+  PrefixTypes,
+} from "../../shared/utils/rate-limiting";
 
 const documentRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
@@ -34,7 +37,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {},
     },
@@ -72,7 +77,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/google-drive`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.MEDIUM },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.MEDIUM },
+        },
       },
       schema: {
         body: {
@@ -95,7 +102,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/upload-url`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.VERY_HIGH },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.VERY_HIGH },
+        },
       },
       schema: {
         body: getStorageUrlSchema,
@@ -113,7 +122,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.VERY_HIGH },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.VERY_HIGH },
+        },
       },
       schema: {
         params: documentIdParamsSchema,
@@ -131,7 +142,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: documentIdParamsSchema,
@@ -149,7 +162,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id/move`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: documentIdParamsSchema,
@@ -171,7 +186,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id/rename`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         params: documentIdParamsSchema,
@@ -192,7 +209,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/:id/generate-summary`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.VERY_HIGH, category: "ai" },
+        rateLimit: {
+          ai: { cost: RateLimitingDegrees.VERY_HIGH },
+        },
       },
       schema: {
         params: documentIdParamsSchema,
@@ -210,7 +229,9 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     `${opts.prefix}/finish-upload`,
     {
       config: {
-        rateLimit: { cost: RateLimitingDegrees.LOW },
+        rateLimit: {
+          request: { cost: RateLimitingDegrees.LOW },
+        },
       },
       schema: {
         body: createDocumentSchema,
