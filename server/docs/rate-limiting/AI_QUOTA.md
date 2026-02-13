@@ -22,7 +22,7 @@ Every user has three concurrent token buckets. A request is only allowed if **AL
 | **Daily**   | Fair Usage       | Pacing               | 1,000,000        | ~11.5 tokens/sec  |
 | **Minute**  | Abuse Protection | Burst Limit          | 100,000          | ~1,666 tokens/sec |
 
-_Note: Capacities are configurable via environment variables (`MAX_AI_TOKENS_PER_...`)._
+_Note: Capacities are configurable via environment variables (`MAX_AI_TOKENS_PER_...`).\_
 
 ---
 
@@ -35,11 +35,13 @@ AI operations have variable costs that are only known _after_ execution (output 
 - **Location**: `rateLimiterPlugin` (Fastify Middleware)
 - **Trigger**: Before request processing.
 - **Logic**:
-  1.  **Estimate Cost**: Based on endpoint type (e.g., Chat = 5000, Summary = 50,000).
+  1.  **Determine Cost**:
+      - **Priority 1**: Explicit configuration (`config.rateLimit.ai.cost`), e.g., `AIRateLimitingDegrees.CHAT`.
+      - **Priority 2**: Fallback dynamic estimation (`estimateCost(request)`) based on endpoint URL.
   2.  **Check Balance**: Verify user has enough tokens in Month, Day, AND Minute buckets.
   3.  **Decision**:
-      - If `Balance < Estimate`: **Block Request** (429 Too Many Requests).
-      - If `Balance >= Estimate`: **Allow Request**.
+      - If `Balance < Cost`: **Block Request** (429 Too Many Requests).
+      - If `Balance >= Cost`: **Allow Request**.
 
 ### Phase 2: Execution & Billing (The Accountant)
 
@@ -57,13 +59,12 @@ AI operations have variable costs that are only known _after_ execution (output 
 
 These estimates are used for the **Pre-Flight Check**.
 
-| Operation            | Estimated Cost | Description                                |
-| :------------------- | :------------- | :----------------------------------------- |
-| **Chat / Assistant** | 5,000 Tokens   | Single turn conversation.                  |
-| **Flashcards**       | 50,000 Tokens  | Generating 10-20 cards from a document.    |
-| **Quizzes**          | 50,000 Tokens  | Generating 5-10 questions from a document. |
-| **Summary**          | 50,000 Tokens  | Summarizing a long document.               |
-| **Standard API**     | 1,000 Tokens   | Fallback for unknown AI routes.            |
+| Operation               | Estimated Cost (Credits) | `AIRateLimitingDegrees` Enum | Description                                  |
+| :---------------------- | :----------------------- | :--------------------------- | :------------------------------------------- |
+| **Chat / Assistant**    | 5,000                    | `CHAT`                       | Single turn conversation.                    |
+| **Document Processing** | 50,000                   | `DOCUMENT`                   | Heavy operations like Summaries, Flashcards, |
+| **Quizzes**             | 50,000                   | `DOCUMENT`                   | Generating questions from content.           |
+| **Standard API**        | 1,000                    | -                            | Fallback for unknown AI routes.              |
 
 ---
 
