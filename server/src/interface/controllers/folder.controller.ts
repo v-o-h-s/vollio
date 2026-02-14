@@ -8,7 +8,6 @@ import {
   CreateFolderDTO,
   UpdateFolderDTO,
   FolderIdParams,
-  DeleteFolderQuery,
 } from "../../shared/validation/folderSchemas";
 import {
   CreateFolderResponse,
@@ -82,7 +81,7 @@ export class FolderController {
       return;
     }
 
-    await this.createFolderUseCase.execute({
+    const createdFolder = await this.createFolderUseCase.execute({
       userId,
       name: request.body.name,
       parentId: request.body.parentId,
@@ -91,7 +90,7 @@ export class FolderController {
     reply.status(201).send({
       success: true,
       message: "Folder created successfully",
-      data: null,
+      data: createdFolder.toJSON(),
       error: null,
     } satisfies CreateFolderResponse);
   }
@@ -147,7 +146,7 @@ export class FolderController {
       return;
     }
 
-    await this.updateFolderUseCase.execute({
+    const updatedFolder = await this.updateFolderUseCase.execute({
       userId,
       folderId: request.params.id,
       name: request.body.name,
@@ -157,7 +156,7 @@ export class FolderController {
     reply.status(200).send({
       success: true,
       message: "Folder updated successfully",
-      data: null,
+      data: updatedFolder.toJSON(),
       error: null,
     } satisfies UpdateFolderResponse);
   }
@@ -168,7 +167,6 @@ export class FolderController {
   async deleteFolder(
     request: FastifyRequest<{
       Params: FolderIdParams;
-      Querystring: DeleteFolderQuery;
     }>,
     reply: FastifyReply,
   ): Promise<void> {
@@ -186,7 +184,6 @@ export class FolderController {
     await this.deleteFolderUseCase.execute({
       userId,
       folderId: request.params.id,
-      moveContentsTo: request.query.moveContentsTo,
     });
 
     reply.status(200).send({
