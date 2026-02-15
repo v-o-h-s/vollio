@@ -7,17 +7,14 @@ import fp from "fastify-plugin";
 import {
   validateBody,
   validateParams,
-  validateQuery,
 } from "../../shared/validation/validator";
 import {
   createFolderSchema,
   updateFolderSchema,
   folderIdParamsSchema,
-  deleteFolderQuerySchema,
   CreateFolderDTO,
   UpdateFolderDTO,
   FolderIdParams,
-  DeleteFolderQuery,
 } from "../../shared/validation/folderSchemas";
 import { FolderController } from "../controllers/folder.controller";
 import { RateLimitingDegrees } from "../../shared/utils/rate-limiting";
@@ -114,7 +111,6 @@ const folderRoutesHandler: FastifyPluginAsync = async (
   // Delete a folder
   fastify.delete<{
     Params: FolderIdParams;
-    Querystring: DeleteFolderQuery;
   }>(
     `${options.prefix}/:id`,
     {
@@ -125,12 +121,8 @@ const folderRoutesHandler: FastifyPluginAsync = async (
       },
       schema: {
         params: folderIdParamsSchema,
-        querystring: deleteFolderQuerySchema,
       },
-      preHandler: [
-        validateParams(folderIdParamsSchema),
-        validateQuery(deleteFolderQuerySchema),
-      ],
+      preHandler: validateParams(folderIdParamsSchema),
     },
     async (request, reply) => {
       const folderController =

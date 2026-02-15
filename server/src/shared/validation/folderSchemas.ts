@@ -19,7 +19,8 @@ export const createFolderSchema: JSONSchemaType<CreateFolderDTO> = {
     parentId: {
       type: "string",
       nullable: true,
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
   },
   required: ["name"],
@@ -46,7 +47,8 @@ export const updateFolderSchema: JSONSchemaType<UpdateFolderDTO> = {
     parentId: {
       type: "string",
       nullable: true,
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
   },
   required: [],
@@ -65,29 +67,10 @@ export const folderIdParamsSchema: JSONSchemaType<FolderIdParams> = {
   properties: {
     id: {
       type: "string",
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      pattern:
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
     },
   },
   required: ["id"],
-  additionalProperties: false,
-} as any;
-
-/**
- * DTO for moving folder contents
- */
-export interface DeleteFolderQuery {
-  moveContentsTo?: string | null;
-}
-
-export const deleteFolderQuerySchema: JSONSchemaType<DeleteFolderQuery> = {
-  type: "object",
-  properties: {
-    moveContentsTo: {
-      type: "string",
-      nullable: true,
-      pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-    },
-  },
-  required: [],
   additionalProperties: false,
 } as any;

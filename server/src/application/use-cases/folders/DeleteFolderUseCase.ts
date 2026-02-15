@@ -5,13 +5,12 @@ import { FastifyBaseLogger } from "fastify";
 interface DeleteFolderInput {
   userId: string;
   folderId: string;
-  moveContentsTo?: string | null;
 }
 
 export class DeleteFolderUseCase {
   constructor(
     private folderRepository: IFolderRepository,
-    private documentRepository: IDocumentRepository, // Inject DocumentRepository to delete documents
+    private documentRepository: IDocumentRepository,
     private logger: FastifyBaseLogger,
   ) {}
 
@@ -20,7 +19,6 @@ export class DeleteFolderUseCase {
       {
         folderId: input.folderId,
         userId: input.userId,
-        moveContentsTo: input.moveContentsTo,
       },
       "Executing DeleteFolderUseCase",
     );
@@ -38,58 +36,8 @@ export class DeleteFolderUseCase {
       throw new Error("Folder not found or access denied");
     }
 
-    // If moveContentsTo is specified, validate the target folder
-    // Otherwise, we perform a CASCADE delete (delete contents)
-    if (input.moveContentsTo) {
-      const targetFolder = await this.folderRepository.getFolderById(
-        input.moveContentsTo,
-        input.userId,
-      );
-
-      if (!targetFolder) {
-        this.logger.warn(
-          { targetFolderId: input.moveContentsTo, userId: input.userId },
-          "Target folder not found in DeleteFolderUseCase",
-        );
-        throw new Error("Target folder not found or access denied");
-      }
-
-      // Move Documents to target folder or root
-      this.logger.info(
-        { folderId: input.folderId, targetFolderId: input.moveContentsTo },
-        "Moving Documents out of folder being deleted",
-      );
-      await this.folderRepository.movePdfsBetweenFolders(
-        input.folderId,
-        input.moveContentsTo || null,
-        input.userId,
-      );
-
-      // Move subfolders to target folder
-      this.logger.info(
-        { folderId: input.folderId, targetFolderId: input.moveContentsTo },
-        "Moving subfolders out of folder being deleted",
-      );
-      await this.folderRepository.moveSubfoldersBetweenFolders(
-        input.folderId,
-        input.moveContentsTo || null,
-        input.userId,
-      );
-    } else {
-      // Cascade DELETE: Delete all subfolders and documents recursively
-      // NOTE: The current requirement is "when folder is deleted its children must also be deleted"
-      // The implementation here relies on the repository to handle cascade or we do it manually.
-      // Assuming database FKs might not have ON DELETE CASCADE or we need application level logic.
-
-      // However, a simple implementation for now is to let the database handle it if configured,
-      // OR manually delete contents.
-      // Since I don't have direct DB schema access to verify ON DELETE CASCADE,
-      // I will implement a manual cascade strategy here or use a repository method if available.
-      // Since no 'deleteWithCascade' exists on repo, I will use recursive calls or rely on DB.
-      // Given the prompt "do this in backend as well", I'll implementation recursion logic here.
-
-      await this.deleteFolderContentsRecursively(input.folderId, input.userId);
-    }
+    // Cascade delete: delete all subfolders and documents recursively
+    await this.deleteFolderContentsRecursively(input.folderId, input.userId);
 
     // Delete the folder itself
     await this.folderRepository.deleteFolder(input.folderId, input.userId);
