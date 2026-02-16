@@ -31,8 +31,7 @@ import { sentryPlugin } from "./plugins/sentry";
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
-const PADDLE_API_KEY = process.env.PADDLE_API_KEY;
-const PADDLE_WEBHOOK_SECRET = process.env.PADDLE_WEBHOOK_SECRET;
+
 
 // Initialize Sentry early
 SentryService.initialize();

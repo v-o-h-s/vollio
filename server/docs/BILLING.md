@@ -7,20 +7,21 @@ This document outlines the architecture and implementation details of the Paddle
 The billing system follows the project's **Clean Architecture** principles:
 
 1.  **Infrastructure Layer**:
-    - The Paddle SDK is initialized and registered as a singleton in `src/plugins/container.ts`.
-    - It uses `Environment.sandbox` for development and `Environment.production` for production based on `NODE_ENV`.
+    - `src/infrastructure/services/PaddleService.ts` implements the `IPaddleService` and handles the raw SDK calls.
+    - The service is registered as a singleton in `src/plugins/container.ts`.
 2.  **Interface Layer**:
     - `src/interface/routes/billing.route.ts` defines the billing endpoints.
     - `src/interface/controllers/billing.controller.ts` handles the incoming HTTP requests.
 3.  **Application Layer**:
-    - `src/application/use-cases/billing/HandlePaddleWebhookUseCase.ts` contains the core logic for processing Paddle notifications.
+    - `src/domain/services/IPaddleService.ts` defines the contract for billing operations.
+    - `src/application/use-cases/billing/HandleBillingWebhookUseCase.ts` contains the core logic for processing billing notifications.
 
 ## Webhook Security
 
 To ensure security, all incoming webhooks are verified using the Paddle SDK's signature verification:
 
 1.  **Raw Body Capture**: The `fastify-raw-body` plugin is configured in `src/server.ts` to capture the raw request body specifically for the `/api/v1/billing/webhook` route.
-2.  **Signature Verification**: The `HandlePaddleWebhookUseCase` uses `paddle.webhooks.unmarshal(rawBody, secret, signature)` to verify the `paddle-signature` header against our `PADDLE_WEBHOOK_SECRET`.
+2.  **Signature Verification**: The `HandleBillingWebhookUseCase` calls `paddleService.verifyWebhook(rawBody, signature)` which uses the SDK's `unmarshal` method to verify the `paddle-signature` header against our `PADDLE_WEBHOOK_SECRET`.
 
 ## Handled Webhook Events
 
