@@ -75,4 +75,17 @@ export class QuizMapper {
       row.title,
     );
   }
+
+  public static toPersistence(quiz: Quiz) {
+    return {
+      id: quiz.getId(),
+      document_id: quiz.getDocumentId(),
+      difficulty_level: quiz.getDifficultyLevel(),
+      language: quiz.getLanguage(),
+      explanation_level: quiz.getExplanationLevel(),
+      number_of_questions: quiz.getNumberOfQuestions(),
+      created_at: quiz.getCreatedAt().toISOString(),
+      title: quiz.getTitle(),
+    };
+  }
 }

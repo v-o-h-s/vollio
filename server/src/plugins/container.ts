@@ -89,6 +89,7 @@ import { AiQuotaService } from "../infrastructure/services/AiQuotaService";
 import { HandleBillingWebhookUseCase } from "../application/use-cases/billing/HandleBillingWebhookUseCase";
 import { BillingController } from "../interface/controllers/billing.controller";
 import { PaddleService } from "../infrastructure/services/PaddleService";
+import { SubscriptionRepository } from "../infrastructure/repositories/SubscriptionRepository";
 
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton Redis client
@@ -544,6 +545,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
           isProduction: process.env.NODE_ENV === "production",
         },
       }),
+    }),
+    subscriptionRepository: asClass(SubscriptionRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
     }),
   });
 };

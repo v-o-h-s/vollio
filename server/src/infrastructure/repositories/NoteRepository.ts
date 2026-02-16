@@ -4,11 +4,12 @@ import { Note } from "../../domain/entities/Note";
 import { INoteRepository } from "../../domain/repositories/INoteRepository";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 import { FastifyBaseLogger } from "fastify";
+import { NoteMapper } from "../../shared/mappers/NoteMapper";
 
 export class NoteRepository implements INoteRepository {
   constructor(
     private supabaseClient: SupabaseClient,
-    private logger: FastifyBaseLogger
+    private logger: FastifyBaseLogger,
   ) {}
 
   async createNote(note: Note): Promise<Note> {
@@ -16,15 +17,7 @@ export class NoteRepository implements INoteRepository {
 
     const { data, error } = await this.supabaseClient
       .from("notes")
-      .insert({
-        id: note.getId(),
-        title: note.getTitle(),
-        content: note.getContent(),
-        document_id: note.getDocumentId(),
-        created_at: note.getCreatedAt(),
-        updated_at: note.getUpdatedAt(),
-        is_summary: note.isNoteSummary(),
-      })
+      .insert(NoteMapper.toPersistence(note))
       .select()
       .single();
 
@@ -35,13 +28,13 @@ export class NoteRepository implements INoteRepository {
     if (!data) {
       this.logger.error(
         { noteId: note.getId() },
-        "Failed to create note: no data returned"
+        "Failed to create note: no data returned",
       );
       throw new DatabaseError({ message: "Failed to create note" });
     }
 
     this.logger.info({ noteId: note.getId() }, "Note created successfully");
-    return this.mapToDomain(data);
+    return NoteMapper.fromPersistenceToDomain(data);
   }
 
   async updateNote(note: Note): Promise<Note> {
@@ -64,13 +57,13 @@ export class NoteRepository implements INoteRepository {
     if (!data) {
       this.logger.error(
         { noteId: note.getId() },
-        "Note not found or not updated"
+        "Note not found or not updated",
       );
       throw new DatabaseError({ message: "Note not found or not updated" });
     }
 
     this.logger.info({ noteId: note.getId() }, "Note updated successfully");
-    return this.mapToDomain(data);
+    return NoteMapper.fromPersistenceToDomain(data);
   }
 
   async deleteNote(noteId: string): Promise<void> {
@@ -105,7 +98,7 @@ export class NoteRepository implements INoteRepository {
     }
 
     this.logger.info({ noteId }, "Note found");
-    return data ? this.mapToDomain(data) : null;
+    return data ? NoteMapper.fromPersistenceToDomain(data) : null;
   }
 
   async getNotesByUserId(): Promise<Note[]> {
@@ -121,18 +114,6 @@ export class NoteRepository implements INoteRepository {
     }
 
     this.logger.info({ count: data?.length || 0 }, "Notes retrieved for user");
-    return (data || []).map((item) => this.mapToDomain(item));
-  }
-
-  private mapToDomain(data: any): Note {
-    return new Note(
-      data.id,
-      data.title,
-      data.content,
-      data.document_id,
-      new Date(data.created_at),
-      new Date(data.updated_at),
-      data.is_summary
-    );
+    return (data || []).map((item) => NoteMapper.fromPersistenceToDomain(item));
   }
 }
