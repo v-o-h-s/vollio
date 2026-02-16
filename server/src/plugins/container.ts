@@ -86,6 +86,9 @@ import { GetStorageUrlUseCase } from "../application/use-cases/documents/GetStor
 import { CreateDocumentUseCase } from "../application/use-cases/documents/CreateDocumentUseCase";
 import { RateLimitingService } from "../infrastructure/services/RateLimitingService";
 import { AiQuotaService } from "../infrastructure/services/AiQuotaService";
+import { HandlePaddleWebhookUseCase } from "../application/use-cases/billing/HandlePaddleWebhookUseCase";
+import { BillingController } from "../interface/controllers/billing.controller";
+import { Environment, LogLevel, Paddle } from "@paddle/paddle-node-sdk";
 
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton Redis client
@@ -96,6 +99,19 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       : "localhost"
     ).trim(),
     port: Number(process.env.REDIS_PORT) || 6379,
+  });
+
+  // Register Paddle client
+  const paddle = new Paddle(process.env.PADDLE_API_KEY!, {
+    environment:
+      process.env.NODE_ENV === "production"
+        ? Environment.production
+        : Environment.sandbox,
+    logLevel:
+      process.env.NODE_ENV === "production" ? LogLevel.error : LogLevel.verbose,
+    customHeaders: {
+      "X-Custom-Header": "value", // Optional custom headers
+    },
   });
 
   fastify.diContainer.register({
@@ -122,6 +138,8 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       }),
     }),
   });
+
+ 
 
   // Register singleton logger
   fastify.diContainer.register({
@@ -520,6 +538,19 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
+  });
+
+  // Billing
+  fastify.diContainer.register({
+    handlePaddleWebhookUseCase: asClass(HandlePaddleWebhookUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    billingController: asClass(BillingController, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    paddle: asValue(paddle),
   });
 };
 export const containerPlugin = fastifyPlugin(diPlugin, {

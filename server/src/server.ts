@@ -4,6 +4,7 @@ import fastifySession from "@fastify/session";
 import fastifyCors from "@fastify/cors";
 import fastifyMultipart from "@fastify/multipart";
 import fastifyHelmet from "@fastify/helmet";
+import fastifyRawBody from "fastify-raw-body";
 import Fastify from "fastify";
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { containerPlugin } from "./plugins/container";
@@ -21,6 +22,7 @@ import { flashcardRoutes } from "./interface/routes/flashcards.route";
 import { assistantRoutes } from "./interface/routes/assistant.route";
 import settingsRoutes from "./interface/routes/settings.routes";
 import { healthRoutes } from "./interface/routes/health.route";
+import { billingRoutes } from "./interface/routes/billing.route";
 import { rateLimiterPlugin } from "./plugins/rateLimiter";
 
 import { SentryService } from "./infrastructure/services/SentryService";
@@ -29,6 +31,8 @@ import { sentryPlugin } from "./plugins/sentry";
 // CONFIGURATION
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || "0.0.0.0";
+const PADDLE_API_KEY = process.env.PADDLE_API_KEY;
+const PADDLE_WEBHOOK_SECRET = process.env.PADDLE_WEBHOOK_SECRET;
 
 // Initialize Sentry early
 SentryService.initialize();
@@ -138,6 +142,14 @@ app.register(fastifyHelmet, {
   frameguard: { action: "deny" },
 });
 
+app.register(fastifyRawBody, {
+  field: "rawBody",
+  global: false,
+  encoding: "utf8",
+  runFirst: true,
+  routes: ["/api/v1/billing/webhook"],
+});
+
 // Register Awilix DI plugin first
 app.register(fastifyAwilixPlugin, {
   disposeOnClose: true,
@@ -190,6 +202,9 @@ app.register(assistantRoutes, {
 });
 app.register(settingsRoutes, {
   prefix: "/api/v1/settings",
+});
+app.register(billingRoutes, {
+  prefix: "/api/v1/billing",
 });
 
 async function start(): Promise<void> {
