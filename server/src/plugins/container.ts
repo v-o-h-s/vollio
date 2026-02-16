@@ -90,6 +90,12 @@ import { HandleBillingWebhookUseCase } from "../application/use-cases/billing/Ha
 import { BillingController } from "../interface/controllers/billing.controller";
 import { PaddleService } from "../infrastructure/services/PaddleService";
 import { SubscriptionRepository } from "../infrastructure/repositories/SubscriptionRepository";
+import { PlanRepository } from "../infrastructure/repositories/PlanRepository";
+import { ResourcesRepository } from "../infrastructure/repositories/ResourcesRepository";
+import { GetResourcesUseCase } from "../application/use-cases/resources/GetResourcesUseCase";
+import { InitializeResourcesUseCase } from "../application/use-cases/resources/InitializeResourcesUseCase";
+import { DeleteResourcesUseCase } from "../application/use-cases/resources/DeleteResourcesUseCase";
+import { UpdateResourceUsageUseCase } from "../application/use-cases/resources/UpdateResourceUsageUseCase";
 
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton Redis client
@@ -547,6 +553,30 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       }),
     }),
     subscriptionRepository: asClass(SubscriptionRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    planRepository: asClass(PlanRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    resourcesRepository: asClass(ResourcesRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getResourcesUseCase: asClass(GetResourcesUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    initializeResourcesUseCase: asClass(InitializeResourcesUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    deleteResourcesUseCase: asClass(DeleteResourcesUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    updateResourceUsageUseCase: asClass(UpdateResourceUsageUseCase, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

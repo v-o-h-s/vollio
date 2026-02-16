@@ -36,7 +36,7 @@ export class HighlightController {
     private logger: FastifyBaseLogger,
     private getHighlightsByDocumentIdUseCase: GetHighlightsByDocumentIdUseCase,
     private countHighlightsByTagUseCase: CountHighlightsByTagUseCase,
-    private deleteHighlightsByTagUseCase: DeleteHighlightsByTagUseCase
+    private deleteHighlightsByTagUseCase: DeleteHighlightsByTagUseCase,
   ) {}
 
   /**
@@ -44,7 +44,7 @@ export class HighlightController {
    */
   async getHighlightsByDocumentId(
     request: FastifyRequest<{ Querystring: HighlightDocumentIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -58,15 +58,14 @@ export class HighlightController {
       return;
     }
     const documentId = request.query.documentId;
-    const highlights = await this.getHighlightsByDocumentIdUseCase.execute(
-      documentId
-    );
+    const highlights =
+      await this.getHighlightsByDocumentIdUseCase.execute(documentId);
 
     ResponseFormatter.success(
       reply,
       highlights,
       "Highlights retrieved successfully",
-      200
+      200,
     );
   }
 
@@ -75,7 +74,7 @@ export class HighlightController {
    */
   async createHighlight(
     request: FastifyRequest<{ Body: CreateHighlightDTO }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -106,9 +105,9 @@ export class HighlightController {
 
     return ResponseFormatter.success(
       reply,
-      HighlightsMapper.mapEntityToResponse(highlight),
+      HighlightsMapper.fromDomainToInterface(highlight),
       "Highlight created successfully",
-      201
+      201,
     );
   }
 
@@ -117,7 +116,7 @@ export class HighlightController {
    */
   async getHighlightById(
     request: FastifyRequest<{ Params: HighlightIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -138,9 +137,9 @@ export class HighlightController {
 
     return ResponseFormatter.success(
       reply,
-      HighlightsMapper.mapEntityToResponse(highlight as any), // Cast if needed, or update UseCase
+      HighlightsMapper.fromDomainToInterface(highlight as any), // Cast if needed, or update UseCase
       "Highlight retrieved successfully",
-      200
+      200,
     );
   }
 
@@ -152,7 +151,7 @@ export class HighlightController {
       Params: HighlightIdParams;
       Body: UpdateHighlightDTO;
     }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -183,9 +182,9 @@ export class HighlightController {
 
     return ResponseFormatter.success(
       reply,
-      HighlightsMapper.mapEntityToResponse(highlight),
+      HighlightsMapper.fromDomainToInterface(highlight),
       "Highlight updated successfully",
-      200
+      200,
     );
   }
 
@@ -194,7 +193,7 @@ export class HighlightController {
    */
   async deleteHighlight(
     request: FastifyRequest<{ Params: HighlightIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -217,7 +216,7 @@ export class HighlightController {
       reply,
       null,
       "Highlight deleted successfully",
-      200
+      200,
     );
   }
 
@@ -226,7 +225,7 @@ export class HighlightController {
    */
   async countHighlightsByTag(
     request: FastifyRequest<{ Params: { tagName: string } }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -237,7 +236,7 @@ export class HighlightController {
     const { tagName } = request.params;
     const count = await this.countHighlightsByTagUseCase.execute(
       userId,
-      tagName
+      tagName,
     );
 
     ResponseFormatter.success(reply, { count }, "Usage count retrieved", 200);
@@ -248,7 +247,7 @@ export class HighlightController {
    */
   async deleteHighlightsByTag(
     request: FastifyRequest<{ Params: { tagName: string } }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {

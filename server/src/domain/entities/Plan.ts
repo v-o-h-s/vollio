@@ -7,8 +7,8 @@ export class Plan {
   private billingInterval: string;
   private paddlePriceId: string | null;
   private isActive: boolean;
-  private maxDocuments: number | null;
-  private maxAiQueriesPerDay: number | null;
+  private maxAiTokens: number | null;
+  private maxStorageBytes: number | null;
   private createdAt: Date;
   private updatedAt: Date;
 
@@ -21,8 +21,8 @@ export class Plan {
     billingInterval: string,
     paddlePriceId: string | null = null,
     isActive: boolean = true,
-    maxDocuments: number | null = null,
-    maxAiQueriesPerDay: number | null = null,
+    maxAiTokens: number | null = null,
+    maxStorageBytes: number | null = null,
     createdAt?: Date,
     updatedAt?: Date,
   ) {
@@ -34,8 +34,8 @@ export class Plan {
     this.billingInterval = billingInterval;
     this.paddlePriceId = paddlePriceId;
     this.isActive = isActive;
-    this.maxDocuments = maxDocuments;
-    this.maxAiQueriesPerDay = maxAiQueriesPerDay;
+    this.maxAiTokens = maxAiTokens;
+    this.maxStorageBytes = maxStorageBytes;
     this.createdAt = createdAt || new Date();
     this.updatedAt = updatedAt || new Date();
   }
@@ -72,12 +72,12 @@ export class Plan {
     return this.isActive;
   }
 
-  public getMaxDocuments(): number | null {
-    return this.maxDocuments;
+  public getMaxAiTokens(): number | null {
+    return this.maxAiTokens;
   }
 
-  public getMaxAiQueriesPerDay(): number | null {
-    return this.maxAiQueriesPerDay;
+  public getMaxStorageBytes(): number | null {
+    return this.maxStorageBytes;
   }
 
   public getCreatedAt(): Date {
@@ -86,6 +86,10 @@ export class Plan {
 
   public getUpdatedAt(): Date {
     return this.updatedAt;
+  }
+
+  public isFree(): boolean {
+    return this.slug === "free";
   }
 
   public toJSON() {
@@ -98,8 +102,8 @@ export class Plan {
       billing_interval: this.billingInterval,
       paddle_price_id: this.paddlePriceId,
       is_active: this.isActive,
-      max_documents: this.maxDocuments,
-      max_ai_queries_per_day: this.maxAiQueriesPerDay,
+      max_ai_tokens: this.maxAiTokens,
+      max_storage_bytes: this.maxStorageBytes,
       created_at: this.createdAt.toISOString(),
       updated_at: this.updatedAt.toISOString(),
     };

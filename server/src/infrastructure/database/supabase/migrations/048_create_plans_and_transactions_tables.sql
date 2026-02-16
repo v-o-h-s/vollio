@@ -32,19 +32,18 @@ CREATE TABLE IF NOT EXISTS plans (
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
   -- Feature limits for this plan
-  max_documents INTEGER,         -- null = unlimited
-  max_ai_queries_per_day INTEGER, -- null = unlimited
+  max_ai_tokens BIGINT,          -- null = unlimited
+  max_storage_bytes BIGINT,      -- null = unlimited
 
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Seed the default plans
-INSERT INTO plans (name, slug, description, price_cents, currency, billing_interval, paddle_price_id, is_active, max_documents, max_ai_queries_per_day)
+INSERT INTO plans (name, slug, description, price_cents, currency, billing_interval, paddle_price_id, is_active, max_ai_tokens, max_storage_bytes)
 VALUES
-  ('Free', 'free', 'Get started with basic features', 0, 'USD', NULL, NULL, TRUE, 5, 10),
-  ('Pro Monthly', 'pro_monthly', 'Full access, billed monthly', 700, 'USD', 'month', NULL, TRUE, NULL, NULL),
-  ('Pro Yearly', 'pro_yearly', 'Full access, billed yearly — save 30%', 5000, 'USD', 'year', NULL, TRUE, NULL, NULL)
+  ('Free', 'free', 'Get started with basic features', 0, 'USD', NULL, NULL, TRUE, 10000, 52428800), -- 10k tokens, 50MB
+  ('Premium', 'premium', 'Full access to all AI features and storage', 700, 'USD', 'month', NULL, TRUE, 10000000, 524288000) -- 10M tokens, 500MB
 ON CONFLICT (slug) DO NOTHING;
 
 
