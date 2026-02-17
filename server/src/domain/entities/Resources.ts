@@ -4,8 +4,10 @@ export class Resources {
   constructor(
     private userId: string,
     private planId: string,
-    private remainingAiTokens: number,
-    private remainingStorageBytes: number,
+    private usedAiTokens: number,
+    private usedStorageBytes: number,
+    private maxAiTokens: number,
+    private maxStorageBytes: number,
     private createdAt: Date = new Date(),
     private updatedAt: Date = new Date(),
   ) {}
@@ -22,20 +24,28 @@ export class Resources {
     this.planId = planId;
   }
 
-  public getRemainingAiTokens(): number {
-    return this.remainingAiTokens;
+  public getUsedAiTokens(): number {
+    return this.usedAiTokens;
   }
 
-  public setRemainingAiTokens(tokens: number): void {
-    this.remainingAiTokens = tokens;
+  public getUsedStorageBytes(): number {
+    return this.usedStorageBytes;
+  }
+
+  public getMaxAiTokens(): number {
+    return this.maxAiTokens;
+  }
+
+  public getMaxStorageBytes(): number {
+    return this.maxStorageBytes;
+  }
+
+  public getRemainingAiTokens(): number {
+    return Math.max(0, this.maxAiTokens - this.usedAiTokens);
   }
 
   public getRemainingStorageBytes(): number {
-    return this.remainingStorageBytes;
-  }
-
-  public setRemainingStorageBytes(bytes: number): void {
-    this.remainingStorageBytes = bytes;
+    return Math.max(0, this.maxStorageBytes - this.usedStorageBytes);
   }
 
   public getCreatedAt(): Date {
@@ -50,36 +60,49 @@ export class Resources {
    * Business Logic: Consume AI tokens
    */
   public consumeAiTokens(amount: number): void {
-    if (this.remainingAiTokens < amount) {
+    // We check against remaining
+    if (this.getRemainingAiTokens() < amount) {
       throw new Error("Insufficient AI tokens");
     }
-    this.remainingAiTokens -= amount;
+    this.usedAiTokens += amount;
+    this.updatedAt = new Date();
   }
 
   /**
    * Business Logic: Consume storage space
    */
   public consumeStorage(sizeInBytes: number): void {
-    if (this.remainingStorageBytes < sizeInBytes) {
+    if (this.getRemainingStorageBytes() < sizeInBytes) {
       throw new Error("Insufficient storage space");
     }
-    this.remainingStorageBytes -= sizeInBytes;
+    this.usedStorageBytes += sizeInBytes;
+    this.updatedAt = new Date();
   }
 
   /**
    * Business Logic: Release storage space (on delete)
    */
   public releaseStorage(sizeInBytes: number): void {
-    this.remainingStorageBytes += sizeInBytes;
+    this.usedStorageBytes = Math.max(0, this.usedStorageBytes - sizeInBytes);
+    this.updatedAt = new Date();
   }
 
   /**
    * Business Logic: Update allocation based on a new plan (e.g. upgrade/renewal)
+   * This preserves existing storage usage while applying new limits.
    */
   public updateFromPlan(plan: Plan): void {
     this.planId = plan.getId();
-    this.remainingAiTokens = plan.getMaxAiTokens() || 0;
-    this.remainingStorageBytes = plan.getMaxStorageBytes() || 0;
+    this.maxAiTokens = plan.getMaxAiTokens() || 0;
+    this.maxStorageBytes = plan.getMaxStorageBytes() || 0;
+
+    // Standard SaaS Behavior:
+    // 1. Reset AI tokens usage to 0 (new month/billing cycle refill)
+    this.usedAiTokens = 0;
+
+    // 2. Storage usage is NOT reset (the files are still there)
+    // We just have a new max. If used > max, getRemaining() will return 0.
+
     this.updatedAt = new Date();
   }
 
@@ -87,8 +110,12 @@ export class Resources {
     return {
       userId: this.userId,
       planId: this.planId,
-      remainingAiTokens: this.remainingAiTokens,
-      remainingStorageBytes: this.remainingStorageBytes,
+      usedAiTokens: this.usedAiTokens,
+      usedStorageBytes: this.usedStorageBytes,
+      remainingAiTokens: this.getRemainingAiTokens(),
+      remainingStorageBytes: this.getRemainingStorageBytes(),
+      maxAiTokens: this.maxAiTokens,
+      maxStorageBytes: this.maxStorageBytes,
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),
     };

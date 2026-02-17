@@ -96,6 +96,7 @@ import { GetResourcesUseCase } from "../application/use-cases/resources/GetResou
 import { InitializeResourcesUseCase } from "../application/use-cases/resources/InitializeResourcesUseCase";
 import { DeleteResourcesUseCase } from "../application/use-cases/resources/DeleteResourcesUseCase";
 import { UpdateResourceUsageUseCase } from "../application/use-cases/resources/UpdateResourceUsageUseCase";
+import { PlanService } from "../infrastructure/services/PlanService";
 
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton Redis client
@@ -577,6 +578,10 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     updateResourceUsageUseCase: asClass(UpdateResourceUsageUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    planService: asClass(PlanService, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

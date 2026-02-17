@@ -11,14 +11,7 @@ import {
   GetHighlightsQuery,
   HighlightDocumentIdParams,
 } from "../../shared/validation/highlightSchemas";
-import {
-  CreateHighlightResponse,
-  UpdateHighlightResponse,
-  GetHighlightsResponse,
-  GetHighlightByIdResponse,
-  DeleteHighlightResponse,
-  HighlightData,
-} from "@vollio/shared";
+
 import { FastifyBaseLogger } from "fastify";
 import { GetHighlightsByDocumentIdUseCase } from "../../application/use-cases/highlights/GetHighlightsByDocumentIdUseCase";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";

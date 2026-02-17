@@ -5,8 +5,10 @@ export class ResourcesMapper {
     return new Resources(
       row.user_id,
       row.plan_id,
-      Number(row.remaining_ai_tokens),
-      Number(row.remaining_storage_bytes),
+      Number(row.used_ai_tokens || 0),
+      Number(row.used_storage_bytes || 0),
+      Number(row.max_ai_tokens || 0),
+      Number(row.max_storage_bytes || 0),
       new Date(row.created_at),
       new Date(row.updated_at),
     );
@@ -16,8 +18,10 @@ export class ResourcesMapper {
     return {
       user_id: resources.getUserId(),
       plan_id: resources.getPlanId(),
-      remaining_ai_tokens: resources.getRemainingAiTokens(),
-      remaining_storage_bytes: resources.getRemainingStorageBytes(),
+      used_ai_tokens: resources.getUsedAiTokens(),
+      used_storage_bytes: resources.getUsedStorageBytes(),
+      max_ai_tokens: resources.getMaxAiTokens(),
+      max_storage_bytes: resources.getMaxStorageBytes(),
       updated_at: new Date().toISOString(),
     };
   }

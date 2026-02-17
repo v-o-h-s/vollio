@@ -4,6 +4,7 @@ import { IPaddleService } from "../../../domain/services/IPaddleService";
 import { ISubscriptionRepository } from "../../../domain/repositories/ISubscriptionRepository";
 import { IPlanRepository } from "../../../domain/repositories/IPlanRepository";
 import { IResourcesRepository } from "../../../domain/repositories/IResourcesRepository";
+import { IPlanService } from "../../../domain/services/IPlanService";
 import { Subscription } from "../../../domain/entities/Subscription";
 import { Resources } from "../../../domain/entities/Resources";
 import { randomUUID } from "node:crypto";
@@ -15,6 +16,7 @@ export class HandleBillingWebhookUseCase {
     private subscriptionRepository: ISubscriptionRepository,
     private planRepository: IPlanRepository,
     private resourcesRepository: IResourcesRepository,
+    private planService: IPlanService,
   ) {}
 
   async execute(rawBody: string, signature: string): Promise<void> {
@@ -52,6 +54,16 @@ export class HandleBillingWebhookUseCase {
 
       case EventName.SubscriptionCreated:
       case EventName.SubscriptionUpdated: {
+        /**
+         * This block synchronizes our local database with Paddle subscription events.
+         * It performs four main tasks:
+         * 1. Extracts the subscription state and dates from the event.
+         * 2. Maps the Paddle Price ID to our internal system Plan.
+         * 3. Creates or updates the Subscription record to track billing status.
+         * 4. Initializes or refills the user's Resources (AI tokens/storage) based on the plan.
+         */
+
+        // 1. Extract core data from the Paddle event
         const paddleSubscriptionId = data.id;
         const paddleCustomerId = data.customerId;
         const status = data.status;
@@ -59,7 +71,7 @@ export class HandleBillingWebhookUseCase {
           ? new Date(data.currentBillingPeriod.endsAt)
           : null;
 
-        // Extract priceId from the first item
+        // 2. Map the Paddle Price ID to our internal Plan ID
         const item = data.items?.[0];
         const priceId = item?.priceId;
 
@@ -78,7 +90,7 @@ export class HandleBillingWebhookUseCase {
           }
         }
 
-        // Find existing subscription by userId or paddleSubscriptionId
+        // 3. Sync the Subscription record (Create or Update)
         let subscription =
           await this.subscriptionRepository.getSubscriptionByUserId(userId);
 
@@ -90,7 +102,7 @@ export class HandleBillingWebhookUseCase {
         }
 
         if (subscription) {
-          // Update existing
+          // Update existing subscription state
           subscription.setStatus(status);
           subscription.setPlanId(planId);
           subscription.setCurrentPeriodEnd(currentPeriodEnd);
@@ -101,7 +113,7 @@ export class HandleBillingWebhookUseCase {
             "Subscription updated in DB",
           );
         } else {
-          // Create new
+          // Create new subscription record if it doesn't exist
           subscription = new Subscription(
             randomUUID(),
             userId,
@@ -119,24 +131,28 @@ export class HandleBillingWebhookUseCase {
           );
         }
 
-        // ──────────────────────────────────────
-        // Resources Logic
-        // ──────────────────────────────────────
+        // 4. Provision or Refill User Resources if the subscription is active
         if (planId && status === "active") {
           const plan = await this.planRepository.getPlanById(planId);
           if (plan) {
             let resources = await this.resourcesRepository.getByUserId(userId);
 
             if (!resources) {
-              // First time: Initialize with plan limits
+              // Initialize resources for first-time premium users
+              const maxAiTokens = plan.getMaxAiTokens() || 0;
+              const maxStorageBytes = plan.getMaxStorageBytes() || 0;
+
               resources = new Resources(
                 userId,
                 planId,
-                plan.getMaxAiTokens() || 0,
-                plan.getMaxStorageBytes() || 0,
+                0, // used tokens
+                0, // used storage
+                maxAiTokens,
+                maxStorageBytes,
               );
             } else {
-              // Renewal/Upgrade: Update limits using the entity method
+              // Reset/Refill resources on renewal or plan change (upgrade/downgrade)
+              // This method now correctly preserves storage usage by only resetting AI token usage
               resources.updateFromPlan(plan);
             }
 
@@ -160,9 +176,17 @@ export class HandleBillingWebhookUseCase {
         if (subscription) {
           subscription.setStatus(data.status);
           await this.subscriptionRepository.updateSubscription(subscription);
+
+          // Downgrade resources to Free plan limits immediately on payment failure
+          await this.planService.downgradeUserToFreePlan(userId);
+
           this.logger.info(
-            { subscriptionId: subscription.getId(), status: data.status },
-            "Subscription marked as past due",
+            {
+              subscriptionId: subscription.getId(),
+              status: data.status,
+              userId,
+            },
+            "Subscription marked as past due and resources downgraded",
           );
         }
         break;
@@ -178,9 +202,17 @@ export class HandleBillingWebhookUseCase {
         if (subscription) {
           subscription.setStatus(data.status);
           await this.subscriptionRepository.updateSubscription(subscription);
+
+          // Final downgrade: User is no longer a subscriber
+          await this.planService.downgradeUserToFreePlan(userId);
+
           this.logger.info(
-            { subscriptionId: subscription.getId(), status: data.status },
-            "Subscription canceled in DB",
+            {
+              subscriptionId: subscription.getId(),
+              status: data.status,
+              userId,
+            },
+            "Subscription canceled and resources downgraded",
           );
         }
         break;
