@@ -7,7 +7,8 @@ import {
   createServiceClient,
 } from "../infrastructure/database/supabase/supabase";
 import { NoteRepository } from "../infrastructure/repositories/NoteRepository";
-import { AIUsageRepository } from "../infrastructure/repositories/AIUsageRepository";
+import { AIResourcesRepository } from "../infrastructure/repositories/AIResourcesRepository";
+import { StorageResourcesRepository } from "../infrastructure/repositories/StorageResourcesRepository";
 import { ChunkRepository } from "../infrastructure/repositories/ChunkRepository";
 import { CreateNoteUseCase } from "../application/use-cases/notes/CreateNoteUseCase";
 import { UpdateNoteUseCase } from "../application/use-cases/notes/UpdateNoteUseCase";
@@ -125,11 +126,18 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    aiUsageRepository: asClass(AIUsageRepository, {
+    aiResourcesRepository: asClass(AIResourcesRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
       injector: () => ({
-        supabase: createServiceClient(),
+        supabaseClient: createServiceClient(),
+      }),
+    }),
+    storageResourcesRepository: asClass(StorageResourcesRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => ({
+        supabaseClient: createServiceClient(),
       }),
     }),
   });

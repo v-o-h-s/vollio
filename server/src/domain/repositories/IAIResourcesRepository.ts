@@ -1,6 +1,7 @@
+import { IResourcesRepository } from "./IResourcesRepository";
 import { TokenUsage } from "../../shared/types/generativeAi";
 
-export interface AIUsageLogEntry {
+export interface AIResourceLogEntry {
   userId: string;
   actionType: "chat" | "summary" | "flashcards" | "quiz" | "other";
   model: string;
@@ -12,6 +13,6 @@ export interface AIUsageLogEntry {
   metadata?: any;
 }
 
-export interface IAIUsageRepository {
-  logUsage(entry: AIUsageLogEntry): Promise<void>;
+export interface IAIResourcesRepository extends IResourcesRepository {
+  logUsage(entry: AIResourceLogEntry): Promise<void>;
 }

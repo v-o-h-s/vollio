@@ -1,14 +1,14 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import { FastifyBaseLogger } from "fastify";
 import { IResourcesRepository } from "../../domain/repositories/IResourcesRepository";
 import { Resources } from "../../domain/entities/Resources";
 import { ResourcesMapper } from "../../shared/mappers/ResourcesMapper";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
-import { FastifyBaseLogger } from "fastify";
 
 export class ResourcesRepository implements IResourcesRepository {
   constructor(
-    private supabaseClient: SupabaseClient,
-    private logger: FastifyBaseLogger,
+    protected supabaseClient: SupabaseClient,
+    protected logger: FastifyBaseLogger,
   ) {}
 
   async getByUserId(userId: string): Promise<Resources | null> {

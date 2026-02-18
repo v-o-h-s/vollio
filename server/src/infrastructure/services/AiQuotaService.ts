@@ -7,7 +7,7 @@ import { IdentifierType, PrefixTypes } from "../../shared/utils/rate-limiting";
 import { TokenUsage } from "../../shared/types/generativeAi";
 import { RateLimitingError } from "../../shared/errors/RateLimitingError";
 import { FastifyBaseLogger } from "fastify";
-import { IAIUsageRepository } from "../../domain/repositories/IAIUsageRepository";
+import { IAIResourcesRepository } from "../../domain/repositories/IAIResourcesRepository";
 
 export class AiQuotaService implements IAiQuotaService {
   private ratio: number;
@@ -17,7 +17,7 @@ export class AiQuotaService implements IAiQuotaService {
 
   constructor(
     private rateLimitingService: IRateLimitingService,
-    private aiUsageRepository: IAIUsageRepository,
+    private aiResourcesRepository: IAIResourcesRepository,
     private logger: FastifyBaseLogger,
   ) {
     this.ratio = Number(process.env.RATIO_REQUEST_RESPONSE_TOKENS) || 1;
@@ -70,7 +70,7 @@ export class AiQuotaService implements IAiQuotaService {
 
     // 0. Log to Database (Async, don't wait for it to block the response if not critical)
     if (details) {
-      this.aiUsageRepository
+      this.aiResourcesRepository
         .logUsage({
           userId,
           actionType: details.actionType,
@@ -82,7 +82,7 @@ export class AiQuotaService implements IAiQuotaService {
           costMultiplier: usage.totalTokens > 0 ? cost / usage.totalTokens : 1,
           metadata: details.metadata,
         })
-        .catch((err) =>
+        .catch((err: any) =>
           this.logger.error({ err }, "Background AI usage logging failed"),
         );
     }
