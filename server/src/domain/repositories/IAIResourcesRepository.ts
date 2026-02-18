@@ -15,4 +15,9 @@ export interface AIResourceLogEntry {
 
 export interface IAIResourcesRepository extends IResourcesRepository {
   logUsage(entry: AIResourceLogEntry): Promise<void>;
+  /**
+   * Check if user can use more AI tokens
+   * @param userId
+   */
+  canUse(userId: string): Promise<boolean>;
 }

@@ -11,6 +11,8 @@ import {
   validateParams,
   validateQuery,
 } from "../../shared/validation/validator";
+import { guardResource } from "../../shared/utils/ResourceGuard";
+
 import {
   documentIdParamsSchema,
   moveDocumentSchema,
@@ -91,6 +93,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
           required: ["documentGoogleDriveId"],
         },
       },
+      preHandler: guardResource("storage"),
     },
     async (request, reply) => {
       const documentController =
@@ -110,7 +113,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       schema: {
         body: getStorageUrlSchema,
       },
-      preHandler: validateBody(getStorageUrlSchema),
+      preHandler: [guardResource("storage"), validateBody(getStorageUrlSchema)],
     },
     async (request, reply) => {
       const documentController =
@@ -218,7 +221,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       schema: {
         params: documentIdParamsSchema,
       },
-      preHandler: validateParams(documentIdParamsSchema),
+      preHandler: [guardResource("ai"), validateParams(documentIdParamsSchema)],
     },
     async (request, reply) => {
       const documentController =
@@ -238,7 +241,10 @@ const documentRoutesHandler: FastifyPluginAsync = async (
       schema: {
         body: createDocumentSchema,
       },
-      preHandler: validateBody(createDocumentSchema),
+      preHandler: [
+        guardResource("storage"),
+        validateBody(createDocumentSchema),
+      ],
     },
     async (request, reply) => {
       const documentController =

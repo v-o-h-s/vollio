@@ -12,6 +12,8 @@ import {
   validateBody,
   validateParams,
 } from "../../shared/validation/validator";
+import { guardResource } from "../../shared/utils/ResourceGuard";
+
 import fp from "fastify-plugin";
 import { QuizController } from "../controllers/quiz.controller";
 import {
@@ -36,7 +38,7 @@ const quizHandler: FastifyPluginAsync = async (
       schema: {
         body: createQuizSchema,
       },
-      preHandler: validateBody(createQuizSchema),
+      preHandler: [guardResource("ai"), validateBody(createQuizSchema)],
     },
     async (request, reply) => {
       const quizController =

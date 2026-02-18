@@ -13,4 +13,10 @@ export interface IStorageResourcesRepository extends IResourcesRepository {
    * Log a storage usage event
    */
   logUsage(entry: StorageResourceLogEntry): Promise<void>;
+
+  /**
+   * check if user can use more storage
+   * @param userId
+   */
+  canUse(userId: string): Promise<boolean>;
 }

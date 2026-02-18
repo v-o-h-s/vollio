@@ -43,6 +43,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { TagManagement } from "./components/TagManagement";
+import { UpgradeButton } from "@/components/billing/UpgradeButton";
 
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
@@ -465,10 +466,7 @@ export default function SettingsPage() {
                           for unlimited AI and more storage.
                         </p>
                       </div>
-                      <Button className="rounded-2xl h-14 px-8 text-lg font-bold shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all duration-300 group">
-                        Upgrade to Pro
-                        <Zap className="ml-2 w-5 h-5 fill-current group-hover:scale-125 transition-transform" />
-                      </Button>
+                      <UpgradeButton className="rounded-2xl h-14 px-8 text-lg font-bold shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all duration-300 group" />
                     </div>
                   </div>
 

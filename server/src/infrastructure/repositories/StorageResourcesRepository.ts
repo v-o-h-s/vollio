@@ -46,4 +46,12 @@ export class StorageResourcesRepository
       );
     }
   }
+
+  async canUse(userId: string): Promise<boolean> {
+    const resources = await this.getByUserId(userId);
+    if (!resources) {
+      return false;
+    }
+    return resources.getUsedStorageBytes() < resources.getMaxStorageBytes();
+  }
 }

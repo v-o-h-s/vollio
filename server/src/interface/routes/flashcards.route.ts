@@ -15,7 +15,9 @@ import {
   validateBody,
   validateParams,
 } from "../../shared/validation/validator";
+import { guardResource } from "../../shared/utils/ResourceGuard";
 import { FlashCardsController } from "../controllers/flashcards.controller";
+
 import fp from "fastify-plugin";
 import {
   AIRateLimitingDegrees,
@@ -40,7 +42,7 @@ const flashcardsHandler: FastifyPluginAsync = async (
       schema: {
         body: createFlashCardsSchema,
       },
-      preHandler: validateBody(createFlashCardsSchema),
+      preHandler: [guardResource("ai"), validateBody(createFlashCardsSchema)],
     },
     async (request, reply) => {
       const flashCardsController =

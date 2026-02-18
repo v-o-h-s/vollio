@@ -7,7 +7,9 @@ import fp from "fastify-plugin";
 import { AssistantDTO } from "@vollio/shared";
 import { AssistantDTOSchema } from "../../shared/validation/aiSchemas";
 import { validateBody } from "../../shared/validation/validator";
+import { guardResource } from "../../shared/utils/ResourceGuard";
 import { AssistantController } from "../controllers/assistant.controller";
+
 import {
   AIRateLimitingDegrees,
   RateLimitingDegrees,
@@ -29,7 +31,7 @@ const assistantRoutesHandler: FastifyPluginAsync = async (
       schema: {
         body: AssistantDTOSchema,
       },
-      preHandler: validateBody(AssistantDTOSchema),
+      preHandler: [guardResource("ai"), validateBody(AssistantDTOSchema)],
     },
     async (request, reply) => {
       const assistantController = request.diScope.resolve<AssistantController>(

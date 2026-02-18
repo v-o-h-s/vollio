@@ -45,4 +45,11 @@ export class AIResourcesRepository
       this.logger.error({ error, entry }, "Failed to log AI usage to database");
     }
   }
+  async canUse(userId: string): Promise<boolean> {
+    const resources = await this.getByUserId(userId);
+    if (!resources) {
+      return false;
+    }
+    return resources.getUsedAiTokens() < resources.getMaxAiTokens();
+  }
 }
