@@ -46,13 +46,17 @@ export class AddDocumentFromGoogleDriveUseCase {
     }
     const documentId = crypto.randomUUID();
 
+    // Consume storage quota (Google Drive docs count toward document limit)
+    await this.storageQuotaService.consumeStorage(userId, data.size || 0);
+
     const document = new Document(
       documentId,
+      userId,
       data.name,
-      data.size,
+      data.size || 0,
       null,
       data.id,
-      data.mimeType,
+      data.mimeType || "application/pdf",
       null,
     );
 

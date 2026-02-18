@@ -35,14 +35,17 @@ export class InitializeResourcesUseCase {
     // 3. Create new resources based on plan limits
     const maxAiTokens = plan.getMaxAiTokens() || 0;
     const maxStorageBytes = plan.getMaxStorageBytes() || 0;
+    const maxDocuments = plan.getMaxDocuments() || 0;
 
     const resources = new Resources(
       userId,
       plan.getId(),
       0, // used_ai_tokens starts at 0
       0, // used_storage_bytes starts at 0
-      maxAiTokens, // max_ai_tokens
-      maxStorageBytes, // max_storage_bytes
+      0, // used_documents starts at 0
+      maxAiTokens,
+      maxStorageBytes,
+      maxDocuments,
     );
 
     const savedResources = await this.resourcesRepository.upsert(resources);

@@ -147,8 +147,10 @@ export class HandleBillingWebhookUseCase {
                 planId,
                 0, // used tokens
                 0, // used storage
+                0, // used documents
                 maxAiTokens,
                 maxStorageBytes,
+                plan.getMaxDocuments() || 0,
               );
             } else {
               // Reset/Refill resources on renewal or plan change (upgrade/downgrade)
