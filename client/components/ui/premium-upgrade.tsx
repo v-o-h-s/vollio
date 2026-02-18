@@ -2,24 +2,18 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Crown,
-  Zap,
-  Check,
-  ArrowRight,
-  Star,
-} from "lucide-react";
+import { UpgradeButton } from "@/components/billing/UpgradeButton";
+
+import { Crown, Zap, Check, ArrowRight, Star } from "lucide-react";
 import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 
 interface PremiumUpgradeProps {
   feature: string;
   description: string;
-  onUpgrade?: () => void;
 }
 
-export function PremiumUpgrade({ feature, description, onUpgrade }: PremiumUpgradeProps) {
+export function PremiumUpgrade({ feature, description }: PremiumUpgradeProps) {
   const premiumFeatures = [
     "AI-powered flashcard generation",
     "Advanced analytics and insights",
@@ -54,9 +48,7 @@ export function PremiumUpgrade({ feature, description, onUpgrade }: PremiumUpgra
 
       <CardContent className="space-y-6">
         <div className="text-center">
-          <p className="text-sm text-muted-foreground mb-4">
-            {description}
-          </p>
+          <p className="text-sm text-muted-foreground mb-4">{description}</p>
         </div>
 
         {/* Premium Features List */}
@@ -77,15 +69,12 @@ export function PremiumUpgrade({ feature, description, onUpgrade }: PremiumUpgra
 
         {/* Upgrade Button */}
         <div className="space-y-3">
-          <Button
-            onClick={onUpgrade}
-            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium hover:scale-105 transition-all duration-200"
-          >
+          <UpgradeButton className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium hover:scale-105 transition-all duration-200">
             <Crown className="w-4 h-4 mr-2" />
             Upgrade to Premium
             <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-          
+          </UpgradeButton>
+
           <p className="text-xs text-center text-muted-foreground">
             Start your free trial • Cancel anytime • No commitment
           </p>

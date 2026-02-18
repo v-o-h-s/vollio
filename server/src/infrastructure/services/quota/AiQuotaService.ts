@@ -1,14 +1,19 @@
 import {
   AiQuotaRemaining,
   IAiQuotaService,
-} from "../../domain/services/IAiQuotaService";
-import { IRateLimitingService } from "../../domain/services/IRateLimitingService";
-import { IdentifierType, PrefixTypes } from "../../shared/utils/rate-limiting";
-import { TokenUsage } from "../../shared/types/generativeAi";
-import { RateLimitingError } from "../../shared/errors/RateLimitingError";
+} from "../../../domain/services/quota/IAiQuotaService";
+import { IRateLimitingService } from "../../../domain/services/IRateLimitingService";
+import {
+  IdentifierType,
+  PrefixTypes,
+} from "../../../shared/utils/rate-limiting";
+import { TokenUsage } from "../../../shared/types/generativeAi";
 import { FastifyBaseLogger } from "fastify";
-import { IAIUsageRepository } from "../../domain/repositories/IAIUsageRepository";
+import { IAIResourcesRepository } from "../../../domain/repositories/IAIResourcesRepository";
 
+/**
+ * @description this class interacts with db logs/resources and redis for rate limiting
+ */
 export class AiQuotaService implements IAiQuotaService {
   private ratio: number;
   private minuteLimit: { capacity: number; refillRate: number };
@@ -17,7 +22,7 @@ export class AiQuotaService implements IAiQuotaService {
 
   constructor(
     private rateLimitingService: IRateLimitingService,
-    private aiUsageRepository: IAIUsageRepository,
+    private aiResourcesRepository: IAIResourcesRepository,
     private logger: FastifyBaseLogger,
   ) {
     this.ratio = Number(process.env.RATIO_REQUEST_RESPONSE_TOKENS) || 1;
@@ -26,28 +31,20 @@ export class AiQuotaService implements IAiQuotaService {
     const maxDay = Number(process.env.MAX_AI_TOKENS_PER_DAY) || 500000;
     const maxMonth = Number(process.env.MAX_AI_TOKENS_PER_MONTH) || 10000000;
 
-    // Formula from docs: Max = C + R * Period
-    // Following Scenario 2 ratio (C=100, R=1, Max=160):
-    // C = (100/160) * Max = 0.625 * Max
-    // R = (60/160) * Max / 60 = 0.375 * Max / 60
     this.minuteLimit = {
-      capacity: maxMinute * 0.625, //62500
-      refillRate: (maxMinute * 0.375) / 60, //625
+      capacity: maxMinute * 0.625,
+      refillRate: (maxMinute * 0.375) / 60,
     };
     this.dayLimit = {
-      capacity: maxDay * 0.625, //312500
-      refillRate: (maxDay * 0.375) / 86400, //2163
+      capacity: maxDay * 0.625,
+      refillRate: (maxDay * 0.375) / 86400,
     };
     this.monthLimit = {
-      capacity: maxMonth * 0.625, //6250000
-      refillRate: (maxMonth * 0.375) / 2592000, //1446
+      capacity: maxMonth * 0.625,
+      refillRate: (maxMonth * 0.375) / 2592000,
     };
   }
 
-  /**
-   * Calculate effective cost of token usage
-   * Based on the ratio between input and output tokens
-   */
   private calculateCost(usage: TokenUsage): number {
     return usage.promptTokens + usage.completionTokens * this.ratio;
   }
@@ -68,9 +65,21 @@ export class AiQuotaService implements IAiQuotaService {
       "Consuming AI tokens in AiQuotaService",
     );
 
-    // 0. Log to Database (Async, don't wait for it to block the response if not critical)
+    const resources = await this.aiResourcesRepository.getByUserId(userId);
+    if (resources) {
+      try {
+        resources.consumeAiTokens(cost);
+        await this.aiResourcesRepository.upsert(resources);
+      } catch (err) {
+        this.logger.error(
+          { err, userId, cost },
+          "Failed to update AI resources tally in DB",
+        );
+      }
+    }
+
     if (details) {
-      this.aiUsageRepository
+      this.aiResourcesRepository
         .logUsage({
           userId,
           actionType: details.actionType,
@@ -82,32 +91,22 @@ export class AiQuotaService implements IAiQuotaService {
           costMultiplier: usage.totalTokens > 0 ? cost / usage.totalTokens : 1,
           metadata: details.metadata,
         })
-        .catch((err) =>
+        .catch((err: any) =>
           this.logger.error({ err }, "Background AI usage logging failed"),
         );
     }
 
-    // 1. Per Month (Largest bucket first - fail fast but allow force consumption)
-    const monthResult = await this.rateLimitingService.tryConsume(
+    await this.rateLimitingService.tryConsume(
       { type: IdentifierType.USERID, value: userId },
       {
         cost,
         ...this.monthLimit,
-        force: true, // Always record usage, even if over limit
+        force: true,
       },
       PrefixTypes.AI_PER_MONTH,
     );
 
-    if (!monthResult.allowed) {
-      // Since we forced it, this should technically be true, but if the underlying service
-      // logic changes, we log a warning.
-      this.logger.warn(
-        `User ${userId} exceeded monthly AI quota by ${Math.abs(monthResult.remaining)} tokens.`,
-      );
-    }
-
-    // 2. Per Day
-    const dayResult = await this.rateLimitingService.tryConsume(
+    await this.rateLimitingService.tryConsume(
       { type: IdentifierType.USERID, value: userId },
       {
         cost,
@@ -117,14 +116,7 @@ export class AiQuotaService implements IAiQuotaService {
       PrefixTypes.AI_PER_DAY,
     );
 
-    if (!dayResult.allowed) {
-      this.logger.warn(
-        `User ${userId} exceeded daily AI quota by ${Math.abs(dayResult.remaining)} tokens.`,
-      );
-    }
-
-    // 3. Per Minute
-    const minuteResult = await this.rateLimitingService.tryConsume(
+    await this.rateLimitingService.tryConsume(
       { type: IdentifierType.USERID, value: userId },
       {
         cost,
@@ -132,25 +124,6 @@ export class AiQuotaService implements IAiQuotaService {
         force: true,
       },
       PrefixTypes.AI_PER_MINUTE,
-    );
-
-    if (!minuteResult.allowed) {
-      this.logger.warn(
-        `User ${userId} exceeded minute AI quota by ${Math.abs(minuteResult.remaining)} tokens.`,
-      );
-    }
-
-    this.logger.info(
-      {
-        userId,
-        cost,
-        remaining: {
-          month: monthResult.remaining,
-          day: dayResult.remaining,
-          minute: minuteResult.remaining,
-        },
-      },
-      "AI token consumption completed (forced if necessary)",
     );
   }
 

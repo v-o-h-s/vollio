@@ -14,12 +14,12 @@ import { HighlightsMapper } from "../../shared/mappers/HighlightsMapper";
 export class HighlightRepository implements IHighlightRepository {
   constructor(
     private supabaseClient: SupabaseClient,
-    private logger: FastifyBaseLogger
+    private logger: FastifyBaseLogger,
   ) {}
 
   async getAllHighlights(
     userId: string,
-    documentId?: string
+    documentId?: string,
   ): Promise<Highlight[]> {
     this.logger.info({ userId, documentId }, "Getting all highlights");
     let query = this.supabaseClient
@@ -37,7 +37,7 @@ export class HighlightRepository implements IHighlightRepository {
     if (error) {
       this.logger.error(
         { error, userId, documentId },
-        "Error getting all highlights"
+        "Error getting all highlights",
       );
       throw new DatabaseError(error);
     }
@@ -49,14 +49,14 @@ export class HighlightRepository implements IHighlightRepository {
 
     this.logger.info(
       { userId, documentId, count: data.length },
-      "Highlights retrieved successfully"
+      "Highlights retrieved successfully",
     );
-    return data.map((row) => HighlightsMapper.mapRowToHighlight(row));
+    return data.map((row) => HighlightsMapper.fromPersistenceToDomain(row));
   }
 
   async getHighlightById(
     id: string,
-    userId: string
+    userId: string,
   ): Promise<Highlight | null> {
     this.logger.info({ highlightId: id, userId }, "Getting highlight by ID");
     const { data, error } = await this.supabaseClient
@@ -73,7 +73,7 @@ export class HighlightRepository implements IHighlightRepository {
       }
       this.logger.error(
         { error, highlightId: id, userId },
-        "Error getting highlight by ID"
+        "Error getting highlight by ID",
       );
       throw new DatabaseError(error);
     }
@@ -81,13 +81,13 @@ export class HighlightRepository implements IHighlightRepository {
     if (!data) {
       this.logger.info(
         { highlightId: id, userId },
-        "Highlight not found (no data)"
+        "Highlight not found (no data)",
       );
       return null;
     }
 
     this.logger.info({ highlightId: id }, "Highlight found");
-    return HighlightsMapper.mapRowToHighlight(data);
+    return HighlightsMapper.fromPersistenceToDomain(data);
   }
 
   async createHighlight(highlight: Highlight): Promise<Highlight> {
@@ -97,62 +97,37 @@ export class HighlightRepository implements IHighlightRepository {
         userId: highlight.getUserId(),
         documentId: highlight.getDocumentId(),
       },
-      "Creating highlight"
+      "Creating highlight",
     );
     const { data, error } = await this.supabaseClient
       .from("highlights")
-      .insert({
-        id: highlight.getId(),
-        user_id: highlight.getUserId(),
-        document_id: highlight.getDocumentId(),
-        type: highlight.getType(),
-        content: highlight.getContent(),
-        position: highlight.getPosition(),
-        color: highlight.getColor(),
-        has_note: highlight.hasNoteAttached(),
-        note_id: highlight.getNoteId(),
-        note_content: highlight.getNoteContent(),
-        tags: highlight.getTags(),
-        style: highlight.getStyle(),
-      })
+      .insert(HighlightsMapper.toPersistence(highlight))
       .select("*")
       .single();
 
     if (error) {
       this.logger.error(
         { error, highlightId: highlight.getId() },
-        "Error creating highlight"
+        "Error creating highlight",
       );
       throw new DatabaseError(error);
     }
 
     this.logger.info(
       { highlightId: data.id },
-      "Highlight created successfully"
+      "Highlight created successfully",
     );
-    return HighlightsMapper.mapRowToHighlight(data);
+    return HighlightsMapper.fromPersistenceToDomain(data);
   }
 
   async updateHighlight(highlight: Highlight): Promise<Highlight> {
     this.logger.info(
       { highlightId: highlight.getId(), userId: highlight.getUserId() },
-      "Updating highlight"
+      "Updating highlight",
     );
     const { data, error } = await this.supabaseClient
       .from("highlights")
-      .update({
-        color: highlight.getColor(),
-        content: highlight.getContent(),
-        has_note: highlight.hasNoteAttached(),
-        note_id: highlight.getNoteId(),
-        note_content: highlight.getNoteContent(),
-        position: highlight.getPosition(),
-        type: highlight.getType(),
-        document_id: highlight.getDocumentId(),
-        tags: highlight.getTags(),
-        style: highlight.getStyle(),
-        updated_at: new Date().toISOString(),
-      })
+      .update(HighlightsMapper.toPersistence(highlight))
       .eq("id", highlight.getId())
       .eq("user_id", highlight.getUserId())
       .select("*")
@@ -161,16 +136,16 @@ export class HighlightRepository implements IHighlightRepository {
     if (error) {
       this.logger.error(
         { error, highlightId: highlight.getId() },
-        "Error updating highlight"
+        "Error updating highlight",
       );
       throw new DatabaseError(error);
     }
 
     this.logger.info(
       { highlightId: highlight.getId() },
-      "Highlight updated successfully"
+      "Highlight updated successfully",
     );
-    return HighlightsMapper.mapRowToHighlight(data);
+    return HighlightsMapper.fromPersistenceToDomain(data);
   }
 
   async deleteHighlight(id: string, userId: string): Promise<void> {
@@ -184,7 +159,7 @@ export class HighlightRepository implements IHighlightRepository {
     if (error) {
       this.logger.error(
         { error, highlightId: id, userId },
-        "Error deleting highlight"
+        "Error deleting highlight",
       );
       throw new DatabaseError(error);
     }
@@ -193,11 +168,11 @@ export class HighlightRepository implements IHighlightRepository {
 
   async getHighlightsByDocumentIdAndUserId(
     documentId: string,
-    userId: string
+    userId: string,
   ): Promise<Highlight[]> {
     this.logger.info(
       { documentId, userId },
-      "Getting highlights by Document ID"
+      "Getting highlights by Document ID",
     );
     const { data, error } = await this.supabaseClient
       .from("highlights")
@@ -209,7 +184,7 @@ export class HighlightRepository implements IHighlightRepository {
     if (error) {
       this.logger.error(
         { error, documentId, userId },
-        "Error getting highlights by Document ID"
+        "Error getting highlights by Document ID",
       );
       throw new DatabaseError(error);
     }
@@ -217,16 +192,16 @@ export class HighlightRepository implements IHighlightRepository {
     if (!data) {
       this.logger.info(
         { documentId, userId },
-        "No highlights found for Document"
+        "No highlights found for Document",
       );
       return [];
     }
 
     this.logger.info(
       { documentId, userId, count: data.length },
-      "Highlights retrieved successfully for Document"
+      "Highlights retrieved successfully for Document",
     );
-    return data.map((row) => HighlightsMapper.mapRowToHighlight(row));
+    return data.map((row) => HighlightsMapper.fromPersistenceToDomain(row));
   }
 
   async getHighlightsByDocumentId(documentId: string): Promise<Highlight[]> {
@@ -240,7 +215,7 @@ export class HighlightRepository implements IHighlightRepository {
     if (error) {
       this.logger.error(
         { error, documentId },
-        "Error getting highlights by document ID"
+        "Error getting highlights by document ID",
       );
       throw new DatabaseError(error);
     }
@@ -252,9 +227,9 @@ export class HighlightRepository implements IHighlightRepository {
 
     this.logger.info(
       { documentId, count: data.length },
-      "Highlights retrieved successfully for document"
+      "Highlights retrieved successfully for document",
     );
-    return data.map((row) => HighlightsMapper.mapRowToHighlight(row));
+    return data.map((row) => HighlightsMapper.fromPersistenceToDomain(row));
   }
 
   async countHighlightsByTag(userId: string, tagName: string): Promise<number> {
@@ -266,7 +241,10 @@ export class HighlightRepository implements IHighlightRepository {
       .contains("tags", [tagName]);
 
     if (error) {
-      this.logger.error({ error, userId, tagName }, "Error counting highlights by tag");
+      this.logger.error(
+        { error, userId, tagName },
+        "Error counting highlights by tag",
+      );
       throw new DatabaseError(error);
     }
 
@@ -282,10 +260,16 @@ export class HighlightRepository implements IHighlightRepository {
       .contains("tags", [tagName]);
 
     if (error) {
-      this.logger.error({ error, userId, tagName }, "Error deleting highlights by tag");
+      this.logger.error(
+        { error, userId, tagName },
+        "Error deleting highlights by tag",
+      );
       throw new DatabaseError(error);
     }
 
-    this.logger.info({ userId, tagName }, "Highlights with tag deleted successfully");
+    this.logger.info(
+      { userId, tagName },
+      "Highlights with tag deleted successfully",
+    );
   }
 }

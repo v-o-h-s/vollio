@@ -33,6 +33,9 @@ import {
   Bell,
   ChevronRight,
   Bot,
+  CreditCard,
+  Zap,
+  BarChart3,
 } from "lucide-react";
 import { RiRobot3Fill as RobotIcon } from "react-icons/ri";
 import { HiTag as Tags } from "react-icons/hi2";
@@ -40,6 +43,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { TagManagement } from "./components/TagManagement";
+import { UpgradeButton } from "@/components/billing/UpgradeButton";
 
 export default function SettingsPage() {
   const dispatch = useAppDispatch();
@@ -134,6 +138,21 @@ export default function SettingsPage() {
               <div className="flex items-center gap-3">
                 <Bot className="w-4 h-4" />
                 <span className="font-medium text-sm">Voll-ai</span>
+              </div>
+              <ChevronRight className="w-4 h-4 opacity-0 group-data-[state=active]:opacity-100 transition-opacity" />
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="billing"
+              className={cn(
+                "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group",
+                "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <CreditCard className="w-4 h-4" />
+                <span className="font-medium text-sm">Billing</span>
               </div>
               <ChevronRight className="w-4 h-4 opacity-0 group-data-[state=active]:opacity-100 transition-opacity" />
             </TabsTrigger>
@@ -405,6 +424,155 @@ export default function SettingsPage() {
                         processed with high priority and enhanced context.
                       </p>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="billing" className="mt-0 outline-none">
+              <Card className="border-border/50 bg-card/20 backdrop-blur-md shadow-xl overflow-hidden relative border-none">
+                <div className="absolute top-0 right-0 p-8 opacity-5">
+                  <CreditCard className="w-48 h-48" />
+                </div>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-2xl font-bold">
+                    Billing & Usage
+                  </CardTitle>
+                  <CardDescription>
+                    Manage your subscription and monitor your resource usage.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8">
+                  <Separator className="opacity-50" />
+
+                  {/* Current Plan Card */}
+                  <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background p-8 shadow-2xl">
+                    <div className="absolute top-0 right-0 p-6 opacity-10">
+                      <Zap className="w-24 h-24 text-primary" />
+                    </div>
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                      <div className="space-y-2">
+                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wider border border-primary/30">
+                          Current Plan
+                        </div>
+                        <h3 className="text-4xl font-black tracking-tight mt-2 flex items-baseline gap-2">
+                          Free Tier
+                          <span className="text-base font-normal text-muted-foreground">
+                            $0/mo
+                          </span>
+                        </h3>
+                        <p className="text-muted-foreground font-medium max-w-sm">
+                          You are currently on the free version. Upgrade to Pro
+                          for unlimited AI and more storage.
+                        </p>
+                      </div>
+                      <UpgradeButton className="rounded-2xl h-14 px-8 text-lg font-bold shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] transition-all duration-300 group" />
+                    </div>
+                  </div>
+
+                  {/* Usage Stats Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* AI Token Usage */}
+                    <div className="p-6 rounded-2xl border border-border/50 bg-accent/10 backdrop-blur-sm space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-orange-500/10">
+                            <Bot className="w-5 h-5 text-orange-500" />
+                          </div>
+                          <span className="font-bold text-sm">
+                            AI Tokens Usage
+                          </span>
+                        </div>
+                        <span className="text-xs font-mono font-bold text-muted-foreground">
+                          2,450 / 10,000
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-3 w-full bg-muted rounded-full overflow-hidden p-0.5 border border-border/50">
+                          <div
+                            className="h-full bg-gradient-to-r from-orange-400 to-orange-600 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]"
+                            style={{ width: "24.5%" }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
+                          <span>Used</span>
+                          <span>24.5% Used</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Storage Usage */}
+                    <div className="p-6 rounded-2xl border border-border/50 bg-accent/10 backdrop-blur-sm space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-blue-500/10">
+                            <BarChart3 className="w-5 h-5 text-blue-500" />
+                          </div>
+                          <span className="font-bold text-sm">
+                            Storage Usage
+                          </span>
+                        </div>
+                        <span className="text-xs font-mono font-bold text-muted-foreground">
+                          12.4 MB / 50 MB
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-3 w-full bg-muted rounded-full overflow-hidden p-0.5 border border-border/50">
+                          <div
+                            className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                            style={{ width: "24.8%" }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-1">
+                          <span>Used</span>
+                          <span>24.8% Used</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator className="opacity-50" />
+
+                  {/* Payment History Mockup */}
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-bold flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-primary" />
+                      Recent Activity
+                    </h4>
+                    <div className="rounded-2xl border border-border/50 overflow-hidden divide-y divide-border/30">
+                      {[1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="p-4 flex items-center justify-between bg-card/10 hover:bg-card/30 transition-colors"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center font-bold text-xs">
+                              {i === 1 ? "MAY" : "APR"}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold">
+                                Standard Monthly Subscription
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                May {10 + i}, 2024 • Invoice #VOL-{3456 + i}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-black">$0.00</p>
+                            <span className="text-[10px] font-black uppercase text-emerald-500 tracking-tighter bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                              Paid
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      className="w-full text-muted-foreground hover:text-primary rounded-xl text-xs font-bold py-6"
+                    >
+                      View all transactions
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

@@ -1,11 +1,12 @@
 import { FlashCard } from "../../domain/entities/FlashCard";
 import { FlashCardsSet } from "../../domain/entities/FlashCardsSet";
 import { QuizLanguage } from "../../domain/entities/Quiz";
+import { CreateFlashCardsSetResponse } from "@vollio/shared";
 
 export class FlashCardMapper {
   public static fromPersistenceToDomain(row: any): FlashCardsSet {
     const flashCards = (row.flashcards || []).map(
-      (fc: any) => new FlashCard(fc.id, fc.set_id, fc.front, fc.back, fc.hint)
+      (fc: any) => new FlashCard(fc.id, fc.set_id, fc.front, fc.back, fc.hint),
     );
 
     return new FlashCardsSet(
@@ -14,7 +15,7 @@ export class FlashCardMapper {
       new Date(row.created_at),
       row.language as QuizLanguage,
       flashCards,
-      row.name
+      row.name,
     );
   }
 
@@ -25,6 +26,24 @@ export class FlashCardMapper {
       document_id: set.getDocumentId(),
       language: set.getLanguage(),
       created_at: set.getCreatedAt().toISOString(),
+    };
+  }
+
+  public static fromDomainToInterface(
+    set: FlashCardsSet,
+  ): CreateFlashCardsSetResponse {
+    return {
+      id: set.getId(),
+      name: set.getName() || "Untitled",
+      documentId: set.getDocumentId(),
+      createdAt: set.getCreatedAt().toISOString(),
+      language: set.getLanguage(),
+      flashCards: set.getFlashCards().map((fc) => ({
+        id: fc.getId(),
+        front: fc.getFront(),
+        back: fc.getBack(),
+        hint: fc.getHint() || "",
+      })),
     };
   }
 }

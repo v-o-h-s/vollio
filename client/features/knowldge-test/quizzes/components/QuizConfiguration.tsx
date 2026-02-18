@@ -21,6 +21,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UpgradeButton } from "@/components/billing/UpgradeButton";
 
 interface QuestionType {
   type: "mcq" | "true-false" | "fill-blank" | "short-answer";
@@ -117,26 +118,26 @@ export function QuizConfiguration({
 
   const handleQuestionTypeToggle = (type: QuestionType["type"]) => {
     const updatedTypes = questionTypes.map((qt) =>
-      qt.type === type ? { ...qt, enabled: !qt.enabled } : qt
+      qt.type === type ? { ...qt, enabled: !qt.enabled } : qt,
     );
     onQuestionTypesChange(updatedTypes);
   };
 
   const handleQuestionTypeWeight = (
     type: QuestionType["type"],
-    weight: number
+    weight: number,
   ) => {
     const updatedTypes = questionTypes.map((qt) =>
       qt.type === type
         ? { ...qt, weight: Math.max(0, Math.min(100, weight)) }
-        : qt
+        : qt,
     );
     onQuestionTypesChange(updatedTypes);
   };
 
   const totalWeight = questionTypes.reduce(
     (sum, qt) => (qt.enabled ? sum + qt.weight : sum),
-    0
+    0,
   );
   const maxQuestions = isPremium ? 50 : 20;
 
@@ -181,7 +182,7 @@ export function QuizConfiguration({
                 size="icon"
                 onClick={() =>
                   onQuestionCountChange(
-                    Math.min(maxQuestions, questionCount + 1)
+                    Math.min(maxQuestions, questionCount + 1),
                   )
                 }
                 disabled={questionCount >= maxQuestions}
@@ -209,9 +210,12 @@ export function QuizConfiguration({
               <div className="text-center p-3 bg-muted/50 rounded-lg">
                 <p className="text-sm text-muted-foreground">
                   Free plan: Up to 20 questions.
-                  <Button variant="link" className="p-0 h-auto text-primary">
+                  <UpgradeButton
+                    variant="link"
+                    className="p-0 h-auto text-primary"
+                  >
                     Upgrade for more
-                  </Button>
+                  </UpgradeButton>
                 </p>
               </div>
             )}
@@ -230,7 +234,7 @@ export function QuizConfiguration({
         <CardContent className="space-y-4">
           {questionTypeOptions.map((option) => {
             const questionType = questionTypes.find(
-              (qt) => qt.type === option.type
+              (qt) => qt.type === option.type,
             );
             const Icon = option.icon;
 
@@ -270,7 +274,7 @@ export function QuizConfiguration({
                         onChange={(e) =>
                           handleQuestionTypeWeight(
                             option.type,
-                            parseInt(e.target.value) || 0
+                            parseInt(e.target.value) || 0,
                           )
                         }
                         className="w-20"
@@ -281,7 +285,7 @@ export function QuizConfiguration({
                       <div
                         className={cn(
                           "h-2 rounded-full transition-all duration-300",
-                          option.bgColor
+                          option.bgColor,
                         )}
                         style={{
                           width: `${
@@ -330,7 +334,7 @@ export function QuizConfiguration({
                   isSelected ? "border-primary bg-primary/5" : "border-border",
                   isDisabled
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:border-primary/50"
+                    : "hover:border-primary/50",
                 )}
                 onClick={() => !isDisabled && onDifficultyChange(option.value)}
               >
@@ -423,10 +427,10 @@ export function QuizConfiguration({
                     .filter((qt) => qt.enabled)
                     .map((qt) => {
                       const option = questionTypeOptions.find(
-                        (opt) => opt.type === qt.type
+                        (opt) => opt.type === qt.type,
                       );
                       const count = Math.round(
-                        (qt.weight / Math.max(totalWeight, 1)) * questionCount
+                        (qt.weight / Math.max(totalWeight, 1)) * questionCount,
                       );
                       return (
                         <p

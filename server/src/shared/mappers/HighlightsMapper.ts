@@ -7,7 +7,8 @@ import { HighlightData } from "@vollio/shared";
 
 export class HighlightsMapper {
   constructor() {}
-  static mapRowToHighlight(row: any): Highlight {
+
+  public static fromPersistenceToDomain(row: any): Highlight {
     return new Highlight(
       row.id,
       row.user_id,
@@ -22,10 +23,29 @@ export class HighlightsMapper {
       row.note_id,
       row.tags,
       row.style as HighlightStyle | undefined,
-      row.note_content
+      row.note_content,
     );
   }
-  static mapEntityToResponse(highlight: Highlight): HighlightData {
+
+  public static toPersistence(highlight: Highlight) {
+    return {
+      id: highlight.getId(),
+      user_id: highlight.getUserId(),
+      document_id: highlight.getDocumentId(),
+      type: highlight.getType(),
+      content: highlight.getContent(),
+      position: highlight.getPosition(),
+      has_note: highlight.getHasNote(),
+      created_at: highlight.getCreatedAt().toISOString(),
+      updated_at: highlight.getUpdatedAt().toISOString(),
+      color: highlight.getColor(),
+      note_id: highlight.getNoteId(),
+      tags: highlight.getTags(),
+      style: highlight.getStyle(),
+    };
+  }
+
+  public static fromDomainToInterface(highlight: Highlight): HighlightData {
     return {
       id: highlight.getId(),
       userId: highlight.getUserId(),

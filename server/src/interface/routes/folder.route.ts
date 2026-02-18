@@ -8,6 +8,8 @@ import {
   validateBody,
   validateParams,
 } from "../../shared/validation/validator";
+import { guardResource } from "../../shared/utils/ResourceGuard";
+
 import {
   createFolderSchema,
   updateFolderSchema,
@@ -53,7 +55,7 @@ const folderRoutesHandler: FastifyPluginAsync = async (
       schema: {
         body: createFolderSchema,
       },
-      preHandler: validateBody(createFolderSchema),
+      preHandler: [guardResource("storage"), validateBody(createFolderSchema)],
     },
     async (request, reply) => {
       const folderController =

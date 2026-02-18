@@ -7,7 +7,8 @@ import {
   createServiceClient,
 } from "../infrastructure/database/supabase/supabase";
 import { NoteRepository } from "../infrastructure/repositories/NoteRepository";
-import { AIUsageRepository } from "../infrastructure/repositories/AIUsageRepository";
+import { AIResourcesRepository } from "../infrastructure/repositories/AIResourcesRepository";
+import { StorageResourcesRepository } from "../infrastructure/repositories/StorageResourcesRepository";
 import { ChunkRepository } from "../infrastructure/repositories/ChunkRepository";
 import { CreateNoteUseCase } from "../application/use-cases/notes/CreateNoteUseCase";
 import { UpdateNoteUseCase } from "../application/use-cases/notes/UpdateNoteUseCase";
@@ -85,7 +86,20 @@ import { GenerateSummaryUseCase } from "../application/use-cases/documents/Gener
 import { GetStorageUrlUseCase } from "../application/use-cases/documents/GetStorageUrlUseCase";
 import { CreateDocumentUseCase } from "../application/use-cases/documents/CreateDocumentUseCase";
 import { RateLimitingService } from "../infrastructure/services/RateLimitingService";
-import { AiQuotaService } from "../infrastructure/services/AiQuotaService";
+import { AiQuotaService } from "../infrastructure/services/quota/AiQuotaService";
+import { StorageQuotaService } from "../infrastructure/services/quota/StorageQuotaService";
+import { DocumentQuotaService } from "../infrastructure/services/quota/DocumentQuotaService";
+import { HandleBillingWebhookUseCase } from "../application/use-cases/billing/HandleBillingWebhookUseCase";
+import { BillingController } from "../interface/controllers/billing.controller";
+import { PaddleService } from "../infrastructure/services/PaddleService";
+import { SubscriptionRepository } from "../infrastructure/repositories/SubscriptionRepository";
+import { PlanRepository } from "../infrastructure/repositories/PlanRepository";
+import { ResourcesRepository } from "../infrastructure/repositories/ResourcesRepository";
+import { GetResourcesUseCase } from "../application/use-cases/resources/GetResourcesUseCase";
+import { InitializeResourcesUseCase } from "../application/use-cases/resources/InitializeResourcesUseCase";
+import { DeleteResourcesUseCase } from "../application/use-cases/resources/DeleteResourcesUseCase";
+import { UpdateResourceUsageUseCase } from "../application/use-cases/resources/UpdateResourceUsageUseCase";
+import { PlanService } from "../infrastructure/services/PlanService";
 
 const diPlugin: FastifyPluginAsync = async (fastify) => {
   // Register singleton Redis client
@@ -114,11 +128,26 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),
-    aiUsageRepository: asClass(AIUsageRepository, {
+    storageQuotaService: asClass(StorageQuotaService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    documentQuotaService: asClass(DocumentQuotaService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    aiResourcesRepository: asClass(AIResourcesRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
       injector: () => ({
-        supabase: createServiceClient(),
+        supabaseClient: createServiceClient(),
+      }),
+    }),
+    storageResourcesRepository: asClass(StorageResourcesRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => ({
+        supabaseClient: createServiceClient(),
       }),
     }),
   });
@@ -517,6 +546,60 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       injectionMode: InjectionMode.CLASSIC,
     }),
     settingsRepository: asClass(SettingsRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+  });
+
+  fastify.diContainer.register({
+    handleBillingWebhookUseCase: asClass(HandleBillingWebhookUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    billingController: asClass(BillingController, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    paddleService: asClass(PaddleService, {
+      lifetime: Lifetime.SINGLETON,
+      injectionMode: InjectionMode.CLASSIC,
+      injector: () => ({
+        config: {
+          apiKey: process.env.PADDLE_API_KEY || "",
+          webhookSecret: process.env.PADDLE_WEBHOOK_SECRET || "",
+          isProduction: process.env.NODE_ENV === "production",
+        },
+      }),
+    }),
+    subscriptionRepository: asClass(SubscriptionRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    planRepository: asClass(PlanRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    resourcesRepository: asClass(ResourcesRepository, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    getResourcesUseCase: asClass(GetResourcesUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    initializeResourcesUseCase: asClass(InitializeResourcesUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    deleteResourcesUseCase: asClass(DeleteResourcesUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    updateResourceUsageUseCase: asClass(UpdateResourceUsageUseCase, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    planService: asClass(PlanService, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

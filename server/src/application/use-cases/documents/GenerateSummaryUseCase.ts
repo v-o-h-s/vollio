@@ -10,7 +10,7 @@ import { ServerError } from "../../../shared/errors/ServerError";
 import { Note } from "../../../domain/entities/Note";
 import { INoteRepository } from "../../../domain/repositories/INoteRepository";
 import { NoteMapper } from "../../../shared/mappers/NoteMapper";
-import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
+import { IAiQuotaService } from "../../../domain/services/quota/IAiQuotaService";
 import { ValidationError } from "../../../shared/errors/ValidationError";
 
 import { TokenUsage } from "../../../shared/types/generativeAi";

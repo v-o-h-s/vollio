@@ -4,6 +4,7 @@ import { Document } from "../../domain/entities/Document";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 import { NotFoundError } from "../../shared/errors/NotFoundError";
 import { FastifyBaseLogger } from "fastify";
+import { DocumentMapper } from "../../shared/mappers/DocumentMapper";
 
 export class DocumentRepository implements IDocumentRepository {
   constructor(
@@ -16,15 +17,9 @@ export class DocumentRepository implements IDocumentRepository {
       { documentId: document.getId(), name: document.getName() },
       "Adding document to repository",
     );
-    const { error } = await this.supabaseClient.from("documents").insert({
-      id: document.getId(),
-      name: document.getName(),
-      size: document.getSize(),
-      storage_path: document.getSource().storagePath,
-      google_document_id: document.getSource().googleDocumentId,
-      mime_type: document.getMimeType(),
-      folder_id: document.getFolderId(),
-    });
+    const { error } = await this.supabaseClient
+      .from("documents")
+      .insert(DocumentMapper.toPersistence(document));
 
     if (error) {
       this.logger.error(
@@ -65,15 +60,7 @@ export class DocumentRepository implements IDocumentRepository {
     }
 
     this.logger.info({ documentId: id }, "Document found");
-    return new Document(
-      data.id,
-      data.name,
-      data.size,
-      data.storage_path,
-      data.google_document_id,
-      data.mime_type,
-      data.folder_id,
-    );
+    return DocumentMapper.fromPersistenceToDomain(data);
   }
 
   async getAllDocumentsByUserId(userId: string): Promise<Document[]> {
@@ -109,18 +96,7 @@ export class DocumentRepository implements IDocumentRepository {
       { userId, count: data.length },
       "Documents retrieved successfully for user",
     );
-    return data.map(
-      (row) =>
-        new Document(
-          row.id,
-          row.name,
-          row.size,
-          row.storage_path,
-          row.google_document_id,
-          row.mime_type,
-          row.folder_id,
-        ),
-    );
+    return data.map((row) => DocumentMapper.fromPersistenceToDomain(row));
   }
 
   async deleteDocument(id: string): Promise<void> {
@@ -172,15 +148,7 @@ export class DocumentRepository implements IDocumentRepository {
     }
 
     this.logger.info({ documentId: id }, "Document name updated successfully");
-    return new Document(
-      data.id,
-      data.name,
-      data.size,
-      data.storage_path,
-      data.google_document_id,
-      data.mime_type,
-      data.folder_id,
-    );
+    return DocumentMapper.fromPersistenceToDomain(data);
   }
 
   async moveDocument(id: string, folderId: string | null): Promise<Document> {
@@ -208,15 +176,7 @@ export class DocumentRepository implements IDocumentRepository {
     }
 
     this.logger.info({ documentId: id }, "Document moved successfully");
-    return new Document(
-      data.id,
-      data.name,
-      data.size,
-      data.storage_path,
-      data.google_document_id,
-      data.mime_type,
-      data.folder_id,
-    );
+    return DocumentMapper.fromPersistenceToDomain(data);
   }
 
   async updateDocumentStoragePath(
@@ -249,14 +209,6 @@ export class DocumentRepository implements IDocumentRepository {
       { documentId: id },
       "Document storage path updated successfully",
     );
-    return new Document(
-      data.id,
-      data.name,
-      data.size,
-      data.storage_path,
-      data.google_document_id,
-      data.mime_type,
-      data.folder_id,
-    );
+    return DocumentMapper.fromPersistenceToDomain(data);
   }
 }

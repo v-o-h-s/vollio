@@ -1,4 +1,4 @@
-import { TokenUsage } from "../../shared/types/generativeAi";
+import { TokenUsage } from "../../../shared/types/generativeAi";
 
 export interface AiQuotaRemaining {
   minute: number;

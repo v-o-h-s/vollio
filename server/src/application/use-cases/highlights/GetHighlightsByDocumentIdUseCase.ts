@@ -1,7 +1,7 @@
 import { IHighlightRepository } from "../../../domain/repositories/IHighlightRepository";
 import { Highlight } from "../../../domain/entities/Highlight";
 import { HighlightsMapper } from "../../../shared/mappers/HighlightsMapper";
-import { HighlightData } from '@vollio/shared';
+import { HighlightData } from "@vollio/shared";
 
 export class GetHighlightsByDocumentIdUseCase {
   constructor(private highlightRepository: IHighlightRepository) {}
@@ -10,7 +10,7 @@ export class GetHighlightsByDocumentIdUseCase {
     const highlights: Highlight[] =
       await this.highlightRepository.getHighlightsByDocumentId(documentId);
     return highlights.map((highlight) =>
-      HighlightsMapper.mapEntityToResponse(highlight)
+      HighlightsMapper.fromDomainToInterface(highlight),
     );
   }
 }

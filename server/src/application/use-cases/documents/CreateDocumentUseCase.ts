@@ -7,6 +7,8 @@ import { randomUUID } from "crypto";
 import { FastifyBaseLogger } from "fastify";
 import { CreateDocumentDto } from "@vollio/shared";
 import { IStorageService } from "../../../domain/services/IStorageService";
+import { IStorageQuotaService } from "../../../domain/services/quota/IStorageQuotaService";
+import { IDocumentQuotaService } from "../../../domain/services/quota/IDocumentQuotaService";
 
 export interface CreateDocumentInput extends CreateDocumentDto {
   userId: string;
@@ -17,7 +19,9 @@ export class CreateDocumentUseCase {
     private documentRepository: IDocumentRepository,
     private folderRepository: IFolderRepository,
     private storageService: IStorageService,
-    private logger: FastifyBaseLogger
+    private storageQuotaService: IStorageQuotaService,
+    private documentQuotaService: IDocumentQuotaService,
+    private logger: FastifyBaseLogger,
   ) {}
 
   async execute(input: CreateDocumentInput): Promise<{ id: string }> {
@@ -27,18 +31,18 @@ export class CreateDocumentUseCase {
         userId: input.userId,
         folderId: input.folderId,
       },
-      "Executing CreateDocumentUseCase"
+      "Executing CreateDocumentUseCase",
     );
     // Validate folder if provided
     if (input.folderId) {
       const folder = await this.folderRepository.getFolderById(
         input.folderId,
-        input.userId
+        input.userId,
       );
       if (!folder) {
         this.logger.warn(
           { folderId: input.folderId, userId: input.userId },
-          "Folder not found in CreateDocumentUseCase"
+          "Folder not found in CreateDocumentUseCase",
         );
         throw new NotFoundError("Folder not found or does not belong to user");
       }
@@ -52,7 +56,7 @@ export class CreateDocumentUseCase {
     if (input.storagePath.includes("..") || input.storagePath.includes("./")) {
       this.logger.warn(
         { storagePath: input.storagePath, userId: input.userId },
-        "Potential path traversal attempt detected in storagePath"
+        "Potential path traversal attempt detected in storagePath",
       );
       throw new ServerError("Invalid storage path provided");
     }
@@ -62,7 +66,7 @@ export class CreateDocumentUseCase {
     if (!input.storagePath.startsWith(`${input.userId}/`)) {
       this.logger.warn(
         { storagePath: input.storagePath, userId: input.userId },
-        "Unauthorized storage path access attempt: path does not start with userId"
+        "Unauthorized storage path access attempt: path does not start with userId",
       );
       throw new ServerError("Unauthorized storage path");
     }
@@ -72,44 +76,59 @@ export class CreateDocumentUseCase {
     if (input.size > MAX_SIZE) {
       this.logger.warn(
         { size: input.size, userId: input.userId },
-        "Document size exceeds maximum limit"
+        "Document size exceeds maximum limit",
       );
       throw new ServerError("Document size exceeds maximum limit (50MB)");
     }
+
+    // 3. QUOTA CHECK — storage bytes + document count (throws QuotaExceededError if exceeded)
+    await this.documentQuotaService.consumeDocument(input.userId);
+    await this.storageQuotaService.consumeStorage(input.userId, input.size);
 
     // Create document entity
     const documentId = randomUUID();
     const document = new Document(
       documentId,
+      input.userId,
       input.name,
       input.size,
       input.storagePath,
       null, // No Google Drive ID
       "application/pdf", // TODO: Detect mime type properly if possible
-      input.folderId ?? null
+      input.folderId ?? null,
     );
 
     // Save to database
     try {
       this.logger.info(
         { documentId, storagePath: input.storagePath },
-        "Saving document metadata to repository"
+        "Saving document metadata to repository",
       );
       await this.documentRepository.addDocument(document);
     } catch (error) {
       this.logger.error(
         { error, documentId },
-        "Error saving document metadata, cleaning up storage"
+        "Error saving document metadata, cleaning up storage and quota",
       );
       // Cleanup: Delete uploaded document from storage if DB save fails
-      // Since the client just uploaded it, we should clean it up to avoid orphans
       await this.storageService.deleteDocument(input.storagePath);
+      // Release both quotas
+      await this.storageQuotaService
+        .releaseStorage(input.userId, input.size)
+        .catch((e) =>
+          this.logger.error({ e }, "Failed to release storage quota"),
+        );
+      await this.documentQuotaService
+        .releaseDocument(input.userId)
+        .catch((e) =>
+          this.logger.error({ e }, "Failed to release document quota"),
+        );
       throw error;
     }
 
     this.logger.info(
       { documentId },
-      "CreateDocumentUseCase executed successfully"
+      "CreateDocumentUseCase executed successfully",
     );
 
     return { id: documentId };

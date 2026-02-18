@@ -11,6 +11,7 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
     const rateLimitingService = request.diScope.resolve<IRateLimitingService>(
       "rateLimitingService",
     );
+    
     const config = request.routeOptions.config.rateLimit;
     request.log.info(
       {
