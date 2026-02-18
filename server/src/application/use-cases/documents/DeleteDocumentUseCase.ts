@@ -49,5 +49,6 @@ export class DeleteDocumentUseCase {
       { documentId },
       "DeleteDocumentUseCase executed successfully",
     );
+
   }
 }
