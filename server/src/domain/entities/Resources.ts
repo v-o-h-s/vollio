@@ -6,8 +6,10 @@ export class Resources {
     private planId: string,
     private usedAiTokens: number,
     private usedStorageBytes: number,
+    private usedDocuments: number,
     private maxAiTokens: number,
     private maxStorageBytes: number,
+    private maxDocuments: number,
     private createdAt: Date = new Date(),
     private updatedAt: Date = new Date(),
   ) {}
@@ -32,6 +34,10 @@ export class Resources {
     return this.usedStorageBytes;
   }
 
+  public getUsedDocuments(): number {
+    return this.usedDocuments;
+  }
+
   public getMaxAiTokens(): number {
     return this.maxAiTokens;
   }
@@ -40,12 +46,20 @@ export class Resources {
     return this.maxStorageBytes;
   }
 
+  public getMaxDocuments(): number {
+    return this.maxDocuments;
+  }
+
   public getRemainingAiTokens(): number {
     return Math.max(0, this.maxAiTokens - this.usedAiTokens);
   }
 
   public getRemainingStorageBytes(): number {
     return Math.max(0, this.maxStorageBytes - this.usedStorageBytes);
+  }
+
+  public getRemainingDocuments(): number {
+    return Math.max(0, this.maxDocuments - this.usedDocuments);
   }
 
   public getCreatedAt(): Date {
@@ -88,6 +102,25 @@ export class Resources {
   }
 
   /**
+   * Business Logic: Increment document count
+   */
+  public consumeDocument(): void {
+    if (this.getRemainingDocuments() <= 0) {
+      throw new Error("Document limit reached");
+    }
+    this.usedDocuments += 1;
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Business Logic: Decrement document count (on delete)
+   */
+  public releaseDocument(): void {
+    this.usedDocuments = Math.max(0, this.usedDocuments - 1);
+    this.updatedAt = new Date();
+  }
+
+  /**
    * Business Logic: Update allocation based on a new plan (e.g. upgrade/renewal)
    * This preserves existing storage usage while applying new limits.
    */
@@ -95,6 +128,7 @@ export class Resources {
     this.planId = plan.getId();
     this.maxAiTokens = plan.getMaxAiTokens() || 0;
     this.maxStorageBytes = plan.getMaxStorageBytes() || 0;
+    this.maxDocuments = plan.getMaxDocuments() || 0;
 
     // Standard SaaS Behavior:
     // 1. Reset AI tokens usage to 0 (new month/billing cycle refill)
@@ -102,6 +136,7 @@ export class Resources {
 
     // 2. Storage usage is NOT reset (the files are still there)
     // We just have a new max. If used > max, getRemaining() will return 0.
+    // same for documents count
 
     this.updatedAt = new Date();
   }
@@ -112,10 +147,13 @@ export class Resources {
       planId: this.planId,
       usedAiTokens: this.usedAiTokens,
       usedStorageBytes: this.usedStorageBytes,
+      usedDocuments: this.usedDocuments,
       remainingAiTokens: this.getRemainingAiTokens(),
       remainingStorageBytes: this.getRemainingStorageBytes(),
+      remainingDocuments: this.getRemainingDocuments(),
       maxAiTokens: this.maxAiTokens,
       maxStorageBytes: this.maxStorageBytes,
+      maxDocuments: this.maxDocuments,
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),
     };

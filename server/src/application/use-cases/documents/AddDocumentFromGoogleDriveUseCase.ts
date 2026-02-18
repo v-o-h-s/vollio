@@ -7,6 +7,7 @@ import { ServerError } from "../../../shared/errors/ServerError";
 import { EnsureValidTokenUseCase } from "../google-Classroom/EnsureValidTokenUseCase";
 import { Document } from "../../../domain/entities/Document";
 import { FastifyBaseLogger } from "fastify";
+import { IStorageQuotaService } from "../../../domain/services/quota/IStorageQuotaService";
 
 export class AddDocumentFromGoogleDriveUseCase {
   constructor(
@@ -14,16 +15,17 @@ export class AddDocumentFromGoogleDriveUseCase {
     private googleDriveService: IGoogleDriveService,
     private userGoogleClassroomRepository: UserGoogleClassroomRepository,
     private ensureValidTokenUseCase: EnsureValidTokenUseCase,
+    private storageQuotaService: IStorageQuotaService,
     private logger: FastifyBaseLogger,
   ) {}
 
-  async execute(documentGoogleDriveId: string): Promise<void> {
+  async execute(documentGoogleDriveId: string, userId: string): Promise<void> {
     this.logger.info(
       { documentGoogleDriveId },
       "Executing AddDocumentFromGoogleDriveUseCase",
     );
     // Ensure valid token and refresh it if not valid
-    await this.ensureValidTokenUseCase.execute();
+    await this.ensureValidTokenUseCase.execute(userId);
     const tokens = await this.userGoogleClassroomRepository.getTokens();
     if (!tokens || !tokens.access_token) {
       this.logger.error(

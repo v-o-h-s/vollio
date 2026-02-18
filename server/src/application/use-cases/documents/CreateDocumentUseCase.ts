@@ -7,6 +7,7 @@ import { randomUUID } from "crypto";
 import { FastifyBaseLogger } from "fastify";
 import { CreateDocumentDto } from "@vollio/shared";
 import { IStorageService } from "../../../domain/services/IStorageService";
+import { IStorageQuotaService } from "../../../domain/services/quota/IStorageQuotaService";
 
 export interface CreateDocumentInput extends CreateDocumentDto {
   userId: string;
@@ -17,6 +18,7 @@ export class CreateDocumentUseCase {
     private documentRepository: IDocumentRepository,
     private folderRepository: IFolderRepository,
     private storageService: IStorageService,
+    private storageQuotaService: IStorageQuotaService,
     private logger: FastifyBaseLogger,
   ) {}
 
@@ -77,10 +79,15 @@ export class CreateDocumentUseCase {
       throw new ServerError("Document size exceeds maximum limit (50MB)");
     }
 
+    // 3. STORAGE QUOTA CHECK
+    // This will throw QuotaExceededError if limits are reached
+    await this.storageQuotaService.consumeStorage(input.userId, input.size);
+
     // Create document entity
     const documentId = randomUUID();
     const document = new Document(
       documentId,
+      input.userId,
       input.name,
       input.size,
       input.storagePath,
@@ -99,11 +106,16 @@ export class CreateDocumentUseCase {
     } catch (error) {
       this.logger.error(
         { error, documentId },
-        "Error saving document metadata, cleaning up storage",
+        "Error saving document metadata, cleaning up storage and quota",
       );
       // Cleanup: Delete uploaded document from storage if DB save fails
-      // Since the client just uploaded it, we should clean it up to avoid orphans
       await this.storageService.deleteDocument(input.storagePath);
+      // Release quota
+      await this.storageQuotaService
+        .releaseStorage(input.userId, input.size)
+        .catch((e) =>
+          this.logger.error({ e }, "Failed to release storage quota"),
+        );
       throw error;
     }
 

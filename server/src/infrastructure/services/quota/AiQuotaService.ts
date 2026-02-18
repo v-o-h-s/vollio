@@ -1,13 +1,16 @@
 import {
   AiQuotaRemaining,
   IAiQuotaService,
-} from "../../domain/services/IAiQuotaService";
-import { IRateLimitingService } from "../../domain/services/IRateLimitingService";
-import { IdentifierType, PrefixTypes } from "../../shared/utils/rate-limiting";
-import { TokenUsage } from "../../shared/types/generativeAi";
-import { RateLimitingError } from "../../shared/errors/RateLimitingError";
+} from "../../../domain/services/quota/IAiQuotaService";
+import { IRateLimitingService } from "../../../domain/services/IRateLimitingService";
+import {
+  IdentifierType,
+  PrefixTypes,
+} from "../../../shared/utils/rate-limiting";
+import { TokenUsage } from "../../../shared/types/generativeAi";
 import { FastifyBaseLogger } from "fastify";
-import { IAIResourcesRepository } from "../../domain/repositories/IAIResourcesRepository";
+import { IAIResourcesRepository } from "../../../domain/repositories/IAIResourcesRepository";
+
 /**
  * @description this class interacts with db logs/resources and redis for rate limiting
  */
@@ -28,39 +31,24 @@ export class AiQuotaService implements IAiQuotaService {
     const maxDay = Number(process.env.MAX_AI_TOKENS_PER_DAY) || 500000;
     const maxMonth = Number(process.env.MAX_AI_TOKENS_PER_MONTH) || 10000000;
 
-    // Formula from docs: Max = C + R * Period
-    // Following Scenario 2 ratio (C=100, R=1, Max=160):
-    // C = (100/160) * Max = 0.625 * Max
-    // R = (60/160) * Max / 60 = 0.375 * Max / 60
     this.minuteLimit = {
-      capacity: maxMinute * 0.625, //62500
-      refillRate: (maxMinute * 0.375) / 60, //625
+      capacity: maxMinute * 0.625,
+      refillRate: (maxMinute * 0.375) / 60,
     };
     this.dayLimit = {
-      capacity: maxDay * 0.625, //312500
-      refillRate: (maxDay * 0.375) / 86400, //2163
+      capacity: maxDay * 0.625,
+      refillRate: (maxDay * 0.375) / 86400,
     };
     this.monthLimit = {
-      capacity: maxMonth * 0.625, //6250000
-      refillRate: (maxMonth * 0.375) / 2592000, //1446
+      capacity: maxMonth * 0.625,
+      refillRate: (maxMonth * 0.375) / 2592000,
     };
   }
 
-  /**
-   * Calculate effective cost of token usage
-   * Based on the ratio between input and output tokens
-   */
   private calculateCost(usage: TokenUsage): number {
     return usage.promptTokens + usage.completionTokens * this.ratio;
   }
 
-  /**
-   * Consume AI tokens
-   * @description This method is used to consume AI tokens in redis and logs in db and also update the db
-   * @param userId - ID of the user
-   * @param usage - Token usage
-   * @param details - Details of the usage
-   */
   async consumeTokens(
     userId: string,
     usage: TokenUsage,
@@ -77,9 +65,6 @@ export class AiQuotaService implements IAiQuotaService {
       "Consuming AI tokens in AiQuotaService",
     );
 
-    // 0. Update Database Tally (Aggregated monthly usage)
-    // TODO: This should eventually be moved to a background job (e.g. BullMQ)
-    // to avoid blocking the request path for AI usage accounting.
     const resources = await this.aiResourcesRepository.getByUserId(userId);
     if (resources) {
       try {
@@ -92,7 +77,7 @@ export class AiQuotaService implements IAiQuotaService {
         );
       }
     }
-    // 1. Log detailed usage record (Async)
+
     if (details) {
       this.aiResourcesRepository
         .logUsage({
@@ -111,27 +96,17 @@ export class AiQuotaService implements IAiQuotaService {
         );
     }
 
-    // 1. Per Month (Largest bucket first - fail fast but allow force consumption)
-    const monthResult = await this.rateLimitingService.tryConsume(
+    await this.rateLimitingService.tryConsume(
       { type: IdentifierType.USERID, value: userId },
       {
         cost,
         ...this.monthLimit,
-        force: true, // Always record usage, even if over limit
+        force: true,
       },
       PrefixTypes.AI_PER_MONTH,
     );
 
-    if (!monthResult.allowed) {
-      // Since we forced it, this should technically be true, but if the underlying service
-      // logic changes, we log a warning.
-      this.logger.warn(
-        `User ${userId} exceeded monthly AI quota by ${Math.abs(monthResult.remaining)} tokens.`,
-      );
-    }
-
-    // 2. Per Day
-    const dayResult = await this.rateLimitingService.tryConsume(
+    await this.rateLimitingService.tryConsume(
       { type: IdentifierType.USERID, value: userId },
       {
         cost,
@@ -141,14 +116,7 @@ export class AiQuotaService implements IAiQuotaService {
       PrefixTypes.AI_PER_DAY,
     );
 
-    if (!dayResult.allowed) {
-      this.logger.warn(
-        `User ${userId} exceeded daily AI quota by ${Math.abs(dayResult.remaining)} tokens.`,
-      );
-    }
-
-    // 3. Per Minute
-    const minuteResult = await this.rateLimitingService.tryConsume(
+    await this.rateLimitingService.tryConsume(
       { type: IdentifierType.USERID, value: userId },
       {
         cost,
@@ -156,25 +124,6 @@ export class AiQuotaService implements IAiQuotaService {
         force: true,
       },
       PrefixTypes.AI_PER_MINUTE,
-    );
-
-    if (!minuteResult.allowed) {
-      this.logger.warn(
-        `User ${userId} exceeded minute AI quota by ${Math.abs(minuteResult.remaining)} tokens.`,
-      );
-    }
-
-    this.logger.info(
-      {
-        userId,
-        cost,
-        remaining: {
-          month: monthResult.remaining,
-          day: dayResult.remaining,
-          minute: minuteResult.remaining,
-        },
-      },
-      "AI token consumption completed (forced if necessary)",
     );
   }
 

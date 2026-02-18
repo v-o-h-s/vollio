@@ -14,7 +14,7 @@ import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/cl
 import { ServerError } from "../../../shared/errors/ServerError";
 import { quizPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/quizzes";
 import { IQuizRepository } from "../../../domain/repositories/IQuizRepository";
-import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
+import { IAiQuotaService } from "../../../domain/services/quota/IAiQuotaService";
 import { ValidationError } from "../../../shared/errors/ValidationError";
 
 export class CreateGeneralQuizUseCase {

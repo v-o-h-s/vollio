@@ -9,6 +9,7 @@ export class Plan {
   private isActive: boolean;
   private maxAiTokens: number | null;
   private maxStorageBytes: number | null;
+  private maxDocuments: number | null;
   private createdAt: Date;
   private updatedAt: Date;
 
@@ -23,6 +24,7 @@ export class Plan {
     isActive: boolean = true,
     maxAiTokens: number | null = null,
     maxStorageBytes: number | null = null,
+    maxDocuments: number | null = null,
     createdAt?: Date,
     updatedAt?: Date,
   ) {
@@ -36,6 +38,7 @@ export class Plan {
     this.isActive = isActive;
     this.maxAiTokens = maxAiTokens;
     this.maxStorageBytes = maxStorageBytes;
+    this.maxDocuments = maxDocuments;
     this.createdAt = createdAt || new Date();
     this.updatedAt = updatedAt || new Date();
   }
@@ -80,6 +83,10 @@ export class Plan {
     return this.maxStorageBytes;
   }
 
+  public getMaxDocuments(): number | null {
+    return this.maxDocuments;
+  }
+
   public getCreatedAt(): Date {
     return this.createdAt;
   }
@@ -104,6 +111,7 @@ export class Plan {
       is_active: this.isActive,
       max_ai_tokens: this.maxAiTokens,
       max_storage_bytes: this.maxStorageBytes,
+      max_documents: this.maxDocuments,
       created_at: this.createdAt.toISOString(),
       updated_at: this.updatedAt.toISOString(),
     };

@@ -66,7 +66,10 @@ export class DocumentController {
 
     const { documentGoogleDriveId } = request.body;
 
-    await this.addDocumentFromGoogleDriveUseCase.execute(documentGoogleDriveId);
+    await this.addDocumentFromGoogleDriveUseCase.execute(
+      documentGoogleDriveId,
+      userId,
+    );
     reply.status(200).send({
       success: true,
       message: "Document added successfully",

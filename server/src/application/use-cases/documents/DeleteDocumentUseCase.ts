@@ -1,5 +1,6 @@
 import { IDocumentRepository } from "../../../domain/repositories/IDocumentRepository";
 import { IStorageService } from "../../../domain/services/IStorageService";
+import { IStorageQuotaService } from "../../../domain/services/quota/IStorageQuotaService";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { FastifyBaseLogger } from "fastify";
 
@@ -7,6 +8,7 @@ export class DeleteDocumentUseCase {
   constructor(
     private documentRepository: IDocumentRepository,
     private storageService: IStorageService,
+    private storageQuotaService: IStorageQuotaService,
     private logger: FastifyBaseLogger,
   ) {}
 
@@ -35,6 +37,13 @@ export class DeleteDocumentUseCase {
       );
       await this.storageService.deleteDocument(source.storagePath);
     }
+
+    // Release quota
+    await this.storageQuotaService
+      .releaseStorage(document.getUserId(), document.getSize())
+      .catch((err) =>
+        this.logger.error({ err }, "Failed to release storage quota"),
+      );
 
     this.logger.info(
       { documentId },

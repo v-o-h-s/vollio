@@ -1,6 +1,6 @@
 import { FastifyBaseLogger } from "fastify";
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
-import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
+import { IAiQuotaService } from "../../../domain/services/quota/IAiQuotaService";
 import {
   AssistantDTO,
   AssistantResponseData,

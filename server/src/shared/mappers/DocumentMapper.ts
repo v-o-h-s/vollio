@@ -5,6 +5,7 @@ export class DocumentMapper {
   public static fromPersistenceToDomain(row: any): Document {
     return new Document(
       row.id,
+      row.user_id,
       row.name,
       row.size,
       row.storage_path,
@@ -17,6 +18,7 @@ export class DocumentMapper {
   public static toPersistence(document: Document) {
     return {
       id: document.getId(),
+      user_id: document.getUserId(),
       name: document.getName(),
       size: document.getSize(),
       storage_path: document.getSource().storagePath,

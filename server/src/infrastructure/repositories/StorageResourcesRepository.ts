@@ -52,6 +52,11 @@ export class StorageResourcesRepository
     if (!resources) {
       return false;
     }
-    return resources.getUsedStorageBytes() < resources.getMaxStorageBytes();
+    const hasSpace =
+      resources.getUsedStorageBytes() < resources.getMaxStorageBytes();
+    const hasDocumentsQuota =
+      resources.getUsedDocuments() < resources.getMaxDocuments();
+
+    return hasSpace && hasDocumentsQuota;
   }
 }

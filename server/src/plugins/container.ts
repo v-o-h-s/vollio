@@ -86,7 +86,9 @@ import { GenerateSummaryUseCase } from "../application/use-cases/documents/Gener
 import { GetStorageUrlUseCase } from "../application/use-cases/documents/GetStorageUrlUseCase";
 import { CreateDocumentUseCase } from "../application/use-cases/documents/CreateDocumentUseCase";
 import { RateLimitingService } from "../infrastructure/services/RateLimitingService";
-import { AiQuotaService } from "../infrastructure/services/AiQuotaService";
+import { AiQuotaService } from "../infrastructure/services/quota/AiQuotaService";
+import { StorageQuotaService } from "../infrastructure/services/quota/StorageQuotaService";
+import { DocumentQuotaService } from "../infrastructure/services/quota/DocumentQuotaService";
 import { HandleBillingWebhookUseCase } from "../application/use-cases/billing/HandleBillingWebhookUseCase";
 import { BillingController } from "../interface/controllers/billing.controller";
 import { PaddleService } from "../infrastructure/services/PaddleService";
@@ -123,6 +125,14 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
       }),
     }),
     aiQuotaService: asClass(AiQuotaService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    storageQuotaService: asClass(StorageQuotaService, {
+      lifetime: Lifetime.SCOPED,
+      injectionMode: InjectionMode.CLASSIC,
+    }),
+    documentQuotaService: asClass(DocumentQuotaService, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,
     }),

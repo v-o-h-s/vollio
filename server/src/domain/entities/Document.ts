@@ -1,28 +1,32 @@
 export class Document {
   private id: string;
+  private userId: string;
   private name: string;
   private size: number;
   private storagePath: string | null;
   private googleDocumentId: string | null;
   private mimeType: string;
   private folderId: string | null;
+
   constructor(
     id: string,
+    userId: string,
     name: string,
     size: number,
     storagePath: string | null,
     googleDocumentId: string | null,
     mimeType: string = "application/pdf",
-    folderId: string | null = null
+    folderId: string | null = null,
   ) {
     // Validate that at least one of storagePath or googleDocumentId is provided
     if (!storagePath && !googleDocumentId) {
       throw new Error(
-        "Either 'storagePath' or 'googleDocumentId' must be provided"
+        "Either 'storagePath' or 'googleDocumentId' must be provided",
       );
     }
 
     this.id = id;
+    this.userId = userId;
     this.name = name;
     this.size = size;
     this.storagePath = storagePath ?? null;
@@ -30,19 +34,28 @@ export class Document {
     this.mimeType = mimeType;
     this.folderId = folderId ?? null;
   }
-  getGoogleDocumentId() {
+
+  public getUserId(): string {
+    return this.userId;
+  }
+
+  public getGoogleDocumentId() {
     return this.googleDocumentId;
   }
-  getId(): string {
+
+  public getId(): string {
     return this.id;
   }
-  getName(): string {
+
+  public getName(): string {
     return this.name;
   }
-  getSize(): number {
+
+  public getSize(): number {
     return this.size;
   }
-  getSource(): {
+
+  public getSource(): {
     storagePath?: string | null;
     googleDocumentId?: string | null;
   } {
@@ -51,19 +64,24 @@ export class Document {
       googleDocumentId: this.googleDocumentId,
     };
   }
-  getStoragePath(): string | null {
+
+  public getStoragePath(): string | null {
     return this.storagePath;
   }
-  getMimeType(): string {
+
+  public getMimeType(): string {
     return this.mimeType;
   }
-  getFolderId(): string | null {
+
+  public getFolderId(): string | null {
     return this.folderId;
   }
-  getSizeInMB(): number {
+
+  public getSizeInMB(): number {
     return this.size / (1024 * 1024);
   }
-  getSizeInKB(): number {
+
+  public getSizeInKB(): number {
     return this.size / 1024;
   }
 }

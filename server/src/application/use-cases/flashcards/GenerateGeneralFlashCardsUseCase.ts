@@ -14,7 +14,7 @@ import { GENRATIVE_AI_CONFIG } from "../../../infrastructure/ai/generative-ai/cl
 import { flashcardPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/flashcards";
 import { FastifyBaseLogger } from "fastify";
 import crypto from "crypto";
-import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
+import { IAiQuotaService } from "../../../domain/services/quota/IAiQuotaService";
 import { ValidationError } from "../../../shared/errors/ValidationError";
 
 export class GenerateGeneralFlashCardsUseCase {

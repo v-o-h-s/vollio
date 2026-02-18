@@ -2,6 +2,8 @@ import { IFolderRepository } from "../../../domain/repositories/IFolderRepositor
 import { IDocumentRepository } from "../../../domain/repositories/IDocumentRepository";
 import { FastifyBaseLogger } from "fastify";
 
+import { DeleteDocumentUseCase } from "../documents/DeleteDocumentUseCase";
+
 interface DeleteFolderInput {
   userId: string;
   folderId: string;
@@ -11,6 +13,7 @@ export class DeleteFolderUseCase {
   constructor(
     private folderRepository: IFolderRepository,
     private documentRepository: IDocumentRepository,
+    private deleteDocumentUseCase: DeleteDocumentUseCase,
     private logger: FastifyBaseLogger,
   ) {}
 
@@ -83,7 +86,7 @@ export class DeleteFolderUseCase {
     const docsInFolder = allDocs.filter((d) => d.getFolderId() === folderId);
 
     for (const doc of docsInFolder) {
-      await this.documentRepository.deleteDocument(doc.getId());
+      await this.deleteDocumentUseCase.execute(doc.getId());
     }
 
     // Recursively delete subfolders
