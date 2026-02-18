@@ -1,15 +1,20 @@
 import { FastifyBaseLogger } from "fastify";
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
+import { IAiQuotaService } from "../../../domain/services/IAiQuotaService";
 import { ExplainTextDTO, ExplainTextResponseData } from "@vollio/shared";
 import { explainTextPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/explain";
 
 export class ExplainTextUseCase {
   constructor(
     private logger: FastifyBaseLogger,
-    private generativeAiService: IGenerativeAiService
+    private generativeAiService: IGenerativeAiService,
+    private aiQuotaService: IAiQuotaService,
   ) {}
 
-  async execute(data: ExplainTextDTO): Promise<ExplainTextResponseData> {
+  async execute(
+    data: ExplainTextDTO,
+    userId: string,
+  ): Promise<ExplainTextResponseData> {
     this.logger.info("Executing ExplainTextUseCase");
 
     const wordCount = data.text
@@ -17,25 +22,34 @@ export class ExplainTextUseCase {
       .filter((word: string) => word.length > 0).length;
     if (wordCount > 1000) {
       throw new Error(
-        "Input text is too long. Please provide text with less than 1000 words."
+        "Input text is too long. Please provide text with less than 1000 words.",
       );
     }
 
     const prompt = explainTextPromptGenerator(data.text);
 
-    const { data: result } = await this.generativeAiService.generateText(prompt);
+    const result = await this.generativeAiService.generateText(prompt);
 
-    // Parse the result (result is now guaranteed to be a string from GenerativeAiResult<string>)
+    // Track usage
+    await this.aiQuotaService.consumeTokens(userId, result.usage, {
+      actionType: "other",
+      model: result.model,
+      metadata: { wordCount },
+    });
+
+    const text = result.data;
+
+    // Parse the result
     let parsed;
     try {
-      const cleanContent = result
+      const cleanContent = text
         .replace(/```json/g, "")
         .replace(/```/g, "")
         .trim();
       parsed = JSON.parse(cleanContent);
     } catch (error) {
       this.logger.error(
-        "Failed to parse AI response in ExplainTextUseCase: " + error
+        "Failed to parse AI response in ExplainTextUseCase: " + error,
       );
       return {
         title: "Explanation",
@@ -44,7 +58,7 @@ export class ExplainTextUseCase {
           content: [
             {
               type: "paragraph",
-              content: [{ type: "text", text: result }],
+              content: [{ type: "text", text: text }],
             },
           ],
         },

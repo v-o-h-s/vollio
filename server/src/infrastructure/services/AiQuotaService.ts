@@ -8,7 +8,9 @@ import { TokenUsage } from "../../shared/types/generativeAi";
 import { RateLimitingError } from "../../shared/errors/RateLimitingError";
 import { FastifyBaseLogger } from "fastify";
 import { IAIResourcesRepository } from "../../domain/repositories/IAIResourcesRepository";
-
+/**
+ * @description this class interacts with db logs/resources and redis for rate limiting
+ */
 export class AiQuotaService implements IAiQuotaService {
   private ratio: number;
   private minuteLimit: { capacity: number; refillRate: number };
@@ -52,6 +54,13 @@ export class AiQuotaService implements IAiQuotaService {
     return usage.promptTokens + usage.completionTokens * this.ratio;
   }
 
+  /**
+   * Consume AI tokens
+   * @description This method is used to consume AI tokens in redis and logs in db and also update the db
+   * @param userId - ID of the user
+   * @param usage - Token usage
+   * @param details - Details of the usage
+   */
   async consumeTokens(
     userId: string,
     usage: TokenUsage,
@@ -68,7 +77,22 @@ export class AiQuotaService implements IAiQuotaService {
       "Consuming AI tokens in AiQuotaService",
     );
 
-    // 0. Log to Database (Async, don't wait for it to block the response if not critical)
+    // 0. Update Database Tally (Aggregated monthly usage)
+    // TODO: This should eventually be moved to a background job (e.g. BullMQ)
+    // to avoid blocking the request path for AI usage accounting.
+    const resources = await this.aiResourcesRepository.getByUserId(userId);
+    if (resources) {
+      try {
+        resources.consumeAiTokens(cost);
+        await this.aiResourcesRepository.upsert(resources);
+      } catch (err) {
+        this.logger.error(
+          { err, userId, cost },
+          "Failed to update AI resources tally in DB",
+        );
+      }
+    }
+    // 1. Log detailed usage record (Async)
     if (details) {
       this.aiResourcesRepository
         .logUsage({

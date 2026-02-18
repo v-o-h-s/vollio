@@ -10,11 +10,14 @@ const billingRoutesHandler: FastifyPluginAsync = async (
   fastify: FastifyInstance,
   options: FastifyPluginOptions,
 ): Promise<void> => {
-  fastify.post(`${options.prefix}/webhook`, async (request, reply) => {
-    const billingController =
-      request.diScope.resolve<BillingController>("billingController");
-    return billingController.handleWebhook(request, reply);
-  });
+  fastify.post(
+    `${options.prefix}/webhook`,
+    async (request, reply) => {
+      const billingController =
+        request.diScope.resolve<BillingController>("billingController");
+      return billingController.handleWebhook(request, reply);
+    },
+  );
 };
 
 export const billingRoutes = fp(billingRoutesHandler, {

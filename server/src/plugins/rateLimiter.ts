@@ -11,9 +11,7 @@ export const rateLimiterPlugin: FastifyPluginAsync = fp(async (fastify) => {
     const rateLimitingService = request.diScope.resolve<IRateLimitingService>(
       "rateLimitingService",
     );
-    if (request.url.includes("webhook")) {
-      return;
-    }
+    
     const config = request.routeOptions.config.rateLimit;
     request.log.info(
       {

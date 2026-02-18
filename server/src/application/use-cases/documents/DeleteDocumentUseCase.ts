@@ -7,7 +7,7 @@ export class DeleteDocumentUseCase {
   constructor(
     private documentRepository: IDocumentRepository,
     private storageService: IStorageService,
-    private logger: FastifyBaseLogger
+    private logger: FastifyBaseLogger,
   ) {}
 
   async execute(documentId: string): Promise<void> {
@@ -16,7 +16,10 @@ export class DeleteDocumentUseCase {
     const document = await this.documentRepository.getDocumentById(documentId);
 
     if (!document) {
-      this.logger.warn({ documentId }, "Document not found in DeleteDocumentUseCase");
+      this.logger.warn(
+        { documentId },
+        "Document not found in DeleteDocumentUseCase",
+      );
       throw new NotFoundError("Document not found");
     }
 
@@ -28,11 +31,14 @@ export class DeleteDocumentUseCase {
     if (source.storagePath) {
       this.logger.info(
         { documentId, storagePath: source.storagePath },
-        "Deleting document from storage"
+        "Deleting document from storage",
       );
       await this.storageService.deleteDocument(source.storagePath);
     }
 
-    this.logger.info({ documentId }, "DeleteDocumentUseCase executed successfully");
+    this.logger.info(
+      { documentId },
+      "DeleteDocumentUseCase executed successfully",
+    );
   }
 }

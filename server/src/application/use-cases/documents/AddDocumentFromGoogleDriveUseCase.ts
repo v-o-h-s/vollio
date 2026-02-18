@@ -14,31 +14,31 @@ export class AddDocumentFromGoogleDriveUseCase {
     private googleDriveService: IGoogleDriveService,
     private userGoogleClassroomRepository: UserGoogleClassroomRepository,
     private ensureValidTokenUseCase: EnsureValidTokenUseCase,
-    private logger: FastifyBaseLogger
+    private logger: FastifyBaseLogger,
   ) {}
 
   async execute(documentGoogleDriveId: string): Promise<void> {
     this.logger.info(
       { documentGoogleDriveId },
-      "Executing AddDocumentFromGoogleDriveUseCase"
+      "Executing AddDocumentFromGoogleDriveUseCase",
     );
     // Ensure valid token and refresh it if not valid
     await this.ensureValidTokenUseCase.execute();
     const tokens = await this.userGoogleClassroomRepository.getTokens();
     if (!tokens || !tokens.access_token) {
       this.logger.error(
-        "No access token available in AddDocumentFromGoogleDriveUseCase"
+        "No access token available in AddDocumentFromGoogleDriveUseCase",
       );
       throw new ServerError("No access token available");
     }
     const data = await this.googleDriveService.getDocumentMetadata(
       tokens.access_token,
-      documentGoogleDriveId
+      documentGoogleDriveId,
     );
     if (!data) {
       this.logger.warn(
         { documentGoogleDriveId },
-        "Document not found in Google Drive"
+        "Document not found in Google Drive",
       );
       throw new NotFoundError("document is not found");
     }
@@ -51,13 +51,13 @@ export class AddDocumentFromGoogleDriveUseCase {
       null,
       data.id,
       data.mimeType,
-      null
+      null,
     );
 
     await this.documentRepository.addDocument(document);
     this.logger.info(
       { documentId, documentGoogleDriveId },
-      "AddDocumentFromGoogleDriveUseCase executed successfully"
+      "AddDocumentFromGoogleDriveUseCase executed successfully",
     );
   }
 }
