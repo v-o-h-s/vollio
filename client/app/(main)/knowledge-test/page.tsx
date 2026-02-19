@@ -20,7 +20,6 @@ type Section = "quizzes" | "flashcards";
 
 import { useRouter } from "next/navigation";
 import { RobustFetchError } from "@/components/RobustFetchError";
-import { getErrorMessage } from "@/lib/utils/rtk-error-transform";
 
 import {
   useGetAllQuizzesQuery,
@@ -92,20 +91,18 @@ export default function KnowledgeTestPage() {
         />
         {section === "quizzes" && quizzesError && (
           <RobustFetchError
-            errorMessage={getErrorMessage(
-              quizzesError,
-              "Failed to load quizzes",
-            )}
+            errorMessage={
+              (quizzesError as any).message || "Failed to load quizzes"
+            }
             onRetry={refetchQuizzes}
             onBack={() => router.back()}
           />
         )}
         {section === "flashcards" && flashcardsError && (
           <RobustFetchError
-            errorMessage={getErrorMessage(
-              flashcardsError,
-              "Failed to load flashcards",
-            )}
+            errorMessage={
+              (flashcardsError as any).message || "Failed to load flashcards"
+            }
             onRetry={refetchFlashcards}
             onBack={() => router.back()}
           />

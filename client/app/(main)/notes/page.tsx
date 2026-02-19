@@ -14,7 +14,6 @@ import { DeleteConfirmationDialog } from "@/components/ui/delete-confirmation-di
 import { useFloatingSidebarIntegration } from "@/hooks/use-floating-sidebar";
 import { toast } from "react-toastify";
 import { RobustFetchError } from "@/components/RobustFetchError";
-import { getErrorMessage } from "@/lib/utils/rtk-error-transform";
 
 /**
  * Notes List Page
@@ -259,7 +258,7 @@ const NotesPage: React.FC = () => {
         {/* Enhanced Notes List with Modern Layout */}
         {error && (
           <RobustFetchError
-            errorMessage={getErrorMessage(error, "Failed to load notes")}
+            errorMessage={(error as any).message || "Failed to load notes"}
             onRetry={refetch}
             onBack={() => router.back()}
           />
