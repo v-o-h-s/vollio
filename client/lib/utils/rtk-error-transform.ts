@@ -4,7 +4,7 @@ import { SerializedError } from "@reduxjs/toolkit";
 // Transformed error response type
 export interface TransformedRTKError {
   message: string;
-  status: number | string;
+  name: string;
 }
 
 /**
@@ -18,7 +18,11 @@ export interface TransformedRTKError {
  * }
  */
 export function getErrorMessage(
-  error: FetchBaseQueryError | SerializedError | undefined,
+  error:
+    | FetchBaseQueryError
+    | SerializedError
+    | TransformedRTKError
+    | undefined,
   fallback: string = "An unexpected error occurred",
 ): string {
   if (!error) return fallback;
@@ -119,7 +123,7 @@ export function transformRTKQueryError(
       message: options?.context
         ? `Network error while ${options.context}. Please check your internet connection.`
         : "Network error. Please check your internet connection.",
-      status: "FETCH_ERROR",
+      name: "FetchError",
     };
   }
 
@@ -127,7 +131,7 @@ export function transformRTKQueryError(
   if (status === "PARSING_ERROR") {
     return {
       message: "Failed to process server response. Please try again.",
-      status: "PARSING_ERROR",
+      name: "ParsingError",
     };
   }
 
@@ -135,7 +139,7 @@ export function transformRTKQueryError(
   if (status === "TIMEOUT_ERROR") {
     return {
       message: "Request timed out. Please try again.",
-      status: "TIMEOUT_ERROR",
+      name: "TimeoutError",
     };
   }
 
@@ -143,19 +147,20 @@ export function transformRTKQueryError(
   if (status === "CUSTOM_ERROR") {
     return {
       message: (response as any).error || "An error occurred.",
-      status: "CUSTOM_ERROR",
+      name: "CustomError",
     };
   }
 
   // HTTP errors - extract server error from data
   const serverError = response.data as any;
   const serverMessage = serverError?.error?.message || serverError?.message;
+  const errorName = serverError?.error?.name || "UnknownError";
 
   // Use custom 404 message if provided
   if (status === 404 && options?.notFoundMessage) {
     return {
       message: options.notFoundMessage,
-      status,
+      name: "NotFoundError",
     };
   }
 
@@ -164,6 +169,6 @@ export function transformRTKQueryError(
       serverMessage ||
       HTTP_STATUS_MESSAGES[status as number] ||
       "An unexpected error occurred",
-    status,
+    name: errorName,
   };
 }
