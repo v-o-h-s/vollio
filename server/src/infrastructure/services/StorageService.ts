@@ -18,14 +18,14 @@ export class StorageService implements IStorageService {
 
     if (error) {
       throw new ServerError(
-        `Failed to delete document from storage: ${error.message}`
+        `Failed to delete document from storage: ${error.message}`,
       );
     }
   }
 
   async getSignedUrl(
     storagePath: string,
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
   ): Promise<string> {
     const { data, error } = await this.supabaseClient.storage
       .from(STORAGE_BUCKET)
@@ -33,7 +33,7 @@ export class StorageService implements IStorageService {
 
     if (error || !data) {
       throw new ServerError(
-        `Failed to generate signed URL: ${error?.message || "Unknown error"}`
+        `Failed to generate signed URL: ${error?.message || "Unknown error"}`,
       );
     }
 
@@ -47,7 +47,7 @@ export class StorageService implements IStorageService {
 
     if (error || !data) {
       throw new ServerError(
-        "Failed to download document for thumbnail generation"
+        "Failed to download document for thumbnail generation",
       );
     }
 
@@ -76,8 +76,36 @@ export class StorageService implements IStorageService {
 
     if (error) {
       throw new ServerError(
-        `Failed to upload document to storage: ${error.message}`
+        `Failed to upload document to storage: ${error.message}`,
       );
     }
+  }
+
+  async getFileMetadata(
+    storagePath: string,
+  ): Promise<{ size: number; mimeType: string }> {
+    const pathParts = storagePath.split("/");
+    const filename = pathParts.pop();
+    const folder = pathParts.join("/");
+
+    const { data, error } = await this.supabaseAdmin.storage
+      .from(STORAGE_BUCKET)
+      .list(folder, {
+        limit: 1,
+        offset: 0,
+        search: filename,
+      });
+
+    if (error || !data || data.length === 0) {
+      throw new ServerError(
+        `Failed to fetch metadata for file: ${storagePath}. Error: ${error?.message || "File not found"}`,
+      );
+    }
+
+    const file = data[0];
+    return {
+      size: file.metadata.size,
+      mimeType: file.metadata.mimetype,
+    };
   }
 }

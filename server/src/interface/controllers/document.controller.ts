@@ -278,7 +278,7 @@ export class DocumentController {
 
     const result = await this.getStorageUrlUseCase.execute({
       userId,
-      name: request.body.name,
+      ...request.body,
     });
     ResponseFormatter.success<GetStorageUrlData>(
       reply,
