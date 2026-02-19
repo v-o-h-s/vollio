@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { HandleBillingWebhookUseCase } from "../../application/use-cases/billing/HandleBillingWebhookUseCase";
+import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 
 export class BillingController {
   constructor(
@@ -17,6 +18,10 @@ export class BillingController {
     const rawBody = (request as any).rawBody;
     const signature = request.headers["paddle-signature"] as string;
     await this.handleBillingWebhookUseCase.execute(rawBody, signature);
-    reply.status(200).send({ success: true });
+    ResponseFormatter.success(
+      reply,
+      { success: true },
+      "Webhook processed successfully",
+    );
   }
 }

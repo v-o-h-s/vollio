@@ -19,6 +19,7 @@ import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 import { CountHighlightsByTagUseCase } from "../../application/use-cases/highlights/CountHighlightsByTagUseCase";
 import { DeleteHighlightsByTagUseCase } from "../../application/use-cases/highlights/DeleteHighlightsByTagUseCase";
 import { HighlightsMapper } from "../../shared/mappers/HighlightsMapper";
+import { UnauthorizedErrorObject } from "../../shared/types/error";
 
 export class HighlightController {
   constructor(
@@ -42,13 +43,7 @@ export class HighlightController {
     const userId = request.user?.id;
     if (!userId) {
       this.logger.warn("Unauthorized access attempt to fetch highlights");
-      reply.status(401).send({
-        success: false,
-        message: "Unauthorized",
-        data: null,
-        error: "User must be authenticated",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
     const documentId = request.query.documentId;
     const highlights =
@@ -72,13 +67,7 @@ export class HighlightController {
     const userId = request.user?.id;
     if (!userId) {
       this.logger.warn("Unauthorized access attempt to create highlight");
-      reply.status(401).send({
-        success: false,
-        message: "Unauthorized",
-        data: null,
-        error: "User must be authenticated",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const highlight = await this.createHighlightUseCase.execute({
@@ -114,13 +103,7 @@ export class HighlightController {
     const userId = request.user?.id;
     if (!userId) {
       this.logger.warn("Unauthorized access attempt to fetch highlight");
-      reply.status(401).send({
-        success: false,
-        message: "Unauthorized",
-        data: null,
-        error: "User must be authenticated",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const highlight = await this.getHighlightByIdUseCase.execute({
@@ -149,13 +132,7 @@ export class HighlightController {
     const userId = request.user?.id;
     if (!userId) {
       this.logger.warn("Unauthorized access attempt to update highlight");
-      reply.status(401).send({
-        success: false,
-        message: "Unauthorized",
-        data: null,
-        error: "User must be authenticated",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const highlight = await this.updateHighlightUseCase.execute({
@@ -191,13 +168,7 @@ export class HighlightController {
     const userId = request.user?.id;
     if (!userId) {
       this.logger.warn("Unauthorized access attempt to delete highlight");
-      reply.status(401).send({
-        success: false,
-        message: "Unauthorized",
-        data: null,
-        error: "User must be authenticated",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     await this.deleteHighlightUseCase.execute({
@@ -222,8 +193,7 @@ export class HighlightController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({ success: false, message: "Unauthorized" });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const { tagName } = request.params;
@@ -244,8 +214,7 @@ export class HighlightController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({ success: false, message: "Unauthorized" });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const { tagName } = request.params;

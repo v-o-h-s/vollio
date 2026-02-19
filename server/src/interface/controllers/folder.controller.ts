@@ -17,6 +17,8 @@ import {
   DeleteFolderResponse,
   FolderData,
 } from "@vollio/shared";
+import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
+import { UnauthorizedErrorObject } from "../../shared/types/error";
 
 export class FolderController {
   constructor(
@@ -36,13 +38,7 @@ export class FolderController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "Unauthorized",
-        data: null,
-        error: "User must be authenticated",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const folders = await this.getAllUserFoldersUseCase.execute({ userId });
@@ -52,15 +48,14 @@ export class FolderController {
       document_count: (folder as any).documentCount,
     }));
 
-    reply.status(200).send({
-      success: true,
-      message: "Folders retrieved successfully",
-      data: {
+    ResponseFormatter.success<GetAllFoldersResponse["data"]>(
+      reply,
+      {
         folders: foldersData,
         totalCount: folders.length,
       },
-      error: null,
-    } satisfies GetAllFoldersResponse);
+      "Folders retrieved successfully",
+    );
   }
 
   /**
@@ -72,13 +67,7 @@ export class FolderController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "Unauthorized",
-        data: null,
-        error: "User must be authenticated",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const createdFolder = await this.createFolderUseCase.execute({
@@ -87,12 +76,12 @@ export class FolderController {
       parentId: request.body.parentId,
     });
 
-    reply.status(201).send({
-      success: true,
-      message: "Folder created successfully",
-      data: createdFolder.toJSON(),
-      error: null,
-    } satisfies CreateFolderResponse);
+    ResponseFormatter.success<CreateFolderResponse["data"]>(
+      reply,
+      createdFolder.toJSON(),
+      "Folder created successfully",
+      201,
+    );
   }
 
   /**
@@ -104,13 +93,7 @@ export class FolderController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "Unauthorized",
-        data: null,
-        error: "User must be authenticated",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const folder = await this.getFolderByIdUseCase.execute({
@@ -120,12 +103,11 @@ export class FolderController {
 
     const folderData: FolderData = folder.toJSON();
 
-    reply.status(200).send({
-      success: true,
-      message: "Folder retrieved successfully",
-      data: folderData,
-      error: null,
-    } satisfies GetFolderByIdResponse);
+    ResponseFormatter.success<GetFolderByIdResponse["data"]>(
+      reply,
+      folderData,
+      "Folder retrieved successfully",
+    );
   }
 
   /**
@@ -137,13 +119,7 @@ export class FolderController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "Unauthorized",
-        data: null,
-        error: "User must be authenticated",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const updatedFolder = await this.updateFolderUseCase.execute({
@@ -153,12 +129,11 @@ export class FolderController {
       parentId: request.body.parentId,
     });
 
-    reply.status(200).send({
-      success: true,
-      message: "Folder updated successfully",
-      data: updatedFolder.toJSON(),
-      error: null,
-    } satisfies UpdateFolderResponse);
+    ResponseFormatter.success<UpdateFolderResponse["data"]>(
+      reply,
+      updatedFolder.toJSON(),
+      "Folder updated successfully",
+    );
   }
 
   /**
@@ -172,13 +147,7 @@ export class FolderController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "Unauthorized",
-        data: null,
-        error: "User must be authenticated",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     await this.deleteFolderUseCase.execute({
@@ -186,11 +155,10 @@ export class FolderController {
       folderId: request.params.id,
     });
 
-    reply.status(200).send({
-      success: true,
-      message: "Folder deleted successfully",
-      data: null,
-      error: null,
-    } satisfies DeleteFolderResponse);
+    ResponseFormatter.success<DeleteFolderResponse["data"]>(
+      reply,
+      null,
+      "Folder deleted successfully",
+    );
   }
 }
