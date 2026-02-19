@@ -8,8 +8,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useViewer } from "../../context/ViewerContext";
 import { useAppSelector } from "@/lib/store/hooks";
+import { AIChatError } from "../errors/AIChatError";
+import { useRouter } from "next/navigation";
 
 export function VollAiChat({ isFocused }: { isFocused?: boolean }) {
+  const router = useRouter();
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -19,9 +22,10 @@ export function VollAiChat({ isFocused }: { isFocused?: boolean }) {
     handleDeleteMessage: handleDelete,
     resetMessages,
     isVollAiLoading: isLoading,
+    chatError,
   } = useViewer();
   const vollAiFontSize = useAppSelector(
-    (state) => state.settings.vollAiFontSize
+    (state) => state.settings.vollAiFontSize,
   );
 
   // Auto-scroll to bottom when new messages arrive
@@ -63,15 +67,25 @@ export function VollAiChat({ isFocused }: { isFocused?: boolean }) {
           "shrink-0 border-b px-4 py-3 flex items-center justify-between transition-colors duration-300",
           isFocused
             ? "border-purple-500/30 bg-purple-500/5"
-            : "border-border bg-card/20"
+            : "border-border bg-card/20",
         )}
       >
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full  flex items-center justify-center">
-            <Bot className={cn("w-4 h-4", isFocused ? "text-purple-500" : "dark:text-white")} />
+            <Bot
+              className={cn(
+                "w-4 h-4",
+                isFocused ? "text-purple-500" : "dark:text-white",
+              )}
+            />
           </div>
           <div>
-            <h2 className={cn("text-sm font-semibold transition-colors", isFocused ? "text-purple-500" : "text-foreground")}>
+            <h2
+              className={cn(
+                "text-sm font-semibold transition-colors",
+                isFocused ? "text-purple-500" : "text-foreground",
+              )}
+            >
               Voll-ai
             </h2>
             <p className="text-xs text-muted-foreground">
@@ -91,7 +105,6 @@ export function VollAiChat({ isFocused }: { isFocused?: boolean }) {
           </Button>
         )}
       </div>
-
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-2 py-4">
         {messages.length === 0 ? (
@@ -147,11 +160,25 @@ export function VollAiChat({ isFocused }: { isFocused?: boolean }) {
                 </div>
               </div>
             )}
+
+            {/* Error Display */}
+            {chatError && (
+              <div className="px-4 py-2">
+                <AIChatError
+                  error={chatError}
+                  onRetry={() => {
+                    addUserMessage(input);
+                    setInput("");
+                  }}
+                  upgradePlan={() => router.push("https://vollio.xyz/pricing")}
+                />
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
         )}
       </div>
-
       {/* Input Area */}
       <div className="shrink-0 border-t border-border bg-background p-4">
         <div className="flex gap-2">
@@ -166,7 +193,7 @@ export function VollAiChat({ isFocused }: { isFocused?: boolean }) {
               "text-foreground placeholder:text-muted-foreground",
               "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent",
               "transition-all duration-200",
-              "max-h-32 min-h-[44px]"
+              "max-h-32 min-h-[44px]",
             )}
             style={{ fontSize: `${vollAiFontSize}px` }}
             rows={1}
