@@ -1,87 +1,9 @@
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import { SerializedError } from "@reduxjs/toolkit";
 
 // Transformed error response type
 export interface TransformedRTKError {
   message: string;
   name: string;
-}
-
-/**
- * Extracts a user-friendly error message from RTK Query error types.
- * Use this when you need to display an error message from a query/mutation error.
- *
- * @example
- * const { error } = useGetDocumentsQuery();
- * if (error) {
- *   return <ErrorDisplay message={getErrorMessage(error)} />;
- * }
- */
-export function getErrorMessage(
-  error:
-    | FetchBaseQueryError
-    | SerializedError
-    | TransformedRTKError
-    | undefined,
-  fallback: string = "An unexpected error occurred",
-): string {
-  if (!error) return fallback;
-
-  // SerializedError has an optional message property
-  if ("message" in error && error.message) {
-    return error.message;
-  }
-
-  // FetchBaseQueryError with string status (FETCH_ERROR, PARSING_ERROR, etc.)
-  if ("status" in error && typeof error.status === "string") {
-    // Map status types to messages
-    switch (error.status) {
-      case "FETCH_ERROR":
-        return "error" in error
-          ? error.error
-          : "Network error. Please check your internet connection.";
-      case "PARSING_ERROR":
-        return "error" in error
-          ? error.error
-          : "Failed to process server response.";
-      case "TIMEOUT_ERROR":
-        return "error" in error
-          ? error.error
-          : "Request timed out. Please try again.";
-      case "CUSTOM_ERROR":
-        return "error" in error ? error.error : fallback;
-      default:
-        return fallback;
-    }
-  }
-
-  // FetchBaseQueryError with numeric status (HTTP errors)
-  if (
-    "status" in error &&
-    typeof error.status === "number" &&
-    "data" in error
-  ) {
-    const data = error.data as Record<string, unknown> | undefined;
-    // Try to extract message from server response
-    if (data && typeof data === "object") {
-      if ("message" in data && typeof data.message === "string") {
-        return data.message;
-      }
-      if (
-        "error" in data &&
-        typeof data.error === "object" &&
-        data.error !== null
-      ) {
-        const errorObj = data.error as Record<string, unknown>;
-        if ("message" in errorObj && typeof errorObj.message === "string") {
-          return errorObj.message;
-        }
-      }
-    }
-    return fallback;
-  }
-
-  return fallback;
 }
 
 // HTTP status code to user-friendly message mapping
