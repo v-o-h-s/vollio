@@ -1,4 +1,5 @@
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import { formatDuration } from "./formatTime";
 
 // Transformed error response type
 export interface TransformedRTKError {
@@ -77,7 +78,23 @@ export function transformRTKQueryError(
   const serverError = response.data as any;
   const serverMessage = serverError?.error?.message || serverError?.message;
   const errorName = serverError?.error?.name || "UnknownError";
+  if (errorName === "RateLimitingError") {
+    // Retry-After is typically in seconds
+    const retryAfterSeconds = serverError?.error?.extra?.retryAfter;
 
+    if (typeof retryAfterSeconds === "number") {
+      const formattedTime = formatDuration(retryAfterSeconds);
+      return {
+        message: `Too many requests. Please try again after ${formattedTime}.`,
+        name: errorName,
+      };
+    }
+
+    return {
+      message: "Too many requests. Please try again later.",
+      name: errorName,
+    };
+  }
   // Use custom 404 message if provided
   if (status === 404 && options?.notFoundMessage) {
     return {
