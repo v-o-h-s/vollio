@@ -29,6 +29,7 @@ import {
   Link,
   X,
 } from "lucide-react";
+import { EmptyNotesState } from "./empty-notes-state";
 
 interface NotesListLayoutProps {
   notes: Note[];
@@ -548,129 +549,12 @@ export const EnhancedNotesList: React.FC<NotesListLayoutProps> = ({
           ))}
         </div>
       ) : (
-        <div className="text-center py-20">
-          {searchQuery ? (
-            // Search empty state
-            <div className="max-w-md mx-auto">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted/50 flex items-center justify-center">
-                <Search size={32} className="text-muted-foreground" />
-              </div>
-              <h3 className="text-2xl font-semibold text-foreground mb-3">
-                No notes found
-              </h3>
-              <p className="text-muted-foreground mb-6 leading-relaxed">
-                No notes match your search for{" "}
-                <span className="font-medium text-foreground">
-                  "{searchQuery}"
-                </span>
-                . Try adjusting your search terms or browse all notes.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  onClick={() => handleSearchChange("")}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <FileText size={16} />
-                  Show All Notes
-                </Button>
-                <Button
-                  onClick={onCreateNote}
-                  className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  <Plus size={16} />
-                  Create New Note
-                </Button>
-              </div>
-            </div>
-          ) : (
-            // Default empty state
-            <div className="max-w-lg mx-auto">
-              <div className="relative mb-8">
-                <div className="w-24 h-24 mx-auto rounded-full bg-linear-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <FileText size={40} className="text-primary" />
-                </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-linear-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
-                  <Plus size={16} className="text-white" />
-                </div>
-              </div>
-              <h3 className="text-3xl font-bold text-foreground mb-4">
-                Start your note-taking journey
-              </h3>
-              <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
-                Create rich, interactive notes with our powerful editor. Link
-                them to Document annotations, organize your thoughts, and build
-                your knowledge base. Get started with your first note!
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  onClick={onCreateNote}
-                  size="lg"
-                  className="flex items-center gap-2 px-8 py-4 text-base font-medium shadow-lg hover:shadow-xl transition-all duration-normal hover-lift bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  <FileText size={18} />
-                  Create your first note
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="flex items-center gap-2 px-8 py-4 text-base"
-                  onClick={() => {
-                    // TODO: Add link to help or demo
-                    console.log("Show help or demo");
-                  }}
-                >
-                  <BookOpen size={18} />
-                  Learn more
-                </Button>
-              </div>
-
-              {/* Feature highlights */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12 text-center">
-                <div className="space-y-2">
-                  <div className="w-12 h-12 mx-auto rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-                    <PenTool
-                      size={20}
-                      className="text-blue-600 dark:text-blue-400"
-                    />
-                  </div>
-                  <h4 className="font-semibold text-foreground">Rich Editor</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Format text, add links, and create structured content
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <div className="w-12 h-12 mx-auto rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                    <FileText
-                      size={20}
-                      className="text-green-600 dark:text-green-400"
-                    />
-                  </div>
-                  <h4 className="font-semibold text-foreground">
-                    Document Integration
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Link notes directly to Document annotations and highlights
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <div className="w-12 h-12 mx-auto rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
-                    <Search
-                      size={20}
-                      className="text-purple-600 dark:text-purple-400"
-                    />
-                  </div>
-                  <h4 className="font-semibold text-foreground">
-                    Smart Search
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    Find notes quickly with powerful search and filtering
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        <EmptyNotesState
+          onCreateNote={onCreateNote}
+          isSearch={!!searchQuery || activeFilters.length > 0}
+          searchQuery={searchQuery}
+          onClearSearch={clearAllFilters}
+        />
       )}
     </div>
   );

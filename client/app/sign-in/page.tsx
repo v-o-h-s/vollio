@@ -1,8 +1,9 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
+import gsap from "gsap";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
@@ -11,10 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 
+import LoginAnimation from "@/components/LoginAnimation";
+
 export default function SignInPage() {
   const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
+  const signElement = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -28,6 +32,16 @@ export default function SignInPage() {
     };
     checkSession();
   }, [router, supabase]);
+
+  useEffect(() => {
+    if (signElement.current) {
+      gsap.fromTo(
+        signElement.current,
+        { opacity: 0, x: 20 },
+        { opacity: 1, x: 0, duration: 0.8, ease: "power2.out" },
+      );
+    }
+  }, []);
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -54,12 +68,14 @@ export default function SignInPage() {
 
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
-      <div className="hidden bg-muted lg:block">
-        {/* Placeholder for left column content */}
-        <div className="h-full w-full bg-zinc-950" />
+      <div className="hidden lg:block relative overflow-hidden">
+        <LoginAnimation />
       </div>
       <div className="flex items-center justify-center py-12">
-        <div className="mx-auto grid w-[350px] gap-6">
+        <div
+          ref={signElement}
+          className="mx-auto grid w-[350px] gap-6 opacity-0"
+        >
           <div className="grid gap-2 text-center">
             <div className="flex justify-center mb-4">
               <div className="relative h-12 w-12 overflow-hidden rounded-lg">
