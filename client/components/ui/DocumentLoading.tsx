@@ -15,7 +15,7 @@ export const DocumentLoading = ({
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full bg-background/50 backdrop-blur-sm">
-      <div className="flex flex-col items-center gap-6 p-8 rounded-2xl bg-card border border-border shadow-2xl animate-in fade-in zoom-in duration-300 w-[300px]">
+      <div className="flex flex-col items-center gap-6 p-8  bg-card animate-in fade-in zoom-in duration-300 w-[300px]">
         <div className="flex flex-col items-center gap-2 w-full">
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
             Loading Document

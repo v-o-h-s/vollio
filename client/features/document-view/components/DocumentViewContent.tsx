@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { GripVertical } from "lucide-react";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, MouseEvent } from "react";
 import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { useGetDocumentByIdQuery } from "@/lib/store/apiSlice";
@@ -17,7 +17,7 @@ import { ViewerComponents } from "../types/types";
 
 const BetterViewer = dynamic(
   () => import("./BetterViewer").then((mod) => mod.BetterViewer),
-  { ssr: false }
+  { ssr: false },
 );
 
 const VollAiChat = dynamic(
@@ -25,7 +25,7 @@ const VollAiChat = dynamic(
     import("./Voll-ai/VollAiChat").then((mod) => ({
       default: mod.VollAiChat,
     })),
-  { ssr: false }
+  { ssr: false },
 );
 
 export function DocumentViewContent() {
@@ -44,9 +44,9 @@ export function DocumentViewContent() {
 
   const [vollAiWidth, setVollAiWidth] = useState(25);
   const [vollNotesWidth, setVollNotesWidth] = useState(25);
-  const [isVollAiDividerDragging, setIsVollAiDividerDragging] =
+  const [isVollAiDividerDragging, setIsVollAiDividerDragging] = useState(false);
+  const [isVollNotesDividerDragging, setIsVollNotesDividerDragging] =
     useState(false);
-  const [isVollNotesDividerDragging, setIsVollNotesDividerDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Fetch Document data using RTK Query
@@ -59,9 +59,12 @@ export function DocumentViewContent() {
   } = useGetDocumentByIdQuery(id as string);
 
   // Focus helper
-  const handleClickComponent = useCallback((component: ViewerComponents) => {
-    setFocusedComponent(component);
-  }, [setFocusedComponent]);
+  const handleClickComponent = useCallback(
+    (component: ViewerComponents) => {
+      setFocusedComponent(component);
+    },
+    [setFocusedComponent],
+  );
 
   // Mouse handlers for Voll-ai divider
   const handleMouseMoveVollAi = useCallback(
@@ -78,7 +81,7 @@ export function DocumentViewContent() {
         setVollAiWidth(newWidth);
       }
     },
-    [isVollAiDividerDragging]
+    [isVollAiDividerDragging],
   );
 
   const handleMouseUpVollAi = useCallback(() => {
@@ -108,7 +111,7 @@ export function DocumentViewContent() {
         setVollNotesWidth(newWidth);
       }
     },
-    [isVollNotesDividerDragging]
+    [isVollNotesDividerDragging],
   );
 
   const handleMouseUpVollNotes = useCallback(() => {
@@ -118,41 +121,6 @@ export function DocumentViewContent() {
   const handleMouseDownVollNotes = useCallback(() => {
     setIsVollNotesDividerDragging(true);
   }, []);
-
-  // Add document-level event listeners for dragging
-  useEffect(() => {
-    if (isVollAiDividerDragging) {
-      document.addEventListener("mousemove", handleMouseMoveVollAi);
-      document.addEventListener("mouseup", handleMouseUpVollAi);
-    } else {
-      document.removeEventListener("mousemove", handleMouseMoveVollAi);
-      document.removeEventListener("mouseup", handleMouseUpVollAi);
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMoveVollAi);
-      document.removeEventListener("mouseup", handleMouseUpVollAi);
-    };
-  }, [
-    isVollAiDividerDragging,
-    handleMouseMoveVollAi,
-    handleMouseUpVollAi,
-  ]);
-
-  useEffect(() => {
-    if (isVollNotesDividerDragging) {
-      document.addEventListener("mousemove", handleMouseMoveVollNotes);
-      document.addEventListener("mouseup", handleMouseUpVollNotes);
-    } else {
-      document.removeEventListener("mousemove", handleMouseMoveVollNotes);
-      document.removeEventListener("mouseup", handleMouseUpVollNotes);
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMoveVollNotes);
-      document.removeEventListener("mouseup", handleMouseUpVollNotes);
-    };
-  }, [isVollNotesDividerDragging, handleMouseMoveVollNotes, handleMouseUpVollNotes]);
 
   // Enhanced loading state
   if (isLoading) {
@@ -173,6 +141,18 @@ export function DocumentViewContent() {
     <div
       ref={containerRef}
       className="flex h-screen w-screen p-2 gap-2 relative"
+      onMouseMove={(e) => {
+        handleMouseMoveVollAi(e);
+        handleMouseMoveVollNotes(e);
+      }}
+      onMouseUp={() => {
+        handleMouseUpVollAi();
+        handleMouseUpVollNotes();
+      }}
+      onMouseLeave={() => {
+        handleMouseUpVollAi();
+        handleMouseUpVollNotes();
+      }}
     >
       {/* Left Panel: Voll-ai (when isVollAiOpen) */}
       {isVollAiOpen && (
@@ -180,17 +160,19 @@ export function DocumentViewContent() {
           <div
             onClick={() => handleClickComponent(ViewerComponents.V_AI)}
             className={cn(
-              "h-full rounded-lg flex flex-row overflow-hidden transition-all duration-300",
+              "h-full rounded-lg flex flex-row overflow-hidden",
               "border bg-card shadow-md",
               focusedComponent === ViewerComponents.V_AI
                 ? "border-purple-500/50 "
-                : "border-primary/20"
+                : "border-primary/20",
             )}
             style={{
               width: `${vollAiWidth}%`,
             }}
           >
-            <VollAiChat isFocused={focusedComponent === ViewerComponents.V_AI} />
+            <VollAiChat
+              isFocused={focusedComponent === ViewerComponents.V_AI}
+            />
           </div>
 
           {/* Divider after Voll-ai */}
@@ -200,7 +182,7 @@ export function DocumentViewContent() {
               "relative flex items-center justify-center shrink-0 group",
               "transition-all duration-200 ease-in-out cursor-col-resize select-none",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              isVollAiDividerDragging ? "w-8" : "w-2 hover:w-8"
+              "w-2",
             )}
             style={{ cursor: "col-resize" }}
             role="separator"
@@ -211,9 +193,7 @@ export function DocumentViewContent() {
               className={cn(
                 "absolute inset-y-0 left-1/2 -translate-x-1/2 rounded-full",
                 "transition-all duration-200",
-                isVollAiDividerDragging
-                  ? "w-1 bg-purple-500"
-                  : "w-0.5 bg-purple-500/30 group-hover:w-1 group-hover:bg-purple-500/80"
+                "w-0.5 bg-purple-500/30 group-hover:w-1 group-hover:bg-purple-500/80",
               )}
             />
             <div
@@ -221,8 +201,8 @@ export function DocumentViewContent() {
                 "relative z-10 rounded-md transition-all duration-200",
                 "flex items-center justify-center",
                 isVollAiDividerDragging
-                  ? "bg-purple-500 text-white scale-110 px-1 py-2"
-                  : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5"
+                  ? "bg-purple-500 text-white px-0.5 py-1.5"
+                  : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5",
               )}
             >
               <GripVertical className="w-4 h-4" />
@@ -235,21 +215,21 @@ export function DocumentViewContent() {
       <div
         onClick={() => handleClickComponent(ViewerComponents.V_DOC)}
         className={cn(
-          "h-full rounded-lg flex flex-row overflow-hidden transition-all duration-300",
+          "h-full rounded-lg flex flex-row overflow-hidden",
           "border bg-card shadow-md",
           focusedComponent === ViewerComponents.V_DOC
             ? "border-primary/50 "
-            : "border-primary/20"
+            : "border-primary/20",
         )}
         style={{
           width:
             isVollNotesOpen && isVollAiOpen
               ? `${100 - vollAiWidth - vollNotesWidth}%`
               : isVollNotesOpen
-              ? `${100 - vollNotesWidth}%`
-              : isVollAiOpen
-              ? `${100 - vollAiWidth}%`
-              : "100%",
+                ? `${100 - vollNotesWidth}%`
+                : isVollAiOpen
+                  ? `${100 - vollAiWidth}%`
+                  : "100%",
         }}
       >
         <BetterViewer
@@ -272,7 +252,7 @@ export function DocumentViewContent() {
               "relative flex items-center justify-center shrink-0 group",
               "transition-all duration-200 ease-in-out cursor-col-resize select-none",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              isVollNotesDividerDragging ? "w-8" : "w-2 hover:w-8"
+              "w-2",
             )}
             style={{ cursor: "col-resize" }}
             role="separator"
@@ -285,7 +265,7 @@ export function DocumentViewContent() {
                 "transition-all duration-200",
                 isVollNotesDividerDragging
                   ? "w-1 bg-indigo-500"
-                  : "w-0.5 bg-indigo-500/30 group-hover:w-1 group-hover:bg-indigo-500/80"
+                  : "w-0.5 bg-indigo-500/30 group-hover:w-1 group-hover:bg-indigo-500/80",
               )}
             />
             <div
@@ -293,8 +273,8 @@ export function DocumentViewContent() {
                 "relative z-10 rounded-md transition-all duration-200",
                 "flex items-center justify-center",
                 isVollNotesDividerDragging
-                  ? "bg-indigo-500 text-white scale-110 px-1 py-2"
-                  : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5"
+                  ? "bg-indigo-500 text-white scale-110 px-0.5 py-1.5"
+                  : "bg-transparent text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:bg-accent group-hover:text-accent-foreground px-0.5 py-1.5",
               )}
             >
               <GripVertical className="w-4 h-4" />
@@ -304,11 +284,11 @@ export function DocumentViewContent() {
           <div
             onClick={() => handleClickComponent(ViewerComponents.V_NOTES)}
             className={cn(
-              "h-full rounded-lg flex flex-row overflow-hidden transition-all duration-300",
+              "h-full rounded-lg flex flex-row overflow-hidden",
               "border shadow-md",
               focusedComponent === ViewerComponents.V_NOTES
                 ? "border-indigo-500/50 "
-                : "border-primary/20"
+                : "border-primary/20",
             )}
             style={{
               width: `${vollNotesWidth}%`,
