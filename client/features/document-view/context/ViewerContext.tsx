@@ -16,6 +16,7 @@ import { useVollAiLogic, Message } from "../hooks/useVollAiLogic";
 import { Highlight, ScaledPosition } from "react-pdf-highlighter-extended-plus";
 
 import { ViewerComponents } from "../types/types";
+import { TransformedRTKError } from "@/lib/utils/rtk-error-transform";
 
 export { HOME_TAB_ID };
 export type { Message };
@@ -76,6 +77,7 @@ interface ViewerContextType {
   handleDeleteMessage: (index: number) => void;
   resetMessages: () => void;
   isVollAiLoading: boolean;
+  chatError: TransformedRTKError | undefined;
 
   // --- Shared Actions (Cross-component features) ---
   appendContentToActiveNote: (content: string | JSONContent) => Promise<void>;

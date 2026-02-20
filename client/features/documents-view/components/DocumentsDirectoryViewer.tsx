@@ -37,7 +37,6 @@ import { IoFolder, IoDocumentTextSharp } from "react-icons/io5";
 import { useGetGoogleClassroomConnectionStatusQuery } from "@/lib/store/apiSlice";
 import { FilesSkeleton } from "./DirectorySkeleton";
 import { RobustFetchError } from "@/components/RobustFetchError";
-import { getErrorMessage } from "@/lib/utils/rtk-error-transform";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 export default function DocumentsDirectoryViewer() {
@@ -159,10 +158,11 @@ export default function DocumentsDirectoryViewer() {
   if (documentsError || foldersError) {
     return (
       <RobustFetchError
-        errorMessage={getErrorMessage(
-          documentsError || foldersError,
-          "Failed to fetch documents",
-        )}
+        errorMessage={
+          (documentsError as any)?.message ||
+          (foldersError as any)?.message ||
+          "Failed to fetch documents"
+        }
         onRetry={() => {
           refetchDocuments();
           refetchFolders();

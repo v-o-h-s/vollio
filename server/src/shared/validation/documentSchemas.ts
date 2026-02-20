@@ -5,8 +5,10 @@ export const getStorageUrlSchema: JSONSchemaType<GetStorageUrlDto> = {
   type: "object",
   properties: {
     name: { type: "string" },
+    size: { type: "number" },
+    mimeType: { type: "string" },
   },
-  required: ["name"],
+  required: ["name", "size", "mimeType"],
   additionalProperties: false,
 };
 

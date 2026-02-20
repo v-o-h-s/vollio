@@ -1,83 +1,10 @@
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import { SerializedError } from "@reduxjs/toolkit";
+import { formatDuration } from "./formatTime";
 
 // Transformed error response type
 export interface TransformedRTKError {
   message: string;
-  status: number | string;
-}
-
-/**
- * Extracts a user-friendly error message from RTK Query error types.
- * Use this when you need to display an error message from a query/mutation error.
- *
- * @example
- * const { error } = useGetDocumentsQuery();
- * if (error) {
- *   return <ErrorDisplay message={getErrorMessage(error)} />;
- * }
- */
-export function getErrorMessage(
-  error: FetchBaseQueryError | SerializedError | undefined,
-  fallback: string = "An unexpected error occurred",
-): string {
-  if (!error) return fallback;
-
-  // SerializedError has an optional message property
-  if ("message" in error && error.message) {
-    return error.message;
-  }
-
-  // FetchBaseQueryError with string status (FETCH_ERROR, PARSING_ERROR, etc.)
-  if ("status" in error && typeof error.status === "string") {
-    // Map status types to messages
-    switch (error.status) {
-      case "FETCH_ERROR":
-        return "error" in error
-          ? error.error
-          : "Network error. Please check your internet connection.";
-      case "PARSING_ERROR":
-        return "error" in error
-          ? error.error
-          : "Failed to process server response.";
-      case "TIMEOUT_ERROR":
-        return "error" in error
-          ? error.error
-          : "Request timed out. Please try again.";
-      case "CUSTOM_ERROR":
-        return "error" in error ? error.error : fallback;
-      default:
-        return fallback;
-    }
-  }
-
-  // FetchBaseQueryError with numeric status (HTTP errors)
-  if (
-    "status" in error &&
-    typeof error.status === "number" &&
-    "data" in error
-  ) {
-    const data = error.data as Record<string, unknown> | undefined;
-    // Try to extract message from server response
-    if (data && typeof data === "object") {
-      if ("message" in data && typeof data.message === "string") {
-        return data.message;
-      }
-      if (
-        "error" in data &&
-        typeof data.error === "object" &&
-        data.error !== null
-      ) {
-        const errorObj = data.error as Record<string, unknown>;
-        if ("message" in errorObj && typeof errorObj.message === "string") {
-          return errorObj.message;
-        }
-      }
-    }
-    return fallback;
-  }
-
-  return fallback;
+  name: string;
 }
 
 // HTTP status code to user-friendly message mapping
@@ -119,7 +46,7 @@ export function transformRTKQueryError(
       message: options?.context
         ? `Network error while ${options.context}. Please check your internet connection.`
         : "Network error. Please check your internet connection.",
-      status: "FETCH_ERROR",
+      name: "FetchError",
     };
   }
 
@@ -127,7 +54,7 @@ export function transformRTKQueryError(
   if (status === "PARSING_ERROR") {
     return {
       message: "Failed to process server response. Please try again.",
-      status: "PARSING_ERROR",
+      name: "ParsingError",
     };
   }
 
@@ -135,7 +62,7 @@ export function transformRTKQueryError(
   if (status === "TIMEOUT_ERROR") {
     return {
       message: "Request timed out. Please try again.",
-      status: "TIMEOUT_ERROR",
+      name: "TimeoutError",
     };
   }
 
@@ -143,19 +70,36 @@ export function transformRTKQueryError(
   if (status === "CUSTOM_ERROR") {
     return {
       message: (response as any).error || "An error occurred.",
-      status: "CUSTOM_ERROR",
+      name: "CustomError",
     };
   }
 
   // HTTP errors - extract server error from data
   const serverError = response.data as any;
   const serverMessage = serverError?.error?.message || serverError?.message;
+  const errorName = serverError?.error?.name || "UnknownError";
+  if (errorName === "RateLimitingError") {
+    // Retry-After is typically in seconds
+    const retryAfterSeconds = serverError?.error?.extra?.retryAfter;
 
+    if (typeof retryAfterSeconds === "number") {
+      const formattedTime = formatDuration(retryAfterSeconds);
+      return {
+        message: `Too many requests. Please try again after ${formattedTime}.`,
+        name: errorName,
+      };
+    }
+
+    return {
+      message: "Too many requests. Please try again later.",
+      name: errorName,
+    };
+  }
   // Use custom 404 message if provided
   if (status === 404 && options?.notFoundMessage) {
     return {
       message: options.notFoundMessage,
-      status,
+      name: "NotFoundError",
     };
   }
 
@@ -164,6 +108,6 @@ export function transformRTKQueryError(
       serverMessage ||
       HTTP_STATUS_MESSAGES[status as number] ||
       "An unexpected error occurred",
-    status,
+    name: errorName,
   };
 }

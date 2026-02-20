@@ -78,6 +78,8 @@ export function useDocument() {
     // Request signed upload URL from server
     const { storageUrl, storagePath } = await generateUploadUrlMutation({
       name: filePath,
+      size: file.size,
+      mimeType: file.type,
     }).unwrap();
 
     // Upload directly to Supabase

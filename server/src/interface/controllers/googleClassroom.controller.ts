@@ -21,6 +21,8 @@ import {
 } from "@vollio/shared";
 import "dotenv/config";
 import { IGoogleClassroomService } from "../../domain/services/IGoogleClassroomService";
+import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
+import { UnauthorizedErrorObject } from "../../shared/types/error";
 export class GoogleClassroomController {
   private googleClassroomService: IGoogleClassroomService;
   private fromCodeToDatabaseUseCase: FromCodeToDatabaseUseCase;
@@ -124,22 +126,15 @@ export class GoogleClassroomController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "User not authenticated",
-        data: null,
-        error: "Unauthorized",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
     await this.refreshTokenUseCase.execute();
 
-    reply.status(200).send({
-      success: true,
-      message: "Access token refreshed successfully",
-      data: null,
-      error: null,
-    } satisfies RefreshAccessTokenResponse);
+    ResponseFormatter.success<RefreshAccessTokenResponse["data"]>(
+      reply,
+      null,
+      "Access token refreshed successfully",
+    );
   }
 
   async checkTokenStatus(
@@ -159,12 +154,11 @@ export class GoogleClassroomController {
 
     const isValid = await this.checkTokenStatusUseCase.execute();
 
-    reply.status(200).send({
-      success: true,
-      message: "Token status retrieved successfully",
-      data: { isValid: isValid },
-      error: null,
-    } satisfies CheckTokenStatusResponse);
+    ResponseFormatter.success<CheckTokenStatusResponse["data"]>(
+      reply,
+      { isValid: isValid },
+      "Token status retrieved successfully",
+    );
   }
 
   async disconnect(
@@ -184,12 +178,11 @@ export class GoogleClassroomController {
 
     await this.disconnectUseCase.execute();
 
-    reply.status(200).send({
-      success: true,
-      message: "Disconnected from Google Classroom successfully",
-      data: null,
-      error: null,
-    } satisfies DisconnectResponse);
+    ResponseFormatter.success<DisconnectResponse["data"]>(
+      reply,
+      null,
+      "Disconnected from Google Classroom successfully",
+    );
   }
 
   async getConnectionStatus(
@@ -208,12 +201,11 @@ export class GoogleClassroomController {
     }
 
     const isConnected = await this.isConnectedUseCase.execute();
-    reply.status(200).send({
-      success: true,
-      message: "Connection status retrieved successfully",
-      data: { isConnected },
-      error: null,
-    } satisfies GetConnectionStatusResponse);
+    ResponseFormatter.success<GetConnectionStatusResponse["data"]>(
+      reply,
+      { isConnected },
+      "Connection status retrieved successfully",
+    );
   }
 
   async getCourses(request: FastifyRequest, reply: FastifyReply): Promise<any> {
@@ -229,12 +221,11 @@ export class GoogleClassroomController {
     }
 
     const courses = await this.getCoursesUseCase.execute();
-    reply.status(200).send({
-      success: true,
-      message: "Courses retrieved successfully",
-      data: courses,
-      error: null,
-    } satisfies GetCoursesResponse);
+    ResponseFormatter.success<GetCoursesResponse["data"]>(
+      reply,
+      courses,
+      "Courses retrieved successfully",
+    );
   }
   async getCourseContent(
     request: FastifyRequest<{ Params: { courseId: string } }>,
@@ -254,11 +245,10 @@ export class GoogleClassroomController {
     const { courseId } = request.params;
 
     const content = await this.getCourseContentUseCase.execute(courseId);
-    reply.status(200).send({
-      success: true,
-      message: "Course content retrieved successfully",
-      data: content,
-      error: null,
-    } satisfies GetCourseContentResponse);
+    ResponseFormatter.success<GetCourseContentResponse["data"]>(
+      reply,
+      content,
+      "Course content retrieved successfully",
+    );
   }
 }

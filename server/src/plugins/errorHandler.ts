@@ -6,7 +6,9 @@ import { NotFoundError } from "../shared/errors/NotFoundError";
 import { RateLimitingError } from "../shared/errors/RateLimitingError";
 import { ValidationError } from "../shared/errors/ValidationError";
 import { ConflictError } from "../shared/errors/ConflictError";
+import { QuotaExceededError } from "../shared/errors/QuotaExceededError";
 import { SentryService } from "../infrastructure/services/SentryService";
+import { ResponseFormatter } from "../shared/utils/ResponseFormatter";
 
 export function errorHandler(
   error: any,
@@ -38,12 +40,7 @@ export function errorHandler(
       route: req.url,
     });
 
-    return res.status(error.statusCode).send({
-      success: false,
-      status: error.statusCode,
-      data: null,
-      error: errorObj,
-    });
+    return ResponseFormatter.error(res, errorObj, error.statusCode);
   }
 
   // Handle other ServerErrors
@@ -67,12 +64,7 @@ export function errorHandler(
       route: req.url,
     });
 
-    return res.status(statusCode).send({
-      success: false,
-      status: statusCode,
-      data: null,
-      error: errorObj,
-    });
+    return ResponseFormatter.error(res, errorObj, statusCode);
   }
   if (error instanceof ConflictError) {
     const errorObj: ErrorObject = {
@@ -86,12 +78,7 @@ export function errorHandler(
 
     req.log.warn({ err: error }, "Conflict Error Occurred");
 
-    return res.status(error.statusCode).send({
-      success: false,
-      status: error.statusCode,
-      data: null,
-      error: errorObj,
-    });
+    return ResponseFormatter.error(res, errorObj, error.statusCode);
   }
 
   if (error instanceof NotFoundError) {
@@ -113,12 +100,7 @@ export function errorHandler(
       route: req.url,
     });
 
-    return res.status(error.statusCode).send({
-      success: false,
-      status: error.statusCode,
-      data: null,
-      error: errorObj,
-    });
+    return ResponseFormatter.error(res, errorObj, error.statusCode);
   }
 
   if (error instanceof ValidationError) {
@@ -135,12 +117,7 @@ export function errorHandler(
 
     req.log.warn({ err: error }, "Validation Error Occurred");
 
-    return res.status(error.statusCode).send({
-      success: false,
-      status: error.statusCode,
-      data: null,
-      error: errorObj,
-    });
+    return ResponseFormatter.error(res, errorObj, error.statusCode);
   }
 
   if (error instanceof RateLimitingError) {
@@ -168,12 +145,25 @@ export function errorHandler(
 
     req.log.warn({ err: error }, "Rate Limiting Error Occurred");
 
-    return res.status(error.statusCode).send({
-      success: false,
-      status: error.statusCode,
-      data: null,
-      error: errorObj,
-    });
+    return ResponseFormatter.error(res, errorObj, error.statusCode);
+  }
+
+  if (error instanceof QuotaExceededError) {
+    const errorObj: ErrorObject = {
+      name: error.name,
+      subType: error.resource,
+      message: error.message,
+      details: `You have exceeded your ${error.resource} quota. Please upgrade your plan.`,
+      statusCode: error.statusCode,
+      extra: {
+        code: error.code,
+        resource: error.resource,
+      },
+    };
+
+    req.log.warn({ err: error }, "Quota Exceeded Error Occurred");
+
+    return ResponseFormatter.error(res, errorObj, error.statusCode);
   }
 
   // Handle unexpected errors
@@ -196,10 +186,5 @@ export function errorHandler(
     extra: {},
   };
 
-  return res.status(statusCode).send({
-    success: false,
-    status: statusCode,
-    data: null,
-    error: errorObj,
-  });
+  return ResponseFormatter.error(res, errorObj, statusCode);
 }

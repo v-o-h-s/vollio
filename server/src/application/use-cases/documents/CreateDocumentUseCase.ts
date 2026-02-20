@@ -71,19 +71,43 @@ export class CreateDocumentUseCase {
       throw new ServerError("Unauthorized storage path");
     }
 
-    // SECURITY: Validate file size (e.g., 50MB limit)
-    const MAX_SIZE = 50 * 1024 * 1024; // 50MB
-    if (input.size > MAX_SIZE) {
+    // 3. TRUTH CHECK — Fetch actual metadata from storage before consuming quota
+    this.logger.info(
+      { storagePath: input.storagePath },
+      "Fetching actual file metadata for truth check",
+    );
+    const { size: actualSize, mimeType: actualMimeType } =
+      await this.storageService.getFileMetadata(input.storagePath);
+
+    this.logger.info(
+      { actualSize, actualMimeType },
+      "Actual metadata retrieved",
+    );
+
+    // Re-validate size and mime type using the truth
+    if (actualMimeType !== "application/pdf") {
       this.logger.warn(
-        { size: input.size, userId: input.userId },
-        "Document size exceeds maximum limit",
+        { actualMimeType },
+        "Invalid mime type detected after upload",
       );
-      throw new ServerError("Document size exceeds maximum limit (50MB)");
+      await this.storageService.deleteDocument(input.storagePath);
+      throw new ServerError("Only PDF files are allowed");
     }
 
-    // 3. QUOTA CHECK — storage bytes + document count (throws QuotaExceededError if exceeded)
+    // SECURITY: Validate file size (e.g., 25MB limit)
+    const MAX_SIZE = 25 * 1024 * 1024; // 25MB
+    if (actualSize > MAX_SIZE) {
+      this.logger.warn(
+        { actualSize, userId: input.userId },
+        "Document size exceeds maximum limit",
+      );
+      await this.storageService.deleteDocument(input.storagePath);
+      throw new ServerError("Document size exceeds maximum limit (25MB)");
+    }
+
+    // 4. QUOTA CONSUMPTION — storage bytes + document count (throws QuotaExceededError if exceeded)
     await this.documentQuotaService.consumeDocument(input.userId);
-    await this.storageQuotaService.consumeStorage(input.userId, input.size);
+    await this.storageQuotaService.consumeStorage(input.userId, actualSize);
 
     // Create document entity
     const documentId = randomUUID();
@@ -91,10 +115,10 @@ export class CreateDocumentUseCase {
       documentId,
       input.userId,
       input.name,
-      input.size,
+      actualSize, // Use truth
       input.storagePath,
       null, // No Google Drive ID
-      "application/pdf", // TODO: Detect mime type properly if possible
+      actualMimeType, // Use truth
       input.folderId ?? null,
     );
 

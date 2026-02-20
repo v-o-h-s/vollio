@@ -33,6 +33,7 @@ import { CreateDocumentUseCase } from "../../application/use-cases/documents/Cre
 import { CreateDocumentDto } from "@vollio/shared";
 import { withRetry } from "@vollio/shared";
 import { NotFoundError } from "../../shared/errors/NotFoundError";
+import { UnauthorizedErrorObject } from "../../shared/types/error";
 export class DocumentController {
   constructor(
     private addDocumentFromGoogleDriveUseCase: AddDocumentFromGoogleDriveUseCase,
@@ -55,13 +56,7 @@ export class DocumentController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "User not authenticated",
-        data: null,
-        error: "Unauthorized",
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const { documentGoogleDriveId } = request.body;
@@ -70,12 +65,11 @@ export class DocumentController {
       documentGoogleDriveId,
       userId,
     );
-    reply.status(200).send({
-      success: true,
-      message: "Document added successfully",
-      data: null,
-      error: null,
-    } satisfies AddDocumentFromGoogleDriveResponse);
+    ResponseFormatter.success<AddDocumentFromGoogleDriveResponse["data"]>(
+      reply,
+      null,
+      "Document added successfully",
+    );
   }
 
   // // get document from google drive by document ID
@@ -119,21 +113,14 @@ export class DocumentController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "Not authenticated",
-        data: null,
-        error: { message: "Not authenticated" },
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const documents = await this.getAllDocumentsUseCase.execute(userId);
 
-    reply.status(200).send({
-      success: true,
-      message: "Documents fetched successfully",
-      data: {
+    ResponseFormatter.success<GetAllDocumentsResponse["data"]>(
+      reply,
+      {
         documents: documents.map((d) => ({
           id: d.id,
           name: d.name,
@@ -145,8 +132,8 @@ export class DocumentController {
         })),
         totalCount: documents.length,
       },
-      error: null,
-    } satisfies GetAllDocumentsResponse);
+      "Documents fetched successfully",
+    );
   }
   // you may use this one when like click on document from supabase storage
   async getDocumentById(
@@ -155,13 +142,7 @@ export class DocumentController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: " Not authenticated",
-        data: null,
-        error: { message: "Not authenticated" },
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const result = await withRetry(
@@ -177,10 +158,9 @@ export class DocumentController {
       },
     );
 
-    reply.status(200).send({
-      success: true,
-      message: "Document fetched successfully",
-      data: {
+    ResponseFormatter.success<GetDocumentByIdResponse["data"]>(
+      reply,
+      {
         id: result.id,
         name: result.name,
         size: result.size,
@@ -190,8 +170,8 @@ export class DocumentController {
         isGoogleDriveDocument: result.isGoogleDriveDocument,
         documentUrl: result.documentUrl,
       },
-      error: null,
-    } satisfies GetDocumentByIdResponse);
+      "Document fetched successfully",
+    );
   }
   // upload document to supabase storage
   // pls use formdata in the frontend to send the document
@@ -201,23 +181,16 @@ export class DocumentController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "Not authenticated",
-        data: null,
-        error: { message: "Not authenticated" },
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     await this.deleteDocumentUseCase.execute(request.params.id);
 
-    reply.status(200).send({
-      success: true,
-      message: "Document deleted successfully",
-      data: null,
-      error: null,
-    } satisfies DeleteDocumentResponse);
+    ResponseFormatter.success<DeleteDocumentResponse["data"]>(
+      reply,
+      null,
+      "Document deleted successfully",
+    );
   }
 
   async moveDocument(
@@ -229,13 +202,7 @@ export class DocumentController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "Not authenticated",
-        data: null,
-        error: { message: "Not authenticated" },
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     await this.moveDocumentUseCase.execute({
@@ -244,12 +211,11 @@ export class DocumentController {
       userId,
     });
 
-    reply.status(200).send({
-      success: true,
-      message: "Document moved successfully",
-      data: null,
-      error: null,
-    } satisfies MoveDocumentResponse);
+    ResponseFormatter.success<MoveDocumentResponse["data"]>(
+      reply,
+      null,
+      "Document moved successfully",
+    );
   }
 
   async renameDocument(
@@ -261,13 +227,7 @@ export class DocumentController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({
-        success: false,
-        message: "Not authenticated",
-        data: null,
-        error: { message: "Not authenticated" },
-      });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const updatedDocument = await this.renameDocumentUseCase.execute({
@@ -275,12 +235,11 @@ export class DocumentController {
       name: request.body.name,
     });
 
-    reply.status(200).send({
-      success: true,
-      message: "Document renamed successfully",
-      data: null,
-      error: null,
-    } satisfies RenameDocumentResponse);
+    ResponseFormatter.success<RenameDocumentResponse["data"]>(
+      reply,
+      null,
+      "Document renamed successfully",
+    );
   }
 
   /**
@@ -292,8 +251,7 @@ export class DocumentController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({ error: "Unauthorized" });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const result = await this.generateSummaryUseCase.execute(
@@ -315,13 +273,12 @@ export class DocumentController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({ error: "Unauthorized" });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const result = await this.getStorageUrlUseCase.execute({
       userId,
-      name: request.body.name,
+      ...request.body,
     });
     ResponseFormatter.success<GetStorageUrlData>(
       reply,
@@ -336,8 +293,7 @@ export class DocumentController {
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({ error: "Unauthorized" });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const result = await this.createDocumentUseCase.execute({

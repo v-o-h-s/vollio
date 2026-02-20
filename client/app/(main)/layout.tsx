@@ -1,6 +1,5 @@
 "use client";
 import { FloatingNavigation } from "@/components/navigation/FloatingNavigation";
-import { FloatingSidebar } from "@/components/navigation/FloatingSidebar";
 import { usePathname } from "next/navigation";
 export default function DashboardLayout({
   children,

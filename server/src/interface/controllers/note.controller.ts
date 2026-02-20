@@ -18,6 +18,7 @@ import {
   DeleteNoteResponse,
 } from "@vollio/shared";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
+import { UnauthorizedErrorObject } from "../../shared/types/error";
 
 export class NoteController {
   constructor(
@@ -25,7 +26,7 @@ export class NoteController {
     private updateNoteUseCase: UpdateNoteUseCase,
     private deleteNoteUseCase: DeleteNoteUseCase,
     private getNoteUseCase: GetNoteUseCase,
-    private getAllUserNotesUseCase: GetAllUserNotesUseCase
+    private getAllUserNotesUseCase: GetAllUserNotesUseCase,
   ) {}
 
   /**
@@ -33,24 +34,23 @@ export class NoteController {
    */
   async createNote(
     request: FastifyRequest<{ Body: CreateNoteDTO }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({ error: "Unauthorized" });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const createdNote = await this.createNoteUseCase.execute({
       ...request.body,
     });
 
-    reply.status(201).send({
-      success: true,
-      message: "Note created successfully",
-      data: createdNote.toJSON(),
-      error: null,
-    } satisfies CreateNoteResponse);
+    ResponseFormatter.success<CreateNoteResponse["data"]>(
+      reply,
+      createdNote.toJSON(),
+      "Note created successfully",
+      201,
+    );
   }
 
   /**
@@ -58,22 +58,20 @@ export class NoteController {
    */
   async getAllNotes(
     request: FastifyRequest,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({ error: "Unauthorized" });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const notes = await this.getAllUserNotesUseCase.execute();
 
-    reply.status(200).send({
-      success: true,
-      message: "Notes retrieved successfully",
-      data: notes.map((note) => note.toJSON()),
-      error: null,
-    } satisfies GetAllNotesResponse);
+    ResponseFormatter.success<GetAllNotesResponse["data"]>(
+      reply,
+      notes.map((note) => note.toJSON()),
+      "Notes retrieved successfully",
+    );
   }
 
   /**
@@ -81,12 +79,11 @@ export class NoteController {
    */
   async getNoteById(
     request: FastifyRequest<{ Params: NoteIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({ error: "Unauthorized" });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const { id } = request.params;
@@ -95,12 +92,11 @@ export class NoteController {
       id,
     });
 
-    reply.status(200).send({
-      success: true,
-      message: "Note retrieved successfully",
-      data: note.toJSON(),
-      error: null,
-    } satisfies GetNoteByIdResponse);
+    ResponseFormatter.success<GetNoteByIdResponse["data"]>(
+      reply,
+      note.toJSON(),
+      "Note retrieved successfully",
+    );
   }
 
   /**
@@ -108,12 +104,11 @@ export class NoteController {
    */
   async updateNote(
     request: FastifyRequest<{ Params: NoteIdParams; Body: UpdateNoteDTO }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
-      reply.status(401).send({ error: "Unauthorized" });
-      return;
+      return ResponseFormatter.error(reply, UnauthorizedErrorObject, 401);
     }
 
     const { id } = request.params;
@@ -123,12 +118,11 @@ export class NoteController {
       data: request.body,
     });
 
-    reply.status(200).send({
-      success: true,
-      message: "Note updated successfully",
-      data: result.toJSON(),
-      error: null,
-    } satisfies UpdateNoteResponse);
+    ResponseFormatter.success<UpdateNoteResponse["data"]>(
+      reply,
+      result.toJSON(),
+      "Note updated successfully",
+    );
   }
 
   /**
@@ -136,7 +130,7 @@ export class NoteController {
    */
   async deleteNote(
     request: FastifyRequest<{ Params: NoteIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -151,11 +145,10 @@ export class NoteController {
       userId,
     });
 
-    reply.status(200).send({
-      success: true,
-      message: "Note deleted successfully",
-      data: null,
-      error: null,
-    } satisfies DeleteNoteResponse);
+    ResponseFormatter.success<DeleteNoteResponse["data"]>(
+      reply,
+      null,
+      "Note deleted successfully",
+    );
   }
 }

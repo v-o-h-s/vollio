@@ -16,6 +16,8 @@ export interface QuerySchema {
 
 export interface GetStorageUrlDto {
   name: string;
+  size: number;
+  mimeType: string;
 }
 
 export interface CreateDocumentDto {

@@ -6,9 +6,13 @@ import { useAssistantChatMutation } from "@/lib/store/apiSlice";
 import { AssistantChatMessage, HighlightContent } from "@vollio/shared";
 import { extractTextFromContent } from "../utils";
 import { Highlight, ScaledPosition } from "react-pdf-highlighter-extended-plus";
+import {
+  transformRTKQueryError,
+  TransformedRTKError,
+} from "@/lib/utils/rtk-error-transform";
 
 /**
- * Distinguishes between messages originating from general user queries 
+ * Distinguishes between messages originating from general user queries
  * and those specifically referencing document content.
  */
 export enum MessageSource {
@@ -40,8 +44,10 @@ export function useVollAiLogic() {
   const [messages, setMessages] = useState<Message[]>([]);
 
   // Mutation hook for sending chat requests to the server
-  const [vollAiChat, { isLoading: isVollAiLoading }] =
+  const [vollAiChat, { isLoading: isVollAiLoading, error: rawChatError }] =
     useAssistantChatMutation();
+
+  const chatError = rawChatError as TransformedRTKError | undefined;
 
   /**
    * Adds a user message to the chat, sends the full history to the AI assistant,
@@ -53,7 +59,7 @@ export function useVollAiLogic() {
       documentName: string;
       content: HighlightContent;
       position: ScaledPosition;
-    }
+    },
   ) => {
     if (!message.trim()) return;
 
@@ -67,16 +73,19 @@ export function useVollAiLogic() {
 
     setMessages((prev) => [...prev, userMsg]);
 
-    try {
-      const history: AssistantChatMessage[] = messages.map((msg) => ({
-        role: msg.role,
-        content: extractTextFromContent(msg.content),
-      }));
+    const history: AssistantChatMessage[] = messages.map((msg) => ({
+      role: msg.role,
+      content: extractTextFromContent(msg.content),
+    }));
 
-      const response = await vollAiChat({
-        message,
-        history,
-      } as any).unwrap();
+    const result = await vollAiChat({
+      message,
+      history,
+    } as any);
+
+    if ("data" in result) {
+      const response = result.data;
+      if (!response) return;
 
       const assistantMsg: Message = {
         role: "assistant",
@@ -87,34 +96,11 @@ export function useVollAiLogic() {
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
-    } catch (error) {
-      console.error("Failed to get assistant response:", { ...(error as any) });
-      const errorMsg: Message = {
-        role: "assistant",
-        content: {
-          type: "doc",
-          content: [
-            {
-              type: "paragraph",
-              content: [
-                {
-                  type: "text",
-                  text: "Sorry, I encountered an error while processing your request.",
-                },
-              ],
-            },
-          ],
-        },
-        timestamp: new Date(),
-        source: MessageSource.USER,
-        metadata,
-      };
-      setMessages((prev) => [...prev, errorMsg]);
     }
   };
 
   /**
-   * Removes a message from the history by its index. If deleting an assistant 
+   * Removes a message from the history by its index. If deleting an assistant
    * message, it also removes the preceding user question for consistency.
    */
   const handleDeleteMessage = (index: number) => {
@@ -142,5 +128,6 @@ export function useVollAiLogic() {
     handleDeleteMessage,
     resetMessages,
     isVollAiLoading,
+    chatError,
   };
 }
