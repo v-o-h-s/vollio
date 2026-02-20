@@ -56,12 +56,7 @@ const navigationItems = [
     icon: GrTestDesktop,
     description: "Interactive knowledge tests",
   },
-  {
-    name: "Support",
-    href: "/support",
-    icon: HelpCircle,
-    description: "Get help or suggest features",
-  },
+
   {
     name: "Settings",
     href: "/settings",
