@@ -1,6 +1,8 @@
-"use client";
+"use client"
 import { FloatingNavigation } from "@/components/navigation/FloatingNavigation";
+import { FeedbackButton } from "@/components/dashboard/FeedbackButton";
 import { usePathname } from "next/navigation";
+
 export default function DashboardLayout({
   children,
 }: {
@@ -17,6 +19,9 @@ export default function DashboardLayout({
 
       {/* Floating Navigation */}
       {!isPdfPage && <FloatingNavigation />}
+
+      {/* Global Feedback Button */}
+      {!isPdfPage && <FeedbackButton />}
 
       {/* Floating Sidebar */}
       {/* {!isPdfPage && <FloatingSidebar />} */}
