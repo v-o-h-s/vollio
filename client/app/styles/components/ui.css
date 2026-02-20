@@ -160,11 +160,30 @@ html {
 }
 
 /* Dark mode toast overrides */
-.dark .toast-solid-bg,
-.dark [data-hot-toast] {
+.dark .Toastify__toast {
   background: #000000 !important;
   color: #ffffff !important;
-  border: 1px solid #374151 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.Toastify__toast {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.Toastify__close-button {
+  color: inherit !important;
+  opacity: 0.7;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
+
+.Toastify__toast-icon {
+  width: 22px !important;
 }
 
 /* Success toasts */

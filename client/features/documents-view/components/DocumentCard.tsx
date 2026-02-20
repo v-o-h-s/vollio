@@ -50,8 +50,7 @@ export function DocumentCard({
   allFolders,
 }: DocumentCardProps) {
   const router = useRouter();
-  const { renameDocument, moveDocument, deleteDocument, refetch } =
-    useDocument();
+  const { renameDocument, moveDocument, deleteDocument } = useDocument();
 
   const { data: notes, isLoading: isLoadingNotes } = useGetNotesQuery({
     documentId: id,
@@ -89,7 +88,6 @@ export function DocumentCard({
       if (result.error) {
         console.error("Failed to delete document:", result.error);
       } else {
-        await refetch();
         setDeleteDialogOpen(false);
       }
     } catch (error) {
@@ -189,7 +187,6 @@ export function DocumentCard({
         onOpenChange={setMoveDialogOpen}
         onSubmit={async (targetFolderId) => {
           await moveDocument(id, targetFolderId);
-          await refetch();
         }}
         folders={allFolders}
         currentFolderId={folderId}

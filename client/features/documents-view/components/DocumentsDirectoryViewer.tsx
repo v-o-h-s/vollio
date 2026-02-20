@@ -117,11 +117,7 @@ export default function DocumentsDirectoryViewer() {
   // Classroom status (connection-level)
   const { data: classroomStatus, isLoading: isClassroomChecking } =
     useGetGoogleClassroomConnectionStatusQuery();
-  const classroomLabel = isClassroomChecking
-    ? "Checking..."
-    : classroomStatus?.data?.isConnected
-      ? "Add from Classroom"
-      : "Connect Classroom";
+  const classroomLabel = isClassroomChecking ? "Checking..." : "Connect LMS";
   // Drag and drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -204,7 +200,11 @@ export default function DocumentsDirectoryViewer() {
             viewMode={viewMode}
             onViewModeChange={setViewMode}
             classroomLabel={classroomLabel}
-            onClassroomClick={() => setClassroomDialogOpen(true)}
+            onClassroomClick={() =>
+              toast.info(
+                "LMS connection is under maintenance. Please try again later.",
+              )
+            }
             onUploadClick={handleUploadClick}
             onCreateFolderClick={() => setCreateFolderDialogOpen(true)}
           />

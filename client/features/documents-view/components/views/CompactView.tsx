@@ -2,6 +2,7 @@
 
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { Cloud, HardDrive, BookOpen, Folder, FileIcon } from "lucide-react";
+import { SimpleEmptyState } from "@/components/ui/simple-empty-state";
 import { cn } from "@/lib/utils";
 
 interface Document {
@@ -59,37 +60,15 @@ export function CompactView({
   if (folders.length === 0 && documents.length === 0) {
     return (
       <div
-        className="grid bg-neutral-100 overflow-y-auto overflow-x-hidden h-[550px] grid-cols-1 gap-4 p-4 auto-rows-max shadow-xs border border-neutral-200 rounded-xl"
+        className="flex flex-col bg-card/20 items-center justify-center h-[550px] shadow-xs border border-neutral-200 dark:border-white/5 rounded-xl w-full"
         onClick={onEmptyAreaClick}
       >
-        <div className="flex flex-col items-center justify-center h-full text-neutral-500 space-y-4">
-          <div className="bg-neutral-200 p-6 rounded-full">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="48"
-              height="48"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-              <polyline points="14 2 14 8 20 8" />
-              <path d="M12 18v-6" />
-              <path d="M9 15l3-3 3 3" />
-            </svg>
-          </div>
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-neutral-700">
-              No documents found
-            </h3>
-            <p className="text-sm mt-1 max-w-[250px] mx-auto">
-              Upload documents to get started. You can drag and drop files here.
-            </p>
-          </div>
-        </div>
+        <SimpleEmptyState
+          icon={FileIcon}
+          title="No documents yet"
+          description="Upload documents to get started. You can drag and drop files here."
+          className="py-0"
+        />
       </div>
     );
   }

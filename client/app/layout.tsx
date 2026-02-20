@@ -6,10 +6,8 @@ import { ReduxProvider } from "@/lib/store/provider";
 import { EditorProvider } from "@/components/editor";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { PaddleProvider } from "@/components/providers/PaddleProvider";
-import { ToastContainer, Bounce } from "react-toastify";
-
-import "react-toastify/dist/ReactToastify.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ToastProvider } from "@/components/providers/ToastProvider";
 import { Analytics } from "@vercel/analytics/next";
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,23 +68,13 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable}  ${poppins.variable} ${outfit.variable} antialiased`}
       >
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick={false}
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-          transition={Bounce}
-        />
         <ThemeProvider defaultTheme="light" storageKey="vollio-theme">
           <ReduxProvider>
             <PaddleProvider>
-              <EditorProvider>{children}</EditorProvider>
+              <EditorProvider>
+                <ToastProvider />
+                {children}
+              </EditorProvider>
             </PaddleProvider>
           </ReduxProvider>
         </ThemeProvider>

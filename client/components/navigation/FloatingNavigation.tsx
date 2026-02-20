@@ -290,6 +290,16 @@ export function FloatingNavigation({
                           <div className="ml-auto w-2 h-2 bg-primary rounded-full" />
                         )}
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setTheme("system")}
+                        className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3"
+                      >
+                        <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
+                        <span className="text-foreground">System</span>
+                        {theme === "system" && (
+                          <div className="ml-auto w-2 h-2 bg-primary rounded-full" />
+                        )}
+                      </DropdownMenuItem>
                     </DropdownMenuSubContent>
                   </DropdownMenuSub>
                   <Link href="/support" className="w-full">
@@ -492,6 +502,16 @@ export function FloatingNavigation({
                             <Moon className="mr-3 h-4 w-4 text-muted-foreground" />
                             <span className="text-foreground">Dark</span>
                             {theme === "dark" && (
+                              <div className="ml-auto w-2 h-2 bg-primary rounded-full" />
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setTheme("system")}
+                            className="rounded-lg hover:bg-muted focus:bg-muted transition-all duration-200 p-3"
+                          >
+                            <Settings className="mr-3 h-4 w-4 text-muted-foreground" />
+                            <span className="text-foreground">System</span>
+                            {theme === "system" && (
                               <div className="ml-auto w-2 h-2 bg-primary rounded-full" />
                             )}
                           </DropdownMenuItem>

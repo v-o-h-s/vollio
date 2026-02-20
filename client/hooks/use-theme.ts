@@ -1,28 +1,29 @@
-'use client';
+"use client";
 
-import { useContext } from 'react';
-import { ThemeContext } from '@/components/theme/ThemeProvider';
+import { useContext } from "react";
+import { ThemeContext } from "@/components/theme/ThemeProvider";
 
 // Use the actual ThemeContextValue from the ThemeProvider implementation
-type ThemeMode = 'light' | 'dark';
+type ThemeMode = "light" | "dark" | "system";
 
 interface ThemeContextValue {
   theme: ThemeMode;
+  resolvedTheme: "light" | "dark";
   setTheme: (theme: ThemeMode) => void;
   toggleTheme: () => void;
 }
 
 /**
  * Hook for consuming theme context throughout the application
- * 
+ *
  * @returns ThemeContextValue with current theme state and control functions
  * @throws Error if used outside of ThemeProvider
- * 
+ *
  * @example
  * ```tsx
  * function MyComponent() {
  *   const { theme, setTheme, toggleTheme } = useTheme();
- *   
+ *
  *   return (
  *     <div>
  *       <p>Current theme: {theme}</p>
@@ -36,14 +37,13 @@ interface ThemeContextValue {
  */
 export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
-  
+
   if (context === undefined) {
     throw new Error(
-      'useTheme must be used within a ThemeProvider. ' +
-      'Make sure to wrap your app with <ThemeProvider>.'
+      "useTheme must be used within a ThemeProvider. " +
+        "Make sure to wrap your app with <ThemeProvider>.",
     );
   }
-  
+
   return context;
 }
-

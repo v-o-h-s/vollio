@@ -2,6 +2,7 @@
 
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { Cloud, HardDrive, BookOpen, Folder, FileIcon } from "lucide-react";
+import { SimpleEmptyState } from "@/components/ui/simple-empty-state";
 import { cn } from "@/lib/utils";
 
 interface Document {
@@ -26,7 +27,7 @@ interface ListViewProps {
   onItemSelect: (
     type: "document" | "folder",
     id: string,
-    e: React.MouseEvent
+    e: React.MouseEvent,
   ) => void;
   onFolderOpen: (folderId: string) => void;
   onDocumentOpen: (documentId: string) => void;
@@ -73,10 +74,15 @@ export function ListView({
   if (folders.length === 0 && documents.length === 0) {
     return (
       <div
-        className="flex items-center justify-center h-64 text-muted-foreground"
+        className="flex flex-col bg-card/20 items-center justify-center h-[550px] shadow-xs border border-neutral-200 dark:border-white/5 rounded-xl w-full"
         onClick={onEmptyAreaClick}
       >
-        <p>No documents or folders</p>
+        <SimpleEmptyState
+          icon={FileIcon}
+          title="No documents yet"
+          description="Upload documents to get started. You can drag and drop files here."
+          className="py-0"
+        />
       </div>
     );
   }
@@ -117,7 +123,7 @@ export function ListView({
                 "hover:bg-muted/50",
                 isSelected && "bg-primary/10 border border-primary/50",
                 isDraggedOver && "bg-primary/20 border border-primary",
-                isDragging && "opacity-50"
+                isDragging && "opacity-50",
               )}
               onClick={(e) => onItemSelect("folder", folder.id, e)}
               onDoubleClick={() => onFolderOpen(folder.id)}
@@ -155,7 +161,7 @@ export function ListView({
                 "flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer transition-all",
                 "hover:bg-muted/50",
                 isSelected && "bg-primary/10 border border-primary/50",
-                isDragging && "opacity-50"
+                isDragging && "opacity-50",
               )}
               onClick={(e) => onItemSelect("document", document.id, e)}
               onDoubleClick={() => onDocumentOpen(document.id)}

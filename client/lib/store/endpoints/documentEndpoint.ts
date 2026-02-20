@@ -47,7 +47,13 @@ export const documentEndpoints = (builder: ApiBuilder) => ({
         context: "loading documents",
         notFoundMessage: "No documents found.",
       }),
-    providesTags: ["Document"],
+    providesTags: (result) =>
+      result
+        ? [
+            ...result.map(({ id }) => ({ type: "Document" as const, id })),
+            { type: "Document", id: "LIST" },
+          ]
+        : [{ type: "Document", id: "LIST" }],
   }),
 
   getDocumentById: builder.query<TransformedDocument, string>({

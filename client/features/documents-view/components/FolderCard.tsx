@@ -38,7 +38,7 @@ export function FolderCard({
   onOpen,
   allFolders,
 }: FolderCardProps) {
-  const { renameFolder, moveFolder, deleteFolder, refetch } = useFolder();
+  const { renameFolder, moveFolder, deleteFolder } = useFolder();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -48,9 +48,13 @@ export function FolderCard({
       <div
         className={cn(
           `relative group flex flex-col justify-center h-[140px] w-[140px] cursor-pointer transition-all hover:shadow-md hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-2xl ${
-            isSelected ? "bg-neutral-100 dark:bg-neutral-800 border-neutral-500 ring-1 ring-neutral-500" : ""
+            isSelected
+              ? "bg-neutral-100 dark:bg-neutral-800 border-neutral-500 ring-1 ring-neutral-500"
+              : ""
           }`,
-          isDraggedOver ? "bg-neutral-100 dark:bg-neutral-800 border-neutral-500" : ""
+          isDraggedOver
+            ? "bg-neutral-100 dark:bg-neutral-800 border-neutral-500"
+            : "",
         )}
         onClick={onSelect}
         onDoubleClick={onOpen}

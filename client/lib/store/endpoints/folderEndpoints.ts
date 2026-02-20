@@ -41,7 +41,16 @@ export const folderEndpoints = (builder: ApiBuilder) => ({
     },
     transformErrorResponse: (response) =>
       transformRTKQueryError(response, { context: "loading folders" }),
-    providesTags: ["Folder"],
+    providesTags: (result) =>
+      result
+        ? [
+            ...result.folders.map(({ id }) => ({
+              type: "Folder" as const,
+              id,
+            })),
+            { type: "Folder", id: "LIST" },
+          ]
+        : [{ type: "Folder", id: "LIST" }],
   }),
 
   getFolderById: builder.query<TransformedFolder, string>({

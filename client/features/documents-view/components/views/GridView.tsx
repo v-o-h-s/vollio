@@ -1,6 +1,6 @@
 "use client";
-import { TiDocumentText } from "react-icons/ti";
-
+import { FileText } from "lucide-react";
+import { SimpleEmptyState } from "@/components/ui/simple-empty-state";
 import { DocumentCard } from "../..";
 import { FolderCard } from "../FolderCard";
 import { useDroppable } from "@dnd-kit/core";
@@ -135,22 +135,15 @@ export function GridView({
   if (folders.length === 0 && documents.length === 0) {
     return (
       <div
-        className="grid bg-neutral-100 overflow-y-auto overflow-x-hidden h-[550px] grid-cols-1 gap-4 p-4 auto-rows-max shadow-xs border border-neutral-200 rounded-xl"
+        className="flex flex-col bg-card/20 items-center justify-center h-[550px] shadow-xs border border-neutral-200 dark:border-white/5 rounded-xl w-full"
         onClick={onEmptyAreaClick}
       >
-        <div className="flex flex-col items-center justify-center h-full text-neutral-500 space-y-4">
-          <div className="bg-neutral-200 p-6 rounded-full dark:bg-neutral-800">
-            <TiDocumentText className="w-12 h-12 text-neutral-500 dark:text-neutral-400" />
-          </div>
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-neutral-700">
-              No documents found
-            </h3>
-            <p className="text-sm mt-1 max-w-[250px] mx-auto">
-              Upload documents to get started. You can drag and drop files here.
-            </p>
-          </div>
-        </div>
+        <SimpleEmptyState
+          icon={FileText}
+          title="No documents yet"
+          description="Upload documents to get started. You can drag and drop files here."
+          className="py-0"
+        />
       </div>
     );
   }

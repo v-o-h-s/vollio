@@ -1,15 +1,15 @@
-    /**
+/**
  * Theme utility functions for managing light/dark mode
  */
 
-type ThemeMode = "light" | "dark";
+export type ThemeMode = "light" | "dark" | "system";
 
 /**
  * Get the initial theme from localStorage or system preference
  */
 export function getInitialTheme(
-  defaultTheme: ThemeMode = "light",
-  storageKey: string = "vollio-theme"
+  defaultTheme: ThemeMode = "system",
+  storageKey: string = "vollio-theme",
 ): ThemeMode {
   // Check if we're on the client side
   if (typeof window === "undefined") {
@@ -42,7 +42,7 @@ export function getInitialTheme(
  */
 export function setStoredTheme(
   theme: ThemeMode,
-  storageKey: string = "vollio-theme"
+  storageKey: string = "vollio-theme",
 ): void {
   if (typeof window === "undefined") {
     return;
@@ -58,7 +58,7 @@ export function setStoredTheme(
 /**
  * Apply the theme to the document root element
  */
-export function applyTheme(theme: ThemeMode): void {
+export function applyTheme(theme: "light" | "dark"): void {
   if (typeof window === "undefined") {
     return;
   }
@@ -80,7 +80,7 @@ export function applyTheme(theme: ThemeMode): void {
     if (metaThemeColor) {
       metaThemeColor.setAttribute(
         "content",
-        theme === "dark" ? "#0a0a0a" : "#ffffff"
+        theme === "dark" ? "#0a0a0a" : "#ffffff",
       );
     }
   } catch (error) {
@@ -92,7 +92,7 @@ export function applyTheme(theme: ThemeMode): void {
  * Listen for system theme changes
  */
 export function watchSystemTheme(
-  callback: (theme: ThemeMode) => void
+  callback: (theme: "light" | "dark") => void,
 ): () => void {
   if (typeof window === "undefined" || !window.matchMedia) {
     return () => {};
