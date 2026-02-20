@@ -5,9 +5,7 @@
  */
 "use client";
 import { useState, useMemo } from "react";
-import React from "react";
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Brain, Layers as RiStackLine } from "lucide-react";
 import { Sidebar } from "@/features/knowldge-test/sidebar/components/Sidebar";

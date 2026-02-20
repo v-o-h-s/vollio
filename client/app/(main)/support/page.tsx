@@ -51,6 +51,7 @@ export default function SupportPage() {
         </div>
 
         <Tabs
+          id="support-page-tabs"
           defaultValue="general"
           orientation="vertical"
           className="flex flex-col md:flex-row gap-8 w-full min-h-[600px]"
@@ -62,7 +63,7 @@ export default function SupportPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group text-left",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -77,7 +78,7 @@ export default function SupportPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group text-left",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -92,7 +93,7 @@ export default function SupportPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group text-left",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -107,7 +108,7 @@ export default function SupportPage() {
               className={cn(
                 "flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group text-left",
                 "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:scale-[1.02]",
-                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+                "data-[state=inactive]:hover:bg-muted/80 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground",
               )}
             >
               <div className="flex items-center gap-3">
@@ -123,7 +124,6 @@ export default function SupportPage() {
             <TabsContent value="general" className="mt-0 outline-none h-full">
               <Card className="border-border/50 bg-card/20 backdrop-blur-md shadow-xl overflow-hidden relative border-none h-full">
                 <div className="absolute top-0 right-0 p-8 opacity-5">
-                  <MessageCircle className="w-48 h-48" />
                 </div>
                 <CardHeader className="pb-4">
                   <CardTitle className="text-2xl font-bold">
@@ -189,9 +189,6 @@ export default function SupportPage() {
 
             <TabsContent value="bug" className="mt-0 outline-none h-full">
               <Card className="border-border/50 bg-card/20 backdrop-blur-md shadow-xl overflow-hidden relative border-none h-full">
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                  <Bug className="w-48 h-48" />
-                </div>
                 <CardHeader className="pb-4">
                   <CardTitle className="text-2xl font-bold">
                     Report a Bug
@@ -236,9 +233,7 @@ export default function SupportPage() {
 
             <TabsContent value="feature" className="mt-0 outline-none h-full">
               <Card className="border-border/50 bg-card/20 backdrop-blur-md shadow-xl overflow-hidden relative border-none h-full">
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                  <Lightbulb className="w-48 h-48" />
-                </div>
+                
                 <CardHeader className="pb-4">
                   <CardTitle className="text-2xl font-bold">
                     Suggest a Feature
@@ -278,9 +273,7 @@ export default function SupportPage() {
 
             <TabsContent value="faq" className="mt-0 outline-none h-full">
               <Card className="border-border/50 bg-card/20 backdrop-blur-md shadow-xl overflow-hidden relative border-none h-full">
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                  <HelpCircle className="w-48 h-48" />
-                </div>
+                
                 <CardHeader className="pb-4">
                   <CardTitle className="text-2xl font-bold">
                     Frequently Asked Questions

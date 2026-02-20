@@ -76,6 +76,7 @@ export default function SettingsPage() {
         </div>
 
         <Tabs
+          id="settings-page-tabs"
           defaultValue="appearance"
           orientation="vertical"
           className="flex flex-col md:flex-row gap-8 w-full min-h-[600px]"

@@ -274,7 +274,7 @@ function CreateFlashCardsPageContent() {
         )}
       </div>
 
-      <Tabs value={activeTab} className="space-y-8">
+      <Tabs id="flashcards-create-tabs" value={activeTab} className="space-y-8">
         <TabsContent value="automatic" className="outline-none">
           <div className="space-y-6 max-w-3xl mx-auto">
             {/* Document Selection */}

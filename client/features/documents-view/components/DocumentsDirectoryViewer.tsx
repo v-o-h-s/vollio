@@ -322,14 +322,6 @@ export default function DocumentsDirectoryViewer() {
             {
               actions: [
                 {
-                  label: "Create Document",
-                  icon: <FileText className="h-4 w-4" />,
-                  onClick: () => {
-                    // Document creation will be handled through a dialog in future
-                    console.log("Create document clicked");
-                  },
-                },
-                {
                   label: "Create Folder",
                   icon: <FolderPlus className="h-4 w-4" />,
                   onClick: () => {
