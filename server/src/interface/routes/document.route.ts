@@ -127,7 +127,7 @@ const documentRoutesHandler: FastifyPluginAsync = async (
     {
       config: {
         rateLimit: {
-          request: { cost: RateLimitingDegrees.HIGH },
+          request: { cost: RateLimitingDegrees.MEDIUM },
         },
       },
       schema: {
