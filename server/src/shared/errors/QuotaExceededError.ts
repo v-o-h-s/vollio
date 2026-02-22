@@ -4,9 +4,17 @@
 export class QuotaExceededError extends Error {
   public readonly statusCode: number = 403;
   public readonly code: string = "QUOTA_EXCEEDED";
-  public readonly resource: "ai" | "storage" | "document";
+  public readonly resource:
+    | "ai"
+    | "storage"
+    | "document"
+    | "quiz"
+    | "flashcards";
 
-  constructor(resource: "ai" | "storage" | "document", message?: string) {
+  constructor(
+    resource: "ai" | "storage" | "document" | "quiz" | "flashcards",
+    message?: string,
+  ) {
     super(message || `Quota exceeded for ${resource} resources`);
     this.name = "QuotaExceededError";
     this.resource = resource;

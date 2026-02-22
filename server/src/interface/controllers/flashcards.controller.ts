@@ -21,12 +21,12 @@ export class FlashCardsController {
     private getFlashCardsSetByIdUseCase: GetFlashCardsSetByIdUseCase,
     private deleteFlashCardsSetUseCase: DeleteFlashCardsSetUseCase,
     private getFlashCardsSetsByDocumentIdUseCase: GetFlashCardsSetsByDocumentIdUseCase,
-    private createFlashCardsSetUseCase: CreateFlashCardsSetUseCase
+    private createFlashCardsSetUseCase: CreateFlashCardsSetUseCase,
   ) {}
 
   async generateFlashCardsSet(
     request: FastifyRequest<{ Body: CreateFlashCardsDTO }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -34,24 +34,24 @@ export class FlashCardsController {
         reply,
         UnauthorizedErrorObject,
         401,
-        "Unauthorized"
+        "Unauthorized",
       );
     }
 
     const response = await this.generateGeneralFlashCardsUseCase.execute(
       request.body,
-      userId
+      userId,
     );
     return ResponseFormatter.success(
       reply,
       response,
-      "Flashcard set generated successfully"
+      "Flashcard set generated successfully",
     );
   }
 
   async createFlashCardsSet(
     request: FastifyRequest<{ Body: CreateManualFlashCardsDTO }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -59,21 +59,24 @@ export class FlashCardsController {
         reply,
         UnauthorizedErrorObject,
         401,
-        "Unauthorized"
+        "Unauthorized",
       );
     }
 
-    const set = await this.createFlashCardsSetUseCase.execute(request.body);
+    const set = await this.createFlashCardsSetUseCase.execute(
+      request.body,
+      userId,
+    );
     return ResponseFormatter.success(
       reply,
       set.toJSON(),
-      "Flashcard set created successfully"
+      "Flashcard set created successfully",
     );
   }
 
   async getAllFlashCardsSets(
     request: FastifyRequest,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -81,7 +84,7 @@ export class FlashCardsController {
         reply,
         UnauthorizedErrorObject,
         401,
-        "Unauthorized"
+        "Unauthorized",
       );
     }
 
@@ -89,13 +92,13 @@ export class FlashCardsController {
     return ResponseFormatter.success(
       reply,
       sets.map((s) => s.toJSON()),
-      "Flashcard sets retrieved successfully"
+      "Flashcard sets retrieved successfully",
     );
   }
 
   async getFlashCardsSetById(
     request: FastifyRequest<{ Params: FlashCardsSetIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -103,23 +106,23 @@ export class FlashCardsController {
         reply,
         UnauthorizedErrorObject,
         401,
-        "Unauthorized"
+        "Unauthorized",
       );
     }
 
     const set = await this.getFlashCardsSetByIdUseCase.execute(
-      request.params.id
+      request.params.id,
     );
     return ResponseFormatter.success(
       reply,
       set.toJSON(),
-      "Flashcard set retrieved successfully"
+      "Flashcard set retrieved successfully",
     );
   }
 
   async getFlashCardsSetsByDocumentId(
     request: FastifyRequest<{ Params: { documentId: string } }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -127,23 +130,23 @@ export class FlashCardsController {
         reply,
         UnauthorizedErrorObject,
         401,
-        "Unauthorized"
+        "Unauthorized",
       );
     }
 
     const sets = await this.getFlashCardsSetsByDocumentIdUseCase.execute(
-      request.params.documentId
+      request.params.documentId,
     );
     return ResponseFormatter.success(
       reply,
       sets.map((s) => s.toJSON()),
-      "Flashcard sets retrieved successfully"
+      "Flashcard sets retrieved successfully",
     );
   }
 
   async deleteFlashCardsSet(
     request: FastifyRequest<{ Params: FlashCardsSetIdParams }>,
-    reply: FastifyReply
+    reply: FastifyReply,
   ): Promise<void> {
     const userId = request.user?.id;
     if (!userId) {
@@ -151,15 +154,15 @@ export class FlashCardsController {
         reply,
         UnauthorizedErrorObject,
         401,
-        "Unauthorized"
+        "Unauthorized",
       );
     }
 
-    await this.deleteFlashCardsSetUseCase.execute(request.params.id);
+    await this.deleteFlashCardsSetUseCase.execute(request.params.id, userId);
     return ResponseFormatter.success(
       reply,
       null,
-      "Flashcard set deleted successfully"
+      "Flashcard set deleted successfully",
     );
   }
 }

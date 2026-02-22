@@ -11,6 +11,10 @@ export class ResourcesMapper {
       Number(row.max_ai_tokens || 0),
       Number(row.max_storage_bytes || 0),
       Number(row.max_documents || 0),
+      Number(row.used_quizzes || 0),
+      Number(row.max_quizzes || 0),
+      Number(row.used_flashcards || 0),
+      Number(row.max_flashcards || 0),
       new Date(row.created_at),
       new Date(row.updated_at),
     );
@@ -26,6 +30,10 @@ export class ResourcesMapper {
       max_ai_tokens: resources.getMaxAiTokens(),
       max_storage_bytes: resources.getMaxStorageBytes(),
       max_documents: resources.getMaxDocuments(),
+      used_quizzes: resources.getUsedQuizzes(),
+      max_quizzes: resources.getMaxQuizzes(),
+      used_flashcards: resources.getUsedFlashcards(),
+      max_flashcards: resources.getMaxFlashcards(),
       updated_at: new Date().toISOString(),
     };
   }

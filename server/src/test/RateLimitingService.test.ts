@@ -71,11 +71,12 @@ describe("RateLimitingService", () => {
       expect(redisMock.eval).toHaveBeenCalledWith(
         expect.any(String), // script
         1, // numKeys
-        expect.stringContaining(`${PrefixTypes.REQUEST}:userId:user1`), // key
+        expect.stringContaining(`request:userId:user1`), // key
         20, // capacity
         1, // default refill rate
-        2, // cost
+        2, // cost,
         expect.any(Number), // now
+        "false", // force
       );
     });
   });
@@ -158,18 +159,13 @@ describe("RateLimitingService", () => {
 
       expect(redisMock.eval).toHaveBeenCalledWith(
         expect.any(String),
-
         1,
-
-        `${PrefixTypes.REQUEST}:userId:user1`,
-
+        `request:userId:user1`,
         10,
-
         1,
-
         1,
-
         expect.any(Number),
+        "false",
       );
 
       // Request 2: AI request
@@ -182,18 +178,13 @@ describe("RateLimitingService", () => {
 
       expect(redisMock.eval).toHaveBeenCalledWith(
         expect.any(String),
-
         1,
-
-        `${PrefixTypes.AI_PER_MINUTE}:userId:user1`,
-
+        `ai:per_minute:userId:user1`,
         10,
-
         1,
-
         1,
-
         expect.any(Number),
+        "false",
       );
     });
   });

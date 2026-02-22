@@ -10,6 +10,10 @@ export class Resources {
     private maxAiTokens: number,
     private maxStorageBytes: number,
     private maxDocuments: number,
+    private usedQuizzes: number = 0,
+    private maxQuizzes: number = 0,
+    private usedFlashcards: number = 0,
+    private maxFlashcards: number = 0,
     private createdAt: Date = new Date(),
     private updatedAt: Date = new Date(),
   ) {}
@@ -50,6 +54,22 @@ export class Resources {
     return this.maxDocuments;
   }
 
+  public getUsedQuizzes(): number {
+    return this.usedQuizzes;
+  }
+
+  public getMaxQuizzes(): number {
+    return this.maxQuizzes;
+  }
+
+  public getUsedFlashcards(): number {
+    return this.usedFlashcards;
+  }
+
+  public getMaxFlashcards(): number {
+    return this.maxFlashcards;
+  }
+
   public getRemainingAiTokens(): number {
     return Math.max(0, this.maxAiTokens - this.usedAiTokens);
   }
@@ -60,6 +80,14 @@ export class Resources {
 
   public getRemainingDocuments(): number {
     return Math.max(0, this.maxDocuments - this.usedDocuments);
+  }
+
+  public getRemainingQuizzes(): number {
+    return Math.max(0, this.maxQuizzes - this.usedQuizzes);
+  }
+
+  public getRemainingFlashcards(): number {
+    return Math.max(0, this.maxFlashcards - this.usedFlashcards);
   }
 
   public getCreatedAt(): Date {
@@ -121,6 +149,44 @@ export class Resources {
   }
 
   /**
+   * Business Logic: Increment quiz count
+   */
+  public consumeQuiz(): void {
+    if (this.getRemainingQuizzes() <= 0) {
+      throw new Error("Quiz limit reached");
+    }
+    this.usedQuizzes += 1;
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Business Logic: Decrement quiz count (on delete)
+   */
+  public releaseQuiz(): void {
+    this.usedQuizzes = Math.max(0, this.usedQuizzes - 1);
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Business Logic: Increment flashcard set count
+   */
+  public consumeFlashcards(): void {
+    if (this.getRemainingFlashcards() <= 0) {
+      throw new Error("Flashcard limit reached");
+    }
+    this.usedFlashcards += 1;
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Business Logic: Decrement flashcard set count (on delete)
+   */
+  public releaseFlashcards(): void {
+    this.usedFlashcards = Math.max(0, this.usedFlashcards - 1);
+    this.updatedAt = new Date();
+  }
+
+  /**
    * Business Logic: Update allocation based on a new plan (e.g. upgrade/renewal)
    * This preserves existing storage usage while applying new limits.
    */
@@ -129,6 +195,8 @@ export class Resources {
     this.maxAiTokens = plan.getMaxAiTokens() || 0;
     this.maxStorageBytes = plan.getMaxStorageBytes() || 0;
     this.maxDocuments = plan.getMaxDocuments() || 0;
+    this.maxQuizzes = plan.getMaxQuizzes() || 0;
+    this.maxFlashcards = plan.getMaxFlashcards() || 0;
 
     // Standard SaaS Behavior:
     // 1. Reset AI tokens usage to 0 (new month/billing cycle refill)
@@ -136,7 +204,7 @@ export class Resources {
 
     // 2. Storage usage is NOT reset (the files are still there)
     // We just have a new max. If used > max, getRemaining() will return 0.
-    // same for documents count
+    // same for documents, quizzes, and flashcards count
 
     this.updatedAt = new Date();
   }
@@ -148,12 +216,18 @@ export class Resources {
       usedAiTokens: this.usedAiTokens,
       usedStorageBytes: this.usedStorageBytes,
       usedDocuments: this.usedDocuments,
+      usedQuizzes: this.usedQuizzes,
+      usedFlashcards: this.usedFlashcards,
       remainingAiTokens: this.getRemainingAiTokens(),
       remainingStorageBytes: this.getRemainingStorageBytes(),
       remainingDocuments: this.getRemainingDocuments(),
+      remainingQuizzes: this.getRemainingQuizzes(),
+      remainingFlashcards: this.getRemainingFlashcards(),
       maxAiTokens: this.maxAiTokens,
       maxStorageBytes: this.maxStorageBytes,
       maxDocuments: this.maxDocuments,
+      maxQuizzes: this.maxQuizzes,
+      maxFlashcards: this.maxFlashcards,
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),
     };

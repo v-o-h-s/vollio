@@ -16,6 +16,7 @@ import { FastifyBaseLogger } from "fastify";
 import crypto from "crypto";
 import { IAiQuotaService } from "../../../domain/services/quota/IAiQuotaService";
 import { ValidationError } from "../../../shared/errors/ValidationError";
+import { QuotaExceededError } from "../../../shared/errors/QuotaExceededError";
 
 export class GenerateGeneralFlashCardsUseCase {
   constructor(
@@ -37,7 +38,16 @@ export class GenerateGeneralFlashCardsUseCase {
       "Executing GenerateGeneralFlashCardsUseCase",
     );
 
-    // Check if user has enough quota for AI operations
+    // Check if user has enough quota for AI operations and flashcards
+    const canCreate = await this.aiQuotaService.canCreateFlashcards(userId);
+    if (!canCreate) {
+      this.logger.warn({ userId }, "User exceeded flashcards quota");
+      throw new QuotaExceededError(
+        "flashcards",
+        "You have reached your maximum quota for flashcards.",
+      );
+    }
+
     const document = await this.documentRepository.getDocumentById(
       data.documentId,
     );

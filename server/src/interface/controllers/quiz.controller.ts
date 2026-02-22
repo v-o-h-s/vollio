@@ -92,7 +92,7 @@ export class QuizController {
         "Unauthorized",
       );
     }
-    await this.deleteQuizByIdUseCase.execute(request.params.id);
+    await this.deleteQuizByIdUseCase.execute(request.params.id, userId);
     return ResponseFormatter.success(reply, null, "quiz deleted successfully");
   }
 }

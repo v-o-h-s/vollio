@@ -3,6 +3,11 @@ import { IStorageResourcesRepository } from "../../../domain/repositories/IStora
 import { FastifyBaseLogger } from "fastify";
 import { QuotaExceededError } from "../../../shared/errors/QuotaExceededError";
 
+/**
+ * @description this class handles the document quota for the user 
+ * @implements IDocumentQuotaService
+ */
+
 export class DocumentQuotaService implements IDocumentQuotaService {
   constructor(
     private storageResourcesRepository: IStorageResourcesRepository,

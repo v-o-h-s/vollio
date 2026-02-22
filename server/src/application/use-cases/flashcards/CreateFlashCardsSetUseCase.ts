@@ -16,14 +16,30 @@ export interface CreateManualFlashCardsDTO {
   }[];
 }
 
+import { IAiQuotaService } from "../../../domain/services/quota/IAiQuotaService";
+import { QuotaExceededError } from "../../../shared/errors/QuotaExceededError";
+
 export class CreateFlashCardsSetUseCase {
   constructor(
     private logger: FastifyBaseLogger,
-    private flashCardsSetRepository: IFlashCardsSetRepository
+    private flashCardsSetRepository: IFlashCardsSetRepository,
+    private aiQuotaService: IAiQuotaService,
   ) {}
 
-  async execute(data: CreateManualFlashCardsDTO): Promise<FlashCardsSet> {
+  async execute(
+    data: CreateManualFlashCardsDTO,
+    userId: string,
+  ): Promise<FlashCardsSet> {
     this.logger.info("Executing CreateFlashCardsSetUseCase");
+
+    const canCreate = await this.aiQuotaService.canCreateFlashcards(userId);
+    if (!canCreate) {
+      this.logger.warn({ userId }, "User exceeded flashcards quota");
+      throw new QuotaExceededError(
+        "flashcards",
+        "You have reached your maximum quota for flashcards.",
+      );
+    }
 
     const setId = crypto.randomUUID();
     const flashCardsSet = new FlashCardsSet(
@@ -31,7 +47,7 @@ export class CreateFlashCardsSetUseCase {
       data.documentId,
       new Date(),
       data.language ? (data.language as any) : "en",
-      []
+      [],
     );
 
     flashCardsSet.setName(data.name);
@@ -41,12 +57,23 @@ export class CreateFlashCardsSetUseCase {
     // let's check the entity definition if possible, but I recall it from GenerateGeneralFlashCardsUseCase usage.
 
     const cards = data.flashCards.map(
-      (c) => new FlashCard(crypto.randomUUID(), setId, c.front, c.back, c.hint)
+      (c) => new FlashCard(crypto.randomUUID(), setId, c.front, c.back, c.hint),
     );
 
     flashCardsSet.setFlashCards(cards);
 
     await this.flashCardsSetRepository.save(flashCardsSet);
+
+    // Consume limits without token cost
+    await this.aiQuotaService.consumeTokens(
+      userId,
+      { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+      {
+        actionType: "flashcards",
+        model: "manual",
+        resourceId: flashCardsSet.getId(),
+      },
+    );
 
     this.logger.info({ setId }, "Flashcard set created successfully");
     return flashCardsSet;

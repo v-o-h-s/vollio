@@ -16,6 +16,7 @@ import { quizPromptGenerator } from "../../../infrastructure/ai/generative-ai/pr
 import { IQuizRepository } from "../../../domain/repositories/IQuizRepository";
 import { IAiQuotaService } from "../../../domain/services/quota/IAiQuotaService";
 import { ValidationError } from "../../../shared/errors/ValidationError";
+import { QuotaExceededError } from "../../../shared/errors/QuotaExceededError";
 
 export class CreateGeneralQuizUseCase {
   constructor(
@@ -36,6 +37,16 @@ export class CreateGeneralQuizUseCase {
       { documentId: data.documentId, userId },
       "Executing CreateGeneralQuizUseCase",
     );
+
+    // Check if user has enough quota for creating quizzes
+    const canCreate = await this.aiQuotaService.canCreateQuiz(userId);
+    if (!canCreate) {
+      this.logger.warn({ userId }, "User exceeded quiz quota");
+      throw new QuotaExceededError(
+        "quiz",
+        "You have reached your maximum quota for quizzes.",
+      );
+    }
 
     // getting chunks relevant to the prompt
     if (!(await this.getDocumentByIdUseCase.execute(data.documentId, userId))) {

@@ -69,11 +69,16 @@ export class AiQuotaService implements IAiQuotaService {
     if (resources) {
       try {
         resources.consumeAiTokens(cost);
+        if (details?.actionType === "quiz") {
+          resources.consumeQuiz();
+        } else if (details?.actionType === "flashcards") {
+          resources.consumeFlashcards();
+        }
         await this.aiResourcesRepository.upsert(resources);
       } catch (err) {
         this.logger.error(
-          { err, userId, cost },
-          "Failed to update AI resources tally in DB",
+          { err, userId, cost, actionType: details?.actionType },
+          "Failed to update resources tally in DB",
         );
       }
     }
@@ -166,5 +171,35 @@ export class AiQuotaService implements IAiQuotaService {
       { type: IdentifierType.USERID, value: userId },
       PrefixTypes.AI_PER_MONTH,
     );
+  }
+
+  async releaseQuiz(userId: string): Promise<void> {
+    this.logger.info({ userId }, "Releasing quiz quota slot");
+    const resources = await this.aiResourcesRepository.getByUserId(userId);
+    if (resources) {
+      resources.releaseQuiz();
+      await this.aiResourcesRepository.upsert(resources);
+    }
+  }
+
+  async releaseFlashcards(userId: string): Promise<void> {
+    this.logger.info({ userId }, "Releasing flashcards quota slot");
+    const resources = await this.aiResourcesRepository.getByUserId(userId);
+    if (resources) {
+      resources.releaseFlashcards();
+      await this.aiResourcesRepository.upsert(resources);
+    }
+  }
+
+  async canCreateQuiz(userId: string): Promise<boolean> {
+    const resources = await this.aiResourcesRepository.getByUserId(userId);
+    if (!resources) return false;
+    return resources.getRemainingQuizzes() > 0;
+  }
+
+  async canCreateFlashcards(userId: string): Promise<boolean> {
+    const resources = await this.aiResourcesRepository.getByUserId(userId);
+    if (!resources) return false;
+    return resources.getRemainingFlashcards() > 0;
   }
 }

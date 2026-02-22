@@ -10,6 +10,8 @@ export class Plan {
   private maxAiTokens: number | null;
   private maxStorageBytes: number | null;
   private maxDocuments: number | null;
+  private maxQuizzes: number | null;
+  private maxFlashcards: number | null;
   private createdAt: Date;
   private updatedAt: Date;
 
@@ -25,6 +27,8 @@ export class Plan {
     maxAiTokens: number | null = null,
     maxStorageBytes: number | null = null,
     maxDocuments: number | null = null,
+    maxQuizzes: number | null = null,
+    maxFlashcards: number | null = null,
     createdAt?: Date,
     updatedAt?: Date,
   ) {
@@ -39,6 +43,8 @@ export class Plan {
     this.maxAiTokens = maxAiTokens;
     this.maxStorageBytes = maxStorageBytes;
     this.maxDocuments = maxDocuments;
+    this.maxQuizzes = maxQuizzes;
+    this.maxFlashcards = maxFlashcards;
     this.createdAt = createdAt || new Date();
     this.updatedAt = updatedAt || new Date();
   }
@@ -87,6 +93,14 @@ export class Plan {
     return this.maxDocuments;
   }
 
+  public getMaxQuizzes(): number | null {
+    return this.maxQuizzes;
+  }
+
+  public getMaxFlashcards(): number | null {
+    return this.maxFlashcards;
+  }
+
   public getCreatedAt(): Date {
     return this.createdAt;
   }
@@ -112,6 +126,8 @@ export class Plan {
       max_ai_tokens: this.maxAiTokens,
       max_storage_bytes: this.maxStorageBytes,
       max_documents: this.maxDocuments,
+      max_quizzes: this.maxQuizzes,
+      max_flashcards: this.maxFlashcards,
       created_at: this.createdAt.toISOString(),
       updated_at: this.updatedAt.toISOString(),
     };

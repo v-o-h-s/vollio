@@ -38,4 +38,32 @@ export interface IAiQuotaService {
    * @returns {Promise<void>}
    */
   resetQuota(userId: string): Promise<void>;
+
+  /**
+   * Release a consumed quiz slot (e.g. on deletion)
+   * @param userId - ID of the user
+   * @returns {Promise<void>}
+   */
+  releaseQuiz(userId: string): Promise<void>;
+
+  /**
+   * Release a consumed flashcard set slot (e.g. on deletion)
+   * @param userId - ID of the user
+   * @returns {Promise<void>}
+   */
+  releaseFlashcards(userId: string): Promise<void>;
+
+  /**
+   * Check if a user can create a new quiz based on their resources
+   * @param userId - ID of the user
+   * @returns {Promise<boolean>}
+   */
+  canCreateQuiz(userId: string): Promise<boolean>;
+
+  /**
+   * Check if a user can create a new flashcards set based on their resources
+   * @param userId - ID of the user
+   * @returns {Promise<boolean>}
+   */
+  canCreateFlashcards(userId: string): Promise<boolean>;
 }

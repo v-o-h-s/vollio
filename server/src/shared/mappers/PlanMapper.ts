@@ -14,6 +14,8 @@ export class PlanMapper {
       row.max_ai_tokens,
       row.max_storage_bytes ? Number(row.max_storage_bytes) : null,
       row.max_documents ? Number(row.max_documents) : null,
+      row.max_quizzes ? Number(row.max_quizzes) : null,
+      row.max_flashcards ? Number(row.max_flashcards) : null,
       new Date(row.created_at),
       new Date(row.updated_at),
     );
@@ -32,6 +34,8 @@ export class PlanMapper {
       max_ai_tokens: plan.getMaxAiTokens(),
       max_storage_bytes: plan.getMaxStorageBytes(),
       max_documents: plan.getMaxDocuments(),
+      max_quizzes: plan.getMaxQuizzes(),
+      max_flashcards: plan.getMaxFlashcards(),
       created_at: plan.getCreatedAt().toISOString(),
       updated_at: plan.getUpdatedAt().toISOString(),
     };
