@@ -90,7 +90,7 @@ export function FeatureErrorDialog({
           ) : (
             <Button
               className={cn(
-                "w-full text-white",
+                "w-auto text-white",
                 isRateLimit
                   ? "bg-indigo-600 hover:bg-indigo-700"
                   : "bg-red-600 hover:bg-red-700",

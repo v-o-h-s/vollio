@@ -34,7 +34,7 @@ export function AIChatError({ error, onRetry, upgradePlan }: AIChatErrorProps) {
         {upgradePlan && (
           <button
             onClick={upgradePlan}
-            className="w-full cursor-pointer py-2 px-4 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+            className="w-fit mx-auto cursor-pointer py-2 px-6 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
           >
             Upgrade Plan
           </button>
@@ -73,7 +73,7 @@ export function AIChatError({ error, onRetry, upgradePlan }: AIChatErrorProps) {
         {onRetry && (
           <button
             onClick={onRetry}
-            className="w-full cursor-pointer py-2 px-4 bg-white dark:bg-red-950 border border-red-200 dark:border-red-800 text-orange-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium rounded-md transition-colors"
+            className="w-fit mx-auto cursor-pointer py-2 px-6 bg-white dark:bg-red-950 border border-red-200 dark:border-red-800 text-orange-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium rounded-md transition-colors"
           >
             Try Again
           </button>
@@ -112,7 +112,7 @@ export function AIChatError({ error, onRetry, upgradePlan }: AIChatErrorProps) {
       {onRetry && (
         <button
           onClick={onRetry}
-          className="w-full py-2 px-4 bg-white dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium rounded-md transition-colors"
+          className="w-fit mx-auto py-2 px-6 bg-white dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium rounded-md transition-colors"
         >
           Try Again
         </button>

@@ -31,8 +31,8 @@ export interface ExtractedContent {
 /**
  * Extract text from Document with page structure (full text, paragraphs, pages(pageNum, text))
  */
-export async function extractFromDocument (
-  data: Uint8Array
+export async function extractFromDocument(
+  data: Uint8Array,
 ): Promise<ExtractedContent> {
   const loadingTask = pdfjsLib.getDocument({ data });
   const document = await loadingTask.promise;
@@ -69,7 +69,8 @@ export async function extractFromDocument (
  * Clean text: remove noise, normalize whitespace, preserve structure
  */
 export function cleanText(text: string): string {
-  let cleaned = text;
+  // Normalize line endings
+  let cleaned = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
   // Remove repeated copyright/header patterns (e.g., "© 2024 Company" appearing multiple times)
   const copyrightPattern = /©\s*\d{4}[^\n]*(\n|$)/gi;
@@ -99,6 +100,10 @@ export function cleanText(text: string): string {
     .map((line) => line.trim())
     .join("\n");
 
+  // Remove null characters and other non-printable control characters (Postgres doesn't like them)
+  // We preserve \n (0x0A) and \t (0x09)
+  cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+
   return cleaned.trim();
 }
 
@@ -107,7 +112,7 @@ export function cleanText(text: string): string {
  */
 export async function createChunksFromParagraphs(
   paragraphs: Array<{ text: string; pageNum: number }>,
-  baseMetadata: Partial<ChunkMetadata>
+  baseMetadata: Partial<ChunkMetadata>,
 ): Promise<Chunk[]> {
   const encoding = encodingForModel("text-embedding-3-small");
   const chunks: Chunk[] = [];
@@ -132,8 +137,8 @@ export async function createChunksFromParagraphs(
             chunkIndex++,
             baseMetadata,
             i - currentChunk.length,
-            getPageRange(currentChunk)
-          )
+            getPageRange(currentChunk),
+          ),
         );
         currentChunk = [];
         currentTokens = 0;
@@ -142,7 +147,7 @@ export async function createChunksFromParagraphs(
       // Split large paragraph into sentences
       const sentenceChunks = splitParagraphIntoSentences(
         paragraph.text,
-        encoding
+        encoding,
       );
       for (const sentenceChunk of sentenceChunks) {
         const sentenceTokens = countTokensWithEncoding(sentenceChunk, encoding);
@@ -154,8 +159,8 @@ export async function createChunksFromParagraphs(
               chunkIndex++,
               baseMetadata,
               i,
-              { start: paragraph.pageNum, end: paragraph.pageNum }
-            )
+              { start: paragraph.pageNum, end: paragraph.pageNum },
+            ),
           );
         }
       }
@@ -177,8 +182,8 @@ export async function createChunksFromParagraphs(
             chunkIndex++,
             baseMetadata,
             i - currentChunk.length,
-            getPageRange(currentChunk)
-          )
+            getPageRange(currentChunk),
+          ),
         );
 
         // Create overlap: keep last 25% of tokens
@@ -189,7 +194,7 @@ export async function createChunksFromParagraphs(
       currentChunk = [...overlapBuffer, paragraph];
       currentTokens = countTokensWithEncoding(
         currentChunk.map((p) => p.text).join("\n\n"),
-        encoding
+        encoding,
       );
       overlapBuffer = [];
     }
@@ -204,8 +209,8 @@ export async function createChunksFromParagraphs(
         chunkIndex++,
         baseMetadata,
         paragraphs.length - currentChunk.length,
-        getPageRange(currentChunk)
-      )
+        getPageRange(currentChunk),
+      ),
     );
   }
 
@@ -217,7 +222,7 @@ export async function createChunksFromParagraphs(
  */
 export function splitParagraphIntoSentences(
   paragraph: string,
-  encoding: Tiktoken
+  encoding: Tiktoken,
 ): string[] {
   const sentences = paragraph
     .split(CHUNKING_CONFIG.SENTENCE_TERMINATORS)
@@ -253,10 +258,10 @@ export function splitParagraphIntoSentences(
  */
 export function createOverlap(
   paragraphs: Array<{ text: string; pageNum: number }>,
-  encoding: Tiktoken
+  encoding: Tiktoken,
 ): Array<{ text: string; pageNum: number }> {
   const targetOverlapTokens = Math.floor(
-    CHUNKING_CONFIG.MAX_TOKENS * CHUNKING_CONFIG.OVERLAP_PERCENT
+    CHUNKING_CONFIG.MAX_TOKENS * CHUNKING_CONFIG.OVERLAP_PERCENT,
   );
   const overlapBuffer: Array<{ text: string; pageNum: number }> = [];
   let overlapTokens = 0;
@@ -285,7 +290,7 @@ export function createOverlap(
  * Get page range from a collection of paragraphs
  */
 export function getPageRange(
-  paragraphs: Array<{ text: string; pageNum: number }>
+  paragraphs: Array<{ text: string; pageNum: number }>,
 ): { start: number; end: number } | undefined {
   if (paragraphs.length === 0) return undefined;
   const pageNumbers = paragraphs.map((p) => p.pageNum);
@@ -304,7 +309,7 @@ export function createChunk(
   chunkIndex: number,
   baseMetadata: Partial<ChunkMetadata>,
   paragraphIndex: number,
-  pageRange?: { start: number; end: number }
+  pageRange?: { start: number; end: number },
 ): Chunk {
   // Extract potential heading (first line if it looks like a heading)
   const lines = text.split("\n");
@@ -342,7 +347,7 @@ export function detectHeading(line: string): boolean {
  */
 export function countTokensWithEncoding(
   text: string,
-  encoding: Tiktoken
+  encoding: Tiktoken,
 ): number {
   return encoding.encode(text).length;
 }
@@ -352,7 +357,7 @@ export function countTokensWithEncoding(
  */
 export function countTokens(
   text: string,
-  model: TiktokenModel = "text-embedding-3-small"
+  model: TiktokenModel = "text-embedding-3-small",
 ): number {
   const encoding = encodingForModel(model);
   const tokens = encoding.encode(text);

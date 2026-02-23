@@ -2,9 +2,30 @@ import { IDocumentProcessingService } from "../../domain/services/IDocumentProce
 import { CHUNKING_CONFIG, ExtractedContent } from "../../shared/utils/chunking";
 import * as pdfjsLib from "pdfjs-dist";
 
+import * as path from "path";
+
 export class DocumentProcessingService implements IDocumentProcessingService {
   async getText(buffer: Uint8Array): Promise<ExtractedContent> {
-    const loadingTask = pdfjsLib.getDocument({ data: buffer });
+    const standardFontDataUrl = path.join(
+      path.dirname(require.resolve("pdfjs-dist/package.json")),
+      "standard_fonts",
+      path.sep,
+    );
+
+    // Configure worker for Node environment if not already set
+    if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          require.resolve("pdfjs-dist/build/pdf.worker.mjs");
+      } catch (e) {
+        // Fallback or silent ignore if worker cannot be resolved
+      }
+    }
+
+    const loadingTask = pdfjsLib.getDocument({
+      data: buffer,
+      standardFontDataUrl,
+    });
     const document = await loadingTask.promise;
 
     const paragraphs: Array<{ text: string; pageNum: number }> = [];
@@ -17,8 +38,8 @@ export class DocumentProcessingService implements IDocumentProcessingService {
       // Extract text preserving line breaks
       const pageText = textContent.items
         .map((item: any) => {
-          // Check if there's a large vertical gap (new paragraph)
-          return item.str;
+          // Check if it's a TextItem or similar that has 'str'
+          return item.str || "";
         })
         .join(" ");
 
