@@ -15,10 +15,10 @@ import Link from "next/link";
 
 import LoginAnimation from "@/components/LoginAnimation";
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const supabase = createClient();
   const [isLoading, setIsLoading] = useState(false);
-const [emailLoading, setEmailLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
   const signElement = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -55,13 +55,17 @@ const [emailLoading, setEmailLoading] = useState(false);
     });
   };
 
-  const handleEmailLogin = (e: React.FormEvent) => {
+  const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailLoading(true);
-    // Simulate a small delay for effect
+
+    // For now, keeping the same placeholder logic as sign-in if the backend isn't ready
+    // or I can try to implement actual signup if the user wants.
+    // Given the previous note, I'll stick to a similar feedback but for sign up.
+
     setTimeout(() => {
       toast.info(
-        "Coming soon: Email and password login is currently under development.",
+        "Coming soon: Email and password registration is currently under development.",
       );
       setEmailLoading(false);
     }, 600);
@@ -89,13 +93,13 @@ const [emailLoading, setEmailLoading] = useState(false);
                 />
               </div>
             </div>
-            <h1 className="text-3xl font-bold">Welcome back</h1>
+            <h1 className="text-3xl font-bold">Create an account</h1>
             <p className="text-balance text-muted-foreground">
-              Sign in to your account to continue
+              Enter your details below to get started
             </p>
           </div>
           <div className="grid gap-4">
-            <form onSubmit={handleEmailLogin} className="grid gap-4">
+            <form onSubmit={handleEmailSignUp} className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -106,16 +110,18 @@ const [emailLoading, setEmailLoading] = useState(false);
                 />
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input id="confirm-password" type="password" required />
               </div>
               <Button type="submit" className="w-full" disabled={emailLoading}>
                 {emailLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Sign In
+                Sign Up
               </Button>
             </form>
 
@@ -158,16 +164,16 @@ const [emailLoading, setEmailLoading] = useState(false);
                   />
                 </svg>
               )}
-              Continue with Google
+              Sign Up with Google
             </Button>
           </div>
           <div className="text-center text-sm">
-            Don&apos;t have an account?{" "}
+            Already have an account?{" "}
             <Link
-              href="/sign-up"
+              href="/sign-in"
               className="underline underline-offset-4 hover:text-primary"
             >
-              Sign Up
+              Sign In
             </Link>
           </div>
         </div>

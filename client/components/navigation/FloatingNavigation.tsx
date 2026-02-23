@@ -99,7 +99,11 @@ export function FloatingNavigation({
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push("/");
+    router.push(
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:3000"
+        : process.env.NEXT_PUBLIC_APP_URL!,
+    );
   };
 
   // Auto-hide on scroll
