@@ -13,6 +13,9 @@ export function useDocumentUpload({
   onUploadComplete,
 }: UseDocumentUploadProps) {
   const [isDraggingDocument, setIsDraggingDocument] = useState(false);
+  const [lastUploadError, setLastUploadError] = useState<any | null>(null);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
 
   const handleUploadClick = () => {
@@ -26,14 +29,23 @@ export function useDocumentUpload({
     if (files.length === 0) return;
 
     for (const document of files) {
+      const toastId = toast.loading(`Uploading ${document.name}...`);
       try {
-        await toast.promise(uploadDocument(document, currentFolder), {
-          pending: `Uploading ${document.name}...`,
-          success: `Successfully uploaded ${document.name}`,
-          error: `Failed to upload ${document.name}`,
+        await uploadDocument(document, currentFolder);
+        toast.update(toastId, {
+          render: `Successfully uploaded ${document.name}`,
+          type: "success",
+          isLoading: false,
+          autoClose: 3000,
         });
-      } catch (error) {
+      } catch (error: any) {
+        toast.dismiss(toastId);
         console.error("Failed to upload document:", document.name, error);
+        setLastUploadError(error);
+        setPendingFile(document);
+        setIsErrorModalOpen(true);
+        // Break the loop on error to avoid modal spamming if multiple files fail
+        break;
       }
     }
 
@@ -83,14 +95,22 @@ export function useDocumentUpload({
     if (files.length === 0) return;
 
     for (const document of files) {
+      const toastId = toast.loading(`Uploading ${document.name}...`);
       try {
-        await toast.promise(uploadDocument(document, currentFolder), {
-          pending: `Uploading ${document.name}...`,
-          success: `Successfully uploaded ${document.name}`,
-          error: `Failed to upload ${document.name}`,
+        await uploadDocument(document, currentFolder);
+        toast.update(toastId, {
+          render: `Successfully uploaded ${document.name}`,
+          type: "success",
+          isLoading: false,
+          autoClose: 3000,
         });
-      } catch (error) {
+      } catch (error: any) {
+        toast.dismiss(toastId);
         console.error("Failed to upload document:", document.name, error);
+        setLastUploadError(error);
+        setPendingFile(document);
+        setIsErrorModalOpen(true);
+        break;
       }
     }
 
@@ -106,5 +126,31 @@ export function useDocumentUpload({
     handleDocumentDragLeave,
     handleDocumentDragOver,
     handleDocumentDrop,
+    lastUploadError,
+    isErrorModalOpen,
+    setIsErrorModalOpen,
+    retryLastUpload: async () => {
+      if (pendingFile) {
+        const toastId = toast.loading(
+          `Retrying upload for ${pendingFile.name}...`,
+        );
+        try {
+          await uploadDocument(pendingFile, currentFolder);
+          toast.update(toastId, {
+            render: `Successfully uploaded ${pendingFile.name}`,
+            type: "success",
+            isLoading: false,
+            autoClose: 3000,
+          });
+          setPendingFile(null);
+          setLastUploadError(null);
+          onUploadComplete();
+        } catch (error) {
+          toast.dismiss(toastId);
+          setLastUploadError(error);
+          setIsErrorModalOpen(true);
+        }
+      }
+    },
   };
 }

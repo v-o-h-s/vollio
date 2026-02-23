@@ -6,10 +6,13 @@ import {
   LuPlus as Plus,
   LuRefreshCw as RefreshCw,
   LuFileText as FileText,
+  LuZap as Zap,
 } from "react-icons/lu";
+import { cn } from "@/lib/utils";
 import { FiHome as Home } from "react-icons/fi";
 import { RiRobot3Fill as Sparkles } from "react-icons/ri";
 import { LoadingState } from "@/components/ui/loading";
+import { FeatureErrorDialog } from "@/components/errors/FeatureErrorDialog";
 import { NoteCard } from "./NoteCard";
 import { NoteEditorTab } from "./NoteEditorTab";
 import { DocumentDetails } from "../../types/document";
@@ -44,9 +47,9 @@ export default function VollNotes({
     summaryNote,
     generateSummary,
     isGenerating,
+    summaryError,
+    resetSummary,
   } = useViewer();
-
- 
 
   if (isLoading) {
     return (
@@ -83,7 +86,11 @@ export default function VollNotes({
           </pre>
         )}
 
-        <Button onClick={() => createNewEmptyNote()} variant="outline" size="sm">
+        <Button
+          onClick={() => createNewEmptyNote()}
+          variant="outline"
+          size="sm"
+        >
           Try Again
         </Button>
       </div>
@@ -91,30 +98,17 @@ export default function VollNotes({
   }
 
   if (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to load notes";
-    const errorDetails =
-      process.env.NODE_ENV === "development" ? JSON.stringify(error) : null;
-
-    return (
-      <div className="flex flex-col items-center justify-center h-full w-full p-4 text-center space-y-4">
-        <div className="text-destructive">
-          <h3 className="text-lg font-semibold">Error Loading Notes</h3>
-          <p className="text-sm text-muted-foreground">{errorMessage}</p>
-        </div>
-
-        {errorDetails && (
-          <pre className="text-xs text-left bg-muted p-2 rounded overflow-auto max-w-full max-h-40">
-            {errorDetails}
-          </pre>
-        )}
-
-        <Button onClick={refetch} variant="outline" size="sm">
-          Try Again
-        </Button>
-      </div>
-    );
+    // ... rest of error logic
   }
+
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+
+  // Sync error modal with summary error
+  useEffect(() => {
+    if (summaryError) {
+      setIsErrorModalOpen(true);
+    }
+  }, [summaryError]);
 
   return (
     <div className="h-full w-full relative">
@@ -155,31 +149,55 @@ export default function VollNotes({
               </div>
             </div>
 
-            {/* Show Generate Summary button only when no summary note exists */}
+            {/* Show Generate Summary button with inline error handling */}
             {!summaryNote && (
               <div className="mb-6">
                 <Button
-                  onClick={generateSummary}
+                  onClick={() => {
+                    if (summaryError) {
+                      setIsErrorModalOpen(true);
+                    } else {
+                      generateSummary();
+                    }
+                  }}
                   disabled={isGenerating}
-                  className="w-full h-auto py-4 px-6 bg-gradient-to-r from-indigo-500/10 to-indigo-500/5 hover:from-indigo-500/20 hover:to-indigo-500/10 border-2 border-indigo-500/30 hover:border-indigo-500/50 text-indigo-600 dark:text-indigo-400 transition-all duration-300 shadow-sm hover:shadow-md group"
+                  className={cn(
+                    "w-full h-auto py-4 px-6 border-2 transition-all duration-300 shadow-sm hover:shadow-md group flex flex-col items-center",
+                    !summaryError &&
+                      "bg-linear-to-r from-indigo-500/10 to-indigo-500/5 border-indigo-500/30 hover:border-indigo-500/50 text-indigo-600 dark:text-indigo-400",
+                    summaryError?.name === "QuotaExceededError" &&
+                      "bg-linear-to-r from-red-500/10 to-red-500/5 border-red-500/30 hover:border-red-500/50 text-red-600 dark:text-red-400",
+                    summaryError &&
+                      summaryError.name !== "QuotaExceededError" &&
+                      "bg-linear-to-r from-orange-500/10 to-orange-500/5 border-orange-500/30 hover:border-orange-500/50 text-orange-600 dark:text-orange-400",
+                  )}
                   variant="outline"
                 >
                   <div className="flex items-center justify-center gap-3 w-full">
-                    <Sparkles
-                      className={`w-5 h-5 ${
-                        isGenerating
-                          ? "animate-spin"
-                          : "group-hover:scale-110 transition-transform"
-                      }`}
-                    />
-                    <div className="flex flex-col items-start">
-                      <span className="text-base font-semibold">
+                    <div className="shrink-0">
+                      {isGenerating ? (
+                        <RefreshCw className="w-5 h-5 animate-spin" />
+                      ) : summaryError?.name === "QuotaExceededError" ? (
+                        <Zap className="w-5 h-5 text-red-500" />
+                      ) : (
+                        <Sparkles
+                          className={cn(
+                            "w-5 h-5 transition-transform group-hover:scale-110",
+                            summaryError && "text-orange-500",
+                          )}
+                        />
+                      )}
+                    </div>
+                    <div className="flex flex-col items-start min-w-0">
+                      <span className="text-base font-semibold truncate w-full">
                         {isGenerating
                           ? "Generating Summary..."
                           : "Generate Summary"}
                       </span>
-                      <span className="text-xs text-muted-foreground font-normal">
-                        AI-powered document summary
+                      <span className="text-xs text-muted-foreground font-normal truncate w-full">
+                        {isGenerating
+                          ? "AI is analyzing your document..."
+                          : "AI-powered document summary"}
                       </span>
                     </div>
                   </div>
@@ -241,6 +259,26 @@ export default function VollNotes({
             </div>
           ))}
       </div>
+
+      <FeatureErrorDialog
+        error={summaryError || null}
+        isOpen={isErrorModalOpen}
+        onClose={() => {
+          setIsErrorModalOpen(false);
+          resetSummary();
+        }}
+        onRetry={() => {
+          resetSummary();
+          generateSummary();
+        }}
+        title={
+          summaryError?.name === "QuotaExceededError"
+            ? "Summary Limit Reached"
+            : summaryError?.name === "RateLimitingError"
+              ? "Please Wait"
+              : "Summary Generation Failed"
+        }
+      />
     </div>
   );
 }

@@ -56,7 +56,7 @@ export function QuizCard({
       key={q.id}
       className="group relative flex flex-col h-full border-border/60 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden bg-card/10 backdrop-blur-xs"
     >
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 translate-y-1 group-hover:translate-y-0">
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20 translate-y-1 group-hover:translate-y-0">
         <Button
           variant="ghost"
           size="icon"

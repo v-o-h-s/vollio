@@ -35,6 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { FlashcardPreview, FlashcardEditor } from "@/components/flashcards";
 import { DocumentSelectionTabs } from "@/features/knowldge-test/quizzes/components/DocumentSelectionTabs";
+import { FeatureErrorDialog } from "@/components/errors/FeatureErrorDialog";
 import {
   useGetAllDocumentsQuery,
   useCreateFlashCardsSetMutation,
@@ -77,8 +78,11 @@ function CreateFlashCardsPageContent() {
   // Mutations
   const [createManualSet, { isLoading: isSaving }] =
     useCreateFlashCardsSetMutation();
-  const [generateSet, { isLoading: isGenerating }] =
+  const [generateSet, { isLoading: isGenerating, error: generateError }] =
     useGenerateFlashCardsSetMutation();
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [lastAutoData, setLastAutoData] =
+    useState<FlashcardAutoFormData | null>(null);
 
   // Manual Mode Form (used for review after AI generation)
   const manualForm = useForm<FlashcardManualFormData>({
@@ -169,7 +173,9 @@ function CreateFlashCardsPageContent() {
       }
     } catch (err: any) {
       toast.dismiss(loadingToast);
-      toast.error(err.data?.message || "Generation failed");
+      setLastAutoData(data);
+      setIsErrorModalOpen(true);
+      console.error("Flashcard generation failed:", err);
     }
   };
 
@@ -549,6 +555,20 @@ function CreateFlashCardsPageContent() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <FeatureErrorDialog
+        error={generateError as any}
+        isOpen={isErrorModalOpen}
+        onClose={() => setIsErrorModalOpen(false)}
+        onRetry={() => lastAutoData && onAutoSubmit(lastAutoData)}
+        title={
+          (generateError as any)?.name === "QuotaExceededError"
+            ? "Flashcard Limit Reached"
+            : (generateError as any)?.name === "RateLimitingError"
+              ? "Please Wait"
+              : "Flashcard Generation Failed"
+        }
+      />
     </div>
   );
 }

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { DocumentSelectionTabs } from "@/features/knowldge-test/quizzes/components/DocumentSelectionTabs";
 import { QuestionDistribution } from "@/features/knowldge-test/quizzes/components/QuestionDistribution";
+import { FeatureErrorDialog } from "@/components/errors/FeatureErrorDialog";
 import { useGetAllDocumentsQuery } from "@/lib/store/apiSlice";
 import {
   quizCreationSchema,
@@ -36,8 +37,14 @@ import {
 import { useSubmitQuiz } from "@/features/knowldge-test/quizzes/hooks/useSubmitQuiz";
 
 export default function CreateQuizPage() {
-  const { onSubmit: handleQuizSubmit, isLoading: isSubmitting } =
-    useSubmitQuiz();
+  const {
+    onSubmit: handleQuizSubmit,
+    isLoading: isSubmitting,
+    error: submitError,
+    isErrorModalOpen,
+    setIsErrorModalOpen,
+    retry: handleRetry,
+  } = useSubmitQuiz();
 
   const { data: documentsData, isLoading: isLoadingDocuments } =
     useGetAllDocumentsQuery();
@@ -305,6 +312,20 @@ export default function CreateQuizPage() {
           </div>
         </form>
       </Form>
+
+      <FeatureErrorDialog
+        error={submitError}
+        isOpen={isErrorModalOpen}
+        onClose={() => setIsErrorModalOpen(false)}
+        onRetry={handleRetry}
+        title={
+          submitError?.name === "QuotaExceededError"
+            ? "Quiz Limit Reached"
+            : submitError?.name === "RateLimitingError"
+              ? "Please Wait"
+              : "Quiz Generation Failed"
+        }
+      />
     </div>
   );
 }

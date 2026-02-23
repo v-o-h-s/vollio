@@ -62,7 +62,9 @@ interface ViewerContextType {
   openNote: (noteId: string) => void;
   isGenerating: boolean;
   generateSummary: () => Promise<void>;
+  resetSummary: () => void;
   summaryNote: Note | undefined;
+  summaryError: TransformedRTKError | undefined;
 
   // --- Voll-ai State & Actions ---
   messages: Message[];

@@ -71,13 +71,13 @@ export function AIChatError({ error, onRetry, upgradePlan }: AIChatErrorProps) {
           </p>
         </div>
         {onRetry && (
-        <button
-          onClick={onRetry}
-          className="w-full cursor-pointer py-2 px-4 bg-white dark:bg-red-950 border border-red-200 dark:border-red-800 text-orange-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium rounded-md transition-colors"
-        >
-          Try Again
-        </button>
-      )}
+          <button
+            onClick={onRetry}
+            className="w-full cursor-pointer py-2 px-4 bg-white dark:bg-red-950 border border-red-200 dark:border-red-800 text-orange-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm font-medium rounded-md transition-colors"
+          >
+            Try Again
+          </button>
+        )}
       </div>
     );
   }

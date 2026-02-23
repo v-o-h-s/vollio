@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { QuizCreationFormData } from "../schemas/createQuizSchema";
 import { toast } from "react-toastify";
@@ -6,6 +7,10 @@ import { useCreateQuizMutation } from "@/lib/store/apiSlice";
 export const useSubmitQuiz = () => {
   const router = useRouter();
   const [createQuiz, { isLoading }] = useCreateQuizMutation();
+  const [error, setError] = useState<any | null>(null);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [lastSubmittedData, setLastSubmittedData] =
+    useState<QuizCreationFormData | null>(null);
 
   const handleSubmit = async (data: QuizCreationFormData) => {
     const body: any = {
@@ -40,6 +45,9 @@ export const useSubmitQuiz = () => {
         })
         .catch((err) => {
           console.error("Quiz creation failed:", err);
+          setError(err);
+          setLastSubmittedData(data);
+          setIsErrorModalOpen(true);
           throw err;
         }),
       {
@@ -56,5 +64,12 @@ export const useSubmitQuiz = () => {
     );
   };
 
-  return { onSubmit: handleSubmit, isLoading };
+  return {
+    onSubmit: handleSubmit,
+    isLoading,
+    error,
+    isErrorModalOpen,
+    setIsErrorModalOpen,
+    retry: () => lastSubmittedData && handleSubmit(lastSubmittedData),
+  };
 };

@@ -40,7 +40,7 @@ export function FlashcardCard({
       key={set.id}
       className="group relative flex flex-col h-full border-border/60 hover:border-pink-500/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden bg-card/10 backdrop-blur-xs"
     >
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 translate-y-1 group-hover:translate-y-0">
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20 translate-y-1 group-hover:translate-y-0">
         <Button
           variant="ghost"
           size="icon"
@@ -60,7 +60,7 @@ export function FlashcardCard({
           <Badge
             variant="outline"
             className={cn(
-              "px-2.5 py-0.5 text-xs font-bold tracking-wide border-pink-500/20 bg-pink-500/10 text-pink-700 dark:text-pink-400"
+              "px-2.5 py-0.5 text-xs font-bold tracking-wide border-pink-500/20 bg-pink-500/10 text-pink-700 dark:text-pink-400",
             )}
           >
             FLASHCARDS
@@ -101,10 +101,7 @@ export function FlashcardCard({
           <div className="text-sm font-semibold text-muted-foreground">
             <span className="text-foreground">{cardCount}</span> Flashcards
           </div>
-          <Link
-            href={`/knowledge-test/flashcards/${set.id}`}
-            className="block"
-          >
+          <Link href={`/knowledge-test/flashcards/${set.id}`} className="block">
             <Button
               size="sm"
               className="rounded-full pl-4 pr-5 bg-pink-600/90 hover:bg-pink-600 text-white shadow-md hover:shadow-pink-500/20 transition-all duration-300"

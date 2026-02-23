@@ -68,7 +68,7 @@ export function CreateFolderDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[350px]">
+      <DialogContent className="max-w-[450px] max-h-[85vh] overflow-y-auto">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}

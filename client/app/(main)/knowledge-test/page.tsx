@@ -12,11 +12,13 @@ import { Sidebar } from "@/features/knowldge-test/sidebar/components/Sidebar";
 import { QuizCard } from "@/features/knowldge-test/quizzes/components/QuizCard";
 import { FlashcardCard } from "@/features/knowldge-test/flashcards/components/FlashcardCard";
 import { SimpleEmptyState } from "@/components/ui/simple-empty-state";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import { cn } from "@/lib/utils";
 import { GrTestDesktop } from "react-icons/gr";
 type Section = "quizzes" | "flashcards";
 
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import { RobustFetchError } from "@/components/RobustFetchError";
 
 import {
@@ -36,15 +38,48 @@ export default function KnowledgeTestPage() {
   } = useGetAllQuizzesQuery();
   const [deleteQuiz] = useDeleteQuizMutation();
 
+  const handleDeleteQuiz = async (id: string) => {
+    await toast.promise(deleteQuiz(id).unwrap(), {
+      pending: "Deleting quiz...",
+      success: "Quiz deleted successfully!",
+      error: "Failed to delete quiz",
+    });
+  };
+
   const {
     data: flashcardsData,
     isLoading: isLoadingFlashcards,
     error: flashcardsError,
     refetch: refetchFlashcards,
   } = useGetAllFlashCardsSetsQuery();
+
   const [deleteFlashcardSet] = useDeleteFlashCardsSetMutation();
 
+  const handleDeleteFlashcardSet = async (id: string) => {
+    await toast.promise(deleteFlashcardSet(id).unwrap(), {
+      pending: "Deleting deck...",
+      success: "Deck deleted successfully!",
+      error: "Failed to delete deck",
+    });
+  };
+
   const [section, setSection] = useState<Section>("quizzes");
+
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    id: string;
+    type: "quiz" | "flashcard";
+  } | null>(null);
+
+  const confirmDelete = async () => {
+    if (!deleteConfirm) return;
+
+    if (deleteConfirm.type === "quiz") {
+      await handleDeleteQuiz(deleteConfirm.id);
+    } else {
+      await handleDeleteFlashcardSet(deleteConfirm.id);
+    }
+    setDeleteConfirm(null);
+  };
   return (
     <div className="space-y-8 container mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -119,7 +154,11 @@ export default function KnowledgeTestPage() {
             {section === "quizzes" &&
               !isLoadingQuizzes &&
               quizzesData?.map((q) => (
-                <QuizCard key={q.id} q={q} onDelete={(id) => deleteQuiz(id)} />
+                <QuizCard
+                  key={q.id}
+                  q={q}
+                  onDelete={(id) => setDeleteConfirm({ id, type: "quiz" })}
+                />
               ))}
 
             {section === "flashcards" && isLoadingFlashcards && (
@@ -136,7 +175,7 @@ export default function KnowledgeTestPage() {
                 <FlashcardCard
                   key={set.id}
                   set={set}
-                  onDelete={(id) => deleteFlashcardSet(id)}
+                  onDelete={(id) => setDeleteConfirm({ id, type: "flashcard" })}
                 />
               ))}
 
@@ -170,6 +209,17 @@ export default function KnowledgeTestPage() {
           </div>
         </main>
       </div>
+
+      <ConfirmationDialog
+        open={!!deleteConfirm}
+        title={`Delete ${deleteConfirm?.type === "quiz" ? "Quiz" : "Flashcard Deck"}`}
+        message={`Are you sure you want to delete this ${deleteConfirm?.type === "quiz" ? "quiz" : "deck"}? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteConfirm(null)}
+        style="destructive"
+      />
     </div>
   );
 }

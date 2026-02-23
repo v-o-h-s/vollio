@@ -37,6 +37,7 @@ import { IoFolder, IoDocumentTextSharp } from "react-icons/io5";
 import { useGetGoogleClassroomConnectionStatusQuery } from "@/lib/store/apiSlice";
 import { FilesSkeleton } from "./DirectorySkeleton";
 import { RobustFetchError } from "@/components/RobustFetchError";
+import { UploadDocumentError } from "./errors/UploadDocumentError";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 export default function DocumentsDirectoryViewer() {
@@ -137,6 +138,10 @@ export default function DocumentsDirectoryViewer() {
     handleDocumentDragLeave,
     handleDocumentDragOver,
     handleDocumentDrop,
+    lastUploadError,
+    isErrorModalOpen,
+    setIsErrorModalOpen,
+    retryLastUpload,
   } = useDocumentUpload({
     currentFolder,
     uploadDocument,
@@ -274,6 +279,13 @@ export default function DocumentsDirectoryViewer() {
           )}
         </div>
       </div>
+
+      <UploadDocumentError
+        error={lastUploadError}
+        isOpen={isErrorModalOpen}
+        onClose={() => setIsErrorModalOpen(false)}
+        onRetry={retryLastUpload}
+      />
 
       {/* Dialogs */}
       <CreateFolderDialog

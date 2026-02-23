@@ -48,15 +48,17 @@ export function useVollNotesLogic(documentId: string) {
     useCreateNoteMutation();
   const [updateNote] = useUpdateNoteMutation();
   const [createHighlight] = useCreateHighlightMutation();
-  const [generateSummaryMutation, { isLoading: isGenerating }] =
-    useGenerateSummaryMutation();
+  const [
+    generateSummaryMutation,
+    { isLoading: isGenerating, error: summaryError, reset: resetSummary },
+  ] = useGenerateSummaryMutation();
 
   // Fetches the full content of the currently active note (if any)
   const { data: currentNote, refetch: refetchCurrentNote } = useGetNoteQuery(
     activeTabId,
     {
       skip: activeTabId === HOME_TAB_ID,
-    }
+    },
   );
 
   /**
@@ -66,7 +68,7 @@ export function useVollNotesLogic(documentId: string) {
     if (!documentNotes) return [];
     return [...documentNotes].sort(
       (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
     );
   }, [documentNotes]);
 
@@ -85,7 +87,9 @@ export function useVollNotesLogic(documentId: string) {
       await generateSummaryMutation(documentId).unwrap();
     } catch (error) {
       console.error("Failed to generate summary:", error);
-      toast.error("Failed to generate summary");
+      // We don't toast generic errors if we're showing a specific error component
+      // but we might want to keep it for now if we don't have the component everywhere.
+      // Actually, the user wants the component, so we'll rely on that.
     }
   };
 
@@ -97,7 +101,7 @@ export function useVollNotesLogic(documentId: string) {
     highlight?: {
       HighlightContent: string;
       HighlightPosition: number;
-    }
+    },
   ) => {
     if (isLoadingNewNote || !documentId) return;
 
@@ -203,11 +207,11 @@ export function useVollNotesLogic(documentId: string) {
     (noteId: string, newTitle: string) => {
       setTabs((prevTabs) =>
         prevTabs.map((tab) =>
-          tab.id === noteId ? { ...tab, label: newTitle } : tab
-        )
+          tab.id === noteId ? { ...tab, label: newTitle } : tab,
+        ),
       );
     },
-    []
+    [],
   );
 
   /**
@@ -220,7 +224,7 @@ export function useVollNotesLogic(documentId: string) {
     Highlight?: {
       HighlightContent: HighlightContent;
       HighlightPosition: ScaledPosition;
-    }
+    },
   ) => {
     if (typeof content === "string") return;
 
@@ -340,5 +344,7 @@ export function useVollNotesLogic(documentId: string) {
     summaryNote,
     generateSummary,
     isGenerating,
+    summaryError: summaryError as any,
+    resetSummary,
   };
 }
