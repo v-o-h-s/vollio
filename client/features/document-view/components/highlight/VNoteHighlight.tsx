@@ -244,21 +244,6 @@ export const VNoteHighlight = ({
             >
               <NotebookPen size={12} className="text-white/80" />
               <div className="font-semibold">V-Note</div>
-
-              {/* Tooltip arrow */}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "-4px",
-                  left: "50%",
-                  transform: "translateX(-50%) rotate(45deg)",
-                  width: "8px",
-                  height: "8px",
-                  background: color,
-                  borderRight: "1px solid rgba(255,255,255,0.2)",
-                  borderBottom: "1px solid rgba(255,255,255,0.2)",
-                }}
-              />
             </div>
           )}
         </div>

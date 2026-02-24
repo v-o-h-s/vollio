@@ -222,65 +222,7 @@ export const InsightHighlight = ({
         >
           <Sparkles size={10} className="text-white drop-shadow-sm" />
 
-          {/* Enhanced tooltip on hover */}
-          {isHovered && (
-            <div
-              ref={tooltipRef}
-              className="absolute rounded-lg shadow-2xl border border-purple-400/30 w-[250px] flex flex-row items-center justify-center"
-              style={{
-                bottom: `${badgePosition.size + 8}px`,
-                left: "50%",
-                transform: "translateX(-50%)",
-                background:
-                  "linear-gradient(to right, rgb(147, 51, 234), rgb(139, 92, 246))",
-                zIndex: 50,
-                padding: "8px 12px",
-                gap: "8px",
-                fontSize: "12px",
-                fontWeight: 500,
-                color: "#ffffff",
-              }}
-            >
-              <div
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "50%",
-                  backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Sparkles size={12} style={{ color: "#ffffff" }} />
-              </div>
-              <div className="">
-                <div style={{ fontWeight: 600, color: "#ffffff" }}>
-                  AI Insight
-                </div>
-              </div>
-              <div className="w-px h-[16px] bg-white/30 " />
-              <div className="">
-                <div style={{ color: "#e9d5ff" }}>Click to view in notes</div>
-              </div>
-
-              {/* Tooltip arrow */}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "-4px",
-                  left: "50%",
-                  transform: "translateX(-50%) rotate(45deg)",
-                  width: "8px",
-                  height: "8px",
-                  background:
-                    "linear-gradient(to bottom right, rgb(147, 51, 234), rgb(139, 92, 246))",
-                  borderRight: "1px solid rgba(216, 180, 254, 0.3)",
-                  borderBottom: "1px solid rgba(216, 180, 254, 0.3)",
-                }}
-              />
-            </div>
-          )}
+        
         </div>
       )}
     </>

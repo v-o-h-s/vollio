@@ -85,13 +85,13 @@ export function ViewerHeader({
       {/* Enhanced stylish header with glassmorphism effect */}
       <div
         className={cn(
-          "bg-white dark:bg-background backdrop-blur-xl border rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl transition-all duration-300",
+          "bg-white/80 dark:bg-background/80 backdrop-blur-md border rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl transition-all duration-300",
           isFocused
-            ? "border-primary/40 shadow-primary/10 ring-1 ring-primary/20"
-            : "border-white/20 dark:border-white/10 shadow-black/10 dark:shadow-black/30",
+            ? "border-primary/30 shadow-primary/10 ring-1 ring-primary/20"
+            : "border-border/40 shadow-black/10 dark:shadow-black/30",
         )}
       >
-        <div className="bg-gradient-to-r from-white/5 to-transparent dark:from-white/5 dark:to-transparent rounded-xl sm:rounded-2xl">
+        <div className="rounded-xl sm:rounded-2xl">
           {/* Always horizontal layout */}
           <div className="flex flex-row items-center justify-between px-2 sm:px-3 lg:px-4 py-2 gap-2">
             {/* Left Section: Back & Title */}
