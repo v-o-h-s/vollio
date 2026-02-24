@@ -1,6 +1,6 @@
 "use client";
 import "@/app/styles/components/betterViewer.css";
-import { ChevronUp, MessageSquare, FileText } from "lucide-react";
+import { MessageSquare, FileText } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import {
   PdfHighlighter,
@@ -21,7 +21,7 @@ import {
 import { useSelection } from "@/features/document-view/hooks/useTextSelection";
 import { useHighlightActions } from "@/features/document-view/hooks/useHighlightActions";
 import { MyHighlight } from "@/features/document-view/types/highlight";
-import { ViewerHeader } from "./viewheader";
+import { ViewerHeader, ShowHeaderTab } from "./viewheader";
 import { DocumentDetails } from "../types/document";
 import { useViewer } from "../context/ViewerContext";
 import { ContextMenu } from "./highlight/ContextMenu";
@@ -229,6 +229,20 @@ export const BetterViewer = ({
       highlighterUtilsRef.current.scrollToHighlight(highlight);
     }
   };
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Poll for page info to keep UI in sync
+  useEffect(() => {
+    const updatePageInfo = () => {
+      if (documentViewerAdapter.current) {
+        setCurrentPage(documentViewerAdapter.current.currentPageNumber || 1);
+        setTotalPages(documentViewerAdapter.current.pageCount || 1);
+      }
+    };
+    const interval = setInterval(updatePageInfo, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="relative h-full w-full flex flex-col overflow-hidden ">
@@ -249,26 +263,12 @@ export const BetterViewer = ({
           isFocused={isFocused}
         />
       ) : (
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30 group/show-header">
-          <button
-            onClick={() => setIsHeaderVisible(true)}
-            className={cn(
-              "flex items-center gap-2 px-4 py-1.5 rounded-b-2xl border-x border-b border-t-0",
-              "bg-white/80 dark:bg-background/80 backdrop-blur-md shadow-lg",
-              "text-muted-foreground hover:text-primary transition-all duration-300",
-              "cursor-pointer active:scale-95 group-hover/show-header:py-2.5",
-              "animate-in slide-in-from-top-4 duration-500",
-              isFocused ? "border-primary/30" : "border-border/40",
-            )}
-          >
-            <div className="flex flex-col items-center gap-0.5">
-              <ChevronUp className="w-3.5 h-3.5 rotate-180" />
-              <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover/show-header:opacity-100 transition-opacity">
-                Show Header
-              </span>
-            </div>
-          </button>
-        </div>
+        <ShowHeaderTab
+          onClick={() => setIsHeaderVisible(true)}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          isFocused={isFocused}
+        />
       )}
 
       <div className="flex-1 relative overflow-hidden [&_*::-webkit-scrollbar]:w-2 [&_*::-webkit-scrollbar]:h-2 [&_*::-webkit-scrollbar-track]:bg-transparent [&_*::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&_*::-webkit-scrollbar-thumb]:rounded-full hover:[&_*::-webkit-scrollbar-thumb]:bg-muted-foreground/40 transition-colors">

@@ -14,11 +14,11 @@ interface VDocHighlightProps {
   color: string;
   updateHighlight: (
     highlightId: string,
-    highlight: Partial<CreateHighlightDTO>
+    highlight: Partial<CreateHighlightDTO>,
   ) => Promise<any>;
   onOpenEditor: (
     highlight: MyHighlight,
-    position: { left: number; top: number }
+    position: { left: number; top: number },
   ) => void;
   isEditorOpen: boolean;
 }
@@ -111,7 +111,7 @@ export const VDocHighlight = ({
           scale: 1,
           duration: 0.2,
           ease: "power2.out",
-        }
+        },
       );
     }
   }, [isHovered]);
@@ -155,12 +155,12 @@ export const VDocHighlight = ({
           <div
             className={cn(
               "absolute inset-0 rounded-[3px] pointer-events-none transition-opacity duration-300",
-              isHovered ? "opacity-100" : "opacity-0"
+              isHovered ? "opacity-100" : "opacity-0",
             )}
             style={{
               background: `linear-gradient(to right, ${hexToRgba(
                 color,
-                0.2
+                0.2,
               )}, ${hexToRgba(color, 0.2)})`,
               mixBlendMode: "screen",
             }}
@@ -170,12 +170,12 @@ export const VDocHighlight = ({
           <div
             className={cn(
               "absolute inset-0 rounded-[3px] pointer-events-none transition-all duration-300",
-              isHovered ? "opacity-100" : "opacity-0"
+              isHovered ? "opacity-100" : "opacity-0",
             )}
             style={{
               boxShadow: `0 0 20px ${hexToRgba(
                 color,
-                0.6
+                0.6,
               )}, 0 0 40px ${hexToRgba(color, 0.3)}`,
               border: `1px solid ${hexToRgba(color, 0.8)}`,
               transform: isHovered ? "scale(1.02)" : "scale(1)",
@@ -228,54 +228,13 @@ export const VDocHighlight = ({
             height: `${badgePosition.size}px`,
             background: `linear-gradient(to bottom right, ${color}, ${hexToRgba(
               color,
-              0.8
+              0.8,
             )})`,
             pointerEvents: "auto",
             zIndex: 20,
           }}
         >
           <FilePenLine size={10} className="text-white drop-shadow-sm" />
-
-          {/* Tooltip on hover */}
-          {isHovered && (
-            <div
-              ref={tooltipRef}
-              className="absolute rounded-lg shadow-2xl border border-indigo-400/30 w-[140px] flex flex-row items-center justify-center"
-              style={{
-                bottom: `${badgePosition.size + 8}px`,
-                left: "50%",
-                transform: "translateX(-50%)",
-                background: `linear-gradient(to right, ${color}, ${hexToRgba(
-                  color,
-                  0.9
-                )})`,
-                zIndex: 50,
-                padding: "8px 12px",
-                gap: "8px",
-                fontSize: "12px",
-                fontWeight: 500,
-                color: "#ffffff",
-              }}
-            >
-              <FilePenLine size={12} className="text-white/80" />
-              <div className="font-semibold">V-Doc</div>
-
-              {/* Tooltip arrow */}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "-4px",
-                  left: "50%",
-                  transform: "translateX(-50%) rotate(45deg)",
-                  width: "8px",
-                  height: "8px",
-                  background: color,
-                  borderRight: "1px solid rgba(255,255,255,0.2)",
-                  borderBottom: "1px solid rgba(255,255,255,0.2)",
-                }}
-              />
-            </div>
-          )}
         </div>
       )}
 
