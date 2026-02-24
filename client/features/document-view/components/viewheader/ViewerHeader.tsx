@@ -7,10 +7,11 @@ import {
   LuFileText as FileText,
   LuChevronDown as ChevronDown,
   LuEye as Eye,
-  LuMessageSquare as MessageSquare,
+  LuNotebookPen as NotebookPen,
 } from "react-icons/lu";
 import { HiTag as TagIcon } from "react-icons/hi2";
 import { FiHome as Home } from "react-icons/fi";
+import { RiRobot3Fill as Bot } from "react-icons/ri";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +33,10 @@ export function ViewerHeader({
   onHighlightColorChange,
   onToggleTags,
   isTagsOpen,
+  onToggleVollAi,
+  isVollAiOpen,
+  onToggleVollNotes,
+  isVollNotesOpen,
   viewerWidth = "100%",
   isFocused,
 }: DocumentViewerHeaderProps) {
@@ -53,9 +58,10 @@ export function ViewerHeader({
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Only collapse tools section when header is narrow (< 900px)
-  // Navigation and zoom always stay inline, only tools go to dropdown
-  const shouldCollapseTools = headerWidth < 900;
+  // Only collapse tools section when header is narrow (< 550px)
+  const shouldCollapseTools = headerWidth < 550;
+  const showFullTitle = headerWidth > 500;
+  const showToolText = headerWidth > 850;
 
   const handleColorChange = (color: string) => {
     if (onHighlightColorChange) {
@@ -82,7 +88,7 @@ export function ViewerHeader({
           "bg-white dark:bg-background backdrop-blur-xl border rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl transition-all duration-300",
           isFocused
             ? "border-primary/40 shadow-primary/10 ring-1 ring-primary/20"
-            : "border-white/20 dark:border-white/10 shadow-black/10 dark:shadow-black/30"
+            : "border-white/20 dark:border-white/10 shadow-black/10 dark:shadow-black/30",
         )}
       >
         <div className="bg-gradient-to-r from-white/5 to-transparent dark:from-white/5 dark:to-transparent rounded-xl sm:rounded-2xl">
@@ -94,7 +100,7 @@ export function ViewerHeader({
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push("/")}
-                className="cursor-pointer h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-full flex-shrink-0 hover:bg-primary/10 hover:text-primary hover:scale-110 active:scale-95 transition-all duration-200"
+                className="cursor-pointer h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-full shrink-0 hover:bg-primary/10 hover:text-primary hover:scale-110 active:scale-95 transition-all duration-200"
                 title="Back to Documents"
               >
                 <Home size={12} className="sm:w-4 sm:h-4" />
@@ -103,16 +109,19 @@ export function ViewerHeader({
               <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
                 <div
                   className={cn(
-                    "w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center flex-shrink-0 shadow-md transition-all",
-                    "bg-gradient-to-br from-red-500 via-red-600 to-red-700"
+                    "w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center shrink-0 shadow-md transition-all",
+                    "bg-gradient-to-br from-red-500 via-red-600 to-red-700",
                   )}
                 >
                   <FileText size={10} className="sm:w-3 sm:h-3 text-white" />
                 </div>
                 <h1
                   className={cn(
-                    "text-xs sm:text-sm font-semibold truncate transition-colors",
-                    isFocused ? "text-primary" : "text-foreground"
+                    "text-xs sm:text-sm font-semibold truncate transition-all duration-300",
+                    isFocused ? "text-primary" : "text-foreground",
+                    !showFullTitle
+                      ? "max-w-[40px] sm:max-w-[80px]"
+                      : "max-w-[120px] sm:max-w-[200px] lg:max-w-[300px]",
                   )}
                 >
                   {document.name}
@@ -122,11 +131,11 @@ export function ViewerHeader({
 
             {/* Middle Section: Navigation & Zoom - Always visible */}
             <div className="flex items-center gap-1 sm:gap-2 lg:gap-3">
-              <div className="w-px h-4 bg-border flex-shrink-0" />
+              <div className="w-px h-4 bg-border/50 shrink-0" />
               <PageNavigation documentViewerRef={documentViewerRef} />
-              <div className="w-px h-4 bg-border flex-shrink-0" />
+              <div className="w-px h-4 bg-border/50 shrink-0" />
               <ZoomControls documentViewerRef={documentViewerRef} />
-              <div className="w-px h-4 bg-border flex-shrink-0" />
+              <div className="w-px h-4 bg-border/50 shrink-0" />
             </div>
 
             {/* Right Section: Tools */}
@@ -137,56 +146,117 @@ export function ViewerHeader({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 sm:h-8 w-7 sm:w-8 p-0 flex-shrink-0"
-                    title="More tools"
+                    className="h-7 sm:h-8 w-7 sm:w-8 p-0 shrink-0"
+                    title="Tools"
                   >
-                    <ChevronDown size={12} className="sm:w-4 sm:h-4" />
+                    <ChevronDown
+                      size={14}
+                      className="sm:w-4 sm:h-4 text-muted-foreground"
+                    />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 sm:w-56">
-                  <div className="p-2 space-y-3">
-                    {/* Highlight Color Selector */}
-                    <div className="space-y-2">
-                      <p className="text-xs font-medium text-muted-foreground px-1">
-                        Highlight Color
+                <DropdownMenuContent
+                  align="end"
+                  className="w-48 sm:w-56 overflow-hidden rounded-xl border-border/50 backdrop-blur-xl"
+                >
+                  <div className="p-2 space-y-2">
+                    {/* Tools Section */}
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider px-2 py-1">
+                        AI & Notes
+                      </p>
+                      <button
+                        onClick={onToggleVollAi}
+                        className={cn(
+                          "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all group flex items-center justify-between",
+                          isVollAiOpen
+                            ? "bg-primary/10 text-primary"
+                            : "text-foreground/80 hover:bg-accent",
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Bot size={16} />
+                          <span>Voll-AI</span>
+                        </div>
+                        {isVollAiOpen && (
+                          <div className="h-2 w-2 rounded-full bg-green-500 shadow-sm shadow-green-500/50 animate-pulse" />
+                        )}
+                      </button>
+
+                      <button
+                        onClick={onToggleVollNotes}
+                        className={cn(
+                          "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all group flex items-center justify-between",
+                          isVollNotesOpen
+                            ? "bg-primary/10 text-primary"
+                            : "text-foreground/80 hover:bg-accent",
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <NotebookPen size={16} />
+                          <span>Voll-Notes</span>
+                        </div>
+                        {isVollNotesOpen && (
+                          <div className="h-2 w-2 rounded-full bg-green-500 shadow-sm shadow-green-500/50 animate-pulse" />
+                        )}
+                      </button>
+
+                      <button
+                        onClick={onToggleTags}
+                        className={cn(
+                          "w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all group flex items-center justify-between",
+                          isTagsOpen
+                            ? "bg-primary/10 text-primary"
+                            : "text-foreground/80 hover:bg-accent",
+                        )}
+                      >
+                        <div className="flex items-center gap-2">
+                          <TagIcon size={16} />
+                          <span>Tags</span>
+                        </div>
+                        {isTagsOpen && (
+                          <div className="h-2 w-2 rounded-full bg-green-500 shadow-sm shadow-green-500/50 animate-pulse" />
+                        )}
+                      </button>
+                    </div>
+
+                    <DropdownMenuSeparator className="bg-border/50" />
+
+                    {/* Highlight Section */}
+                    <div className="space-y-2 p-1">
+                      <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider px-1">
+                        Highlight
                       </p>
                       <div className="grid grid-cols-5 gap-1.5 px-1">
                         {HIGHLIGHT_COLORS.map((color) => (
                           <button
                             key={color.value}
                             onClick={() => handleColorChange(color.value)}
-                            className={`w-6 h-6 rounded-full border-2 hover:scale-110 active:scale-95 transition-transform cursor-pointer ${
+                            className={cn(
+                              "w-6 h-6 rounded-full border-2 transition-all cursor-pointer relative",
                               currentHighlightColor === color.value
-                                ? "border-primary ring-2 ring-primary ring-offset-2"
-                                : "border-border hover:border-primary/50"
-                            }`}
+                                ? "border-primary ring-2 ring-primary/20 ring-offset-1"
+                                : "border-transparent hover:scale-110",
+                            )}
                             style={{ backgroundColor: color.value }}
                             title={color.name}
-                          />
+                          >
+                            {currentHighlightColor === color.value && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-1 h-1 rounded-full bg-foreground/20" />
+                              </div>
+                            )}
+                          </button>
                         ))}
                       </div>
                     </div>
 
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator className="bg-border/50" />
 
-                    {/* Tags Toggle */}
-                    <button
-                      onClick={onToggleTags}
-                      className={cn(
-                        "w-full text-left px-3 py-2 rounded text-sm font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer flex items-center gap-2",
-                        isTagsOpen && "bg-accent text-accent-foreground"
-                      )}
-                    >
-                      <TagIcon size={16} />
-                      <span>Tags</span>
-                    </button>
-
-                    <DropdownMenuSeparator />
-
-                    {/* Hide Header */}
+                    {/* Meta */}
                     <button
                       onClick={() => setIsHeaderVisible(false)}
-                      className="w-full text-left px-3 py-2 rounded text-sm font-medium text-foreground/80 hover:bg-accent hover:text-accent-foreground transition-colors cursor-pointer flex items-center gap-2"
+                      className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-foreground/80 hover:bg-red-500/10 hover:text-red-500 transition-all group flex items-center gap-2"
                     >
                       <Eye size={16} />
                       <span>Hide Header</span>
@@ -195,9 +265,61 @@ export function ViewerHeader({
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              // Desktop: Inline Tool Buttons (when header is wide enough)
-              <div className="flex items-center gap-2 justify-end">
-                
+              // Desktop: Inline Tool Buttons
+              <div className="flex items-center gap-1 sm:gap-2 justify-end">
+                {/* AI Toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleVollAi}
+                  className={cn(
+                    "cursor-pointer h-8 px-2 shrink-0 rounded-lg group transition-all",
+                    isVollAiOpen
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-accent",
+                  )}
+                  title="Voll-AI"
+                >
+                  <div className="relative">
+                    <Bot size={16} />
+                    {isVollAiOpen && (
+                      <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      </span>
+                    )}
+                  </div>
+                  {showToolText && (
+                    <span className="text-xs ml-1.5 font-medium">AI</span>
+                  )}
+                </Button>
+
+                {/* Notes Toggle */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onToggleVollNotes}
+                  className={cn(
+                    "cursor-pointer h-8 px-2 shrink-0 rounded-lg group transition-all",
+                    isVollNotesOpen
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-accent",
+                  )}
+                  title="Voll-Notes"
+                >
+                  <div className="relative">
+                    <NotebookPen size={16} />
+                    {isVollNotesOpen && (
+                      <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      </span>
+                    )}
+                  </div>
+                  {showToolText && (
+                    <span className="text-xs ml-1.5 font-medium">Notes</span>
+                  )}
+                </Button>
 
                 {/* Tags Toggle */}
                 <Button
@@ -205,25 +327,38 @@ export function ViewerHeader({
                   size="sm"
                   onClick={onToggleTags}
                   className={cn(
-                    "cursor-pointer h-8 px-2 flex-shrink-0",
-                    isTagsOpen && "bg-accent text-accent-foreground"
+                    "cursor-pointer h-8 px-2 shrink-0 rounded-lg group transition-all",
+                    isTagsOpen
+                      ? "bg-primary/10 text-primary"
+                      : "hover:bg-accent",
                   )}
                   title="Tags"
                 >
-                  <TagIcon size={14} />
-                  <span className="text-xs ml-1">Tags</span>
+                  <div className="relative">
+                    <TagIcon size={16} />
+                    {isTagsOpen && (
+                      <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      </span>
+                    )}
+                  </div>
+                  {showToolText && (
+                    <span className="text-xs ml-1.5 font-medium">Tags</span>
+                  )}
                 </Button>
+
+                <div className="w-px h-4 bg-border/50 mx-1 shrink-0" />
 
                 {/* Hide Header */}
                 <Button
-                  className="cursor-pointer h-8 px-2 flex-shrink-0"
+                  className="cursor-pointer h-8 w-8 p-0 shrink-0 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all"
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsHeaderVisible(false)}
                   title="Hide Header (Esc)"
                 >
-                  <Eye size={14} />
-                  <span className="text-xs ml-1">Hide</span>
+                  <Eye size={16} />
                 </Button>
               </div>
             )}

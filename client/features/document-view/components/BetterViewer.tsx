@@ -22,11 +22,11 @@ import { useSelection } from "@/features/document-view/hooks/useTextSelection";
 import { useHighlightActions } from "@/features/document-view/hooks/useHighlightActions";
 import { MyHighlight } from "@/features/document-view/types/highlight";
 import { ViewerHeader } from "./viewheader";
-import { ViewerFloatingActions } from "./ViewerFloatingActions";
 import { DocumentDetails } from "../types/document";
 import { useViewer } from "../context/ViewerContext";
 import { ContextMenu } from "./highlight/ContextMenu";
 import MinimalEditor from "./highlight/MinimalEditor";
+import { cn } from "@/lib/utils";
 export const BetterViewer = ({
   document,
   onToggleVollNotes,
@@ -144,7 +144,7 @@ export const BetterViewer = ({
       zoomPercentage: {
         get: () =>
           Math.round(
-            (highlighterUtilsRef.current?.getViewer()?.currentScale || 1) * 100
+            (highlighterUtilsRef.current?.getViewer()?.currentScale || 1) * 100,
           ),
         configurable: true,
       },
@@ -191,7 +191,7 @@ export const BetterViewer = ({
   // Listen for scroll to position events from Insight component
   useEffect(() => {
     const handleScrollToPdfPosition = (
-      event: CustomEvent<{ position: any }>
+      event: CustomEvent<{ position: any }>,
     ) => {
       const { position } = event.detail;
       if (!position || !highlighterUtilsRef.current) return;
@@ -213,13 +213,13 @@ export const BetterViewer = ({
 
     window.addEventListener(
       "scrollToPdfPosition",
-      handleScrollToPdfPosition as EventListener
+      handleScrollToPdfPosition as EventListener,
     );
 
     return () => {
       window.removeEventListener(
         "scrollToPdfPosition",
-        handleScrollToPdfPosition as EventListener
+        handleScrollToPdfPosition as EventListener,
       );
     };
   }, []);
@@ -242,26 +242,33 @@ export const BetterViewer = ({
           onHighlightColorChange={setCurrentHighlightColor}
           onToggleTags={() => setIsTagSidebarOpen(!isTagSidebarOpen)}
           isTagsOpen={isTagSidebarOpen}
+          onToggleVollAi={onToggleVollAi}
+          isVollAiOpen={isVollAiOpen}
+          onToggleVollNotes={onToggleVollNotes}
+          isVollNotesOpen={isVollNotesOpen}
           isFocused={isFocused}
         />
       ) : (
-        <button
-          onClick={() => setIsHeaderVisible(true)}
-          className="absolute top-4 left-1/2 -translate-x-1/2 z-999 
-            bg-white dark:bg-gray-900 
-            text-gray-900 dark:text-gray-100 
-            px-4 py-2 rounded-xl
-            border border-gray-200 dark:border-gray-700
-            shadow-sm dark:shadow-gray-900/50
-            hover:bg-gray-50 dark:hover:bg-gray-800 
-            active:scale-95 
-            font-medium text-sm flex items-center gap-2
-            animate-in fade-in slide-in-from-top-2 duration-300
-            backdrop-blur-sm cursor-pointer"
-        >
-          <ChevronUp className="w-4 h-4" />
-          <span>Show Header</span>
-        </button>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30 group/show-header">
+          <button
+            onClick={() => setIsHeaderVisible(true)}
+            className={cn(
+              "flex items-center gap-2 px-4 py-1.5 rounded-b-2xl border-x border-b border-t-0",
+              "bg-white/80 dark:bg-background/80 backdrop-blur-md shadow-lg",
+              "text-muted-foreground hover:text-primary transition-all duration-300",
+              "cursor-pointer active:scale-95 group-hover/show-header:py-2.5",
+              "animate-in slide-in-from-top-4 duration-500",
+              isFocused ? "border-primary/30" : "border-border/40",
+            )}
+          >
+            <div className="flex flex-col items-center gap-0.5">
+              <ChevronUp className="w-3.5 h-3.5 rotate-180" />
+              <span className="text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover/show-header:opacity-100 transition-opacity">
+                Show Header
+              </span>
+            </div>
+          </button>
+        </div>
       )}
 
       <div className="flex-1 relative overflow-hidden [&_*::-webkit-scrollbar]:w-2 [&_*::-webkit-scrollbar]:h-2 [&_*::-webkit-scrollbar-track]:bg-transparent [&_*::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&_*::-webkit-scrollbar-thumb]:rounded-full hover:[&_*::-webkit-scrollbar-thumb]:bg-muted-foreground/40 transition-colors">
@@ -331,13 +338,6 @@ export const BetterViewer = ({
         onClose={() => setIsTagSidebarOpen(false)}
         highlights={highlights}
         onScrollToHighlight={handleScrollToHighlight}
-      />
-
-      <ViewerFloatingActions
-        onToggleVollNotes={onToggleVollNotes}
-        onToggleVollAi={onToggleVollAi}
-        isVollNotesOpen={isVollNotesOpen}
-        isVollAiOpen={isVollAiOpen}
       />
 
       {/* Global Context Menu - Moved here because we have problems with z value */}

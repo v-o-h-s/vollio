@@ -15,9 +15,15 @@ export interface DocumentViewerHeaderProps {
   onHighlightColorChange?: (color: string) => void;
   /** Function to toggle tags sidebar */
   onToggleTags?: () => void;
-  /** Whether tags sidebar is open */
   isTagsOpen?: boolean;
   /** Function to toggle AI assistant */
+  onToggleVollAi?: () => void;
+  /** Whether AI assistant is open */
+  isVollAiOpen?: boolean;
+  /** Function to toggle notes sidebar */
+  onToggleVollNotes?: () => void;
+  /** Whether notes sidebar is open */
+  isVollNotesOpen?: boolean;
 
   /** Width of the viewer container (for responsive resizing) */
   viewerWidth?: string;
