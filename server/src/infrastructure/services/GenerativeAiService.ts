@@ -1,13 +1,12 @@
 import { JSONContent } from "@vollio/shared";
 import { QuizQuestion } from "../../domain/entities/Quiz";
 import { IGenerativeAiService } from "../../domain/services/IGenerativeAiService";
-import { openRouter } from "../ai/generative-ai/client";
+import { GENRATIVE_AI_CONFIG, openRouter } from "../ai/generative-ai/client";
 import { FastifyBaseLogger } from "fastify";
 import {
   GenerativeAiResult,
   createEmptyResult,
   extractTokenUsage,
-  EMPTY_TOKEN_USAGE,
 } from "../../shared/types/generativeAi";
 
 export class GenerativeAiService implements IGenerativeAiService {
@@ -19,7 +18,7 @@ export class GenerativeAiService implements IGenerativeAiService {
   ): Promise<GenerativeAiResult<string>> {
     try {
       const completion = await openRouter.chat.send({
-        model: "google/gemini-2.0-flash-001",
+        model: GENRATIVE_AI_CONFIG.MODEL,
         messages: [
           {
             role: "user",
@@ -35,11 +34,11 @@ export class GenerativeAiService implements IGenerativeAiService {
       return {
         data: typeof content === "string" ? content : "",
         usage,
-        model: "google/gemini-2.0-flash-001",
+        model: GENRATIVE_AI_CONFIG.MODEL,
       };
     } catch (error) {
       this.logger.error({ error }, "GenerativeAiService.generateText failed");
-      return createEmptyResult("", "google/gemini-2.0-flash-001");
+      return createEmptyResult("", GENRATIVE_AI_CONFIG.MODEL);
     }
   }
 
@@ -57,11 +56,9 @@ export class GenerativeAiService implements IGenerativeAiService {
       summary?: string;
     }>
   > {
-    const modelId = "google/gemini-2.0-flash-001";
-
     try {
       const completion = await openRouter.chat.send({
-        model: modelId,
+        model: GENRATIVE_AI_CONFIG.MODEL,
         messages: [
           {
             role: "user",
@@ -89,13 +86,13 @@ export class GenerativeAiService implements IGenerativeAiService {
             typeof parsed.summary === "string" ? parsed.summary : undefined,
         },
         usage,
-        model: modelId,
+        model: GENRATIVE_AI_CONFIG.MODEL,
       };
     } catch (error) {
       this.logger.error(
         "GenerativeAiService.generateQuizQuestions failed: " + error,
       );
-      return createEmptyResult({ questions: [] }, modelId);
+      return createEmptyResult({ questions: [] }, GENRATIVE_AI_CONFIG.MODEL);
     }
   }
 
@@ -104,11 +101,9 @@ export class GenerativeAiService implements IGenerativeAiService {
   ): Promise<
     GenerativeAiResult<{ flashCards: any[]; name?: string; summary?: string }>
   > {
-    const modelId = "google/gemini-2.0-flash-001";
-
     try {
       const completion = await openRouter.chat.send({
-        model: modelId,
+        model: GENRATIVE_AI_CONFIG.MODEL,
         messages: [
           {
             role: "user",
@@ -136,24 +131,22 @@ export class GenerativeAiService implements IGenerativeAiService {
             typeof parsed.summary === "string" ? parsed.summary : undefined,
         },
         usage,
-        model: modelId,
+        model: GENRATIVE_AI_CONFIG.MODEL,
       };
     } catch (error) {
       this.logger.error(
         "GenerativeAiService.generateFlashCards failed: " + error,
       );
-      return createEmptyResult({ flashCards: [] }, modelId);
+      return createEmptyResult({ flashCards: [] }, GENRATIVE_AI_CONFIG.MODEL);
     }
   }
 
   async generateSummary(
     prompt: string,
   ): Promise<GenerativeAiResult<JSONContent>> {
-    const modelId = "google/gemini-2.0-flash-001";
-
     try {
       const completion = await openRouter.chat.send({
-        model: modelId,
+        model: GENRATIVE_AI_CONFIG.MODEL,
         messages: [
           {
             role: "user",
@@ -176,11 +169,14 @@ export class GenerativeAiService implements IGenerativeAiService {
       return {
         data: parsed,
         usage,
-        model: modelId,
+        model: GENRATIVE_AI_CONFIG.MODEL,
       };
     } catch (error) {
       this.logger.error("GenerativeAiService.generateSummary failed: " + error);
-      return createEmptyResult({ type: "doc", content: [] }, modelId);
+      return createEmptyResult(
+        { type: "doc", content: [] },
+        GENRATIVE_AI_CONFIG.MODEL,
+      );
     }
   }
 }
