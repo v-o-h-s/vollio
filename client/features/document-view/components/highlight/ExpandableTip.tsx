@@ -14,8 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 import MinimalEditor from "@/features/document-view/components/highlight/MinimalEditor";
-import { FeatureInfo, FeatureInfoDual } from "@/components/FeatureExplanation";
-import { NoteMenu } from "./NoteMenu";
+import { FeatureInfo } from "@/components/FeatureExplanation";
 import { Check } from "lucide-react";
 
 interface ExpandableTipProps {
@@ -41,7 +40,6 @@ export const ExpandableTip = ({
   onAddVDocNote,
   onAddVNote,
 }: ExpandableTipProps) => {
-  const [openNoteMenu, setOpenNoteMenu] = useState(false);
   const [openVDocMenu, setOpenVDocMenu] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -63,7 +61,7 @@ export const ExpandableTip = ({
                   size="icon"
                   className={cn(
                     "cursor-pointer h-10 w-10 rounded-full bg-white text-neutral-900 shadow-sm border border-neutral-200 hover:bg-neutral-50 transition-all duration-200 hover:scale-105 active:scale-95",
-                    isCopied && "bg-green-500 text-white hover:bg-green-600"
+                    isCopied && "bg-green-500 text-white hover:bg-green-600",
                   )}
                 >
                   {isCopied ? (
@@ -114,34 +112,43 @@ export const ExpandableTip = ({
               </div>
             )}
 
-            {(onAddNote || onAddVNote) && (
+            {onAddVDocNote && (
               <div className="relative group">
                 <Button
-                  onClick={() => setOpenNoteMenu(!openNoteMenu)}
+                  onClick={() => setOpenVDocMenu(!openVDocMenu)}
                   variant="ghost"
                   size="icon"
                   className={cn(
                     "cursor-pointer h-10 w-10 rounded-full transition-all duration-200 hover:scale-105 active:scale-95",
-                    openNoteMenu
+                    openVDocMenu
                       ? "bg-indigo-500 text-white hover:bg-indigo-600"
-                      : "hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+                      : "hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400",
                   )}
+                >
+                  <FilePenLine className="h-4.5 w-4.5 " />
+                  <span className="sr-only">Comment</span>
+                </Button>
+                <FeatureInfo
+                  title="Comment"
+                  description="Create a rich document linked to this highlight for detailed analysis."
+                />
+              </div>
+            )}
+
+            {onAddVNote && (
+              <div className="relative group">
+                <Button
+                  onClick={onAddVNote}
+                  variant="ghost"
+                  size="icon"
+                  className="cursor-pointer h-10 w-10 rounded-full hover:bg-purple-500/10 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-200 hover:scale-105 active:scale-95"
                 >
                   <NotebookPen className="h-4.5 w-4.5 " />
                   <span className="sr-only">Note</span>
                 </Button>
-
-                <FeatureInfoDual
-                  featureA={{
-                    title: "V-Doc",
-                    description:
-                      "Create a rich document linked to this highlight for detailed analysis.",
-                  }}
-                  featureB={{
-                    title: "V-Notes",
-                    description:
-                      "Quickly jot down brief notes and thoughts without leaving the page.",
-                  }}
+                <FeatureInfo
+                  title="Note"
+                  description="Quickly jot down brief notes and thoughts without leaving the page."
                 />
               </div>
             )}
@@ -174,14 +181,7 @@ export const ExpandableTip = ({
           </div>
         </CardContent>
       </Card>
-      {openNoteMenu && (
-        <NoteMenu
-          onAddVDocNote={onAddVDocNote}
-          onAddVNote={onAddVNote}
-          onClose={() => setOpenNoteMenu(false)}
-          setOpenVDocMenu={setOpenVDocMenu}
-        />
-      )}
+
       {openVDocMenu && (
         <MinimalEditor
           className="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-999"
