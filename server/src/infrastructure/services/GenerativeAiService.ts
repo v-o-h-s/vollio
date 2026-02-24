@@ -13,28 +13,13 @@ import {
 export class GenerativeAiService implements IGenerativeAiService {
   constructor(private logger: FastifyBaseLogger) {}
 
-  private getModelId(model?: string): string {
-    switch (model) {
-      case "fast":
-        return "google/gemini-2.0-flash-exp:free";
-      case "smart":
-        return "google/gemini-2.0-flash-001";
-      case "creative":
-        return "anthropic/claude-3.5-sonnet";
-      default:
-        return "google/gemini-2.0-flash-001";
-    }
-  }
-
   async generateText(
     prompt: string,
     model?: string,
   ): Promise<GenerativeAiResult<string>> {
-    const modelId = this.getModelId(model);
-
     try {
       const completion = await openRouter.chat.send({
-        model: modelId,
+        model: "google/gemini-2.0-flash-001",
         messages: [
           {
             role: "user",
@@ -50,11 +35,11 @@ export class GenerativeAiService implements IGenerativeAiService {
       return {
         data: typeof content === "string" ? content : "",
         usage,
-        model: modelId,
+        model: "google/gemini-2.0-flash-001",
       };
     } catch (error) {
       this.logger.error({ error }, "GenerativeAiService.generateText failed");
-      return createEmptyResult("", modelId);
+      return createEmptyResult("", "google/gemini-2.0-flash-001");
     }
   }
 
