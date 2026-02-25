@@ -25,3 +25,4 @@ export * from "./requests/aiRequests";
 
 // utils
 export * from "./utils";
+export * from "./errors";

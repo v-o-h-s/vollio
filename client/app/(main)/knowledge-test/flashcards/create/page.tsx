@@ -39,8 +39,8 @@ import { FeatureErrorDialog } from "@/components/errors/FeatureErrorDialog";
 import {
   useGetAllDocumentsQuery,
   useCreateFlashCardsSetMutation,
-  useGenerateFlashCardsSetMutation,
 } from "@/lib/store/apiSlice";
+import { useSubmitFlashcards } from "@/features/knowldge-test/flashcards/hooks/useSubmitFlashcards";
 import {
   flashcardManualSchema,
   flashcardAutoSchema,
@@ -78,11 +78,14 @@ function CreateFlashCardsPageContent() {
   // Mutations
   const [createManualSet, { isLoading: isSaving }] =
     useCreateFlashCardsSetMutation();
-  const [generateSet, { isLoading: isGenerating, error: generateError }] =
-    useGenerateFlashCardsSetMutation();
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
-  const [lastAutoData, setLastAutoData] =
-    useState<FlashcardAutoFormData | null>(null);
+  const {
+    onSubmit: generateSet,
+    isLoading: isGenerating,
+    error: generateError,
+    isErrorModalOpen,
+    setIsErrorModalOpen,
+    retry,
+  } = useSubmitFlashcards();
 
   // Manual Mode Form (used for review after AI generation)
   const manualForm = useForm<FlashcardManualFormData>({
@@ -143,39 +146,22 @@ function CreateFlashCardsPageContent() {
 
   // Handlers
   const onAutoSubmit = async (data: FlashcardAutoFormData) => {
-    const loadingToast = toast.loading(
-      "Generating flashcards... This may take a moment.",
-    );
     try {
-      const response = await generateSet(
-        prepareFlashcardPayload("auto", data) as any,
-      ).unwrap();
+      const result = await generateSet(data);
 
-      const generatedCards =
-        (response as any).flashCards?.map((c: any) => ({
-          id: c.id || Math.random().toString(),
-          front: c.front,
-          back: c.back,
-          hint: c.hint || "",
-        })) || [];
-
-      toast.dismiss(loadingToast);
-      if (generatedCards.length > 0) {
-        manualForm.setValue("flashcards", generatedCards);
+      if (result && result.generatedCards.length > 0) {
+        manualForm.setValue("flashcards", result.generatedCards);
         manualForm.setValue(
           "title",
           `AI Deck: ${autoDocument?.title || "Generated"}`,
         );
-        manualForm.setValue("documentId", data.documentId);
-        manualForm.setValue("difficulty", data.difficulty);
+        manualForm.setValue("documentId", result.documentId);
+        manualForm.setValue("difficulty", result.difficulty);
         setActiveTab("manual");
-        toast.success(`Generated ${generatedCards.length} cards!`);
       }
     } catch (err: any) {
-      toast.dismiss(loadingToast);
-      setLastAutoData(data);
-      setIsErrorModalOpen(true);
-      console.error("Flashcard generation failed:", err);
+      // Error handling is managed by the hook (Sentry, Modal state, etc.)
+      console.error("Flashcard generation failed in page:", err);
     }
   };
 
@@ -560,11 +546,11 @@ function CreateFlashCardsPageContent() {
         error={generateError as any}
         isOpen={isErrorModalOpen}
         onClose={() => setIsErrorModalOpen(false)}
-        onRetry={() => lastAutoData && onAutoSubmit(lastAutoData)}
+        onRetry={retry}
         title={
-          (generateError as any)?.name === "QuotaExceededError"
+          generateError?.name === "QuotaExceededError"
             ? "Flashcard Limit Reached"
-            : (generateError as any)?.name === "RateLimitingError"
+            : generateError?.name === "RateLimitingError"
               ? "Please Wait"
               : "Flashcard Generation Failed"
         }

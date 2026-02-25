@@ -16,8 +16,11 @@ import { flashcardEndpoints } from "./endpoints/flashcardEndpoints";
 import { assistantEndpoints } from "./endpoints/assistantEndpoints";
 import { settingsEndpoints } from "./endpoints/settingsEndpoints";
 
+import * as Sentry from "@sentry/nextjs";
+import { ErrorName } from "@vollio/shared";
+
 // Simple base query configuration with cookie-based authentication
-const baseQuery = fetchBaseQuery({
+const rawBaseQuery = fetchBaseQuery({
   baseUrl:
     process.env.NODE_ENV === "production"
       ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/`
@@ -44,6 +47,60 @@ const baseQuery = fetchBaseQuery({
     return headers;
   },
 });
+
+// Wrap baseQuery with Sentry error reporting
+const baseQuery: typeof rawBaseQuery = async (args, api, extraOptions) => {
+  const result = await rawBaseQuery(args, api, extraOptions);
+
+  if (result.error) {
+    const status = result.error.status;
+    const serverError = result.error.data as any;
+    const errorName = serverError?.error?.name || serverError?.name;
+
+    // Errors we NEVER want to show in Sentry (Expected business logic)
+    const SILENT_ERRORS: (string | undefined)[] = [
+      ErrorName.QuotaExceededError,
+      ErrorName.RateLimitingError,
+      ErrorName.AuthError,
+      ErrorName.NotFoundError,
+      ErrorName.ConflictError,
+      "AbortError", // Common when users navigate away
+    ];
+
+    const isNetworkError =
+      status === "FETCH_ERROR" || status === "TIMEOUT_ERROR";
+    const isServerError = typeof status === "number" && status >= 500;
+
+    // We report:
+    // 1. All Server Errors (500+)
+    // 2. All Network/Timeout errors
+    // 3. Client errors (400) that are NOT in our "Silent" whitelist
+    const shouldReport =
+      isServerError ||
+      isNetworkError ||
+      (!SILENT_ERRORS.includes(errorName) &&
+        typeof status === "number" &&
+        status >= 400);
+
+    if (shouldReport) {
+      Sentry.captureException(result.error, {
+        extra: {
+          path: typeof args === "string" ? args : args.url,
+          method: typeof args === "string" ? "GET" : args.method,
+          api_endpoint: api.endpoint,
+          server_error_name: errorName,
+        },
+        tags: {
+          error_type: isNetworkError ? "network" : "api_error",
+          status: status.toString(),
+          endpoint: api.endpoint,
+        },
+      });
+    }
+  }
+
+  return result;
+};
 
 // Define the API slice
 export const apiSlice = createApi({
