@@ -7,6 +7,17 @@ export interface TransformedRTKError {
   name: string;
 }
 
+// List of error names that are safe to show to the user
+// These contain actionable information the user can resolve.
+const SAFE_SERVER_ERRORS = [
+  "RateLimitingError",
+  "QuotaExceededError",
+  "ValidationError",
+  "NotFoundError",
+  "ConflictError",
+  "AuthError",
+];
+
 // HTTP status code to user-friendly message mapping
 const HTTP_STATUS_MESSAGES: Record<number, string> = {
   400: "Invalid request. Please check your input.",
@@ -25,9 +36,6 @@ const HTTP_STATUS_MESSAGES: Record<number, string> = {
 /**
  * Transforms RTK Query FetchBaseQueryError into a user-friendly error object.
  * Use this in `transformErrorResponse` callbacks for consistent error handling.
- *
- * @example
- * transformErrorResponse: (response) => transformRTKQueryError(response),
  */
 export function transformRTKQueryError(
   response: FetchBaseQueryError,
@@ -40,7 +48,7 @@ export function transformRTKQueryError(
 ): TransformedRTKError {
   const status = response.status;
 
-  // Network/fetch errors (no connection, CORS, etc.)
+  // 1. Handle Hardcoded Network/Fetch Errors
   if (status === "FETCH_ERROR") {
     return {
       message: options?.context
@@ -50,7 +58,6 @@ export function transformRTKQueryError(
     };
   }
 
-  // JSON parsing errors
   if (status === "PARSING_ERROR") {
     return {
       message: "Failed to process server response. Please try again.",
@@ -58,7 +65,6 @@ export function transformRTKQueryError(
     };
   }
 
-  // Timeout errors
   if (status === "TIMEOUT_ERROR") {
     return {
       message: "Request timed out. Please try again.",
@@ -66,7 +72,6 @@ export function transformRTKQueryError(
     };
   }
 
-  // Custom errors
   if (status === "CUSTOM_ERROR") {
     return {
       message: (response as any).error || "An error occurred.",
@@ -74,14 +79,14 @@ export function transformRTKQueryError(
     };
   }
 
-  // HTTP errors - extract server error from data
+  // 2. Extract Server Error Data
   const serverError = response.data as any;
   const serverMessage = serverError?.error?.message || serverError?.message;
   const errorName = serverError?.error?.name || "UnknownError";
-  if (errorName === "RateLimitingError") {
-    // Retry-After is typically in seconds
-    const retryAfterSeconds = serverError?.error?.extra?.retryAfter;
 
+  // 3. Special Handling: Rate Limiting (Actionable)
+  if (errorName === "RateLimitingError") {
+    const retryAfterSeconds = serverError?.error?.extra?.retryAfter;
     if (typeof retryAfterSeconds === "number") {
       const formattedTime = formatDuration(retryAfterSeconds);
       return {
@@ -89,13 +94,9 @@ export function transformRTKQueryError(
         name: errorName,
       };
     }
-
-    return {
-      message: "Too many requests. Please try again later.",
-      name: errorName,
-    };
   }
-  // Use custom 404 message if provided
+
+  // 4. Special Handling: Custom Not Found
   if (status === 404 && options?.notFoundMessage) {
     return {
       message: options.notFoundMessage,
@@ -103,11 +104,15 @@ export function transformRTKQueryError(
     };
   }
 
+  // 5. Whitelist Logic: Only show the server message if the error name is "SAFE"
+  const isSafeError = SAFE_SERVER_ERRORS.includes(errorName);
+  const finalMessage = isSafeError
+    ? serverMessage || HTTP_STATUS_MESSAGES[status as number]
+    : HTTP_STATUS_MESSAGES[status as number] ||
+      "An unexpected error occurred. Please try again later.";
+
   return {
-    message:
-      serverMessage ||
-      HTTP_STATUS_MESSAGES[status as number] ||
-      "An unexpected error occurred",
+    message: finalMessage,
     name: errorName,
   };
 }
