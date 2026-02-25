@@ -45,7 +45,6 @@ export const useSubmitQuiz = () => {
           return res;
         })
         .catch((err) => {
-          console.error("Quiz creation failed:", err);
           setLastSubmittedData(data);
 
           // Only show the specific Quota modal for QuotaExceededError
