@@ -1,6 +1,6 @@
 import { OpenRouter } from "@openrouter/sdk";
 export const GENRATIVE_AI_CONFIG = {
-  MODEL: "google/gemini-2.0-flash-001",
+  MODEL: "minimax/minimax-m2.5",
   BATCH_SIZE: 67,
 }   
 export const openRouter = new OpenRouter({
