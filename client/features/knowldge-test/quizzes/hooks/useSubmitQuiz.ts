@@ -3,11 +3,12 @@ import { useRouter } from "next/navigation";
 import { QuizCreationFormData } from "../schemas/createQuizSchema";
 import { toast } from "react-toastify";
 import { useCreateQuizMutation } from "@/lib/store/apiSlice";
+import { TransformedRTKError } from "@/lib/utils/rtk-error-transform";
+import { ErrorName } from "@vollio/shared";
 
 export const useSubmitQuiz = () => {
   const router = useRouter();
-  const [createQuiz, { isLoading }] = useCreateQuizMutation();
-  const [error, setError] = useState<any | null>(null);
+  const [createQuiz, { isLoading, error }] = useCreateQuizMutation();
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [lastSubmittedData, setLastSubmittedData] =
     useState<QuizCreationFormData | null>(null);
@@ -44,10 +45,15 @@ export const useSubmitQuiz = () => {
           return res;
         })
         .catch((err) => {
-          console.error("Quiz creation failed:", err);
-          setError(err);
           setLastSubmittedData(data);
-          setIsErrorModalOpen(true);
+
+          // Only show the specific Quota modal for QuotaExceededError
+          if (err?.name === ErrorName.QuotaExceededError) {
+            setIsErrorModalOpen(true);
+          } else {
+            setIsErrorModalOpen(false);
+          }
+          // IMPORTANT: We MUST rethrow so toast.promise knows it failed
           throw err;
         }),
       {
@@ -55,9 +61,8 @@ export const useSubmitQuiz = () => {
         success: "Quiz created successfully!",
         error: {
           render({ data }: any) {
-            return (
-              data?.data?.message || data?.error || "Failed to create quiz"
-            );
+            // Since we use transformErrorResponse, 'data' is the TransformedRTKError object
+            return data?.message || "Failed to create quiz";
           },
         },
       },
@@ -67,7 +72,7 @@ export const useSubmitQuiz = () => {
   return {
     onSubmit: handleSubmit,
     isLoading,
-    error,
+    error: (error as TransformedRTKError) || null,
     isErrorModalOpen,
     setIsErrorModalOpen,
     retry: () => lastSubmittedData && handleSubmit(lastSubmittedData),
