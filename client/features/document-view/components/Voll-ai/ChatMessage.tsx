@@ -14,7 +14,7 @@ import { useViewer } from "../../context/ViewerContext";
 import { MessageSource } from "../../hooks/useVollAiLogic";
 import { useAppSelector } from "@/lib/store/hooks";
 import { ScaledPosition } from "react-pdf-highlighter-extended-plus";
-import { HighlightContent } from "@vollio/shared";
+import { HighlightContent } from "@/lib/shared";
 
 interface ChatMessageProps {
   role: "user" | "assistant";

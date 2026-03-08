@@ -1,7 +1,7 @@
 import { IHighlightRepository } from "../../../domain/repositories/IHighlightRepository";
 import { Highlight } from "../../../domain/entities/Highlight";
 import { FastifyBaseLogger } from "fastify";
-import { HighlightData } from "@vollio/shared";
+import { HighlightData } from "../../../shared";
 import { HighlightsMapper } from "../../../shared/mappers/HighlightsMapper";
 
 interface GetAllHighlightsInput {

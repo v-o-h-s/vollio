@@ -3,7 +3,7 @@ import { IGoogleClassroomService } from "../../../domain/services/IGoogleClassro
 import {
   ClassroomAnnouncementResponse,
   ClassroomCourseWorkResponse,
-} from "@vollio/shared";
+} from "../../../shared";
 import { EnsureValidTokenUseCase } from "./EnsureValidTokenUseCase";
 
 export class GetCourseContentUseCase {

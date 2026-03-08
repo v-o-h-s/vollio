@@ -9,7 +9,7 @@ import { X, Plus } from "lucide-react";
 import { HiTag as TagIcon } from "react-icons/hi2";
 import { cn } from "@/lib/utils";
 import type { MyHighlight } from "@/features/document-view/types/highlight";
-import { CreateHighlightDTO, Tag } from "@vollio/shared";
+import { CreateHighlightDTO, Tag } from "@/lib/shared";
 import { TagSelectionDialog } from "../tags/TagSelectionDialog";
 import { Button } from "@/components/ui/button";
 import gsap from "gsap";

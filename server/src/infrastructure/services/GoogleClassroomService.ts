@@ -6,7 +6,7 @@ import {
   GoogleOAuthTokenResponse,
   GoogleOAuthRawResponse,
   Course,
-} from "@vollio/shared";
+} from "../../shared";
 import { ServerError } from "../../shared/errors/ServerError";
 
 export class GoogleClassroomService implements IGoogleClassroomService {

@@ -1,5 +1,5 @@
 import { QuizQuestion } from "../entities/Quiz";
-import { JSONContent } from "@vollio/shared";
+import { JSONContent } from "../../shared";
 import {
   GenerativeAiResult,
   TokenUsage,

@@ -14,7 +14,7 @@ import { Check } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
-import { Tag } from "@vollio/shared";
+import { Tag } from "@/lib/shared";
 
 interface TagSelectionDialogProps {
   open: boolean;

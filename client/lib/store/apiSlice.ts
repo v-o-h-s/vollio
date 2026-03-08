@@ -17,7 +17,7 @@ import { assistantEndpoints } from "./endpoints/assistantEndpoints";
 import { settingsEndpoints } from "./endpoints/settingsEndpoints";
 
 import * as Sentry from "@sentry/nextjs";
-import { ErrorName } from "@vollio/shared";
+import { ErrorName } from "@/lib/shared";
 
 // Simple base query configuration with cookie-based authentication
 const rawBaseQuery = fetchBaseQuery({

@@ -1,6 +1,6 @@
 import { useUpdateHighlightMutation } from "@/lib/store/apiSlice";
 import { useDeleteHighlightMutation } from "@/lib/store/apiSlice";
-import { CreateHighlightDTO } from "@vollio/shared";
+import { CreateHighlightDTO } from "@/lib/shared";
 
 /**
  * Provides actions for managing individual PDF highlights, including updating

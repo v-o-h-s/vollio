@@ -4,7 +4,7 @@ import {
   ApiResponse,
   AssistantDTO,
   AssistantResponseData,
-} from "@vollio/shared";
+} from "@/lib/shared";
 
 export const assistantEndpoints = (builder: ApiBuilder) => ({
   assistantChat: builder.mutation<AssistantResponseData, AssistantDTO>({

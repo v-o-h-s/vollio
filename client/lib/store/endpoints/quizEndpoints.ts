@@ -4,9 +4,9 @@ import {
   GetAllQuizzesResponse,
   GetQuizByIdResponse,
   CreateQuizResponse,
-} from "@vollio/shared";
-import { ServerSuccessResponse } from "@vollio/shared";
-import { CreateQuizDTO } from "@vollio/shared";
+} from "@/lib/shared";
+import { ServerSuccessResponse } from "@/lib/shared";
+import { CreateQuizDTO } from "@/lib/shared";
 
 export const quizEndpoints = (builder: ApiBuilder) => ({
   getQuiz: builder.query<GetQuizByIdResponse, string>({

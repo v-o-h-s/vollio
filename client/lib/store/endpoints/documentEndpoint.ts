@@ -8,7 +8,7 @@ import {
   GetStorageUrlResponse,
   CreateDocumentDto,
   NoteData,
-} from "@vollio/shared";
+} from "@/lib/shared";
 import { apiSlice } from "../apiSlice";
 
 export interface TransformedDocument {

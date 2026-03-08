@@ -25,12 +25,6 @@
     "paths": {
       "@/*": [
         "./*"
-      ],
-      "@vollio/shared": [
-        "../packages/shared/src/index.ts"
-      ],
-      "@vollio/shared/*": [
-        "../packages/shared/src/*"
       ]
     }
   },

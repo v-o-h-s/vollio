@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { JSONContent } from "@tiptap/core";
 import { useAssistantChatMutation } from "@/lib/store/apiSlice";
-import { AssistantChatMessage, HighlightContent } from "@vollio/shared";
+import { AssistantChatMessage, HighlightContent } from "@/lib/shared";
 import { extractTextFromContent } from "../utils";
 import { Highlight, ScaledPosition } from "react-pdf-highlighter-extended-plus";
 import {

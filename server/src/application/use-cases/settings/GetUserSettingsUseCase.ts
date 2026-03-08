@@ -1,4 +1,4 @@
-import { UserSettings } from "@vollio/shared";
+import { UserSettings } from "../../../shared";
 import { ISettingsRepository } from "../../../domain/repositories/ISettingsRepository";
 import { DEFAULT_TAGS } from "../../../shared/constants/tags";
 import { FastifyBaseLogger } from "fastify";

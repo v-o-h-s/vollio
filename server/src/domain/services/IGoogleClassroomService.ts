@@ -1,4 +1,4 @@
-import { GoogleOAuthTokenResponse } from "@vollio/shared";
+import { GoogleOAuthTokenResponse } from "../../shared";
 export interface IGoogleClassroomService {
   getOAuthUrl(): { url: string; state: string };
   exchangeCodeForTokens(code: string): Promise<GoogleOAuthTokenResponse>;

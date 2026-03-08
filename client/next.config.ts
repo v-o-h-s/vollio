@@ -10,7 +10,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  transpilePackages: ["@vollio/shared"],
   // Enable Turbopack - the pdfjs-dist CSS is patched via postinstall script
   turbopack: {},
 };

@@ -25,13 +25,13 @@ import {
   MoveDocumentResponse,
   NoteData,
   RenameDocumentResponse,
-} from "@vollio/shared";
+} from "../../shared";
 import { GenerateSummaryUseCase } from "../../application/use-cases/documents/GenerateSummaryUseCase";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 import { GetStorageUrlUseCase } from "../../application/use-cases/documents/GetStorageUrlUseCase";
 import { CreateDocumentUseCase } from "../../application/use-cases/documents/CreateDocumentUseCase";
-import { CreateDocumentDto } from "@vollio/shared";
-import { withRetry } from "@vollio/shared";
+import { CreateDocumentDto } from "../../shared";
+import { withRetry } from "../../shared";
 import { NotFoundError } from "../../shared/errors/NotFoundError";
 import { UnauthorizedErrorObject } from "../../shared/types/error";
 export class DocumentController {

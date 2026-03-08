@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { GetUserSettingsUseCase } from "../../application/use-cases/settings/GetUserSettingsUseCase";
 import { UpdateUserSettingsUseCase } from "../../application/use-cases/settings/UpdateUserSettingsUseCase";
-import { UserSettings } from "@vollio/shared";
+import { UserSettings } from "../../shared";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 
 export class SettingsController {

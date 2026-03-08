@@ -8,7 +8,7 @@ import { Tab } from "../components/notes";
 import { Note } from "@/lib/types/editor";
 import { extractText } from "../utils";
 import { useCreateHighlightMutation } from "@/lib/store/apiSlice";
-import { CreateHighlightDTO, HighlightContent } from "@vollio/shared";
+import { CreateHighlightDTO, HighlightContent } from "@/lib/shared";
 
 import { useViewerUI } from "../hooks/useViewerUI";
 import { useVollNotesLogic, HOME_TAB_ID } from "../hooks/useVollNotesLogic";

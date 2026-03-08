@@ -5,7 +5,7 @@ import {
   UpdateNoteDTO,
   NoteIdParams,
   GenerateSummaryDTO,
-} from "@vollio/shared";
+} from "../";
 
 export {
   JSONContent,

@@ -23,7 +23,7 @@ import {
   getStorageUrlSchema,
   createDocumentSchema,
 } from "../../shared/validation/documentSchemas";
-import { GetStorageUrlDto, CreateDocumentDto } from "@vollio/shared";
+import { GetStorageUrlDto, CreateDocumentDto } from "../../shared";
 import { DocumentController } from "../controllers/document.controller";
 import {
   AIRateLimitingDegrees,

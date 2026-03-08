@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CreateQuizResponse } from "@vollio/shared";
+import { CreateQuizResponse } from "@/lib/shared";
 import { cn } from "@/lib/utils";
 
 const getDifficultyColor = (diff: string | null) => {

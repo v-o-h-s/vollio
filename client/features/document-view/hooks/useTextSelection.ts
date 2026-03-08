@@ -7,7 +7,7 @@ import { PdfHighlighterUtils } from "react-pdf-highlighter-extended-plus";
 import { v4 as uuidv4 } from "uuid";
 import { DocumentDetails } from "@/features/document-view/types/document";
 import { useViewer } from "../context/ViewerContext";
-import { CreateHighlightDTO } from "@vollio/shared";
+import { CreateHighlightDTO } from "@/lib/shared";
 import { JSONContent } from "@tiptap/core";
 
 interface useSelectionProps {

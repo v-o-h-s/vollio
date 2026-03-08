@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import MinimalEditor from "./MinimalEditor";
 import { LuFilePenLine as FilePenLine } from "react-icons/lu";
-import { CreateHighlightDTO } from "@vollio/shared";
+import { CreateHighlightDTO } from "@/lib/shared";
 import gsap from "gsap";
 
 interface VDocHighlightProps {

@@ -5,7 +5,7 @@ import type {
 } from "@/lib/types/editor";
 import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import type { ApiBuilder } from "./types";
-import { NoteData } from "@vollio/shared";
+import { NoteData } from "@/lib/shared";
 
 interface BackendResponse<T> {
   success: boolean;

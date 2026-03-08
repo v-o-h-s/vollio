@@ -1,4 +1,4 @@
-import { UserSettings } from "@vollio/shared";
+import { UserSettings } from "@/lib/shared";
 import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
 import type { ApiBuilder } from "./types";
 

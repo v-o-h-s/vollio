@@ -8,7 +8,7 @@
 import { useHighlightContainerContext } from "react-pdf-highlighter-extended-plus";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { CreateHighlightDTO, Tag } from "@vollio/shared";
+import { CreateHighlightDTO, Tag } from "@/lib/shared";
 import { ContextMenu } from "./ContextMenu";
 import { StandardHighlight } from "./StandardHighlight";
 import { TaggedHighlight } from "./TaggedHighlight";

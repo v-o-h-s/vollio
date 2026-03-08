@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ISettingsRepository } from "../../domain/repositories/ISettingsRepository";
-import { Tag } from "@vollio/shared";
+import { Tag } from "../../shared";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 import { FastifyBaseLogger } from "fastify";
 

@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { IUserGoogleClassroomRepository } from "../../domain/repositories/IUserGoogleClassroomRepository";
-import { GoogleOAuthTokenResponse } from "@vollio/shared";
+import { GoogleOAuthTokenResponse } from "../../shared";
 import { DatabaseError } from "../../shared/errors/DatabaseError";
 import { createServiceClient } from "../database/supabase/supabase";
 import { FastifyBaseLogger } from "fastify";

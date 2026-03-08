@@ -1,7 +1,7 @@
 import { FastifyBaseLogger } from "fastify";
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
 import { IChunkRepository } from "../../../domain/repositories/IChunkRepository";
-import { DocumentIdParams, JSONContent, NoteData } from "@vollio/shared";
+import { DocumentIdParams, JSONContent, NoteData } from "../../../shared";
 import { summarizeDocumentPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/summarize";
 import { EnsureDocumentChunkedUseCase } from "../chunking/EnsureExistingOfDocumentChunkUseCase";
 import { ChunkMetadata } from "../../../shared/utils/chunking";

@@ -1,6 +1,6 @@
 import { ApiBuilder } from "@/lib/store/endpoints/types";
 import { transformRTKQueryError } from "@/lib/utils/rtk-error-transform";
-import { GetAllFoldersResponse } from "@vollio/shared";
+import { GetAllFoldersResponse } from "@/lib/shared";
 import { apiSlice } from "../apiSlice";
 
 interface TransformedFolder {

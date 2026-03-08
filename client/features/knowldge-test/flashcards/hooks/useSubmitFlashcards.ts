@@ -5,7 +5,7 @@ import {
   prepareFlashcardPayload,
 } from "../schemas/createFlashCards";
 import { toast } from "react-toastify";
-import { ErrorName } from "@vollio/shared";
+import { ErrorName } from "@/lib/shared";
 import { TransformedRTKError } from "@/lib/utils/rtk-error-transform";
 
 export const useSubmitFlashcards = () => {

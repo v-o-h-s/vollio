@@ -1,5 +1,5 @@
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
-import { CreateQuizResponse } from "@vollio/shared";
+import { CreateQuizResponse } from "../../../shared";
 import { CreateQuizDTO } from "../../../shared/validation/quizSchemas";
 import { Quiz, QuizQuestion } from "../../../domain/entities/Quiz";
 import { EnsureDocumentChunkedUseCase } from "../chunking/EnsureExistingOfDocumentChunkUseCase";

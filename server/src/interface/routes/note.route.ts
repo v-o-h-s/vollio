@@ -10,7 +10,7 @@ import {
   validateParams,
   validateQuery,
 } from "../../shared/validation/validator";
-import { CreateNoteDTO, UpdateNoteDTO, NoteIdParams } from "@vollio/shared";
+import { CreateNoteDTO, UpdateNoteDTO, NoteIdParams } from "../../shared";
 import {
   createNoteSchema,
   updateNoteSchema,

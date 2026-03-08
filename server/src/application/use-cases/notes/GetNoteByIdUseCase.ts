@@ -3,7 +3,7 @@ import { Note } from "../../../domain/entities/Note";
 import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { AuthError, AuthErrorSubType } from "../../../shared/errors/AuthError";
 import { FastifyBaseLogger } from "fastify";
-import { NoteIdParams } from "@vollio/shared";
+import { NoteIdParams } from "../../../shared";
 
 export class GetNoteUseCase {
   constructor(

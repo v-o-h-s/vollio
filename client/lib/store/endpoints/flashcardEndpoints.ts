@@ -5,9 +5,9 @@ import {
   GetFlashCardsSetByIdResponse,
   CreateFlashCardsSetResponse,
   GetFlashCardsSetsByDocumentIdResponse,
-} from "@vollio/shared";
-import { ServerSuccessResponse } from "@vollio/shared";
-import { CreateFlashCardsDTO, CreateManualFlashCardsDTO } from "@vollio/shared";
+} from "@/lib/shared";
+import { ServerSuccessResponse } from "@/lib/shared";
+import { CreateFlashCardsDTO, CreateManualFlashCardsDTO } from "@/lib/shared";
 
 export const flashcardEndpoints = (builder: ApiBuilder) => ({
   getFlashCardsSet: builder.query<GetFlashCardsSetByIdResponse, string>({

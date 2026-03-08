@@ -3,7 +3,7 @@ import {
   ExplainTextDTO,
   AssistantDTO,
   GenerateSummaryDTO,
-} from "@vollio/shared";
+} from "../../shared";
 
 export const ExplainTextDTOSchema: JSONSchemaType<ExplainTextDTO> = {
   type: "object",

@@ -5,7 +5,7 @@ import { NotFoundError } from "../../../shared/errors/NotFoundError";
 import { ServerError } from "../../../shared/errors/ServerError";
 import { randomUUID } from "crypto";
 import { FastifyBaseLogger } from "fastify";
-import { CreateDocumentDto } from "@vollio/shared";
+import { CreateDocumentDto } from "../../../shared";
 import { IStorageService } from "../../../domain/services/IStorageService";
 import { IStorageQuotaService } from "../../../domain/services/quota/IStorageQuotaService";
 import { IDocumentQuotaService } from "../../../domain/services/quota/IDocumentQuotaService";

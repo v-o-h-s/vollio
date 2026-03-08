@@ -16,7 +16,7 @@ import {
   GetFolderByIdResponse,
   DeleteFolderResponse,
   FolderData,
-} from "@vollio/shared";
+} from "../../shared";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 import { UnauthorizedErrorObject } from "../../shared/types/error";
 

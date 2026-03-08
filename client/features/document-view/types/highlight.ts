@@ -3,7 +3,7 @@
  * Matches the database schema for the highlights table
  */
 
-import { CreateHighlightDTO } from "@vollio/shared";
+import { CreateHighlightDTO } from "@/lib/shared";
 
 // Allowed highlight types
 export type HighlightType = "text" | "area";

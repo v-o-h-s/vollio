@@ -1,7 +1,7 @@
 import { FastifyBaseLogger } from "fastify";
 import { IGenerativeAiService } from "../../../domain/services/IGenerativeAiService";
 import { IAiQuotaService } from "../../../domain/services/quota/IAiQuotaService";
-import { ExplainTextDTO, ExplainTextResponseData } from "@vollio/shared";
+import { ExplainTextDTO, ExplainTextResponseData } from "../../../shared";
 import { explainTextPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/explain";
 
 export class ExplainTextUseCase {

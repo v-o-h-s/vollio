@@ -16,9 +16,9 @@ import {
   useGenerateSummaryMutation,
 } from "@/lib/store/apiSlice";
 import { Tab } from "../components/notes";
-import { CreateHighlightDTO } from "@vollio/shared";
+import { CreateHighlightDTO } from "@/lib/shared";
 import { ScaledPosition } from "react-pdf-highlighter-extended-plus";
-import { HighlightContent } from "@vollio/shared";
+import { HighlightContent } from "@/lib/shared";
 export const HOME_TAB_ID = "home";
 
 /**

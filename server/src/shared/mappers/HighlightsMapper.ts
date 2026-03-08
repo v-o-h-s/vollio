@@ -3,7 +3,7 @@ import { HighlightContent } from "../validation/highlightSchemas";
 import { HighlightStyle } from "../../domain/entities/Highlight";
 import { HighlightType } from "../../domain/entities/Highlight";
 import { ScaledPosition } from "../../domain/entities/Highlight";
-import { HighlightData } from "@vollio/shared";
+import { HighlightData } from "../../shared";
 
 export class HighlightsMapper {
   constructor() {}

@@ -46,7 +46,7 @@ import {
   useGetGoogleClassroomCoursesListQuery,
   useGetGoogleClassroomCourseContentQuery,
 } from "@/lib/store/apiSlice";
-import { CourseContent, CourseListResponse } from "@vollio/shared";
+import { CourseContent, CourseListResponse } from "@/lib/shared";
 interface ClassroomImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

@@ -10,13 +10,13 @@ import {
   RefreshAccessTokenResponse as RefreshTokenResponse,
   TokenStatus,
   GetCourseContentResponse,
-} from "@vollio/shared";
+} from "@/lib/shared";
 import {
   CourseContent,
   CourseListResponse,
   CourseWithContent,
-} from "@vollio/shared";
-import { GetCoursesResponse as ListCoursesResponse } from "@vollio/shared";
+} from "@/lib/shared";
+import { GetCoursesResponse as ListCoursesResponse } from "@/lib/shared";
 
 export const googleClassroomEndpoints = (builder: ApiBuilder) => ({
   // 1. Connect to Google Classroom (OAuth)

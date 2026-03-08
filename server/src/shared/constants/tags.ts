@@ -1,4 +1,4 @@
-import { Tag } from "@vollio/shared";
+import { Tag } from "../../shared";
 
 export const DEFAULT_TAGS: Tag[] = [
   {

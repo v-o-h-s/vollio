@@ -5,7 +5,7 @@ import {
   AssistantDTO,
   AssistantResponseData,
   AssistantChatMessage,
-} from "@vollio/shared";
+} from "../../../shared";
 import { assistantChatPromptGenerator } from "../../../infrastructure/ai/generative-ai/prompts/assistant";
 
 export class AssistantChatUseCase {

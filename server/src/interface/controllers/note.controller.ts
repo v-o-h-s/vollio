@@ -16,7 +16,7 @@ import {
   GetNoteByIdResponse,
   UpdateNoteResponse,
   DeleteNoteResponse,
-} from "@vollio/shared";
+} from "../../shared";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 import { UnauthorizedErrorObject } from "../../shared/types/error";
 

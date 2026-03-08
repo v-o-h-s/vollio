@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { CreateQuizDTO } from "../../shared/validation/quizSchemas";
-import { CreateQuizResponse } from "@vollio/shared";
+import { CreateQuizResponse } from "../../shared";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 import { CreateGeneralQuizUseCase } from "../../application/use-cases/quizzes/CreateGeneralQuizUseCase";
 

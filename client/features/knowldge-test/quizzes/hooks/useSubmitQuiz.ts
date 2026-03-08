@@ -4,7 +4,7 @@ import { QuizCreationFormData } from "../schemas/createQuizSchema";
 import { toast } from "react-toastify";
 import { useCreateQuizMutation } from "@/lib/store/apiSlice";
 import { TransformedRTKError } from "@/lib/utils/rtk-error-transform";
-import { ErrorName } from "@vollio/shared";
+import { ErrorName } from "@/lib/shared";
 
 export const useSubmitQuiz = () => {
   const router = useRouter();

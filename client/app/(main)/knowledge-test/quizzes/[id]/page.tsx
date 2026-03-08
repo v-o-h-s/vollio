@@ -30,7 +30,7 @@ import {
   QuizQuestionsTypeEnum,
   MCQQuestion,
   TrueFalseQuestion,
-} from "@vollio/shared";
+} from "@/lib/shared";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 

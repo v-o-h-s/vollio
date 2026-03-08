@@ -18,7 +18,7 @@ import {
   GetCoursesResponse,
   GetCoursesWithContentResponse,
   GetCourseContentResponse,
-} from "@vollio/shared";
+} from "../../shared";
 import "dotenv/config";
 import { IGoogleClassroomService } from "../../domain/services/IGoogleClassroomService";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";

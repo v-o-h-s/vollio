@@ -1,7 +1,7 @@
 import { FlashCard } from "../../domain/entities/FlashCard";
 import { FlashCardsSet } from "../../domain/entities/FlashCardsSet";
 import { QuizLanguage } from "../../domain/entities/Quiz";
-import { CreateFlashCardsSetResponse } from "@vollio/shared";
+import { CreateFlashCardsSetResponse } from "../../shared";
 
 export class FlashCardMapper {
   public static fromPersistenceToDomain(row: any): FlashCardsSet {

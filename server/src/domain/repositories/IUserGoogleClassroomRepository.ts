@@ -1,4 +1,4 @@
-import { GoogleOAuthTokenResponse } from "@vollio/shared";
+import { GoogleOAuthTokenResponse } from "../../shared";
 
 export interface IUserGoogleClassroomRepository {
   saveTokens(tokens: GoogleOAuthTokenResponse): Promise<void>;

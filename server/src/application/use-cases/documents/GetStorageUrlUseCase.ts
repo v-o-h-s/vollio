@@ -1,4 +1,4 @@
-import { GetStorageUrlData, GetStorageUrlDto } from "@vollio/shared";
+import { GetStorageUrlData, GetStorageUrlDto } from "../../../shared";
 import { generateUploadPath } from "../../../shared/utils/uploads";
 import { IStorageService } from "../../../domain/services/IStorageService";
 import { IStorageQuotaService } from "../../../domain/services/quota/IStorageQuotaService";

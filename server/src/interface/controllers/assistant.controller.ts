@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { AssistantChatUseCase } from "../../application/use-cases/ai/AssistantChatUseCase";
-import { AssistantDTO, AssistantResponse } from "@vollio/shared";
+import { AssistantDTO, AssistantResponse } from "../../shared";
 import { ResponseFormatter } from "../../shared/utils/ResponseFormatter";
 
 export class AssistantController {

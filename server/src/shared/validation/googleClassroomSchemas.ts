@@ -4,7 +4,7 @@ import {
   AnnouncementState,
   ClassroomCourseWorkResponse,
   CourseWorkState,
-} from "@vollio/shared";
+} from "../../shared";
 
 export interface GoogleCallbackQuery {
   code: string;

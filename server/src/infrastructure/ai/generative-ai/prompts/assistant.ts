@@ -1,4 +1,4 @@
-import { AssistantChatMessage } from "@vollio/shared";
+import { AssistantChatMessage } from "../../../../shared";
 
 export const assistantChatPromptGenerator = (
   message: string,

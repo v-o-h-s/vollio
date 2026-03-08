@@ -1,5 +1,5 @@
 import { IDocumentRepository } from "../../../domain/repositories/IDocumentRepository";
-import { DocumentDetails } from "@vollio/shared";
+import { DocumentDetails } from "../../../shared";
 import { FastifyBaseLogger } from "fastify";
 
 export class GetAllDocumentsUseCase {

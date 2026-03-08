@@ -6,9 +6,9 @@ import {
   UpdateHighlightResponse,
   DeleteHighlightResponse,
   HighlightData,
-} from "@vollio/shared";
-import { CreateHighlightDTO, UpdateHighlightDTO } from "@vollio/shared";
-import { ServerSuccessResponse } from "@vollio/shared";
+} from "@/lib/shared";
+import { CreateHighlightDTO, UpdateHighlightDTO } from "@/lib/shared";
+import { ServerSuccessResponse } from "@/lib/shared";
 import { apiSlice } from "../apiSlice";
 
 export const highlightEndpoints = (builder: ApiBuilder) => ({

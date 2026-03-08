@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Tag } from "@vollio/shared";
+import { Tag } from "@/lib/shared";
 import {
   useGetSettingsQuery,
   useUpdateSettingsMutation,

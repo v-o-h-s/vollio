@@ -1,4 +1,4 @@
-import { JSONContent } from "@vollio/shared";
+import { JSONContent } from "../../../../shared";
 
 export const summarizeDocumentPromptGenerator = (
   documentText: string,

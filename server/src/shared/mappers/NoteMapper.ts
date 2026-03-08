@@ -1,5 +1,5 @@
 import { Note } from "../../domain/entities/Note";
-import { NoteData } from "@vollio/shared";
+import { NoteData } from "../../shared";
 
 export class NoteMapper {
   public static fromDomainToInterface(note: Note): NoteData {

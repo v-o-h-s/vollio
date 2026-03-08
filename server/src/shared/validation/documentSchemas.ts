@@ -1,5 +1,5 @@
 import { JSONSchemaType } from "ajv";
-import { GetStorageUrlDto, CreateDocumentDto } from "@vollio/shared";
+import { GetStorageUrlDto, CreateDocumentDto } from "../../shared";
 
 export const getStorageUrlSchema: JSONSchemaType<GetStorageUrlDto> = {
   type: "object",

@@ -4,7 +4,7 @@ import {
   FastifyPluginOptions,
 } from "fastify";
 import fp from "fastify-plugin";
-import { AssistantDTO } from "@vollio/shared";
+import { AssistantDTO } from "../../shared";
 import { AssistantDTOSchema } from "../../shared/validation/aiSchemas";
 import { validateBody } from "../../shared/validation/validator";
 import { guardResource } from "../../shared/utils/ResourceGuard";

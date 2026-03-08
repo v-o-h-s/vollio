@@ -1,5 +1,5 @@
 import { Document } from "../../domain/entities/Document";
-import { DocumentDetails } from "@vollio/shared";
+import { DocumentDetails } from "../../shared";
 
 export class DocumentMapper {
   public static fromPersistenceToDomain(row: any): Document {

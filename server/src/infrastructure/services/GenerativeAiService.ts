@@ -1,4 +1,4 @@
-import { JSONContent } from "@vollio/shared";
+import { JSONContent } from "../../shared";
 import { QuizQuestion } from "../../domain/entities/Quiz";
 import { IGenerativeAiService } from "../../domain/services/IGenerativeAiService";
 import { GENRATIVE_AI_CONFIG, openRouter } from "../ai/generative-ai/client";

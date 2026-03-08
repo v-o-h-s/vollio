@@ -7,7 +7,7 @@ import type { Editor } from "@tiptap/react";
 export type {
   CreateNoteDTO as CreateNoteRequest,
   UpdateNoteDTO as UpdateNoteRequest,
-} from "@vollio/shared";
+} from "@/lib/shared";
 
 // ============================================================================
 // EDITOR TYPES
