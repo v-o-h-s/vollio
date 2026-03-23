@@ -7,11 +7,6 @@ export interface IPlanRepository {
   getPlanById(id: string): Promise<Plan | null>;
 
   /**
-   * Get a plan by its Paddle price ID
-   */
-  getPlanByPaddlePriceId(paddlePriceId: string): Promise<Plan | null>;
-
-  /**
    * Get all active plans
    */
   getActivePlans(): Promise<Plan[]>;

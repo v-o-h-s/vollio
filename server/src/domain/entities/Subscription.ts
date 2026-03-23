@@ -1,8 +1,6 @@
 export class Subscription {
   private id: string;
   private userId: string;
-  private paddleCustomerId: string | null;
-  private paddleSubscriptionId: string | null;
   private planId: string | null;
   private status: string;
   private priceId: string | null;
@@ -14,8 +12,6 @@ export class Subscription {
     id: string,
     userId: string,
     status: string,
-    paddleCustomerId: string | null = null,
-    paddleSubscriptionId: string | null = null,
     planId: string | null = null,
     priceId: string | null = null,
     currentPeriodEnd: Date | null = null,
@@ -25,8 +21,6 @@ export class Subscription {
     this.id = id;
     this.userId = userId;
     this.status = status;
-    this.paddleCustomerId = paddleCustomerId;
-    this.paddleSubscriptionId = paddleSubscriptionId;
     this.planId = planId;
     this.priceId = priceId;
     this.currentPeriodEnd = currentPeriodEnd;
@@ -40,14 +34,6 @@ export class Subscription {
 
   public getUserId(): string {
     return this.userId;
-  }
-
-  public getPaddleCustomerId(): string | null {
-    return this.paddleCustomerId;
-  }
-
-  public getPaddleSubscriptionId(): string | null {
-    return this.paddleSubscriptionId;
   }
 
   public getPlanId(): string | null {
@@ -93,8 +79,6 @@ export class Subscription {
     return {
       id: this.id,
       user_id: this.userId,
-      paddle_customer_id: this.paddleCustomerId,
-      paddle_subscription_id: this.paddleSubscriptionId,
       plan_id: this.planId,
       status: this.status,
       price_id: this.priceId,

@@ -5,7 +5,6 @@ import "./globals.css";
 import { ReduxProvider } from "@/lib/store/provider";
 import { EditorProvider } from "@/components/editor";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { PaddleProvider } from "@/components/providers/PaddleProvider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { Analytics } from "@vercel/analytics/next";
@@ -70,12 +69,10 @@ export default function RootLayout({
       >
         <ThemeProvider defaultTheme="light" storageKey="vollio-theme">
           <ReduxProvider>
-            <PaddleProvider>
-              <EditorProvider>
-                <ToastProvider />
-                {children}
-              </EditorProvider>
-            </PaddleProvider>
+            <EditorProvider>
+              <ToastProvider />
+              {children}
+            </EditorProvider>
           </ReduxProvider>
         </ThemeProvider>
 

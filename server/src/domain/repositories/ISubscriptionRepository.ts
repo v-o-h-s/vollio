@@ -22,13 +22,6 @@ export interface ISubscriptionRepository {
   getSubscriptionByUserId(userId: string): Promise<Subscription | null>;
 
   /**
-   * Get a subscription by Paddle subscription ID
-   */
-  getSubscriptionByPaddleId(
-    paddleSubscriptionId: string,
-  ): Promise<Subscription | null>;
-
-  /**
    * Delete a subscription record
    */
   deleteSubscription(id: string): Promise<void>;

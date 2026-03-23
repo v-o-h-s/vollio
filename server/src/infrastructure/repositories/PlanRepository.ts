@@ -26,24 +26,6 @@ export class PlanRepository implements IPlanRepository {
     return data ? PlanMapper.fromPersistenceToDomain(data) : null;
   }
 
-  async getPlanByPaddlePriceId(paddlePriceId: string): Promise<Plan | null> {
-    const { data, error } = await this.supabaseClient
-      .from("plans")
-      .select("*")
-      .eq("paddle_price_id", paddlePriceId)
-      .maybeSingle();
-
-    if (error) {
-      this.logger.error(
-        { error, paddlePriceId },
-        "Error getting plan by Paddle Price ID",
-      );
-      throw new DatabaseError(error);
-    }
-
-    return data ? PlanMapper.fromPersistenceToDomain(data) : null;
-  }
-
   async getActivePlans(): Promise<Plan[]> {
     const { data, error } = await this.supabaseClient
       .from("plans")

@@ -7,8 +7,6 @@ export class SubscriptionMapper {
       row.id,
       row.user_id,
       row.status,
-      row.paddle_customer_id,
-      row.paddle_subscription_id,
       row.plan_id,
       row.price_id,
       row.current_period_end ? new Date(row.current_period_end) : null,
@@ -21,8 +19,6 @@ export class SubscriptionMapper {
     return {
       id: subscription.getId(),
       user_id: subscription.getUserId(),
-      paddle_customer_id: subscription.getPaddleCustomerId(),
-      paddle_subscription_id: subscription.getPaddleSubscriptionId(),
       plan_id: subscription.getPlanId(),
       status: subscription.getStatus(),
       price_id: subscription.getPriceId(),

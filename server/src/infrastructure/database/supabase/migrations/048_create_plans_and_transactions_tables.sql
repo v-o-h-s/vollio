@@ -1,5 +1,5 @@
 -- ============================================================
--- 048: Create plans and transactions tables
+-- 048: Create plans table
 -- ============================================================
 
 -- 1. Plans table: stores the available subscription tiers
@@ -25,9 +25,6 @@ CREATE TABLE IF NOT EXISTS plans (
   -- Billing interval: "month", "year", or null for free
   billing_interval TEXT,
 
-  -- The Paddle price ID linked to this plan (null for free tier)
-  paddle_price_id TEXT UNIQUE,
-
   -- Whether this plan is currently available for purchase
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
@@ -40,10 +37,10 @@ CREATE TABLE IF NOT EXISTS plans (
 );
 
 -- Seed the default plans
-INSERT INTO plans (name, slug, description, price_cents, currency, billing_interval, paddle_price_id, is_active, max_ai_tokens, max_storage_bytes)
+INSERT INTO plans (name, slug, description, price_cents, currency, billing_interval, is_active, max_ai_tokens, max_storage_bytes)
 VALUES
-  ('Free', 'free', 'Get started with basic features', 0, 'USD', NULL, NULL, TRUE, 10000, 52428800), -- 10k tokens, 50MB
-  ('Premium', 'premium', 'Full access to all AI features and storage', 700, 'USD', 'month', NULL, TRUE, 10000000, 524288000) -- 10M tokens, 500MB
+  ('Free', 'free', 'Get started with basic features', 0, 'USD', NULL, TRUE, 10000, 52428800), -- 10k tokens, 50MB
+  ('Premium', 'premium', 'Full access to all AI features and storage', 700, 'USD', 'month', TRUE, 10000000, 524288000) -- 10M tokens, 500MB
 ON CONFLICT (slug) DO NOTHING;
 
 
@@ -56,56 +53,13 @@ ALTER TABLE subscriptions
 -- UPDATE subscriptions SET plan_id = (SELECT id FROM plans WHERE slug = 'pro_monthly') WHERE status = 'active';
 
 
--- 3. Transactions table: logs every payment from Paddle
-CREATE TABLE IF NOT EXISTS transactions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-  -- Link to our user
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-
-  -- Link to the subscription this payment is for
-  subscription_id UUID REFERENCES subscriptions(id) ON DELETE SET NULL,
-
-  -- Paddle IDs for reference
-  paddle_transaction_id TEXT UNIQUE NOT NULL,
-
-  -- Status: draft, ready, billed, paid, completed, canceled, past_due
-  status TEXT NOT NULL,
-
-  -- Amount in cents
-  amount_cents INTEGER,
-  currency TEXT DEFAULT 'USD',
-
-  -- What was billed (Paddle price ID)
-  paddle_price_id TEXT,
-
-  -- Billing period this transaction covers
-  billing_period_start TIMESTAMPTZ,
-  billing_period_end TIMESTAMPTZ,
-
-  -- When Paddle created the transaction
-  paddle_created_at TIMESTAMPTZ,
-
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- Enable RLS
 ALTER TABLE plans ENABLE ROW LEVEL SECURITY;
-ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 
 -- Plans: everyone can read (they need to see pricing)
 CREATE POLICY "Anyone can view active plans"
   ON plans FOR SELECT
   USING (is_active = TRUE);
 
--- Transactions: users can only see their own
-CREATE POLICY "Users can view their own transactions"
-  ON transactions FOR SELECT
-  USING (auth.uid() = user_id);
-
 -- Indexes
-CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
-CREATE INDEX IF NOT EXISTS idx_transactions_subscription_id ON transactions(subscription_id);
-CREATE INDEX IF NOT EXISTS idx_transactions_paddle_transaction_id ON transactions(paddle_transaction_id);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_plan_id ON subscriptions(plan_id);

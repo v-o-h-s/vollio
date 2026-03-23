@@ -12,7 +12,6 @@ export const authPlugin = fp(async (fastify) => {
     "/health",
     "/ready",
     "/live",
-    "/api/v1/billing/webhook",
   ];
 
   fastify.addHook("onRequest", async (req, reply) => {

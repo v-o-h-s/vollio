@@ -4,7 +4,7 @@ A modern, full-stack note-taking application built with Next.js, Fastify, and Su
 
 ## Project Structure
 
-```
+```text
 vollio/
 ├── backend/          # Fastify API server
 │   ├── src/
@@ -55,6 +55,7 @@ npm run frontend:dev
 ```
 
 The application will be available at:
+
 - Frontend: `http://localhost:3001`
 - Backend API: `http://localhost:3000` (or configured port)
 
@@ -107,6 +108,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 - **Language**: TypeScript
 
 **Key Features**:
+
 - Cookie-based session management
 - Custom logger with pretty printing
 - Modular plugin architecture
@@ -121,6 +123,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 - **PDF Support**: PDF.js
 
 **Key Features**:
+
 - Server-side rendering
 - API route handling
 - Responsive design
@@ -130,7 +133,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 
 ### Health Check
 
-```
+```text
 GET /health
 ```
 
@@ -154,7 +157,8 @@ The backend uses Pino for structured logging with environment-based configuratio
 - **Development**: Pretty-printed logs with colors and timestamps
 - **Production**: Structured JSON logs
 
-Set `LOG_LEVEL` environment variable to control verbosity: `debug`, `info`, `warn`, `error`.
+Set `LOG_LEVEL` environment variable to control verbosity: `debug`,
+`info`, `warn`, `error`.
 
 ## Testing
 

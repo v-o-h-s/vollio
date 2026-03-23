@@ -89,9 +89,6 @@ import { RateLimitingService } from "../infrastructure/services/RateLimitingServ
 import { AiQuotaService } from "../infrastructure/services/quota/AiQuotaService";
 import { StorageQuotaService } from "../infrastructure/services/quota/StorageQuotaService";
 import { DocumentQuotaService } from "../infrastructure/services/quota/DocumentQuotaService";
-import { HandleBillingWebhookUseCase } from "../application/use-cases/billing/HandleBillingWebhookUseCase";
-import { BillingController } from "../interface/controllers/billing.controller";
-import { PaddleService } from "../infrastructure/services/PaddleService";
 import { SubscriptionRepository } from "../infrastructure/repositories/SubscriptionRepository";
 import { PlanRepository } from "../infrastructure/repositories/PlanRepository";
 import { ResourcesRepository } from "../infrastructure/repositories/ResourcesRepository";
@@ -552,25 +549,6 @@ const diPlugin: FastifyPluginAsync = async (fastify) => {
   });
 
   fastify.diContainer.register({
-    handleBillingWebhookUseCase: asClass(HandleBillingWebhookUseCase, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    billingController: asClass(BillingController, {
-      lifetime: Lifetime.SCOPED,
-      injectionMode: InjectionMode.CLASSIC,
-    }),
-    paddleService: asClass(PaddleService, {
-      lifetime: Lifetime.SINGLETON,
-      injectionMode: InjectionMode.CLASSIC,
-      injector: () => ({
-        config: {
-          apiKey: process.env.PADDLE_API_KEY || "",
-          webhookSecret: process.env.PADDLE_WEBHOOK_SECRET || "",
-          isProduction: process.env.NODE_ENV === "production",
-        },
-      }),
-    }),
     subscriptionRepository: asClass(SubscriptionRepository, {
       lifetime: Lifetime.SCOPED,
       injectionMode: InjectionMode.CLASSIC,

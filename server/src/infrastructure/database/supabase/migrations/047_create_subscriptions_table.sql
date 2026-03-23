@@ -3,10 +3,6 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   
-  -- Store Paddle IDs so we can talk to their API later
-  paddle_customer_id TEXT,
-  paddle_subscription_id TEXT UNIQUE,
-  
   -- Status: active, trialing, past_due, paused, canceled
   status TEXT NOT NULL,
   
@@ -33,4 +29,3 @@ CREATE POLICY "Users can view their own subscription"
 
 -- Index for fast lookup
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
-CREATE INDEX IF NOT EXISTS idx_subscriptions_paddle_subscription_id ON subscriptions(paddle_subscription_id);

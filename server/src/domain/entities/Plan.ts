@@ -5,7 +5,6 @@ export class Plan {
   private priceCents: number;
   private currency: string;
   private billingInterval: string;
-  private paddlePriceId: string | null;
   private isActive: boolean;
   private maxAiTokens: number | null;
   private maxStorageBytes: number | null;
@@ -22,7 +21,6 @@ export class Plan {
     priceCents: number,
     currency: string,
     billingInterval: string,
-    paddlePriceId: string | null = null,
     isActive: boolean = true,
     maxAiTokens: number | null = null,
     maxStorageBytes: number | null = null,
@@ -38,7 +36,6 @@ export class Plan {
     this.priceCents = priceCents;
     this.currency = currency;
     this.billingInterval = billingInterval;
-    this.paddlePriceId = paddlePriceId;
     this.isActive = isActive;
     this.maxAiTokens = maxAiTokens;
     this.maxStorageBytes = maxStorageBytes;
@@ -71,10 +68,6 @@ export class Plan {
 
   public getBillingInterval(): string {
     return this.billingInterval;
-  }
-
-  public getPaddlePriceId(): string | null {
-    return this.paddlePriceId;
   }
 
   public getIsActive(): boolean {
@@ -121,7 +114,6 @@ export class Plan {
       price_cents: this.priceCents,
       currency: this.currency,
       billing_interval: this.billingInterval,
-      paddle_price_id: this.paddlePriceId,
       is_active: this.isActive,
       max_ai_tokens: this.maxAiTokens,
       max_storage_bytes: this.maxStorageBytes,

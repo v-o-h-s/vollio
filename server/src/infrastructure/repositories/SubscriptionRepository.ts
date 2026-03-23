@@ -15,7 +15,6 @@ export class SubscriptionRepository implements ISubscriptionRepository {
     this.logger.info(
       {
         userId: subscription.getUserId(),
-        paddleSubscriptionId: subscription.getPaddleSubscriptionId(),
       },
       "Creating subscription in database",
     );
@@ -81,22 +80,6 @@ export class SubscriptionRepository implements ISubscriptionRepository {
       .from("subscriptions")
       .select("*")
       .eq("user_id", userId)
-      .maybeSingle();
-
-    if (error) {
-      throw new DatabaseError(error);
-    }
-
-    return data ? SubscriptionMapper.fromPersistenceToDomain(data) : null;
-  }
-
-  async getSubscriptionByPaddleId(
-    paddleSubscriptionId: string,
-  ): Promise<Subscription | null> {
-    const { data, error } = await this.supabaseClient
-      .from("subscriptions")
-      .select("*")
-      .eq("paddle_subscription_id", paddleSubscriptionId)
       .maybeSingle();
 
     if (error) {
