@@ -1,200 +1,143 @@
 # Vollio - Full-Stack Note-Taking Application
 
-A modern, full-stack note-taking application built with Next.js, Fastify, and Supabase.
+This project was a learning exercise to build an app end-to-end.
+I learned a lot from it and aimed to make it production-ready.
+
+## Dictionary
+
+- [Project Structure](#project-structure)
+- [What We Built](#what-we-built)
+  - [Frontend](#frontend)
+    - [Frontend Stack](#frontend-stack)
+    - [Frontend Notes](#frontend-notes)
+  - [Backend](#backend)
+    - [Backend Stack](#backend-stack)
+    - [Backend Notes](#backend-notes)
+- [Data & Storage](#data--storage)
+- [Redis & Rate Limiting](#redis--rate-limiting)
+- [Observability & Ops](#observability--ops)
+- [DevOps](#devops)
+- [Testing](#testing)
+- [License](#license)
 
 ## Project Structure
 
 ```text
 vollio/
-├── backend/          # Fastify API server
-│   ├── src/
-│   │   ├── server.ts
-│   │   ├── infrastructure/
-│   │   ├── plugins/
-│   │   ├── shared/
-│   │   └── utils/
-│   ├── package.json
-│   └── tsconfig.json
-├── frontend/         # Next.js web application
+├── client/             # Next.js web application
 │   ├── app/
 │   ├── components/
+│   ├── features/
 │   ├── hooks/
 │   ├── lib/
-│   ├── package.json
-│   └── tsconfig.json
-├── package.json      # Root workspace configuration
+│   ├── public/
+│   └── ...
+├── server/             # Fastify API server
+│   ├── src/
+│   │   ├── application/
+│   │   ├── domain/
+│   │   ├── infrastructure/
+│   │   ├── interface/
+│   │   ├── plugins/
+│   │   ├── shared/
+│   │   └── test/
+│   └── ...
+├── docs/               # Project documentation
+├── Dockerfile
+├── docker-compose.yml
+├── package.json        # Root workspace configuration
+├── tsconfig.json
+├── AGENTS.md
+├── README.md
 └── .gitignore
 ```
 
-## Prerequisites
-
-- Node.js >= 18.0.0
-- npm >= 9.0.0 or yarn >= 3.0.0
-- Supabase project (for authentication and database)
-
-## Quick Start
-
-### Installation
-
-```bash
-# Install all dependencies for both backend and frontend
-npm install
-```
-
-### Development
-
-Start both the backend and frontend in development mode:
-
-```bash
-# Start both services concurrently
-npm run dev
-
-# Or start them individually
-npm run backend:dev
-npm run frontend:dev
-```
-
-The application will be available at:
-
-- Frontend: `http://localhost:3001`
-- Backend API: `http://localhost:3000` (or configured port)
-
-### Building for Production
-
-```bash
-# Build both backend and frontend
-npm run build
-
-# Build specific workspace
-npm run backend:build
-npm run frontend:build
-```
-
-### Production Start
-
-```bash
-npm start
-```
-
-## Configuration
-
-### Environment Variables
-
-#### Backend (`.env`)
-
-```env
-NODE_ENV=development
-PORT=3000
-HOST=localhost
-COOKIE_SECRET=your-secret-key
-SUPABASE_URL=your-supabase-url
-SUPABASE_KEY=your-supabase-key
-```
-
-#### Frontend (`.env.local`)
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-```
-
-## Architecture
-
-### Backend
-
-- **Framework**: Fastify 5.x
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
-- **Language**: TypeScript
-
-**Key Features**:
-
-- Cookie-based session management
-- Custom logger with pretty printing
-- Modular plugin architecture
-- Type-safe API endpoints
+## What We Built
 
 ### Frontend
 
-- **Framework**: Next.js 14+ with App Router
-- **UI Library**: Radix UI + Tailwind CSS
-- **State Management**: Redux Toolkit
-- **Rich Text Editor**: TipTap
-- **PDF Support**: PDF.js
+#### Frontend Stack
 
-**Key Features**:
+- **Framework**: Next.js 15+ with App Router
+- **UI**: Shadcn UI + Tailwind CSS
+- **State**: Redux Toolkit + RTK Query
+- **Editor**: TipTap with PDF.js integration
+- **UX**: Responsive layouts, focus-driven study flows, and client-side
+  routing
 
-- Server-side rendering
-- API route handling
-- Responsive design
-- Real-time synchronization
+#### Frontend Notes
 
-## API Endpoints
+I built the app with Next.js and focused on performance and
+server-side rendering. I kept the structure clean so features are easy
+to add. For shared state, I used context to manage components that
+depend on the same data, and I separated logic from UI with hooks. When
+hooks need to coordinate, they do so through shared context. For
+server communication I used RTK Query and added optimistic updates to
+keep the UX smooth.
 
-### Health Check
+### Backend
 
-```text
-GET /health
-```
+#### Backend Stack
 
-### Authentication
+- **Framework**: Fastify 5.x (TypeScript)
+- **Architecture**: Clean architecture with plugin-driven APIs
+- **DI**: Awilix for dependency injection
+- **Auth**: Supabase Auth sessions and cookie-based
+  auth
+- **API**: Versioned routes under `/api/v1` for core
+  resources
 
-- `GET /api/auth/user` - Get current user
-- `POST /api/auth/login` - Login
-- `POST /api/auth/logout` - Logout
+#### Backend Notes
 
-### Notes
+The backend is the part I enjoyed most and learned the most from. I
+implemented clean architecture to keep the layers separate, and the
+Fastify plugin system made the experience smooth. I built rate limiting
+from scratch with Redis, integrated AI services, and focused on keeping
+the codebase clean and scalable. I also enjoyed setting up DI with
+Awilix-based dependency wiring.
 
-- `GET /api/notes` - Get all notes
-- `POST /api/notes` - Create note
-- `PUT /api/notes/:id` - Update note
-- `DELETE /api/notes/:id` - Delete note
+### Data & Storage
 
-## Logging
+- **Database**: Supabase Postgres with structured
+  entities
+- **Storage**: Supabase Storage for files and
+  generated assets
+- **Migrations**: SQL migrations in
+  `server/src/infrastructure/database/supabase/migrations`
 
-The backend uses Pino for structured logging with environment-based configuration:
+### Redis & Rate Limiting
 
-- **Development**: Pretty-printed logs with colors and timestamps
-- **Production**: Structured JSON logs
+- **Redis**: ioredis for caching and quota tracking
+- **Rate Limiting**: Token bucket strategy with Lua
+  scripting
+- **Quotas**: AI, storage, and document usage
+  tracked via services
 
-Set `LOG_LEVEL` environment variable to control verbosity: `debug`,
-`info`, `warn`, `error`.
+### Observability & Ops
 
-## Testing
+- **Logging**: Pino with environment-aware formatting
+- **Monitoring**: Sentry integration for server and
+  client
+- **Performance**: Vercel Analytics and Speed
+  Insights on the client
 
-```bash
-# Run tests for all workspaces
-npm test
+### DevOps
 
-# Run tests with coverage
-npm test -- --coverage
+- **Frontend**: Deployed on Vercel (free tier) with
+  Sentry monitoring.
+- **Backend**: Deployed on DigitalOcean (free trial)
+  using Docker.
+- **Networking**: Docker network connects the backend
+  and Redis in the same private network.
+- **Monitoring**: Better Stack for uptime and logs,
+  plus a Redis client to track Redis state.
 
-# Watch mode
-npm test -- --watch
-```
+### Testing
 
-## Troubleshooting
-
-### Port Already in Use
-
-If port 3000 is already in use, set the `PORT` environment variable:
-
-```bash
-PORT=3001 npm run dev
-```
-
-### Environment Variables Not Loading
-
-Make sure `.env` files exist in both `backend/` and `frontend/` directories.
-
-Backend uses `dotenv` for loading environment variables automatically.
-
-## Contributing
-
-1. Create a feature branch
-2. Make your changes
-3. Ensure tests pass
-4. Submit a pull request
+- **Framework**: Vitest in both client and
+  server
+- **Coverage**: Unit tests around storage utilities and
+  rate limiting
 
 ## License
 
